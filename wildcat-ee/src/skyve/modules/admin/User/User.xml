@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="User"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_SecurityUser" />
+	<singularAlias>User</singularAlias>
+	<pluralAlias>Users</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return (getContact() == null) ?
+					getUserName() : 
+					getUserName() + " - " + getContact().getBizKey();
+		]]>
+	</bizKey>
+	<attributes>
+		<text name="userName" required="true">
+			<displayName>User Name</displayName>
+			<shortDescription>Login name of the user.</shortDescription>
+			<length>50</length>
+		</text>
+		<text name="password" >
+			<displayName>Password</displayName>
+			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<!--  The password is checked and populated in the Bizlet -->
+			<length>30</length>
+		</text>
+		<dateTime name="createdDateTime">
+			<displayName>Created</displayName>
+			<shortDescription>The time and date when this user account was created.</shortDescription>
+		</dateTime>
+		<text name="homeModule" >
+			<displayName>Home Module</displayName>
+			<shortDescription>The module displayed when the user first logs in.</shortDescription>
+			<domain>variant</domain>
+			<length>30</length>
+		</text>
+		<text name="newPassword" persistent="false">
+			<displayName>New Password</displayName>
+			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<length>30</length>
+		</text>
+		<text name="confirmPassword" persistent="false">
+			<displayName>Confirm Password</displayName>
+			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<length>30</length>
+		</text>
+		<boolean  name="generated">
+			<displayName>Generated</displayName>
+			<shortDescription>Whether the User was generated or manually entered.</shortDescription>
+		</boolean >
+		<text name="legacyId" >
+			<displayName>Legacy Id</displayName>
+			<shortDescription>Legacy ID value when imported from legacy System using the conversion tool.</shortDescription>
+			<length>100</length>
+		</text>
+		<text name="clearTextPassword" >
+			<displayName>Generated Password</displayName>
+			<shortDescription>
+				The newly assigned password - this password must be changed at your next login.
+			</shortDescription>
+			<length>50</length>
+		</text>
+		<boolean  name="passwordExpired">
+			<displayName>Must change password</displayName>
+			<shortDescription>Whether the password must be changed</shortDescription>
+		</boolean >
+		<dateTime name="passwordLastChanged">
+			<displayName>Last changed</displayName>
+			<shortDescription>Date and Time the users password was last changed</shortDescription>
+		</dateTime>
+
+		<association name="contact" type="aggregation" required="true">
+			<displayName>Contact</displayName>
+			<shortDescription>The contact details for the user.</shortDescription>
+			<documentName>Contact</documentName>
+			<queryName>qContacts</queryName>
+		</association>
+		<association name="dataGroup" type="aggregation">
+			<displayName>Data Group</displayName>
+			<shortDescription>The group that constrains what information this user can see.</shortDescription>
+			<domain>variant</domain>
+			<documentName>DataGroup</documentName>
+		</association>
+		<collection name="groups" type="aggregation">
+			<displayName>Groups</displayName>
+			<shortDescription>The collection of groups that this user belongs to.</shortDescription>
+			<domain>variant</domain>
+			<documentName>Group</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="name" sort="ascending" />
+			</ordering>
+			<unique name="UniqueGroupName">
+				<message>Membership of group {name} has already been assigned to this user.</message>
+				<fieldReferences>
+					<ref>bizId</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		<collection name="roles" type="child">
+			<displayName>Roles</displayName>
+			<shortDescription><![CDATA[
+			Typically users are assigned membership of groups, which define sets of roles, 
+			corresponding to business roles within an organisation.
+			<br/>
+			However user may also have specific roles assigned in addition to the roles
+			which are implied from the groups to which they belong.
+			]]></shortDescription>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="roleName" sort="ascending" />
+			</ordering>
+			<unique name="UniqueUserRole">
+				<message>The role {roleName} already exists for this user.</message>
+				<fieldReferences>
+					<ref>roleName</ref>
+				</fieldReferences>
+			</unique>
+		</collection>
+		
+		<!-- New user wizard state properties -->
+		<enum name="wizardState" persistent="false">
+			<displayName>Wizard State</displayName>
+			<shortDescription>
+			The create user wizard is staged into the following states which roughly follow in order.
+			Either an existing contact is confirmed as that of the new user,
+			OR
+			A new contact is created for the new user.
+			Once the identity of the new user is established, the wizard moves on
+			to confirm the new user name and password and membership of groups.
+			</shortDescription>
+			<values>
+				<value code="confirmContact"/>
+				<value code="createContact"/>
+				<value code="confirmUserNameAndPassword"/>
+				<value code="confirmGroupMemberships"/>
+			</values>
+		</enum>
+		<text name="searchContactName" persistent="false">
+			<displayName>Full name</displayName>
+			<shortDescription>This is used to determine if you are on the system already</shortDescription>
+			<length>1024</length>
+		</text>
+		<text name="searchEmail" persistent="false">
+			<displayName>Email</displayName>
+			<shortDescription>The email address to use to search existing contacts.</shortDescription>
+			<length>512</length>
+		</text>
+		<collection name="candidateContacts" type="child" persistent="false">
+			<displayName>Candidate Contacts</displayName>
+			<shortDescription>The contacts who possibly match the search criteria.</shortDescription>
+			<documentName>UserCandidateContact</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="contactSelected" persistent="false">
+			<displayName>The contact selected for this user.</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
+	</attributes>
+	<conditions>
+		<!-- Evaluation of Wizard State -->
+		<condition name="confirmContact">
+			<![CDATA[WizardState.confirmContact.equals(getWizardState())]]>
+		</condition>
+		<condition name="createContact">
+			<![CDATA[WizardState.createContact.equals(getWizardState())]]>
+		</condition>
+		<condition name="confirmUserNameAndPassword">
+			<![CDATA[WizardState.confirmUserNameAndPassword.equals(getWizardState())]]>
+		</condition>
+		<condition name="confirmGroupMemberships">
+			<![CDATA[WizardState.confirmGroupMemberships.equals(getWizardState())]]>
+		</condition>
+		<condition name="showNextButton">
+			<![CDATA[isCreateContact() || isConfirmUserNameAndPassword() ]]>
+		</condition>
+
+		<condition name="created">
+			<![CDATA[isPersisted()]]>
+		</condition>
+		<condition name="inDataGroup">
+			<![CDATA[! isUserInDataGroup(null)]]>
+		</condition>
+		<condition name="securityAdministrator">
+			<![CDATA[isUserInRole("admin","SecurityAdministrator")]]>
+		</condition>
+		<condition name="designer">
+			<![CDATA[isUserInRole("design", "BizHubDesigner")]]>
+		</condition>
+		<condition name="candidateContactsEmpty">
+			<![CDATA[candidateContacts.isEmpty()]]>
+		</condition>
+	</conditions>
+	<uniqueConstraints>
+		<constraint name="UniqueUserName" scope="customer">
+			<message>The user {userName} already exists.</message>
+			<fieldReferences>
+				<ref>userName</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
+</document>

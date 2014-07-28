@@ -1,0 +1,6 @@
+<DataSource ID="FlowLayout"	inheritsFrom="TileLayout" Constructor="FlowLayout">
+   <fields>
+       <field name="autoWrapLines" type="boolean" basic="true"/>
+       <field name="tilesPerLine" inapplicable="true"/>
+   </fields>
+</DataSource>

@@ -1,0 +1,20 @@
+<DataSource	ID="DrawShapeCommand">
+    <fields>
+        <field name="type" type="DrawShapeCommandType" title="Type"/>
+        <field name="args" type="DrawShapeCommandArgs"/>
+    </fields>
+
+
+    <types>
+        <type ID="DrawShapeCommandType" inheritsFrom="enum">
+             <valueMap>
+                <value>close</value>
+                <value>moveto</value>
+                <value>lineto</value>
+                <value>circleto</value>
+                <value>ellipseto</value>
+            </valueMap>
+        </type>
+    </types>
+
+</DataSource>

@@ -1,0 +1,5 @@
+<Object ID="ContainsValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="contains" addGlobalId="false">
+    <fields>
+        <substring type="string"/>
+    </fields>
+</Object>

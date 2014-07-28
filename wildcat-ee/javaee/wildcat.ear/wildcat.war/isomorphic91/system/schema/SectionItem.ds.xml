@@ -1,0 +1,21 @@
+<DataSource ID="SectionItem" inheritsFrom="CanvasItem" Constructor="SectionItem">
+    <fields>
+		<field name="required" 			type="boolean" title="Required" inapplicable="true"/>
+   		<field name="disabled" 			type="boolean" title="Disable" inapplicable="true"/>
+		<field name="redrawOnChange" 	type="boolean" title="Redraw On Change" inapplicable="true"/>
+		<field name="validators"		type="Validator"	multiple="true"	title="Validators" inapplicable="true"/>
+		<field name="validateOnChange" 	type="boolean" title="Validate On Change" inapplicable="true"/>
+ 		<field name="title" 			type="string"  title="Title"  inapplicable="true"/>    
+		<field name="showTitle"	type="boolean" title="Show Title" inapplicable="true" defaultValue="false"/>
+
+        <field name="canCollapse"   type="boolean" />
+        <!-- sectionVisible is backcompat for sectionExpanded -->
+        <field name="sectionVisible" type="boolean" title="Section Visible"/>
+        <field name="sectionExpanded" type="boolean" title="Section Expanded"/>
+        <field name="sectionHeaderClass" type="className" />
+        <field name="itemIds" type="string" multiple="true" title="Item Ids"/>
+        <field name="items" type="FormItem" multiple="true" title="Inline Items"/>
+
+		<field name="canvas" inapplicable="true"/>
+    </fields>
+</DataSource>

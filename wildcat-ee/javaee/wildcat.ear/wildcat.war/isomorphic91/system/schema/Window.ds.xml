@@ -1,0 +1,123 @@
+<DataSource	ID="Window" inheritsFrom="Canvas" Constructor="Window">
+	<fields>
+        <!-- Window as a whole -->
+		<field name="autoCenter" type="boolean" basic="true"/>
+		<field name="isModal" type="boolean" basic="true"/>
+		<field name="dismissOnOutsideClick" type="boolean"/>
+		<field name="dismissOnEscape" type="boolean"/>
+
+		<field name="visibility" type="visibilityEnum" basic="true"/>	
+
+        <!-- prevent generic Layout properties from showing up as basics -->
+		<field name="layoutMargin"	type="positiveInteger" basic="false"/>
+        <field name="align" type="anyAlignEnum" basic="false"/>
+        <field name="defaultLayoutAlign" type="anyAlignEnum" basic="false"/>	
+		<field name="membersMargin"	type="positiveInteger" basic="false"/>
+
+
+        <!-- contents -->
+		<field name="autoSize" type="boolean" basic="true"/>
+		<field name="src" type="URL"/>
+        <field name="contentsType" type="string"/>
+		<field name="contentLayout"	type="enum">
+			<valueMap>
+				<value>vertical</value>
+				<value>horizontal</value>
+				<value>none</value>
+			</valueMap>
+		</field>
+
+
+        <!-- header -->
+		<field name="showHeader" type="boolean"/>
+		<field name="canFocusInHeaderButtons" type="boolean"/>
+		<field name="headerConstructor" multiple="true" type="className"/>
+		<field name="headerStyle" type="cssClass"/>
+		<field name="hiliteHeaderStyle" type="cssClass"/>
+        <field name="showHeaderBackground" type="boolean"/>
+		<field name="headerSrc" type="URL" />
+		<field name="hiliteHeaderSrc" type="URL" />
+		<field name="headerDefaults" type="Canvas" propertiesOnly="true"/>
+        <field name="headerControls" type="Canvas" idAllowed="true" multiple="true"/>
+
+           <!-- title (a label in the header with the Window's title) -->
+		   <field name="showTitle" type="boolean"/>
+		   <field name="title" type="HTMLString"/>
+           <field name="headerLabelConstructor" type="className" visibility="internal"/>
+		   <field name="headerLabelTextStyle" type="cssClass"/>
+		   <field name="headerLabelInnerTextStyle" type="cssClass"/>
+           <field name="headerLabelDefaults" type="Canvas" propertiesOnly="true"/>
+
+           <!-- headerIcon (icon, typically on left of headerBar, with various windows controls) -->
+		   <field name="showHeaderIcon" type="boolean"/>
+           <field name="headerIconConstructor" type="className" visibility="internal"/>
+           <field name="headerIconDefaults" type="Canvas" propertiesOnly="true"/>
+         
+           <!-- close button --> 
+		   <field name="showCloseButton" type="boolean" basic="true"/>
+		   <field name="closeButtonConstructor" type="className" visibility="internal"/>
+		   <field name="closeButtonDefaults" type="Canvas" propertiesOnly="true"/>
+
+           <!-- minimize button --> 
+		   <field name="showMinimizeButton" type="boolean"/>
+		   <field name="minimizeButtonConstructor" type="className" visibility="internal"/>
+		   <field name="minimizeButtonDefaults" type="Canvas" propertiesOnly="true"/>
+		   <field name="minimized" type="boolean"/>
+   		   <field name="maximized" type="boolean"/>
+		   <field name="defaultMinimizeHeight" type="positiveInteger"/>
+		   <field name="animateMinimize" type="boolean"/>
+		   <field name="minimizeTime" type="positiveInteger"/>
+           <field name="minimizeHeight" type="number"/>
+           
+           <!-- animation -->
+           <field name="animateMinimize" type="boolean"/>
+           <field name="minimizeAcceleration" type="string"/>
+           <field name="minimizeTime"   type="int"/>
+
+           <!-- restore button -->
+		   <field name="restoreButtonDefaults" type="Canvas" propertiesOnly="true"/>
+
+           <!-- maximize button --> 
+		   <field name="showMaximizeButton" type="boolean"/>
+		   <field name="maximizeButtonConstructor" type="className" visibility="internal"/>
+		   <field name="maximizeButtonDefaults" type="Canvas" propertiesOnly="true"/>
+
+        <!-- footer -->
+		<field name="showFooter" type="boolean"/>
+		<field name="footerHeight" type="positiveInteger"/>
+        <field name="footerControls" type="Canvas" idAllowed="true" multiple="true"/>
+           
+        <!-- status bar --> 
+		<field name="showStatusBar" type="boolean"/>
+		<field name="statusBarConstructor" type="className" visibility="internal"/>
+		<field name="statusBarStyle" type="cssClass"/>
+		<field name="statusBarDefaults" type="Canvas" propertiesOnly="true" visibility="internal"/>
+           
+        <!-- corner resizer --> 
+		<field name="showResizer" type="boolean"/>
+		<field name="resizerConstructor" type="className" visibility="internal"/>
+		<field name="resizerDefaults" type="Canvas" propertiesOnly="true"/>
+           
+        <!-- toolbar (shown inside body) -->
+		<field name="showToolbar" type="boolean" visibility="internal"/>
+		<field name="toolbarButtons" type="Canvas" multiple="true" propertiesOnly="true" visibility="internal"/>
+		<field name="toolbarConstructor" type="className" visibility="internal"/>
+		<field name="toolbarDefaults" type="Canvas" propertiesOnly="true" visibility="internal"/>
+         
+        <!-- body -->
+		<field name="showBody" type="boolean"/>
+		<field name="bodyStyle" type="cssClass"/>
+		<field name="bodyColor" type="color"/>
+		<field name="hiliteBodyColor" type="color"/>
+		<field name="bodyConstructor" type="string"/>
+		<field name="bodyDefaults" type="Layout" propertiesOnly="true"/>
+
+        <!-- Leave this field at the end of the list for Visual ISC D&D -->
+		<field name="items" type="Canvas" multiple="true"/>
+        
+        <field name="showModalMask" type="boolean"/>
+        <field name="modalMaskOpacity" type="number"/>
+        
+    </fields>
+</DataSource>
+        

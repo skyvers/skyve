@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+top-level-classloader="true"
+-->
+<classloading xmlns="urn:jboss:classloading:1.0"
+				domain="WILDCATWeb"
+				parent-domain="WILDCATApp"
+				parent-first="true"
+				export-all="NON_EMPTY"
+				import-all="true">
+</classloading>

@@ -1,0 +1,16 @@
+<DataSource ID="SectionStackSection">
+    <fields>
+        <field name="ID"        type="string"/>
+		<field name="title"     type="string" basic="true"/>
+        <!-- backcompat -->
+        <field name="autoShow"  type="boolean" visibility="hidden"/>
+        <field name="expanded"  type="boolean" basic="true"/>
+        <field name="hidden"    type="boolean"/>
+        <field name="canCollapse"    type="boolean" basic="true"/>
+        <field name="resizeable"     type="boolean" basic="true"/>
+        <field name="showHeader"     type="boolean"/>
+        <field name="showLabel" type="boolean"  defaultValue="true"/>
+        <field name="controls"  type="Canvas" multiple="true" propertiesOnly="true"/>
+		<field name="items"     type="Canvas" multiple="true" propertiesOnly="true"/>
+    </fields>
+</DataSource>

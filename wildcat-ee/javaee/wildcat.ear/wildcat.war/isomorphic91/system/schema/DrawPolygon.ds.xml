@@ -1,0 +1,6 @@
+<DataSource	ID="DrawPolygon" inheritsFrom="DrawPath" Constructor="DrawPolygon" >
+    <fields>
+        <field name="points" type="Point" title="Points" multiple="true"/>
+        <field name="lineCap" type="LineCap" title="Line Cap" defaultValue="butt"/>
+    </fields>
+</DataSource>

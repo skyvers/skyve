@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    	xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pm="http://primefaces.org/mobile"
+		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    <f:view renderKitId="PRIMEFACES_MOBILE">
+		<ui:composition template="./template.xhtml">
+			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
+			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
+			<ui:define name="pages">
+				<w:phoneMenu />
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

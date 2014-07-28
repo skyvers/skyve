@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/common" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:complexType name="namedMetaData" abstract="true">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:simpleType name="webAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="g"/>
+      <xs:enumeration value="e"/>
+      <xs:enumeration value="m"/>
+      <xs:enumeration value="c"/>
+      <xs:enumeration value="t"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="converterName">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="Decimal5IntegerPercentage"/>
+      <xs:enumeration value="HH_MI"/>
+      <xs:enumeration value="Decimal5TwoDecimalPlaces"/>
+      <xs:enumeration value="HH24_MI"/>
+      <xs:enumeration value="Decimal5TwoDecimalPlacesPercentage"/>
+      <xs:enumeration value="HH_MI_SS"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="SimplePercentage"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
+      <xs:enumeration value="HH24_MI_SS"/>
+      <xs:enumeration value="Decimal5TimeDuration"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="Decimal5DollarsAndCents"/>
+      <xs:enumeration value="DD_MMM_YYYY"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
+      <xs:enumeration value="Decimal2DollarsAndCents"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="sortDirection">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ascending"/>
+      <xs:enumeration value="descending"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="reportFormat">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="txt"/>
+      <xs:enumeration value="xhtml"/>
+      <xs:enumeration value="ods"/>
+      <xs:enumeration value="xls"/>
+      <xs:enumeration value="xml"/>
+      <xs:enumeration value="pdf"/>
+      <xs:enumeration value="odt"/>
+      <xs:enumeration value="rtf"/>
+      <xs:enumeration value="csv"/>
+      <xs:enumeration value="html"/>
+      <xs:enumeration value="pptx"/>
+      <xs:enumeration value="xlsx"/>
+      <xs:enumeration value="docx"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

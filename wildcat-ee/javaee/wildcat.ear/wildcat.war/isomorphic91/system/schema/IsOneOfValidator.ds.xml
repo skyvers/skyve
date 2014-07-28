@@ -1,0 +1,6 @@
+<Object ID="IsOneOfValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="isOneOf" addGlobalId="false">
+    <fields>
+        <!-- technically the type of the list entries would vary by the type of the field -->
+        <list multiple="true" type="string"/>
+    </fields>
+</Object>

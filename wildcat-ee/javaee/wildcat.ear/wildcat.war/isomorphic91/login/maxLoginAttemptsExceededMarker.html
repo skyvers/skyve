@@ -1,0 +1,35 @@
+<SCRIPT>//'"]]>>isc_maxLoginAttemptsExceeded
+//
+// If your authenticator sends the user to a special page if they've failed to log in after N
+// number of tries and you want to integrate that functionaly with SmartClient RPC relogin, add
+// this whole script block VERBATIM to that page.
+//=======    
+
+
+
+if (!window.isc && document.domain && document.domain.indexOf(".") != -1 
+	&& !(new RegExp("^(\\d{1,3}\\.){3}\\d{1,3}$").test(document.domain))) 
+{
+    
+    var set = false;
+    while (document.domain.indexOf(".") != -1) {
+        try {
+            if (window.opener && window.opener.isc) break;
+            if (window.top.isc) break;
+            
+            if (!set) { document.domain = document.domain; set = true; }
+            else { document.domain = document.domain.replace(/.*?\./, ''); }
+        } catch (e) {
+            try {
+                if (!set) { document.domain = document.domain; set = true }
+                else { document.domain = document.domain.replace(/.*?\./, ''); }
+            } catch (ee) {
+                break;
+            }
+        }
+    } 
+}
+
+var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
+if (isc) isc.RPCManager.delayCall("handleMaxLoginAttemptsExceeded", [window]);
+</SCRIPT>

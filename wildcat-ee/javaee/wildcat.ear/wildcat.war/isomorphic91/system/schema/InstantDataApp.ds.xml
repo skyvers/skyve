@@ -1,0 +1,87 @@
+<DataSource ID="InstantDataApp" inheritsFrom="Application" Constructor="InstantDataApp">
+	<fields>
+		<field name="ID" type="identifier" />
+
+		<field name="dataSources" type="identifier" multiple="true" />
+		<field name="userTypes" type="IDAUserType" multiple="true" uniqueProperty="ID" />
+		<field name="operations" type="IDAOperation" multiple="true" uniqueProperty="ID" />
+		<field name="components" type="IDAComponent" multiple="true" uniqueProperty="ID" 
+               propertiesOnly="true"/>
+		<field name="pages" type="IDAPage" multiple="true" uniqueProperty="ID" />
+
+		<field name="fileSandboxes" type="FileSandbox" multiple="true" uniqueProperty="ID" />
+
+		<field name="height" type="positiveInteger" />
+		<field name="width" type="positiveInteger" />
+		<field name="top" type="positiveInteger" />
+		<field name="left" type="positiveInteger" />
+		<field name="marginHeight" type="positiveInteger" />
+		<field name="marginWidth" type="positiveInteger" />
+		<field name="defaultPrompt" type="HTMLString" />
+		<field name="actionURL" type="URL" />
+		<field name="commType" type="string" />
+		<field name="definedOperationsOnly" type="boolean" />
+		<field name="defaultWindowSettings" type="string" />
+		<field name="defaultWindowHeight" type="positiveInteger" />
+		<field name="defaultWindowWidth" type="positiveInteger" />
+		<field name="defaultWindowName" type="string" />
+
+
+		<field name="appImplementer" type="string" /> <!-- java class -->
+		<field name="appAssembly" type="string" /> <!-- .NET assembly containing appImplementer -->
+		<field name="appVersion" type="float" />
+		
+		<!-- fields for constructing components and pieces -->
+		<field name="makeHeader" type="boolean" />
+		<field name="headerConstructor" type="className"/>
+		<field name="headerDefaults" type="Canvas" propertiesOnly="true"/>
+
+		<field name="makeInstructions" type="boolean" />
+		<field name="instructionsConstructor" type="className"/>
+		<field name="instructionsDefaults" type="Canvas" propertiesOnly="true"/>
+
+		<field name="makeToolbar" type="boolean" />
+		<field name="toolbarConstructor" type="className"/>
+		<field name="toolbarDefaults" type="Toolbar" propertiesOnly="true"/>
+		<field name="buttonWidth" type="positiveInteger" />
+
+		<field name="filterConstructor" type="className"/>
+		<field name="filterDefaults" type="DynamicForm" propertiesOnly="true"/>
+		<field name="emptyFilterMessage" type="string" />
+
+		<field name="summaryConstructor" type="className"/>
+		<field name="summaryDefaults" type="ListGrid" propertiesOnly="true"/>
+
+		<field name="treeConstructor" type="className"/>
+		<field name="treeDefaults" type="TreeGrid" propertiesOnly="true"/>
+
+		<field name="editorConstructor" type="className"/>
+		<field name="editorDefaults" type="DynamicForm" propertiesOnly="true"/>
+		<field name="fieldIdProperty" type="string" />
+		
+		<field name="viewerConstructor" type="className"/>
+		<field name="viewerDefaults" type="DetailViewer" propertiesOnly="true"/>
+
+		<field name="graphConstructor" type="string" />
+		<field name="graphDefaults" type="BarGraph" propertiesOnly="true"/>
+
+		<field name="batchEditorConstructor" type="string" />
+		<field name="batchEditorDefaults" type="ListGrid" propertiesOnly="true"/>
+
+		<field name="componentSpacerHeight" type="positiveInteger" />
+		<field name="spacerConstructor" type="className"/>
+		<field name="spacerDefaults" type="Canvas" propertiesOnly="true"/>
+
+<!-- expose these ? -->
+		<field name="initialAppLoad" type="boolean" />
+
+	</fields>
+
+    <types>
+        <type ID="FileSandbox">
+            <fields>
+                <field name="ID" type="identifier"/>
+            </fields>
+        </type>
+    </types>
+</DataSource>

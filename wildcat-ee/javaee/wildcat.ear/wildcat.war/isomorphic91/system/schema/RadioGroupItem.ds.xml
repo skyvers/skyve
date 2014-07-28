@@ -1,0 +1,15 @@
+<DataSource	ID="RadioGroupItem" inheritsFrom="ContainerItem" Constructor="RadioGroupItem">
+	<fields>
+        <!-- Could use options rather than valueMap - same effect -->
+		<field name="valueMap" type="ValueMap" title="Value Map"/>
+        <field name="disabledValues" type="string" multiple="true" />
+		<field name="vertical" type="boolean" title="Vertical"/>
+		<field name="itemHeight" type="positiveInteger" title="Item Height" visibility="internal"/>
+        <!-- Hide the prompt, since the itemPrompt is more relevant for these items -->
+		<field name="prompt" 			type="HTMLString"    title="Prompt" inapplicable="true"/>        
+   		<field name="itemPrompt" type="HTMLString" title="Item Prompt" visibility="internal"
+            hint='Prompt for each item - "*" denotes the item title' />
+        <!-- can't really take pluggable items -->
+		<field name="items"		type="FormItem"	multiple="true"	inapplicable="true"/>		
+	</fields>
+</DataSource>

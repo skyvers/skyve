@@ -1,0 +1,6 @@
+<Object ID="LengthRangeValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="lengthRange" addGlobalId="false">
+    <fields>
+        <min type="integer"/>
+        <max type="integer"/>
+    </fields>
+</Object>

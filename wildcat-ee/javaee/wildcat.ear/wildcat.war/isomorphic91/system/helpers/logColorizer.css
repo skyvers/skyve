@@ -1,0 +1,8 @@
+.log_timestamp { color: gray }
+.log_separator { color: orange }
+.log_category { color: blue }
+.log_thresh_fatal_and_error {color: red}
+.log_thresh_warn {color: #CC6600}
+.log_thresh_info {color: green}
+.log_thresh_debug {color: lightgreen}
+.log_thread { color: lightblue }

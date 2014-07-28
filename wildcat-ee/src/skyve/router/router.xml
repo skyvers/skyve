@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<router uxuiSelectorClassName="router.DefaultUxUiSelector"
+			xmlns="http://www.skyve.org/xml/router"
+			xsi:schemaLocation="http://www.skyve.org/xml/router ../schemas/router.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<uxui name="desktop">
+		<route outcome="/desktop/home.xhtml" />
+	</uxui>
+	<uxui name="public">
+		<route outcome="/public/grid.xhtml">
+			<criteria webAction="g" />
+		</route>
+		<route outcome="/public/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/public/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/public/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/public/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/public/frameset.xhtml" />
+	</uxui>
+	<uxui name="tablet">
+		<route outcome="/tablet/grid.xhtml">
+			<criteria webAction="g" />
+		</route>
+		<route outcome="/tablet/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/tablet/calendar.xhtml">
+			<criteria webAction="c" />
+		</route>
+		<route outcome="/tablet/map.xhtml">
+			<criteria webAction="m" />
+		</route>
+		<route outcome="/tablet/tree.xhtml">
+			<criteria webAction="t" />
+		</route>
+		<route outcome="/tablet/frameset.xhtml" />
+	</uxui>
+	<uxui name="phone">
+		<route outcome="/phone/grid.xhtml">
+			<criteria webAction="g" />
+		</route>
+		<route outcome="/phone/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/phone/menu.xhtml" />
+	</uxui>
+</router>

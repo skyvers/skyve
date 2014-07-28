@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Create a new User"
+		type="create"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form invisible="notConfirmContact" pixelHeight="1">
+		<column percentageWidth="20" />
+		<column />
+		<column />
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item colspan="2">
+				<blurb textAlignment="left">
+					<markup>
+						<![CDATA[
+							<i>Enter an existing <b>contact name and/or email</b> of the user you wish to create and press the <b>Search</b> button.</i>
+						]]>
+					</markup>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="searchContactName" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="searchEmail" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<button actionName="Check" pixelWidth="150" />
+			</item>
+		</row>
+	</form>
+	<hbox invisible="candidateContactsEmpty" pixelHeight="1">
+		<form percentageWidth="20">
+			<column />
+			<row>
+				<item>
+					<label value="Matches :" textAlignment="right" />
+				</item>
+			</row>
+		</form>
+		<dataGrid binding="candidateContacts" editable="false" pixelHeight="200">
+			<containerColumn title="Actions" pixelWidth="70" alignment="centre">
+				<link value="Select">
+					<actionReference action="Select" />
+				</link>
+			</containerColumn>
+			<boundColumn binding="contact.name" />
+			<boundColumn binding="contact.email1" />
+			<boundColumn binding="matchScore" />
+		</dataGrid>
+	</hbox>
+	<form invisible="notConfirmContact" pixelHeight="1">
+		<column percentageWidth="20" />
+		<column />
+		<column />
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item colspan="2">
+				<blurb textAlignment="left">
+					<markup>
+						<![CDATA[
+							<b><i>OR</i> </b>
+							<br/>
+							<br/>
+							<i>Press the <b>New Contact</b> button to add a user who is a new contact.</i>
+						]]>
+					</markup>
+				</blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item>
+				<button actionName="New" pixelWidth="150" />
+			</item>
+		</row>
+	</form>
+	<hbox invisible="notCreateContact">
+		<form percentageWidth="60">
+			<column percentageWidth="30" />
+			<column />
+			<row>
+				<item>
+					<default binding="contact.name" />
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<default binding="contact.email1" />
+				</item>
+			</row>
+		</form>
+		<form percentageWidth="40">
+			<column />
+			<column />
+			<column />
+			<row>
+				<item>
+					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+				</item>
+			</row>
+		</form>
+	</hbox>
+	<hbox invisible="notConfirmUserNameAndPassword">
+		<form percentageWidth="60">
+			<column percentageWidth="30" />
+			<column />
+			<row>
+				<item>
+					<textField binding="contact.name" disabled="true" />
+				</item>
+			</row>
+			<row>
+				<item required="true">
+					<textField binding="contact.email1" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="userName" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<password binding="newPassword" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<password binding="confirmPassword" />
+				</item>
+			</row>
+		</form>
+		<form percentageWidth="40">
+			<column />
+			<column />
+			<column />
+			<row>
+				<item>
+					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+				</item>
+			</row>
+		</form>
+	</hbox>
+	<hbox invisible="notConfirmGroupMemberships">
+		<vbox percentageWidth="60">
+			<form>
+				<column percentageWidth="30" />
+				<column />
+				<row>
+					<item>
+						<textField binding="contact.name" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<textField binding="contact.email1" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="userName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="newPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="confirmPassword" />
+					</item>
+				</row>
+			</form>
+			<hbox percentageWidth="100" pixelHeight="300">
+				<form percentageWidth="30">
+					<column />
+					<row>
+						<item>
+							<label value="Groups :" textAlignment="right" />
+						</item>
+					</row>
+				</form>
+				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
+			</hbox>
+		</vbox>
+		<form percentageWidth="40">
+			<column />
+			<column />
+			<column />
+			<row>
+				<item>
+					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+				</item>
+			</row>
+		</form>
+	</hbox>
+	<actions>
+		<defaults invisible="notConfirmGroupMemberships" />
+		<cancel invisible="confirmGroupMemberships" />
+		<action className="New" displayName="New Person" invisible="notConfirmContact" inActionPanel="false"
+			relativeIconFileName="actions/New.gif" />
+		<action className="Check" displayName="Search" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
+		<action className="Back" displayName="Back" clientValidation="false" relativeIconFileName="shared/icons/Back.gif"
+			invisible="confirmContact" />
+		<action className="Next" displayName="Next" clientValidation="false" relativeIconFileName="shared/icons/Next.gif"
+			invisible="notShowNextButton" />
+	</actions>
+</view>

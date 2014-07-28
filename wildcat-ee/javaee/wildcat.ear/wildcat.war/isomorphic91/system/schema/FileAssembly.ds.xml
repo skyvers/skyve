@@ -1,0 +1,6 @@
+<DataSource ID="FileAssembly">
+    <fields>
+        <field name="virtualXML" type="Object"/>
+        <field name="assemblies" type="FileAssemblyEntry" multiple="true" uniqueProperty="uri"/>
+    </fields>
+</DataSource>

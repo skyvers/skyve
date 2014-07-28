@@ -1,0 +1,8 @@
+<Object ID="MessageRule" __autoConstruct="DataSource" inheritsFrom="Rule" Constructor="message" addGlobalId="false">
+	<fields>
+		<message type="string"/>
+		<severity type="string"/>
+		<displayMode type="string"/>
+	</fields>
+</Object>
+

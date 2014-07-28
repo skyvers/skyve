@@ -1,0 +1,43 @@
+<DataSource	ID="MenuItem" inheritsFrom="ListGridRecord" showLocalFieldsOnly="true"
+            autoIdField="name">
+    <!-- NOTE: show local fields only as full inheritance from ListGridRecord picks up a lot of
+         inappropriate stuff, like editing-related properties -->
+	<fields>
+		<field name="title" basic="true"/>
+		<field name="submenu" type="Menu"/>
+		<field name="enabled" type="boolean" basic="true"/>
+		<field name="checked" type="boolean" basic="true"/>
+		<field name="isSeparator" basic="true"/>
+		<field name="icon" type="string"/>
+		<field name="iconWidth" type="positiveInteger"/>
+		<field name="iconHeight" type="positiveInteger"/>
+		<field name="keys" type="key"   multiple="true"/>
+        <field name="keyTitle" type="string"/>
+        <field name="enableIf" type="expression"/>
+        <field name="checkIf" type="expression"/>
+        <field name="dynamicTitle" type="expression"/>
+        <field name="dynamicIcon" type="expression"/>
+        <field name="action" type="Action" editorType="ActionMenuItem"/>
+        <field name="canSelectParent" type="boolean"/>
+	</fields>
+	<types>
+		<type ID="key">
+			<fields>
+				<field name="ctrlKey"	type="boolean"/>
+				<field name="shiftKey"	type="boolean"/>
+				<field name="metaKey"	type="boolean"/>
+				<field name="altKey"	type="boolean"/>
+			</fields>
+		</type>
+	</types>
+    <methods>
+        <method name="click">
+            <description>Fires when this menu item is clicked</description>
+            <params>
+                <param name="target" type="Canvas"/>
+                <param name="item" type="MenuItem"/>
+                <param name="menu" type="Menu"/>
+            </params>
+        </method>
+    </methods>
+</DataSource>

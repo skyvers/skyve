@@ -1,0 +1,6 @@
+<Object ID="RequiredIfValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="requiredIf" addGlobalId="false">
+    <fields>
+        <expression type="string"/>
+        <errorMessage type="string"/>
+    </fields>
+</Object>

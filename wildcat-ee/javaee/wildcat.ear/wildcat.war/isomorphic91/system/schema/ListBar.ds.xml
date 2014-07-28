@@ -1,0 +1,5 @@
+<DataSource	ID="ListBar" inheritsFrom="SectionStack" Constructor="ListBar">
+    <fields>
+		<field name="groups"  type="ListBarGroup" multiple="true" propertiesOnly="true"/>
+    </fields>
+</DataSource>

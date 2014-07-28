@@ -1,0 +1,8 @@
+<DataSource	ID="SubmitItem" inheritsFrom="ButtonItem" Constructor="SubmitItem">
+    <fields>
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+    </fields>
+</DataSource>
+

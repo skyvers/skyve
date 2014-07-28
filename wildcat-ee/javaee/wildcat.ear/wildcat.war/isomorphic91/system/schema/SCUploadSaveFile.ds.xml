@@ -1,0 +1,15 @@
+<DataSource
+    ID="SCUploadSaveFile"
+    serverConstructor="com.isomorphic.datasource.SCUploadSaveFileDataSource"
+    addGlobalId="false"
+>
+    <fields>
+    	<field name="path" primaryKey="true" hidden="true" />
+    	<field name="lastChangeDate" hidden="true" />
+		<field name="file" type="binary" />
+    </fields>
+    
+    <operationBindings>
+	    <binding operationType="custom" operationId="checkUploadFeature" />
+    </operationBindings>
+</DataSource>

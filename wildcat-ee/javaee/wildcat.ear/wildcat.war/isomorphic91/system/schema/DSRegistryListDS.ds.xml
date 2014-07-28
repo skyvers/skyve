@@ -1,0 +1,21 @@
+<DataSource ID="DSRegistryListDS"
+            dropExtraFields="false"
+>
+    <fields>
+        <field name="ID" title="Name" primaryKey="true"/>
+        <field name="type"/>
+        <field name="version"/>
+        <field name="objectFormat"/>
+        <field name="object"/>
+    </fields>
+    <operationBindings>
+    	<binding operationType="fetch" language="groovy"><script><![CDATA[
+            import com.isomorphic.sql.*;
+            import com.isomorphic.datasource.*;
+            import com.isomorphic.tools.*;
+
+            def ds DSRepoRegistry.getDSRepo().getDataSource();
+            return ds.fetch(values);
+	    ]]></script></binding>
+    </operationBindings>
+</DataSource>

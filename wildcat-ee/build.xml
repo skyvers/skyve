@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Wildcat" default="build" basedir=".">
+	<path id="classpath">
+		<fileset dir="tools/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="javaee/wildcat.ear/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="javaee/wildcat.ear/wildcat.war/WEB-INF/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+
+		<!-- for generating xsds -->
+		<fileset dir="." includes="lib/jaxb-*.jar" />
+		<pathelement path="../wildcat-core/src" />
+		<pathelement path="../wildcat-tools/src" />
+		
+		<!-- for generating domain - don't use a file element here - doesn't work in old ant -->
+		<pathelement path="javaee/wildcat.ear/apps.jar/" />
+	</path>
+
+	<target name="_touch" description="Touch the app to enable redeploy">
+		<delete file="javaee/*.failed" />
+		<touch file="javaee/wildcat.ear.dodeploy" />
+	</target>
+
+	<target name="_deprecationReport" description="Report of Deprecated Attributes">
+		<java fork="true" classname="modules.DeprecationReport">
+			<classpath refid="classpath" />
+			<arg value="src/" />
+		</java>
+	</target>
+	
+	<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask"> 
+		<classpath refid="classpath"/>
+	</taskdef>
+	<target name="_compileReports" description="Mass compile all reports">
+		<touch> 
+			<fileset dir="src/skyve/">
+				<include name="**/*.jrxml"/>
+			</fileset>
+		</touch>
+		<jrc keepjava="false" xmlvalidation="true" srcdir="src/skyve/">
+			<classpath refid="classpath"/>
+			<include name="**/*.jrxml"/>
+		</jrc>
+	</target>
+
+	<target name="_generateDomain" description="Domain Class Generation">
+		<java fork="true" classname="org.skyve.wildcat.generate.DomainGenerator">
+			<classpath refid="classpath" />
+			<arg value="src/skyve/" />
+			<arg value="debug!" />
+		</java>
+	</target>
+
+	<target name="_generateEditView" description="Edit View Generation">
+		<java fork="true" classname="org.skyve.wildcat.generate.ViewGenerator">
+			<classpath refid="classpath" />
+			<arg value="demo" />
+			<arg value="admin" />
+			<arg value="Contact" />
+			<arg value="false" />
+			<arg value="false" />
+		</java>
+	</target>
+	
+	<target name="_generateDefaultQueries" description="Default Query Generation">
+		<java fork="true" classname="org.skyve.wildcat.generate.QueryGenerator">
+			<classpath refid="classpath"/>
+			<arg value="bizhub" />
+			<arg value="admin" />
+		</java>
+	</target>
+
+	<target name="build" description="Create jars for the wildcat framework and associated tools">
+		<jar jarfile="javaee/wildcat.ear/lib/wildcat-core.jar" basedir="../wildcat-core/bin" />
+		<jar destfile="javaee/wildcat.ear/lib/wildcat-api-src.jar">
+			<fileset dir="../wildcat-core/src" includes="com/wildcat/**/*.java" />
+			<fileset dir="../wildcat-ext/src" includes="com/wildcat/api/**/*.java" />
+		</jar>
+		<jar jarfile="javaee/wildcat.ear/lib/wildcat-ext.jar" basedir="../wildcat-ext/bin" />
+		<jar jarfile="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/wildcat-web.jar" basedir="../wildcat-web/bin">
+			<metainf dir="../wildcat-web/META-INF" includes="*.xml" />
+		</jar>
+		<jar jarfile="tools/lib/wildcat-tools.jar" basedir="../wildcat-tools/bin" />
+	</target>
+	<target name="concatWildcatJavascript">
+		<concat destfile="src/js/desktop/wildcat.js" append="false" >
+			<filelist dir="src/js/desktop/">
+				<!-- static utility functions -->
+				<file name="util2.js" />
+				<!-- enable callback on smart client's RPC system to login -->
+				<file name="reloginFlow.js" />
+				<!-- basic bizhub types and their editors -->
+				<file name="types.js" />
+				<!-- bizhub modal windows -->
+				<file name="windowStack.js" />
+				<!-- bizhub reporting -->
+				<file name="reporting.js" />
+				<!-- bizhub advanced filter builder -->
+				<file name="advancedFilter.js" />
+				<!-- bizhub grid implementations -->
+				<file name="grids.js" />
+				<!-- listview2.js must be first as it is used by harness -->
+				<file name="listview2.js" />
+				<!-- bizhub edit view -->
+				<file name="editView.js" />
+				<!-- bootstrap the bizhub environment -->
+				<file name="harness.js" />
+			</filelist>
+		</concat>
+	</target>
+	<target name="copyJavascript" depends="concatWildcatJavascript">
+		<copy tofile="javaee/wildcat.ear/wildcat.war/desktop/wildcat-min.js" file="src/js/desktop/wildcat.js" overwrite="true"/>
+		<delete file="src/js/desktop/wildcat.js" />
+		<copy tofile="javaee/wildcat.ear/wildcat.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="javaee/wildcat.ear/wildcat.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="javaee/wildcat.ear/wildcat.war/desktop/upload-min.js" file="src/js/desktop/upload.js" overwrite="true"/>
+		<copy tofile="javaee/wildcat.ear/wildcat.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
+	</target>
+	<target name="compressJavascript" depends="concatWildcatJavascript">
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/desktop/wildcat-min.js src/js/desktop/wildcat.js"/>
+		</java>
+		<delete file="src/js/desktop/wildcat.js" />
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/css/basic-min.css src/css/basic.css"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/css/prime-min.css src/css/prime.css"/>
+		</java>
+
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/desktop/upload-min.js src/js/desktop/upload.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
+		</java>
+	</target>
+	<target name="getLibs" xmlns:artifact="urn:maven-artifact-ant">
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpath="lib/maven-ant-tasks-2.1.3.jar" />
+		<condition property="maven.repo.local" value="${maven.repo.local}" else="${user.home}/.m2/repository">
+			<isset property="maven.repo.local" />
+		</condition>
+		<echo>maven.repo.local=${maven.repo.local}</echo>
+		<artifact:localRepository id="local.repository" path="${maven.repo.local}" />
+		<artifact:pom file="pom.xml" id="maven.project" />
+		<artifact:dependencies filesetId="maven.fileset">
+			<pom refid="maven.project" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+
+		<delete dir="javaee/wildcat.ear/lib" excludes="commons-javaflow-20060411.jar,wildcat*.jar" />
+		<copy todir="javaee/wildcat.ear/lib" flatten="true">
+			<fileset refid="maven.fileset" />
+		</copy>
+		<get src="http://downloads.sourceforge.net/project/jasperreports/jasperreports/JasperReports%205.0.0/jasperreports-javaflow-5.0.0.jar?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjasperreports%2Ffiles%2Fjasperreports%2FJasperReports%25205.0.0%2F&amp;ts=1360285830&amp;use_mirror=internode"
+				dest="testical/jasperreports-javaflow-5.0.0.jar" 
+				usetimestamp="true"
+				verbose="true" />
+
+		<!-- Delete older versions of the same libraries -->
+		<delete dir="testical" includes="ehcache-1.2.3.jar,bcmail-jdk14-1.38.jar,bcprov-jdk14-1.38.jar,commons-lang-2.6.jar,ehcache-1.2.3.jar,jaxb*.jar" failonerror="true" />
+
+		<move todir="javaee/wildcat.ear/wildcat.war/WEB-INF/lib" failonerror="true">
+			<fileset dir="javaee/wildcat.ear/lib" includes="commons-fileupload-1.2.2.jar,commons-io-2.3.jar,jsf-api-2.1.17.jar,jsf-impl-2.1.17.jar,primefaces-3.4.2.jar,primefaces-extensions-0.6.2.jar" />
+		</move>
+	</target>
+
+	<target name="MANIFEST.MF">
+		<!-- create a property containing all .jar files, prefix lib/, and seperated with a space -->
+		<pathconvert property="libs.deploy" pathsep=" ">
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<flattenmapper />
+					<!-- add lib/ prefix -->
+					<globmapper from="*" to="lib/*" />
+				</chainedmapper>
+			</mapper>
+			<path>
+				<fileset dir="javaee/wildcat.ear/lib">
+					<include name="**/*wildcat-core.jar" />
+					<include name="**/*wildcat-ext.jar" />
+				</fileset>
+				<fileset dir="javaee/wildcat.ear/lib">
+					<include name="**/*.jar" />
+					<exclude name="**/*wildcat*.jar" />
+				</fileset>
+			</path>
+		</pathconvert>
+		<manifest file="javaee/wildcat.ear/wildcat.war/META-INF/MANIFEST.MF">
+			<!-- finally, use the magically generated libs path -->
+			<attribute name="Class-Path" value="${libs.deploy}" />
+		</manifest>
+	</target>
+	
+	<taskdef name="schemagen" classname="com.sun.tools.jxc.SchemaGenTask">
+		<classpath refid="classpath" />
+	</taskdef>
+	<target name="buildXmlSchemas">
+		<schemagen destdir="src/skyve/schemas" includeantruntime="true">
+			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/router" />
+			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/customer" />
+			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/module" />
+			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/document" />
+			<src path="../wildcat-tools/src/org/skyve/wildcat/tools/test/wail/language" />
+			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/view" />
+			<classpath refid="classpath" />
+			<schema namespace="http://www.skyve.org/xml/common" file="common.xsd" />
+			<schema namespace="http://www.skyve.org/xml/router" file="router.xsd" />
+			<schema namespace="http://www.skyve.org/xml/customer" file="customer.xsd" />
+			<schema namespace="http://www.skyve.org/xml/module" file="module.xsd" />
+			<schema namespace="http://www.skyve.org/xml/document" file="document.xsd" />
+			<schema namespace="http://www.skyve.org/xml/view" file="view.xsd" />
+			<schema namespace="http://www.skyve.org/xml/wail" file="wail.xsd" />
+		</schemagen>
+	</target>
+	<target name="createLibZip">
+		<zip destfile="libs.zip" basedir="." includes="lib/**,javaee/wildcat.ear/lib/**,javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,tools/lib/**" />
+	</target>
+</project>

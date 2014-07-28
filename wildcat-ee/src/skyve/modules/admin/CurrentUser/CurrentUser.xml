@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="CurrentUser"
+				xmlns="http://www.skyve.org/xml/document"
+	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Current User</singularAlias>
+	<pluralAlias>Current Users</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return "Current User";
+		]]>
+	</bizKey>
+	<attributes>
+		<association type="aggregation" name="currentUser" persistent="false">
+			<displayName>Current User</displayName>
+			<documentName>User</documentName>
+		</association>
+		<collection name="groups" type="aggregation" persistent="false">
+			<displayName>Groups</displayName>
+			<domain>variant</domain>
+			<documentName>Group</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="name" sort="ascending" />
+			</ordering>
+		</collection>		
+	</attributes>
+</document>

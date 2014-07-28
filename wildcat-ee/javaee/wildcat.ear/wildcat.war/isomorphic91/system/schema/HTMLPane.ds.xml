@@ -1,0 +1,7 @@
+<DataSource	ID="HTMLPane" inheritsFrom="HTMLFlow" Constructor="HTMLPane">
+    <groups>
+        <group>contentLoading</group>
+        <group>contents</group>
+        <group>appearance</group>
+    </groups>
+</DataSource>

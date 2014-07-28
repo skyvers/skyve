@@ -1,0 +1,1 @@
+<DataSource ID="BooleanItem" inheritsFrom="CheckboxItem" Constructor="CheckboxItem"/>

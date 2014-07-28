@@ -1,0 +1,5 @@
+<DataSource ID="ToolStripButton" inheritsFrom="StretchImgButton" Constructor="ToolStripButton">
+    <methods>
+        <method action="event" title="Click" name="click" basic="true" />
+    </methods>
+</DataSource>

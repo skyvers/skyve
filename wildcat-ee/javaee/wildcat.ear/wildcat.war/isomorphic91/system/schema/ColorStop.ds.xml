@@ -1,0 +1,7 @@
+<DataSource ID="ColorStop">
+    <fields>
+        <field  name="offset"  type="float" defaultValue="0.0"/>
+        <field  name="opacity"  type="float" defaultValue="1.0"/>
+        <field  name="color"  type="color" title="Color"/>
+    </fields>
+</DataSource>

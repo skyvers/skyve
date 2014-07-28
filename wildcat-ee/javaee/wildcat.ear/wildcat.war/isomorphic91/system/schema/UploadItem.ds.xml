@@ -1,0 +1,8 @@
+<DataSource ID="UploadItem" inheritsFrom="TextItem" Constructor="UploadItem">
+    <fields>
+        <field name="defaultValue" inapplicable="true"/>
+   		<field name="length" inapplicable="true"/>                
+        <field name="defaultDynamicValue" inapplicable="true"/>
+    </fields>
+</DataSource>
+

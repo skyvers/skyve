@@ -1,0 +1,8 @@
+<DataSource ID="LinearGradient" inheritsFrom="Gradient">
+    <fields>
+        <field  name="x1"  type="string"/>
+        <field  name="y1"  type="string"/>
+        <field  name="x2"  type="string"/>
+        <field  name="y2"  type="string"/>
+    </fields>
+</DataSource>

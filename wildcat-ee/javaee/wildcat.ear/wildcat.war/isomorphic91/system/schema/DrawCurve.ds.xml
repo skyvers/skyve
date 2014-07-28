@@ -1,0 +1,9 @@
+<DataSource	ID="DrawCurve" inheritsFrom="DrawItem" Constructor="DrawCurve" >
+    <fields>
+        <field name="startPoint" type="Point" title="Start Point"/>
+        <field name="endPoint" type="Point" title="End point"/>
+        <field name="controlPoint1" type="Point" title="Control Point 1"/>
+        <field name="controlPoint2" type="Point" title="Control Point 2"/>
+        <field name="lineCap" type="LineCap" title="Line Cap" defaultValue="butt"/>
+    </fields>
+</DataSource>

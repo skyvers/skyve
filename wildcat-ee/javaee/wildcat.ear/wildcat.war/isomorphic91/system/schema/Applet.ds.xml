@@ -1,0 +1,16 @@
+<DataSource	ID="Applet" inheritsFrom="BrowserPlugin" Constructor="Applet">
+    <fields>
+		<field name="name"         type="string"/>
+		<field name="code"         type="URL"/>
+		<field name="codeBase"     type="URL"/>
+		<field name="archive"      type="URL"/>
+		<field name="alt"          type="string"/>
+		<field name="altHTML"	   type="HTMLString"/>
+		<field name="params"	   type="object"/>
+		<field name="mayScript"	   type="boolean"/>
+		<field name="scriptable"   type="boolean"/>
+		<field name="classID"      type="string"/>
+		<field name="objectCodeBase"      type="string"/>
+		<field name="useTag"       type="string"/>
+    </fields>
+</DataSource>

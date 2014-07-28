@@ -1,0 +1,7 @@
+<DataSource	ID="BrowserPlugin"	inheritsFrom="Canvas" Constructor="BrowserPlugin">
+    <fields>
+        <field name="src" type="string"/>
+        <field name="extraHTML" type="string"/>
+        <field name="pluginsPage" type="URL"/>
+    </fields>
+</DataSource>

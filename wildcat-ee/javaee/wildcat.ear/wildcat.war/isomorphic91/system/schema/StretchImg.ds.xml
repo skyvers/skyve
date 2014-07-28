@@ -1,0 +1,18 @@
+<DataSource	ID="StretchImg" inheritsFrom="StatefulCanvas" Constructor="StretchImg">
+	<fields>
+		<field name="vertical" type="boolean" />
+		<field name="capSize" type="positiveInteger" />
+		<field name="src"	type="URL" />
+		<field name="hSrc"	type="URL" />
+		<field name="vSrc"	type="URL" />
+ 		<field name="imageType"	type="imageTypeEnum"/>	<!-- imageTypeEnum defined in Canvas -->
+		<field name="items" type="imageProperty" multiple="true"/> <!-- imageProperty is defined in Canvas -->
+		<field name="autoCalculateSizes" type="boolean" visibility="internal"/>
+		<field name="cacheImageSizes" type="boolean" visibility="internal"/>
+	</fields>
+    
+    <methods>
+        <method name="click" basic="true"/>
+        <method name="doubleClick" basic="true"/>
+    </methods>
+</DataSource>

@@ -1,0 +1,9 @@
+<DataSource ID="MethodDeclaration">
+    <fields>
+        <field name="name" type="string"/>
+        <field name="title" type="string"/>
+        <field name="description" type="string"/>
+        <field name="action" type="boolean"/>
+        <field name="params" type="ParamsDeclaration" multiple="true"/>
+    </fields>
+</DataSource>

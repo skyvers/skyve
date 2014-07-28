@@ -1,0 +1,6 @@
+<DataSource ID="TileRecord" inheritsFrom="Record">
+	<fields>
+		<field name="tileProperties"				type="object"/>
+        <field name="tileProperties"				type="string"/>
+	</fields>
+</DataSource>

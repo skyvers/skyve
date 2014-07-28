@@ -1,0 +1,22 @@
+<DataSource	ID="DateItem" inheritsFrom="ContainerItem" Constructor="DateItem">
+	<fields>
+		<field name="required" 			type="boolean"  title="Required" inapplicable="true"/>    
+		<field name="defaultValue"      type="date"   useTextField="true" 
+               title="Default Value"/> 
+		<field name="useTextField"      type="boolean"  title="Use Text Field" basic="true" />
+        <field name="invalidDateStringMessage"  type="string"/>
+		<field name="centuryThreshold"  type="positiveInteger"  title="Century Threshold"/>    
+		<field name="dateFormat"	type="enum"> 
+		    <valueMap DMYP="DAY_MONTH_YEAR" MDYP="MONTH_DAY_YEAR" YMDP="YEAR_MONTH_DAY"/>
+		</field>
+        <field name="inputFormat" type="string"/>
+        <field name="displayFormat" type="string"/>
+        <field name="type" inapplicable="true"/>
+   		<field name="startDate"		type="date" useTextField="true" title="Start Date"
+               prompt="First available date in date-range"/>
+		<field name="endDate"		type="date" useTextField="true" title="End Date"
+               prompt="Last available date in date-range"/>
+        <!-- can't really take pluggable items -->
+		<field name="items"		type="FormItem"	multiple="true"	inapplicable="true"/>		
+    </fields>
+</DataSource>

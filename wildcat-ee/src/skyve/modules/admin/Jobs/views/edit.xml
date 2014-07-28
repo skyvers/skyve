@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Jobs"
+		type="edit"
+		refreshTimeInSeconds="30"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Actual">
+			<!-- form needs to be included for the client to make a call to the server -->
+			<form>
+				<column percentageWidth="100" />
+				<row><item><spacer/></item></row>
+			</form>
+			<dataGrid binding="runningJobs" title="Running Jobs">
+				<boundColumn binding="startTime" title="Start Time" />
+				<boundColumn binding="displayName" title="Name" />
+				<boundColumn binding="percentComplete" title="Percent Complete" />
+				<boundColumn binding="log" title="Log" />
+			</dataGrid>
+			<listGrid query="qCompletedJobs" title="Completed Jobs" />
+		</tab>
+		<tab title="Schedule">
+			<listGrid query="qAllSchedules" title="Job Schedule" />
+		</tab>
+	</tabPane>
+	<actions>
+		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" />
+	</actions>
+</view>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Change Your Password" 
+			type="edit" 
+			xmlns="http://www.skyve.org/xml/view"
+			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column percentageWidth="20" />
+		<column/>
+		<row><item><password binding="newPassword" /></item></row>
+		<row><item><password binding="confirmPassword" /></item></row>
+		<row><item><label binding="response" /></item></row>
+	</form>
+	<actions>
+		<action className="MakePasswordChange" displayName="Change Password" toolTip="Change password" />
+	</actions>
+</view>

@@ -1,0 +1,53 @@
+<DataSource ID="Tree"	Constructor="Tree">
+	<fields>
+        <field name="rootValue"             type="string"/>
+        <field name="autoOpenRoot"          type="boolean"/>
+        <field name="modelType"             type="TreeModelType"/>
+		<field name="isFolderProperty"		type="string"/>
+		<field name="autoSetupParentLinks"  type="boolean" visibility="internal"/>
+		<field name="pathDelim"				type="string"/>
+		<field name="nameProperty"			type="string"/>
+		<field name="titleProperty"			type="string"/>
+        <field name="idField"               type="string"/>
+        <field name="parentIdField"         type="string"/>
+		<field name="parentProperty"		type="string"/>
+		<field name="childrenProperty"		type="string"/>
+		<field name="openProperty"			type="string"/>
+        <field name="discardParentlessNodes" type="boolean"/>
+		<field name="cacheOpenList"			type="boolean" visibility="internal"/>
+        <field name="data"                  type="List"/>
+		<field name="root"					type="TreeNode"/>
+		<field name="sortProp"				type="string" visibility="internal"/>
+		<field name="sortDirection"			type="boolean" visibility="internal"/>
+		<field name="showRoot"				type="boolean"/>
+		<field name="separateFolders"		type="boolean" visibility="internal"/>
+		<field name="defaultNodeTitle"		type="string"/>
+		<field name="defaultLoadState"		type="loadStateEnum" visibility="internal"/>
+		<field name="loadStateMessages"		type="loadStateMessageObject" visibility="internal"/>
+        <field name="defaultIsFolder" type="boolean"/>
+        <field name="reportCollisions" type="boolean"/>
+	</fields>
+	<types>
+		<type ID="TreeModelType" inheritsFrom="enum">
+			<valueMap>
+                <value>parent</value>
+                <value>children</value>
+			</valueMap>
+		</type>
+		<type ID="loadStateEnum" inheritsFrom="enum">
+			<valueMap>
+				<value></value>	<!-- is NULL in the code... ??? -->
+				<value>loading</value>
+				<value>folders</value>	<!-- folders only ??? -->
+				<value>loaded</value>
+			</valueMap>
+		</type>
+		<type ID="loadStateMessagesObject">
+			<fields>
+				<field name="normal" type="string"/>
+				<field name="loading" type="string"/>
+				<field name="empty" type="string"/>
+			</fields>
+		</type>
+	</types>
+</DataSource>

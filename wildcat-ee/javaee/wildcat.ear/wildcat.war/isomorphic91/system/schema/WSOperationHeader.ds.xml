@@ -1,0 +1,7 @@
+<DataSource ID="WSOperationHeader" addGlobalId="false">
+    <fields>
+        <fields name="encoding"/>
+        <fields name="message"/>
+        <fields name="part"/>
+    </fields>
+</DataSource>

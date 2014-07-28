@@ -1,0 +1,5 @@
+<Object	ID="Method" __autoConstruct="DataSource">
+    <fields>
+        <name type="string"/>
+    </fields>
+</Object>

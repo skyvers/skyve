@@ -1,0 +1,28 @@
+<DataSource ID="FacetValue">
+    <fields>
+        <field  name="id"   type="string" />
+        <field  name="title"    type="string" />
+        <field  name="parentId" type="FacetValueId" />
+        <field  name="moveGroup" type="moveGroupId" visibility="infa"/>
+        <field  name="canCollapse"  type="boolean" />
+        <field  name="collapsed"    type="boolean" />
+        <field  name="canMinimize"    type="boolean" />
+        <field  name="minimized"    type="boolean" />
+        <field  name="isMinimizeValue"    type="boolean"/>
+        <field  name="nextFacetCollapsed"   type="boolean" />
+        <field  name="width"    type="number" />
+        <field  name="align"    type="alignEnum" />
+        <field  name="cellAlign"    type="alignEnum" />
+        <field  name="borderBefore" type="cssLineStyle" />
+        <field  name="borderAfter"  type="cssLineStyle" />
+        <field  name="titleHilite"  type="hiliteId" />
+        <field  name="selectionBoundary"    type="selectionBoundaryEnum" />
+        <field  name="canEdit"  type="boolean" />
+        <field  name="canClose" type="boolean" visibility="infa"/>
+        <field  name="canSort"  type="boolean" visibility="infa"/>
+    </fields>
+    <types>
+        <type   ID="moveGroupId"    inheritsFrom="identifier" />
+        <type   ID="hiliteId"   inheritsFrom="identifier" />
+    </types>
+</DataSource>

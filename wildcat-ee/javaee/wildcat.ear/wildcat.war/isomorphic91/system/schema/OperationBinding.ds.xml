@@ -1,0 +1,102 @@
+<Object ID="OperationBinding" __autoConstruct="DataSource">
+    <fields>
+        <operationType type="string"/>
+        <customSQL type="string"/>
+
+        <dataFormat type="string" title="DataFormat">
+            <valueMap iscServer="ISC Java Server" 
+                      xml="XML / WSDL Web Service" 
+                      json="JSON Web Service"
+                      custom="Custom Binding"/>
+        </dataFormat>
+        <!-- web services operation to invoke -->
+        <wsOperation type="string"/>
+        <!-- element or type name within the web service response that should be used
+             as dsResponse.data -->
+        <recordName type="string"/>
+
+		<!-- xPath to data to return, generally auto-derived from resultType -->
+        <recordXPath type="XPath"/>
+        <dropExtraFields type="boolean"/>
+        <!-- customize outbound transform via schema.  In the absence of this, the entity
+             schema is used -->
+        <responseDataSchema type="DataSource"/>
+
+        <!-- id, for variants on basic operation types -->
+        <operationId type="string"/>
+        
+        <!-- whether components bound to this operation should use all simple type fields found
+             anywhere in the input message, ignoring nesting -->
+        <useFlatFields type="boolean"/>
+
+        <!-- overrides to allow non-WSDL operationBindings, like fetch via HTTP GET, save via HTTP POST -->
+        <dataURL type="URL"/>
+        <dataTransport type="string"/>
+        <defaultParams type="Object"/>
+        <soapAction type="string"/>
+        <dataProtocol type="DSProtocol"/>
+
+        <callbackParam type="string" title="Callback Parameter"/>
+        <requestProperties type="Object"/>
+
+        <!-- optional serverObject override -->
+        <serverObject type="ServerObject"/>
+
+        <!-- method to be called on the server (default to operationType) -->
+        <serverMethod type="string"/>
+        
+        <!-- string of comma separated VTL expressions for explicit argument assignment to serverMethod -->
+        <methodArguments type="string"/>
+        
+        <xmlNamespaces type="Object"/>
+        
+        <preventHTTPCaching type="boolean"/>
+        <spoofResponses type="boolean"/>
+        <exportResults type="boolean"/>
+        <exportDatesAsFormattedString type="boolean"/>
+        <useForCacheSync type="boolean"/>
+        <canSyncCache type="boolean"/>
+        <allowMultiUpdate type="boolean"/>
+        
+        <!-- Security -->
+        <requiresAuthentication type="boolean"/>
+        <requiresRoles type="boolean"/>
+        <requires type="string" />
+        
+        <mail type="Mail" />
+        
+        <!-- Return results in a Javabean instead of a map (SQL DataSources only) -->
+        <beanClassName type="string"/>
+        
+        <!-- For "custom" operations on Hibernate and SQL DataSources, issue an update or a query? -->
+        <sqlType type="string"/>
+
+        <outputs type="string"/>
+
+        <autoJoinTransactions type="boolean"/>
+
+        <progressiveLoading type="boolean"/>
+
+        <allowAdvancedCriteria type="boolean" />
+        
+        <scriptImport type="string"/>
+        <script type="Object" idAllowed="true"/>
+
+        <summaryFunctions type="SummaryFunction" />
+        <groupBy type="string" />
+        <allowClientRequestedSummaries type="boolean" />
+        
+        </fields>
+    
+    <types>
+        <type ID="DSProtocol" inheritsFrom="enum">
+            <valueMap>
+                <value>getParams</value>
+                <value>postParams</value>
+                <value>postXML</value>
+                <value>soap</value>
+                <value>postMessage</value>
+            </valueMap>
+        </type>
+    </types>
+</Object>

@@ -1,0 +1,11 @@
+<DataSource	ID="DrawLinePath" inheritsFrom="DrawPath" Constructor="DrawLinePath" >
+    <fields>
+        <field name="startPoint" type="Point" title="Start Point" />
+        <field name="endPoint" type="Point" title="End Point" />
+        <field name="tailSize" type="integer" title="Tail Size" defaultValue="30"/>
+        <field name="startLeft" type="integer" title="Start Left" defaultValue="0"/>
+        <field name="startTop" type="integer" title="Start Top" defaultValue="0"/>
+        <field name="endLeft" type="integer" title="End Left" defaultValue="0"/>
+        <field name="endTop" type="integer" title="End Top" defaultValue="0"/>
+    </fields>
+</DataSource>

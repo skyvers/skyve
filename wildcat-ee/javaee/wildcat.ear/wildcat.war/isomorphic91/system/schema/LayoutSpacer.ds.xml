@@ -1,0 +1,46 @@
+<DataSource	ID="LayoutSpacer" inheritsFrom="Canvas" Constructor="LayoutSpacer"
+            showSuperClassEvents="false">
+    <fields>
+		<field name="width" type="measure" basic="true"/>	
+		<field name="height" type="measure" basic="true"/>
+
+        <field name="backgroundColor" inapplicable="true"/>
+        <field name="backgroundImage" inapplicable="true"/>
+        <field name="backgroundRepeat" inapplicable="true"/>
+
+        <field name="margin" inapplicable="true"/>
+        <field name="border" inapplicable="true"/>
+        <field name="padding" inapplicable="true"/>
+
+        <field name="styleName" inapplicable="true"/>
+
+        <field name="overflow" inapplicable="true"/>
+
+        <field name="left" inapplicable="true"/>
+        <field name="top" inapplicable="true"/>
+
+        <field name="prompt" inapplicable="true"/>
+        <field name="canHover" inapplicable="true"/>
+        <field name="showHover" inapplicable="true"/>
+        <field name="hoverWidth" inapplicable="true"/>
+        <field name="hoverHeight" inapplicable="true"/>
+
+        <field name="showShadow" inapplicable="true"/>
+        <field name="shadowDepth" inapplicable="true"/>
+
+        <field name="showEdges" inapplicable="true"/>
+        <field name="edgeSize" inapplicable="true"/>
+        <field name="edgeImage" inapplicable="true"/>
+        <field name="customEdges" inapplicable="true"/>
+        <field name="edgeBackgroundColor" inapplicable="true"/>
+        <field name="edgeCenterBackgroundColor" inapplicable="true"/>
+        <field name="edgeShowCenter" inapplicable="true"/>
+
+        <field name="peers" inapplicable="true"/>
+		<field name="children" inapplicable="true"/>	
+    </fields>
+    <groups>
+        <group>basics</group>
+        <group>sizing</group>
+    </groups>
+</DataSource>

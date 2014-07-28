@@ -1,0 +1,43 @@
+<DataSource ID="DBListDS"
+            dropExtraFields="false"
+>
+    <fields>
+        <field name="name" primaryKey="true"/>
+        <field name="type"/>
+        <field name="version"/>
+        <field name="driverVersion"/>
+        <field name="status"/>
+    </fields>
+    <operationBindings>
+    	<binding operationType="fetch" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+            import com.isomorphic.sql.*;
+            import com.isomorphic.tools.*;
+
+            def dbNames = SQLConnectionManager.getDefinedDatabaseNames();
+            dbNames.collect{
+                def name = it;
+
+                // type and version
+                def type = "N/A";
+                def version = "N/A";
+                def driverVersion = "N/A";
+                def status = "OK";
+                try {
+                    def conn = SQLConnectionManager.getConnection(name);
+                    def smd = new SQLMetaData(conn);
+                    def result = smd.getProductNameAndVersion();
+                    SQLConnectionManager.free(conn);
+                    type = result.productName;
+                    version = result.productVersion;
+                    driverVersion = result.driverVersion;
+                } catch (Exception e) { 
+                    if (e.toString() =~ /ClassNotFoundException/) status = "JDBC driver not installed";
+                    else status = "Unable to connect";
+                }
+
+                [name:name, status: status, type: type, version: version, driverVersion: driverVersion];
+            }
+	    ]]></script></binding>
+    </operationBindings>
+</DataSource>

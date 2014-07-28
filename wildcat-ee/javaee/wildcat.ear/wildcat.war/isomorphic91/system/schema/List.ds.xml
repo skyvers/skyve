@@ -1,0 +1,1 @@
+<DataSource ID="List" serverConstructor="com.isomorphic.datasource.ListType"/>

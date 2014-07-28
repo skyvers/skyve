@@ -1,0 +1,3 @@
+<jboss-web>
+	<security-domain>java:/jaas/wildcat</security-domain>
+</jboss-web>

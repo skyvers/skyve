@@ -1,0 +1,16 @@
+<DataSource ID="SliderItem" inheritsFrom="CanvasItem" Constructor="SliderItem">
+    <fields>
+		<field name="vertical"  type="boolean"/>
+        <field name="minValue"  type="number"/>
+        <field name="maxValue"  type="number"/>
+        <field name="numValues" type="number"/>
+        <field name="defaultValue" type="number"/>
+        <field name="sliderProperties" type="Slider"    propertiesOnly="true"/>
+        <field name="sliderDefaults" type="Slider"      propertiesOnly="true"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+        <field name="roundPrecision" type="number"/>
+    </fields>
+</DataSource>

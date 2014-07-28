@@ -1,0 +1,60 @@
+<DataSource ID="DataSourceStore">
+    <fields>
+        <field name="ID" primaryKey="true"/>
+        <field name="version"/>
+        <field name="dsXML" length="50000" type="text"/>
+
+        <field name="config" hidden="true"/>
+        <field name="dbName" hidden="true"/>
+        <field name="tableName" hidden="true"/>
+        <field name="schema" hidden="true"/>
+        <field name="sql" hidden="true"/>
+        <field name="ds" type="DataSource" hidden="true"/>
+    </fields>
+
+    <operationBindings>
+    	<binding operationType="custom" operationId="dsFromSQL" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+            import com.isomorphic.sql.*;
+           
+            def dsId = values.dbName+"_devSqlBrowser_"+System.currentTimeMillis();
+            def conn = SQLConnectionManager.getConnection(values.dbName);
+            def ds = SQLDataSource.fromTable(conn, null, values.schema, dsId, "sql", values.dbName,
+                        [operationType:"fetch", customSQL: values.sql, sqlPaging: "jdbcScroll"], true, null, null);
+            SQLConnectionManager.free(conn);
+
+/*
+            def ds = DataSource.fromConfig([
+                ID: dsId,
+                dbName: values.dbName,
+                serverType: "sql",
+                autoDeriveSchema: "true",
+                operationBindings: [
+                    [type: "fetch", autoDeriveSchemaOperation: "true", tableClause: values.sql]
+                ]
+            ]);
+*/
+            return [ds:ds];
+	    ]]></script></binding>
+    	<binding operationType="custom" operationId="dsFromTable" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+            import com.isomorphic.sql.*;
+
+            def dsId = values.dbName+"_"+values.tableName+"_devTableBrowser_"+System.currentTimeMillis();
+            def ds = SQLDataSource.fromTable(null, values.tableName, values.schema, dsId, "sql", values.dbName);
+
+            return [ds:ds, dsXML:ds.toXML()];
+	    ]]></script></binding>
+    	<binding operationType="custom" operationId="dsFromConfig" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+            import com.isomorphic.store.*;
+            import com.isomorphic.datasource.*;
+
+            def ds = DataSource.fromConfig(values.config, dsRequest);
+            if (ds != null) {
+                DataStructCache.addCachedObjectWithNoConfigFile(ds.getName(), ds);
+            }
+            return [ds:ds, dsXML: ds.toXML()];
+	    ]]></script></binding>
+    </operationBindings>
+</DataSource>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="User {userName}"
+		type="edit"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Profile">
+			<form>
+				<column percentageWidth="20" />
+				<column/>
+				<row><item><textField binding="userName" /></item></row>
+				<row><item><lookupDescription binding="contact" descriptionBinding="name" /></item></row>
+				<row>
+					<item label="Data Group">
+						<textField binding="dataGroup.name" disabled="true" invisible="notInDataGroup" />
+					</item>
+					<item><combo binding="dataGroup" invisible="inDataGroup" /></item>
+				</row>
+				<row><item><combo binding="homeModule" /></item></row>
+			</form>
+		</tab>
+		<tab title="Groups">
+			<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
+		</tab>
+		<tab title="Roles">
+			<dataGrid title="User Roles" binding="roles">
+				<boundColumn binding="roleName" title="Role Name" />
+			</dataGrid>
+		</tab>
+		<tab title="Password">
+			<form>
+				<column percentageWidth="20" />
+				<column/>
+				<row><item><password binding="newPassword" /></item></row>
+				<row><item><password binding="confirmPassword" /></item></row>
+				<row>
+					<item><checkBox binding="passwordExpired" invisible="notSecurityAdministrator" /></item>
+					<item><textField binding="clearTextPassword" disabled="true" invisible="notSecurityAdministrator" /></item>
+				</row>
+			</form>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults/>
+		<action className="GenerateUniqueUserName" displayName="Generate UserName" invisible="notSecurityAdministrator" />
+		<action className="GeneratePassword" displayName="Generate Password" invisible="notSecurityAdministrator" />
+	</actions>
+</view>

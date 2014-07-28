@@ -1,0 +1,10 @@
+<DataSource ID="ListGridRecord" inheritsFrom="Record">
+	<fields>
+		<field name="enabled"				type="boolean"/>
+		<field name="isSeparator"			type="boolean"/>
+        <field name="singleCellValue"       type="string"/>
+		<field name="canDrag"	 		    type="boolean"/>
+		<field name="canAcceptDrop"			type="boolean"/>
+        <field name="linkText"              type="string"/>
+	</fields>
+</DataSource>

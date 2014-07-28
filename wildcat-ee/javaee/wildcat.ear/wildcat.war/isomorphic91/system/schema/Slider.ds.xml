@@ -1,0 +1,42 @@
+<DataSource	ID="Slider" inheritsFrom="Canvas" Constructor="Slider">
+	<fields>
+		<field name="title" type="string"/>
+		<field name="length" type="positiveInteger"/>
+		<field name="vertical" type="boolean"/>
+		<field name="thumbThickWidth" type="positiveInteger"/>
+		<field name="thumbThinWidth" type="positiveInteger"/>
+		<field name="trackWidth" type="positiveInteger"/>
+		<field name="thumbSrc" type="URL"/>
+		<field name="trackSrc" type="URL"/>
+		<field name="trackCapSize" type="positiveInteger"/>
+		<field name="trackImageType" type="enum">
+			<valueMap>
+				<value>center</value>
+				<value>tile</value>
+				<value>stretch</value>
+			</valueMap>
+		</field>
+        <field name="showTitle" type="boolean"/>
+        <field name="showRange" type="boolean"/>
+        <field name="showValue" type="boolean"/>
+		<field name="labelWidth" type="positiveInteger"/>
+		<field name="labelHeight" type="positiveInteger"/>
+		<field name="labelSpacing" type="positiveInteger"/>
+		<field name="value" type="float"/>
+		<field name="minValue" type="float"/>
+		<field name="minValueLabel" type="string"/>
+		<field name="maxValue" type="float"/>
+		<field name="maxValueLabel" type="string"/>
+		<field name="numValues" type="positiveInteger"/>
+        <field name="roundValues" type="boolean"/>
+        <field name="roundPrecision" type="positiveInteger"/>
+        <field name="flipValues" type="boolean"/>
+		<field name="sliderTarget" type="reference"/>
+        <field name="canFocus" type="boolean"/>
+		<field name="stepPercent" type="float"/>
+        <field name="animateThumb" type="boolean"/>
+        <field name="animateThumbTime" type="positiveInteger"/>
+        <field name="animateThumbInit" type="boolean"/>
+	</fields>
+</DataSource>
+

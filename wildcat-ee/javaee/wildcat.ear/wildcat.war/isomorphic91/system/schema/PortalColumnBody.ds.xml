@@ -1,0 +1,7 @@
+<DataSource ID="PortalColumnBody" inheritsFrom="Layout" Constructor="PortalColumnBody">
+
+    <!-- mark superclass fields as not relevant -->
+    <field name="children" inapplicable="true"/>
+    <field name="peers" inapplicable="true"/>
+    <field name="members" inapplicable="true"/>
+</DataSource>

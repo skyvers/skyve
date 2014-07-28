@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en"
+		xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+	<f:view contentType="text/html">
+		<f:metadata>
+			<f:viewParam name="a" value="#{menu.webActionParameter}" />
+			<f:viewParam name="m" value="#{menu.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{menu.bizDocumentParameter}" />
+			<f:viewParam name="i" value="#{menu.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{menu.preRender}"/>
+		</f:metadata>
+		<h:head>
+	        <f:facet name="first">
+	            <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+	        </f:facet>
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+			<META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
+			<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache" />
+			<META HTTP-EQUIV="Expires" CONTENT="0" />
+			<base href="#{menu.baseHref}" />
+			<title>RevNet</title>
+	
+			<style>
+				* {margin: 0; padding: 0}
+				html, body {height: 100%; width: 100%;}
+			</style>
+		</h:head>
+		<h:body>
+			<div style="text-align:center"><img src="#{menu.logoRelativeFileNameUrl}" /></div>
+			<p:panelMenu model="#{menu.menu}" />
+		</h:body>
+	</f:view>
+</html>

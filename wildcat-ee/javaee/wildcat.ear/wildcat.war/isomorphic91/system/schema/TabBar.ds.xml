@@ -1,0 +1,21 @@
+<DataSource	ID="TabBar" inheritsFrom="Toolbar" Constructor="TabBar">
+	<fields>
+		<field name="tabs"					type="Tab"			propertiesOnly="true"
+          	   multiple="true" visibility="internal"/>
+		<field name="buttonConstructor" 	type="className" visibility="internal"/>
+        
+        <field name="breadth"   type="positiveInteger" visibility="internal"/>
+        <field name="defaultTabSize" type="positiveInteger" visibilit="internal"/>
+		<field name="selectedTabExpansion"	type="positiveInteger" visibility="internal"/>
+		<field name="baseLineThickness"		type="positiveInteger" visibility="internal"/>
+		<field name="baseLineCapSize"		type="positiveInteger" visibility="internal"/>
+		<field name="baseLineSrc"			type="URL" visibility="internal"/>
+		<field name="tabBarPosition"		type="valignEnum" visibility="internal"/>
+		<field name="tabBarAlign"			type="halignEnum" visibility="internal"/>
+		<field name="tabDefaults" 			type="TabBar" 		propertiesOnly="true" visibility="internal"/>
+
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+	</fields>	
+</DataSource>

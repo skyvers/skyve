@@ -1,0 +1,89 @@
+<DataSource	ID="StatefulCanvas" inheritsFrom="Canvas" Constructor="StatefulCanvas">
+    <fields>
+
+		<field name="selected"					type="boolean"/>
+		<field name="baseStyle"					type="cssClass"/>
+		<field name="className"			        type="cssClass" inapplicable="true"/>
+		<field name="state"						type="stateEnum"/>
+		<field name="showRollOver"				type="boolean"/>
+		<field name="showDown"					type="boolean"/>
+		<field name="showDisabled"				type="boolean"/>
+        <field name="showFocused"               type="boolean"/>
+        <field name="showFocusedAsOver"         type="boolean"/>
+		<field name="radioGroup"				type="string"/>
+		<field name="actionType"				type="selectionTypeEnum"/>
+
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+
+        <!-- hidden in editor because they are applicable only to certain subclasses --> 
+		<field name="labelDefaults"    type="Canvas" propertiesOnly="true" inapplicable="true"/>
+		<field name="labelConstructor" type="className" inapplicable="true"/>
+		<field name="redrawOnStateChange"		type="boolean" inapplicable="true"/>
+
+        <!-- for all button subclasses of StatefulCanvas -->
+		<field name="icon"			    type="string" />
+		<field name="iconSize"	        type="positiveInteger" />
+		<field name="iconWidth"	        type="positiveInteger" />
+		<field name="iconHeight"        type="positiveInteger" />
+		<field name="iconAlign"         type="alignEnum" visibility="internal"/>
+		<field name="iconOrientation"   type="string" />
+		<field name="iconSpacing"       type="positiveInteger" />
+		<field name="showDisabledIcon"  type="boolean" />
+		<field name="showRollOverIcon"  type="boolean" />
+		<field name="showDownIcon"      type="boolean" />
+		<field name="showSelectedIcon"  type="boolean" />
+        <field name="showFocusedIcon"   type="boolean" />
+
+        <field name="autoFit"   type="boolean"/>
+        <field name="selected"  type="boolean"/>
+
+        <field name="showDisabled"   type="boolean"/>
+        <field name="showDown"       type="boolean"/>
+        <field name="showFocus"      type="boolean"/>
+        <field name="showRollOver"   type="boolean"/>
+
+		<field name="align"  type="alignEnum"/>
+		<field name="valign" type="valignEnum"/>
+
+        <field name="title"  type="HTMLString" basic="true" />
+        <field name="showTitle" type="boolean"/>
+        <field name="titleStyle"        type="cssClass" visibility="internal"/>
+
+        <field name="showOverCanvas" type="boolean"/>
+    </fields>
+    
+	<types>
+	
+		<type ID="stateEnum" inheritsFrom="enum" >
+			<valueMap>
+				<value></value>
+				<value>Down</value>
+				<value>Over</value>
+				<value>Disabled</value>
+			</valueMap>	
+		</type>
+
+		<type ID="selectionTypeEnum" inheritsFrom="enum" >
+			<valueMap>
+				<value>button</value>
+				<value>checkbox</value>
+				<value>radio</value>
+			</valueMap>	
+		</type>
+
+		<type ID="selectedEnum" inheritsFrom="enum" >
+			<valueMap>
+				<value>Selected</value>
+				<value></value>
+			</valueMap>	
+		</type>
+		
+	</types>    
+    
+    <methods>
+        <method name="click" basic="true"/>
+    </methods>
+</DataSource>
+

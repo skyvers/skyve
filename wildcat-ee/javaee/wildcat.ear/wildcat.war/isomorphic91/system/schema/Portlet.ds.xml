@@ -1,0 +1,10 @@
+<DataSource	ID="Portlet"	inheritsFrom="Window" Constructor="Portlet" >
+    <fields>
+        <field name="closeConfirmationMessage" type="string" basic="true" group="Portlet" />
+        <field name="showCloseConfirmationMessage" type="boolean" basic="true" group="Portlet" />
+        <field name="destroyOnClose" type="boolean" basic="true" group="Portlet" />
+        <field name="minWidth" basic="true" group="Portlet" />
+        <field name="minHeight" basic="true" group="Portlet" />
+        <field name="rowHeight" type="measure" basic="true" group="Portlet" />
+    </fields>
+</DataSource>

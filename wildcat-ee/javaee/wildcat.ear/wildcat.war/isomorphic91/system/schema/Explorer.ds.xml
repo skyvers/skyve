@@ -1,0 +1,6 @@
+<DataSource	ID="Explorer" inheritsFrom="TreeGrid" Constructor="Explorer">
+	<fields>
+		<field name="explorerList" type="TreeGrid"/>	
+	</fields>
+</DataSource>
+

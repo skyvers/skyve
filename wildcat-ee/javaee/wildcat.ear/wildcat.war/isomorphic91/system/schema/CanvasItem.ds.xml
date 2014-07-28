@@ -1,0 +1,8 @@
+<DataSource	ID="CanvasItem" inheritsFrom="FormItem" Constructor="CanvasItem">
+	<fields>
+		<field name="canvas"    type="Canvas" />    
+		<field name="canvasConstructor" type="string" />                
+        <field name="canvasProperties" type="Canvas" propertiesOnly="true" />
+        <field name="canvasDefaults" type="Canvas" propertiesOnly="true" />
+     </fields>
+</DataSource>

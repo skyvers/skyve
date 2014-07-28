@@ -1,0 +1,266 @@
+<DataSource ID="FormItem" Constructor="FormItem" createStandalone="false" autoIdField="name">
+	<fields>
+        <field name="type" xmlAttribute="true" type="FormItemType" title="Data Type" />
+        <field name="editorType" xmlAttribute="true" type="FormItemType" title="Editor Type"/>
+		<field name="name" xmlAttribute="true" type="identifier"  title="Name" basic="true" />
+        <field name="dataPath" xmlAttribute="true" type="string" hidden="true"/>
+		<field name="ID" xmlAttribute="true" type="identifier" basic="false"/>
+		<field name="title" xmlAttribute="true" type="string"  title="Title" basic="true" />
+		<field name="defaultValue"      type="string"  title="Default Value" basic="true" />
+        <field name="defaultDynamicValue" type="expression" title="Default Dynamic Value"
+            hint="JS expression to evaluate on redraw"
+            prompt="JS expression - evaluates to default value"/>
+
+        <!-- hidden because for now, you would switch the type of the component instead -->
+		<field name="canEdit" xmlAttribute="true" type="boolean"  title="Can Edit" hidden="true" />
+        
+		<field name="showTitle"			type="boolean" title="Show Title" defaultValue="true" />
+		<field name="icons"         type="FormItemIcon" multiple="true"/>
+		<field name="iconVAlign"	type="" defaultValue="bottom"/>
+		<field name="iconHeight"	type="positiveInteger" defaultValue="20"/>
+		<field name="iconWidth"		type="positiveInteger" defaultValue="20"/>
+		<field name="defaultIconSrc"		type="string" defaultValue="/DynamicForm/default_formItem_icon.gif"/>
+		<field name="showOverIcons"		type="boolean"/>
+		<field name="showIcons"		type="boolean" defaultValue="true"/>
+
+        <!-- This directionEnum type is not understood by the formBuilder code -->
+        <field name="titleOrientation" 	type="directionEnum" title="Title Orientation"
+            prompt="Position item title to the left or right of text"/>
+        <!-- These align enum's contain up and down which does not work -->    
+        <field name="titleAlign" 		type="alignEnum" title="Title Alignment" />
+        <field name="textAlign"         type="alignEnum" />
+		<field name="align" 			type="alignEnum" title="Alignment" />
+        <field name="wrapTitle" type="boolean" title="Title Wrapping" />
+
+        <!-- These measure type fields are not understood - stored as text only -->
+		<field name="width" 			type="measure" title="Width" xmlAttribute="true"/>
+		<field name="height" 			type="measure" title="Height" xmlAttribute="true"/>
+		<field name="colSpan" 			type="measure" title="Column Span" basic="true" xmlAttribute="true"/>
+        <field name="titleColSpan"      type="measure" title="Title Column Span" basic="true"/>
+		<field name="rowSpan" 			type="measure" title="Row Span" basic="true" xmlAttribute="true"/>
+		<field name="startRow" 			type="boolean" title="Start Row" basic="true" xmlAttribute="true"
+            prompt="Position this item on a new row"/>
+		<field name="endRow" 			type="boolean" title="End Row" basic="true" xmlAttribute="true"
+            prompt="Start a new row after this item"/>
+        <field name="cellHeight"        type="measure" title="Cell Height"/>
+
+        <!-- these apply only to df.itemLayout:"absolute" -->
+		<field name="left" 			    type="integer" visibility="absForm"/>
+		<field name="top" 			    type="integer" visibility="absForm"/>
+
+		<field name="visible" 			type="boolean" title="Visible" defaultValue="true"/>
+		<field name="showIf" 			type="expression" title="Show If"
+            hint="JS expression"
+            prompt="JS expression - item will be visible if this evaluates to true" />
+
+		<field name="shouldSaveValue" type="boolean" title="Should Save Value" visibility="internal"/>
+            
+		<field name="disabled" 			type="boolean" title="Disable"/>
+		
+        <field name="required" 			type="boolean" title="Required"/>
+		<field name="validators"		type="Validator"	multiple="true"	title="Validators"/>
+		<field name="validateOnChange" 	type="boolean" title="Validate On Change"/>
+
+		<field name="prompt" 			type="HTMLString"    title="Prompt" basic="true" />
+		<field name="hint" 				type="HTMLString" title="Hint" basic="true"/>
+		<field name="showHint" 			type="boolean" title="Show Hint"/>
+
+		<field name="redrawOnChange" 	type="boolean" title="Redraw On Change" visibility="internal"/>
+		<field name="changeOnBlur" 		type="boolean" title="Change On Blur" visibility="internal"/>
+
+		<field name="accessKey" 		type="char" title="Access Key"/>
+        <field name="tabIndex" 		 	type="integer"/>
+        <field name="globalTabIndex" 	type="integer"/>
+        
+        <field name="showErrorStyle" type="boolean" title="Show Error Styling"/>
+        <field name="showDisabled" type="boolean" title="Show Disabled Styling"/>
+        <field name="showFocused" type="boolean" title="Show Focused Styling"/>
+        <field name="selectOnFocus" type="boolean" title="Select On Focus"/>
+
+		<field name="hintStyle" 	type="cssClass" title="Hint Style"/>
+		<field name="cellStyle" 	type="cssClass" title="Cell Style"/>
+		<field name="titleStyle" 	type="cssClass" title="Title Style"/>
+        <field name="textBoxStyle"  type="cssClass" title="TextBox Style"/>
+        
+        <!-- deprecated styling properties -->
+		<field name="hintClassName" 	type="cssClass" title="Hint Class Name" hidden="true"/>
+		<field name="cellClassName" 	type="cssClass" title="Cell Class Name" hidden="true"/>
+		<field name="errorCellClassName" type="cssClass" title="Error Cell Class Name" hidden="true"/>
+		<field name="titleClassName" 	type="cssClass" title="Title Class Name" hidden="true"/>
+		<field name="titleErrorClassName" type="cssClass" title="Title Error Class Name" hidden="true"/>
+        
+        <!-- picker icon properties -->
+        <field name="showPickerIcon" type="boolean" title="Show a picker icon" visibility="pickerIcon"/>
+        <field name="pickerIconSrc" type="string" title="Src for PickerIcon" visibility="pickerIcon"/>
+        <field name="pickerIconWidth" type="string" title="Width for PickerIcon" visibility="pickerIcon"/>
+        <field name="pickerIconHeight" type="string" title="Height for PickerIcon" visibility="pickerIcon"/>
+        <field name="pickerIconProperties" type="icon" title="Properties for the picker icon" visibility="pickerIcon"/>
+
+        <field name="controlStyle"  type="cssClass" title="CSS class for form item control box"
+            visibility="pickerIcon"/>
+        <field name="pickerIconStyle"  type="cssClass" title="CSS class for form item pickerIcon"
+            visibility="pickerIcon"/>
+            
+        <field name="valueField" type="string"/>
+        <field name="displayField" type="string"/>
+        <field name="optionDataSource" type="DataSource" idAllowed="true"/>
+        <field name="optionOperationId" type="string"/>
+        <field name="operator" type="OperatorId"/>
+
+
+        <!-- valueIcons properties -->
+        <field name="valueIcons" type="Mapping" visibility="external"
+               valueTitle="Value" displayTitle="Icon" />
+        <field name="emptyValueIcon" type="string" visibility="external"/>
+        <field name="valueIconWidth" type="number" visibility="external"/>
+        <field name="valueIconHeight" type="number" visibility="external"/>
+        <field name="valueIconSize" type="number" visibility="external"/>
+        <field name="valueIconLeftPadding" type="number" visibility="external"/>
+        <field name="valueIconRightPadding" type="number" visibility="external"/>
+        <field name="showValueIconOnly" type="boolean" visibility="external"/>
+        <field name="suppressValueIcon" type="boolean"  visibility="external"/>
+        
+        <field name="imageURLPrefix" type="string" visibility="external"/>
+        <field name="imageURLSuffix" type="string" visibility="external"/>
+
+	
+        <field name="hoverDelay"        type="int"/>        
+        <field name="hoverWidth" type="measure"/>
+        <field name="hoverHeight" type="measure"/>
+        <field name="hoverAlign" type="alignEnum" />
+        <field name="hoverVAlign" type="valignEnum" />
+        <field name="hoverStyle" type="cssClass" />
+        <field name="hoverOpacity" type="int" />
+    
+        <field name="dateFormatter" type="string"/>
+        <field name="timeFormatter" type="string" />
+	
+        <!--  Below are subclass-specific properties included here because our XML processor
+              is not currently capable of using specific FormItem subclass schema when just 
+              the "type" atttribute is specified.
+              In order to avoid showing inapplicable properties in editors or allowing invalid
+              D&D in Visual Builder, all of these should be marked hidden="true" then
+              redeclared in the specific subclass where there are really used. -->
+			<!-- ToolbarItem properties -->		
+			<field name="buttons" multiple="true" type="ButtonItem" hidden="true"/>
+			<field name="spacing" type="positiveInteger" hidden="true"/>
+			<field name="valueMap" 			type="ValueMap" title="Value Map" hidden="true"/>
+            <field name="disabledValues" type="string" multiple="true" hidden="true"/>
+
+            <!-- RadioGroup -->
+            <field name="vertical" type="boolean" hidden="true"/>
+            
+            <!-- SectionItem -->
+            <field name="itemIds" type="string" multiple="true" hidden="true"/>
+            <!-- sectionVisible is backcompat for sectionExpanded -->
+            <field name="sectionVisible" type="boolean" hidden="true"/>
+            <field name="sectionExpanded" type="boolean" hidden="true"/>
+            <field name="items" type="FormItem" multiple="true" hidden="true"/>
+            
+            <!-- RichTextItem -->
+            <field name="controlGroups" type="string" multiple="true" hidden="true"/>
+            
+            <!-- PickList, SelectItem and ComboBoxItem -->
+            <field name="fetchMissingValues" type="boolean" hidden="true" />
+            <field name="autoFetchData" type="boolean" hidden="true"/>
+            <field name="filterLocally" type="boolean" />
+            <field name="pickListProperties" type="ListGrid" propertiesOnly="true"/>
+            
+            <!-- PickTree -->
+            <field name="buttonDefaults"    type="Canvas"   propertiesOnly="true" hidden="true"/>
+            <field name="loadDataOnDemand"  type="boolean" hidden="true"/>
+            <field name="canSelectParentItems" type="boolean" hidden="true"/>
+            
+            <!-- DateItem -->
+            <field name="useTextField" type="boolean" title="Use Text Field" hidden="true" />
+            
+            <!-- CanvasItem -->
+            <field name="canvas"    type="Canvas" hidden="true"/>    
+            <field name="canvasConstructor" type="string" hidden="true"/>                
+            <field name="canvasProperties" type="Canvas" propertiesOnly="true" hidden="true"/>
+            <field name="canvasDefaults" type="Canvas" propertiesOnly="true" hidden="true"/>
+            
+            <!-- StaticTextItem and BlurbItem -->
+            <field name="wrap" type="boolean" hidden="true" />
+            <field name="clipValue" type="boolean" hidden="true"/>
+         
+            <field name="showFocusedIcons" type="boolean"/>
+            
+            <!-- skinning properties that shouldn't be set in the Visual Builder property sheet-->
+            <field name="errorIconHeight" type="number" advanced="true"/>
+            <field name="errorIconWidth" type="number" advanced="true"/>
+            
+            <field name="errorMessageWidth" type="number"/>
+            
+	</fields>
+
+    <types>
+        <type ID="FormItemType"> 
+            <valueMap>
+				<value>text</value>
+				<value>boolean</value>
+				<value>integer</value>
+				<value>float</value>
+				<value>date</value>
+				<value>time</value>
+				<value>sequence</value>
+				<value>link</value>
+				<value>image</value>
+				<value>imageFile</value>
+				<value>binary</value>
+			</valueMap>
+        </type>
+        <type ID="OperatorId"> 
+            <valueMap>
+				<value>equals</value>
+				<value>notEqual</value>
+				<value>iEquals</value>
+				<value>iNotEqual</value>
+				<value>greaterThan</value>
+				<value>lessThan</value>
+				<value>greaterOrEqual</value>
+				<value>lessOrEqual</value>
+				<value>contains</value>
+				<value>startsWith</value>
+				<value>endsWith</value>
+				<value>iContains</value>
+				<value>iStartsWith</value>
+				<value>iEndsWith</value>
+				<value>notContains</value>
+				<value>notStartsWith</value>
+				<value>notEndsWith</value>
+				<value>iNotContains</value>
+				<value>iNotStartsWith</value>
+				<value>iNotEndsWith</value>
+				<value>regexp</value>
+				<value>iregexp</value>
+				<value>isNull</value>
+				<value>notNull</value>
+				<value>inSet</value>
+				<value>notInSet</value>
+				<value>equalsField</value>
+				<value>notEqualField</value>
+				<value>greaterThanField</value>
+				<value>lessThanField</value>
+				<value>greaterOrEqualField</value>
+				<value>lessOrEqualField</value>
+				<value>containsField</value>
+				<value>startsWithField</value>
+				<value>endsWithField</value>
+				<value>and</value>
+				<value>not</value>
+				<value>or</value>
+				<value>between</value>
+				<value>betweenInclusive</value>
+			</valueMap>
+        </type>
+    </types>
+    
+    <groups>
+        <group>basics</group>
+        <group>formLayout</group>
+        <group>appearance</group>
+        <group>formIcons</group>
+    </groups>
+
+</DataSource>

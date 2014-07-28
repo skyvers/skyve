@@ -1,0 +1,9 @@
+<Object ID="Criterion" __autoConstruct="DataSource" addGlobalId="false">
+    <fields>
+        <fieldName type="string"/>
+        <operator type="string"/>
+        <value type="any"/>
+        <criteria type="Criterion" multiple="true"/>
+    </fields>
+</Object>
+        

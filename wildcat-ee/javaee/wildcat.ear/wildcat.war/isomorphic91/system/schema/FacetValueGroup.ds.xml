@@ -1,0 +1,7 @@
+<DataSource ID="FacetValueGroup">
+    <fields>
+        <field  name="id"   type="string" />
+        <field  name="values"   type="FacetValue"   multiple="true" />
+        <field  name="facetValues"  type="FacetValue"   multiple="true" />
+    </fields>
+</DataSource>

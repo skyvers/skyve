@@ -1,0 +1,1 @@
+<DataSource	ID="WSDataSource" inheritsFrom="DataSource" Constructor="WSDataSource"/>

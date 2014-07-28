@@ -1,0 +1,2 @@
+<DataSource	ID="LoginDialog" inheritsFrom="Dialog" Constructor="LoginDialog"/>
+        

@@ -1,0 +1,6 @@
+<Object ID="SummaryFunction" __autoConstruct="DataSource" addGlobalId="false">
+    <fields>
+        <fieldName type="string" title="Field name" xmlAttribute="true" primaryKey="true" />
+        <function type="string" title="Function" xmlAttribute="true" />
+    </fields>
+</Object>

@@ -1,0 +1,27 @@
+<DataSource ID="Facet">
+    <fields>
+        <field  name="id"   type="string" />
+        <field  name="title"    type="string" />
+        <field  name="values"   type="FacetValue"   multiple="true" />
+        <field  name="rollupValue"  type="FacetValueId" />
+        <field  name="isTree"   type="boolean" />
+        <field  name="showParentsLast"  type="boolean" />
+        <field  name="canCollapse"  type="boolean" />
+        <field  name="collapsed"    type="boolean" />
+        <field  name="canMinimize"   type="boolean" />
+        <field  name="minimized"    type="boolean" />
+        <field  name="width"    type="number" />
+        <field  name="align"    type="alignEnum" />
+        <field  name="titleAlign"   type="alignEnum" />
+        <field  name="cellAlign"    type="alignEnum" />
+        <field  name="borderBefore" type="cssLineStyle" />
+        <field  name="borderAfter"  type="cssLineStyle" />
+        <field  name="selectionBoundary"    type="selectionBoundaryEnum" />
+        <field  name="canClose" type="boolean" visibility="infa"/>
+        <field  name="canSort"  type="boolean" visibility="infa"/>
+        <field  name="summaryValue" type="FacetValueId" />
+        <field  name="summaryTitle" type="string" />
+        <field  name="synchColumnLayout"    type="boolean" />
+    </fields>
+</DataSource>
+

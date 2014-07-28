@@ -1,0 +1,68 @@
+<DataSource ID="FacetChart" inheritsFrom="Canvas" Constructor="FacetChart">
+    <fields>
+        <field name="valueProperty" type="string"/>
+        <field name="data" type="CellRecord" multiple="true"/>
+        <field name="facets" type="Facet" multiple="true"/>
+        <field name="chartType" type="ChartType">
+			<valueMap>
+				<value>Column</value>
+				<value>Bar</value>
+				<value>Line</value>
+				<value>Pie</value>
+				<value>Doughnut</value>
+				<value>Area</value>
+				<value>Radar</value>
+			</valueMap>
+        </field>
+        <field name="stacked" type="boolean"/>
+        <field name="filled" type="boolean"/>
+
+        <field name="title" type="string"/>
+        <field name="valueTitle" type="string"/>
+        <field name="showTitle" type="boolean"/>
+
+        <field name="logScale" type="boolean"/>
+        <field name="useLogGradations" type="boolean"/>
+        <field name="logBase" type="integer"/>
+        <field name="logGradations" type="float" multiple="true"/>
+
+        <field name="showChartRect" type="boolean"/>
+        <field name="chartRectMargin" type="integer"/>
+        <field name="dataMargin" type="integer"/>
+
+        <field name="showLegend" type="boolean"/>
+        <field name="legendMargin" type="integer"/>
+        <field name="legendPadding" type="integer"/>
+        <field name="legendSwatchSize" type="integer"/>
+        <field name="legendTextPadding" type="integer"/>
+        <field name="legendItemPadding" type="integer"/>
+
+        <field name="rotateLabels" type="LabelRotationMode"/>
+        <field name="autoRotateLabels" type="boolean"/>
+        <field name="decimalPrecision" type="integer"/>
+        
+        <field name="barMargin" type="integer"/>
+        <field name="minBarThickness" type="integer"/>
+        <field name="maxBarThickness" type="integer"/>
+        <field name="clusterMarginRatio" type="integer"/>
+        
+        <field name="dataPointSize" type="integer"/>
+
+        <field name="radialLabelOffset" type="integer"/>
+
+        <field name="showDoughnut" type="boolean"/>
+        <field name="doughnutRatio" type="float"/>
+
+        <field name="pieLabelAngleStart" type="integer"/>
+        <field name="pieLabelLineExtent" type="integer"/>
+    </fields>
+    <types>
+        <type ID="LabelRotationMode" inheritsFrom="enum">
+            <valueMap>
+                <value>never</value>
+                <value>auto</value>
+                <value>always</value>
+            </valueMap>
+        </type>
+    </types>
+</DataSource>

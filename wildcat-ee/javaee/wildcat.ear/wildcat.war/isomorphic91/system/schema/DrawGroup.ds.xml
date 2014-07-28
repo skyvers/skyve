@@ -1,0 +1,10 @@
+<DataSource	ID="DrawGroup" inheritsFrom="DrawItem" Constructor="DrawGroup" >
+    <fields>
+        <field name="useGroupRect" type="boolean" default="false" title="Use Group Rect"/>
+        <field name="left" type="integer" title="Left" default="0"/>
+        <field name="top" type="integer" title="Top" default="0"/>
+        <field name="width" type="integer" title="Width" default="1"/>
+        <field name="height" type="integer" title="Height" default="1"/>
+        <field name="drawItems"  type="DrawItem" title="Draw Items" multiple="true"/>
+    </fields>
+</DataSource>

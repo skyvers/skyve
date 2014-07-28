@@ -1,0 +1,15 @@
+<DataSource ID="ServiceOperation" Constructor="ServiceOperation">
+    <fields>
+        <field name="operationName" title="Operation Name" required="true"/>
+        <field name="serviceNamespace" title="Service Namespace" />
+        <field name="serviceName" title="Service Name" />
+        <field name="serviceDescription" title="Service Descriptive Name" />
+        <field name="portTypeName" title="PortType Name" />
+        <field name="location" title="WSDL location" />
+        <field name="inputVM" title="Input ValuesManager" type="ValuesManager" />
+        <field name="outputVM" title="Output ValuesManager" type="ValuesManager" />
+    </fields>
+    <methods>
+        <method name="invoke" title="Invoke" action="true" basic="true" />
+    </methods>
+</DataSource>

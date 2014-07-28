@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core">
+    <f:view contentType="text/html">
+		<f:metadata>
+			<f:viewParam name="m" value="#{desktop.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{desktop.bizDocumentParameter}" />
+			<f:viewParam name="i" value="#{desktop.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{desktop.preRender}"/>
+		</f:metadata>
+		<h:head>
+	        <f:facet name="first">
+	            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	        </f:facet>
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+			<meta http-equiv="Content-Type" content="text/html" />
+		
+			<base href="#{desktop.baseHref}" />
+			<link rel="icon" type="image/png" href="images/window/BizHub16.png" />
+
+			<title>Biz Hub</title>
+			<h:outputText value="#{desktop.wildcatVersionComment}" escape="false" />			
+			<link rel="stylesheet" type="text/css" href="#{desktop.cssRelativeFileNameUrl}" />
+		</h:head>
+		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="200px">
+						<td><img src="images/bizhub_logo4.jpg" alt="Get Organized" /></td>
+					</tr>
+				</tbody>
+			</table>
+			<table class="logo" align="center">
+				<tbody>
+					<tr height="50px">
+						<td><img src="images/loading.gif" /></td>
+						<td>Loading WILDCAT Application</td>
+					</tr>
+				</tbody>
+			</table>
+			<script type="text/javascript" src="LABjs-1.0.2rc1/LAB.min.js"></script>
+			<script type="text/javascript">var isomorphicDir='isomorphic91/';</script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Core.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Foundation.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Containers.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Grids.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Forms.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_DataBinding.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_Calendar.js"></script>
+			<script type="text/javascript" src="isomorphic91/system/modules/ISC_RichTextEditor.js"></script>
+			<script type="text/javascript" src="isomorphic91/skins/wildcat/load_skin.js"></script>
+			<script type="text/javascript" src="desktop/wildcat-min.js?v=#{desktop.javascriptFileVersion}"></script>
+			<script type="text/javascript">
+				#{desktop.script}
+			</script>
+		</h:body>
+	</f:view>
+</html>

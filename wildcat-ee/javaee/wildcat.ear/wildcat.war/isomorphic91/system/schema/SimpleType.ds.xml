@@ -1,0 +1,7 @@
+<DataSource ID="SimpleType" Constructor="SimpleType" inheritsFrom="DataSourceField"
+            addGlobalId="false">
+    <fields>
+        <field name="inheritsFrom" type="string"/>
+        <field name="editorType"   type="string"/>
+    </fields>
+</DataSource>

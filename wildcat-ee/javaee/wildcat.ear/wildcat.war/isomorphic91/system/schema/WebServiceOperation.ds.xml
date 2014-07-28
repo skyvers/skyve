@@ -1,0 +1,10 @@
+<DataSource ID="WebServiceOperation" addGlobalId="false">
+    <fields>
+        <fields name="name" title="Operation Name" required="true"/>
+        <fields name="soapAction" title="SOAPAction Header"/>
+        <fields name="inputMessage" title="Input Message"/>
+        <fields name="outputMessage" title="Output Message"/>
+        <fields name="inputHeaders" type="WSOperationHeader" multiple="true"/>
+        <fields name="outputHeaders" type="WSOperationHeader" multiple="true"/>
+    </fields>
+</DataSource>

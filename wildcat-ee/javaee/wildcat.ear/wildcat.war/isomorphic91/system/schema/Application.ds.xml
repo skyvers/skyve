@@ -1,0 +1,5 @@
+<DataSource	ID="Application" Constructor="Application">
+    <fields>
+        <field name="rpcBindings" type="ServerObject" multiple="true" propertiesOnly="true"/>
+    </fields>
+</DataSource>

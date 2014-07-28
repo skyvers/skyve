@@ -1,0 +1,69 @@
+<Object ID="Validator" __autoConstruct="DataSource" addGlobalId="false">
+	<fields>
+        <!-- used by all validators -->
+        <type type="string"/>					
+        <!-- name and description - useful when editing rules -->
+        <name type="string"/>
+        <description type="string"/>
+        
+        <stopIfFalse type="boolean"/>
+        <stopOnError type="boolean"/>
+        <validateOnChange type="boolean"/>
+        <clientOnly type="boolean"/>
+        <errorMessage type="string"/>
+		
+		<!-- used by integerRange, lengthRange, floatLimit
+            note: Overloaded by DateRangeValidator to be of type 'date'.
+        -->
+		<max type="float"/>
+		<min type="float"/>
+		<exclusive type="boolean"/>
+        <!-- used by mask -->
+		<mask type="regexp"/>
+		<transformTo type="regexp"/>
+        <!-- used by floatLimit -->
+		<precision type="integer"/>
+        <!-- used by requiredIf, regexp -->
+		<expression type="string"/>
+        <!-- used by matchesField -->
+		<otherField type="string"/>
+        <!-- used by isOneOf -->
+		<list type="text" multiple="true"/>
+        <!-- used by contains, doesntContain, and substringCount -->
+        <valueMap type="ValueMap"/>
+        <!-- used by inValueMap -->
+		<substring type="text"/>
+        <!-- used by substringCount -->
+		<operator type="text"/>
+		<count type="integer"/>
+
+        <!-- for conditional validators -->
+        <applyWhen type="AdvancedCriteria"/>
+        <dependentFields type="string" multiple="true"/>
+
+        <!-- for serverCondition if uses server scripting -->
+        <scriptImport type="string"/>
+
+        <!-- custom server validator: Velocity expression or server-side script -->
+        <serverCondition type="Object" idAllowed="true"/>
+        <!-- custom server validator: Object invoked via DMI -->
+        <serverObject type="ServerObject"/>
+        
+        <!-- Rule-specific attributes, since any validator may be used as a rule in a RulesEngine
+             by including a triggerEvent and field attribute. -->
+	    <fieldName type="string"/>
+	    <triggerEvent type="string"/>
+	    
+	    <!-- 'message' attributes -->
+	    <message type="string"/>
+	    <severity type="string"/>
+	    <displayMode type="string"/>
+	    <duration type="integer"/>
+	    
+	    <!-- 'populate' attributes -->
+	    <formula type="string"/>
+	    <formulaVars type="ValueMap"/>
+
+	</fields>
+</Object>
+

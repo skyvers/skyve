@@ -1,0 +1,7 @@
+<DataSource ID="SimpleGradient" inheritsFrom="Gradient">
+    <fields>
+        <field  name="direction"  type="float" defaultValue="0.0"/>
+        <field  name="startColor"  type="color"/>
+        <field  name="endColor"  type="color"/>
+    </fields>
+</DataSource>

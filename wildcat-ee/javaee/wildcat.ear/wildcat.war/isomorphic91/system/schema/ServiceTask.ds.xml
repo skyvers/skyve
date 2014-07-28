@@ -1,0 +1,11 @@
+<DataSource ID="ServiceTask" inheritsFrom="Task" Constructor="ServiceTask">
+	<fields>
+		<dataSource type="DataSource" idAllowed="true" />
+        <operationType type="string" />
+        <criteria type="Criterion" />
+        <values type="Record" />
+        <fixedCriteria type="Criterion" />
+        <fixedValues type="Record" />
+	</fields>
+</DataSource>
+

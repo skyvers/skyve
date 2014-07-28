@@ -1,0 +1,12 @@
+<DataSource ID="PortalColumn" Constructor="PortalColumn">
+    <fields>
+        <field name="portalRows" type="PortalRow" multiple="true" propertiesOnly="true" />
+        
+        <field name="width"    type="measure"         title="Width"     xmlAttribute="true" basic="true" /> 
+        <field name="minWidth" type="positiveInteger" title="Min Width" xmlAttribute="true"/>	
+        <field name="maxWidth" type="positiveInteger" title="Max Width" xmlAttribute="true"/>	
+
+        <!-- This is to allow for auto-wrapping -->
+        <field name="portlets" type="Portlet" multiple="true" />
+    </fields> 
+</DataSource>

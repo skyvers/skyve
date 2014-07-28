@@ -1,0 +1,5 @@
+<DataSource	ID="IButton" inheritsFrom="StretchImgButton" Constructor="IButton">
+    <methods>
+        <method name="click" basic="true" />
+    </methods>
+</DataSource>

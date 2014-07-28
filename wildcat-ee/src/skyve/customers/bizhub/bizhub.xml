@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<customer name="bizhub"
+			xmlns="http://www.skyve.org/xml/customer"
+			xsi:schemaLocation="http://www.skyve.org/xml/customer ../../schemas/customer.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<uiResources logo="bizhub.jpg" />
+	<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>
+	<defaultTimeConverter>HH24_MI</defaultTimeConverter>
+	<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>
+	<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>
+	<modules>
+		<module name="admin" />
+	</modules>
+	<homeModule>admin</homeModule>
+</customer>

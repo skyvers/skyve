@@ -1,0 +1,9 @@
+<DataSource ID="Example" inheritsFrom="TreeNode">
+    <fields>
+        <field name="showSource" type="boolean"/>
+        <field name="external" type="boolean"/>
+        <field name="showSkinSwitcher" type="boolean"/>
+        <field name="children" type="Object" multiple="true"/>
+        <field name="tabs"    type="Object"   multiple="true"/>
+    </fields>
+</DataSource>

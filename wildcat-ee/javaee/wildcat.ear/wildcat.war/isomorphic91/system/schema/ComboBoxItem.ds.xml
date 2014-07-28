@@ -1,0 +1,33 @@
+<DataSource	ID="ComboBoxItem" inheritsFrom="TextItem" Constructor="ComboBoxItem" >
+	<fields>
+        <field name="pickerIconHeight"  type="number"/>
+        <field name="pickerIconWidth"   type="number" />
+        <field name="pickerIconSrc"     type="string" />
+
+        <field name="showPickListOnKeypress"     type="boolean" visibility="comboBox"/>
+        <field name="completeOnTab"     type="boolean" />
+         
+        <field name="textMatchStyle"    type="string"/>
+        <field name="separatorRows"     type="Object" multiple="true"/>
+
+        <!-- PickList props: keep synched between SelectItem and ComboBoxItem -->
+        <field name="optionDataSource" type="DataSource"/>       
+        <field name="valueField" type="string"/>
+        <field name="displayField" type="string"/>
+        <field name="pickListHeight" type="number" visibility="internal"/>
+		<field name="pickListFields"    type="ListGridField"   multiple="true"/>
+        <field name="pickListCriteria" type="Object"/>
+        <field name="filterLocally" type="boolean"/>
+		<field name="pickListBaseStyle" type="string"/>
+		<field name="animatePickList" type="boolean"/>
+        <field name="showOptionsFromDataSource" type="boolean"/>
+        <field name="showAllOptions" type="boolean"/>
+        <field name="optionFilterContext" type="RPCRequest"/>
+        <field name="pickListProperties" type="ListGrid" propertiesOnly="true"/>
+
+        <!-- deprecated -->
+        <field name="pickButtonWidth"   type="number" hidden="true"/>
+        <field name="pickButtonHeight"  type="number" hidden="true"/>
+        <field name="pickButtonSrc"     type="URL" hidden="true"/>
+	</fields>
+</DataSource>

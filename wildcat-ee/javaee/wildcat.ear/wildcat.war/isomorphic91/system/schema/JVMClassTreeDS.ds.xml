@@ -1,0 +1,59 @@
+<DataSource ID="JVMClassTreeDS"
+
+>
+    <fields>
+        <field name="name"/>
+        <field name="path" primaryKey="true"/>
+        <field name="parentID" hidden="true" foreignKey="JVMClassTreeDS.path"/>
+        <field name="isFolder" type="boolean"/>
+    </fields>
+    <operationBindings>
+    	<binding operationType="fetch" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+
+            def namespace = criteria.parentID;
+            def classLoader = Thread.currentThread().getContextClassLoader();
+
+            if (namespace == null) {
+                return classLoader.getPackages().collect{it.name}.collect{
+                    def dotIndex = it.indexOf(".");
+                    dotIndex != -1 ? it.substring(0, dotIndex) : it;
+                }.unique().sort().collect{
+                    [name: it, path: it, parentID: namespace];
+                }
+            }
+
+            // non-root
+            def namespaces = classLoader.getPackages().collect{it.name}.findAll{ it.startsWith(namespace+".") }.collect{ it.substring(namespace.length()+1) }.collect{
+                def dotIndex = it.indexOf(".");
+                dotIndex != -1 ? it.substring(0, dotIndex) : it;
+            }.unique().sort().collect{
+                [name: it, path: namespace+"."+it, parentID: namespace];
+            };
+
+            // lookup classes for this namespace...
+            def resources = classLoader.getResources(namespace.replace('.', '/'));
+            def resource = resources.hasMoreElements() ? resources.nextElement() : null;
+            def children;
+            def url;
+            if (resource) {
+                url = resource.getFile();
+                log.warn(url);
+                if (url.startsWith("jar:")) {
+            
+                } else {
+                    try {
+                        def file = new File(url);
+                        children = file.list().findAll{ it =~ /\.class$/}.sort().collect{ 
+                            def name = it.substring(0, it.length()-6);
+                            [name:name,path:namespace+"."+name,parentID:namespace,isFolder:false] 
+                        };
+                    } catch (ignore) {}
+                }
+            }
+
+            namespaces?.addAll(children?:[]);
+            return namespaces;
+    	]]></script></binding>
+    </operationBindings>
+</DataSource>

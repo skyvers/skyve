@@ -1,0 +1,1 @@
+<DataSource ID="LineEditor"	inheritsFrom="ListGrid"	Constructor="LineEditor"/>

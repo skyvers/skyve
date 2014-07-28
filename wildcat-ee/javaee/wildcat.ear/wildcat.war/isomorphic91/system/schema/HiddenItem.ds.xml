@@ -1,0 +1,34 @@
+<DataSource	ID="HiddenItem" inheritsFrom="FormItem" Constructor="HiddenItem">
+    <fields>
+		<field name="title" 			type="string"  title="Title" inapplicable="true"/>
+		<field name="showTitle"			type="boolean" title="Show Title" inapplicable="true" defaultValue="false" />
+        <field name="titleOrientation" 	type="directionEnum" title="Title Orientation" inapplicable="true"
+            prompt="Position item title to the left or right of text"/>
+        <field name="titleAlign" 		type="alignEnum" title="Title Alignment" inapplicable="true"/>
+		<field name="colSpan" 			type="measure" title="Column Span" inapplicable="true"/>
+		<field name="rowSpan" 			type="measure" title="Row Span" inapplicable="true"/>
+		<field name="startRow" 			type="boolean" title="Start Row" inapplicable="true"
+            prompt="Check to position this item on a new row"/>
+		<field name="endRow" 			type="boolean" title="End Row" inapplicable="true"
+            prompt="Check to start a new row after this item"/>
+		<field name="visible" 			type="boolean" title="Visible" defaultValue="true" inapplicable="true"/>
+		<field name="showIf" 			type="expression" title="Show If" inapplicable="true"
+            hint="JS expression"
+            prompt="JS expression - item will be visible if this evaluates to true" />
+            
+		<field name="disabled" 			type="boolean" title="Disable" inapplicable="true"/>
+		<field name="validators"		type="Validator"	multiple="true"	title="Validators" inapplicable="true"/>
+		<field name="validateOnChange" 	type="boolean" title="Validate On Change" inapplicable="true"/>
+
+		<field name="prompt" 			type="HTMLString"    title="Prompt" inapplicable="true"/>
+		<field name="hint" 				type="HTMLString" title="Hint" inapplicable="true"/>
+		<field name="showHint" 			type="boolean" title="Show Hint" inapplicable="true"/>
+        
+        
+		<field name="required" 			type="boolean" title="Required" inapplicable="true"/>
+		<field name="width" 			type="measure" title="Width" inapplicable="true"/>
+		<field name="height" 			type="measure" title="Height" inapplicable="true"/>
+		<field name="align" 			type="alignEnum" title="Text Alignment" inapplicable="true"/>
+    </fields>
+</DataSource>
+

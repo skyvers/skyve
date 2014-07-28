@@ -1,0 +1,10 @@
+<DataSource
+    ID="WorkflowLoader"
+    serverConstructor="com.isomorphic.datasource.WorkflowLoaderDataSource"
+    addGlobalId="false"
+>
+    <fields>
+    	<field name="id" />
+		<field name="content" />
+    </fields>
+</DataSource>

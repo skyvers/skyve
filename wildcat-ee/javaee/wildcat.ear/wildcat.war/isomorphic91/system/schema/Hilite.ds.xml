@@ -1,0 +1,6 @@
+<DataSource ID="Hilite" inheritsFrom="Object">
+    <fields>
+        <field name="disabled"          type="boolean"/>  
+        <field name="canEdit"           type="boolean"/>  
+    </fields>
+</DataSource>

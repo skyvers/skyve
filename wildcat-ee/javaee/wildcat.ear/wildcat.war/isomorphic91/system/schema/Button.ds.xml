@@ -1,0 +1,20 @@
+<DataSource ID="Button" inheritsFrom="StatefulCanvas" Constructor="Button">
+
+	<fields>
+		<field name="wrap"				type="boolean" />
+        <field name="hiliteAccessKey"   type="boolean" />
+        <field name="action" type="Action" editorType="ActionMenuItem"/>
+	</fields>
+
+    <groups>
+        <group>basics</group>
+        <group>sizing</group>
+        <group>appearance</group>
+        <group>buttonIcon</group>
+        <group>state</group>
+    </groups>
+    <methods>
+        <method action="event" title="Click" name="click" basic="true" />
+    </methods>
+    
+</DataSource>

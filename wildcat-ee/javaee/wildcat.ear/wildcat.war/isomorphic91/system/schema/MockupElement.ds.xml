@@ -1,0 +1,23 @@
+<DataSource	ID="MockupElement" inheritsFrom="Img" Constructor="MockupElement">
+	<fields>
+        <field name="name"              type="string"/>
+        <field name="controlName"       type="string"/>
+ 		<field name="imageType"			type="imageTypeEnum" basic="true"/>	<!-- imageTypeEnum defined in Canvas -->
+        <field name="size"              type="positiveInteger"/>
+        <field name="imageHeight"       type="positiveInteger"/>
+        <field name="imageWidth"       type="positiveInteger"/>
+        <field name="activeAreaHTML"    type="string"/>
+
+		<field name="src" type="URL" basic="true"/>
+
+        <field name="title" inapplicable="true"/>
+        <field name="autoFit" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+		<field name="children" inapplicable="true"/>	
+	</fields>
+    
+    <methods>
+        <method name="click" basic="true"/>
+        <method name="doubleClick" basic="true"/>
+    </methods>
+</DataSource>

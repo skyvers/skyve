@@ -1,0 +1,26 @@
+<DataSource
+    ID="Filesystem"
+    criteriaPolicy="dropOnChange"
+    serverConstructor="com.isomorphic.datasource.FilesystemDataSource"
+>
+    <fields>
+
+        <field name="path"  title="Path"   type="text"  length="2000"
+               required="true"
+               primaryKey="true" />
+
+        <field name="parentID"  hidden="true"  type="text"
+               required="true"
+               foreignKey="Filesystem.path"
+               rootValue="/" />
+
+        <field name="name"  type="text"/>
+        <field name="isFolder" type="boolean"/>
+        <field name="size"  type="long"/>
+        <field name="lastModified" type="lastModified"/>
+        <field name="mimeType"  type="text"/>
+
+        <field name="contents"  type="text" size="1000000" />
+        <field name="webrootOnly" type="boolean" />
+        </fields>
+</DataSource>

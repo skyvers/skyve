@@ -1,0 +1,43 @@
+<DataSource	ID="Menu" Constructor="Menu" inheritsFrom="ListGrid" showSuperClassActions="false">
+	<fields>
+		<field name="items"	type="MenuItem" multiple="true"/>
+		<field name="data"	type="MenuItem"	multiple="true"/>
+		<field name="useKeys"			type="boolean"	/>
+		<field name="showKeys"			type="boolean"	/>
+		<field name="showIcons"			type="boolean"	/>
+		<field name="showSubmenus"		type="boolean"	/>
+        <field name="canSelectParentItems" type="boolean" />
+		<field name="showEmptyMessage"	type="boolean"	/>
+		<field name="cellSpacing"		type="positiveInteger" visibility="internal"/>
+		<field name="cellPadding"		type="positiveInteger" visibility="internal"/>
+		<field name="iconWidth"			type="positiveInteger"/>
+		<field name="iconHeight"		type="positiveInteger"/>
+        <field name="showAnimationEffect"   type="string"   visibility="animation"/>
+		<field name="autoSetDynamicItems"	type="boolean" visibility="internal"/>
+		<field name="submenuImage"		type="imageProperty"/>
+		<field name="submenuDisabledImage"	type="imageProperty"/>
+		<field name="checkmarkImage"	type="imageProperty"/>
+		<field name="checkmarkDisabledImage"	type="imageProperty"/>
+        <field name="autoDismiss" type="boolean"/>
+
+        <!-- prevent ListGrid properties from appearing as basics -->
+		<field name="canEdit" type="boolean" basic="false"/>
+		<field name="editByCell" type="boolean" basic="false"/>
+		<field name="saveByCell" type="boolean" basic="false"/>
+		<field name="showFilterEditor" type="boolean" basic="false"/>
+		<field name="editEvent" basic="false"/>
+		<field name="selectionType" basic="false"/>
+		<field name="emptyMessage" type="HTMLString" basic="false"/>
+		<field name="loadingDataMessage" type="HTMLString" basic="false"/>
+		<field name="canSort" type="boolean" basic="false"/>
+		<field name="canDragRecordsOut" type="boolean" basic="false"/>
+		<field name="canAcceptDroppedRecords" type="boolean" basic="false"/>
+		<field name="canReorderRecords" type="boolean" basic="false"/>
+		<field name="dragDataAction" type="enum" basic="false"/>
+        <field name="canGroupBy" type="boolean" basic="false"/>
+        <field name="autoFitData" type="string" basic="false"/>
+        <field name="autoFitMaxRecords" type="integer" basic="false"/>
+		<field name="autoFetchData"	type="boolean" basic="false"/>	
+        <field name="canRemoveRecords" type="boolean" basic="false"/>
+	</fields>
+</DataSource>

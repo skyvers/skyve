@@ -1,0 +1,12 @@
+<DataSource ID="FormItemIcon" inheritsFrom="Object">
+	<fields>
+        <field  name="src"        type="string" />
+        <field  name="showOver"   type="boolean" />
+        <field  name="overSrc"    type="string" />
+        <field  name="width"      type="number" />
+        <field  name="height"     type="number" />
+        <field  name="neverDisable" type="boolean" />
+        <field name="showFocused" type="boolean"/>
+        <field name="prompt" type="string"/>
+    </fields>
+</DataSource>

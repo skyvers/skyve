@@ -1,0 +1,13 @@
+<DataSource ID="Process" inheritsFrom="Task" Constructor="Process">
+	<fields>
+	    <field name="autoStart" type="boolean" />
+	    <field name="wizard" type="boolean" />
+        <field name="containerId" type="string" />
+        <field name="startElement" type="string" />
+        <field name="sequences" type="ProcessSequence" multiple="true" />
+        <field name="elements" type="ProcessElement" multiple="true" />
+        <field name="state" type="Record" />
+        <field name="views" type="Canvas" multiple="true" propertiesOnly="true" />
+	</fields>
+</DataSource>
+

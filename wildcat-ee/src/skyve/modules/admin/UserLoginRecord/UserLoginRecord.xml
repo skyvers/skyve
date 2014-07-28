@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserLoginRecord"
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_UserLoginRecord" />
+	<singularAlias>User Login Record</singularAlias>
+	<pluralAlias>User Login Records</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return getUserName() + " @ " + getLoginDateTime();
+		]]>
+	</bizKey>
+	<attributes>
+		<text name="userName" required="true">
+			<displayName>User Name</displayName>
+			<length>30</length>
+		</text>
+		<dateTime name="loginDateTime" required="true">
+			<displayName>Login Date/Time</displayName>
+		</dateTime>
+	</attributes>
+</document>

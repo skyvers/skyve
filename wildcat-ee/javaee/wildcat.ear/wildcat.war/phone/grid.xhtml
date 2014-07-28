@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    	xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pm="http://primefaces.org/mobile"
+		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    <f:view renderKitId="PRIMEFACES_MOBILE">
+		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<f:metadata>
+			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />
+			<f:viewParam name="m" value="#{wildcat.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{wildcat.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{wildcat.queryNameParameter}" />
+			<f:viewParam name="i" value="#{wildcat.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{wildcat.preRender}"/>
+		</f:metadata>
+		<ui:composition template="./template.xhtml">
+			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
+			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
+			<ui:define name="pages">
+				<pm:page id="list">
+					<pm:header title="#{wildcat.title}" fixed="true">
+						<p:button value="Home" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
+						<p:button value="Logout" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
+					</pm:header>
+					<pm:content>
+						<p:messages id="messages" globalOnly="false" autoUpdate="true" />
+						<h:form>
+
+							<w:listGrid module="#{wildcat.bizModuleParameter}"
+										query="#{wildcat.queryNameParameter}"
+										managedBean="wildcat"
+										type="phone" />
+						</h:form>
+					</pm:content>
+				</pm:page>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

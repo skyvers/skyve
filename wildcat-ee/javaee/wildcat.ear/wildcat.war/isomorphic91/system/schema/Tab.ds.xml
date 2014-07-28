@@ -1,0 +1,25 @@
+<DataSource	ID="Tab">
+    <!-- NOTE: doesn't inherit from ImgTab, because multiple types of concrete tab
+         implementations are possible - if you know you're using an ImgTab, you can
+         specify <ImgTab> in your XML -->
+	<fields>
+		<field name="title"	type="string" basic="true" xmlAttribute="true"/>
+		<field name="pane"	type="Canvas"/>
+		<field name="ID"	type="identifier"/>
+		<field name="width"	type="measure" basic="true" xmlAttribute="true"/>
+
+        <field name="disabled" type="boolean" basic="true"/>
+        
+        <field name="pickerTitle" type="string"/>
+        
+        <field name="icon" type="string" xmlAttribute="true"/>
+        <field name="canClose" type="boolean" basic="true" xmlAttribute="true"/>
+        <field name="closeIcon" type="string"/>
+        
+        <!-- backcompat -->
+        <field name="enabled" type="boolean" visibility="hidden"/>
+	</fields>
+    <methods>
+        <method title="Select Tab" name="select" action="true"/>
+    </methods>
+</DataSource>

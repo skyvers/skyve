@@ -1,0 +1,36 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+		xmlns:ui="http://java.sun.com/jsf/facelets" 
+		xmlns:h="http://java.sun.com/jsf/html" 
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui">
+    <f:view contentType="text/html">
+		<h:head>
+			<title>Biz Hub Upload</title>
+			<style>
+				.ui-widget {
+				    font-size: 12px !important;
+				}
+				.ui-panelgrid .ui-widget-content {
+					border-width: 0px;
+					border-style: none;
+				}
+				.ui-panelgrid td {
+					border-width: 0px;
+					border-style: none;
+				}
+			</style>
+		</h:head>
+		<h:body>
+			<h:form enctype="multipart/form-data" prependId="false">
+				<h:inputHidden id="_c" value="#{fileUpload.context}" />
+				<h:inputHidden id="_b" value="#{fileUpload.binding}" />
+				<h:inputHidden id="_a" value="#{fileUpload.action}" />
+				<p:fileUpload fileUploadListener="#{fileUpload.handleFileUpload}" 
+								update="messages" 
+								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
+			    <p:growl id="messages" showDetail="true" />
+			</h:form>
+		</h:body>
+	</f:view>
+</html>

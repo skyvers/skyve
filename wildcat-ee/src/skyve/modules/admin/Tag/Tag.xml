@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Tag" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Tag" />
+	<singularAlias>Tag</singularAlias>
+	<pluralAlias>Tags</pluralAlias>
+	<bizKey>
+		return (name == null ? "Tag" : name);
+	</bizKey>
+	<attributes>
+		<text name="name" >
+			<displayName>Name</displayName>
+			<length>256</length>
+		</text>
+		<boolean name="visible">
+			<displayName>Visible</displayName>
+		</boolean>
+		<text name="moduleName" >
+			<displayName>Module</displayName>
+			<shortDescription>The module to tag.</shortDescription>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="documentName" >
+			<displayName>Document</displayName>
+			<shortDescription>The document to tag.</shortDescription>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="attributeName" >
+			<displayName>Attribute</displayName>
+			<shortDescription>The name of the attribute to tag.</shortDescription>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="fileHasHeaders" persistent="false">
+			<displayName>Upload File has Column Headers</displayName>
+		</boolean>
+		<integer name="numberLoaded" persistent="false">
+			<displayName>Number of loaded values</displayName>
+		</integer>
+		<integer name="numberMatched" persistent="false">
+			<displayName>Number of matched</displayName>
+		</integer>
+		<integer name="numberTagged" persistent="false">
+			<displayName>Number of tagged values</displayName>
+		</integer>
+		<enum name="filterOperator" persistent="false">
+			<displayName>Filter Operator</displayName>
+			<values>
+				<value code="equals" description="Equals"/>
+				<value code="like" description="Like"/>
+				<value code="contains" description="Contains"/>
+			</values>
+		</enum>
+		<enum name="filterAction" persistent="false">
+			<displayName>Filter Action</displayName>
+			<values>
+				<value code="tag" description="Tag records that match" />
+				<value code="unTag" description="UnTag records that match"/>
+			</values>
+		</enum>
+		<boolean name="unTagSuccessful" persistent="false">
+			<displayName>Untag successful documents</displayName>
+		</boolean>
+		<integer name="filterColumn" persistent="false">
+			<displayName>Column</displayName>
+		</integer>
+		<association type="aggregation" name="actionTag" persistent="false">
+			<displayName>Tag</displayName>
+			<shortDescription>The tag to use for the action to be performed on this tag.</shortDescription>
+			<domain>dynamic</domain>
+			<documentName>Tag</documentName>
+		</association>
+		<text name="documentCondition" persistent="false">
+			<displayName>Condition</displayName>
+			<shortDescription>The condition which must be satisfied for the tagged document, for the action to be executed.</shortDescription>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<text name="documentAction" persistent="false">
+			<displayName>Action</displayName>
+			<shortDescription>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</shortDescription>
+			<domain>dynamic</domain>
+			<length>1000</length>
+		</text>
+		<memo name="documentActionResults" persistent="false">
+			<displayName>Results</displayName>
+		</memo>
+	</attributes>
+	<conditions>
+		<condition name="moduleSet">
+			<![CDATA[getModuleName()!=null]]>
+		</condition>
+		<condition name="documentSet">
+			<![CDATA[getModuleName()!=null && getDocumentName()!=null]]>
+		</condition>
+		<condition name="attributeSet">
+			<![CDATA[getAttributeName()!=null]]>
+		</condition>
+		<condition name="fileLoaded">
+			<![CDATA[getNumberLoaded().intValue()>0]]>
+		</condition>
+	</conditions>
+</document>

@@ -1,0 +1,12 @@
+<Object ID="Mail" __autoConstruct="DataSource">
+    <fields>
+        <templateFile type="URL"/>
+        <multiple type="boolean"/>
+        <to type="string"/>
+        <from type="string"/>
+        <replyTo type="string"/>
+        <cc type="string"/>
+        <bcc type="string"/>
+        <subject type="string"/>
+    </fields>
+</Object>

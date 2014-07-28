@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="admin"
+			title="Admin"
+			xmlns="http://www.skyve.org/xml/module"
+			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>list</homeRef>
+	<homeDocument>User</homeDocument>
+	<jobs>
+		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
+	</jobs>	
+	<documents>
+		<document ref="ChangePassword" />
+		<document ref="Configuration" />
+		<document ref="Contact" defaultQueryName="qContacts" />
+		<document ref="CurrentUser"/>
+		<document ref="DataGroup" />
+		<document ref="DataMaintenance" />
+		<document ref="Display" />
+		<document ref="DocumentNumber" />
+		<document ref="Group" />
+		<document ref="GroupRole" />
+		<document ref="Job" defaultQueryName="qCompletedJobs" />
+		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
+		<document ref="Jobs" />
+		<document ref="User" defaultQueryName="qUsers" />
+		<document ref="UserCandidateContact" />
+		<document ref="UserLoginRecord" />
+		<document ref="UserMonthlyHits" />
+		<document ref="UserRole" />
+		<document ref="Snapshot" defaultQueryName="qSnapshots"/>
+		<document ref="Tag" defaultQueryName="qTags"/>
+		<document ref="Tagged" />
+	</documents>
+	<queries>
+		<query name="qUserPasswords" documentName="User">
+			<displayName>User Passwords</displayName>
+			<description>Initial Passwords for Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder ="ascending" />
+				<column binding="userName" />
+				<column binding="clearTextPassword">
+					<filterOperator>notNull</filterOperator>
+				</column>
+				<column binding="createdDateTime" />
+				<column binding="passwordExpired" >
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>true</filterExpression>
+				</column>
+			</columns>
+		</query>
+		<query name="qContacts" documentName="Contact">
+			<displayName>Contacts</displayName>
+			<description>All Contact Details</description>
+			<columns>
+				<column binding="name" sortOrder ="ascending" />
+				<column binding="contactType" sortOrder ="ascending" />
+				<column binding="email1" sortOrder ="ascending" />
+				<column binding="mobile" sortOrder ="ascending" />
+			</columns>
+		</query>
+		<query name="qMyContact" documentName="Contact">
+			<displayName>My Contact Details</displayName>
+			<description>My Contact Details</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="bizId">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{CONTACTID}</filterExpression>
+				</column>
+			</columns>
+		</query>
+		<query name="qUsers" documentName="User">
+			<displayName>Users</displayName>
+			<description>All Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder ="ascending" />
+				<column binding="contact.email1" sortOrder ="ascending" />
+				<column binding="contact.mobile" sortOrder ="ascending" />
+				<column binding="userName" sortOrder ="ascending" />
+			</columns>
+		</query>
+		<query name="qCompletedJobs" documentName="Job">
+			<displayName>All Completed Jobs</displayName>
+			<description>All completed jobs whether successful or not</description>
+			<columns>
+				<column binding="startTime" sortOrder="descending"/>
+				<column binding="displayName" />
+				<column binding="endTime" />
+				<column binding="status" />
+				<column binding="percentComplete" />
+			</columns>
+		</query>
+		<query name="qAllSchedules" documentName="JobSchedule">
+			<displayName>Job Schedule</displayName>
+			<description>The list of all job schedule entries</description>
+			<columns>
+				<column binding="bizKey" sortOrder ="ascending" />
+				<column binding="startTime" sortOrder ="ascending" />
+				<column binding="endTime" />
+			</columns>
+		</query>
+		<query name="qExistingHits" documentName="UserMonthlyHits">
+			<displayName>Existing Hits</displayName>
+			<description>The existing hits record for a user, month and year</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="numberOfHits" />
+				<column binding="userName">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+				<column binding="year">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+				<column binding="month">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+			</columns>
+		</query>
+		<query name="qSnapshots" documentName="Snapshot">
+			<displayName>Snapshot</displayName>
+			<description>The list of all Snapshots.</description>
+			<columns>
+				<column binding="moduleName" sortOrder ="ascending" />
+				<column binding="queryName" sortOrder ="ascending" />
+				<column binding="name" sortOrder ="ascending" />
+			</columns>
+		</query>
+		<query name="qTags" documentName="Tag">
+			<displayName>Tag</displayName>
+			<description>The list of all Tags.</description>
+			<columns>
+				<column binding="name" sortOrder ="ascending" />
+				<column binding="visible" />
+			</columns>
+		</query>
+	</queries>
+	<roles>
+		<role name="BasicUser">
+			<description>
+				Enough privileges and permissions to login and operate BizHub with access to the admin module only.
+			</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="_RU_D" />
+				<document name="CurrentUser" permission="CR__U" />
+				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="Snapshot" permission="CRUDU" />
+				<document name="Tag" permission="CRUDU" >	
+					<action name="Clear"/>
+					<action name="TagAll"/>
+					<action name="ExceptTag"/>
+					<action name="IntersectTag"/>
+					<action name="UnionTag"/>
+					<action name="UpdateModule"/>
+					<action name="UpdateDocument"/>
+					<action name="UploadTagCriteria"/>
+					<action name="BulkDocumentAction"/>
+				</document>
+				<document name="Tagged" permission="CRUDU" />
+				<document name="User" permission="_R__D" />
+				<document name="UserCandidateContact" permission="_____">
+					<action name="Select" />
+				</document>
+			</privileges>
+		</role>
+		<role name="ViewUser">
+			<description>
+				Enough privileges and permissions to login, change password and view own contact details.
+			</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="_R__D" />
+			</privileges>
+		</role>
+		<role name="ContactViewer">
+			<description>Can only view contacts.</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="_R__D" />
+			</privileges>
+		</role>
+		<role name="ContactManager">
+			<description>Can manage contacts.</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Contact" permission="CRUDD" />
+			</privileges>
+		</role>
+		<role name="SecurityAdministrator">
+			<description>Allows administration of Users and Groups.</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Configuration" permission="CRUDC" />
+				<document name="Contact" permission="CRUDC" />
+				<document name="DataGroup" permission="CRUDC" />
+				<document name="DataMaintenance" permission="CRUDC" >
+					<action name="DataMaintenanceExportAction"/>
+					<action name="DataMaintenanceImportAction"/>
+				</document>
+				<document name="Display" permission="_____" />
+				<document name="DocumentNumber" permission="CRUDC"/>
+				<document name="Group" permission="CRUDC" />
+				<document name="GroupRole" permission="CRUDC" />
+				<document name="User" permission="CRUDD">
+					<action name="Check" />
+					<action name="GeneratePassword" />
+					<action name="GenerateUniqueUserName" />
+					<action name="New" />
+					<action name="Next"/>
+					<action name="Back"/>
+				</document>
+				<document name="UserCandidateContact" permission="_____">
+				</document>
+				<document name="UserRole" permission="CRUDD" />
+			</privileges>
+		</role>
+		<role name="JobMaintainer">
+			<description>Maintain customer Jobs.</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="Job" permission="CRUDD" />
+				<document name="JobSchedule" permission="CRUDD" />
+				<document name="Jobs" permission="_____">
+					<action name="DeleteCompletedJobs" />
+				</document>
+			</privileges>
+		</role>
+		<role name="AppUser">
+			<description>
+				Privileges and permissions to login but no native visibility of the admin module.
+			</description>
+			<privileges>
+				<document name="Contact" permission="_RU_U" />
+				<document name="User" permission="_RU_U"/>
+				<document name="Group" permission="_R__C" />
+				<document name="GroupRole" permission="_R__C" />				
+			</privileges>
+		</role>				
+	</roles>
+	<menu>
+		<edit document="ChangePassword" name="Password">
+			<role name="BasicUser" />
+			<role name="ViewUser" />
+		</edit>
+		<grid query="qMyContact" name="My Details">
+			<role name="BasicUser" />
+			<role name="ViewUser" />
+		</grid>
+		<edit document="CurrentUser" name="Current User Details">
+			<role name="BasicUser" />
+			<role name="ViewUser" />
+		</edit>
+		<grid document="Contact" name="Contacts">
+			<role name="ContactViewer" />
+			<role name="ContactManager" />
+			<role name="DataAdministrator" />
+			<role name="SecurityAdministrator" />
+		</grid>
+		<group name="Security Admin">
+			<grid document="Group" name="Groups">
+				<role name="SecurityAdministrator" />
+			</grid>
+			<grid document="DataMaintenance" name="Data Maintenance">
+				<role name="SecurityAdministrator" />
+			</grid>
+			<grid document="User" name="Users">
+				<role name="SecurityAdministrator" />
+			</grid>
+			<grid document="DataGroup" name="Data Groups">
+				<role name="DataAdministrator" />
+				<role name="SecurityAdministrator" />
+			</grid>
+			<edit document="Configuration" name="Password Complexity">
+				<role name="SecurityAdministrator" />
+			</edit>
+			<grid name="PasswordList" query="qUserPasswords">
+				<role name="SecurityAdministrator" />
+			</grid>
+		</group>
+		<grid name="Snapshots" document="Snapshot">
+			<role name="BasicUser" />
+		</grid>
+		<grid name="Tags" document="Tag">
+			<role name="BasicUser" />
+		</grid>
+		<edit document="Display" name="Web Stats">
+			<role name="DataAdministrator" />
+			<role name="SecurityAdministrator" />
+		</edit>
+		<grid name="Document Numbers" document="DocumentNumber">
+			<role name="DataAdministrator" />
+			<role name="SecurityAdministrator" />
+		</grid>		
+		<edit document="Jobs" name="Jobs">
+			<role name="JobMaintainer" />
+		</edit>
+	</menu>
+</module>

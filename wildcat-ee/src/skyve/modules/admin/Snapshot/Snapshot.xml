@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Snapshot" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Snapshot" />
+	<singularAlias>Snapshot</singularAlias>
+	<pluralAlias>Snapshots</pluralAlias>
+	<bizKey>
+		return (name == null ? "New Snapshot" : name);
+	</bizKey>
+	<attributes>
+		<text name="moduleName" required="true">
+			<displayName>Module</displayName>
+			<length>100</length>
+		</text>
+		<text name="queryName" required="true">
+			<displayName>Query</displayName>
+			<length>100</length>
+		</text>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<length>256</length>
+		</text>
+		<memo name="snapshot" required="true">
+			<displayName>Snapshot</displayName>
+		</memo>
+	</attributes>
+</document>

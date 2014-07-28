@@ -1,0 +1,4 @@
+<DataSource ID="FloatItem" inheritsFrom="TextItem" Constructor="FloatItem" >
+    <fields>
+    </fields>
+</DataSource>

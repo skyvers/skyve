@@ -1,0 +1,8 @@
+<DataSource	ID="DefineClass" serverConstructor="com.isomorphic.datasource.DefineClass">
+	<fields>
+        <field name="name" type="string"/>
+        <field name="extends" type="string"/>
+		<field name="properties" type="Object"/>
+		<field name="methods" type="Object"/>
+	</fields>
+</DataSource>

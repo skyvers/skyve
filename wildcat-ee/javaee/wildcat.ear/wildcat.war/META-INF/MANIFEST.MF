@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.9.2
+Created-By: 1.7.0_60-b19 (Oracle Corporation)
+Class-Path: lib/wildcat-core.jar lib/wildcat-ext.jar lib/FontBox-0.1.0
+ .jar lib/PDFBox-0.7.3.jar lib/SuperCSV-1.52.jar lib/antlr-2.7.6.jar l
+ ib/asm-3.2.jar lib/bsh-2.0b4.jar lib/cglib-2.2.2.jar lib/commons-bean
+ utils.jar lib/commons-codec-1.3.jar lib/commons-collections-3.2.jar l
+ ib/commons-digester-1.8.jar lib/commons-javaflow-20060411.jar lib/com
+ mons-lang3-3.1.jar lib/commons-logging-1.1.1.jar lib/commons-validato
+ r-1.4.0.jar lib/concurrent-1.3.4.jar lib/cxf-2.5.2.jar lib/dom4j-1.6.
+ 1.jar lib/ehcache-core-2.0.1.jar lib/ejb3-persistence.jar lib/geodb-0
+ .7.jar lib/geodb-app-0.7.jar lib/geodb_commons-cli-1.2.jar lib/geodb_
+ hatbox-1.0.b7.jar lib/geodb_henplus-0.9.8.jar lib/geodb_libreadline-j
+ ava-0.8.0.jar lib/groovy-all-1.8.3.jar lib/hibernate-annotations.jar 
+ lib/hibernate-commons-annotations.jar lib/hibernate-entitymanager.jar
+  lib/hibernate-validator.jar lib/hibernate3.jar lib/iText-2.1.7.jar l
+ ib/jackrabbit-api-1.4.jar lib/jackrabbit-core-1.4.4.jar lib/jackrabbi
+ t-jcr-commons-1.4.2.jar lib/jackrabbit-jcr2spi-1.4.jar lib/jackrabbit
+ -spi-1.4.jar lib/jackrabbit-spi-commons-1.4.jar lib/jackrabbit-text-e
+ xtractors-1.4.jar lib/jasperreports-javaflow-4.7.0.jar lib/javassist-
+ 3.12.0.GA.jar lib/jcommon-1.0.15.jar lib/jcr-1.0.jar lib/jfreechart-1
+ .0.12.jar lib/jsr173_1.0_api.jar lib/jts-1.13.jar lib/jxl-2.6.10.jar 
+ lib/lucene-core-2.2.0.jar lib/lucene-snowball-2.3.2.jar lib/lucene-sp
+ ellchecker-2.2.0.jar lib/neethi-3.0.1.jar lib/nekohtml-1.9.7.jar lib/
+ poi-3.5-FINAL-20090928.jar lib/poi-contrib-3.5-FINAL-20090928.jar lib
+ /poi-ooxml-3.5-FINAL-20090928.jar lib/poi-scratchpad-3.5-FINAL-200909
+ 28.jar lib/quality-check-1.3.jar lib/quartz-1.6.0.jar lib/slf4j-api-1
+ .5.0.jar lib/slf4j-simple-1.5.0.jar lib/thumbnailator-0.4.5.jar lib/t
+ m-extractors-0.4.jar lib/uadetector-core-0.9.14.jar lib/uadetector-re
+ sources-2014.02.jar lib/wsdl4j-1.6.2.jar lib/xercesImpl.jar lib/xmlsc
+ hema-core-2.0.1.jar
+

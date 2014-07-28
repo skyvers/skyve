@@ -1,0 +1,6 @@
+<Object ID="FloatPrecisionValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="floatPrecision" addGlobalId="false">
+    <fields>
+        <precision type="integer"/>
+        <roundToPrecision type="boolean"/>
+    </fields>
+</Object>

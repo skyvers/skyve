@@ -1,0 +1,83 @@
+<DataSource ID="Calendar"	inheritsFrom="Canvas"	Constructor="Calendar">
+	<fields>
+        <field name="chosenDate" type="Date"/>
+        <field name="firstDayOfWeek" type="positiveInteger"/>
+        
+        <field name="baseStyle" type="CSSStyleName"/>
+        <field name="dayHeaderBaseStyle" type="CSSStyleName"/>
+        <field name="dayBodyBaseStyle" type="CSSStyleName"/>
+        <field name="otherDayHeaderBaseStyle" type="CSSStyleName"/>
+        <field name="otherDayBodyBaseStyle" type="CSSStyleName"/>
+        <field name="otherDayBlankStyle" type="CSSStyleName"/>
+        <field name="selectedCellStyle" type="CSSStyleName"/>
+        <field name="eventWindowStyle" type="CSSStyleName"/>
+        <field name="weekEventBorderOverlap" type="CSSStyleName"/>
+        
+        <field name="workdayBaseStyle" type="CSSStyleName"/>
+        <field name="workdayStart" type="Time"/>
+        <field name="workdayEnd" type="Time"/>
+        <field name="showWorkday" type="boolean"/>
+        <field name="scrollToWorkday" type="boolean"/>
+        
+        <field name="nameField" type="string"/>
+        <field name="descriptionField" type="string"/>
+        <field name="startDateField" type="string"/>
+        <field name="endDateField" type="string"/>
+        <field name="eventWindowStyleField" type="string"/>
+        <field name="canEditField" type="string"/>
+        
+        <field name="eventSnapGap" type="positiveInteger"/>
+        <field name="showQuickEventDialog" type="boolean"/>
+        <field name="eventEditorFields" type="FormItem" multiple="true"/>
+        <field name="eventDialogFields" type="FormItem" multiple="true"/>
+        
+        <field name="canCreateEvents" type="boolean"/>
+        <field name="canEditEvents" type="boolean"/>
+        <field name="canDeleteEvents" type="boolean"/>
+        
+        <field name="showDateChooser" type="boolean"/>
+        <field name="disableWeekends" type="boolean"/>
+        <field name="showWeekends" type="boolean"/>
+        <field name="showDayHeaders" type="boolean"/>
+        <field name="showOtherDays" type="boolean"/>
+        <field name="showDayView" type="boolean"/>
+        <field name="showWeekView" type="boolean"/>
+        <field name="showMonthView" type="boolean"/>
+        
+        <field name="invalidDateMessage" type="string"/>
+        <field name="initialCriteria" type="Object"/>
+		<field name="data" multiple="true" type="CalendarEvent"/>
+        
+        <field name="mainViewProperties" type="TabSet" propertiesOnly="true"/>
+        <field name="eventDialogProperties" type="Window" propertiesOnly="true"/>
+        <field name="eventEditorProperties" type="DynamicForm" propertiesOnly="true"/>
+        <field name="eventEditorLayoutProperties" type="Window" propertiesOnly="true"/>
+        <field name="addEventButtonProperties" type="ImgButton" propertiesOnly="true"/>
+        <field name="datePickerButtonProperties" type="ImgButton" propertiesOnly="true"/>
+        <field name="controlsBarProperties" type="HLayout" propertiesOnly="true"/>
+        <field name="previousButtonProperties" type="ImgButton" propertiesOnly="true"/>
+        <field name="nextButtonProperties" type="ImgButton" propertiesOnly="true"/>
+        <field name="dateDisplayProperties" type="Label" propertiesOnly="true"/>
+        
+        <field name="showEventsByTypeView" type="boolean"/>
+        
+        <field name="eventOverlapPercent" type="number"/>
+       
+	</fields>
+    <groups>
+        <group>date</group>
+        <group>appearance</group>
+        <group>workday</group>
+        <group>calendarEvent</group>
+        <group>editing</group>
+        <group>allowedOperations</group>
+        <group>visibility</group>
+        <group>data</group>
+    </groups>
+
+    <methods>
+        <method title="Fetch Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+       
+    </methods>
+</DataSource>

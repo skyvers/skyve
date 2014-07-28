@@ -1,0 +1,21 @@
+<DataSource ID="ButtonTable" inheritsFrom="Canvas" Constructor="ButtonTable">
+	<fields>
+		<field name="items" type="ButtonTableItem" multiple="true" />
+		<field name="cellSpacing" type="positiveInteger" />
+		<field name="cellPadding" type="positiveInteger" />
+		<field name="cellBorder" type="positiveInteger" />
+		<field name="tableStyle" type="cssClass" />
+	</fields>
+	
+	<types>
+		<type ID="ButtonTableItem" type="DataSource">
+			<fields>
+				<field name="contents" 		type="HTMLString" />
+				<field name="action" 		type="eventHandler" />
+				<field name="style" 		type="cssStyle" />
+				<field name="align" 		type="alignEnum" />
+				<field name="extraTagStuff" type="HTMLString" />
+			</fields>
+		</type>
+	</types>
+</DataSource>

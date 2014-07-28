@@ -1,0 +1,2 @@
+<DataSource	ID="WSDLMessage" inheritsFrom="DataSource" Constructor="WSDLMessage"
+            addGlobalId="false"/>

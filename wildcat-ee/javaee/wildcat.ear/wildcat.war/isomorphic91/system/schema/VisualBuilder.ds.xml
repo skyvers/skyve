@@ -1,0 +1,7 @@
+<DataSource ID="VisualBuilder">
+    <fields>
+        <field name="projectID" type="any" />
+        <field name="recentProjects" type="MenuItem" multiple="true" />
+    </fields>
+</DataSource>
+

@@ -1,0 +1,411 @@
+<DataSource	ID="Canvas"	Constructor="Canvas">
+	<fields>
+		<field name="ID" xmlAttribute="true" type="identifier" title="Identifier" basic="true"/>	
+		<field name="ref" type="identifier" xmlAttribute="true" title="Identifier"/>	
+
+        <!-- sizing -->
+		<field name="width"				type="measure" title="Width" xmlAttribute="true"/>	
+		<field name="height"			type="measure" title="Height" xmlAttribute="true"/>
+        <field name="defaultWidth"      type="measure" title="Default Width"/>
+        <field name="defaultHeight"     type="measure" title="Default Height"/>
+        <field name="inherentHeight"    type="boolean" visibility="internal"/>
+        <field name="inherentWidth"     type="boolean" visibility="internal"/>
+		<field name="minWidth"			type="positiveInteger" title="Min Width" xmlAttribute="true"/>	
+		<field name="maxWidth"			type="positiveInteger" title="Max Width" xmlAttribute="true"/>	
+		<field name="minHeight"			type="positiveInteger" title="Min Height" xmlAttribute="true"/>	
+		<field name="maxHeight"			type="positiveInteger" title="Max Height" xmlAttribute="true"/>	
+
+        <!-- positioning -->
+		<field name="position"			type="enum" title="Position">
+			<valueMap>
+				<value>absolute</value>
+				<value>relative</value>
+			</valueMap>
+		</field>
+		<field name="left"				type="measure" title="Left Offset" xmlAttribute="true"/>	
+		<field name="top"				type="measure" title="Top Offset" xmlAttribute="true"/>	
+
+        <!-- contents -->       
+        <field name="contents"			type="HTMLString"/>	
+		<field name="dynamicContents" type="boolean" defaultValue="false"/>	
+        <field name="dynamicContentsVars" type="ValueMap"/>
+		<field name="contentsURL"		type="URL" visibility="internal"/>	
+
+        <!-- appearance -->
+		<field name="className"			type="cssClass" title="CSS Style"/>
+        <field name="styleName"         type="cssClass" title="CSS Style"/>
+		<field name="margin"			type="positiveInteger" title="Margin"/>	
+        <!-- These are actually EdgedCanvas settings, not generic margins support
+		<field name="marginTop"  	    type="positiveInteger" title="Margin Top"/>	
+		<field name="marginBottom"  	type="positiveInteger" title="Margin Bottom"/>	
+		<field name="marginLeft"  	    type="positiveInteger" title="Margin Left"/>	
+		<field name="marginRight"  	    type="positiveInteger" title="Margin Right"/>	
+        -->
+		<field name="padding"			type="positiveInteger" title="Padding"/>	
+		<field name="border"			type="string" title="Border" />	
+
+		<field name="backgroundColor"	type="color" title="Background Color" />	
+		<field name="backgroundImage"	type="URL" title="Background Image"/>	
+		<field name="backgroundRepeat"	type="enum"	title="Background Repeat">
+			<valueMap>
+				<value>repeat</value>
+				<value>no-repeat</value>
+				<value>repeat-x</value>
+				<value>repeat-y</value>
+			</valueMap>
+		</field>	
+		<field name="cursor"			type="cursorEnum" title="Cursor"/>
+        <field name="disabledCursor"    type="cursorEnum" title="Disabled Cursor"/>
+		<field name="opacity"			type="integerPercent" title="Opacity"/>
+		<field name="prompt"			type="HTMLString" title="Tooltip Prompt"/>
+
+        <!-- hovers -->
+        <field name="canHover"  type="boolean" />
+        <field name="showHover" type="boolean" />
+        
+        <field name="hoverDelay" type="number" />
+        <field name="hoverStyle" type="cssClass"/>
+        <field name="hoverOpacity" type="integer"/>
+        <field name="hoverMoveWithMouse" type="boolean"/>
+        <field name="hoverWidth" type="measure" />
+        <field name="hoverHeight" type="measure"/>
+        <field name="hoverAlign" type="alignEnum"/>
+        <field name="hoverVAlign" type="valignEnum"/>
+        <field name="hoverWrap" type="boolean"/>
+        
+        <!-- images -->
+		<field name="appImgDir"			type="URL"/>
+		<field name="skinImgDir"		type="URL"/>
+
+        <!-- These are properties that Layout looks for on members -->
+		<field name="showResizeBar" type="boolean" defaultValue="false"/>	
+        <field name="resizeBarTarget" type="string"/>
+		<field name="layoutAlign"     type="anyAlignEnum"/>	
+		<field name="extraSpace"      type="positiveInteger" />
+
+        <!-- overflow / scrolling -->
+		<field name="overflow" xmlAttribute="true" type="overflowEnum" title="Overflow"/>	
+		<field name="showCustomScrollbars"	type="boolean" title="Use Custom Scollbars" visibility="internal"/>	
+		<field name="scrollbarSize"		type="positiveInteger" title="Scrollbar Size"/>
+		<field name="scrollLeft"		type="integer" title="Scroll Left Shift (Pixels)" visibility="internal"/>	
+		<field name="scrollTop"			type="integer" title="Scroll Top Shift (Pixels)" visibility="internal"/>
+		
+        <field name="disabled"			type="boolean" title="Disabled" defaultValue="false"/>	
+		<field name="redrawOnDisable"	type="boolean" title="Redraw On Disable" visibility="internal"/>	
+        <!-- backcompat only -->
+        <field name="enabled"			type="boolean" title="Enabled" defaultValue="true"/>	
+		<field name="redrawOnEnable"	type="boolean" title="Redraw On Enable" visibility="internal"/>	
+		
+        <!-- dragging -->	
+		<field name="canDrag"			type="boolean" title="Can Drag"/>	
+		<field name="dragStartDistance"	type="positiveInteger"/>	
+		<field name="dragIntersectStyle"	type="enum">
+			<valueMap>
+				<value>mouse</value>
+				<value>rect</value> 
+			</valueMap>
+		</field>	
+		<field name="canDragReposition"	type="boolean" title="Can Drag-Reposition"/>	
+		<field name="dragRepositionCursor"	type="cursorEnum" title="Drag Reposition Cursor"/>	
+		<field name="canDragResize"		type="boolean" title="Can Drag-Resize"/>	
+		<field name="resizeFrom"		type="enum"	multiple="true" title="Resize From Edge">
+			<valueMap>
+				<value>L</value>
+				<value>T</value>
+				<value>R</value>
+				<value>B</value>
+				<value>TL</value>
+				<value>TR</value>
+				<value>BL</value>
+				<value>BR</value>
+			</valueMap>
+		</field>	
+		<field name="showEdges"			type="boolean"/>	
+		<field name="edgeSize"			type="positiveInteger"/>	
+		<field name="edgeMarginSize"	type="positiveInteger" visibility="internal"/>	
+		<field name="edgeImage"			type="URL"/>	
+		<field name="customEdges"		type="string" multiple="true" editorType="ArrayItem"/>	
+		<field name="edgeBackgroundColor"	type="color"/>	
+		<field name="edgeShowCenter"	type="boolean"/>	
+		<field name="edgeCenterBackgroundColor"	type="color"/>	
+		<field name="dragAppearance"	type="dragAppearanceEnum" title="Drag Appearance" />
+		<field name="keepInParentRect"	type="boolean" title="Keep in Parent"/>
+		<field name="dragType"			type="string" title="Drag Type"/>	
+        <!-- dragTarget must be marked advanced, despite docBuilder warnings, or visual ISC
+             permits D&D of any Canvas onto any Canvas subclass -->
+		<field name="dragTarget"		type="Canvas" title="Drag Target" advanced="true"/>	
+		<field name="showDragShadow"	type="boolean"/>	
+		<field name="dragOpacity"	    type="integerPercent"/>	
+		<field name="canDrop"			type="boolean" title="Can Drop"/>	
+		<field name="canAcceptDrop"		type="boolean" title="Can Accept Drop"/>	
+		<field name="canDropBefore"		type="boolean" title="Can Drop Before"/>	
+		<field name="canDragScroll"		type="boolean" title="Can dragScroll"/>	
+		<field name="dragScrollThreshold"		type="measure" title="DragScroll Threshold" visibility="internal"/>	
+		<field name="minDragScrollIncrement"	type="measure" title="Min DragScroll Increment" visibility="internal"/>	
+		<field name="maxDragScrollIncrement"	type="measure" title="Max DragScroll Increment" visibility="internal"/>	
+		<field name="dragScrollDelay"		type="positiveInteger" title="dragScrollDelay"/>
+		<field name="dropTypes"			type="string"	multiple="true"/>	
+		<field name="mouseStillDownDelay"	type="positiveInteger" title="Mouse Still Down Delay"/>	
+		<field name="mouseStillDownInitialDelay"	type="positiveInteger" title="Mouse Still Down Initial Delay"/>	
+		<field name="doubleClickDelay"	type="positiveInteger" title="Double-Click Delay"/>	
+        <field name="noDoubleClicks"    type="boolean" />
+		<field name="edgeCursorMap"		type="edgeCursorMap"/>
+		
+        <!-- databinding (not exposed on Canvas, but defined here to make any Canvas subclass databindable) -->
+		<field name="dataSource" xmlAttribute="true" idAllowed="true" type="DataSource" hidden="true"/>
+		<field name="serviceName" type="string" />
+		<field name="serviceNamespace" type="string" />
+		<field name="useAllDataSourceFields"	type="boolean" hidden="true"/>	
+		<field name="showComplexFields"	type="boolean" hidden="true"/>	
+
+		<field name="autoFetchData"	type="boolean" visibility="internal" xmlAttribute="true"/>	
+		<field name="autoFetchTextMatchStyle"	type="string" visibility="internal"/>
+        <!-- dataPath and valuesManager is supported and docd on all Canvii, even if it just 
+             acts as a container for data-aware sub-components -->
+        <field name="dataPath"  type="string" />
+        <field name="valuesManager" type="ValuesManager" />
+        <field name="dataArity" type="string" hidden="true" />
+
+        <!-- shadows -->
+        <field name="showShadow"        type="boolean"/>
+        <field name="shadowDepth"       type="int"/>
+        <field name="shadowOffset"      type="int"/>
+        <field name="shadowSoftness"    type="int"/>
+        <field name="shadowImage"       type="url"/>
+
+        <!-- parent / children / peers -->
+        <field name="parentElement" type="string"/>
+        <field name="peers"			type="Canvas" multiple="true"   propertiesOnly="true"/>
+		<field name="children"		type="Canvas" multiple="true"	propertiesOnly="true"/>
+		<field name="contextMenu"   type="Menu"/>
+		
+        <!-- visibility -->
+		<field name="visibility"		type="visibilityEnum" title="Visibility"/>	
+		<field name="autoShowParent"	type="boolean" title="Auto Show Parent"/>
+
+        <!-- don't show autoDraw in tools -->
+		<field name="autoDraw" xmlAttribute="true" type="boolean" title="Auto-Draw" hidden="true"/>
+
+        <field name="observes"		type="Object" multiple="true" visibility="internal"/>	
+
+        <field name="hasFocus"			type="boolean" visibility="internal"/>	
+		<field name="canFocus"		type="boolean"/>	
+		<field name="redrawOnFocus"		type="boolean" title="Redraw On Focus" visibility="internal"/>	
+        
+        <field name="tabIndex"  type="int"/>
+        <field name="accessKey" type="string"/>
+
+		<field name="canSelectText"		type="boolean" title="Can Select Text"/>	
+		<field name="eventProxy"		type="Canvas" visibility="internal"/>
+
+		<field name="textDirection"		type="enum" title="Text Direction" visibility="internal">
+			<valueMap ltr="Left to Right" rtl="Right to Left"/>
+		</field>
+
+		<field name="zIndex"			type="integerOrAuto" title="Z-Index" visibility="internal"/>
+		
+		<field name="redrawOnResize"	type="boolean" title="Redraw On Resize"/>
+		
+        <!-- animation -->
+        <field name="animateTime" type="positiveInteger"/>
+        <field name="animateAcceleration" type="function"/>
+        <field name="animateMoveTime" type="positiveInteger"/>
+        <field name="animateResizeTime" type="positiveInteger"/>
+        <field name="animateRectTime" type="positiveInteger"/>
+        <field name="animateFadeTime" type="positiveInteger"/>
+        <field name="animateScrollTime" type="positiveInteger"/>
+        <field name="animateShowTime" type="positiveInteger"/>
+        <field name="animateHideTime" type="positiveInteger"/>
+        <field name="animateMoveAcceleration" type="function"/>
+        <field name="animateResizeAcceleration" type="function"/>
+        <field name="animateRectAcceleration" type="function"/>
+        <field name="animateScrollAcceleration" type="function"/>
+        <field name="animateShowAcceleration" type="function"/>
+        <field name="animateHideAcceleration" type="function"/>
+        
+        <!-- htmlElement -->
+        <field name="htmlElement" type="string" visibility="internal"/>
+        <field name="htmlPosition" type="string" visibility="internal"/>
+        <field name="matchElement" type="boolean" visibility="internal"/>
+        
+        <field name="snapToGrid" type="boolean"/>
+        <field name="snapResizeToGrid" type="boolean"/>
+        <field name="childrenSnapToGrid" type="boolean"/>
+        <field name="childrenSnapResizeToGrid" type="boolean"/>
+        <field name="snapOnDrop" type="boolean"/>
+        
+        <field name="snapOffsetLeft" type="number"/>
+        <field name="snapOffsetTop" type="number"/>
+        <field name="snapHGap" type="number"/>
+        <field name="snapVGap" type="number"/>
+        <field name="edgeOffset" type="number"/>
+        <field name="edgeOpacity" type="number"/>
+	</fields>
+
+	<types>
+		<!-- "measure" also needs to take percentage, * or "auto" -->
+		<type ID="measure"	inheritsFrom="integer"	/>
+
+		<!-- "integerOrAuto" also needs to take "auto" -->
+		<type ID="integerOrAuto"	inheritsFrom="integer"	/>
+
+
+		<type ID="positionEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>absolute</value>
+				<value>relative</value> 
+			</valueMap>
+		</type>	
+
+		<type ID="visibilityEnum"	inheritsFrom="enum"	 >
+			<valueMap>
+				<value>inherit</value>
+				<value>visible</value>
+				<value>hidden</value>
+			</valueMap>
+		</type>	
+		
+		<type ID="overflowEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>visible</value>
+				<value>hidden</value>
+				<value>scroll</value>
+				<value>auto</value>
+				<value>clip-h</value>
+				<value>clip-v</value>
+			</valueMap>
+		</type>	
+		
+		
+		<type ID="sortEnum"		inheritsFrom="enum"	 >
+					<valueMap>
+						<value>ascending</value>
+						<value>descending</value>
+					</valueMap>
+		</type>
+		
+		<type ID="alignEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>left</value>
+				<value>right</value>
+				<value>center</value>
+			</valueMap>
+		</type>	
+
+		<type ID="anyAlignEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>left</value>
+				<value>right</value>
+				<value>top</value>
+				<value>bottom</value>
+				<value>center</value>
+			</valueMap>
+		</type>	
+		
+		<type ID="valignEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>top</value>
+				<value>bottom</value>
+				<value>center</value>
+			</valueMap>
+		</type>	
+		
+		<type ID="directionEnum"	inheritsFrom="enum"	 >
+			<valueMap>
+				<value>up</value>
+				<value>down</value>
+				<value>left</value>
+				<value>right</value>
+			</valueMap>
+		</type>	
+		
+		<type ID="bkgndRepeatEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>repeat</value>
+				<value>no-repeat</value>
+				<value>repeat-x</value>
+				<value>repeat-y</value>
+			</valueMap>
+		</type>	
+
+
+		<type ID="dragAppearanceEnum" inheritsFrom="enum"	 >
+			<valueMap>
+				<value>none</value>
+				<value>tracker</value>
+				<value>outline</value>
+				<value>target</value> 
+			</valueMap>
+		</type>	
+
+		
+		<type ID="cursorEnum"		inheritsFrom="enum"	 >
+			<valueMap>
+				<value>default</value>
+				<value>wait</value>
+				<value>hand</value>
+				<value>move</value>
+				<value>help</value>
+				<value>text</value>
+				<value>crosshair</value>
+				<value>n-resize</value>
+				<value>w-resize</value>
+				<value>s-resize</value>
+				<value>e-resize</value>
+				<value>nw-resize</value>
+				<value>ne-resize</value>
+				<value>sw-resize</value>
+				<value>se-resize</value>
+			</valueMap>
+		</type>
+		
+		<type ID="imageTypeEnum" type="enum" >
+			<!-- for images, stretch images, etc -->
+			<valueMap>
+				<value>center</value>
+				<value>tile</value>
+				<value>stretch</value>
+			</valueMap>
+		</type>
+
+		
+		<type ID="edgeCursorMap"	type="DataSource"	>
+			<fields>
+				<field name="T"		type="cursorEnum" />	
+				<field name="L"		type="cursorEnum" />	
+				<field name="R"		type="cursorEnum" />	
+				<field name="B"		type="cursorEnum" />	
+				<field name="TL"	type="cursorEnum" />	
+				<field name="TR"	type="cursorEnum" />	
+				<field name="BL"	type="cursorEnum" />	
+				<field name="BR"	type="cursorEnum" />
+			</fields>
+		</type>
+
+		<type ID="imageProperty"	type="DataSource"	>
+<!-- NOTE: can also be a simple text field (corresponds to src property) -->
+			<fields>
+				<field name="src"			type="URL" />	
+				<field name="width"			type="measure" />	
+				<field name="height"		type="measure" />	
+				<field name="name"			type="string" />	
+				<field name="imgDir"		type="URL" />	
+				<field name="extraStuff"	type="string" />	
+			</fields>
+		</type>
+
+	</types>
+
+    <groups>
+        <group>contents</group>
+        <group>appearance</group>
+        <group>sizing</group>
+    </groups>
+
+    <methods>
+        <method name="show" title="Show" action="true"/>
+        <method name="hide" title="Hide" action="true"/>
+        <method name="showNextTo" title="Show Next To" action="true"/>
+    </methods>
+</DataSource>
+

@@ -1,0 +1,16 @@
+<Object	ID="ServerObject" __autoConstruct="DataSource">
+    <fields>
+        <ID type="string"/>
+        <className type="string"/>
+        <lookupStyle type="enum">
+            <valueMap new="new" factory="factory" attribute="attribute" spring="spring"/>
+        </lookupStyle>
+        <attributeName type="string"/>
+        <attributeScope type="enum">
+            <valueMap request="request" session="session" application="application"/>
+        </attributeScope>
+        <bean type="string"/>
+        <visibleMethods multiple="true" type="Method" propertiesOnly="true"/>
+        <dropExtraFields type="boolean"/>
+    </fields>
+</Object>

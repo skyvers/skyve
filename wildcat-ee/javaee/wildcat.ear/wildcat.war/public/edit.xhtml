@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:w="http://bizhub.com.au/ui">
+	<f:view contentType="text/html">
+		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<f:metadata>
+			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />
+			<f:viewParam name="m" value="#{wildcat.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{wildcat.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{wildcat.queryNameParameter}" />
+			<f:viewParam name="i" value="#{wildcat.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{wildcat.preRender}"/>
+		</f:metadata>
+		<ui:composition template="./template.xhtml">
+			<ui:param name="title" value="#{wildcat.title}" />
+			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
+			<ui:param name="javascriptFileVersion" value="#{wildcat.javascriptFileVersion}" />
+			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
+			<ui:define name="head">
+			</ui:define>
+			<ui:define name="body">
+				<h:form>
+					<w:view module="#{wildcat.bizModuleParameter}"
+								document="#{wildcat.bizDocumentParameter}"
+								managedBean="wildcat"
+								type="desktop" />
+				</h:form>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>

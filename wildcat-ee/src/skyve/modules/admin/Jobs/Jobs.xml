@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Jobs" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Jobs</singularAlias>
+	<pluralAlias>Jobs</pluralAlias>
+	<attributes>
+		<collection name="runningJobs" type="aggregation">
+			<displayName>Running Jobs</displayName>
+			<documentName>Job</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

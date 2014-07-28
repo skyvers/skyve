@@ -1,0 +1,13 @@
+<DataSource ID="WebService" Constructor="WebService" addGlobalId="false">
+    <fields>
+        <field name="location" type="url"/>
+        <field name="targetNamespace" type="url"/>
+        <field name="schemaImports" type="Object" multiple="true"/>
+        <field name="wsdlImports" type="Object" multiple="true"/>
+        <field name="operations" type="WebServiceOperation" multiple="true"/>
+        <field name="portTypes" type="Object" multiple="true"/>
+        <field name="bindings" type="Object" multiple="true"/>
+        <field name="messages" type="WSDLMessage" multiple="true"/>
+        <field name="globalNamespaces" type="Object"/>
+    </fields>
+</DataSource>

@@ -1,0 +1,131 @@
+package modules.admin.domain;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+import org.skyve.wildcat.domain.AbstractPersistentBean;
+
+/**
+ * Tagged
+ * 
+ * @navhas n tag 1 Tag
+ * @stereotype "persistent"
+ */
+@XmlType
+public class Tagged extends AbstractPersistentBean {
+	/**
+	 * For Serialization
+	 * @hidden
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/** @hidden */
+	public static final String MODULE_NAME = "admin";
+	/** @hidden */
+	public static final String DOCUMENT_NAME = "Tagged";
+
+	/** @hidden */
+	public static final String taggedModulePropertyName = "taggedModule";
+	/** @hidden */
+	public static final String taggedDocumentPropertyName = "taggedDocument";
+	/** @hidden */
+	public static final String taggedBizIdPropertyName = "taggedBizId";
+	/** @hidden */
+	public static final String tagPropertyName = "tag";
+
+	private String taggedModule;
+	private String taggedDocument;
+	private String taggedBizId;
+	/**
+	 * The tag
+	 **/
+	private Tag tag = null;
+
+	@Override
+	@XmlTransient
+	public String getBizModule() {
+		return Tagged.MODULE_NAME;
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizDocument() {
+		return Tagged.DOCUMENT_NAME;
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizKey() {
+return "Tagged";
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		return ((o instanceof Tagged) && 
+					this.getBizId().equals(((Tagged) o).getBizId()));
+	}
+
+	/**
+	 * {@link #taggedModule} accessor.
+	 **/
+	public String getTaggedModule() {
+		return taggedModule;
+	}
+
+	/**
+	 * {@link #taggedModule} mutator.
+	 **/
+	@XmlElement
+	public void setTaggedModule(String taggedModule) {
+		preset(taggedModulePropertyName, taggedModule);
+		this.taggedModule = taggedModule;
+	}
+
+	/**
+	 * {@link #taggedDocument} accessor.
+	 **/
+	public String getTaggedDocument() {
+		return taggedDocument;
+	}
+
+	/**
+	 * {@link #taggedDocument} mutator.
+	 **/
+	@XmlElement
+	public void setTaggedDocument(String taggedDocument) {
+		preset(taggedDocumentPropertyName, taggedDocument);
+		this.taggedDocument = taggedDocument;
+	}
+
+	/**
+	 * {@link #taggedBizId} accessor.
+	 **/
+	public String getTaggedBizId() {
+		return taggedBizId;
+	}
+
+	/**
+	 * {@link #taggedBizId} mutator.
+	 **/
+	@XmlElement
+	public void setTaggedBizId(String taggedBizId) {
+		preset(taggedBizIdPropertyName, taggedBizId);
+		this.taggedBizId = taggedBizId;
+	}
+
+	/**
+	 * {@link #tag} accessor.
+	 **/
+	public Tag getTag() {
+		return tag;
+	}
+
+	/**
+	 * {@link #tag} mutator.
+	 **/
+	@XmlElement
+	public void setTag(Tag tag) {
+		preset(tagPropertyName, tag);
+		this.tag = tag;
+	}
+}

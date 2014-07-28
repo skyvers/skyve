@@ -1,0 +1,8 @@
+<DataSource ID="UserTask" inheritsFrom="Task" Constructor="UserTask">
+	<fields>
+		<field name="wizard" type="boolean" />
+		<field name="previousElement" type="text" />
+		<field name="inlineView" propertiesOnly="true" />
+	</fields>
+</DataSource>
+

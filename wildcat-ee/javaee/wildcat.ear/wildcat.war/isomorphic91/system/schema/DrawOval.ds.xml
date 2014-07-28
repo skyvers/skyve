@@ -1,0 +1,10 @@
+<DataSource	ID="DrawOval" inheritsFrom="DrawItem" Constructor="DrawOval" >
+    <fields>
+        <field name="left" type="integer" title="Left" defaultValue="0"/>
+        <field name="top" type="integer" title="Top" defaultValue="0"/>
+        <field name="width" type="integer" title="Width" defaultValue="100"/>
+        <field name="height" type="integer" title="Height" defaultValue="100"/>
+        <field name="centerPoint" type="Point" title="Center Point"/>
+        <field name="radius" type="integer" title="Radius" />
+    </fields>
+</DataSource>

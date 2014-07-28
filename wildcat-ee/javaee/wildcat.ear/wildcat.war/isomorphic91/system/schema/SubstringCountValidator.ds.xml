@@ -1,0 +1,7 @@
+<Object ID="SubstringCountValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="substringCount" addGlobalId="false">
+    <fields>
+        <!-- Could be an enum -->
+        <operator type="string" />
+        <substring type="string"/>
+    </fields>
+</Object>

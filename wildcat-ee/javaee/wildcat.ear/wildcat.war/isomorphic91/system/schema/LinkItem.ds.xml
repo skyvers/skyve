@@ -1,0 +1,6 @@
+<DataSource	ID="LinkItem" inheritsFrom="StaticTextItem" Constructor="LinkItem">
+    <fields>
+        <field name="target" type="string"/>
+        <field name="linkTitle" type="string"/>
+    </fields>
+</DataSource>

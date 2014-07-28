@@ -1,0 +1,5 @@
+<DataSource	ID="DrawTriangle" inheritsFrom="DrawPolygon" Constructor="DrawTriangle" >
+    <fields>
+        <field name="points" type="Point" title="Points" multiple="true"/>
+    </fields>
+</DataSource>

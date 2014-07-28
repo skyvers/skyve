@@ -1,0 +1,5 @@
+<DataSource ID="ExampleTree" inheritsFrom="Tree" Constructor="ExampleTree">
+    <fields>
+        <field name="children" type="Example" multiple="true"/>
+    </fields>
+</DataSource>

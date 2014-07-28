@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Configuration"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Configuration" />
+	<singularAlias>Setup</singularAlias>
+	<pluralAlias>Setup</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return "Admin Setup";
+		]]>
+	</bizKey>
+	<attributes>
+		<enum name="passwordComplexityModel" required="true">
+			<displayName>Password Strength</displayName>
+			<shortDescription>The security level/complexity model for user passwords</shortDescription>
+			<values>
+				<value code="MINIMUM"/>
+				<value code="MEDIUM"/>
+				<value code="MAXIMUM"/>
+			</values>
+		</enum>
+	</attributes>
+</document>

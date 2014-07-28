@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Job" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Job" />
+	<singularAlias>Job</singularAlias>
+	<pluralAlias>Jobs</pluralAlias>
+	<bizKey>
+		return (getDisplayName()==null?"Job":getDisplayName());
+	</bizKey>
+	<attributes>
+		<timestamp name="startTime">
+			<displayName>Start Time</displayName>
+		</timestamp>
+		<timestamp name="endTime">
+			<displayName>End Time</displayName>
+		</timestamp>
+		<text name="displayName" >
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+		<integer name="percentComplete">
+			<displayName>Percent Complete</displayName>
+		</integer>
+		<text name="status" >
+			<displayName>Status</displayName>
+			<length>8</length>
+		</text>
+		<memo name="log">
+			<displayName>Log</displayName>
+		</memo>
+	</attributes>
+</document>

@@ -1,0 +1,6 @@
+<DataSource ID="ProcessSequence" inheritsFrom="ProcessElement" Constructor="ProcessSequence">
+	<fields>
+	    <field name="elements" type="ProcessElement" multiple="true" />
+	</fields>
+</DataSource>
+

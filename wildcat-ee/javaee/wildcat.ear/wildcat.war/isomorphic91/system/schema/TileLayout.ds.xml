@@ -1,0 +1,35 @@
+<DataSource ID="TileLayout"	inheritsFrom="Canvas"	Constructor="TileLayout">
+	<fields>
+		<field name="tiles" multiple="true" type="Canvas"/>
+		
+        <field name="tileSize" type="positiveInteger"/>
+        <field name="tileWidth" type="positiveInteger" basic="true"/>
+        <field name="tileHeight" type="positiveInteger" basic="true"/>
+        
+        <field name="tileMargin" type="positiveInteger"/> 
+        <field name="tileHMargin" type="positiveInteger" basic="true"/>
+        <field name="tileVMargin" type="positiveInteger" basic="true"/>
+        <field name="expandMargins" type="boolean" basic="true"/>
+        <field name="layoutMargin" type="number" basic="true"/>
+        <field name="layoutPolicy" type="enum">
+            <valueMap>
+				<value>fit</value>
+				<value>flow</value>
+			</valueMap>
+        </field>
+        <field name="orientation" type="Orientation" basic="true"/>
+        <field name="tilesPerLine" type="positiveInteger" basic="true"/>
+        <field name="autoWrapLines" type="boolean"/>
+        
+        <field name="paddingAsLayoutMargin" type="boolean"/>
+        <field name="animateTileChange" type="boolean"/>
+	</fields>
+    <groups>
+        <group>layoutPolicy</group>
+        <group>layoutMargin</group>
+        <group>sizing</group>
+       
+    </groups>
+
+   
+</DataSource>
