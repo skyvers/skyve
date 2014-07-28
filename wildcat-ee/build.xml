@@ -76,9 +76,11 @@
 
 	<target name="build" description="Create jars for the wildcat framework and associated tools">
 		<jar jarfile="javaee/wildcat.ear/lib/wildcat-core.jar" basedir="../wildcat-core/bin" />
-		<jar destfile="javaee/wildcat.ear/lib/wildcat-api-src.jar">
-			<fileset dir="../wildcat-core/src" includes="com/wildcat/**/*.java" />
-			<fileset dir="../wildcat-ext/src" includes="com/wildcat/api/**/*.java" />
+		<jar destfile="lib/wildcat-src.jar">
+			<fileset dir="../wildcat-core/src" />
+			<fileset dir="../wildcat-ext/src" />
+			<fileset dir="../wildcat-tools/src" />
+			<fileset dir="../wildcat-web/src" />
 		</jar>
 		<jar jarfile="javaee/wildcat.ear/lib/wildcat-ext.jar" basedir="../wildcat-ext/bin" />
 		<jar jarfile="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/wildcat-web.jar" basedir="../wildcat-web/bin">
