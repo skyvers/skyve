@@ -33,11 +33,6 @@
         <param-name>javax.faces.FACELETS_LIBRARIES</param-name>
         <param-value>/WEB-INF/wildcat.taglib.xml</param-value>
     </context-param>
-	<!-- to use method expressions with arguments -->
-	<context-param>
-		<param-name>com.sun.faces.expressionFactory</param-name>
-		<param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
-	</context-param>
 
     <filter>
         <filter-name>PrimeFaces FileUpload Filter</filter-name>

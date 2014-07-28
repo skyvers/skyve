@@ -1,0 +1,19 @@
+CLASSPATH=../lib/javaee-api-7.0.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/jcr-1.0.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/jackrabbit-text-extractors-1.4.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/hibernate3.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/hibernate-entitymanager.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/hibernate-commons-annotations.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/hibernate-annotations.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/jts-1.13.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/dom4j-1.6.1.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/cglib-2.2.2.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/asm-3.2.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/slf4j-api-1.5.0.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/slf4j-simple-1.5.0.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/commons-logging-1.1.1.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/commons-collections-3.2.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/wildcat-core.jar:../javaee/wildcat.ear/lib/wildcat-ext.jar:lib/wildcat-tools.jar
+CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/apps.jar/
+CLASSPATH=$CLASSPATH:lib/h2-1.3.173.jar:lib/mysql-connector-java-5.1.15-bin.jar:lib/sqljdbc4.jar
+java -cp $CLASSPATH org.skyve.wildcat.tools.kickstart.KickStart

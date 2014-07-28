@@ -23,7 +23,7 @@ class KickStartPanel extends JPanel {
 	private JTextField mobile = new JTextField();
 	private JTextField dbDialect = new JTextField("org.skyve.wildcat.persistence.hibernate.dialect.H2SpatialDialect");
 	private JTextField dbDriver = new JTextField("org.h2.jdbcx.JdbcDataSource");
-	private JTextField dbUrl = new JTextField("jdbc:h2:file:/Users/mike/demo");
+	private JTextField dbUrl = new JTextField("jdbc:h2:file:~/demo");
 	private JTextField dbUserName = new JTextField("sa");
 	private JTextField dbPassword = new JTextField("sa");
 	
