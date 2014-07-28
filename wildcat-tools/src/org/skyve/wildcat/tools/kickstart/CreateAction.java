@@ -69,17 +69,17 @@ class CreateAction extends AbstractAction {
 System.out.println(createSql());
 					statement.executeUpdate(createSql());
 				}
+				UIUtil.popup("Database has been created");
 			}
 			finally {
 				if (connection != null) {
 					connection.commit();
 				}
 				persistence.commit(true);
-				UIUtil.popup("Database has been created");
 			}
 		}
-		catch (Exception e) {
-			UIUtil.popup(e);
+		catch (Throwable t) {
+			UIUtil.popup(t);
 		}
 		finally {
 			UIUtil.stopWaitCursor(panel);
