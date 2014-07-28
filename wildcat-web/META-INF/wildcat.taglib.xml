@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib version="2.0"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd">
+	<!-- This taglib thinly extends the primefaces p taglib - keep this in sync with new primefaces versions introduced -->
+	<namespace>http://bizhub.com.au/ui</namespace>
+	<tag>
+		<tag-name>view</tag-name>
+		<component>
+			<component-type>org.skyve.wildcat.web.faces.components.View</component-type>
+			<renderer-type>javax.faces.Group</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>module</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>document</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>managedBean</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>type</name>
+			<required>true</required>
+			<type>org.skyve.wildcat.web.UserAgent.UserAgentType</type>
+		</attribute>
+		<attribute>
+			<name>widgetId</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Component(s) to process in partial request. Defaults to @form.</description>
+			<name>process</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Component(s) to update with ajax. Defaults to @(form)</description>
+			<name>update</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
+	<tag>
+		<tag-name>phoneMenu</tag-name>
+		<component>
+			<component-type>org.skyve.wildcat.web.faces.components.PhoneMenu</component-type>
+			<renderer-type>javax.faces.Group</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+	</tag>
+	<tag>
+		<tag-name>listGrid</tag-name>
+		<component>
+			<component-type>org.skyve.wildcat.web.faces.components.ListGrid</component-type>
+			<renderer-type>javax.faces.Group</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>module</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>query</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>managedBean</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<name>type</name>
+			<required>true</required>
+			<type>org.skyve.wildcat.web.UserAgent.UserAgentType</type>
+		</attribute>
+	</tag>
+</facelet-taglib>
