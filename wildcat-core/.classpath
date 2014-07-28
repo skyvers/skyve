@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/ejb3-persistence.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate-annotations.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate3.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-validator-1.4.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

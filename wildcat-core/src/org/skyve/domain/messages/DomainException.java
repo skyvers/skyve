@@ -1,0 +1,43 @@
+package org.skyve.domain.messages;
+
+/**
+ * 
+ */
+public class DomainException extends Exception {
+	/**
+	 * For Serialization.
+	 */
+	private static final long serialVersionUID = -2523236450510857431L;
+
+	/**
+	 * 
+	 */
+	protected DomainException() {
+		// used in subclasses
+	}
+
+	/**
+	 * 
+	 * @param message
+	 */
+	public DomainException(String message) {
+		super(message);
+	}
+
+	/**
+	 * 
+	 * @param t
+	 */
+	public DomainException(Throwable t) {
+		super("A problem was encountered.", t);
+	}
+
+	/**
+	 * 
+	 * @param message
+	 * @param t
+	 */
+	public DomainException(String message, Throwable t) {
+		super(message, t);
+	}
+}
