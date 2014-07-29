@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
@@ -50,7 +51,7 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 		return markup;
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, required = true)
+	@XmlValue
 	public void setMarkup(String markup) {
 		this.markup = UtilImpl.processStringValue(markup);
 	}

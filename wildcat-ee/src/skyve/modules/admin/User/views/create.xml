@@ -14,11 +14,9 @@
 			</item>
 			<item colspan="2">
 				<blurb textAlignment="left">
-					<markup>
-						<![CDATA[
-							<i>Enter an existing <b>contact name and/or email</b> of the user you wish to create and press the <b>Search</b> button.</i>
-						]]>
-					</markup>
+					<![CDATA[
+						<i>Enter an existing <b>contact name and/or email</b> of the user you wish to create and press the <b>Search</b> button.</i>
+					]]>
 				</blurb>
 			</item>
 		</row>
