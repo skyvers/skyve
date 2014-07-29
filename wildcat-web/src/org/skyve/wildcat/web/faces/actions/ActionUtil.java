@@ -30,13 +30,15 @@ public class ActionUtil {
     throws Exception {
     	Bean result = facesView.getBean();
     	
-    	String viewBinding = facesView.getViewBinding();
-    	if (viewBinding != null) {
-    		result = (Bean) Binder.get(result, viewBinding);
+    	if (result != null) { // hopefully never
+	    	String viewBinding = facesView.getViewBinding();
+	    	if (viewBinding != null) {
+	    		result = (Bean) Binder.get(result, viewBinding);
+	    	}
+			if (collectionName != null) {
+				result = Binder.findElementInCollection(result, collectionName, elementBizId);
+			}
     	}
-		if (collectionName != null) {
-			result = Binder.findElementInCollection(result, collectionName, elementBizId);
-		}
     	
     	return result;
     }
@@ -44,22 +46,24 @@ public class ActionUtil {
     static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView<T> facesView, String collectionName, T newValue)
 	throws Exception {
     	Bean bean = facesView.getBean();
-    	String viewBinding = facesView.getViewBinding();
-    	
-    	if (collectionName != null) {
-    		StringBuilder collectionBinding = new StringBuilder(64);
-    		if (viewBinding != null) {
-    			collectionBinding.append(viewBinding).append('.');
-    		}
-    		collectionBinding.append(collectionName).append('(').append(newValue.getBizId()).append(')');
-    		Binder.set(bean, collectionBinding.toString(), newValue);
-    	}
-    	else {
-	    	if (viewBinding == null) {
-	    		facesView.setBean(newValue);
+    	if (bean != null) { // hopefully never
+	    	String viewBinding = facesView.getViewBinding();
+	    	
+	    	if (collectionName != null) {
+	    		StringBuilder collectionBinding = new StringBuilder(64);
+	    		if (viewBinding != null) {
+	    			collectionBinding.append(viewBinding).append('.');
+	    		}
+	    		collectionBinding.append(collectionName).append('(').append(newValue.getBizId()).append(')');
+	    		Binder.set(bean, collectionBinding.toString(), newValue);
 	    	}
 	    	else {
-	    		Binder.set(bean, viewBinding, newValue);
+		    	if (viewBinding == null) {
+		    		facesView.setBean(newValue);
+		    	}
+		    	else {
+		    		Binder.set(bean, viewBinding, newValue);
+		    	}
 	    	}
     	}
     }
