@@ -69,14 +69,12 @@
 			</item>
 			<item colspan="2">
 				<blurb textAlignment="left">
-					<markup>
-						<![CDATA[
-							<b><i>OR</i> </b>
-							<br/>
-							<br/>
-							<i>Press the <b>New Contact</b> button to add a user who is a new contact.</i>
-						]]>
-					</markup>
+					<![CDATA[
+						<b><i>OR</i> </b>
+						<br/>
+						<br/>
+						<i>Press the <b>New Contact</b> button to add a user who is a new contact.</i>
+					]]>
 				</blurb>
 			</item>
 		</row>
