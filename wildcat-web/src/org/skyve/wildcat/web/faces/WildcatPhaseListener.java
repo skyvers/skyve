@@ -90,11 +90,13 @@ public class WildcatPhaseListener implements PhaseListener {
 		AbstractWebContext webContext = WebUtil.getCachedConversation(view.getWebId(),
 																	(HttpServletRequest) ec.getRequest(),
 																	(HttpServletResponse) ec.getResponse());
-		view.hydrate(webContext);
-
-		// place the conversation into the thread
-		AbstractPersistence persistence = webContext.getConversation();
-		persistence.setForThread();
+		if (webContext != null) { // should always be the case
+			view.hydrate(webContext);
+	
+			// place the conversation into the thread
+			AbstractPersistence persistence = webContext.getConversation();
+			persistence.setForThread();
+		}
 	}
 	
 	private static void afterResponseRendered(PhaseEvent event)
