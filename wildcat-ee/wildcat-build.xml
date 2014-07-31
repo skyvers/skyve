@@ -87,7 +87,7 @@
 			<arg line="-o javaee/wildcat.ear/wildcat.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
 		</java>
 	</target>
-	<target name="getLibs" xmlns:artifact="urn:maven-artifact-ant">
+	<target name="mavenLibs" xmlns:artifact="urn:maven-artifact-ant">
 		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant" classpath="lib/maven-ant-tasks-2.1.3.jar" />
 		<condition property="maven.repo.local" value="${maven.repo.local}" else="${user.home}/.m2/repository">
 			<isset property="maven.repo.local" />
@@ -166,7 +166,43 @@
 			<schema namespace="http://www.skyve.org/xml/wail" file="wail.xsd" />
 		</schemagen>
 	</target>
-	<target name="createLibZip">
-		<zip destfile="libs.zip" basedir="." includes="lib/**,javaee/wildcat.ear/lib/**,javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,tools/lib/**" />
+	
+	<property name="staging.dir" value="." />
+	
+	<target name="libsZip">
+		<delete dir="." includes="libs.zip" failonerror="false" />
+		<zip destfile="${staging.dir}/libs.zip"
+				basedir="."
+				includes="lib/**,javaee/wildcat.ear/lib/**,javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,tools/lib/**"
+				excludes="**/.DS_Store"
+				duplicate="fail" />
+	</target>
+	<target name="demoAssemble">
+		<delete dir="${staging.dir}/demo/wildcat/javaee/wildcat.ear" includes="**" failonerror="false" />
+		<copy todir="${staging.dir}/demo/wildcat/javaee/wildcat.ear" overwrite="true">
+			<fileset dir="javaee/wildcat.ear" includes="**" />
+		</copy>
+		<delete dir="${staging.dir}/demo/wildcat/lib" includes="**" failonerror="false" />
+		<copy todir="${staging.dir}/demo/wildcat/lib" overwrite="true">
+			<fileset dir="lib" includes="javaee*.jar,wildcat*.jar" />
+		</copy>
+		<delete dir="${staging.dir}/demo/wildcat/src/skyve" includes="**" failonerror="false" />
+		<copy todir="${staging.dir}/demo/wildcat/src/skyve" overwrite="true">
+			<fileset dir="src/skyve" includes="**" />
+		</copy>
+		<delete dir="${staging.dir}/demo/wildcat/tools/lib" includes="**" failonerror="false" />
+		<copy todir="${staging.dir}/demo/wildcat/tools/lib" overwrite="true">
+			<fileset dir="tools/lib" includes="**" />
+		</copy>
+		<copy todir="${staging.dir}/demo/wildcat" overwrite="true">
+			<fileset dir="." includes="build.xml" />
+		</copy>
+	</target>
+	<target name="demoZip">
+		<delete dir="." includes="demo.zip" failonerror="false" />
+		<zip destfile="${staging.dir}/demo.zip" duplicate="fail">
+			<fileset dir="demo" includes="**" excludes="**/.DS_Store,**/run.sh,**/standalone.sh" />
+			<zipfileset dir="demo" includes="**/run.sh,**/standalone.sh" filemode="755" />
+		</zip>
 	</target>
 </project>
