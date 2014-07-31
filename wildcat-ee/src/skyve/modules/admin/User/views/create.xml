@@ -174,16 +174,6 @@
 						<textField binding="userName" />
 					</item>
 				</row>
-				<row>
-					<item>
-						<password binding="newPassword" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<password binding="confirmPassword" />
-					</item>
-				</row>
 			</form>
 			<hbox percentageWidth="100" pixelHeight="300">
 				<form percentageWidth="30">
