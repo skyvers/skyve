@@ -1,0 +1,237 @@
+WILDCAT
+Copyright 2004-2014 Biz Hub Australia Pty Ltd
+
+WILDCAT depends upon the following libraries:
+
+	* Java EE 7
+		http://www.oracle.com/
+		See http://www-content.oracle.com/technetwork/java/javaee/downloads/366879
+
+	* Java 7
+		http://www.oracle.com/
+		See http://www.oracle.com/technetwork/java/javase/terms/license/index.html
+
+	* JAXB RI
+		https://jaxb.java.net/
+		See https://glassfish.java.net/public/CDDL+GPL_1_1.html
+
+	* MariaDB Java Client
+		https://mariadb.org/
+		See https://mariadb.com/kb/en/mariadb/mariadb-mariadb-faq/questions-about-licensing-mariadb-plugins-etc/licensing-faq
+		
+	* Maven ANT Tasks
+		http://maven.apache.org/ant-tasks/
+		See http://maven.apache.org/ant-tasks/license.html
+		
+	* SQLServer JDBC Driver
+		http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx
+		See http://msdn.microsoft.com/en-us/sqlserver/aa937726.aspx
+    
+    * YUI Compressor
+    	http://yui.github.io/yuicompressor/
+    	See http://yuilibrary.com/license/
+    	
+    * Jaspersoft iReport Designer
+    	http://community.jaspersoft.com/project/ireport-designer
+    	http://community.jaspersoft.com/wiki/ireport-designer-gpl-license
+    	
+    * UMLGraph
+    	http://www.umlgraph.org/
+    	See http://www.umlgraph.org/faq.html#license
+    
+    * ANTLR
+    	http://www.antlr.org
+    	See http://www.antlr.org/license.html
+    	
+    * ASM
+    	http://asm.ow2.org/
+    	See http://asm.ow2.org/license.html
+    	
+    * BeanShell
+    	http://www.beanshell.org/
+    	See http://www.beanshell.org/license.html
+    	
+    * cglib
+    	http://cglib.sourceforge.net/
+    	http://cglib.sourceforge.net/license.html
+    	
+    * Apache Commons
+    	http://commons.apache.org/
+    	See http://www.apache.org/licenses/LICENSE-2.0.txt
+    	
+    * Concurrency Utilities
+    	http://gee.cs.oswego.edu/dl/concurrencyee-interest/index.html
+    	See http://creativecommons.org/licenses/publicdomain/
+    
+    * Apache CXF
+    	http://cxf.apache.org/
+    	See http://www.apache.org/licenses/
+    	
+    * dom4j
+    	http://dom4j.sourceforge.net/
+    	See http://dom4j.sourceforge.net/dom4j-1.6.1/license.html
+    	
+	* EHCACHE
+		http://ehcache.org/
+		See http://ehcache.org/about/license
+
+	* FontBox
+		http://sourceforge.net/projects/fontbox/
+		See http://sourceforge.net/directory/license:bsd/
+		
+	* GeoDB
+		https://github.com/jdeolive/geodb/wiki
+		See https://github.com/jdeolive/geodb/blob/master/LICENSE.txt
+		
+	* Hat Box
+		http://hatbox.sourceforge.net/
+    	See http://sourceforge.net/directory/license:lgpl/
+
+	* Hen Plus
+		http://henplus.sourceforge.net/
+		See http://www.gnu.org/licenses/gpl.txt
+		
+	* H2 Database 
+		http://www.h2database.com 
+		See http://www.h2database.com/html/license.html
+    
+	* Groovy
+		http://groovy.codehaus.org/
+    	See http://groovy.codehaus.org/License+Information
+    
+    * Hibernate ORM
+    	http://hibernate.org/
+    	See http://hibernate.org/community/license/
+    	
+    * Hibernate Validator
+    	http://hibernate.org/
+    	See http://hibernate.org/community/license/
+    	
+    * Hibernate Spatial
+    	http://www.hibernatespatial.org/
+    	See http://www.hibernatespatial.org/
+    	
+    * iText
+    	http://sourceforge.net/projects/itext/
+    	(Version 5 and above is AGPL, lower versions are LGPL)
+    	See http://sourceforge.net/projects/itext/
+    
+    * Apache Jackrabbit
+    	http://jackrabbit.apache.org/
+    	See http://www.apache.org/licenses/LICENSE-2.0
+    	
+    * JasperReports Library
+    	http://community.jaspersoft.com/project/jasperreports-library
+    	See http://community.jaspersoft.com/project/jasperreports-library
+    	
+    * Javassist
+    	http://www.csg.ci.i.u-tokyo.ac.jp/~chiba/javassist/
+    	See http://www.csg.ci.i.u-tokyo.ac.jp/~chiba/javassist/
+    	
+    * JCommon
+    	http://www.jfree.org/jcommon/
+    	See http://www.gnu.org/licenses/lgpl.html
+    	
+    * JFreeChart
+    	http://www.jfree.org/jfreechart/
+    	See http://www.gnu.org/licenses/lgpl.html
+
+	* JCR
+		http://www.day.com/maven/jcr/2.0/
+		See http://www.day.com/maven/jcr/2.0/license.html
+		
+	* Streaming API for XML (JSR 173)
+		https://www.jcp.org/en/jsr/detail?id=173
+		See https://www.jcp.org/aboutJava/communityprocess/licenses/jsr173/JSR173_Spec_License_Streaming_API_XML-1_3-10_22_13.pdf
+		
+    * JTS Topology Suite
+		http://www.vividsolutions.com/jts/JTSHome.htm
+		See http://www.gnu.org/copyleft/lesser.html
+		
+	* Java Excel API
+		http://jexcelapi.sourceforge.net/
+		See https://code.google.com/p/jcite/source/browse/lib/jxl.jar.LICENSE.txt?r=7abe861389fd0d55d1022d6dcb2e68ef99572e61
+		
+	* Apache Lucene Core
+		http://lucene.apache.org/core/
+		See http://www.apache.org/licenses/LICENSE-2.0.html		
+    	
+    * Apache Neethi
+    	http://ws.apache.org/neethi/
+    	See http://www.apache.org/licenses/
+    	
+    * CyberNeko HTML Parser
+    	http://nekohtml.sourceforge.net/
+    	See http://apache.org/licenses/LICENSE-2.0.txt
+    	
+    * Apache PDFBox
+    	https://pdfbox.apache.org/
+    	See http://www.apache.org/licenses/LICENSE-2.0
+    	
+    * Apache POI
+    	http://poi.apache.org/
+    	See http://www.apache.org/licenses/
+    	
+    * Quality-Check
+    	http://qualitycheck.sourceforge.net/
+    	See http://qualitycheck.sourceforge.net/license.html
+    	
+    * Quartz Job Scheduler
+    	http://quartz-scheduler.org/
+    	http://www.apache.org/licenses/LICENSE-2.0
+    	
+    * SLF4J
+    	http://www.slf4j.org/
+    	See http://www.slf4j.org/license.html
+    	
+    * Super CSV
+    	http://supercsv.sourceforge.net/
+    	See http://supercsv.sourceforge.net/license.html
+    	
+    * thumbnailator
+    	https://code.google.com/p/thumbnailator/
+    	http://www.opensource.org/licenses/mit-license.php
+    	
+    * TM Extractors
+    	https://code.google.com/p/text-mining/downloads/detail?name=tm-extractors-1.0.jar&
+    	LGPL 2.1 (from within the jar file)
+    	
+    * UADetector
+    	http://uadetector.sourceforge.net/
+    	See http://uadetector.sourceforge.net/license.html
+    	
+    * Web Services Description Language For Java
+    	http://sourceforge.net/projects/wsdl4j/
+    	http://sourceforge.net/directory/license:ibmcpl/
+    	
+    * Apache Xerces
+    	http://xerces.apache.org/
+    	See http://www.apache.org/licenses/
+    	
+    * XMLSchema Core
+    	http://ws.apache.org/xmlschema/xmlschema-core/index.html
+    	http://ws.apache.org/xmlschema/xmlschema-core/license.html
+
+	* PrimeFaces
+		http://www.primefaces.org/
+		See http://primefaces.org/license
+		
+	* Primefaces Extensions
+		http://primefaces-extensions.github.io/
+		See http://primefaces-extensions.github.io/ (Apache Licence V2)
+		
+	* CKEditor
+		http://ckeditor.com/
+		http://ckeditor.com/about/license
+		
+	* SmartClient LGPL
+		http://www.smartclient.com/product/smartclient.jsp
+		https://www.smartclient.com/product/licensingFAQ.jsp
+		
+	* LABjs
+		http://labjs.com/
+		See http://labjs.com/ (MIT licence)
+		
+	* Wicket
+		https://github.com/arthur-e/Wicket
+		See https://github.com/arthur-e/Wicket#license
