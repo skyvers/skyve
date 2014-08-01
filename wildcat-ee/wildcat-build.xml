@@ -172,8 +172,8 @@
 	<target name="libsZip">
 		<delete dir="." includes="libs.zip" failonerror="false" />
 		<zip destfile="${staging.dir}/libs.zip"
-				basedir="."
-				includes="lib/**,javaee/wildcat.ear/lib/**,javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,tools/lib/**"
+				basedir=".."
+				includes="wildcat-ee/lib/**,wildcat-ee/javaee/wildcat.ear/lib/**,wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,wildcat-ee/tools/lib/**,LICENSE.txt,DEPENDENCIES.txt"
 				excludes="**/.DS_Store"
 				duplicate="fail" />
 	</target>
@@ -196,6 +196,7 @@
 		</copy>
 		<copy todir="${staging.dir}/demo/wildcat" overwrite="true">
 			<fileset dir="." includes="build.xml" />
+			<fileset dir=".." includes="LICENSE.txt,DEPENDENCIES.txt" />
 		</copy>
 	</target>
 	<target name="demoZip">
