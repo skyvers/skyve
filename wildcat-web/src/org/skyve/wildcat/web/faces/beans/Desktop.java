@@ -140,7 +140,7 @@ public class Desktop extends Harness {
 				result.append(thisModuleName);
 				result.append("',");
 				result.append("title:'");
-				result.append(thisModule.getTitle());
+				result.append(SmartClientGenerateUtils.processString(thisModule.getTitle()));
 				result.append("',");
 
 				renderMenuStructure(customer, thisModule, menu.getItems(), uxui, result);
@@ -297,7 +297,7 @@ public class Desktop extends Harness {
 						ref = "edit";
 					}
 					result.append("',desc:'");
-					result.append(item.getName());
+					result.append(SmartClientGenerateUtils.processString(item.getName()));
 					result.append("',ref:'");
 					result.append(ref);
 					// ,icon:'../images/pooHead.png' - use a document icon here or a  menu/action icon?
