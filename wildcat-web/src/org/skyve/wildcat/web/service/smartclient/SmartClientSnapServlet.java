@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.ErrorMessage;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -114,8 +114,10 @@ public class SmartClientSnapServlet extends HttpServlet {
 		    	}
 	
 		    	pw.append("isc.warn('");
-		    	if (t instanceof ErrorMessage) {
-		    		SmartClientEditServlet.appendErrorText("The snapshot operation was unsuccessful", (ErrorMessage) t, pw);
+		    	if (t instanceof MessageException) {
+		    		SmartClientEditServlet.appendErrorText("The snapshot operation was unsuccessful", 
+		    												((MessageException) t).getMessages(),
+		    												pw);
 		    	}
 		    	else {
 			    	pw.append("The snapshot operation was unsuccessful: ");

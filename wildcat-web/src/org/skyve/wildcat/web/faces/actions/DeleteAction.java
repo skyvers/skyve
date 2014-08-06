@@ -7,7 +7,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -46,7 +46,7 @@ public class DeleteAction extends FacesAction<Void> {
 																		false);
 
 		if (persistentBeanToDelete == null) { // deleted by another user
-			throw new ValidationException(new ValidationMessage("Failed to delete this information as it was already deleted by someone else after you looked at it."));
+			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));
 		}
 
 		if (! user.canReadBean(persistentBeanToDelete.getBizId(), 

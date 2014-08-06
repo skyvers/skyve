@@ -21,7 +21,7 @@ import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -150,11 +150,11 @@ public class UserBizlet extends Bizlet<User> {
 
 	public static void validateUserContact(User bean, ValidationException e) {
 		if (bean.getContact() == null) {
-			e.getSubordinates().add(new ValidationMessage(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
+			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must specify a contact person for this user."));
 		} else if (bean.getContact().getName() == null) {
-			e.getSubordinates().add(new ValidationMessage(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must enter a name."));
+			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.namePropertyName), "You must enter a name."));
 		} else if (bean.getContact().getEmail1() == null) {
-			e.getSubordinates().add(new ValidationMessage(Binder.createCompoundBinding(User.contactPropertyName, Contact.email1PropertyName), "You must enter an email address."));
+			e.getMessages().add(new Message(Binder.createCompoundBinding(User.contactPropertyName, Contact.email1PropertyName), "You must enter an email address."));
 		}
 	}
 
@@ -162,9 +162,9 @@ public class UserBizlet extends Bizlet<User> {
 
 		// validate username is not null, not too short and unique
 		if (user.getUserName() == null) {
-			e.getSubordinates().add(new ValidationMessage(User.userNamePropertyName, "Username is required."));
+			e.getMessages().add(new Message(User.userNamePropertyName, "Username is required."));
 		} else if(!user.isPersisted() && user.getUserName().length()<AdminUtil.MINIMUM_USERNAME_LENGTH){
-			e.getSubordinates().add(new ValidationMessage(User.userNamePropertyName, "Username is too short."));
+			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
 			Persistence pers = CORE.getPersistence();
 			DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
@@ -173,7 +173,7 @@ public class UserBizlet extends Bizlet<User> {
 
 			List<User> otherUsers = pers.retrieve(q);
 			if (!otherUsers.isEmpty()) {
-				e.getSubordinates().add(new ValidationMessage(User.userNamePropertyName, "This username is already being used - try again."));
+				e.getMessages().add(new Message(User.userNamePropertyName, "This username is already being used - try again."));
 			} else {
 
 				// validate password
@@ -183,23 +183,23 @@ public class UserBizlet extends Bizlet<User> {
 
 				if ((newPassword == null) && (confirmPassword == null)) {
 					if (hashedPassword == null) {
-						ValidationMessage message = new ValidationMessage(User.newPasswordPropertyName, "A password is required.");
+						Message message = new Message(User.newPasswordPropertyName, "A password is required.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						e.getSubordinates().add(message);
+						e.getMessages().add(message);
 					}
 				} else {
 					if ((newPassword == null) || (confirmPassword == null)) {
-						ValidationMessage message = new ValidationMessage(User.newPasswordPropertyName, "New Password and Confirm Password are required to change the password.");
+						Message message = new Message(User.newPasswordPropertyName, "New Password and Confirm Password are required to change the password.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						e.getSubordinates().add(message);
+						e.getMessages().add(message);
 					} else if (newPassword.equals(confirmPassword)) {
 
 						// check for suitable complexity
 						Configuration configuration = AdminUtil.getConfiguration();
 						PasswordComplexityModel cm = configuration.getPasswordComplexityModel();
 						if (!AdminUtil.validatePasswordComplexity(newPassword, cm)) {
-							ValidationMessage message = new ValidationMessage(ChangePassword.newPasswordPropertyName, "The password you have entered is not sufficiently complex.\n" + AdminUtil.validatePasswordComplexityMessage(cm) + "\nPlease re-enter and confirm the password.");
-							e.getSubordinates().add(message);
+							Message message = new Message(ChangePassword.newPasswordPropertyName, "The password you have entered is not sufficiently complex.\n" + AdminUtil.validatePasswordComplexityMessage(cm) + "\nPlease re-enter and confirm the password.");
+							e.getMessages().add(message);
 						}
 
 						MessageDigest md = MessageDigest.getInstance(UtilImpl.PASSWORD_HASHING_ALGORITHM);
@@ -217,9 +217,9 @@ public class UserBizlet extends Bizlet<User> {
 						user.setNewPassword(null);
 						user.setConfirmPassword(null);
 					} else {
-						ValidationMessage message = new ValidationMessage(User.newPasswordPropertyName, "You did not type the same password.  Please re-enter the password again.");
+						Message message = new Message(User.newPasswordPropertyName, "You did not type the same password.  Please re-enter the password again.");
 						message.addBinding(User.confirmPasswordPropertyName);
-						e.getSubordinates().add(message);
+						e.getMessages().add(message);
 					}
 				}
 			}
@@ -229,7 +229,7 @@ public class UserBizlet extends Bizlet<User> {
 
 	public static void validateGroups(User user, ValidationException e) {
 		if (user.getRoles().isEmpty() && user.getGroups().isEmpty()) {
-			e.getSubordinates().add(new ValidationMessage("At least 1 role or group is required to enable correct login for this user."));
+			e.getMessages().add(new Message("At least 1 role or group is required to enable correct login for this user."));
 		}
 	}
 }

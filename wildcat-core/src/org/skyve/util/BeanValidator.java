@@ -2,9 +2,9 @@ package org.skyve.util;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.ErrorMessage;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -59,7 +59,7 @@ public class BeanValidator {
 	 * @throws MetaDataException
 	 */
 	public static void processErrorMessageBindings(Customer customer,
-													final ErrorMessage e,
+													final Message e,
 													Bean masterBean,
 													final Bean validatedBean) 
 	throws DomainException, MetaDataException {

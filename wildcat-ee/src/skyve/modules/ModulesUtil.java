@@ -21,7 +21,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -867,10 +867,9 @@ public class ModulesUtil {
 	}
 	
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
-		ValidationMessage vM = new ValidationMessage(messageString);
+		Message vM = new Message(messageString);
 		vM.addBinding(fieldName);
-		ValidationException vE = new ValidationException(vM);
-		e.getSubordinates().add(vE);
+		e.getMessages().add(vM);
 	}
 
 	/**

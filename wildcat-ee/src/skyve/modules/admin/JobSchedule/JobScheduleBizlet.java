@@ -12,7 +12,7 @@ import org.quartz.CronExpression;
 import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Job;
@@ -319,8 +319,8 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	public void validate(JobSchedule bean, ValidationException e)
 	throws Exception {
 		if ((! ALL_CODE.equals(bean.getAllDays())) && (! ALL_CODE.equals(bean.getAllWeekdays()))) {
-			e.getSubordinates().add(new ValidationMessage(new String[] {JobSchedule.allDaysPropertyName, JobSchedule.allWeekdaysPropertyName},
-															"Choose week days or days of the month, but not both"));
+			e.getMessages().add(new Message(new String[] {JobSchedule.allDaysPropertyName, JobSchedule.allWeekdaysPropertyName},
+												"Choose week days or days of the month, but not both"));
 		}
 		
 		if (SELECTED_CODE.equals(bean.getAllMinutes())) {
@@ -332,7 +332,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 				}
 			}
 			if (! found) {
-				e.getSubordinates().add(new ValidationMessage(JobSchedule.allMinutesPropertyName, "Must select at least one minute."));
+				e.getMessages().add(new Message(JobSchedule.allMinutesPropertyName, "Must select at least one minute."));
 			}
 		}
 		if (SELECTED_CODE.equals(bean.getAllHours())) {
@@ -344,7 +344,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 				}
 			}
 			if (! found) {
-				e.getSubordinates().add(new ValidationMessage(JobSchedule.allHoursPropertyName, "Must select at least one hour."));
+				e.getMessages().add(new Message(JobSchedule.allHoursPropertyName, "Must select at least one hour."));
 			}
 		}
 		if (SELECTED_CODE.equals(bean.getAllDays())) {
@@ -356,7 +356,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 				}
 			}
 			if (! found) {
-				e.getSubordinates().add(new ValidationMessage(JobSchedule.allDaysPropertyName, "Must select at least one day."));
+				e.getMessages().add(new Message(JobSchedule.allDaysPropertyName, "Must select at least one day."));
 			}
 		}
 		if (SELECTED_CODE.equals(bean.getAllMonths())) {
@@ -368,7 +368,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 				}
 			}
 			if (! found) {
-				e.getSubordinates().add(new ValidationMessage(JobSchedule.allMonthsPropertyName, "Must select at least one month."));
+				e.getMessages().add(new Message(JobSchedule.allMonthsPropertyName, "Must select at least one month."));
 			}
 		}
 		if (SELECTED_CODE.equals(bean.getAllWeekdays())) {
@@ -380,7 +380,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 				}
 			}
 			if (! found) {
-				e.getSubordinates().add(new ValidationMessage(JobSchedule.allWeekdaysPropertyName, "Must select at least one week day."));
+				e.getMessages().add(new Message(JobSchedule.allWeekdaysPropertyName, "Must select at least one week day."));
 			}
 		}
 	}

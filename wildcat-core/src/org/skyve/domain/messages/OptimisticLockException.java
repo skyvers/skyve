@@ -1,5 +1,6 @@
 package org.skyve.domain.messages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.domain.types.OptimisticLock;
@@ -9,13 +10,11 @@ import org.skyve.metadata.customer.Customer;
 /**
  * 
  */
-public class OptimisticLockException extends DomainException implements ErrorException {
+public class OptimisticLockException extends DomainException implements MessageException {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 9168437033648462795L;
-
-	private ValidationMessage validationMessageDelegate;
 
 	/**
 	 * 
@@ -32,6 +31,8 @@ public class OptimisticLockException extends DomainException implements ErrorExc
 		delete;
 	}
 
+	private List<Message> messages = new ArrayList<>(1);
+	
 	public OptimisticLockException(Customer customer, OperationType operationType, OptimisticLock persistentLock) {
 		super("Optimistic Lock failed - updated by user " + 
 				persistentLock.getUsername() + 
@@ -47,63 +48,23 @@ public class OptimisticLockException extends DomainException implements ErrorExc
 		}
 
 		if (operationType == OperationType.update) {
-			validationMessageDelegate = new ValidationMessage("Failed to update this information as it was updated by user " +
-																persistentLock.getUsername() + 
-																" at " + 
-																timeStampDisplay +
-																" after you looked at it.  The information is now refreshed.  Please re-apply your changes.");
+			messages.add(new Message("Failed to update this information as it was updated by user " +
+										persistentLock.getUsername() + 
+										" at " + 
+										timeStampDisplay +
+										" after you looked at it.  Please re-apply your changes."));
 		}
 		else if (operationType == OperationType.delete) {
-			validationMessageDelegate = new ValidationMessage("Failed to delete this information as it was updated by user " +
-																persistentLock.getUsername() + 
-																" at " + 
-																timeStampDisplay +
-																" after you looked at it.  The information is now refreshed.  Please review and delete if still necessary.");
+			messages.add(new Message("Failed to delete this information as it was updated by user " +
+										persistentLock.getUsername() + 
+										" at " + 
+										timeStampDisplay +
+										" after you looked at it.  Please review and delete if still necessary."));
 		}
 	}
 
 	@Override
-	public String getMessage() {
-		return getErrorMessage();
-	}
-
-	@Override
-	public String getLocalizedMessage() {
-		return getMessage();
-	}
-
-	@Override
-	public String toString() {
-		return getMessage();
-	}
-
-	@Override
-	public void addBinding(String binding) {
-		validationMessageDelegate.addBinding(binding);
-	}
-
-	@Override
-	public Iterable<String> getBindings() {
-		return validationMessageDelegate.getBindings();
-	}
-
-	@Override
-	public String getErrorMessage() {
-		return validationMessageDelegate.getErrorMessage();
-	}
-
-	@Override
-	public List<ErrorMessage> getSubordinates() {
-		return validationMessageDelegate.getSubordinates();
-	}
-
-	@Override
-	public void setBindingPrefix(String bindingPrefixWithDot) {
-		validationMessageDelegate.setBindingPrefix(bindingPrefixWithDot);
-	}
-
-	@Override
-	public ValidationMessage getDelegate() {
-		return validationMessageDelegate;
+	public List<Message> getMessages() {
+		return messages;
 	}
 }

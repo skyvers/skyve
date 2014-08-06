@@ -5,7 +5,7 @@ import modules.admin.domain.JobSchedule;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -39,7 +39,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 			sb.append(bean.getJobName());
 			sb.append(" can't be identified.");
 
-			throw new ValidationException(new ValidationMessage(JobSchedule.jobNamePropertyName, sb.toString()));
+			throw new ValidationException(new Message(JobSchedule.jobNamePropertyName, sb.toString()));
 		}
 
 		Module module = customer.getModule(parts[0]);

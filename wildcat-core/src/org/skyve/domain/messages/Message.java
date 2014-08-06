@@ -6,18 +6,15 @@ import java.util.List;
 /**
  * 
  */
-public class ValidationMessage implements ErrorMessage {
+public class Message {
 	private List<String> bindings = new ArrayList<>();
-
 	private String errorMessage;
-
-	private List<ErrorMessage> subordinates = new ArrayList<>();
 
 	/**
 	 * 
 	 * @param errorMessage
 	 */
-	public ValidationMessage(String errorMessage) {
+	public Message(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
 
@@ -27,7 +24,7 @@ public class ValidationMessage implements ErrorMessage {
 	 * @param binding
 	 * @param errorMessage
 	 */
-	public ValidationMessage(String binding, String errorMessage) {
+	public Message(String binding, String errorMessage) {
 		this.errorMessage = errorMessage;
 		bindings.add(binding);
 	}
@@ -37,7 +34,7 @@ public class ValidationMessage implements ErrorMessage {
 	 * @param bindings
 	 * @param errorMessage
 	 */
-	public ValidationMessage(String[] bindings, String errorMessage) {
+	public Message(String[] bindings, String errorMessage) {
 		this.errorMessage = errorMessage;
 
 		for (String binding : bindings) {
@@ -48,22 +45,16 @@ public class ValidationMessage implements ErrorMessage {
 	/**
 	 * 
 	 */
-	@Override
 	public void setBindingPrefix(String bindingPrefixWithDot) {
 		for (int i = 0, l = bindings.size(); i < l; i++) {
 			String binding = bindings.remove(i);
 			bindings.add(i, bindingPrefixWithDot + binding);
-		}
-
-		for (ErrorMessage subordinate : subordinates) {
-			subordinate.setBindingPrefix(bindingPrefixWithDot);
 		}
 	}
 
 	/**
 	 * 
 	 */
-	@Override
 	public void addBinding(String binding) {
 		bindings.add(binding);
 	}
@@ -71,7 +62,6 @@ public class ValidationMessage implements ErrorMessage {
 	/**
 	 * 
 	 */
-	@Override
 	public Iterable<String> getBindings() {
 		return bindings;
 	}
@@ -79,17 +69,8 @@ public class ValidationMessage implements ErrorMessage {
 	/**
 	 * 
 	 */
-	@Override
 	public String getErrorMessage() {
 		return errorMessage;
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public List<ErrorMessage> getSubordinates() {
-		return subordinates;
 	}
 
 	/**
@@ -104,10 +85,6 @@ public class ValidationMessage implements ErrorMessage {
 		}
 		result.append('\n');
 		result.append("Error message = ").append(errorMessage).append('\n');
-
-		for (ErrorMessage subordinate : subordinates) {
-			result.append(subordinate.toString());
-		}
 
 		return result.toString();
 	}

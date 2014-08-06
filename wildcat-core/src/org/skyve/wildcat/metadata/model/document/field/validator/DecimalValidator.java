@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.wildcat.util.XMLUtil;
@@ -36,7 +36,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 			Decimal max = getMax();
 			if (((min != null) && (value.compareTo(min) < 0)) ||
 					((max != null) && (value.compareTo(max) > 0))) {
-				e.getSubordinates().add(new ValidationMessage(binding, constructMessage(displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(displayName, converter)));
 				addedCustomerValidationMessage = (getValidationMessage() != null);
 			}
 			if ((! addedCustomerValidationMessage) && (precision != null)) {
@@ -45,7 +45,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 				if (precisionInt != scale) {
 					String message = getValidationMessage();
 					if (message == null) {
-						e.getSubordinates().add(new ValidationMessage(binding, constructPrecisionMessage(displayName)));
+						e.getMessages().add(new Message(binding, constructPrecisionMessage(displayName)));
 					}
 				}
 			}

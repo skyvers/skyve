@@ -13,7 +13,8 @@ import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.ErrorMessage;
+import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -556,8 +557,10 @@ public class StandardLoader {
 		BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 		Object sheetId = refs.get(bean.getBizId());
 		sheet.moveToRow(sheetId);
-		if (e instanceof ErrorMessage) {
-			addError(customer, module, document, bean, sheet, (ErrorMessage) e);
+		if (e instanceof MessageException) {
+			for (Message em : ((MessageException) e).getMessages()) {
+				addError(customer, module, document, bean, sheet, em);
+			}
 		}
 		else {
 			sheet.addErrorAtCurrentRow(problems, column, e.getMessage());
@@ -570,7 +573,7 @@ public class StandardLoader {
 							Document document, 
 							Bean bean,
 							BizPortSheet sheet, 
-							ErrorMessage em) 
+							Message em) 
 	throws BizPortException {
 		boolean noBindings = true;
 		for (String binding : em.getBindings()) {
@@ -617,10 +620,6 @@ public class StandardLoader {
 		if (noBindings) {
 			BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 			sheet.addErrorAtCurrentRow(problems, column, em.getErrorMessage());
-		}
-		
-		for (ErrorMessage subordinate : em.getSubordinates()) {
-			addError(customer, module, document, bean, sheet, subordinate);
 		}
 	}
 }

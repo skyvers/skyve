@@ -8,10 +8,9 @@ import java.util.logging.Level;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.ErrorMessage;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -62,7 +61,7 @@ public class ValidationUtil {
 
 	private static void validateBeanAgainstDocument(Customer customer, Document document, Bean bean)
 	throws ValidationException {
-		ValidationException e = new ValidationException(new ValidationMessage("Problems have occurred with the " + document.getSingularAlias() + "."));
+		ValidationException e = new ValidationException();
 
 		for (Attribute attribute : document.getAttributes()) {
 			if (! attribute.getName().equals(Bean.BIZ_KEY)) {
@@ -70,7 +69,7 @@ public class ValidationUtil {
 			}
 		}
 
-		if (! e.getSubordinates().isEmpty()) {
+		if (! e.getMessages().isEmpty()) {
 			throw e;
 		}
 	}
@@ -96,7 +95,7 @@ public class ValidationUtil {
 		Object attributeValue = getAttributeValue(bean, binding);
 		if (attribute.isRequired()) {
 			if (attributeValue == null) {
-				e.getSubordinates().add(new ValidationMessage(binding, displayName +  " is required."));
+				e.getMessages().add(new Message(binding, displayName +  " is required."));
 			}
 		}
 
@@ -117,11 +116,11 @@ public class ValidationUtil {
 				if (min > 0) {
 					List<Bean> collectionValue = (List<Bean>) attributeValue;
 					if ((collectionValue == null) || (collectionValue.size() < min)) {
-						e.getSubordinates().add(new ValidationMessage(binding, 
-																		"At least " + min + ' ' + collection.getDisplayName() +
-																			((min == 1) ? 
-																				" record is required." : 
-																				" records are required.")));
+						e.getMessages().add(new Message(binding, 
+															"At least " + min + ' ' + collection.getDisplayName() +
+																((min == 1) ? 
+																	" record is required." : 
+																	" records are required.")));
 					}
 				}
 			}
@@ -130,11 +129,11 @@ public class ValidationUtil {
 				int max = maxCardinality.intValue();
 				List<Bean> collectionValue = (List<Bean>) attributeValue;
 				if ((collectionValue != null) && (collectionValue.size() > max)) {
-					e.getSubordinates().add(new ValidationMessage(binding, 
-																	"No more than " + max + ' ' + collection.getDisplayName() +
-																		((max == 1) ? 
-																			" record is allowed." : 
-																			" records are allowed.")));
+					e.getMessages().add(new Message(binding, 
+														"No more than " + max + ' ' + collection.getDisplayName() +
+															((max == 1) ? 
+																" record is allowed." : 
+																" records are allowed.")));
 				}
 			}
 		}
@@ -144,8 +143,8 @@ public class ValidationUtil {
 			if (attributeValue instanceof String) {
 				String stringValue = (String) attributeValue;
 				if (stringValue.length() > fieldLength) {
-					e.getSubordinates().add(new ValidationMessage(binding, 
-																	displayName + " is longer than " + fieldLength + " characters."));
+					e.getMessages().add(new Message(binding, 
+														displayName + " is longer than " + fieldLength + " characters."));
 				}
 				TextFormat format = text.getFormat();
 				if (format != null) {
@@ -280,8 +279,8 @@ public class ValidationUtil {
 				format.fromDisplayValue(display);
 			}
 			catch (Exception e1) {
-				e.getSubordinates().add(new ValidationMessage(binding, 
-																displayName + " value " + value + " does not match the format " + format.getMask() + " (A = alphanumeric, L = alpha, # = numeric)"));
+				e.getMessages().add(new Message(binding, 
+													displayName + " value " + value + " does not match the format " + format.getMask() + " (A = alphanumeric, L = alpha, # = numeric)"));
 			}
 		}
 	}
@@ -294,8 +293,8 @@ public class ValidationUtil {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			throw new ValidationException(new ValidationMessage(binding,
-																	"You do not have access.  Please contact your Biz Hub administrator."));
+			throw new ValidationException(new Message(binding,
+														"You do not have access.  Please contact your Biz Hub administrator."));
 		}
 
 		return result;
@@ -303,7 +302,7 @@ public class ValidationUtil {
 
 	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) 
 	throws ValidationException {
-		ValidationException e = new ValidationException(new ValidationMessage("Problems have occurred."));
+		ValidationException e = new ValidationException();
 
 		try {
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Entering " + bizlet.getClass().getName() + ".validate: " + bean);
@@ -313,12 +312,9 @@ public class ValidationUtil {
 		catch (ValidationException ve) {
 			// validation method has thrown a validation exception that is not the e parameter passed in
 			if (ve != e) {
-				List<ErrorMessage> subordinates = ve.getSubordinates();
-				if (subordinates.isEmpty()) { // ve is just a lone exception, add it as a subordinate
-					e.getSubordinates().add(ve);
-				}
-				else { // ve has subordinates - add them
-					e.getSubordinates().addAll(ve.getSubordinates());
+				List<Message> messages = ve.getMessages();
+				if (! messages.isEmpty()) { // add ve's messages
+					e.getMessages().addAll(messages);
 				}
 			}
 			else {
@@ -327,12 +323,12 @@ public class ValidationUtil {
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			e.getSubordinates().add(new ValidationMessage("An error occurred processing " + 
-															bizlet.getClass().getName() +
-															".validate() - See stack trace in log"));
+			e.getMessages().add(new Message("An error occurred processing " + 
+												bizlet.getClass().getName() +
+												".validate() - See stack trace in log"));
 		}
 
-		if (! e.getSubordinates().isEmpty()) {
+		if (! e.getMessages().isEmpty()) {
 			throw e;
 		}
 	}
@@ -349,7 +345,7 @@ public class ValidationUtil {
 	 * @throws MetaDataException
 	 */
 	public static void processErrorMessageBindings(Customer customer,
-													final ErrorMessage e,
+													final Message e,
 													Bean masterBean,
 													final Bean validatedBean) 
 	throws DomainException, MetaDataException {
@@ -411,9 +407,7 @@ public class ValidationUtil {
 												constraint.getName();
 								}
 
-								UniqueConstraintViolationException ucve = new UniqueConstraintViolationException(constraint.getName(), message);
-								ucve.addBinding(referenceName + '[' + i + ']');
-								throw ucve;
+								throw new UniqueConstraintViolationException(constraint.getName(), referenceName + '[' + i + ']', message);
 							}
 						}
 					}
@@ -425,7 +419,7 @@ public class ValidationUtil {
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
-			throw new ValidationException(new ValidationMessage("An error occurred checking collection unique constraints. - See stack trace in log"));
+			throw new ValidationException(new Message("An error occurred checking collection unique constraints. - See stack trace in log"));
 		}
 	}
 }

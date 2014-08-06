@@ -1,80 +1,42 @@
 package org.skyve.domain.messages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 
  */
-public class ValidationException extends DomainException implements ErrorException {
+public class ValidationException extends DomainException implements MessageException {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -2033700648810378214L;
 
-	protected ValidationMessage message;
+	protected List<Message> messages = new ArrayList<>();
 
+	public ValidationException() {
+	}
+	
 	/**
 	 * 
 	 * @param message
 	 */
-	public ValidationException(ValidationMessage message) {
-		super(message.getErrorMessage());
-		this.message = message;
+	public ValidationException(Message message) {
+		messages.add(message);
 	}
 
-	/**
-	 * 
-	 */
 	@Override
-	public void addBinding(String binding) {
-		message.addBinding(binding);
+	public List<Message> getMessages() {
+		return messages;
 	}
 
-	/**
-	 * 
-	 */
-	@Override
-	public Iterable<String> getBindings() {
-		return message.getBindings();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public String getErrorMessage() {
-		return message.getErrorMessage();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public List<ErrorMessage> getSubordinates() {
-		return message.getSubordinates();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public void setBindingPrefix(String bindingPrefixWithDot) {
-		message.setBindingPrefix(bindingPrefixWithDot);
-	}
-
-	/**
-	 * 
-	 */
 	@Override
 	public String toString() {
-		return super.toString() + "\n" + message.toString();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public ValidationMessage getDelegate() {
-		return message;
+		StringBuilder result = new StringBuilder(super.toString());
+		for (Message message : messages) {
+			result.append('\n').append(message.toString());
+		}
+		
+		return result.toString();
 	}
 }

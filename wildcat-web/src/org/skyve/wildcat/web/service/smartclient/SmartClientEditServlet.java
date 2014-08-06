@@ -21,12 +21,12 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.ErrorMessage;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -314,7 +314,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 		    	produceErrorResponse(t, operation, true, pw);
 	
-		    	if (! (t instanceof ErrorMessage)) {
+		    	if (! (t instanceof MessageException)) {
 		    		commandSuccessful = false;
 		    	}
 			}
@@ -338,12 +338,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param pw	To append to.
 	 */
 	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw) {
-		if (t instanceof ErrorMessage) {
-    		ErrorMessage em = (ErrorMessage) t;
+		if (t instanceof MessageException) {
+			List<Message> ms = ((MessageException) t).getMessages();
+			
     		// We need keys to send a -4 message back
 	    	StringBuilder sb = new StringBuilder(128);
 	    	sb.append("{response:{status:-4,errors:{");
-	    	if (includeBindings && pumpOutValidationErrors(em, sb)) { // are there any keys in the message?
+	    	if (includeBindings && pumpOutValidationErrors(ms, sb)) { // are there any keys in the message?
 		    	sb.setLength(sb.length() - 1); // remove the comma
 		    	pw.append(sb);
                 pw.append('}');
@@ -354,7 +355,7 @@ public class SmartClientEditServlet extends HttpServlet {
                     pw.append("startRow:0,endRow:0,totalRows:0,");
                 }
                 pw.append("data:\"");
-                appendErrorText("Please address the following errors.", em, pw);
+                appendErrorText("Please address the following errors.", ms, pw);
                 pw.append('"');
 	    	}
     	}
@@ -377,27 +378,15 @@ public class SmartClientEditServlet extends HttpServlet {
     	pw.append("}}");
 	}
 	
-	static void appendErrorText(String synopsis, ErrorMessage em, PrintWriter pw) {
+	static void appendErrorText(String synopsis, List<Message> ms, PrintWriter pw) {
     	pw.append(synopsis).append("<br/><ul>");
-    	appendInnerErrorText(em, pw);
+    	for (Message m : ms) {
+	    	pw.append("<li>");
+	        pw.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+	        pw.append("</li>");
+    	}
     	pw.append("</ul>");
 	}
-	
-	private static void appendInnerErrorText(ErrorMessage em, PrintWriter pw) {
-        pw.append("<li>");
-
-        // process this message
-        pw.append(SmartClientGenerateUtils.processString(em.getErrorMessage()));
-
-        // process subordinates
-        for (ErrorMessage subordinate : em.getSubordinates()) {
-            pw.append("<ul>");
-            appendInnerErrorText(subordinate, pw);
-            pw.append("</ul>");
-        }
-
-        pw.append("</li>");
-    }
 
     /**
      * 
@@ -405,29 +394,23 @@ public class SmartClientEditServlet extends HttpServlet {
      * @param sb
      * @return if there are any keys in the message
      */
-    private static boolean pumpOutValidationErrors(ErrorMessage e, StringBuilder sb) {
+    private static boolean pumpOutValidationErrors(List<Message> ms, StringBuilder sb) {
     	boolean result = false;
 
-    	for (String binding : e.getBindings()) {
-    		result = true;
-    		// no '.' or '[' or ']' allowed in JSON identifiers
-    		sb.append(binding.replace('.', '_').replace('[', '_').replace(']', '_')).append(":\"");
-    		String message = e.getErrorMessage();
-    		if (message == null) {
-    			sb.append("An error has occurred");
-    		}
-    		else {
-	    		sb.append(SmartClientGenerateUtils.processString(e.getErrorMessage()));
-    		}
-    		sb.append("\",");
-    	}
-    	
-    	List<ErrorMessage> subordinates = e.getSubordinates();
-    	if (subordinates != null) {
-    		for (ErrorMessage subordinate : subordinates) {
-    			// put function call first so it is executed and not short-circuited
-    			result = pumpOutValidationErrors(subordinate, sb) || result;
-    		}
+    	for (Message m : ms) {
+	    	for (String binding : m.getBindings()) {
+	    		result = true;
+	    		// no '.' or '[' or ']' allowed in JSON identifiers
+	    		sb.append(binding.replace('.', '_').replace('[', '_').replace(']', '_')).append(":\"");
+	    		String message = m.getErrorMessage();
+	    		if (message == null) {
+	    			sb.append("An error has occurred");
+	    		}
+	    		else {
+		    		sb.append(SmartClientGenerateUtils.processString(m.getErrorMessage()));
+	    		}
+	    		sb.append("\",");
+	    	}
     	}
     	
     	return result;
@@ -823,7 +806,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																		false);
 
 		if (persistentBeanToDelete == null) { // deleted by another user
-			throw new ValidationException(new ValidationMessage("Failed to delete this information as it was already deleted by someone else after you looked at it."));
+			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));
 		}
 
 		if (! user.canReadBean(persistentBeanToDelete.getBizId(), 

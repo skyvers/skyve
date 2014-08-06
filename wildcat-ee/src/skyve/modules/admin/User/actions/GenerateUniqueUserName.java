@@ -7,7 +7,7 @@ import modules.admin.domain.User;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.DocumentQuery;
@@ -32,7 +32,7 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 
 	public static String generateUniqueUserNameFromContactName(User user) throws Exception {
 		if (user.getContact() == null) {
-			ValidationMessage vm = new ValidationMessage(User.contactPropertyName, "You first need to select a contact for this user");
+			Message vm = new Message(User.contactPropertyName, "You first need to select a contact for this user");
 			ValidationException ve = new ValidationException(vm);
 			throw ve;
 		}

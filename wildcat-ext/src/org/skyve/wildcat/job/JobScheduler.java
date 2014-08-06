@@ -18,7 +18,7 @@ import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Job;
@@ -218,8 +218,8 @@ public class JobScheduler {
 				JOB_SCHEDULER.scheduleJob(trigger);
 			}
 			catch (ObjectAlreadyExistsException e) {
-				throw new ValidationException(new ValidationMessage("You are already running job " + job.getDisplayName() +
-																		".  Look in the jobs list for more information."));
+				throw new ValidationException(new Message("You are already running job " + job.getDisplayName() +
+															".  Look in the jobs list for more information."));
 			}
 		}
 		

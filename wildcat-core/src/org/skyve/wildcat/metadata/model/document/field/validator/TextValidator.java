@@ -14,7 +14,7 @@ import org.apache.commons.validator.routines.checkdigit.ISINCheckDigit;
 import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.apache.commons.validator.routines.checkdigit.VerhoeffCheckDigit;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -125,7 +125,7 @@ public class TextValidator extends FieldValidator<String> {
 			}
 			
 			if (! valid) {
-				e.getSubordinates().add(new ValidationMessage(binding, constructMessage(displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(displayName, converter)));
 			}
 		}
 	}

@@ -4,7 +4,7 @@ import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Tag;
 
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -23,7 +23,7 @@ public class IntersectTag implements ServerSideAction<Tag> {
 	throws Exception {
 		
 		if(bean.getActionTag()==null){
-			throw new ValidationException(new ValidationMessage(Tag.actionTagPropertyName, "Select a tag to perform this action."));
+			throw new ValidationException(new Message(Tag.actionTagPropertyName, "Select a tag to perform this action."));
 		} 
 		
 		TagBizlet.intersect(bean, bean.getActionTag());

@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -24,7 +24,7 @@ public class DateValidator extends RangeValidator<Date> {
 			Date max = getMax();
 			if (((min != null) && value.before(min)) ||
 					((max != null) && value.after(max))) {
-				e.getSubordinates().add(new ValidationMessage(binding, constructMessage(displayName, converter)));
+				e.getMessages().add(new Message(binding, constructMessage(displayName, converter)));
 			}
 		}
 	}

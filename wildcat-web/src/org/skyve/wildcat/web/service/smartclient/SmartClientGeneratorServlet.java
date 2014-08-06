@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.messages.ErrorMessage;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -2609,8 +2609,10 @@ pickListFields:[{name:'value'}],
 				persistence.rollback();
 	
 				pw.append("isc.warn('");
-				if (t instanceof ErrorMessage) {
-					SmartClientEditServlet.appendErrorText("Could not generate view.", (ErrorMessage) t, pw);
+				if (t instanceof MessageException) {
+					SmartClientEditServlet.appendErrorText("Could not generate view.",
+															((MessageException) t).getMessages(),
+															pw);
 					pw.append("');");
 				}
 				else {

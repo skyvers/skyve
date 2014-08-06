@@ -12,6 +12,7 @@ import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIParameter;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlForm;
 import javax.faces.component.html.HtmlOutputLabel;
@@ -581,26 +582,25 @@ public class ComponentBuilder {
         return result;
     }
 
-	public AjaxBehavior ajax(String actionName, String listBinding, boolean immediate) {
+	public AjaxBehavior ajax(String actionName, String listBinding) {
 		AjaxBehavior result = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-		if (immediate) {
-			result.setProcess("@this");
-		}
-		else {
-			result.setProcess(process);
-		}
+		result.setProcess(process);
 		result.setUpdate(update);
 		if (actionName != null) {
 			MethodExpression me = methodExpressionForAction(null, actionName, listBinding);
 			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
-//		if (immediate) {
-//			result.setValueExpression("immediate", ef.createValueExpression(Boolean.TRUE, Boolean.class));
-//		}
 		
 		return result;
 	}
     
+	public UIParameter parameter(String name, Object value) {
+		UIParameter result = (UIParameter) a.createComponent(UIParameter.COMPONENT_TYPE);
+		result.setName(name);
+		result.setValue(value);
+		return result;
+	}
+	
 	private void action(UICommand command,
 							ImplicitActionName implicitActionName,
 							String actionName,
@@ -1064,11 +1064,15 @@ public class ComponentBuilder {
 			result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
 		}
 		result.setValueExpression("title", ef.createValueExpression(elc,
-		                                                                title,
+		                                                                required ? title + " *" : title,
 		                                                                String.class));
-		result.setValueExpression("required", ef.createValueExpression(Boolean.toString(required),
-																	    Boolean.class));
-		result.setRequiredMessage(title + " is required");
+
+// Cannot utilise the faces required attributes as some requests need to ignore required-ness.
+// eg - triggered actions on widget events.
+// Setting required attribute to an expression worked server-side but the client-side message integration didn't.
+//		result.setValueExpression("required", ef.createValueExpression(required ? "#{true}" : "false",
+//																	    Boolean.class));
+//		result.setRequiredMessage(title + " is required");
 		addDisabled(result, disabled);
 		
 		return result;

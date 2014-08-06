@@ -20,7 +20,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
@@ -887,7 +887,7 @@ public final class BindUtil {
 											SortedMap<String, Object> properties, 
 											boolean fromSerializedFormat)
 	throws ValidationException {
-		ValidationException e = new ValidationException(new ValidationMessage("Problems have occurred."));
+		ValidationException e = new ValidationException();
 
 		// Do nothing unless both arguments have been specified
 		if ((bean == null) || (properties == null)) {
@@ -909,11 +909,11 @@ public final class BindUtil {
 			catch (Exception ex) {
 				System.err.println("Exception thrown when populating from the request.");
 				ex.printStackTrace();
-				e.getSubordinates().add(new ValidationMessage(name, value + " is invalid."));
+				e.getMessages().add(new Message(name, value + " is invalid."));
 			}
 		}
 
-		if (! e.getSubordinates().isEmpty()) {
+		if (! e.getMessages().isEmpty()) {
 			throw e;
 		}
 	}

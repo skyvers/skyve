@@ -22,7 +22,7 @@
 	</attributes>
 	<uniqueConstraints>
 		<constraint name="UniqueName" scope="customer">
-			<message>A Data Group with {name} already exists.</message>
+			<message>A Data Group named {name} already exists.</message>
 			<fieldReferences>
 				<ref>name</ref>
 			</fieldReferences>

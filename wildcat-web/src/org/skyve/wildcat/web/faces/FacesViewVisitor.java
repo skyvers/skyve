@@ -11,7 +11,6 @@ import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.component.html.HtmlSelectOneMenu;
 
-import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
@@ -533,6 +532,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	private void addComponent(String widgetLabel,
+								boolean widgetRequired,
 								String widgetInvisible,
 								UIComponent component,
 								Integer pixelWidth,
@@ -564,6 +564,10 @@ public class FacesViewVisitor extends ViewVisitor {
 						label = widgetLabel;
 					}
 					if (label != null) {
+						if (widgetRequired) {
+							label = label + " *";
+						}
+						
 						if (UserAgentType.phone.equals(userAgentType)) {
 							columnOrField = b.field(null);
 							HtmlOutputLabel l = b.label(null, null, label, null);
@@ -642,7 +646,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			                            action.getClientValidation(),
 			                            action.getDisabledConditionName(),
 			                            action.getInvisibleConditionName());
-	    addComponent(null, action.getInvisibleConditionName(), c, button.getPixelWidth(), null);
+	    addComponent(null, false, action.getInvisibleConditionName(), c, button.getPixelWidth(), null);
 	}
 
 	@Override
@@ -651,7 +655,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = b.label(null, null, "geoLocator", null); // TODO geolocator
-	    addComponent(null, locator.getInvisibleConditionName(), l, null, null);
+	    addComponent(null, false, locator.getInvisibleConditionName(), l, null, null);
 	}
 
 	@Override
@@ -660,7 +664,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = b.label(null, null, "geometry", null); // TODO geometry
-	    addComponent(null, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null);
+	    addComponent(null, false, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null);
 	}
 
 	@Override
@@ -669,7 +673,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = b.label(null, null, "map", null); // TODO map
-	    addComponent(null, map.getInvisibleConditionName(), l, map.getPixelWidth(), map.getPercentageWidth());
+	    addComponent(null, false, map.getInvisibleConditionName(), l, map.getPixelWidth(), map.getPercentageWidth());
 	}
 
 	@Override
@@ -678,7 +682,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent bn = b.label(null, null, "dialogButton", null); // TODO dialog button
-	    addComponent(null, button.getInvisibleConditionName(), bn, null, null);
+	    addComponent(null, false, button.getInvisibleConditionName(), bn, null, null);
 	}
 
 	@Override
@@ -717,12 +721,12 @@ public class FacesViewVisitor extends ViewVisitor {
     									image.getPercentageHeight(),
     									url.toString(),
     									image.getInvisibleConditionName());
-		addComponent(null, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
+		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
 	}
 
 	@Override
 	public void visitSpacer(Spacer spacer) throws MetaDataException {
-		addComponent(null, null, b.label(null, null, " ", null), null, null);
+		addComponent(null, false, null, b.label(null, null, " ", null), null, null);
 	}
 
 	@Override
@@ -736,7 +740,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    								image.getPercentageHeight(),
 	    								"images/" + image.getRelativeFile(),
 	    								image.getInvisibleConditionName());
-		addComponent(null, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
+		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
 	}
 
 	@Override
@@ -759,7 +763,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								blurb.getPixelWidth(), 
 								blurb.getPixelHeight(), 
 								false);
-		addComponent(null, blurb.getInvisibleConditionName(), c, blurb.getPixelWidth(), null);
+		addComponent(null, false, blurb.getInvisibleConditionName(), c, blurb.getPixelWidth(), null);
 	}
 
 	@Override
@@ -842,7 +846,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}.process(outerReference);
 
-		addComponent(null, link.getInvisibleConditionName(), c.get(), link.getPixelWidth(), null);
+		addComponent(null, false, link.getInvisibleConditionName(), c.get(), link.getPixelWidth(), null);
 	}
 
 	@Override
@@ -851,7 +855,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                        boolean parentEnabled)
     throws MetaDataException {
 	    UIComponent c = b.label(listBinding, label.getBinding(), label.getValue(), null);
-	    addComponent(null, label.getInvisibleConditionName(), c, label.getPixelWidth(), null);
+	    addComponent(null, false, label.getInvisibleConditionName(), c, label.getPixelWidth(), null);
 	}
 
 	@Override
@@ -860,7 +864,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent p = b.label(null, null, "progressBar", null); // TODO progress bar
-	    addComponent(null, null, p, progressBar.getPixelWidth(), null);
+	    addComponent(null, false, null, p, progressBar.getPixelWidth(), null);
 	}
 
 	private MetaData currentGrid;
@@ -1058,6 +1062,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										UserAgentType.phone.equals(userAgentType));
 		eventSource = c;
 		addComponent(UserAgentType.phone.equals(userAgentType) ? null : def.getTitle(), 
+						def.isRequired(),
 						checkBox.getInvisibleConditionName(), 
 						c, 
 						checkBox.getPixelWidth(), 
@@ -1104,7 +1109,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											def.isRequired(), 
 											colour.getPixelWidth());
 		eventSource = c;
-		addComponent(def.getTitle(), colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
+		addComponent(def.getTitle(), def.isRequired(), colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1131,7 +1136,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		UISelectItems i = b.selectItems(listBinding, binding, true);
 		s.getChildren().add(i);
 		eventSource = s;
-		addComponent(def.getTitle(), combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null);
+		addComponent(def.getTitle(), def.isRequired(), combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1154,7 +1159,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												null, 
 												image.getBinding(), 
 												null);
-        addComponent(def.getTitle(), image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
+        addComponent(def.getTitle(), false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1164,7 +1169,7 @@ public class FacesViewVisitor extends ViewVisitor {
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
         UIComponent c = b.label(null, null, "contentLink", null); // TODO content link
-        addComponent(def.getTitle(), link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1178,7 +1183,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			                        def.getTitle(),
 			                        def.isRequired(),
 			                        html.getDisabledConditionName());
-        addComponent(def.getTitle(), html.getInvisibleConditionName(), c, html.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), html.getInvisibleConditionName(), c, html.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1227,7 +1232,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        ldef.getQuery(),
 	                                        lookup.getPixelWidth());
         eventSource = c;
-        addComponent(def.getTitle(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1244,7 +1249,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		UIComponent c = b.label(null, null, "lookup", null); // TODO lookup
-		addComponent(null, null, c, null, null);
+		addComponent(null, false, null, c, null, null);
 	}
 
 	@Override
@@ -1268,7 +1273,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        password.getDisabledConditionName(),
 				                        password.getPixelWidth());
         eventSource = c;
-        addComponent(def.getTitle(), password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1295,7 +1300,7 @@ public class FacesViewVisitor extends ViewVisitor {
         UISelectItems i = b.selectItems(listBinding, binding, false);
 		c.getChildren().add(i);
 		eventSource = c;
-		addComponent(def.getTitle(), radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null);
+		addComponent(def.getTitle(), def.isRequired(), radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1318,7 +1323,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        def.isRequired(),
 				                        richText.getDisabledConditionName());
         eventSource = c;
-        addComponent(def.getTitle(), richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1337,7 +1342,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
         UIComponentBase c = b.label(null, null, "slider", null); // TODO slider
         eventSource = c;
-        addComponent(def.getTitle(), slider.getInvisibleConditionName(), c, slider.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), slider.getInvisibleConditionName(), c, slider.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1361,7 +1366,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        spinner.getDisabledConditionName(),
 				                        spinner.getPixelWidth());
         eventSource = c;
-        addComponent(def.getTitle(), spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1386,7 +1391,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        text.getPixelWidth(),
 				                        text.getPixelHeight());
         eventSource = c;
-        addComponent(def.getTitle(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1464,7 +1469,7 @@ public class FacesViewVisitor extends ViewVisitor {
                                 text.getPixelWidth());
         }
         eventSource = c;
-		addComponent(def.getTitle(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+		addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1598,7 +1603,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 	}
 	
-	private AjaxBehavior createAjaxBehavior(List<EventAction> actions) {
+	private void addAjaxBehavior(String eventName, List<EventAction> actions) {
 		String actionName = null;
 		for (EventAction action : actions) {
 			if (action instanceof ServerSideActionEventAction) {
@@ -1606,12 +1611,8 @@ public class FacesViewVisitor extends ViewVisitor {
 				break;
 			}
 		}
-		boolean immediate = false;
-		if (actionName != null) {
-			Action action = (Action) view.getAction(actionName);
-			immediate = Boolean.FALSE.equals(action.getClientValidation());
-		}
-		return b.ajax(actionName, listBinding, immediate);
+		
+		eventSource.addClientBehavior(eventName, b.ajax(actionName, listBinding));
 	}
 	
 	@Override
@@ -1619,7 +1620,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		eventSource.addClientBehavior("change", createAjaxBehavior(changeable.getChangedActions()));
+		addAjaxBehavior("change", changeable.getChangedActions());
 	}
 
 	@Override
@@ -1634,7 +1635,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		eventSource.addClientBehavior("focus", createAjaxBehavior(blurable.getFocusActions()));
+		addAjaxBehavior("focus", blurable.getFocusActions());
 	}
 
 	@Override
@@ -1650,7 +1651,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		eventSource.addClientBehavior("blur", createAjaxBehavior(blurable.getFocusActions()));
+		addAjaxBehavior("blur", blurable.getFocusActions());
 	}
 
 	@Override
@@ -1698,7 +1699,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		eventSource.addClientBehavior("itemSelect", createAjaxBehavior(lookup.getPickedActions()));
+		addAjaxBehavior("itemSelect", lookup.getPickedActions());
 	}
 
 	@Override
@@ -1714,7 +1715,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		eventSource.addClientBehavior("itemUnselect", createAjaxBehavior(lookup.getClearedActions()));
+		addAjaxBehavior("itemUnselect", lookup.getClearedActions());
 	}
 
 	@Override

@@ -5,7 +5,7 @@ import modules.admin.domain.User;
 import modules.admin.domain.User.WizardState;
 
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -19,13 +19,13 @@ public class Next implements ServerSideAction<User> {
 	@Override
 	public ServerSideActionResult execute(User adminUser, WebContext webContext) throws Exception {
 
-		ValidationException e = new ValidationException(new ValidationMessage("There are problems to resolve"));
+		ValidationException e = new ValidationException();
 		
 		if(WizardState.confirmContact.equals(adminUser.getWizardState())){
-			throw new ValidationException(new ValidationMessage("You must either search for an existing contact or choose to create a new contact."));
+			throw new ValidationException(new Message("You must either search for an existing contact or choose to create a new contact."));
 		} else if(WizardState.createContact.equals(adminUser.getWizardState())){
 			UserBizlet.validateUserContact(adminUser, e);
-			if(e.getSubordinates().size()>0){
+			if(e.getMessages().size()>0){
 				throw e;
 			}
 			
@@ -33,7 +33,7 @@ public class Next implements ServerSideAction<User> {
 			adminUser.setWizardState(WizardState.confirmUserNameAndPassword);
 		} else if(WizardState.confirmUserNameAndPassword.equals(adminUser.getWizardState())){
 			UserBizlet.validateUserNameAndPassword(adminUser,e );
-			if(e.getSubordinates().size()>0){
+			if(e.getMessages().size()>0){
 				throw e;
 			}
 			

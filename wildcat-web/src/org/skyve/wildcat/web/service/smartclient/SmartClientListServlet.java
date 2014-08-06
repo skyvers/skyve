@@ -25,7 +25,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -853,9 +853,9 @@ System.out.println(criterium);
 					e.printStackTrace();
 					e1.printStackTrace();
 					if (valueBinding == null) {
-						throw new ValidationException(new ValidationMessage("Please enter a properly formatted " + valueDescription));
+						throw new ValidationException(new Message("Please enter a properly formatted " + valueDescription));
 					}
-					throw new ValidationException(new ValidationMessage(valueBinding.replace('.', '_'), "Please enter a properly formatted " + valueDescription));
+					throw new ValidationException(new Message(valueBinding.replace('.', '_'), "Please enter a properly formatted " + valueDescription));
 				}
 			}
 		}

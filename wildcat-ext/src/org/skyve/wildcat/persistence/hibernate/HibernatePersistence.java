@@ -81,6 +81,7 @@ import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -887,7 +888,9 @@ t.printStackTrace();
 					}
 				}
 				catch (ValidationException e) {
-					ValidationUtil.processErrorMessageBindings(customer, e, beanToSave, bean);
+					for (Message message : e.getMessages()) {
+						ValidationUtil.processErrorMessageBindings(customer, message, beanToSave, bean);
+					}
 					throw e;
 				}
 
@@ -956,7 +959,9 @@ t.printStackTrace();
 						}
 					}
 					catch (ValidationException e) {
-						ValidationUtil.processErrorMessageBindings(customer, e, beanToSave, bean);
+						for (Message message : e.getMessages()) {
+							ValidationUtil.processErrorMessageBindings(customer, message, beanToSave, bean);
+						}
 						throw e;
 					}
 				}
@@ -1736,7 +1741,9 @@ t.printStackTrace();
 			((PersistentBean) beanToDelete).setBizLock(new OptimisticLock(user.getName(), new Date()));
 		}
 		catch (ValidationException e) {
-			ValidationUtil.processErrorMessageBindings(customer, e, beanToDelete, beanToDelete);
+			for (Message message : e.getMessages()) {
+				ValidationUtil.processErrorMessageBindings(customer, message, beanToDelete, beanToDelete);
+			}
 			throw e;
 		}
 	}

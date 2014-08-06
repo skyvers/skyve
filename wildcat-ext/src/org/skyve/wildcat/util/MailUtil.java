@@ -22,7 +22,6 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
 
 public class MailUtil {
 	private MailUtil() {
@@ -58,7 +57,7 @@ public class MailUtil {
 		}
 		catch (Exception e) {
 			UtilImpl.LOGGER.log(Level.SEVERE, "Email was not written", e);
-			throw new ValidationException(new ValidationMessage("Email was not written..."));
+			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not written..."));
 		}
 	}
 	
@@ -90,7 +89,7 @@ public class MailUtil {
 		}
 		catch (Exception e) {
 			UtilImpl.LOGGER.log(Level.SEVERE, "Email was not sent", e);
-			throw new ValidationException(new ValidationMessage("Email was not sent..."));
+			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not sent..."));
 		}
 	}
 

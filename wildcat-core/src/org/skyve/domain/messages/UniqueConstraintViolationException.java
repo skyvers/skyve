@@ -1,19 +1,19 @@
 package org.skyve.domain.messages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 
  */
-public class UniqueConstraintViolationException extends DomainException implements ErrorException {
+public class UniqueConstraintViolationException extends DomainException implements MessageException {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 2245888585799230814L;
 
-	private ValidationMessage validationMessageDelegate;
-
 	private String constraintName;
+	private List<Message> messages = new ArrayList<>(1);
 	
 	/**
 	 * 
@@ -22,7 +22,19 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 */
 	public UniqueConstraintViolationException(String constraintName, String message) {
 		super(message);
-		validationMessageDelegate = new ValidationMessage(message);
+		messages.add(new Message(message));
+		this.constraintName = constraintName;
+	}
+
+	/**
+	 * 
+	 * @param constraintName
+	 * @param binding
+	 * @param message
+	 */
+	public UniqueConstraintViolationException(String constraintName, String binding, String message) {
+		super(message);
+		messages.add(new Message(binding, message));
 		this.constraintName = constraintName;
 	}
 
@@ -34,51 +46,8 @@ public class UniqueConstraintViolationException extends DomainException implemen
 		return constraintName;
 	}
 
-	/**
-	 * 
-	 */
 	@Override
-	public void addBinding(String binding) {
-		validationMessageDelegate.addBinding(binding);
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public Iterable<String> getBindings() {
-		return validationMessageDelegate.getBindings();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public String getErrorMessage() {
-		return validationMessageDelegate.getErrorMessage();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public List<ErrorMessage> getSubordinates() {
-		return validationMessageDelegate.getSubordinates();
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public void setBindingPrefix(String bindingPrefixWithDot) {
-		validationMessageDelegate.setBindingPrefix(bindingPrefixWithDot);
-	}
-
-	/**
-	 * 
-	 */
-	@Override
-	public ValidationMessage getDelegate() {
-		return validationMessageDelegate;
+	public List<Message> getMessages() {
+		return messages;
 	}
 }

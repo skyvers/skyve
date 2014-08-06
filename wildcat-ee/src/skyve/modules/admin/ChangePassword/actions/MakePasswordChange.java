@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.ValidationMessage;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -51,14 +51,12 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			sb.append(AdminUtil.validatePasswordComplexityMessage(cm));
 			sb.append("\nPlease re-enter and confirm the password.");
 
-			ValidationMessage message = new ValidationMessage(ChangePassword.newPasswordPropertyName, sb.toString());
+			Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 			throw new ValidationException(message);
 		}
 
-		if (!newPassword.equals(confirmPassword)) // these 2 are mandatory in
-		// the document
-		{
-			ValidationMessage message = new ValidationMessage(ChangePassword.newPasswordPropertyName,
+		if (! newPassword.equals(confirmPassword)) { // these 2 are mandatory in the document
+			Message message = new Message(ChangePassword.newPasswordPropertyName,
 					"You did not type the same password.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);
 			throw new ValidationException(message);

@@ -10,8 +10,8 @@ import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.ErrorMessageVisitor;
-import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.job.JobStatus;
 import org.skyve.metadata.MetaData;
@@ -128,15 +128,11 @@ public abstract class AbstractWildcatJob implements InterruptableJob, MetaData {
 			status = JobStatus.failed;
 			persistence.rollback();
 
-			if (t instanceof ValidationException) {
+			if (t instanceof MessageException) {
 				getLog().add("Job Failed :- ");
-				new ErrorMessageVisitor() {
-					@Override
-					protected void accept(String message, 
-											Iterable<String> bindings) {
-						getLog().add(message);
-					}
-				}.visit((ValidationException) t);
+				for (Message em : ((MessageException) t).getMessages()) {
+					getLog().add(em.getErrorMessage());
+				}
 			}
 			else if (t.getMessage() != null) {
 				getLog().add("Job Failed :- " + t.getMessage());

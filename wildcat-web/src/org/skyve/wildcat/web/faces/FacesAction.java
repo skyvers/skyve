@@ -10,7 +10,8 @@ import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
-import org.skyve.domain.messages.ErrorMessage;
+import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.Message;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
 public abstract class FacesAction<T> {
@@ -31,9 +32,10 @@ public abstract class FacesAction<T> {
 			persistence.rollback();
 			t.printStackTrace();
 			
-			if (t instanceof ErrorMessage) {
-				ErrorMessage em = (ErrorMessage) t;
-				processErrors(fc, em);
+			if (t instanceof MessageException) {
+				for (Message em : ((MessageException) t).getMessages()) {
+					processErrors(fc, em);
+				}
 			}
 			else {
 				FacesMessage msg = new FacesMessage(t.getMessage(), t.getMessage());
@@ -44,8 +46,23 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
-	private static void processErrors(FacesContext context, ErrorMessage em) {
-		boolean bound = false;
+	/**
+	 * If the message is bound, add it globally and add it to all it's bindings.
+	 * If the message is not bound, just add it globally.
+	 * The approach relies on the template.xhtmls having something like...
+	 * 
+	 * <p:messages id="messages" globalOnly="true" autoUpdate="true" />
+	 * <p:growl id="growl" globalOnly="true" showDetail="false" autoUpdate="true" />
+	 * 
+	 * and
+	 * 
+	 * <p:message for="<binding>" on each input widget.
+	 * Adding messages manually for each type of message display mechanism affords the most flexibility.
+	 * 
+	 * @param context
+	 * @param em
+	 */
+	private static void processErrors(FacesContext context, Message em) {
 		String message = em.getErrorMessage();
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
 		for (String binding : em.getBindings()) {
@@ -53,19 +70,10 @@ public abstract class FacesAction<T> {
 			for (UIComponent component : components) {
 				if (component.isRendered()) {
 					context.addMessage(component.getClientId(), msg);
-					bound = true;
 				}
 			}
 		}
-		if (! bound) {
-			context.addMessage(null, msg);
-		}
-		List<ErrorMessage> subs = em.getSubordinates();
-		if (subs != null) {
-			for (ErrorMessage sub : subs) {
-				processErrors(context, sub);
-			}
-		}
+		context.addMessage(null, msg);
 	}
 	
 	public abstract T callback() throws Exception;
@@ -102,9 +110,15 @@ public abstract class FacesAction<T> {
 		if (ve != null) {
 			String expression = ve.getExpressionString();
 			int bindingIndex = expression.indexOf(binding);
-			// found a match if binding is at the end of the expression (minus the last '}')
-			if ((bindingIndex >= 0) && (bindingIndex + binding.length() == expression.length() - 1)) {
-				result.add(base);
+			// found a match if binding is at the end of the expression (minus the last "}" or minus the last "']}" or minus the last "}']}")
+			if (bindingIndex > 0) { // found a match somewhere
+				int endBindingIndex = bindingIndex + binding.length();
+				int expressionLength = expression.length();
+				if ((endBindingIndex == expressionLength - 1) || // "}" standard expression
+						(endBindingIndex == expressionLength - 3) || // "']}" BeanMapAdapter binding expression
+						(endBindingIndex == expressionLength - 4)) { // "}']} BeanMapAdapter binding replacement expression
+					result.add(base);
+				}
 			}
 		}
 
