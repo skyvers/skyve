@@ -10,6 +10,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.wildcat.metadata.view.widget.bound.input.Combo;
 import org.skyve.wildcat.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.wildcat.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.wildcat.metadata.view.widget.bound.input.Geometry;
 import org.skyve.wildcat.metadata.view.widget.bound.input.HTML;
 import org.skyve.wildcat.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.wildcat.metadata.view.widget.bound.input.LookupDescription;
@@ -37,13 +38,14 @@ public class WidgetReference implements MetaData {
 
 	@XmlElementRefs({@XmlElementRef(type = ContentImage.class),
 						@XmlElementRef(type = ContentLink.class), 
-						@XmlElementRef(type = HTML.class),
 						@XmlElementRef(type = CheckBox.class),
 						@XmlElementRef(type = ColourPicker.class), 
 						@XmlElementRef(type = Combo.class), 
-						@XmlElementRef(type = Radio.class),
+						@XmlElementRef(type = Geometry.class),
+						@XmlElementRef(type = HTML.class),
 						@XmlElementRef(type = LookupDescription.class),
 						@XmlElementRef(type = Password.class), 
+						@XmlElementRef(type = Radio.class),
 						@XmlElementRef(type = RichText.class), 
 						@XmlElementRef(type = Slider.class),
 						@XmlElementRef(type = Spinner.class),

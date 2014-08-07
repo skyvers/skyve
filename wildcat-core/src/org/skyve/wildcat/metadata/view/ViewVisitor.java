@@ -515,7 +515,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 							Bound defaultWidget = attribute.getDefaultInputWidget();
 							String definedBinding = defaultWidget.getBinding();
 							try {
-								// Temporarily set the binding to the default widget binding
+								// Temporarily set the binding in the default widget binding
 								defaultWidget.setBinding(binding);
 								visitWidget(defaultWidget, parentVisible, parentEnabled);
 							}

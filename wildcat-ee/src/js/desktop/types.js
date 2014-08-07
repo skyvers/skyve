@@ -1828,14 +1828,23 @@ GeometryItem.addProperties({
     width: 100,
     operator: 'gWithin',
 	validOperators: GeometryItem.validOperators,
-	selectOnFocus: true,
-    icons: [{
-        src: 'icons/map.png',
-        prompt: 'Click to set or see the geometry on a map',
-        click: function(form, item, icon) {
-    		WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
-        }
-    }]
+	selectOnFocus: true
+});
+GeometryItem.addMethods({
+	init: function(config) {
+		this.icons = [{
+	        src: 'icons/map.png',
+	        prompt: 'Click to set or see the geometry on a map',
+	        click: function(form, item, icon) {
+	    		WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
+	        }
+	    }];
+		if (config.icons) {
+			this.icons.addList(config.icons);
+		}
+		
+		this.Super("init", arguments);
+	}
 });
 isc.SimpleType.create({
     name: "geometry",
