@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Staff" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Someone who works for this organisation
+		]]>
+	</documentation>
+	<persistent name="WHO_Staff" />
+	<singularAlias>Staff</singularAlias>
+	<pluralAlias>Staff Members</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return getContact().getName();
+		]]>
+	</bizKey>
+	<attributes>
+		<association type="aggregation" name="contact">
+			<displayName>Contact</displayName>
+			<documentName>Contact</documentName>
+		</association>
+		<text name="staffCode">
+			<displayName>Code</displayName>
+			<length>50</length>
+		</text>
+		<date name="dateOfBirth">
+			<displayName>Date of Birth</displayName>
+		</date>
+		<text name="roleTitle">
+			<displayName>Role Title</displayName>
+			<shortDescription>The person's organisational title or role</shortDescription>
+			<length>200</length>
+		</text>
+		<association type="aggregation" name="baseOffice">
+			<displayName>Base Office</displayName>
+			<shortDescription>The office this person usually operates from.</shortDescription>
+			<documentName>Office</documentName>
+		</association>
+		<geometry name="location">
+			<displayName>Location</displayName>
+		</geometry>
+		<enum name="status">
+			<displayName>Status</displayName>
+			<values>
+				<value code="inOffice" description="In the Office"/>
+				<value code="outOffice" description="Out of the Office"/>
+				<value code="onLeave" description="On Leave"/>
+				<value code="atLunch" description="At Lunch"/>
+			</values>
+		</enum>
+		<dateTime name="dueBack">
+			<displayName>Due Back</displayName>
+			<shortDescription>If not in the office, when the staff member is due back.</shortDescription>
+		</dateTime>
+	</attributes>
+</document>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="whosin" title="Who's In?" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>list</homeRef>
+	<homeDocument>Staff</homeDocument>
+	<documents>
+		<document ref="Office" />
+		<document ref="Staff" />
+
+		<document ref="Contact" moduleRef="admin" />
+		<document ref="User" moduleRef="admin" />
+	</documents>
+	<queries>
+		<query name="qStaff" documentName="Staff">
+			<displayName>All Staff</displayName>
+			<description>All Staff</description>
+			<columns>
+				<column binding="contact.name" />
+				<column binding="roleTitle" />
+				<column binding="status" />
+				<column binding="dueBack" />
+				<column binding="location" />
+			</columns>
+		</query>
+	</queries>
+	<roles>
+		<role name="manager">
+			<description>Manages offices and staff.</description>
+			<privileges>
+				<document name="Office" permission="CRUDC" />
+				<document name="Staff" permission="CRUDC" />
+			</privileges>
+		</role>
+		<role name="staffMember">
+			<description>A staff member.</description>
+			<privileges>
+				<document name="Office" permission="_R__C" />
+				<document name="Staff" permission="_RU_C" />
+			</privileges>
+		</role>
+	</roles>
+	<menu>
+		<grid name="Offices" document="Office">
+			<role name="manager" />
+		</grid>
+		<grid name="All Staff" query="qStaff">
+			<uxui name="desktop" />
+			<role name="manager" />
+		</grid>
+		<map name="Staff Locations" document="Staff" geometryBinding="location" >
+			<uxui name="desktop" />
+			<role name="manager" />
+		</map>
+	</menu>
+</module>

@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jcr-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.0.jar"/>
 	<classpathentry kind="output" path="javaee/wildcat.ear/apps.jar"/>
 </classpath>

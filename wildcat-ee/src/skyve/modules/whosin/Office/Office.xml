@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Office" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			An official location where staff operate.
+		]]>
+	</documentation>
+	<persistent name="WHO_Office" />
+	<singularAlias>Office</singularAlias>
+	<pluralAlias>Offices</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return modules.whosin.Office.OfficeBizlet.bizKey(this);
+		]]>
+	</bizKey>
+	<attributes>
+		<text name="levelUnit">
+			<displayName>Level and Unit number</displayName>
+			<length>200</length>
+		</text>
+		<text name="buildingName">
+			<displayName>Building Name</displayName>
+			<length>200</length>
+		</text>
+		<text name="streetAddress">
+			<displayName>Street Address</displayName>
+			<length>200</length>
+		</text>
+		<text name="suburb">
+			<displayName>Suburb</displayName>
+			<length>200</length>
+		</text>
+		<text name="postCode">
+			<displayName>Post Code</displayName>
+			<length>4</length>
+			<format mask="####" />
+		</text>
+		<text name="phone">
+			<displayName>Phone</displayName>
+			<length>14</length>
+			<format mask="(##) #### ####" />
+		</text>
+		<geometry name="boundary">
+			<displayName>Boundary</displayName>
+			<shortDescription>The boundary around the office.</shortDescription>
+		</geometry>
+	</attributes>
+</document>
