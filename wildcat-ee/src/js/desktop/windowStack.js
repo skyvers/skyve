@@ -15,7 +15,8 @@ WindowStack.addClassProperties({
 						showCloseButton, // show to close button in the window title bar
 						items, // the items to show in the window
 						height, // height of window - can specify without width
-						width) { // width of window - can specify null as height to only set width
+						width, // width of window - can specify null as height to only set width
+						closeButtonRefreshes) { // true to refresh opener on close button, or false otherwise
 		WindowStack._margin += 50;
 		var result = WindowStack._unused.pop();
 
@@ -30,6 +31,9 @@ WindowStack.addClassProperties({
 			}
 			result.setWidth(windowWidth);
 			result.setHeight(windowHeight);
+			result.closeClick = function() {
+				WindowStack.popoff(closeButtonRefreshes ? true : false);
+			}
 		}
 		else {
 			result = isc.Window.create({
@@ -50,7 +54,7 @@ WindowStack.addClassProperties({
 				height: windowHeight,
 				sizeSet: sizeSet,
 				closeClick: function() {
-					WindowStack.popoff(false); // dont rerender the opener view
+					WindowStack.popoff(closeButtonRefreshes ? true : false);
 				}
 			});
 		}

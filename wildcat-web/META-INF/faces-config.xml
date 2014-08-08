@@ -150,4 +150,8 @@
 		<converter-id>AssociationAutoComplete</converter-id>
 		<converter-class>org.skyve.wildcat.web.faces.converters.select.AssociationAutoCompleteConverter</converter-class>
 	</converter>
+	<converter>
+		<converter-id>Geometry</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.geometry.GeometryConverter</converter-class>
+	</converter>
 </faces-config>

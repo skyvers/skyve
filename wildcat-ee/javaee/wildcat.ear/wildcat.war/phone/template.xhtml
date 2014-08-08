@@ -29,9 +29,10 @@
 			    $.mobile.defaultDialogTransition = 'none';
 			    $.mobile.useFastClick = true;
 			</script>
+			<ui:insert name="head" />
 		</h:head>
 		<h:body>
-			<p:growl id="growl" globalOnly="true" showDetail="false" autoUpdate="true" />
+			<p:growl id="growl" widgetVar="growl" globalOnly="true" showDetail="false" autoUpdate="true" />
 			<ui:insert name="pages" />
 		</h:body>
 	</f:view>
