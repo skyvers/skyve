@@ -10,8 +10,6 @@ import java.util.List;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DocumentNumber;
 
-import org.skyve.wildcat.bizport.StandardGenerator;
-import org.skyve.wildcat.bizport.StandardLoader;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.bizport.BizPortException;
@@ -20,8 +18,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -38,6 +36,8 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
+import org.skyve.wildcat.bizport.StandardGenerator;
+import org.skyve.wildcat.bizport.StandardLoader;
 
 /**
  * Utility methods applicable across application modules.
@@ -65,53 +65,6 @@ public class ModulesUtil {
 		}
 	}
 
-	/** the rate of Goods and Services Tax applicable in Australia */
-	public static final Decimal2 GST_RATE = new Decimal2(0.1);
-
-	/** general status types for application documents */
-	public static enum DocumentStatus {
-		DRAFT, SUBMITTED, AUTHORISED, REJECTED, LOCKED, UNLOCKED, PAID, LODGED
-	}
-
-	public static final List<DomainValue> DOCUMENT_STATES = new ArrayList<>();
-
-	static {
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.DRAFT.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.SUBMITTED.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.AUTHORISED.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.REJECTED.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.LOCKED.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.UNLOCKED.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.PAID.toString()));
-		DOCUMENT_STATES.add(new DomainValue(DocumentStatus.LODGED.toString()));
-	}
-
-	public static final List<DomainValue> EMPLOYEE_PAYMENT_TYPES = new ArrayList<>();
-
-	static {
-		EMPLOYEE_PAYMENT_TYPES.add(new DomainValue("Salary"));
-		EMPLOYEE_PAYMENT_TYPES.add(new DomainValue("Wages"));
-	}
-
-	/** special type of payment considered to be tax */
-	public static final String TAX_PAY_SHEET_PAYMENT_TYPE = "Tax";
-
-	/** special type of payment considered to be superannuation */
-	public static final String SUPER_PAY_SHEET_PAYMENT_TYPE = "Superannuation";
-
-	/** general status of payments */
-	public static enum PaymentStatus {
-		UNPAID, PENDING, PAID, WITHHELD
-	}
-
-	public static final List<DomainValue> PAYMENT_STATUS_TYPES = new ArrayList<>();
-
-	static {
-		PAYMENT_STATUS_TYPES.add(new DomainValue(PaymentStatus.UNPAID.toString()));
-		PAYMENT_STATUS_TYPES.add(new DomainValue(PaymentStatus.PENDING.toString()));
-		PAYMENT_STATUS_TYPES.add(new DomainValue(PaymentStatus.PAID.toString()));
-		PAYMENT_STATUS_TYPES.add(new DomainValue(PaymentStatus.WITHHELD.toString()));
-	}
 
 	/** general types of time-based frequencies */
 	public static enum OccurenceFrequency {
@@ -133,31 +86,6 @@ public class ModulesUtil {
 		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
 	}
 
-	/** subset of time-based frequencies relevant for paysheets */
-	public static final List<DomainValue> PAY_SHEET_PAYMENT_FREQUENCIES = new ArrayList<>();
-
-	static {
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Irregularly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Weekly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Fortnightly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Monthly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Quarterly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.HalfYearly.toString()));
-		PAY_SHEET_PAYMENT_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
-	}
-
-	/** subset of time-based frequencies relevant for invoices */
-	public static final List<DomainValue> INVOICING_FREQUENCIES = new ArrayList<>();
-
-	static {
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Irregularly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Weekly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Fortnightly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Monthly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Quarterly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.HalfYearly.toString()));
-		INVOICING_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
-	}
 
 	/** subset of frequencies relevant for use as terms */
 	public static final List<DomainValue> TERM_FREQUENCIES = new ArrayList<>();
@@ -172,60 +100,6 @@ public class ModulesUtil {
 		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
 	}
 
-	/** general priority levels */
-	public static enum PriorityType {
-		High, Medium, Low
-	}
-
-	public static final List<DomainValue> PRIORITY_TYPES = new ArrayList<>();
-
-	static {
-		PRIORITY_TYPES.add(new DomainValue(PriorityType.High.toString()));
-		PRIORITY_TYPES.add(new DomainValue(PriorityType.Medium.toString()));
-		PRIORITY_TYPES.add(new DomainValue(PriorityType.Low.toString()));
-	}
-
-	/** general specifier for accounting records */
-	public static enum CreditType {
-		Credit, Debit
-	}
-
-	public static final List<DomainValue> CREDIT_TYPES = new ArrayList<>();
-
-	static {
-		CREDIT_TYPES.add(new DomainValue(CreditType.Credit.toString()));
-		CREDIT_TYPES.add(new DomainValue(CreditType.Debit.toString()));
-	}
-
-	/**
-	 * position of payment within a period for the purposes of calculating
-	 * interest payments
-	 */
-	public static enum PaymentPosition {
-		StartOfPeriod, EndOfPeriod
-	}
-
-	public static final List<DomainValue> PAYMENT_POSITIONS = new ArrayList<>();
-
-	static {
-		PAYMENT_POSITIONS.add(new DomainValue(PaymentPosition.StartOfPeriod.toString()));
-		PAYMENT_POSITIONS.add(new DomainValue(PaymentPosition.EndOfPeriod.toString()));
-	}
-
-	/** generally accepted methods of payment */
-	public static enum PaymentMethod {
-		Cash, Cheque, EFT, Card, BPay
-	}
-
-	public static final List<DomainValue> PAYMENT_METHODS = new ArrayList<>();
-
-	static {
-		PAYMENT_METHODS.add(new DomainValue(PaymentMethod.Cash.toString()));
-		PAYMENT_METHODS.add(new DomainValue(PaymentMethod.Cheque.toString()));
-		PAYMENT_METHODS.add(new DomainValue(PaymentMethod.EFT.toString()));
-		PAYMENT_METHODS.add(new DomainValue(PaymentMethod.Card.toString()));
-		PAYMENT_METHODS.add(new DomainValue(PaymentMethod.BPay.toString()));
-	}
 
 	/** normal days of the week */
 	public static enum DayOfWeek {
@@ -344,7 +218,7 @@ public class ModulesUtil {
 		int periodCount = 1; // default period Count
 
 		if (frequency.equals(OccurenceFrequency.Daily)) {
-			// need to work out whether this year is a leap year
+			// estimated
 			periodCount = 365;
 		} else if (frequency.equals(OccurenceFrequency.Weekly)) {
 			periodCount = 52;
@@ -374,7 +248,7 @@ public class ModulesUtil {
 		int periodCount = 1; // default period Count
 
 		if (period.equals(OccurrencePeriod.Days)) {
-			// need to work out whether this year is a leap year
+			// estimated
 			periodCount = 365;
 		} else if (period.equals(OccurrencePeriod.Weeks)) {
 			periodCount = 52;
@@ -505,174 +379,6 @@ public class ModulesUtil {
 		return null;
 	}
 
-	/**
-	 * general types of whether something is considered to be an asset or
-	 * liability for accounting purposes
-	 */
-	public static enum AssetType {
-		Asset, Liability;
-	}
-
-	public static final List<DomainValue> ASSET_TYPES = new ArrayList<>();
-
-	static {
-		ASSET_TYPES.add(new DomainValue(AssetType.Asset.toString()));
-		ASSET_TYPES.add(new DomainValue(AssetType.Liability.toString()));
-	}
-
-	/**
-	 * assumed multiplier for asset type based on the assumption that assets are
-	 * positive value
-	 */
-	public static Decimal2 assetTypeMultiplier(AssetType assetType) {
-		if (assetType.equals(AssetType.Liability)) {
-			return new Decimal2(-1);
-		}
-		return new Decimal2(1);
-	}
-
-	/**
-	 * general type specifying whether the item has residual value for
-	 * accounting purposes
-	 */
-	public static enum ConsumableType {
-		// Asset is used here instead of "non-consumable"
-		Consumable, Asset
-	}
-
-	public static final List<DomainValue> CONSUMABLE_TYPES = new ArrayList<>();
-
-	static {
-		CONSUMABLE_TYPES.add(new DomainValue(ConsumableType.Consumable.toString()));
-		CONSUMABLE_TYPES.add(new DomainValue(ConsumableType.Asset.toString()));
-	}
-
-	/** general types of income for accounting purposes */
-	public static enum IncomeType {
-		// Transfer and Repayment are synonymous but included for clarity for
-		// the user
-		Income, Expense, Transfer, Repayment, Drawings, CapitalContribution, Wages, Superannuation, Interest, OtherReceipts, Fees;
-	}
-
-	public static final List<DomainValue> INCOME_TYPES = new ArrayList<>();
-
-	static {
-		INCOME_TYPES.add(new DomainValue(IncomeType.Income.toString()));
-		INCOME_TYPES.add(new DomainValue(IncomeType.Expense.toString()));
-		INCOME_TYPES.add(new DomainValue(IncomeType.Transfer.toString()));
-		INCOME_TYPES.add(new DomainValue(IncomeType.Repayment.toString()));
-	}
-
-	/**
-	 * returns the opposite income types - used for effectively negating or
-	 * reversing the transaction
-	 */
-	public static IncomeType oppositeIncomeType(String incomeType) {
-		IncomeType opposite;
-		if (IncomeType.Expense.toString().equals(incomeType)) {
-			opposite = IncomeType.Income;
-
-		} else if (IncomeType.Income.toString().equals(incomeType)) {
-			opposite = IncomeType.Expense;
-		} else {
-			opposite = IncomeType.valueOf(incomeType);
-		}
-
-		return opposite;
-	}
-
-	/**
-	 * multiplier relevant assuming that income represents positive value for
-	 * the purposes of accounting
-	 */
-	public static Decimal2 incomeTypeMultiplier(IncomeType incomeType) {
-		if (incomeType.equals(IncomeType.Expense)) {
-			return new Decimal2(-1);
-		}
-		return new Decimal2(1);
-	}
-
-	/**
-	 * income type assuming that income represents positive value for the
-	 * purposes of accounting
-	 */
-	public static IncomeType incomeTypeFromDecimal2(Decimal2 value) {
-		IncomeType incomeType;
-
-		if (value.intValue() > 0) {
-			incomeType = IncomeType.Income;
-		} else {
-			incomeType = IncomeType.Expense;
-		}
-
-		return incomeType;
-	}
-
-	/**
-	 * classifier of whether the item is subject to the Goods and Services Tax
-	 * in Australia for accounting purposes
-	 */
-	public static enum SubjectToGSTType {
-		SubjectToGST, NotSubjectToGST;
-	}
-
-	public static final List<DomainValue> SUBJECT_TO_GST_TYPES = new ArrayList<>();
-
-	static {
-		SUBJECT_TO_GST_TYPES.add(new DomainValue(SubjectToGSTType.SubjectToGST.toString()));
-		SUBJECT_TO_GST_TYPES.add(new DomainValue(SubjectToGSTType.NotSubjectToGST.toString()));
-	}
-
-	/**
-	 * whether the asset is considered to be increasing (appreciating) or
-	 * decreasing in value
-	 */
-	public static enum AppreciationType {
-		Appreciate, Depreciate;
-	}
-
-	public static final List<DomainValue> APPRECIATION_TYPES = new ArrayList<>();
-
-	static {
-		APPRECIATION_TYPES.add(new DomainValue(AppreciationType.Appreciate.toString()));
-		APPRECIATION_TYPES.add(new DomainValue(AppreciationType.Depreciate.toString()));
-	}
-
-	/**
-	 * created in anticipation of future legislative changes to the Goods and
-	 * Services Tax in Australia
-	 */
-	public static Decimal2 gstRate() {
-		// if(applicableDateOnly.after(new DateOnly()))
-		return new Decimal2(0.1);
-	}
-
-	/**
-	 * calculates the total of tax applicable under the Goods and Services Tax
-	 * in Australia
-	 */
-	public static Decimal2 valueOfGST(Decimal2 amount, boolean isExGST) {
-		if (isExGST) {
-			return amount.multiply(gstRate());
-		}
-		return amount.divide(Decimal2.ONE.add(gstRate()));
-	}
-
-	/**
-	 * calculates the total excluding tax applicable under the Goods and
-	 * Services Tax in Australia
-	 */
-	public static Decimal2 exGSTAmount(Decimal2 incGSTAmount) {
-		return incGSTAmount.multiply(Decimal2.ONE.subtract(gstRate()));
-	}
-
-	/**
-	 * calculates the total including tax applicable under the Goods and
-	 * Services Tax in Australia
-	 */
-	public static Decimal2 incGSTAmount(Decimal2 exGSTAmount) {
-		return exGSTAmount.add(valueOfGST(exGSTAmount, true));
-	}
 
 	/**
 	 * Returns the date of the first day of the month in which the specified
@@ -1043,45 +749,6 @@ public class ModulesUtil {
 		return bean;
 	}
 
-	/**
-	 * Calculates minimum repayment for loan P = iA / (1-(1+i)-N
-	 * 
-	 * @param principle
-	 *            - the principal amount of the loan
-	 * @param annualRate
-	 *            - the annual interest rate
-	 * @param term
-	 *            - the term of the loan
-	 * @param termPeriod
-	 *            - the period units of the term
-	 * @param repaymentFrequency
-	 *            - the frequency repayments are made
-	 * @return - the minimum amount of repayment to ensure the loan is repaid
-	 */
-	public static Decimal2 minimumLoanRepayment(Decimal2 principle, Decimal5 annualRate, int term, OccurrencePeriod termPeriod, OccurenceFrequency repaymentFrequency) {
-		Decimal2 minRepayment = Decimal2.ZERO;
-
-		if (principle != null && annualRate != null) {
-			int periodCount = annualPeriodCount(termPeriod);
-			int annualRepaymentCount = annualFrequencyCount(repaymentFrequency);
-
-			if (periodCount != 0 && annualRepaymentCount != 0) {
-				int totalPeriods = (annualRepaymentCount * term) / periodCount;
-				Decimal5 periodRate = annualRate.divide(new Decimal5(annualRepaymentCount));
-				minRepayment = new Decimal2(periodRate.multiply(principle.abs())).divide((Decimal5.ONE.subtract((Decimal5.ONE.add(periodRate)).pow(0 - totalPeriods))));
-			}
-		}
-		return minRepayment;
-	}
-
-	/** Wrapper for minimumLoanRepayment using annual interest rates */
-	public static Decimal2 minimumLoanRepayment(Decimal2 principle, Decimal2 annualRatePC, int term, String termPeriodString, String repaymentFrequencyString) {
-		Decimal5 annualRate = new Decimal5(annualRatePC.divide(new Decimal2(100)));
-		OccurrencePeriod termPeriod = OccurrencePeriod.valueOf(termPeriodString);
-		OccurenceFrequency repaymentFrequency = OccurenceFrequency.valueOf(repaymentFrequencyString);
-
-		return minimumLoanRepayment(principle, annualRate, term, termPeriod, repaymentFrequency);
-	}
 
 	/** returns a fomatted string representing the condition */
 	public static String getConditionName(String conditionCode) {
@@ -1268,6 +935,26 @@ public class ModulesUtil {
 		return concatWithDelim("", l, concatWithDelim("", s, r));
 	}
 
+
+	/**
+	 * Returns whether the user has access to the specified module
+	 * 
+	 * @param moduleName
+	 * @return
+	 */
+	public static boolean hasModule(String moduleName) throws MetaDataException {
+		boolean result = false;
+		User user = CORE.getPersistence().getUser();
+		Customer customer = user.getCustomer();
+		for (Module module : customer.getModules()) {
+			if (module.getName().equals(moduleName)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Generic bizport export method.
 	 * 
@@ -1375,22 +1062,4 @@ public class ModulesUtil {
 		return bean;
 	}
 
-	/**
-	 * Returns whether the user has access to the specified module
-	 * 
-	 * @param moduleName
-	 * @return
-	 */
-	public static boolean hasModule(String moduleName) throws MetaDataException {
-		boolean result = false;
-		User user = CORE.getPersistence().getUser();
-		Customer customer = user.getCustomer();
-		for (Module module : customer.getModules()) {
-			if (module.getName().equals(moduleName)) {
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
 }

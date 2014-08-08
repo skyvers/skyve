@@ -19,6 +19,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
 public class DataGroupUtil {
+	
 	/**
 	 * Iterate throughout all levels of the bean, modifying the datagroup to
 	 * that specified.
@@ -79,6 +80,13 @@ public class DataGroupUtil {
 		return result;
 	}
 	
+	/**
+	 * retrieve the data group for a given bean (from the BizDataGroupId)
+	 * 
+	 * @param bean
+	 * @return
+	 * @throws Exception
+	 */
 	public static DataGroup getBeanDataGroup(Bean bean) throws Exception{
 		DataGroup result  = null;
 		

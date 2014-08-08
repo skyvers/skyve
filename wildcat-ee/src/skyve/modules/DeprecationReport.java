@@ -10,6 +10,14 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 
+/**
+ * Report on metadata attributes which are marked as deprecated - 
+ * 
+ * Output to System.out - developer only usage
+ * 
+ * @author Matt Williams
+ *
+ */
 public abstract class DeprecationReport {
 
 	protected static String SRC_PATH; 
