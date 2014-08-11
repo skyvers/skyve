@@ -1,4 +1,0 @@
-Zip up config.xml and index.html
-Go to http://build.phonegap.com/ and Log in
-Upload the zip file and wait to see if the build works.
-http://build.phonegap.com/apps/312871/share has the apps to download.
