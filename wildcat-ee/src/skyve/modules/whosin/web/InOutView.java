@@ -1,20 +1,29 @@
 package modules.whosin.web;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.jcr.Session;
 
+import modules.admin.domain.Contact;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 
+import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.web.WebAction;
+import org.skyve.wildcat.content.ContentUtil;
+import org.skyve.wildcat.content.StreamContent;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -71,18 +80,74 @@ public class InOutView extends FacesView<Office> {
 	public void setSelectedStaff(Staff selectedStaff) {
 		this.selectedStaff = selectedStaff;
 	}
-	
+
+	private String base64Image = null;
+	public String getBase64Image() {
+		return base64Image;
+	}
+	public void setBase64Image(String base64Image) {
+		this.base64Image = base64Image;
+	}
+
 	public String saveSelectedStaff() {
 		return new FacesAction<String>() {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public String callback() throws Exception {
-				CORE.getPersistence().save(selectedStaff);
+				Persistence p = CORE.getPersistence();
+				User u = p.getUser();
+				
+				if (base64Image != null) {
+					// remove "data:image/png;base64," from the start
+					int start = base64Image.indexOf(',') + 1;
+					if (start > 0) {
+						byte[] bytes = Base64.decodeBase64(base64Image.substring(start).getBytes());
+
+						String bizCustomer = u.getCustomerName();
+						Contact contact = selectedStaff.getContact();
+						Session session = ContentUtil.getFullSession(bizCustomer);
+						try {
+							StreamContent content = new StreamContent(bizCustomer, 
+																		Contact.MODULE_NAME, 
+																		Contact.DOCUMENT_NAME,
+																		u.getDataGroupId(), 
+																		u.getId(), 
+																		contact.getBizId(), 
+																		Contact.imagePropertyName);
+							content.setUuid(contact.getImage());
+							content.setVersionable(false);
+							content.setMimeType(MimeType.png);
+							content.setStream(new ByteArrayInputStream(bytes));
+							content = ContentUtil.put(session, content, false);
+							contact.setImage(content.getUuid());
+							changedContactImageId = contact.getImage(); // the next render of graphic image will drop the cache
+							base64Image = null;
+						}
+						finally {
+							session.logout();
+						}
+					}
+				}
+
+				p.save(selectedStaff);
 				selectedStaff = null;
 				staff = retrieveStaff();
 				
 				return "pm:inout";
 			}
 		}.execute();
+	}
+	
+	// For refreshing images
+	private String changedContactImageId;
+	public boolean shouldCacheImage(String contactImageId) {
+		String processedContactImageId = Util.processStringValue(contactImageId);
+		if (processedContactImageId != null) {
+			if (processedContactImageId.equals(changedContactImageId)) {
+				changedContactImageId = null;
+				return false;
+			}
+		}
+		return true;
 	}
 }

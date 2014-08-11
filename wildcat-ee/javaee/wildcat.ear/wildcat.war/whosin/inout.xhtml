@@ -18,23 +18,32 @@
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{inOutView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<link type="text/css" media="screen" rel="stylesheet" href="whosin/jquery.cropbox.css" />
-				<script type="text/javascript" src="whosin/hammer.js"></script>
-				<script type="text/javascript" src="whosin/jquery.mousewheel.js"></script>
-				<script type="text/javascript" src="whosin/jquery.cropbox.js"></script>
+				<link type="text/css" media="screen" rel="stylesheet" href="/wildcat/whosin/jquery.cropbox.css" />
+				<script type="text/javascript" src="/wildcat/whosin/hammer.js"></script>
+				<script type="text/javascript" src="/wildcat/whosin/jquery.mousewheel.js"></script>
+				<script type="text/javascript" src="/wildcat/whosin/jquery.cropbox.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="inout">
 					<pm:header title="In/Out - #{inOutView.currentBean['bizKey']}" fixed="true">
-						<p:button value="Home" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
-						<p:button value="Logout" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
+						<p:button value="Home" 
+									styleClass="ui-btn-left ui-btn-inline" 
+									icon="ui-icon-home" 
+									href="/"
+									rendered="#{inOutView.uxUi eq 'phone'}" />
+						<p:button value="Logout" 
+									styleClass="ui-btn-right ui-btn-inline"
+									icon="ui-icon-gear"
+									href="/loggedOut"
+									rendered="#{inOutView.uxUi eq 'phone'}" />
 					</pm:header>
 					<pm:content>
 						<h:form id="inoutForm">
 							<w:view module="#{inOutView.bizModuleParameter}"
 										document="#{inOutView.bizDocumentParameter}"
 										managedBean="inOutView"
-										type="phone" />
+										type="phone" 
+										rendered="#{inOutView.uxUi eq 'phone'}" />
 							<p:dataList id="inoutList"
 											paginator="false"
 											rows="10"
@@ -47,6 +56,10 @@
 								<f:attribute name="paginatorText" value="More..." />
 								<p:column>
 									<p:commandLink action="pm:staff" update=":staff:staffHeader :staff:staffForm">
+								        <p:graphicImage value="/content?_n=#{member.contact.image}&amp;_doc=admin.Contact&amp;_b=image"
+								        					style="width:100px;height:100px;float:left"
+								        					cache="#{inOutView.shouldCacheImage(member.contact.image)}"
+								        					rendered="#{not empty member.contact.image}" />
 										<h:outputText value="#{member.contact.name}" />
 										<h:outputText value="#{member.getStatus().toDescription()}" style="float:right"/>
 										<f:setPropertyActionListener value="#{member}" target="#{inOutView.selectedStaff}" />
@@ -58,8 +71,16 @@
 				</pm:page>
 				<pm:page id="staff">
 					<pm:header id="staffHeader" title="In/Out - #{inOutView.selectedStaff.bizKey}" fixed="true">
-						<p:button value="Home" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
-						<p:button value="Logout" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
+						<p:button value="Home"
+									styleClass="ui-btn-left ui-btn-inline"
+									icon="ui-icon-home"
+									href="/"
+									rendered="#{inOutView.uxUi eq 'phone'}" />
+						<p:button value="Logout"
+									styleClass="ui-btn-right ui-btn-inline"
+									icon="ui-icon-gear"
+									href="/loggedOut"
+									rendered="#{inOutView.uxUi eq 'phone'}" />
 					</pm:header>
 					<pm:content>
 						<h:form id="staffForm">
@@ -82,16 +103,33 @@
 					                    });
 					            };
 				
-					            function readURL(input) {
+					            function setupCropping(input) {
 					                if (input.files &amp;&amp; input.files[0]) {
 					                    var reader = new FileReader();
 					                    reader.onload = function (e) {
-											$('#Photo').attr('src', e.target.result);
+					                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', e.target.result);
+											$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(e.target.result);
+											removeCropBox();
+											createCropBox();
 					                    }
 					                    reader.readAsDataURL(input.files[0]);
 					                }
 					            }
-				
+
+					            function removeCropBox() {
+						            var crop = $(PrimeFaces.escapeClientId('staff:staffForm:photo')).data('cropbox');
+						            if (crop) {
+										crop.remove();
+								    }
+						        }
+						        
+					            function createCropBox() {
+					            	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).cropbox({width: 200, height: 200, zoom: 50, showControls: 'auto'}).on('cropbox',
+										function(event, results, img) {
+											$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(img.getDataURL());
+						            	});
+						        }
+						        
 					            $(function() {
 									$('#PhotoButton').click(function() {
 										$('#PhotoPicker').trigger('click');
@@ -100,26 +138,27 @@
 							        $('#PhotoPicker').on('change', function(e) {
 							            e.preventDefault();
 							            if(this.files.length === 0) return;
-										readURL(this);
+										setupCropping(this);
 							        });
-						            $('#Photo').cropbox({width: 200, height: 200, zoom: 50, showControls: 'auto'}).on('cropbox',
-											function(event, results, img) {
-			//									alert(img.getDataURL());
-			//			            			$('#download').attr('href', img.getDataURL());
-											});
 					            });
 							</script>
 
 							<!-- Place file upload in a div size 0 with no overflow -->
 							<div style="width: 0; height: 0; overflow: hidden;">
-								<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
+								<input id="PhotoPicker" type="file" accept="image/*" capture="camera" />
 							</div>
-							<button id="PhotoButton" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera">
+							<button id="PhotoButton"
+										class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera"
+										style="visibility: #{(inOutView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
 								Photo
 							</button>
 							<div style="width:100%;text-align:center">
-								<img id="Photo" src="whosin/img.jpg" />					
+								<p:graphicImage id="photo" value="#{empty inOutView.selectedStaff.contact.image ? 
+																	'/images/blank.gif' :
+																	'/content?_n='.concat(inOutView.selectedStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
+																	cache="false" />
 							</div>
+							<h:inputHidden id="base64Image" value="#{inOutView.base64Image}" />
 							<pm:field>
 							    <p:outputLabel for="status" value="Status:" />
 								<p:selectOneRadio id="status" value="#{inOutView.selectedStaff.status}" converter="SelectItemsBean">
@@ -131,6 +170,7 @@
 							</pm:field>
 							<h:inputHidden id="location" value="#{inOutView.selectedStaff.location}" converter="Geometry" />
 							<button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-navigation"
+										style="visibility: #{(inOutView.uxUi eq 'phone') ? 'visible' : 'hidden'}"
 										onclick="geoLocate(); return false">
 								Set Current Location
 							</button>

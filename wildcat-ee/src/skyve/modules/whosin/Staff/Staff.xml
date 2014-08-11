@@ -15,7 +15,7 @@
 		]]>
 	</bizKey>
 	<attributes>
-		<association type="aggregation" name="contact">
+		<association name="contact" type="aggregation">
 			<displayName>Contact</displayName>
 			<documentName>Contact</documentName>
 		</association>
