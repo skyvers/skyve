@@ -24,14 +24,14 @@
 		</query>
 	</queries>
 	<roles>
-		<role name="manager">
+		<role name="Manager">
 			<description>Manages offices and staff.</description>
 			<privileges>
 				<document name="Office" permission="CRUDC" />
 				<document name="Staff" permission="CRUDC" />
 			</privileges>
 		</role>
-		<role name="staffMember">
+		<role name="StaffMember">
 			<description>A staff member.</description>
 			<privileges>
 				<document name="Office" permission="_R__C" />
@@ -41,15 +41,15 @@
 	</roles>
 	<menu>
 		<grid name="Offices" document="Office">
-			<role name="manager" />
+			<role name="Manager" />
 		</grid>
 		<grid name="All Staff" query="qStaff">
 			<uxui name="desktop" />
-			<role name="manager" />
+			<role name="Manager" />
 		</grid>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
-			<role name="manager" />
+			<role name="Manager" />
 		</map>
 	</menu>
 </module>

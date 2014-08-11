@@ -29,7 +29,7 @@ class CreateAction extends AbstractAction {
 	private static final String[] ROLES = new String[] {"admin.BasicUser",
 															"admin.ContactViewer",
 															"admin.SecurityAdministrator",
-															};
+															"whosin.Manager"};
 	
 	CreateAction(KickStartPanel panel) {
 		super("Create");

@@ -5,45 +5,49 @@
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<hbox pixelMemberPadding="10">
-	    <form pixelWidth="400" border="true" borderTitle="Office Details">
-	        <column pixelWidth="100"/>
-	        <column/>
-	        <row>
-	            <item>
-	                <default binding="levelUnit"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="buildingName"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="streetAddress"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="suburb"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="postCode"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="phone"/>
-	            </item>
-	        </row>
-	        <row>
-	            <item>
-	                <default binding="boundary"/>
-	            </item>
-	        </row>
-	    </form>
+		<vbox pixelWidth="400" border="true" borderTitle="Office Details" pixelPadding="10" pixelMemberPadding="10">
+		    <form percentageWidth="100">
+		        <column pixelWidth="100"/>
+		        <column/>
+		        <row>
+		            <item>
+		                <default binding="levelUnit"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="buildingName"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="streetAddress"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="suburb"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="postCode"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="phone"/>
+		            </item>
+		        </row>
+		        <row>
+		            <item>
+		                <default binding="boundary"/>
+		            </item>
+		        </row>
+		    </form>
+		    <hbox>
+		    </hbox>
+		</vbox>
 	    <vbox border="true" borderTitle="Map">
 			<map modelName="OfficeMap" percentageWidth="100" percentageHeight="100" />
 	    </vbox>
@@ -67,7 +71,8 @@
 						WindowStack.popup(null, 'In/Out', true, [inout], null, null, true);
 					}
 				});
-				view.addAction(b);
+				v3.addContained(isc.LayoutSpacer.create({width: 300}));
+				v3.addContained(b);
 			]]>
 		</script>
     </inject>

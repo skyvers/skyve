@@ -46,4 +46,9 @@
 			<shortDescription>The boundary around the office.</shortDescription>
 		</geometry>
 	</attributes>
+	<conditions>
+		<condition name="created">
+			<![CDATA[isPersisted()]]>
+		</condition>
+	</conditions>
 </document>
