@@ -108,6 +108,7 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.BeanContent;
 import org.skyve.wildcat.content.ContentUtil;
@@ -1105,10 +1106,19 @@ t.printStackTrace();
 				}
 
 				Query query = session.createQuery(queryString.toString());
+				if (UtilImpl.QUERY_TRACE) {
+					StringBuilder log = new StringBuilder(256);
+					log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
+					log.append(" using ").append(queryString);
+					Util.LOGGER.info(log.toString());
+				}
 				query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 				int index = 0;
 				for (@SuppressWarnings("unused") String fieldName : constraint.getFieldNames()) {
 					query.setParameter(index, constraintFieldValues.get(index));
+					if (UtilImpl.QUERY_TRACE) {
+						Util.LOGGER.info("    SET PARAM " + index + " = " + constraintFieldValues.get(index));
+					}
 					index++;
 				}
 	
