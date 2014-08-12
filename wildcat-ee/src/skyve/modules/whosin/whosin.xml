@@ -21,6 +21,7 @@
 				<column binding="contact.name" sortOrder="ascending"/>
 				<column binding="roleTitle" />
 				<column binding="status" />
+				<column binding="contact.mobile" />
 				<column binding="dueBack" />
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Update My Status" 
+			type="edit" 
+			xmlns="http://www.skyve.org/xml/view"
+			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form invisible="notExists">
+		<column percentageWidth="20" />
+		<column/>
+		<column/>
+		<row>
+			<item>
+				<default binding="myStaff.contact.name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="myStaff.contact.mobile" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="myStaff.contact.email1" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="myStaff.location" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="myStaff.status" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="myStaff.dueBack" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<action className="UpdateMyStatus" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif" />
+	</actions>
+</view>

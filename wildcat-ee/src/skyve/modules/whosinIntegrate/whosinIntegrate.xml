@@ -6,6 +6,7 @@
 	<documents>
 		<document ref="Office" />
 		<document ref="Staff" defaultQueryName="qStaff"/>
+		<document ref="MyStatus" />
 
 		<document ref="Contact" moduleRef="admin" />
 		<document ref="User" moduleRef="admin" />
@@ -18,6 +19,7 @@
 				<column binding="contact.name" sortOrder="ascending"/>
 				<column binding="roleTitle" />
 				<column binding="status" />
+				<column binding="contact.mobile" />
 				<column binding="dueBack" />
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>
@@ -30,6 +32,7 @@
 			<privileges>
 				<document name="Office" permission="CRUDC" />
 				<document name="Staff" permission="CRUDC" />
+				<document name="MyStatus" permission="_____" />
 			</privileges>
 		</role>
 		<role name="StaffMember">
@@ -37,10 +40,15 @@
 			<privileges>
 				<document name="Office" permission="_R__C" />
 				<document name="Staff" permission="_RU_C" />
+				<document name="MyStatus" permission="_____" />
 			</privileges>
 		</role>
 	</roles>
 	<menu>
+		<edit document="MyStatus" name="My Status">
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</edit>
 		<grid name="Offices" document="Office">
 			<role name="Manager" />
 			<role name="StaffMember" />
