@@ -1,11 +1,11 @@
-package modules.whosin.Office.models;
+package modules.whosinIntegrate.Office.models;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import modules.whosin.domain.Office;
-import modules.whosin.domain.Staff;
-import modules.whosin.domain.Staff.Status;
+import modules.whosinIntegrate.domain.Office;
+import modules.whosinIntegrate.domain.Staff;
+import modules.whosinIntegrate.domain.Staff.Status;
 
 import org.skyve.CORE;
 import org.skyve.metadata.view.model.map.MapFeature;

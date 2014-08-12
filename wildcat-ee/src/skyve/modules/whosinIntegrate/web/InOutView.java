@@ -1,4 +1,4 @@
-package modules.whosin.web;
+package modules.whosinIntegrate.web;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -9,8 +9,8 @@ import javax.faces.context.FacesContext;
 import javax.jcr.Session;
 
 import modules.admin.domain.Contact;
-import modules.whosin.domain.Office;
-import modules.whosin.domain.Staff;
+import modules.whosinIntegrate.domain.Office;
+import modules.whosinIntegrate.domain.Staff;
 
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;

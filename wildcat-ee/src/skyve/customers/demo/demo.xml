@@ -10,7 +10,8 @@
 	<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>
 	<modules>
 		<module name="admin" />
-		<module name="whosin" />
+		<module name="whosin"/>
+		<module name="whosinIntegrate" />
 	</modules>
-	<homeModule>admin</homeModule>
+	<homeModule>whosinIntegrate</homeModule>
 </customer>

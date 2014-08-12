@@ -1,8 +1,8 @@
-package modules.whosin.Staff;
+package modules.whosinIntegrate.Staff;
 
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
-import modules.whosin.domain.Staff;
+import modules.whosinIntegrate.domain.Staff;
 
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;

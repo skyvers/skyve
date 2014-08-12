@@ -11,7 +11,7 @@
 	<pluralAlias>Offices</pluralAlias>
 	<bizKey>
 		<![CDATA[
-			return modules.whosin.Office.OfficeBizlet.bizKey(this);
+			return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 		]]>
 	</bizKey>
 	<attributes>

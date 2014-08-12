@@ -16,10 +16,10 @@
 	</path>
 
 	<target name="touch" description="Touch the app to enable redeploy">
-		<copy todir="javaee/wildcat.ear/wildcat.war/WEB-INF/classes/modules/whosin/web" failonerror="false" >
-			<fileset dir="javaee/wildcat.ear/apps.jar/modules/whosin/web" includes="**/*.class" />
+		<copy todir="javaee/wildcat.ear/wildcat.war/WEB-INF/classes/modules/whosinIntegrate/web" failonerror="false" >
+			<fileset dir="javaee/wildcat.ear/apps.jar/modules/whosinIntegrate/web" includes="**/*.class" />
 		</copy>
-		<delete dir="javaee/wildcat.ear/apps.jar/modules/whosin/web" />
+		<delete dir="javaee/wildcat.ear/apps.jar/modules/whosinIntegrate/web" />
 
 		<delete file="javaee/*.failed" />
 		<touch file="javaee/wildcat.ear.dodeploy" />

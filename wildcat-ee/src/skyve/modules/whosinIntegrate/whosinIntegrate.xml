@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<module name="whosin" title="Who's In?" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+<module name="whosinIntegrate" title="Who's In? (Integration)" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>list</homeRef>
 	<homeDocument>Staff</homeDocument>
-	<jobs>
-		<job name="jLoadDemoData" displayName="Load Demonstration Data" className="modules.whosin.LoadDemonstrationDataJob" />
-	</jobs>
 	<documents>
 		<document ref="Office" />
 		<document ref="Staff" defaultQueryName="qStaff"/>

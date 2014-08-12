@@ -18,10 +18,10 @@
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{inOutView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<link type="text/css" media="screen" rel="stylesheet" href="/wildcat/whosin/jquery.cropbox.css" />
-				<script type="text/javascript" src="/wildcat/whosin/hammer.js"></script>
-				<script type="text/javascript" src="/wildcat/whosin/jquery.mousewheel.js"></script>
-				<script type="text/javascript" src="/wildcat/whosin/jquery.cropbox.js"></script>
+				<link type="text/css" media="screen" rel="stylesheet" href="/wildcat/whosinIntegrate/jquery.cropbox.css" />
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/hammer.js"></script>
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.mousewheel.js"></script>
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.cropbox.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="inout">
@@ -84,7 +84,7 @@
 					</pm:header>
 					<pm:content>
 						<h:form id="staffForm">
-							<!-- This needs to be in here each time to get rerendered when the mobile poage is shown, not in head -->
+							<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
 							<script type="text/javascript">
 							    geoLocate = function() {
 							    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});

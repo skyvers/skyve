@@ -43,8 +43,8 @@
 		<route outcome="/tablet/frameset.xhtml" />
 	</uxui>
 	<uxui name="phone">
-		<route outcome="/whosin/inout.xhtml">
-			<criteria webAction="e" module="whosin" document="Office" />
+		<route outcome="/whosinIntegrate/inout.xhtml">
+			<criteria webAction="e" module="whosinIntegrate" document="Office" />
 		</route>
 		<route outcome="/phone/grid.xhtml">
 			<criteria webAction="g" />
