@@ -13,6 +13,7 @@
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
+		<document ref="MyContact" />
 		<document ref="CurrentUser"/>
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
@@ -153,6 +154,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
+				<document name="MyContact" permission="_____" >
+					<action name="UpdateMyDetails"/>
+				</document>
 				<document name="CurrentUser" permission="CR__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
@@ -176,30 +180,27 @@
 		</role>
 		<role name="ViewUser">
 			<description>
-				Enough privileges and permissions to login, change password and view own contact details.
+				Enough privileges and permissions to login, change password and update own contact details.
 			</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_R__D" />
+				<document name="Contact" permission="_RU_D" />
+				<document name="MyContact" permission="_____" >
+					<action name="UpdateMyDetails"/>
+				</document>
 			</privileges>
 		</role>
 		<role name="ContactViewer">
 			<description>Can only view contacts.</description>
 			<privileges>
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
 				<document name="Contact" permission="_R__D" />
 			</privileges>
 		</role>
 		<role name="ContactManager">
 			<description>Can manage contacts.</description>
 			<privileges>
-				<document name="ChangePassword" permission="_____">
-					<action name="MakePasswordChange" />
-				</document>
 				<document name="Contact" permission="CRUDD" />
 			</privileges>
 		</role>
@@ -240,7 +241,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Job" permission="CRUDD" />
-				<document name="JobSchedule" permission="CRUDD" />
+				<document name="JobSchedule" permission="CRUDD" >
+					<action name="RunJobNow"/>
+				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
 				</document>
@@ -263,13 +266,12 @@
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 		</edit>
-		<grid query="qMyContact" name="My Details">
+		<edit document="MyContact" name="My Details">
 			<role name="BasicUser" />
 			<role name="ViewUser" />
-		</grid>
+		</edit>
 		<edit document="CurrentUser" name="Current User Details">
 			<role name="BasicUser" />
-			<role name="ViewUser" />
 		</edit>
 		<grid document="Contact" name="Contacts">
 			<role name="ContactViewer" />

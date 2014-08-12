@@ -17,7 +17,7 @@
 			<index>textual</index>
 			<length>200</length>
 		</text>
-		<enum name="contactType" required="true">
+		<enum name="contactType">
 			<displayName>Contact Type</displayName>
 			<shortDescription>Whether this contact is a person or an organisation.</shortDescription>
 			<values>

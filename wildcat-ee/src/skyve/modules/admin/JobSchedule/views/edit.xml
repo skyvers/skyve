@@ -7,7 +7,8 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<form percentageWidth="100" border="true" borderTitle="Job Details">
 		<column percentageWidth="20" />
-		<column percentageWidth="80" />
+		<column percentageWidth="40" />
+		<column percentageWidth="40" />
 		<row>
 			<item>
 				<combo binding="jobName" />
