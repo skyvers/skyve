@@ -4,8 +4,8 @@
 			xmlns="http://www.skyve.org/xml/module"
 			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<homeRef>list</homeRef>
-	<homeDocument>User</homeDocument>
+	<homeRef>edit</homeRef>
+	<homeDocument>ChangePassword</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 	</jobs>	
@@ -195,12 +195,18 @@
 		<role name="ContactViewer">
 			<description>Can only view contacts.</description>
 			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>			
 				<document name="Contact" permission="_R__D" />
 			</privileges>
 		</role>
 		<role name="ContactManager">
 			<description>Can manage contacts.</description>
 			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>			
 				<document name="Contact" permission="CRUDD" />
 			</privileges>
 		</role>
@@ -254,6 +260,9 @@
 				Privileges and permissions to login but no native visibility of the admin module.
 			</description>
 			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>			
 				<document name="Contact" permission="_RU_U" />
 				<document name="User" permission="_RU_U"/>
 				<document name="Group" permission="_R__C" />
