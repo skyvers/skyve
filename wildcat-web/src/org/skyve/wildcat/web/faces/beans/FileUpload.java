@@ -75,7 +75,7 @@ public class FileUpload {
 		FacesContext fc = FacesContext.getCurrentInstance();
 
 		if ((context == null) || (action == null)) {
-			UtilImpl.LOGGER.warning("Malformed URL on Upload Action - context, binding, or action is null");
+			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context, binding, or action is null");
 			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 	        fc.addMessage(null, msg);
 	        return;
@@ -97,7 +97,7 @@ public class FileUpload {
 	
 			AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
 			if (webContext == null) {
-				UtilImpl.LOGGER.warning("Malformed URL on Upload Action - context does not exist");
+				UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
 				FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
 		        FacesContext.getCurrentInstance().addMessage(null, msg);
 		        return;

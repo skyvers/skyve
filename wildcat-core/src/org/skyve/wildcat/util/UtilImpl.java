@@ -38,11 +38,10 @@ public class UtilImpl {
 	}
 
 	public static boolean XML_TRACE = true;
-	public static boolean CLASS_LOADER_TRACE = false;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
 	public static boolean COMMAND_TRACE = false;
-	public static boolean RENDER_TRACE = false;
+	public static boolean FACES_TRACE = false;
 	public static boolean SQL_TRACE = false;
 	public static boolean CONTENT_TRACE = false;
 	public static boolean SECURITY_TRACE = false;

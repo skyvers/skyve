@@ -7,7 +7,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Util;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 
 public class GetBeansAction extends FacesAction<List<Bean>> {
@@ -22,6 +24,8 @@ public class GetBeansAction extends FacesAction<List<Bean>> {
 	
 	@Override
 	public List<Bean> callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetBeansAction - bizModule=" + bizModule + " : queryName=" + queryName);
+
 		Query query = ActionUtil.getQuery(bizModule, queryName);
 		DocumentQuery documentQuery = query.constructDocumentQuery(null, null);
 		

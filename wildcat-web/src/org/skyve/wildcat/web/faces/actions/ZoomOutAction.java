@@ -10,6 +10,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.util.UtilImpl;
@@ -28,6 +29,8 @@ public class ZoomOutAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction");
+
 		// Call the bizlet
 		Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 		User user = CORE.getUser();
@@ -36,7 +39,6 @@ public class ZoomOutAction extends FacesAction<Void> {
 		Document document = module.getDocument(customer, currentBean.getBizDocument());
 		Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 		if (bizlet != null) {
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.ZoomOut);
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " +  facesView.getWebContext());
 			currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, facesView.getWebContext());
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);

@@ -3,7 +3,9 @@ package org.skyve.wildcat.web.faces.actions;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -15,6 +17,8 @@ public class RemoveAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("RemoveAction");
+
 		Bean bean = facesView.getBean();
 		String viewBinding = facesView.getViewBinding();
 		int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");

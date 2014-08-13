@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
 import org.skyve.wildcat.web.faces.beans.FacesView;
@@ -29,7 +30,7 @@ public class WildcatPhaseListener implements PhaseListener {
 	@Override
 	public void afterPhase(PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
-//System.out.println("AFTER " + phaseId + " : " + event.getFacesContext().getResponseComplete());
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("WildcatPhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
 		try {
 			if (PhaseId.RENDER_RESPONSE.equals(phaseId)) {
 				afterResponseRendered(event);
@@ -62,14 +63,14 @@ public class WildcatPhaseListener implements PhaseListener {
 		// restore from the session - used when http redirect is used to navigate to a new view
 		// restore from the view root - used when within the same view-scoped bean
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
-			System.out.println("SET PERSISTENCE FROM SESSION");
+			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("WildcatPhaseListener - SET PERSISTENCE FROM SESSION");
 			FacesView<?> view = (FacesView<?>) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			restore(view);
 		}
 		else if (vr != null) {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
-				System.out.println("SET PERSISTENCE FROM VIEW");
+				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("WildcatPhaseListener - SET PERSISTENCE FROM VIEW");
 				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
 				restore(view);
 			}
@@ -114,10 +115,10 @@ public class WildcatPhaseListener implements PhaseListener {
 			}
 		}
 		finally {
-System.out.println("DISCONNECT PERSISTENCE");
+			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("WildcatPhaseListener - DISCONNECT PERSISTENCE");
 			AbstractPersistence persistence = AbstractPersistence.get();
 			persistence.commit(true);
-WebUtil.logConversationsStats();
+			if (UtilImpl.FACES_TRACE) WebUtil.logConversationsStats();
 		}
 	}
 }

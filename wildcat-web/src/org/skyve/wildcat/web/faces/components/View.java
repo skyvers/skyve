@@ -14,11 +14,14 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.view.ViewImpl;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.UserAgent.UserAgentType;
+import org.skyve.wildcat.web.faces.ComponentRenderer;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.FacesUtil;
 import org.skyve.wildcat.web.faces.FacesViewVisitor;
@@ -31,13 +34,7 @@ public class View extends HtmlPanelGroup {
     @Override
     public void encodeBegin(FacesContext context) throws IOException {
     	if (getChildCount() == 0) {
-//System.out.println("GENERATE FOR " + this + " : " + FacesContext.getCurrentInstance() + " : " + this.getId());
-//System.out.println("FACET = " + getFacet("edit"));
-//System.out.println("STATE = " + getStateHelper().get("edit"));
-
-//		getChildren().clear();
-		
-			Map<String, Object> attributes = getAttributes();
+ 			Map<String, Object> attributes = getAttributes();
 			final String moduleName = (String) attributes.get("module");
 			final String documentName = (String) attributes.get("document");
 	    	final String managedBeanName = (String) attributes.get("managedBean");
@@ -45,6 +42,17 @@ public class View extends HtmlPanelGroup {
 	    	final String widgetId = (String) attributes.get("widgetId");
 	    	final String process = (String) attributes.get("process");
 	    	final String update = (String) attributes.get("update");
+
+	   		if (UtilImpl.FACES_TRACE) {
+	   			UtilImpl.LOGGER.info("View - GENERATE moduleName=" + moduleName + 
+	   									" : documentName=" + documentName + 
+	   									" : managedBeanName=" + managedBeanName + 
+	   									" : type=" + type + 
+	   									" : widgetId=" + widgetId + 
+	   									" : process=" + process + 
+	   									" : update=" + update + 
+	   									" : managedBeanName=" + managedBeanName);
+	   		}
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
 	    	final String uxui = (String) fc.getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
@@ -54,8 +62,6 @@ public class View extends HtmlPanelGroup {
 	    	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-//					FacesView facesView = FacesUtil.getManagedBean(managedBeanName);
-					
 					User user = CORE.getUser();
 			        Customer customer = user.getCustomer();
 			        Module module = customer.getModule(moduleName);
@@ -64,7 +70,6 @@ public class View extends HtmlPanelGroup {
 			        FacesViewVisitor fvv = null;
 			        org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit);
 			        if (view != null) {
-//System.out.println("VISIT!!");
 		        		fvv = new FacesViewVisitor(user,
 													(CustomerImpl) customer,
 													(ModuleImpl) module, 
@@ -76,8 +81,6 @@ public class View extends HtmlPanelGroup {
 													process,
 													update);
 	                    fvv.visit();
-//	                	getFacets().put("edit", edit);
-//	                	View.this.getStateHelper().put("edit", edit);
 	                    View.this.getChildren().add(fvv.getFacesView());
 	                }
 	                view = repository.getView(uxui, customer, document, ViewType.create);
@@ -99,6 +102,8 @@ public class View extends HtmlPanelGroup {
 	                return null;
 				}
 			}.execute();
+			
+			if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
 		}
 
 		super.encodeBegin(context);

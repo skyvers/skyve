@@ -10,7 +10,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -32,7 +34,9 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-    	AbstractPersistence persistence = AbstractPersistence.get();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ExecuteActionAction - actionName=" + actionName + " : collectionName=" + collectionName + " : elementBizId=" + elementBizId);
+
+		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, collectionName, elementBizId);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();

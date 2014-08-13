@@ -4,8 +4,10 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -17,7 +19,8 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-//System.out.println("GO " + this);
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction");
+		
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
 		org.skyve.wildcat.metadata.user.User internalUser = (org.skyve.wildcat.metadata.user.User) persistence.getUser();
 		Customer customer = internalUser.getCustomer();
@@ -44,11 +47,14 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 			facesView.setWebActionParameter(webAction);
 		}
 
-System.out.println("GO " + facesView.getWebActionParameter() + " : " + facesView.getBizModuleParameter() + " : " + facesView.getBizDocumentParameter() + " : " + facesView.getQueryNameParameter());
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction - GO a=" + facesView.getWebActionParameter() + 
+													" : m=" + facesView.getBizModuleParameter() + 
+													" : d=" + facesView.getBizDocumentParameter() + 
+													" : q=" + facesView.getQueryNameParameter() + 
+													" : i=" + facesView.getBizIdParameter());
 		switch (webAction) {
 		case e:
 			new EditAction<>(facesView).callback(); // execute without error trapping
-//System.out.println("EDIT BEAN = " + FacesView.this.getBean());
 			new SetTitleAction(facesView).callback(); // execute without error trapping
 			break;
 		case g:

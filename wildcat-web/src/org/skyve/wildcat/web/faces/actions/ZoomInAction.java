@@ -9,6 +9,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
@@ -26,6 +27,8 @@ public class ZoomInAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomInAction - listBinding=" + listBinding + " : bizId=" + bizId);
+
 		String viewBinding = facesView.getViewBinding();
 		StringBuilder sb = new StringBuilder(64);
 		if (viewBinding != null) {
@@ -42,7 +45,6 @@ public class ZoomInAction extends FacesAction<Void> {
 		Document collectionDocument = collectionModule.getDocument(customer, currentBean.getBizDocument());
 		Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
 		if (bizlet != null) {
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Edit);
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + facesView.getWebContext());
 			currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, facesView.getBean(), facesView.getWebContext());
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);

@@ -69,24 +69,20 @@ public abstract class DomainGenerator {
 		}
 
 		if (args.length != 2) { // allow for debug mode if there are 2 arguments
-			UtilImpl.CLASS_LOADER_TRACE = false;
 			UtilImpl.COMMAND_TRACE = false;
 			UtilImpl.CONTENT_TRACE = false;
 			UtilImpl.HTTP_TRACE = false;
 			UtilImpl.QUERY_TRACE = false;
-			UtilImpl.RENDER_TRACE = false;
 			UtilImpl.SECURITY_TRACE = false;
 			UtilImpl.BIZLET_TRACE = false;
 			UtilImpl.SQL_TRACE = false;
 			UtilImpl.XML_TRACE = false;
 		}
 		else {
-			UtilImpl.CLASS_LOADER_TRACE = true;
 			UtilImpl.COMMAND_TRACE = true;
 			UtilImpl.CONTENT_TRACE = true;
 			UtilImpl.HTTP_TRACE = true;
 			UtilImpl.QUERY_TRACE = true;
-			UtilImpl.RENDER_TRACE = true;
 			UtilImpl.SECURITY_TRACE = true;
 			UtilImpl.BIZLET_TRACE = true;
 			UtilImpl.SQL_TRACE = true;

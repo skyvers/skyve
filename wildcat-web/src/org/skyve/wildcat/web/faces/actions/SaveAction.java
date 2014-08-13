@@ -11,6 +11,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -29,7 +30,9 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-    	AbstractPersistence persistence = AbstractPersistence.get();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
+
+		AbstractPersistence persistence = AbstractPersistence.get();
 		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 
 		// Run the bizlet
@@ -40,7 +43,6 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 		Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 		if (bizlet != null) {
 			ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ian);
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + facesView.getWebContext());
 			targetBean = bizlet.preExecute(ian, targetBean, null, facesView.getWebContext());
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
