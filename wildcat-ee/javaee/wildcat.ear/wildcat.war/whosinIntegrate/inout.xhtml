@@ -55,11 +55,14 @@
 								</f:facet>
 								<f:attribute name="paginatorText" value="More..." />
 								<p:column>
-									<p:commandLink action="pm:staff" update=":staff:staffHeader :staff:staffForm">
-								        <p:graphicImage value="/content?_n=#{member.contact.image}&amp;_doc=admin.Contact&amp;_b=image"
+									<p:commandLink action="pm:staff" update=":staff:staffHeader :staff:staffForm">		
+								        <p:graphicImage value="#{empty member.contact.image ?
+																'/images/UnknownContact.gif' :								        						
+								        						'/content?_n='.concat(member.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
 								        					style="width:100px;height:100px;float:left"
 								        					cache="#{inOutView.shouldCacheImage(member.contact.image)}"
-								        					rendered="#{not empty member.contact.image}" />
+								        />
+								        					
 										<h:outputText value="#{member.contact.name}" />
 										<h:outputText value="#{member.getStatus().toDescription()}" style="float:right"/>
 										<f:setPropertyActionListener value="#{member}" target="#{inOutView.selectedStaff}" />
@@ -154,7 +157,7 @@
 							</button>
 							<div style="width:100%;text-align:center">
 								<p:graphicImage id="photo" value="#{empty inOutView.selectedStaff.contact.image ? 
-																	'/images/blank.gif' :
+																	'/images/UnknownContact.gif' :
 																	'/content?_n='.concat(inOutView.selectedStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
 																	cache="false" />
 							</div>
