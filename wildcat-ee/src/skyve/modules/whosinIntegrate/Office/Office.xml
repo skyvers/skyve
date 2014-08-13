@@ -50,5 +50,8 @@
 		<condition name="created">
 			<![CDATA[isPersisted()]]>
 		</condition>
+		<condition name="manager">
+			<![CDATA[isUserInRole("whosin","Manager")]]>
+		</condition>
 	</conditions>
 </document>

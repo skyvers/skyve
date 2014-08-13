@@ -199,4 +199,13 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 	public boolean isNotCreated() {
 		return (! isCreated());
 	}
+
+	@XmlTransient
+	public boolean isManager() {
+		return (isUserInRole("whosin","Manager"));
+	}
+
+	public boolean isNotManager() {
+		return (! isManager());
+	}
 }

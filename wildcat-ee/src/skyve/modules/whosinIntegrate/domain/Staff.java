@@ -301,4 +301,31 @@ return getContact().getName();
 		preset(dueBackPropertyName, dueBack);
 		this.dueBack = dueBack;
 	}
+
+	@XmlTransient
+	public boolean isCanChange() {
+		return (isManager() || isMe());
+	}
+
+	public boolean isNotCanChange() {
+		return (! isCanChange());
+	}
+
+	@XmlTransient
+	public boolean isManager() {
+		return (isUserInRole("whosin","Manager"));
+	}
+
+	public boolean isNotManager() {
+		return (! isManager());
+	}
+
+	@XmlTransient
+	public boolean isMe() {
+		return (modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this));
+	}
+
+	public boolean isNotMe() {
+		return (! isMe());
+	}
 }
