@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Staff" type="edit" xmlns="http://www.skyve.org/xml/view"
-	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view title="Staff" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<form>
 		<column percentageWidth="20" />
@@ -8,63 +7,63 @@
 		<column />
 		<row>
 			<item>
-				<default binding="contact.name" />
+				<textField binding="contact.name" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="contact.mobile" />
+				<textField binding="contact.mobile" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="contact.email1" />
+				<textField binding="contact.email1" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
+				<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" disabled="notCanChange" />
 			</item>
 		</row>
 
 		<row>
 			<item>
-				<default binding="staffCode" />
+				<textField binding="staffCode" disabled="notManager" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="dateOfBirth" />
+				<textField binding="dateOfBirth" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="roleTitle" />
+				<textField binding="roleTitle" disabled="notManager" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="baseOffice" />
+				<lookupDescription descriptionBinding="bizKey" binding="baseOffice" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="location" />
+				<geometry binding="location" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="status" />
+				<combo binding="status" disabled="notCanChange" />
 			</item>
 		</row>
 		<row>
 			<item>
-				<default binding="dueBack" />
+				<textField binding="dueBack" disabled="notCanChange" />
 			</item>
 		</row>
-	</form>	
+	</form>
 	<actions>
 		<defaults />
 	</actions>
-	<newParameters />	
+	<newParameters />
 </view>

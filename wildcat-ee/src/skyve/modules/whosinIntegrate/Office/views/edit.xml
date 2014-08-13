@@ -11,37 +11,37 @@
 		        <column/>
 		        <row>
 		            <item>
-		                <default binding="levelUnit"/>
+		                <textField binding="levelUnit" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="buildingName"/>
+		                <textField binding="buildingName" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="streetAddress"/>
+		                <textField binding="streetAddress" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="suburb"/>
+		                <textField binding="suburb" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="postCode"/>
+		                <textField binding="postCode" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="phone"/>
+		                <textField binding="phone" disabled="notManager"/>
 		            </item>
 		        </row>
 		        <row>
 		            <item>
-		                <default binding="boundary"/>
+		                <geometry binding="boundary" disabled="notManager"/>
 		            </item>
 		        </row>
 		    </form>

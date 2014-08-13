@@ -53,4 +53,15 @@
 			<shortDescription>If not in the office, when the staff member is due back.</shortDescription>
 		</dateTime>
 	</attributes>
+	<conditions>
+		<condition name="manager">
+			<![CDATA[isUserInRole("whosin","Manager")]]>
+		</condition>	
+		<condition name="me">
+			<![CDATA[modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this)]]>
+		</condition>
+		<condition name="canChange">
+			<![CDATA[isManager() || isMe()]]>
+		</condition>
+	</conditions>
 </document>

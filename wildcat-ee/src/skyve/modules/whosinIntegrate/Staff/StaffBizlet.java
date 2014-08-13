@@ -10,6 +10,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 
 public class StaffBizlet extends Bizlet<Staff>{
 	private static final long serialVersionUID = -5073318444540975484L;
@@ -26,5 +27,10 @@ public class StaffBizlet extends Bizlet<Staff>{
 		bean.setContact(contact);
 		
 		return bean;
+	}
+	
+	public static boolean staffIsMe(Staff bean){
+		Persistence pers = CORE.getPersistence();
+		return pers.getUser().getContactId().equals(bean.getContact().getBizId());
 	}
 }
