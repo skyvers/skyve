@@ -2,7 +2,7 @@
 <module name="whosin" title="Who's In?" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>list</homeRef>
-	<homeDocument>Staff</homeDocument>
+	<homeDocument>Office</homeDocument>
 	<jobs>
 		<job name="jLoadDemoData" displayName="Load Demonstration Data" className="modules.whosin.LoadDemonstrationDataJob" />
 	</jobs>
@@ -67,11 +67,13 @@
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
+			<role name="StaffMember" />
 		</grid>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
+			<role name="StaffMember" />
 		</map>
 	</menu>
 </module>
