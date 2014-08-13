@@ -14,10 +14,12 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.metadata.model.document.Association;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
@@ -33,7 +35,9 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
-    	String bizModule = bean.getBizModule();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
+
+		String bizModule = bean.getBizModule();
     	String bizDocument = bean.getBizDocument();
 
     	Customer customer = CORE.getUser().getCustomer();

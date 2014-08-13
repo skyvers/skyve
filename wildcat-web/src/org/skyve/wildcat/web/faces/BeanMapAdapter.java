@@ -27,14 +27,14 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 	}
 	
 	public T getBean() {
-//System.out.println("BMA:GB " + bean);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getBean " + bean);
 		return bean;
 	}
 	
 	public void setBean(T bean) {
 		this.bean = bean;
 		delegate.clear();
-//System.out.println("BMA:SB " + bean);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.setBean " + bean);
 	}
 	
 	@Override
@@ -49,13 +49,13 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 
 	@Override
 	public boolean containsKey(Object key) {
-//System.out.println("BMA:CK " + key);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.containsKey " + key);
 		return delegate.containsKey(key);
 	}
 
 	@Override
 	public boolean containsValue(Object value) {
-//System.out.println("BMA:CV " + value);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.containsValue " + value);
 		return delegate.containsValue(value);
 	}
 
@@ -95,7 +95,7 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 				}
 				delegate.put(binding, result);
 
-//System.out.println("***GET " + key + " = " + result);
+				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.get " + key + " = " + result);
 				return result;
 			}
 		}.execute();
@@ -103,7 +103,7 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 
 	@Override
 	public Object put(String key, Object value) {
-//System.out.println("***SET " + key + " to " + value);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.put " + key + " to " + value);
 		set(key, value);
 		return delegate.put(key, value);
 	}
@@ -143,7 +143,7 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
 		final String key = new StringBuilder(64).append(bizModule).append('.').append(bizDocument).append('.').append(binding).toString();
-//System.out.println("DOMAIN KEY = " + key);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
 		List<SelectItem> result = lists.get(key);
 		if (result == null) {
 			result = new GetSelectItemsAction(bean, binding, includeEmptyItem).execute();

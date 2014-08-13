@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -33,6 +34,8 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction");
+
 		String bizModule = facesView.getBizModuleParameter();
 		if (bizModule == null) {
 			throw new IllegalStateException("bizModule is required");
@@ -64,14 +67,13 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				// this is for the cancel, ok and delete buttons
 				String referer = ec.getRequestHeaderMap().get("referer");
 				facesView.getHistory().push(referer);
-//System.out.println("PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
+				if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 				webContext = new FacesWebContext();
 				webContext.setConversation(AbstractPersistence.get());
 				webContext.setCurrentBean(bean);
 
 				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 				if (bizlet != null) {
-					UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.New);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
 	    			bean = (T) bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
@@ -94,14 +96,13 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			// this is for the cancel, ok and delete buttons
 			String referer = ec.getRequestHeaderMap().get("referer");
 			facesView.getHistory().push(referer);
-//System.out.println("PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
+			if (UtilImpl.FACES_TRACE) Util.LOGGER.info("EditAction - PUSH REFERER OF " + referer + " yields " + facesView.getHistory().size());
 			webContext = new FacesWebContext();
 			webContext.setConversation(persistence);
 			webContext.setCurrentBean(bean);
 
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
-				UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Edit);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
     			bean = (T) bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);

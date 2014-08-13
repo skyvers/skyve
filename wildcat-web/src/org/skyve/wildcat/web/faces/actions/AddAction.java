@@ -13,9 +13,11 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.util.UtilImpl;
+import org.skyve.wildcat.web.faces.ComponentRenderer;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -32,7 +34,9 @@ public class AddAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-    	StringBuilder newViewBinding = new StringBuilder(32);
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding);
+		
+		StringBuilder newViewBinding = new StringBuilder(32);
     	String viewBinding = facesView.getViewBinding();
 		if (viewBinding != null) {
 			newViewBinding.append(viewBinding).append('.');
@@ -56,7 +60,6 @@ public class AddAction extends FacesAction<Void> {
 		// Call the bizlet
 		Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
 		if (bizlet != null) {
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Add);
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + facesView.getWebContext());
 			newBean = bizlet.preExecute(ImplicitActionName.Add, newBean, facesView.getBean(), facesView.getWebContext());
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);

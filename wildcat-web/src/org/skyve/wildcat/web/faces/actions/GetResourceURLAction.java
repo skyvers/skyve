@@ -2,6 +2,8 @@ package org.skyve.wildcat.web.faces.actions;
 
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.faces.FacesAction;
 
@@ -15,6 +17,8 @@ public class GetResourceURLAction extends FacesAction<String> {
 	
 	@Override
 	public String callback() throws Exception {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetResourceURLAction - binding=" + binding);
+
 		String contentId = (String) Binder.get(bean, binding);
 		if (contentId == null) {
 			return "images/blank.gif";

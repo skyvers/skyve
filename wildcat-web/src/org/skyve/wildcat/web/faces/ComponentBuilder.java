@@ -19,7 +19,6 @@ import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 
@@ -97,7 +96,6 @@ public class ComponentBuilder {
 
 	private void setId(UIComponent component) {
 		component.setId(managedBean.nextId());
-//System.out.println(component.getId() + " : " + component);
 	}
 
 	public PanelGrid panelGrid(Integer pixelWidth,
@@ -646,7 +644,7 @@ public class ComponentBuilder {
 			}
 		}
 		expression.append('}');
-//System.out.println("MEL = " + expression.toString());
+
 		return ef.createMethodExpression(elc,
 											expression.toString(),
 											null,
@@ -791,22 +789,22 @@ public class ComponentBuilder {
     	return result;
     }
     
-    public HtmlSelectOneMenu selectOneMenu(String bindingPrefix,
-	    									String binding,
-	                                        String title,
-	                                        boolean required,
-	                                        String disabled,
-    										Integer pixelWidth) {
-    	HtmlSelectOneMenu result = (HtmlSelectOneMenu) input(SelectOneMenu.COMPONENT_TYPE,
-    															bindingPrefix,
-    															binding,
-    															title,
-    															required,
-    															disabled);
+    public SelectOneMenu selectOneMenu(String bindingPrefix,
+    									String binding,
+                                        String title,
+                                        boolean required,
+                                        String disabled,
+										Integer pixelWidth) {
+    	SelectOneMenu result = (SelectOneMenu) input(SelectOneMenu.COMPONENT_TYPE,
+														bindingPrefix,
+														binding,
+														title,
+														required,
+														disabled);
     	// Do not default pixel width to 100% as it causes renderering issues on the drop button on the end.
     	// The control sets its width by default based on the font metrics of the drop-down values.
     	addSize(result, null, pixelWidth, null, null, null, null); 
-        result.setConverter(new SelectItemsBeanConverter());
+    	result.setConverter(new SelectItemsBeanConverter());
         return result;
     }
     
@@ -1112,7 +1110,7 @@ public class ComponentBuilder {
         	sb.append(" and ").append(extraELConditionToAppend);
         }
         sb.append('}');
-//System.out.println("EL = " + sb);
+
         return ef.createValueExpression(elc, sb.toString(), typeReturned);
     }
 	

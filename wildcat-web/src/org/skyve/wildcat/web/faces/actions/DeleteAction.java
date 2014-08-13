@@ -14,6 +14,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -29,7 +30,9 @@ public class DeleteAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-    	AbstractPersistence persistence = AbstractPersistence.get();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("DeleteAction");
+
+		AbstractPersistence persistence = AbstractPersistence.get();
 		PersistentBean beanToDelete = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -67,7 +70,6 @@ public class DeleteAction extends FacesAction<Void> {
 		// Run preExecute after the copy is taken, in case we rollback
 		Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 		if (bizlet != null) {
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Delete);
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + ", " + facesView.getWebContext());
 			persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
 														persistentBeanToDelete, 

@@ -8,6 +8,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -19,7 +21,9 @@ public class SetTitleAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
-       	if (facesView.getBean() != null) {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SetTitleAction");
+
+		if (facesView.getBean() != null) {
 	    	Customer customer = CORE.getUser().getCustomer();
 			Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());

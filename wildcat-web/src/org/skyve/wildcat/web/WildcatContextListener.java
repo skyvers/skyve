@@ -51,11 +51,11 @@ public class WildcatContextListener implements ServletContextListener {
 		}
 
 		UtilImpl.XML_TRACE = Boolean.parseBoolean(properties.getProperty("XML_TRACE"));
-		UtilImpl.CLASS_LOADER_TRACE = Boolean.parseBoolean(properties.getProperty("CLASS_LOADER_TRACE"));
 		UtilImpl.HTTP_TRACE = Boolean.parseBoolean(properties.getProperty("HTTP_TRACE"));
 		UtilImpl.COMMAND_TRACE = Boolean.parseBoolean(properties.getProperty("COMMAND_TRACE"));
+		UtilImpl.COMMAND_TRACE = Boolean.parseBoolean(properties.getProperty("FACES_TRACE"));
 		UtilImpl.QUERY_TRACE = Boolean.parseBoolean(properties.getProperty("QUERY_TRACE"));
-		UtilImpl.RENDER_TRACE = Boolean.parseBoolean(properties.getProperty("RENDER_TRACE"));
+		UtilImpl.FACES_TRACE = Boolean.parseBoolean(properties.getProperty("FACES_TRACE"));
 		UtilImpl.SQL_TRACE = Boolean.parseBoolean(properties.getProperty("SQL_TRACE"));
 		UtilImpl.CONTENT_TRACE = Boolean.parseBoolean(properties.getProperty("CONTENT_TRACE"));
 		UtilImpl.SECURITY_TRACE = Boolean.parseBoolean(properties.getProperty("SECURITY_TRACE"));

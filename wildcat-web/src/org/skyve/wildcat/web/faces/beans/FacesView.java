@@ -136,13 +136,17 @@ public class FacesView<T extends Bean> extends Harness {
 		if (! fc.isPostback()) {
 			new PreRenderAction<>(this).execute();
 		}
-//		else {
-//System.out.println("POSTPACK = " + getWebActionParameter() + " : " + getBizModuleParameter() + " : " + getBizDocumentParameter() + " : " + queryNameParameter);
-//		}
+		else if (UtilImpl.FACES_TRACE) {
+			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
+									" : m=" + getBizModuleParameter() + 
+									" : d=" + getBizDocumentParameter() + 
+									" : q=" + queryNameParameter + 
+									" : i=" + getBizIdParameter());
+		}
 	}
 
 	public void ok() {
-System.out.println("ok");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - ok");
 		new SaveAction<>(this, true).execute();
 		
 		FacesContext c = FacesContext.getCurrentInstance();
@@ -157,7 +161,7 @@ System.out.println("ok");
 	}
 
 	public void save() {
-System.out.println("save");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - save");
 		new SaveAction<>(this, false).execute();
 		new SetTitleAction(this).execute();
 		
@@ -168,6 +172,7 @@ System.out.println("save");
 	}
 	
 	public void cancel() {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - cancel");
 		try {
 			FacesContext.getCurrentInstance().getExternalContext().redirect(history.pop());
 		}
@@ -177,7 +182,7 @@ System.out.println("save");
 	}
 
 	public void delete() {
-System.out.println("delete");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - delete");
 		new DeleteAction(this).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
@@ -193,9 +198,9 @@ System.out.println("delete");
 
 	// This corresponds to the lower case action name used in data grid generation (there is already edit())
 	public void navigate(String listBinding, String bizId) {
-System.out.println("zoom in to " + listBinding + '.' + bizId);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoom in to " + listBinding + '.' + bizId);
 		new ZoomInAction(this, listBinding, bizId).execute();
-System.out.println("view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	// for navigate-on-select in data grids
@@ -207,13 +212,13 @@ System.out.println("view binding now " + viewBinding);
 	}
 	
 	public void add(String listBinding) {
-System.out.println("add to " + listBinding);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + listBinding);
 		new AddAction(this, listBinding).execute();
-System.out.println("view binding now " + viewBinding);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	public void zoomout() {
-System.out.println("zoomout");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - zoomout");
 		new ZoomOutAction(this).execute();
 	}
 
@@ -221,12 +226,12 @@ System.out.println("zoomout");
 	 * This method only removes elements from collections, it doesn't null out associations.
 	 */
 	public void remove() {
-System.out.println("remove " + viewBinding);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
 		new RemoveAction(this).execute();
 	}
 
 	public void action(String actionName, String listBinding, String bizId) {
-System.out.println("EXECUTE ACTION " + actionName + " for grid " + listBinding);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - EXECUTE ACTION " + actionName + " for grid " + listBinding);
 		new ExecuteActionAction<>(this, 
 									actionName, 
 									UtilImpl.processStringValue(listBinding),
@@ -264,7 +269,7 @@ System.out.println("EXECUTE ACTION " + actionName + " for grid " + listBinding);
 	 				key.append('.').append(parameterName).append('=').append(parameters.get(parameterName));
 	 			}
 	 		}
-System.out.println("LIST KEY = " + key);
+	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
 				List<Bean> interimBeans = new GetBeansAction(bizModule, queryName, parameters).execute();
@@ -291,14 +296,14 @@ System.out.println("LIST KEY = " + key);
 		String displayBinding = (String) attributes.get("display");
 		Map<String, Object> parameters = new TreeMap<>();
 		parameters.put(displayBinding, query);
-System.out.println("COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 		return getBeans(completeModule, completeQuery, parameters);
 	}
 	
 	// restore the webContext and current bean etc
 	public void hydrate(AbstractWebContext newWebContext)
 	throws Exception {
-System.out.println("hydrate");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - hydrate");
 		webContext = newWebContext;
 		webId = null;
 		setBean(getBean());
@@ -306,7 +311,7 @@ System.out.println("hydrate");
 
 	// remove the webContext and current bean etc leaving only the webId
 	public void dehydrate() {
-System.out.println("dehydrate");
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydrate");
 		if (webContext != null) {
 			webId = webContext.getWebId();
 		}
