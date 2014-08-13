@@ -38,6 +38,7 @@ public class MyStatusView extends FacesView<MyStatus> {
 			setWebActionParameter(WebAction.e);
 		}
 		
+		
 		// This loads the bean from the parameters and sets up ready for action
 		super.preRender();
 		
