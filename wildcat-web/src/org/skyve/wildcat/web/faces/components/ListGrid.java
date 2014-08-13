@@ -123,7 +123,8 @@ public class ListGrid extends HtmlPanelGroup {
 				<f:attribute name="paginatorText" value="More..." />
 				<f:attribute name="filter" value="true" />
 				<h:outputLink value="/?a=e&amp;m=#{row['bizModule']}&amp;d=#{row['bizDocument']}&amp;i=#{row['bizId']}">
-					<h:outputText value="#{row['bizKey']}" />
+					<h2><h:outputText value="#{row['bizKey']}" /></h2>
+					<p><h:outputText value="#{row['bizKey']}" /></p>
 				</h:outputLink>
 			</p:dataList>
 		</h:form>
@@ -296,10 +297,10 @@ public class ListGrid extends HtmlPanelGroup {
 				value.setLength(0);
 			}
 			else {
-				if (value.length() > 0) {
-					value.append(' ');
-				}
+				boolean first = (value.length() == 0);
+				value.append(first ? "<h2>" : "<p>");
 				value.append("#{row['{").append(queryColumn.getBinding()).append("}']}");
+				value.append(first ? "</h2>" : "</p>");
 			}
 		}
 		
