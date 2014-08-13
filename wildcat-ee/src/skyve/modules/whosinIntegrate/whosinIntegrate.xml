@@ -25,6 +25,14 @@
 				<column binding="location" hidden="true"/>
 			</columns>
 		</query>
+		<query name="qOfficeForPhone" documentName="Office">
+			<displayName>Offices</displayName>
+			<description>All Offices</description>
+			<columns>
+				<column binding="bizKey" sortOrder="ascending"/>
+			</columns>
+		</query>
+		
 	</queries>
 	<roles>
 		<role name="Manager">
@@ -50,15 +58,24 @@
 			<role name="StaffMember" />
 		</edit>
 		<grid name="Offices" document="Office">
+			<uxui name="desktop" />
+			<uxui name="tablet"/>
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</grid>
+		<grid name="Offices" query="qOfficeForPhone">
+			<uxui name="phone"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</grid>
 		<grid name="All Staff" query="qStaff">
 			<uxui name="desktop" />
+			<uxui name="tablet"/>
 			<role name="Manager" />
 		</grid>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
+			<uxui name="tablet"/>
 			<role name="Manager" />
 		</map>
 	</menu>
