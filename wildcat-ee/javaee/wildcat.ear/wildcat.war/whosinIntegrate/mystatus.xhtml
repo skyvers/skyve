@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    	xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pm="http://primefaces.org/mobile"
+		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    <f:view renderKitId="PRIMEFACES_MOBILE">
+		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
+		<f:metadata>
+			<f:viewParam name="i" value="#{myStatusView.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{myStatusView.preRender}"/>
+		</f:metadata>
+		<ui:composition template="../phone/template.xhtml">
+			<ui:param name="baseHref" value="#{myStatusView.baseHref}" />
+			<ui:param name="wildcatVersionComment" value="#{myStatusView.wildcatVersionComment}" />
+			<ui:define name="head">
+				<link type="text/css" media="screen" rel="stylesheet" href="/wildcat/whosinIntegrate/jquery.cropbox.css" />
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/hammer.js"></script>
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.mousewheel.js"></script>
+				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.cropbox.js"></script>
+			</ui:define>
+			<ui:define name="pages">
+				<pm:page id="mystatus">
+					<pm:header id="staffHeader" title="Status - #{myStatusView.myStaff.bizKey}" fixed="true">
+						<p:button value="Home"
+									styleClass="ui-btn-left ui-btn-inline"
+									icon="ui-icon-home"
+									href="/"
+									rendered="#{myStatusView.uxUi eq 'phone'}" />
+						<p:button value="Logout"
+									styleClass="ui-btn-right ui-btn-inline"
+									icon="ui-icon-gear"
+									href="/loggedOut"
+									rendered="#{myStatusView.uxUi eq 'phone'}" />
+					</pm:header>
+					<pm:content>
+						<h:form id="staffForm">
+							<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
+							<script type="text/javascript">
+							    geoLocate = function() {
+							    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Please wait...', severity: 'info'}]});});
+					                navigator.geolocation.getCurrentPosition(
+					                    function(position) {
+					                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:location')).val(
+												'POINT (' + position.coords.longitude + ' ' + position.coords.latitude + ')'
+					                    	);
+					    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: 'Done', severity: 'info'}]});});
+					                    },
+					                    function(error) {
+					    			    	$(function(){PrimeFaces.cw("Growl","growl",{id:"growl",widgetVar:"growl",msgs:[{summary:'GeoLocating', detail: error.message, severity: 'warn'}]});});
+					                    },
+					                    {
+					                       enableHighAccuracy: true
+					                    });
+					            };
+				
+					            function setupCropping(input) {
+					                if (input.files &amp;&amp; input.files[0]) {
+					                    var reader = new FileReader();
+					                    reader.onload = function (e) {
+					                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).attr('src', e.target.result);
+											$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(e.target.result);
+											removeCropBox();
+											createCropBox();
+					                    }
+					                    reader.readAsDataURL(input.files[0]);
+					                }
+					            }
+
+					            function removeCropBox() {
+						            var crop = $(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).data('cropbox');
+						            if (crop) {
+										crop.remove();
+								    }
+						        }
+						        
+					            function createCropBox() {
+					            	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).cropbox({width: 200, height: 200, zoom: 50, showControls: 'auto'}).on('cropbox',
+										function(event, results, img) {
+											$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(img.getDataURL());
+						            	});
+						        }
+						        
+					            $(function() {
+									$('#PhotoButton').click(function() {
+										$('#PhotoPicker').trigger('click');
+											return false;
+										});
+							        $('#PhotoPicker').on('change', function(e) {
+							            e.preventDefault();
+							            if(this.files.length === 0) return;
+										setupCropping(this);
+							        });
+					            });
+							</script>
+
+							<!-- Place file upload in a div size 0 with no overflow -->
+							<div style="width: 0; height: 0; overflow: hidden;">
+								<input id="PhotoPicker" type="file" accept="image/*" capture="camera" />
+							</div>
+							<button id="PhotoButton"
+										class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera"
+										style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
+								Photo
+							</button>
+							<div style="width:100%;text-align:center">
+								<p:graphicImage id="photo" value="#{empty myStatusView.myStaff.contact.image ? 
+																	'/images/UnknownContact.gif' :
+																	'/content?_n='.concat(myStatusView.myStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
+																	cache="false" />
+							</div>
+							<h:inputHidden id="base64Image" value="#{myStatusView.base64Image}" />
+							<pm:field>
+							    <p:outputLabel for="status" value="Status:" />
+								<p:selectOneRadio id="status" value="#{myStatusView.myStaff.status}" converter="SelectItemsBean">
+									<f:selectItem itemLabel="In the Office" itemValue="inTheOffice" />
+									<f:selectItem itemLabel="Out of the Office" itemValue="outOfTheOffice" />
+									<f:selectItem itemLabel="On Leave" itemValue="onLeave" />
+									<f:selectItem itemLabel="At Lunch" itemValue="atLunch" />
+								</p:selectOneRadio>
+							</pm:field>
+							<h:inputHidden id="location" value="#{myStatusView.myStaff.location}" converter="Geometry" />
+							<button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-navigation"
+										style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}"
+										onclick="geoLocate(); return false">
+								Set Current Location
+							</button>
+							<br/>
+							<p:commandButton value="Save" 
+												icon="ui-icon-check"
+												action="#{myStatusView.saveMyStaff}" 
+												update=":mystatus:staffForm" />
+						</h:form>
+					</pm:content>
+				</pm:page>
+			</ui:define>
+		</ui:composition>
+	</f:view>
+</html>
