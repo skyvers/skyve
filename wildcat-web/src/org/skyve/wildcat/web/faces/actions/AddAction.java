@@ -34,17 +34,18 @@ public class AddAction extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding);
+		String viewBinding = facesView.getViewBinding();
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding + " : facesView.viewBinding=" + viewBinding);
 		
 		StringBuilder newViewBinding = new StringBuilder(32);
-    	String viewBinding = facesView.getViewBinding();
 		if (viewBinding != null) {
 			newViewBinding.append(viewBinding).append('.');
 		}
 		newViewBinding.append(listBinding);
 
-		String bizModule = facesView.getBizModuleParameter();
-    	String bizDocument = facesView.getBizDocumentParameter();
+		Bean bean = facesView.getBean();
+		String bizModule = bean.getBizModule();
+    	String bizDocument = bean.getBizDocument();
 
 		User user = CORE.getUser();
     	Customer customer = user.getCustomer();
@@ -67,7 +68,7 @@ public class AddAction extends FacesAction<Void> {
 
 		// Add the new element to the collection
 		@SuppressWarnings("unchecked")
-		List<Bean> beans = (List<Bean>) Binder.get(facesView.getBean(), newViewBinding.toString());
+		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 		beans.add(newBean);
 
 		newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');

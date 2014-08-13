@@ -1138,7 +1138,8 @@ public final class BindUtil {
 						inherits = baseDocument.getExtends();
 					}
 					if (parentDocumentName == null) {
-						throw new MetaDataException(navigatingDocument.getName() + "." + binding + 
+						throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
+														navigatingDocument.getName() + " @ " + binding + 
 														" does not exist (token [parent] doesn't check out as " + navigatingDocument.getName() + 
 														" is not a child document)");
 					}
@@ -1148,7 +1149,8 @@ public final class BindUtil {
 					navigatingDocument = navigatingModule.getDocument(customer, ((Relation) attribute).getDocumentName());
 				}
 				else {
-					throw new MetaDataException(navigatingDocument.getName() + "." + binding + 
+					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
+													navigatingDocument.getName() + " @ " + binding + 
 													" does not exist (token [" + 
 													tokenizer.nextToken() +
 													"] doesn't check out)");
@@ -1158,10 +1160,9 @@ public final class BindUtil {
 			else {
 				// ignore validating implicit attributes
 				if ((attribute == null) && (! isImplicit(fieldName))) {
-					throw new MetaDataException(binding + 
-													" does not exist (last attribute not in document " +
-													navigatingDocument.getName() + 
-													')');
+					throw new MetaDataException(navigatingDocument.getOwningModuleName() + '.' + 
+													navigatingDocument.getName() + " @ " + binding + 
+													" does not exist (last attribute not in document)");
 				}
 			}
 		}
