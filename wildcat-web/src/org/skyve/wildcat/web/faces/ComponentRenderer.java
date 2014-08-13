@@ -100,7 +100,7 @@ public class ComponentRenderer {
 			putMethodExpression(attributes, "completeMethod", complete.getCompleteMethod());
 			putValue(attributes, "forceSelection", Boolean.valueOf(complete.isForceSelection()));
 			putValue(attributes, "dropdown", Boolean.valueOf(complete.isDropdown()));
-			putValueExpression(attributes, "scrollHeight", component);
+			putValue(attributes, "scrollHeight", Integer.valueOf(complete.getScrollHeight()));
 			putValue(attributes, "style", complete.getStyle());
 
 			
@@ -440,7 +440,9 @@ public class ComponentRenderer {
 		// Add general attributes
 		attributes = component.getAttributes();
 		for (String attributeName : attributes.keySet()) {
-			if ((! attributeName.startsWith("com.sun")) && (! excludedAttributeNames.contains(attributeName))) {
+			if ((! attributeName.startsWith("com.sun")) && 
+					(! excludedAttributeNames.contains(attributeName)) &&
+					(! tagAttributeNames.contains(attributeName))) {
 				out.append(' ').append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
 			}
 		}
@@ -448,7 +450,10 @@ public class ComponentRenderer {
 		// Add passthrough attributes
 		attributes = component.getPassThroughAttributes();
 		for (String attributeName : attributes.keySet()) {
-			out.append(" pt:").append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
+			if ((! excludedAttributeNames.contains(attributeName)) &&
+					(! tagAttributeNames.contains(attributeName))) {
+				out.append(" pt:").append(attributeName).append("=\"").append(attributes.get(attributeName)).append('"');
+			}
 		}
 
 		indentation += INDENT;

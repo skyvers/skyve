@@ -851,7 +851,7 @@ public class ComponentBuilder {
     	attributes.put("query", query.getName());
     	attributes.put("display", displayBinding);
     	
-    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
+    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.FALSE : null);
     	
     	return result;
     }
