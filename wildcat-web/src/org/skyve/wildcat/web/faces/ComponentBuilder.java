@@ -248,9 +248,10 @@ public class ComponentBuilder {
 								String title,
 								boolean required,
 								String disabled,
-								Integer pixelWidth) {
+								Integer pixelWidth,
+								boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		addSize(result, null, pixelWidth, null, null, null, Boolean.TRUE);
+		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
 		return result;
 	}
 	
@@ -260,12 +261,13 @@ public class ComponentBuilder {
 								boolean required,
 								String disabled,
 								Converter converter,
-								Integer pixelWidth) {
+								Integer pixelWidth,
+								boolean applyDefaultWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		addSize(result, null, pixelWidth, null, null, null, Boolean.TRUE);
+		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
 		return result;
 	}
 
@@ -276,7 +278,8 @@ public class ComponentBuilder {
 								String disabled,
 								TextFormat format,
 								Converter converter,
-								Integer pixelWidth) {
+								Integer pixelWidth,
+								boolean applyDefaultWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
 		result.setMask(determineMask(format));
 		String existingStyle = null;
@@ -299,7 +302,7 @@ public class ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		addSize(result, existingStyle, pixelWidth, null, null, null, Boolean.TRUE);
+		addSize(result, existingStyle, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
 		return result;
 	}
 
@@ -421,9 +424,10 @@ public class ComponentBuilder {
 									boolean required,
 									String disabled,
 									Integer pixelWidth,
-									Integer pixelHeight) {
+									Integer pixelHeight,
+									boolean applyDefaultWidth) {
 	    InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		addSize(result, null, pixelWidth, null, pixelHeight, null, Boolean.TRUE);
+		addSize(result, null, pixelWidth, null, pixelHeight, null, applyDefaultWidth ? Boolean.TRUE : null);
 		return result;
 	}
 
@@ -783,9 +787,10 @@ public class ComponentBuilder {
 										String binding,
                                         String title,
                                         boolean required,
-                                        Integer pixelWidth) {
+                                        Integer pixelWidth,
+                                        boolean applyDefaultWidth) {
     	ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE, bindingPrefix, binding, title, required, null);
-    	addSize(result, null, pixelWidth, null, null, null, Boolean.TRUE);
+    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
     	return result;
     }
     
@@ -825,7 +830,8 @@ public class ComponentBuilder {
     									String disabled,
     									String displayBinding,
     									Query query,
-    									Integer pixelWidth) {
+    									Integer pixelWidth,
+    									boolean applyDefaultWidth) {
     	AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
     	result.setForceSelection(true);
     	result.setDropdown(true);
@@ -845,7 +851,7 @@ public class ComponentBuilder {
     	attributes.put("query", query.getName());
     	attributes.put("display", displayBinding);
     	
-    	addSize(result, null, pixelWidth, null, null, null, Boolean.TRUE);
+    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
     	
     	return result;
     }

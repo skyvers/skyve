@@ -1107,7 +1107,8 @@ public class FacesViewVisitor extends ViewVisitor {
 											colour.getBinding(), 
 											def.getTitle(), 
 											def.isRequired(), 
-											colour.getPixelWidth());
+											colour.getPixelWidth(),
+											! UserAgentType.phone.equals(userAgentType));
 		eventSource = c;
 		addComponent(def.getTitle(), def.isRequired(), colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
 	}
@@ -1230,7 +1231,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        lookup.getDisabledConditionName(),
 	                                        ldef.getDisplayField().replace('_', '.'),
 	                                        ldef.getQuery(),
-	                                        lookup.getPixelWidth());
+	                                        lookup.getPixelWidth(),
+	                                        ! UserAgentType.phone.equals(userAgentType));
         eventSource = c;
         addComponent(def.getTitle(), def.isRequired(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
 	}
@@ -1271,7 +1273,8 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        def.getTitle(),
 				                        def.isRequired(),
 				                        password.getDisabledConditionName(),
-				                        password.getPixelWidth());
+				                        password.getPixelWidth(),
+				                        ! UserAgentType.phone.equals(userAgentType));
         eventSource = c;
         addComponent(def.getTitle(), def.isRequired(), password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
 	}
@@ -1389,7 +1392,8 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        def.isRequired(),
 				                        text.getDisabledConditionName(),
 				                        text.getPixelWidth(),
-				                        text.getPixelHeight());
+				                        text.getPixelHeight(),
+				                        ! UserAgentType.phone.equals(userAgentType));
         eventSource = c;
         addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
 	}
@@ -1457,7 +1461,8 @@ public class FacesViewVisitor extends ViewVisitor {
                     text.getDisabledConditionName(),
                     format,
                     convertConverter(converter),
-                    text.getPixelWidth());
+                    text.getPixelWidth(),
+                    ! UserAgentType.phone.equals(userAgentType));
         }
         else {
             c = b.textField(listBinding,
@@ -1466,7 +1471,8 @@ public class FacesViewVisitor extends ViewVisitor {
                                 def.isRequired(),
                                 text.getDisabledConditionName(),
                                 convertConverter(converter),
-                                text.getPixelWidth());
+                                text.getPixelWidth(),
+                                ! UserAgentType.phone.equals(userAgentType));
         }
         eventSource = c;
 		addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
