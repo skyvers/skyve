@@ -45,5 +45,10 @@
 			<displayName>Boundary</displayName>
 			<shortDescription>The boundary around the office.</shortDescription>
 		</geometry>
+		<boolean name="demoData">
+			<displayName>Demonstration Data</displayName>
+			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+		</boolean>
+		
 	</attributes>
 </document>

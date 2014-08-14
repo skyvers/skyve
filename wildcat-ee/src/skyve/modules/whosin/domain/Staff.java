@@ -56,6 +56,8 @@ public class Staff extends AbstractPersistentBean {
 	public static final String statusPropertyName = "status";
 	/** @hidden */
 	public static final String dueBackPropertyName = "dueBack";
+	/** @hidden */
+	public static final String demoDataPropertyName = "demoData";
 
 	/**
 	 * Status
@@ -144,6 +146,10 @@ public class Staff extends AbstractPersistentBean {
 	 * If not in the office, when the staff member is due back.
 	 **/
 	private DateTime dueBack;
+	/**
+	 * If this is set, the data was created by the demo data job and can safely be deleted.
+	 **/
+	private Boolean demoData;
 
 	@Override
 	@XmlTransient
@@ -300,5 +306,21 @@ return getContact().getName();
 	public void setDueBack(DateTime dueBack) {
 		preset(dueBackPropertyName, dueBack);
 		this.dueBack = dueBack;
+	}
+
+	/**
+	 * {@link #demoData} accessor.
+	 **/
+	public Boolean getDemoData() {
+		return demoData;
+	}
+
+	/**
+	 * {@link #demoData} mutator.
+	 **/
+	@XmlElement
+	public void setDemoData(Boolean demoData) {
+		preset(demoDataPropertyName, demoData);
+		this.demoData = demoData;
 	}
 }

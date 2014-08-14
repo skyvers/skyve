@@ -52,5 +52,9 @@
 			<displayName>Due Back</displayName>
 			<shortDescription>If not in the office, when the staff member is due back.</shortDescription>
 		</dateTime>
+		<boolean name="demoData">
+			<displayName>Demonstration Data</displayName>
+			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+		</boolean>
 	</attributes>
 </document>

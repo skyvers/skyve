@@ -40,6 +40,8 @@ public class Office extends AbstractPersistentBean {
 	public static final String phonePropertyName = "phone";
 	/** @hidden */
 	public static final String boundaryPropertyName = "boundary";
+	/** @hidden */
+	public static final String demoDataPropertyName = "demoData";
 
 	private String levelUnit;
 	private String buildingName;
@@ -51,6 +53,10 @@ public class Office extends AbstractPersistentBean {
 	 * The boundary around the office.
 	 **/
 	private Geometry boundary;
+	/**
+	 * If this is set, the data was created by the demo data job and can safely be deleted.
+	 **/
+	private Boolean demoData;
 
 	@Override
 	@XmlTransient
@@ -187,5 +193,21 @@ return modules.whosin.Office.OfficeBizlet.bizKey(this);
 	public void setBoundary(Geometry boundary) {
 		preset(boundaryPropertyName, boundary);
 		this.boundary = boundary;
+	}
+
+	/**
+	 * {@link #demoData} accessor.
+	 **/
+	public Boolean getDemoData() {
+		return demoData;
+	}
+
+	/**
+	 * {@link #demoData} mutator.
+	 **/
+	@XmlElement
+	public void setDemoData(Boolean demoData) {
+		preset(demoDataPropertyName, demoData);
+		this.demoData = demoData;
 	}
 }

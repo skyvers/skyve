@@ -17,6 +17,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.wildcat.util.TimeUtil;
 
@@ -46,7 +47,11 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 		try {
 			log.add("Started Loading Demonstration Data at " + new Date());
 
-			generateExampleData();
+			Persistence persistence = CORE.getPersistence();
+			clearPreviousData(persistence);
+			
+			//In this case, it's so quick, it's one step
+			generateExampleData(persistence);
 
 			setPercentComplete(100);
 			log.add("Finished Loading Demonstration Data at " + new Date());
@@ -60,8 +65,8 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 	 * Generates a set of example data for demonstration
 	 * 
 	 */
-	public static void generateExampleData() throws Exception {
-		Persistence persistence = CORE.getPersistence();
+	public static void generateExampleData(Persistence persistence) throws Exception {
+
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 
@@ -87,10 +92,17 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 
 		Geometry boundary1 = gf1.createLinearRing(vertices1);
 		newOffice1.setBoundary(boundary1);
+		newOffice1.setDemoData(Boolean.TRUE); //remember that we created this
+		
 		newOffice1 = persistence.save(newOffice1);
 
-		for(int i=0;i<120;i++){
+		for(int i=0;i<80;i++){
 			createRandomStaff(persistence, officeModule, customer, user, newOffice1, boundary1.getCentroid(), i);
+		}
+
+		//create staff in random states and positions
+		for(int i=0;i<40;i++){
+			createRandomStaff(persistence, officeModule, customer, user, newOffice1, null, i);
 		}
 
 		// create the second office
@@ -112,12 +124,19 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 
 		Geometry boundary2 = gf2.createLinearRing(vertices2);
 		newOffice2.setBoundary(boundary2);
+		newOffice2.setDemoData(Boolean.TRUE); //remember that we created this
+		
 		newOffice2 = persistence.save(newOffice2);
 
-		for(int i=0;i<80;i++){
+		for(int i=0;i<40;i++){
 			createRandomStaff(persistence, officeModule, customer, user, newOffice2, boundary2.getCentroid(), i);
 		}
 
+		//create staff in random states and positions
+		for(int i=0;i<40;i++){
+			createRandomStaff(persistence, officeModule, customer, user, newOffice2, null, i);
+		}
+		
 	}
 
 	public static void createRandomStaff(Persistence persistence, Module module, Customer customer, User user, Office baseOffice, Geometry location, int index)
@@ -130,6 +149,8 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 				"Lane", "Griffith", "Cline", "Gresham" };
 		String[] roles = { "Manager", "Sales Manager", "Sales Consultant", "Sales Support Technician", "Accountant", "Receptionist"};
 		String[] digits = {"0","1","2","3","4","5","6","7","8","9"};
+		Status[] inOfficeStates = {Status.inTheOffice, Status.atLunch};
+		Status[] outOfOfficeStates = {Status.outOfTheOffice, Status.atLunch, Status.onLeave};
 
 		//generate random indices
 		int firstNameIndex = new Random().nextInt(firstNames.length);
@@ -174,10 +195,80 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 		staff.setDateOfBirth(birthday);
 		staff.setRoleTitle(roles[roleIndex]);
 		staff.setBaseOffice(baseOffice);
-		staff.setLocation(location);
-		staff.setStatus(Status.inTheOffice);
+		
+		//set location 
+		if(location!=null){
+			staff.setLocation(location);
+			
+		} else {
+			//generate a random location in the vicinity of the base office
+			double x = baseOffice.getBoundary().getCentroid().getX();
+			double y = baseOffice.getBoundary().getCentroid().getY();
+			
+			//generate only positive offsets as anything to the west would be in the ocean!
+			double offsetX = (double) new Random().nextInt(10000)-5000;
+			double offsetY = (double) new Random().nextInt(10000)-5000;
+			x += offsetX/100000;
+			y += offsetY/100000;
+			
+			GeometryFactory gf = new GeometryFactory();
+			Coordinate c = new Coordinate(x, y);
+			Geometry point = gf.createPoint(c);
+			staff.setLocation(point);
+		}
+		
+		//set status corresponding to position
+		if(baseOffice.getBoundary().contains(staff.getLocation())){
+			staff.setStatus(inOfficeStates[new Random().nextInt(inOfficeStates.length)]);	
+		} else {
+			staff.setStatus(outOfOfficeStates[new Random().nextInt(outOfOfficeStates.length)]);	
+		}
 
+		staff.setDemoData(Boolean.TRUE); //remember that we created this
+		
 		staff = persistence.save(staff);
+		
+	}
+	
+	public static void clearPreviousData(Persistence pers) throws Exception {
+
+		//try to delete all staff (some may fail if users have been created)
+		DocumentQuery qStaff = pers.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		qStaff.getFilter().addEquals(Staff.demoDataPropertyName, Boolean.TRUE);
+		
+		List<Staff> allStaff = pers.retrieve(qStaff);
+		for(Staff s: allStaff){
+			try{
+				Contact c = s.getContact();
+				pers.delete(s);
+				pers.delete(c);
+				pers.commit(false);
+				pers.evictCached(s);
+				pers.evictCached(c);
+				
+				//after evicting start a new transaction
+				pers.begin(); 
+			} catch (Exception e){
+				//I figure these are probably not intended to be deleted, so just fail and move on				
+			}
+		}
+		
+		//try to delete all offices (some may fail if users have been created)
+		DocumentQuery qOffice = pers.newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
+		qOffice.getFilter().addEquals(Office.demoDataPropertyName, Boolean.TRUE);
+		
+		List<Office> allOffices = pers.retrieve(qOffice);
+		for(Office o: allOffices){
+			try{
+				pers.delete(o);
+				pers.commit(false);
+				pers.evictCached(o);
+				pers.begin();
+			} catch (Exception e){
+				//I figure these are probably not intended to be deleted, so just fail and move on				
+			}
+		}
+		
 		
 	}
 }
