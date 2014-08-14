@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <facelet-taglib version="2.0"
-	xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd">
-	<!-- This taglib thinly extends the primefaces p taglib - keep this in sync with new primefaces versions introduced -->
+					xmlns="http://java.sun.com/xml/ns/javaee"
+					xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+					xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd">
 	<namespace>http://bizhub.com.au/ui</namespace>
+	<tag>
+		<tag-name>conversation</tag-name>
+		<component>
+			<component-type>org.skyve.wildcat.web.faces.components.Conversation</component-type>
+			<renderer-type>javax.faces.Group</renderer-type>
+		</component>
+		<attribute>
+			<description>Unique identifier of the component in a namingContainer.</description>
+			<name>id</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>Boolean value to specify the rendering of the component, when set to false component will not be rendered.</description>
+			<name>rendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<name>managedBean</name>
+			<required>true</required>
+			<type>java.lang.String</type>
+		</attribute>
+	</tag>
 	<tag>
 		<tag-name>view</tag-name>
 		<component>

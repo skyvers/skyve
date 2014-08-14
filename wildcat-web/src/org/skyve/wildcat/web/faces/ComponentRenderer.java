@@ -204,7 +204,14 @@ public class ComponentRenderer {
 			tagName = "p:graphicImage";
 			
 			GraphicImage image = (GraphicImage) component;
-			putValue(attributes, "url", image.getUrl());
+			String url = image.getUrl();
+			if ((url == null) || ("".equals(url))) {
+				putValue(attributes, "value", image.getValue());
+				putValueExpression(attributes, "value", component);
+			}
+			else {
+				putValue(attributes, "url", url);
+			}
 			putValue(attributes, "style", image.getStyle());
 		}
 		else if (component instanceof HtmlForm) {

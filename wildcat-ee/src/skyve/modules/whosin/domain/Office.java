@@ -188,15 +188,4 @@ return modules.whosin.Office.OfficeBizlet.bizKey(this);
 		preset(boundaryPropertyName, boundary);
 		this.boundary = boundary;
 	}
-
-	@XmlTransient
-	@Override
-	public boolean isCreated() {
-		return (isPersisted());
-	}
-
-	@Override
-	public boolean isNotCreated() {
-		return (! isCreated());
-	}
 }

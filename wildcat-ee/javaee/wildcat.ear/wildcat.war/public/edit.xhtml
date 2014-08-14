@@ -16,6 +16,7 @@
 			<f:viewParam name="i" value="#{wildcat.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{wildcat.preRender}"/>
 		</f:metadata>
+		<w:conversation managedBean="wildcat" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="title" value="#{wildcat.title}" />
 			<ui:param name="baseHref" value="#{wildcat.baseHref}" />

@@ -14,10 +14,6 @@ import org.skyve.util.Binder;
 
 
 public class MyStatusBizlet extends Bizlet<MyStatus> {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5831916461072143515L;
 
 	@Override

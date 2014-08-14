@@ -2,6 +2,7 @@ package modules.whosinIntegrate.web;
 
 import java.io.ByteArrayInputStream;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
@@ -30,36 +31,15 @@ public class MyStatusView extends FacesView<MyStatus> {
 
 	@Override
 	public void preRender() {
-		boolean postback = FacesContext.getCurrentInstance().isPostback();
-		if (! postback) {
-			// set the standard parameters ready for retrieval
+		if (! FacesContext.getCurrentInstance().isPostback()) {
+			setWebActionParameter(WebAction.e);
 			setBizModuleParameter(MyStatus.MODULE_NAME);
 			setBizDocumentParameter(MyStatus.DOCUMENT_NAME);
-			setWebActionParameter(WebAction.e);
 		}
 		
-		
-		// This loads the bean from the parameters and sets up ready for action
 		super.preRender();
-		
-		if (! postback) {
-			// Get all staff for this office
-			myStaff = new FacesAction<Staff>() {
-				@Override
-				@SuppressWarnings("synthetic-access")
-				public Staff callback()
-				throws Exception {
-					return getMyStaff();
-				}
-			}.execute();
-		}
 	}
 
-	private Staff myStaff = null;
-	public Staff getMyStaff() {
-		return myStaff;
-	}
-	
 	private String base64Image = null;
 	public String getBase64Image() {
 		return base64Image;
@@ -68,13 +48,24 @@ public class MyStatusView extends FacesView<MyStatus> {
 		this.base64Image = base64Image;
 	}
 
-	public String saveStaff() {
-		return new FacesAction<String>() {
+	public void saveStaff() {
+		new FacesAction<Void>() {
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public String callback() throws Exception {
+			public Void callback() throws Exception {
+				FacesContext ctx = FacesContext.getCurrentInstance();
 				Persistence p = CORE.getPersistence();
 				User u = p.getUser();
+
+				MyStatus bean = getBean();
+				Staff staff = bean.getMyStaff();
+				if (staff == null) {
+					ctx.addMessage(null, 
+									new FacesMessage(FacesMessage.SEVERITY_ERROR, 
+														"Your user does not have a staff member assigned",
+														null));
+					return null;
+				}
 				
 				if (base64Image != null) {
 					// remove "data:image/png;base64," from the start
@@ -83,7 +74,7 @@ public class MyStatusView extends FacesView<MyStatus> {
 						byte[] bytes = Base64.decodeBase64(base64Image.substring(start).getBytes());
 
 						String bizCustomer = u.getCustomerName();
-						Contact contact = myStaff.getContact();
+						Contact contact = staff.getContact();
 						Session session = ContentUtil.getFullSession(bizCustomer);
 						try {
 							StreamContent content = new StreamContent(bizCustomer, 
@@ -108,11 +99,10 @@ public class MyStatusView extends FacesView<MyStatus> {
 					}
 				}
 
-				p.save(myStaff);
-				myStaff = null;
-				myStaff = getMyStaff();
+				staff = p.save(staff);
+				bean.setMyStaff(staff);
 				
-				return "pm:myStaff";
+				return null;
 			}
 		}.execute();
 	}

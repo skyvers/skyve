@@ -57,8 +57,6 @@ public class View extends HtmlPanelGroup {
 	    	FacesContext fc = FacesContext.getCurrentInstance();
 	    	final String uxui = (String) fc.getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
 	    	
-	    	fc.getViewRoot().getAttributes().put(FacesUtil.MANAGED_BEAN_NAME_KEY, managedBeanName);
-	    	
 	    	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {

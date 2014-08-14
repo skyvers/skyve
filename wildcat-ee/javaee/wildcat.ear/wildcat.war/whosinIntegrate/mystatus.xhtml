@@ -9,33 +9,30 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
     <f:view renderKitId="PRIMEFACES_MOBILE">
-		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
-			<f:viewParam name="i" value="#{myStatusView.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{myStatusView.preRender}"/>
 		</f:metadata>
+		<w:conversation managedBean="myStatusView" />
 		<ui:composition template="../phone/template.xhtml">
 			<ui:param name="baseHref" value="#{myStatusView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{myStatusView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<link type="text/css" media="screen" rel="stylesheet" href="/wildcat/whosinIntegrate/jquery.cropbox.css" />
-				<script type="text/javascript" src="/wildcat/whosinIntegrate/hammer.js"></script>
-				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.mousewheel.js"></script>
-				<script type="text/javascript" src="/wildcat/whosinIntegrate/jquery.cropbox.js"></script>
+				<link type="text/css" media="screen" rel="stylesheet" href="#{myStatusView.baseHref}whosinIntegrate/jquery.cropbox.css" />
+				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/hammer.js"></script>
+				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/jquery.mousewheel.js"></script>
+				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/jquery.cropbox.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="mystatus">
-					<pm:header id="staffHeader" title="Status - #{myStatusView.myStaff.bizKey}" fixed="true">
+					<pm:header id="staffHeader" title="Status - #{myStatusView.currentBean['myStaff.bizKey']}" fixed="true">
 						<p:button value="Home"
 									styleClass="ui-btn-left ui-btn-inline"
 									icon="ui-icon-home"
-									href="/"
-									rendered="#{myStatusView.uxUi eq 'phone'}" />
+									href="/"  />
 						<p:button value="Logout"
 									styleClass="ui-btn-right ui-btn-inline"
 									icon="ui-icon-gear"
-									href="/loggedOut"
-									rendered="#{myStatusView.uxUi eq 'phone'}" />
+									href="/loggedOut" />
 					</pm:header>
 					<pm:content>
 						<h:form id="staffForm">
@@ -101,7 +98,7 @@
 							<!-- Place file upload in a div size 0 with no overflow -->
 							
 							<div style="width: 0; height: 0; overflow: hidden;">
-								<input id="PhotoPicker" type="file" accept="image/*" capture="camera" />
+								<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
 							</div>
 							<button id="PhotoButton"
 										class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-camera"
@@ -109,22 +106,22 @@
 								Photo
 							</button>
 							<div style="width:100%;text-align:center">
-								<p:graphicImage id="photo" value="#{empty myStatusView.myStaff.contact.image ? 
-																	'/images/UnknownContact.gif' :
-																	'/content?_n='.concat(myStatusView.myStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
+								<p:graphicImage id="photo" value="#{empty myStatusView.currentBean['myStaff.contact.image'] ? 
+																	'/whosinIntegrate/UnknownContact.gif' :
+																	'/content?_n='.concat(myStatusView.currentBean['myStaff.contact.image']).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
 																	cache="false" />
 							</div>
 							<h:inputHidden id="base64Image" value="#{myStatusView.base64Image}" />
 							<pm:field>
 							    <p:outputLabel for="status" value="Status:" />
-								<p:selectOneRadio id="status" value="#{myStatusView.myStaff.status}" converter="SelectItemsBean">
+								<p:selectOneRadio id="status" value="#{myStatusView.currentBean['myStaff.status']}" converter="SelectItemsBean">
 									<f:selectItem itemLabel="In the Office" itemValue="inTheOffice" />
 									<f:selectItem itemLabel="Out of the Office" itemValue="outOfTheOffice" />
 									<f:selectItem itemLabel="On Leave" itemValue="onLeave" />
 									<f:selectItem itemLabel="At Lunch" itemValue="atLunch" />
 								</p:selectOneRadio>
 							</pm:field>
-							<h:inputHidden id="location" value="#{myStatusView.myStaff.location}" converter="Geometry" />
+							<h:inputHidden id="location" value="#{myStatusView.currentBean['myStaff.location']}" converter="Geometry" />
 							<button class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-icon-navigation"
 										style="visibility: #{(myStatusView.uxUi eq 'phone') ? 'visible' : 'hidden'}"
 										onclick="geoLocate(); return false">
@@ -133,7 +130,7 @@
 							<br/>
 							<p:commandButton value="Save" 
 												icon="ui-icon-check"
-												action="#{myStatusView.saveMyStaff}" 
+												action="#{myStatusView.saveStaff}" 
 												update=":mystatus:staffForm" />
 						</h:form>
 					</pm:content>

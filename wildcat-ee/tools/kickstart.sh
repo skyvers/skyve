@@ -19,9 +19,9 @@ CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/wildcat-core.jar
 CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/wildcat-ext.jar
 CLASSPATH=$CLASSPATH:lib/wildcat-tools.jar
 CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/apps.jar/
-CLASSPATH=$CLASSPATH:lib/h2-1.3.173.jar
+CLASSPATH=$CLASSPATH:../lib/h2-1.3.173.jar
 CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/geodb-0.7.jar
 CLASSPATH=$CLASSPATH:../javaee/wildcat.ear/lib/geodb_hatbox-1.0.b7.jar
-CLASSPATH=$CLASSPATH:lib/mysql-connector-java-5.1.15-bin.jar
-CLASSPATH=$CLASSPATH:lib/sqljdbc4.jar
+CLASSPATH=$CLASSPATH:../lib/mariadb-java-client-1.1.7.jar
+CLASSPATH=$CLASSPATH:../lib/sqljdbc4.jar
 java -cp $CLASSPATH org.skyve.wildcat.tools.kickstart.KickStart
