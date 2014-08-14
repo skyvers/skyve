@@ -280,16 +280,20 @@
 			<role name="ViewUser" />
 		</edit>
 		<edit document="CurrentUser" name="Current User Details">
+			<uxui name="desktop"/>
+			<uxui name="tablet"/>
 			<role name="BasicUser" />
 		</edit>
 		<grid document="Contact" name="Contacts">
+			<uxui name="desktop"/>
+			<uxui name="tablet"/>		
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</grid>
 		<group name="Security Admin">
-			<grid document="Group" name="Groups">
+			<grid document="Group" name="Groups">			
 				<role name="SecurityAdministrator" />
 			</grid>
 			<grid document="DataMaintenance" name="Data Maintenance">
@@ -310,9 +314,13 @@
 			</grid>
 		</group>
 		<grid name="Snapshots" document="Snapshot">
+			<uxui name="desktop"/>
+			<uxui name="tablet"/>		
 			<role name="BasicUser" />
 		</grid>
 		<grid name="Tags" document="Tag">
+			<uxui name="desktop"/>
+			<uxui name="tablet"/>		
 			<role name="BasicUser" />
 		</grid>
 		<edit document="Display" name="Web Stats">
