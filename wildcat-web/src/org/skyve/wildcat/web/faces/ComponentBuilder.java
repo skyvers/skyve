@@ -74,7 +74,11 @@ import org.skyve.wildcat.web.faces.converters.select.AssociationAutoCompleteConv
 import org.skyve.wildcat.web.faces.converters.select.SelectItemsBeanConverter;
 
 public class ComponentBuilder {
-    private FacesContext fc = FacesContext.getCurrentInstance();
+	private static final Integer ONE_HUNDRED = Integer.valueOf(100);
+	private static final Integer NINETY_EIGHT = Integer.valueOf(98);
+	private static final Integer NINETY_FIVE = Integer.valueOf(95);
+	
+	private FacesContext fc = FacesContext.getCurrentInstance();
     private Application a = fc.getApplication();
     private ExpressionFactory ef = a.getExpressionFactory();
     private ELContext elc = fc.getELContext();
@@ -105,7 +109,7 @@ public class ComponentBuilder {
                                 String invisible) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
         addInvisible(result, invisible, null);
-        addSize(result, null, pixelWidth, percentageWidth, pixelHeight, percentageHeight, Boolean.FALSE);
+        addSize(result, null, pixelWidth, percentageWidth, pixelHeight, percentageHeight, NINETY_EIGHT);
         setId(result);
 		return result;
 	}
@@ -182,7 +186,7 @@ public class ComponentBuilder {
 		}
 
 		addInvisible(result, invisible, null);
-		addSize(result, "border:solid 1px gray !important;", pixelWidth, null, null, null, Boolean.FALSE);
+		addSize(result, "border:solid 1px gray !important;", pixelWidth, null, null, null, NINETY_EIGHT);
 		setId(result);
 		return result;
 	}
@@ -251,7 +255,7 @@ public class ComponentBuilder {
 								Integer pixelWidth,
 								boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
+		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 	
@@ -267,7 +271,7 @@ public class ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
+		addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -302,7 +306,7 @@ public class ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		addSize(result, existingStyle, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
+		addSize(result, existingStyle, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -427,7 +431,7 @@ public class ComponentBuilder {
 									Integer pixelHeight,
 									boolean applyDefaultWidth) {
 	    InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		addSize(result, null, pixelWidth, null, pixelHeight, null, applyDefaultWidth ? Boolean.TRUE : null);
+		addSize(result, null, pixelWidth, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -736,10 +740,10 @@ public class ComponentBuilder {
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		
 		StringBuilder expression = new StringBuilder(64);
-		expression.append("#{").append(managedBeanName).append(".getResourceUrl(").append(managedBeanName).append(".currentBean['");
-		expression.append(binding).append("'])}");
+		expression.append("#{").append(managedBeanName).append(".getResourceUrl('");
+		expression.append(binding).append("')}");
 
-		result.setValueExpression("url", ef.createValueExpression(elc, expression.toString(), String.class));
+		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 		addSize(result, "border:1px solid gray;", pixelWidth, percentageWidth, pixelHeight, percentageHeight, null);
 		addInvisible(result, invisible, null);
 		setId(result);
@@ -790,7 +794,7 @@ public class ComponentBuilder {
                                         Integer pixelWidth,
                                         boolean applyDefaultWidth) {
     	ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE, bindingPrefix, binding, title, required, null);
-    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.TRUE : null);
+    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
     	return result;
     }
     
@@ -851,7 +855,7 @@ public class ComponentBuilder {
     	attributes.put("query", query.getName());
     	attributes.put("display", displayBinding);
     	
-    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? Boolean.FALSE : null);
+    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? NINETY_FIVE : null);
     	
     	return result;
     }
@@ -1157,7 +1161,7 @@ public class ComponentBuilder {
                             Integer percentageWidth,
                             Integer pixelHeight,
                             Integer percentageHeight,
-                            Boolean defaultTo100InsteadOf98Percent) {
+                            Integer defaultPercentageWidth) {
 		StringBuilder style = new StringBuilder(64);
 		boolean noWidth = true;
 		if (existingStyle != null) {
@@ -1171,8 +1175,8 @@ public class ComponentBuilder {
 	    	noWidth = false;
             style.append("width:").append(percentageWidth).append('%');
 	    }
-	    if (noWidth && (defaultTo100InsteadOf98Percent != null)) {
-	    	style.append(defaultTo100InsteadOf98Percent.booleanValue() ? "width:100%" : "width:98%");
+	    if (noWidth && (defaultPercentageWidth != null)) {
+	    	style.append("width:").append(defaultPercentageWidth).append('%');
 	    }
 	    if (pixelHeight != null) {
 	        if (style.length() > 0) {

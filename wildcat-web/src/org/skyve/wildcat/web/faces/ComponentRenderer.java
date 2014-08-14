@@ -204,13 +204,11 @@ public class ComponentRenderer {
 			tagName = "p:graphicImage";
 			
 			GraphicImage image = (GraphicImage) component;
-			String url = image.getUrl();
-			if ((url == null) || ("".equals(url))) {
-				putValue(attributes, "value", image.getValue());
-				putValueExpression(attributes, "value", component);
-			}
-			else {
-				putValue(attributes, "url", url);
+			// URL is populated from the value if present, so check the value first
+			putValue(attributes, "value", image.getValue());
+			putValueExpression(attributes, "value", component);
+			if (! attributes.containsKey("value")) {
+				putValue(attributes, "url", image.getUrl());
 			}
 			putValue(attributes, "style", image.getStyle());
 		}

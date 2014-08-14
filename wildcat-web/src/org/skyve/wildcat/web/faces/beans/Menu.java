@@ -87,9 +87,7 @@ public class Menu extends Harness {
 				result.addElement(moduleSub);
 
 				for (MenuItem item : moduleMenu.getItems()) {
-					if (item.isApplicable(uxui)) {
-						processItem(item, moduleSub, customer, thisModule);
-					}
+					processItem(item, moduleSub, customer, thisModule, uxui);
 				}
 /*				
 				if (setFirstModuleOpen) {
@@ -110,13 +108,16 @@ public class Menu extends Harness {
 	private static void processItem(MenuItem item,
 										Submenu menu,
 										Customer customer,
-										Module module)
+										Module module,
+										String uxui)
 	throws MetaDataException {
-		if (item instanceof MenuGroup) {
-			menu.getElements().add(createSubMenu((MenuGroup) item, customer, module));
-		}
-		else {
-			menu.getElements().add(createMenuItem(item, customer, module));
+		if (item.isApplicable(uxui)) {
+			if (item instanceof MenuGroup) {
+				menu.getElements().add(createSubMenu((MenuGroup) item, customer, module, uxui));
+			}
+			else {
+				menu.getElements().add(createMenuItem(item, customer, module));
+			}
 		}
 	}
 
@@ -134,11 +135,12 @@ public class Menu extends Harness {
 
 	private static Submenu createSubMenu(MenuGroup group,
 											Customer customer, 
-											Module module)
+											Module module,
+											String uxui)
 	throws MetaDataException {
 		Submenu result = new DefaultSubMenu(group.getName());
 		for (MenuItem subItem : group.getItems()) {
-			processItem(subItem, result, customer, module);
+			processItem(subItem, result, customer, module, uxui);
 		}
 
 		return result;
