@@ -63,7 +63,10 @@
 		</row>
 	</form>
 	<actions>
-		<defaults />
+		<ok invisible="notCanChange"/>
+		<save invisible="notCanChange"/>
+		<cancel/>
+		<delete invisible="notManager"/>
 	</actions>
 	<newParameters />
 </view>

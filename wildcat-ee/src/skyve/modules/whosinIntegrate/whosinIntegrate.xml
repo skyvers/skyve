@@ -48,7 +48,9 @@
 			<privileges>
 				<document name="Office" permission="_R__C" />
 				<document name="Staff" permission="_RU_C" />
-				<document name="MyStatus" permission="_____" />
+				<document name="MyStatus" permission="_____" >
+					<action name="UpdateMyStatus"/>
+				</document>
 			</privileges>
 		</role>
 	</roles>
@@ -72,6 +74,7 @@
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
+			<role name="StaffMember" />
 		</grid>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />

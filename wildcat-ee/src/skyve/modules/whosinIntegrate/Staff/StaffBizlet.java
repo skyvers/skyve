@@ -12,7 +12,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
-public class StaffBizlet extends Bizlet<Staff>{
+public class StaffBizlet extends Bizlet<Staff> {
 	private static final long serialVersionUID = -5073318444540975484L;
 
 	@Override
@@ -21,16 +21,20 @@ public class StaffBizlet extends Bizlet<Staff>{
 		Customer c = u.getCustomer();
 		Module m = c.getModule(Contact.MODULE_NAME);
 		Document d = m.getDocument(c, Contact.DOCUMENT_NAME);
-		
+
 		Contact contact = d.newInstance(u);
 		contact.setContactType(ContactType.person);
 		bean.setContact(contact);
-		
+
 		return bean;
 	}
-	
-	public static boolean staffIsMe(Staff bean){
+
+	public static boolean staffIsMe(Staff bean) {
+
 		Persistence pers = CORE.getPersistence();
-		return pers.getUser().getContactId().equals(bean.getContact().getBizId());
+		boolean result = pers.getUser().getContactId().equals(bean.getContact().getBizId());
+		return result;
+
 	}
+
 }
