@@ -75,7 +75,6 @@
 		</grid>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
-			<uxui name="tablet"/>
 			<role name="Manager" />
 		</map>
 	</menu>
