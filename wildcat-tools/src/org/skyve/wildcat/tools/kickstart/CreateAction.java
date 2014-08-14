@@ -30,7 +30,8 @@ class CreateAction extends AbstractAction {
 															"admin.ContactViewer",
 															"admin.SecurityAdministrator",
 															"admin.JobMaintainer",
-															"whosin.Manager"};
+															"whosin.Manager",
+															"whosinIntegrate.Manager"};
 	
 	CreateAction(KickStartPanel panel) {
 		super("Create");

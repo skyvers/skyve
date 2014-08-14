@@ -13,7 +13,7 @@
 			<f:viewParam name="i" value="#{inOutView.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{inOutView.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="inOutView" rendered="#{inOutView.uxUi eq 'phone'}" />
+		<w:conversation managedBean="inOutView" />
 		<ui:composition template="../phone/template.xhtml">
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{inOutView.wildcatVersionComment}" />
@@ -25,7 +25,7 @@
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="inout">
-					<pm:header title="In/Out - #{inOutView.currentBean['bizKey']}" fixed="true">
+					<pm:header title="In/Out" fixed="true">
 						<p:button value="Home" 
 									styleClass="ui-btn-left ui-btn-inline" 
 									icon="ui-icon-home" 
@@ -39,23 +39,21 @@
 					</pm:header>
 					<pm:content>
 						<h:form id="inoutForm">
-							<w:view module="#{inOutView.bizModuleParameter}"
-										document="#{inOutView.bizDocumentParameter}"
+							<h2 style="text-align:center">#{inOutView.currentBean['bizKey']}</h2>
+							<w:view module="whosinIntegrate"
+										document="Office"
 										managedBean="inOutView"
 										type="phone" 
 										rendered="#{inOutView.uxUi eq 'phone'}" />
 							<p:dataList id="inoutList"
-											paginator="false"
-											rows="10"
 											value="#{inOutView.staff}"
 											var="member"
 											pt:data-inset="true">
 								<f:facet name="header">
 									Staff
 								</f:facet>
-								<f:attribute name="paginatorText" value="More..." />
 								<p:column>
-									<p:commandLink action="pm:staff" update=":staff:staffHeader :staff:staffForm">		
+									<p:commandLink action="pm:staff" update=":staff:staffForm">		
 								        <p:graphicImage value="#{empty member.contact.image ?
 																'/whosinIntegrate/UnknownContact.gif' :								        						
 								        						'/content?_n='.concat(member.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
@@ -71,7 +69,7 @@
 					</pm:content>
 				</pm:page>
 				<pm:page id="staff">
-					<pm:header id="staffHeader" title="In/Out - #{inOutView.selectedStaff.bizKey}" fixed="true">
+					<pm:header id="staffHeader" title="In/Out" fixed="true">
 						<p:button value="Home"
 									styleClass="ui-btn-left ui-btn-inline"
 									icon="ui-icon-home"
@@ -144,6 +142,13 @@
 					            });
 							</script>
 
+							<h2 style="text-align:center">#{inOutView.selectedStaff.bizKey}</h2>
+
+							<p:commandButton value="OK" 
+												icon="ui-icon-check"
+												action="#{inOutView.saveSelectedStaff}" 
+												update=":inout:inoutForm:inoutList" />
+
 							<!-- Place file upload in a div size 0 with no overflow -->
 							<div style="width: 0; height: 0; overflow: hidden;">
 								<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
@@ -175,11 +180,6 @@
 										onclick="geoLocate(); return false">
 								Set Current Location
 							</button>
-							<br/>
-							<p:commandButton value="Save" 
-												icon="ui-icon-check"
-												action="#{inOutView.saveSelectedStaff}" 
-												update=":inout:inoutForm:inoutList" />
 						</h:form>
 					</pm:content>
 				</pm:page>

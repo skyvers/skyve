@@ -65,6 +65,7 @@ public class InOutView extends FacesView<Office> {
 		q.getFilter().addEquals(Binder.createCompoundBinding(Staff.baseOfficePropertyName,
 																Bean.DOCUMENT_ID),
 									getBean().getBizId());
+		q.addOrdering(Binder.createCompoundBinding(Staff.contactPropertyName, Contact.namePropertyName));
 		return p.retrieve(q);
 	}
 	

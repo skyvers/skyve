@@ -24,7 +24,7 @@
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="mystatus">
-					<pm:header id="staffHeader" title="Status - #{myStatusView.currentBean['myStaff.bizKey']}" fixed="true">
+					<pm:header id="staffHeader" title="Status" fixed="true">
 						<p:button value="Home"
 									styleClass="ui-btn-left ui-btn-inline"
 									icon="ui-icon-home"
@@ -36,9 +36,9 @@
 					</pm:header>
 					<pm:content>
 						<h:panelGroup rendered="#{empty myStatusView.currentBean['myStaff.bizId']}">
-						<b>Your user is not a staff member.</b>
-						<p/>
-						<i>Only staff members can update their status.</i>
+							<b>Your user is not a staff member.</b>
+							<p/>
+							<i>Only staff members can update their status.</i>
 						</h:panelGroup>
 						<h:form id="staffForm" rendered="#{not empty myStatusView.currentBean['myStaff.bizId']}">
 							<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
@@ -100,8 +100,12 @@
 					            });
 							</script>
 
+							<p:commandButton value="Save" 
+												icon="ui-icon-check"
+												action="#{myStatusView.saveStaff}" 
+												update=":mystatus:staffForm" />
+
 							<!-- Place file upload in a div size 0 with no overflow -->
-							
 							<div style="width: 0; height: 0; overflow: hidden;">
 								<input id="PhotoPicker" type="file" accept="image/*" pt:capture="camera" />
 							</div>
@@ -133,10 +137,6 @@
 								Set Current Location
 							</button>
 							<br/>
-							<p:commandButton value="Save" 
-												icon="ui-icon-check"
-												action="#{myStatusView.saveStaff}" 
-												update=":mystatus:staffForm" />
 						</h:form>
 					</pm:content>
 				</pm:page>
