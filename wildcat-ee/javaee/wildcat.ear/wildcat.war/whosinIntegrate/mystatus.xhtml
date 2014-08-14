@@ -35,7 +35,12 @@
 									href="/loggedOut" />
 					</pm:header>
 					<pm:content>
-						<h:form id="staffForm">
+						<h:panelGroup rendered="#{empty myStatusView.currentBean['myStaff.bizId']}">
+						<b>Your user is not a staff member.</b>
+						<p/>
+						<i>Only staff members can update their status.</i>
+						</h:panelGroup>
+						<h:form id="staffForm" rendered="#{not empty myStatusView.currentBean['myStaff.bizId']}">
 							<!-- This needs to be in here each time to get re-rendered when the mobile page is shown, not in head -->
 							<script type="text/javascript">
 							    geoLocate = function() {

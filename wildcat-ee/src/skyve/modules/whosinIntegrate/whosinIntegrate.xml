@@ -79,6 +79,7 @@
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
 			<role name="Manager" />
+			<role name="StaffMember" />
 		</map>
 	</menu>
 </module>
