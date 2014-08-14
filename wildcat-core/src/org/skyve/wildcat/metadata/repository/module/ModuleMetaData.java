@@ -691,8 +691,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				}
 			}
 			result.getRoleNames().add(value);
-			populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 		}
+		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 	}
 	
 	private static void populateUxuis(String metaDataName, 
