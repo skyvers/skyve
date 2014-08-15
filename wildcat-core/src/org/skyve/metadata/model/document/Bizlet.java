@@ -25,6 +25,8 @@ import org.skyve.web.WebContext;
  * 
  * getDomainValues() - called when rendering the pertinent field (including in list view).
  * preExecute() - called before an implicit action is executed.
+ * 					parentBean parameter is not null when adding or editing (zooming) in a grid or lookup
+ * 					(ie when ImplicitActionName.Add or ImplicitActionName.Edit is used).
  *
  * @param <T>	The type of document bean we want to process with this Bizlet.
  */
