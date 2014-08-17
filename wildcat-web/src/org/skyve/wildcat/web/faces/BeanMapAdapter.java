@@ -184,7 +184,7 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 				else if (value instanceof String) {
 					processedValue = UtilImpl.processStringValue((String) value);
 				}
-				Binder.convertAndSet(bean, binding, processedValue);
+				Binder.populateProperty(CORE.getUser(), bean, binding, processedValue, false);
 				
 				return null;
 			}
