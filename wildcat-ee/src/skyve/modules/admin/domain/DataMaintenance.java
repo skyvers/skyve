@@ -61,6 +61,8 @@ return "Data Maintenance";
 
 	/**
 	 * {@link #modDocName} mutator.
+	 * 
+	 * @param modDocName	The new value to set.
 	 **/
 	@XmlElement
 	public void setModDocName(String modDocName) {

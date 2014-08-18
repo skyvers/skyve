@@ -91,10 +91,15 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@SuppressWarnings("static-method")
-	protected final <T extends Bean> T findElementById(List<T> list, String elementBizId) {
-		return BindUtil.findElementInCollection(list, elementBizId);
+	protected final <T extends Bean> T getElementById(List<T> list, String elementBizId) {
+		return BindUtil.getElementInCollection(list, elementBizId);
 	}
 	
+	@SuppressWarnings("static-method")
+	protected final <T extends Bean> void setElementById(List<T> list, T element) {
+		BindUtil.setElementInCollection(list, element);
+	}
+
 	@Override
 	public boolean evaluateCondition(String conditionName) throws MetaDataException {
 		boolean result = false;

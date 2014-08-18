@@ -476,7 +476,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					}
 					Bean thisBean = null;
 					if (thisBizId != null) {
-						thisBean = BindUtil.findElementInCollection(beanList, thisBizId);
+						thisBean = BindUtil.getElementInCollection(beanList, thisBizId);
 					}
 
 					if (thisBean == null) { // DNE in beanList

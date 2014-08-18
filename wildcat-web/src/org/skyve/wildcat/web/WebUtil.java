@@ -156,7 +156,7 @@ System.out.println(conversationKey + " : " + currentBeanId);
         		// find the process bean
         		Object referenceValue = BindUtil.get(result, formBinding);
         		if (referenceValue instanceof List<?>) {
-        			result = BindUtil.findElementInCollection(result, formBinding, bizId); 
+        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
         		}
         		else {
         			result = (Bean) referenceValue;

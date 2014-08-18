@@ -74,6 +74,8 @@ return "Tagged";
 
 	/**
 	 * {@link #taggedModule} mutator.
+	 * 
+	 * @param taggedModule	The new value to set.
 	 **/
 	@XmlElement
 	public void setTaggedModule(String taggedModule) {
@@ -90,6 +92,8 @@ return "Tagged";
 
 	/**
 	 * {@link #taggedDocument} mutator.
+	 * 
+	 * @param taggedDocument	The new value to set.
 	 **/
 	@XmlElement
 	public void setTaggedDocument(String taggedDocument) {
@@ -106,6 +110,8 @@ return "Tagged";
 
 	/**
 	 * {@link #taggedBizId} mutator.
+	 * 
+	 * @param taggedBizId	The new value to set.
 	 **/
 	@XmlElement
 	public void setTaggedBizId(String taggedBizId) {
@@ -122,6 +128,8 @@ return "Tagged";
 
 	/**
 	 * {@link #tag} mutator.
+	 * 
+	 * @param tag	The new value to set.
 	 **/
 	@XmlElement
 	public void setTag(Tag tag) {

@@ -36,7 +36,7 @@ public class ActionUtil {
 	    		result = (Bean) Binder.get(result, viewBinding);
 	    	}
 			if (collectionName != null) {
-				result = Binder.findElementInCollection(result, collectionName, elementBizId);
+				result = Binder.getElementInCollection(result, collectionName, elementBizId);
 			}
     	}
     	

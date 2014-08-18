@@ -272,6 +272,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #name} mutator.
+	 * 
+	 * @param name	The new value to set.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -288,6 +290,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #visible} mutator.
+	 * 
+	 * @param visible	The new value to set.
 	 **/
 	@XmlElement
 	public void setVisible(Boolean visible) {
@@ -304,6 +308,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #moduleName} mutator.
+	 * 
+	 * @param moduleName	The new value to set.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -320,6 +326,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #documentName} mutator.
+	 * 
+	 * @param documentName	The new value to set.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -336,6 +344,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #attributeName} mutator.
+	 * 
+	 * @param attributeName	The new value to set.
 	 **/
 	@XmlElement
 	public void setAttributeName(String attributeName) {
@@ -352,6 +362,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #fileHasHeaders} mutator.
+	 * 
+	 * @param fileHasHeaders	The new value to set.
 	 **/
 	@XmlElement
 	public void setFileHasHeaders(Boolean fileHasHeaders) {
@@ -368,6 +380,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #numberLoaded} mutator.
+	 * 
+	 * @param numberLoaded	The new value to set.
 	 **/
 	@XmlElement
 	public void setNumberLoaded(Integer numberLoaded) {
@@ -384,6 +398,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #numberMatched} mutator.
+	 * 
+	 * @param numberMatched	The new value to set.
 	 **/
 	@XmlElement
 	public void setNumberMatched(Integer numberMatched) {
@@ -400,6 +416,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #numberTagged} mutator.
+	 * 
+	 * @param numberTagged	The new value to set.
 	 **/
 	@XmlElement
 	public void setNumberTagged(Integer numberTagged) {
@@ -416,6 +434,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #filterOperator} mutator.
+	 * 
+	 * @param filterOperator	The new value to set.
 	 **/
 	@XmlElement
 	public void setFilterOperator(FilterOperator filterOperator) {
@@ -432,6 +452,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #filterAction} mutator.
+	 * 
+	 * @param filterAction	The new value to set.
 	 **/
 	@XmlElement
 	public void setFilterAction(FilterAction filterAction) {
@@ -448,6 +470,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #unTagSuccessful} mutator.
+	 * 
+	 * @param unTagSuccessful	The new value to set.
 	 **/
 	@XmlElement
 	public void setUnTagSuccessful(Boolean unTagSuccessful) {
@@ -464,6 +488,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #filterColumn} mutator.
+	 * 
+	 * @param filterColumn	The new value to set.
 	 **/
 	@XmlElement
 	public void setFilterColumn(Integer filterColumn) {
@@ -480,6 +506,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #actionTag} mutator.
+	 * 
+	 * @param actionTag	The new value to set.
 	 **/
 	@XmlElement
 	public void setActionTag(Tag actionTag) {
@@ -496,6 +524,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #documentCondition} mutator.
+	 * 
+	 * @param documentCondition	The new value to set.
 	 **/
 	@XmlElement
 	public void setDocumentCondition(String documentCondition) {
@@ -512,6 +542,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #documentAction} mutator.
+	 * 
+	 * @param documentAction	The new value to set.
 	 **/
 	@XmlElement
 	public void setDocumentAction(String documentAction) {
@@ -528,6 +560,8 @@ return (name == null ? "Tag" : name);
 
 	/**
 	 * {@link #documentActionResults} mutator.
+	 * 
+	 * @param documentActionResults	The new value to set.
 	 **/
 	@XmlElement
 	public void setDocumentActionResults(String documentActionResults) {

@@ -58,9 +58,21 @@ public class Jobs extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #runningJobs} mutator.
+	 * {@link #runningJobs} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public Job getRunningJobsElementById(String bizId) {
-		return findElementById(runningJobs, bizId);
+		return getElementById(runningJobs, bizId);
+	}
+
+	/**
+	 * {@link #runningJobs} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param runningJobs	The new value to set.
+	 **/
+	public void setRunningJobsElementById(String bizId, Job element) {
+		 setElementById(runningJobs, element);
 	}
 }

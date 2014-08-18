@@ -150,6 +150,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #name} mutator.
+	 * 
+	 * @param name	The new value to set.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -166,6 +168,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #contactType} mutator.
+	 * 
+	 * @param contactType	The new value to set.
 	 **/
 	@XmlElement
 	public void setContactType(ContactType contactType) {
@@ -182,6 +186,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #email1} mutator.
+	 * 
+	 * @param email1	The new value to set.
 	 **/
 	@XmlElement
 	public void setEmail1(String email1) {
@@ -198,6 +204,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #mobile} mutator.
+	 * 
+	 * @param mobile	The new value to set.
 	 **/
 	@XmlElement
 	public void setMobile(String mobile) {
@@ -214,6 +222,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #image} mutator.
+	 * 
+	 * @param image	The new value to set.
 	 **/
 	@XmlElement
 	public void setImage(String image) {

@@ -70,6 +70,8 @@ return (name == null ? "New Snapshot" : name);
 
 	/**
 	 * {@link #moduleName} mutator.
+	 * 
+	 * @param moduleName	The new value to set.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -86,6 +88,8 @@ return (name == null ? "New Snapshot" : name);
 
 	/**
 	 * {@link #queryName} mutator.
+	 * 
+	 * @param queryName	The new value to set.
 	 **/
 	@XmlElement
 	public void setQueryName(String queryName) {
@@ -102,6 +106,8 @@ return (name == null ? "New Snapshot" : name);
 
 	/**
 	 * {@link #name} mutator.
+	 * 
+	 * @param name	The new value to set.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -118,6 +124,8 @@ return (name == null ? "New Snapshot" : name);
 
 	/**
 	 * {@link #snapshot} mutator.
+	 * 
+	 * @param snapshot	The new value to set.
 	 **/
 	@XmlElement
 	public void setSnapshot(String snapshot) {

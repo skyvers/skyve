@@ -603,13 +603,13 @@ public final class BindUtil {
 	 * @throws InvocationTargetException
 	 */
 	@SuppressWarnings("unchecked")
-	public static Bean findElementInCollection(Bean owner, String binding, String elementBizId) 
+	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) 
 	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		List<Bean> list = (List<Bean>) get(owner, binding);
-		return findElementInCollection(list, elementBizId);
+		return getElementInCollection(list, elementBizId);
 	}
 
-	public static <T extends Bean> T findElementInCollection(List<T> list, String elementBizId) {
+	public static <T extends Bean> T getElementInCollection(List<T> list, String elementBizId) {
 		// check each bean in the list to see if its ID is the same
 		for (T existing : list) {
 			if (elementBizId.equals(existing.getBizId())) {
@@ -618,6 +618,16 @@ public final class BindUtil {
 		}
 
 		return null;
+	}
+	
+	public static <T extends Bean> void setElementInCollection(List<T> list, T element) {
+		// Set each occurrence in the list where the bizIds are the same
+		String elementBizId = element.getBizId();
+		for (int i = 0, l = list.size(); i < l; i++) {
+			if (elementBizId.equals(list.get(i).getBizId())) {
+				list.set(i, element);
+			}
+		}
 	}
 	
 	/**

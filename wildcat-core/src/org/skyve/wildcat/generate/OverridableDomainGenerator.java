@@ -1524,7 +1524,7 @@ joined tables
 			methods.append("\t}\n");
 			
 			// Mapped Accessor method
-			mutatorJavadoc(reference, methods);
+			accessorJavadoc(reference, methods, true);
 			if (overriddenReference) { // method in base class
 				methods.append("\n\t@Override");
 			}
@@ -1532,7 +1532,20 @@ joined tables
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
-			methods.append("\t\treturn findElementById(").append(name).append(", bizId);\n");
+			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
+			methods.append("\t}\n");
+			
+			// Mapped Mutator method
+			mutatorJavadoc(reference, methods, true);
+			if (overriddenReference) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void set").append(methodName);
+			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
+			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
 		}
 		else { // this is an association
@@ -1557,7 +1570,7 @@ joined tables
 			methods.append("\t}\n");
 
 			// Mutator method
-			mutatorJavadoc(reference, methods);
+			mutatorJavadoc(reference, methods, false);
 			if (overriddenReference) { // method in base class
 				methods.append("\n\t@Override");
 			}
@@ -1631,7 +1644,7 @@ joined tables
 			methods.append("\n\t@Deprecated");
 		}
 		methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
-		methods.append("\t\treturn findElementById(").append(name).append(", bizId);\n");
+		methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
 		methods.append("\t}\n");
 	}
 	
@@ -1828,7 +1841,7 @@ joined tables
 				methods.append("\t}\n");
 	
 				// Mutator method
-				mutatorJavadoc(attribute, methods);
+				mutatorJavadoc(attribute, methods, false);
 				if (overridden && 
 						(baseDocumentName != null) && // base class exists
 						(documentClass != null) && 
@@ -2128,9 +2141,14 @@ joined tables
 		toAppendTo.append("\t **/");
 	}
 
-	private static void mutatorJavadoc(Attribute attribute, StringBuilder toAppendTo) {
+	private static void mutatorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} mutator.\n");
+		toAppendTo.append("\t * \n");
+		if (mapped) {
+			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
+		}
+		toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value to set.\n");
 		toAppendTo.append("\t **/");
 	}
 }

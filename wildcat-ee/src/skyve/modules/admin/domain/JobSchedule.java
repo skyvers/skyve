@@ -504,6 +504,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #jobName} mutator.
+	 * 
+	 * @param jobName	The new value to set.
 	 **/
 	@XmlElement
 	public void setJobName(String jobName) {
@@ -520,6 +522,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #cronExpression} mutator.
+	 * 
+	 * @param cronExpression	The new value to set.
 	 **/
 	@XmlElement
 	public void setCronExpression(String cronExpression) {
@@ -536,6 +540,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #allMinutes} mutator.
+	 * 
+	 * @param allMinutes	The new value to set.
 	 **/
 	@XmlElement
 	public void setAllMinutes(String allMinutes) {
@@ -552,6 +558,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute0} mutator.
+	 * 
+	 * @param minute0	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute0(Boolean minute0) {
@@ -568,6 +576,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute1} mutator.
+	 * 
+	 * @param minute1	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute1(Boolean minute1) {
@@ -584,6 +594,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute2} mutator.
+	 * 
+	 * @param minute2	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute2(Boolean minute2) {
@@ -600,6 +612,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute3} mutator.
+	 * 
+	 * @param minute3	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute3(Boolean minute3) {
@@ -616,6 +630,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute4} mutator.
+	 * 
+	 * @param minute4	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute4(Boolean minute4) {
@@ -632,6 +648,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute5} mutator.
+	 * 
+	 * @param minute5	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute5(Boolean minute5) {
@@ -648,6 +666,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute6} mutator.
+	 * 
+	 * @param minute6	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute6(Boolean minute6) {
@@ -664,6 +684,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute7} mutator.
+	 * 
+	 * @param minute7	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute7(Boolean minute7) {
@@ -680,6 +702,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute8} mutator.
+	 * 
+	 * @param minute8	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute8(Boolean minute8) {
@@ -696,6 +720,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute9} mutator.
+	 * 
+	 * @param minute9	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute9(Boolean minute9) {
@@ -712,6 +738,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute10} mutator.
+	 * 
+	 * @param minute10	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute10(Boolean minute10) {
@@ -728,6 +756,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute11} mutator.
+	 * 
+	 * @param minute11	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute11(Boolean minute11) {
@@ -744,6 +774,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute12} mutator.
+	 * 
+	 * @param minute12	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute12(Boolean minute12) {
@@ -760,6 +792,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute13} mutator.
+	 * 
+	 * @param minute13	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute13(Boolean minute13) {
@@ -776,6 +810,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute14} mutator.
+	 * 
+	 * @param minute14	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute14(Boolean minute14) {
@@ -792,6 +828,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute15} mutator.
+	 * 
+	 * @param minute15	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute15(Boolean minute15) {
@@ -808,6 +846,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute16} mutator.
+	 * 
+	 * @param minute16	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute16(Boolean minute16) {
@@ -824,6 +864,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute17} mutator.
+	 * 
+	 * @param minute17	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute17(Boolean minute17) {
@@ -840,6 +882,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute18} mutator.
+	 * 
+	 * @param minute18	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute18(Boolean minute18) {
@@ -856,6 +900,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute19} mutator.
+	 * 
+	 * @param minute19	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute19(Boolean minute19) {
@@ -872,6 +918,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute20} mutator.
+	 * 
+	 * @param minute20	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute20(Boolean minute20) {
@@ -888,6 +936,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute21} mutator.
+	 * 
+	 * @param minute21	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute21(Boolean minute21) {
@@ -904,6 +954,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute22} mutator.
+	 * 
+	 * @param minute22	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute22(Boolean minute22) {
@@ -920,6 +972,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute23} mutator.
+	 * 
+	 * @param minute23	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute23(Boolean minute23) {
@@ -936,6 +990,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute24} mutator.
+	 * 
+	 * @param minute24	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute24(Boolean minute24) {
@@ -952,6 +1008,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute25} mutator.
+	 * 
+	 * @param minute25	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute25(Boolean minute25) {
@@ -968,6 +1026,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute26} mutator.
+	 * 
+	 * @param minute26	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute26(Boolean minute26) {
@@ -984,6 +1044,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute27} mutator.
+	 * 
+	 * @param minute27	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute27(Boolean minute27) {
@@ -1000,6 +1062,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute28} mutator.
+	 * 
+	 * @param minute28	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute28(Boolean minute28) {
@@ -1016,6 +1080,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute29} mutator.
+	 * 
+	 * @param minute29	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute29(Boolean minute29) {
@@ -1032,6 +1098,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute30} mutator.
+	 * 
+	 * @param minute30	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute30(Boolean minute30) {
@@ -1048,6 +1116,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute31} mutator.
+	 * 
+	 * @param minute31	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute31(Boolean minute31) {
@@ -1064,6 +1134,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute32} mutator.
+	 * 
+	 * @param minute32	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute32(Boolean minute32) {
@@ -1080,6 +1152,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute33} mutator.
+	 * 
+	 * @param minute33	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute33(Boolean minute33) {
@@ -1096,6 +1170,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute34} mutator.
+	 * 
+	 * @param minute34	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute34(Boolean minute34) {
@@ -1112,6 +1188,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute35} mutator.
+	 * 
+	 * @param minute35	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute35(Boolean minute35) {
@@ -1128,6 +1206,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute36} mutator.
+	 * 
+	 * @param minute36	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute36(Boolean minute36) {
@@ -1144,6 +1224,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute37} mutator.
+	 * 
+	 * @param minute37	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute37(Boolean minute37) {
@@ -1160,6 +1242,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute38} mutator.
+	 * 
+	 * @param minute38	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute38(Boolean minute38) {
@@ -1176,6 +1260,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute39} mutator.
+	 * 
+	 * @param minute39	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute39(Boolean minute39) {
@@ -1192,6 +1278,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute40} mutator.
+	 * 
+	 * @param minute40	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute40(Boolean minute40) {
@@ -1208,6 +1296,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute41} mutator.
+	 * 
+	 * @param minute41	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute41(Boolean minute41) {
@@ -1224,6 +1314,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute42} mutator.
+	 * 
+	 * @param minute42	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute42(Boolean minute42) {
@@ -1240,6 +1332,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute43} mutator.
+	 * 
+	 * @param minute43	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute43(Boolean minute43) {
@@ -1256,6 +1350,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute44} mutator.
+	 * 
+	 * @param minute44	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute44(Boolean minute44) {
@@ -1272,6 +1368,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute45} mutator.
+	 * 
+	 * @param minute45	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute45(Boolean minute45) {
@@ -1288,6 +1386,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute46} mutator.
+	 * 
+	 * @param minute46	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute46(Boolean minute46) {
@@ -1304,6 +1404,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute47} mutator.
+	 * 
+	 * @param minute47	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute47(Boolean minute47) {
@@ -1320,6 +1422,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute48} mutator.
+	 * 
+	 * @param minute48	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute48(Boolean minute48) {
@@ -1336,6 +1440,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute49} mutator.
+	 * 
+	 * @param minute49	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute49(Boolean minute49) {
@@ -1352,6 +1458,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute50} mutator.
+	 * 
+	 * @param minute50	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute50(Boolean minute50) {
@@ -1368,6 +1476,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute51} mutator.
+	 * 
+	 * @param minute51	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute51(Boolean minute51) {
@@ -1384,6 +1494,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute52} mutator.
+	 * 
+	 * @param minute52	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute52(Boolean minute52) {
@@ -1400,6 +1512,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute53} mutator.
+	 * 
+	 * @param minute53	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute53(Boolean minute53) {
@@ -1416,6 +1530,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute54} mutator.
+	 * 
+	 * @param minute54	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute54(Boolean minute54) {
@@ -1432,6 +1548,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute55} mutator.
+	 * 
+	 * @param minute55	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute55(Boolean minute55) {
@@ -1448,6 +1566,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute56} mutator.
+	 * 
+	 * @param minute56	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute56(Boolean minute56) {
@@ -1464,6 +1584,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute57} mutator.
+	 * 
+	 * @param minute57	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute57(Boolean minute57) {
@@ -1480,6 +1602,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute58} mutator.
+	 * 
+	 * @param minute58	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute58(Boolean minute58) {
@@ -1496,6 +1620,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #minute59} mutator.
+	 * 
+	 * @param minute59	The new value to set.
 	 **/
 	@XmlElement
 	public void setMinute59(Boolean minute59) {
@@ -1512,6 +1638,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #allHours} mutator.
+	 * 
+	 * @param allHours	The new value to set.
 	 **/
 	@XmlElement
 	public void setAllHours(String allHours) {
@@ -1528,6 +1656,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour0} mutator.
+	 * 
+	 * @param hour0	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour0(Boolean hour0) {
@@ -1544,6 +1674,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour1} mutator.
+	 * 
+	 * @param hour1	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour1(Boolean hour1) {
@@ -1560,6 +1692,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour2} mutator.
+	 * 
+	 * @param hour2	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour2(Boolean hour2) {
@@ -1576,6 +1710,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour3} mutator.
+	 * 
+	 * @param hour3	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour3(Boolean hour3) {
@@ -1592,6 +1728,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour4} mutator.
+	 * 
+	 * @param hour4	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour4(Boolean hour4) {
@@ -1608,6 +1746,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour5} mutator.
+	 * 
+	 * @param hour5	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour5(Boolean hour5) {
@@ -1624,6 +1764,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour6} mutator.
+	 * 
+	 * @param hour6	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour6(Boolean hour6) {
@@ -1640,6 +1782,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour7} mutator.
+	 * 
+	 * @param hour7	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour7(Boolean hour7) {
@@ -1656,6 +1800,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour8} mutator.
+	 * 
+	 * @param hour8	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour8(Boolean hour8) {
@@ -1672,6 +1818,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour9} mutator.
+	 * 
+	 * @param hour9	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour9(Boolean hour9) {
@@ -1688,6 +1836,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour10} mutator.
+	 * 
+	 * @param hour10	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour10(Boolean hour10) {
@@ -1704,6 +1854,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour11} mutator.
+	 * 
+	 * @param hour11	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour11(Boolean hour11) {
@@ -1720,6 +1872,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour12} mutator.
+	 * 
+	 * @param hour12	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour12(Boolean hour12) {
@@ -1736,6 +1890,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour13} mutator.
+	 * 
+	 * @param hour13	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour13(Boolean hour13) {
@@ -1752,6 +1908,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour14} mutator.
+	 * 
+	 * @param hour14	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour14(Boolean hour14) {
@@ -1768,6 +1926,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour15} mutator.
+	 * 
+	 * @param hour15	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour15(Boolean hour15) {
@@ -1784,6 +1944,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour16} mutator.
+	 * 
+	 * @param hour16	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour16(Boolean hour16) {
@@ -1800,6 +1962,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour17} mutator.
+	 * 
+	 * @param hour17	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour17(Boolean hour17) {
@@ -1816,6 +1980,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour18} mutator.
+	 * 
+	 * @param hour18	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour18(Boolean hour18) {
@@ -1832,6 +1998,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour19} mutator.
+	 * 
+	 * @param hour19	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour19(Boolean hour19) {
@@ -1848,6 +2016,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour20} mutator.
+	 * 
+	 * @param hour20	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour20(Boolean hour20) {
@@ -1864,6 +2034,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour21} mutator.
+	 * 
+	 * @param hour21	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour21(Boolean hour21) {
@@ -1880,6 +2052,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour22} mutator.
+	 * 
+	 * @param hour22	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour22(Boolean hour22) {
@@ -1896,6 +2070,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #hour23} mutator.
+	 * 
+	 * @param hour23	The new value to set.
 	 **/
 	@XmlElement
 	public void setHour23(Boolean hour23) {
@@ -1912,6 +2088,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #allDays} mutator.
+	 * 
+	 * @param allDays	The new value to set.
 	 **/
 	@XmlElement
 	public void setAllDays(String allDays) {
@@ -1928,6 +2106,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day1} mutator.
+	 * 
+	 * @param day1	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay1(Boolean day1) {
@@ -1944,6 +2124,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day2} mutator.
+	 * 
+	 * @param day2	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay2(Boolean day2) {
@@ -1960,6 +2142,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day3} mutator.
+	 * 
+	 * @param day3	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay3(Boolean day3) {
@@ -1976,6 +2160,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day4} mutator.
+	 * 
+	 * @param day4	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay4(Boolean day4) {
@@ -1992,6 +2178,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day5} mutator.
+	 * 
+	 * @param day5	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay5(Boolean day5) {
@@ -2008,6 +2196,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day6} mutator.
+	 * 
+	 * @param day6	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay6(Boolean day6) {
@@ -2024,6 +2214,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day7} mutator.
+	 * 
+	 * @param day7	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay7(Boolean day7) {
@@ -2040,6 +2232,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day8} mutator.
+	 * 
+	 * @param day8	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay8(Boolean day8) {
@@ -2056,6 +2250,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day9} mutator.
+	 * 
+	 * @param day9	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay9(Boolean day9) {
@@ -2072,6 +2268,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day10} mutator.
+	 * 
+	 * @param day10	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay10(Boolean day10) {
@@ -2088,6 +2286,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day11} mutator.
+	 * 
+	 * @param day11	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay11(Boolean day11) {
@@ -2104,6 +2304,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day12} mutator.
+	 * 
+	 * @param day12	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay12(Boolean day12) {
@@ -2120,6 +2322,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day13} mutator.
+	 * 
+	 * @param day13	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay13(Boolean day13) {
@@ -2136,6 +2340,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day14} mutator.
+	 * 
+	 * @param day14	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay14(Boolean day14) {
@@ -2152,6 +2358,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day15} mutator.
+	 * 
+	 * @param day15	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay15(Boolean day15) {
@@ -2168,6 +2376,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day16} mutator.
+	 * 
+	 * @param day16	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay16(Boolean day16) {
@@ -2184,6 +2394,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day17} mutator.
+	 * 
+	 * @param day17	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay17(Boolean day17) {
@@ -2200,6 +2412,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day18} mutator.
+	 * 
+	 * @param day18	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay18(Boolean day18) {
@@ -2216,6 +2430,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day19} mutator.
+	 * 
+	 * @param day19	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay19(Boolean day19) {
@@ -2232,6 +2448,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day20} mutator.
+	 * 
+	 * @param day20	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay20(Boolean day20) {
@@ -2248,6 +2466,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day21} mutator.
+	 * 
+	 * @param day21	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay21(Boolean day21) {
@@ -2264,6 +2484,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day22} mutator.
+	 * 
+	 * @param day22	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay22(Boolean day22) {
@@ -2280,6 +2502,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day23} mutator.
+	 * 
+	 * @param day23	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay23(Boolean day23) {
@@ -2296,6 +2520,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day24} mutator.
+	 * 
+	 * @param day24	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay24(Boolean day24) {
@@ -2312,6 +2538,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day25} mutator.
+	 * 
+	 * @param day25	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay25(Boolean day25) {
@@ -2328,6 +2556,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day26} mutator.
+	 * 
+	 * @param day26	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay26(Boolean day26) {
@@ -2344,6 +2574,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day27} mutator.
+	 * 
+	 * @param day27	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay27(Boolean day27) {
@@ -2360,6 +2592,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day28} mutator.
+	 * 
+	 * @param day28	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay28(Boolean day28) {
@@ -2376,6 +2610,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day29} mutator.
+	 * 
+	 * @param day29	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay29(Boolean day29) {
@@ -2392,6 +2628,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day30} mutator.
+	 * 
+	 * @param day30	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay30(Boolean day30) {
@@ -2408,6 +2646,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #day31} mutator.
+	 * 
+	 * @param day31	The new value to set.
 	 **/
 	@XmlElement
 	public void setDay31(Boolean day31) {
@@ -2424,6 +2664,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #allMonths} mutator.
+	 * 
+	 * @param allMonths	The new value to set.
 	 **/
 	@XmlElement
 	public void setAllMonths(String allMonths) {
@@ -2440,6 +2682,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month1} mutator.
+	 * 
+	 * @param month1	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth1(Boolean month1) {
@@ -2456,6 +2700,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month2} mutator.
+	 * 
+	 * @param month2	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth2(Boolean month2) {
@@ -2472,6 +2718,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month3} mutator.
+	 * 
+	 * @param month3	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth3(Boolean month3) {
@@ -2488,6 +2736,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month4} mutator.
+	 * 
+	 * @param month4	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth4(Boolean month4) {
@@ -2504,6 +2754,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month5} mutator.
+	 * 
+	 * @param month5	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth5(Boolean month5) {
@@ -2520,6 +2772,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month6} mutator.
+	 * 
+	 * @param month6	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth6(Boolean month6) {
@@ -2536,6 +2790,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month7} mutator.
+	 * 
+	 * @param month7	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth7(Boolean month7) {
@@ -2552,6 +2808,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month8} mutator.
+	 * 
+	 * @param month8	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth8(Boolean month8) {
@@ -2568,6 +2826,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month9} mutator.
+	 * 
+	 * @param month9	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth9(Boolean month9) {
@@ -2584,6 +2844,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month10} mutator.
+	 * 
+	 * @param month10	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth10(Boolean month10) {
@@ -2600,6 +2862,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month11} mutator.
+	 * 
+	 * @param month11	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth11(Boolean month11) {
@@ -2616,6 +2880,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #month12} mutator.
+	 * 
+	 * @param month12	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth12(Boolean month12) {
@@ -2632,6 +2898,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #allWeekdays} mutator.
+	 * 
+	 * @param allWeekdays	The new value to set.
 	 **/
 	@XmlElement
 	public void setAllWeekdays(String allWeekdays) {
@@ -2648,6 +2916,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday1} mutator.
+	 * 
+	 * @param weekday1	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday1(Boolean weekday1) {
@@ -2664,6 +2934,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday2} mutator.
+	 * 
+	 * @param weekday2	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday2(Boolean weekday2) {
@@ -2680,6 +2952,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday3} mutator.
+	 * 
+	 * @param weekday3	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday3(Boolean weekday3) {
@@ -2696,6 +2970,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday4} mutator.
+	 * 
+	 * @param weekday4	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday4(Boolean weekday4) {
@@ -2712,6 +2988,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday5} mutator.
+	 * 
+	 * @param weekday5	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday5(Boolean weekday5) {
@@ -2728,6 +3006,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday6} mutator.
+	 * 
+	 * @param weekday6	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday6(Boolean weekday6) {
@@ -2744,6 +3024,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #weekday7} mutator.
+	 * 
+	 * @param weekday7	The new value to set.
 	 **/
 	@XmlElement
 	public void setWeekday7(Boolean weekday7) {
@@ -2760,6 +3042,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #startTime} mutator.
+	 * 
+	 * @param startTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -2778,6 +3062,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #endTime} mutator.
+	 * 
+	 * @param endTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -2796,6 +3082,8 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * {@link #runAs} mutator.
+	 * 
+	 * @param runAs	The new value to set.
 	 **/
 	@XmlElement
 	public void setRunAs(User runAs) {

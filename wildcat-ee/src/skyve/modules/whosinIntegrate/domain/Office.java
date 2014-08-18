@@ -85,6 +85,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #levelUnit} mutator.
+	 * 
+	 * @param levelUnit	The new value to set.
 	 **/
 	@XmlElement
 	public void setLevelUnit(String levelUnit) {
@@ -101,6 +103,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #buildingName} mutator.
+	 * 
+	 * @param buildingName	The new value to set.
 	 **/
 	@XmlElement
 	public void setBuildingName(String buildingName) {
@@ -117,6 +121,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #streetAddress} mutator.
+	 * 
+	 * @param streetAddress	The new value to set.
 	 **/
 	@XmlElement
 	public void setStreetAddress(String streetAddress) {
@@ -133,6 +139,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #suburb} mutator.
+	 * 
+	 * @param suburb	The new value to set.
 	 **/
 	@XmlElement
 	public void setSuburb(String suburb) {
@@ -149,6 +157,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #postCode} mutator.
+	 * 
+	 * @param postCode	The new value to set.
 	 **/
 	@XmlElement
 	public void setPostCode(String postCode) {
@@ -165,6 +175,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #phone} mutator.
+	 * 
+	 * @param phone	The new value to set.
 	 **/
 	@XmlElement
 	public void setPhone(String phone) {
@@ -181,6 +193,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #boundary} mutator.
+	 * 
+	 * @param boundary	The new value to set.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement

@@ -64,6 +64,8 @@ return (getName()==null?"Datagroup":getName());
 
 	/**
 	 * {@link #name} mutator.
+	 * 
+	 * @param name	The new value to set.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -80,6 +82,8 @@ return (getName()==null?"Datagroup":getName());
 
 	/**
 	 * {@link #description} mutator.
+	 * 
+	 * @param description	The new value to set.
 	 **/
 	@XmlElement
 	public void setDescription(String description) {

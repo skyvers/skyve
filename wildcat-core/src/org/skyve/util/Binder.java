@@ -130,9 +130,9 @@ public class Binder {
 	 * @return	The found element or null.
 	 * @throws xception
 	 */
-	public static Bean findElementInCollection(Bean owner, String binding, String elementBizId) 
+	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) 
 	throws Exception {
-		return BindUtil.findElementInCollection(owner, binding, elementBizId);
+		return BindUtil.getElementInCollection(owner, binding, elementBizId);
 	}
 
 	/**

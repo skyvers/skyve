@@ -139,6 +139,8 @@ return "Admin Setup";
 
 	/**
 	 * {@link #passwordComplexityModel} mutator.
+	 * 
+	 * @param passwordComplexityModel	The new value to set.
 	 **/
 	@XmlElement
 	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {

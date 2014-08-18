@@ -62,6 +62,8 @@ public class CurrentUser extends AbstractTransientBean {
 
 	/**
 	 * {@link #currentUser} mutator.
+	 * 
+	 * @param currentUser	The new value to set.
 	 **/
 	@XmlElement
 	public void setCurrentUser(User currentUser) {
@@ -78,9 +80,21 @@ public class CurrentUser extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #groups} mutator.
+	 * {@link #groups} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public Group getGroupsElementById(String bizId) {
-		return findElementById(groups, bizId);
+		return getElementById(groups, bizId);
+	}
+
+	/**
+	 * {@link #groups} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param groups	The new value to set.
+	 **/
+	public void setGroupsElementById(String bizId, Group element) {
+		 setElementById(groups, element);
 	}
 }

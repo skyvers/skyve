@@ -70,6 +70,8 @@ return (getName()==null?"Group":getName());
 
 	/**
 	 * {@link #name} mutator.
+	 * 
+	 * @param name	The new value to set.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -86,6 +88,8 @@ return (getName()==null?"Group":getName());
 
 	/**
 	 * {@link #description} mutator.
+	 * 
+	 * @param description	The new value to set.
 	 **/
 	@XmlElement
 	public void setDescription(String description) {
@@ -102,9 +106,21 @@ return (getName()==null?"Group":getName());
 	}
 
 	/**
-	 * {@link #roles} mutator.
+	 * {@link #roles} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public GroupRole getRolesElementById(String bizId) {
-		return findElementById(roles, bizId);
+		return getElementById(roles, bizId);
+	}
+
+	/**
+	 * {@link #roles} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param roles	The new value to set.
+	 **/
+	public void setRolesElementById(String bizId, GroupRole element) {
+		 setElementById(roles, element);
 	}
 }

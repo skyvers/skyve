@@ -80,6 +80,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #startTime} mutator.
+	 * 
+	 * @param startTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -98,6 +100,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #endTime} mutator.
+	 * 
+	 * @param endTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -116,6 +120,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #displayName} mutator.
+	 * 
+	 * @param displayName	The new value to set.
 	 **/
 	@XmlElement
 	public void setDisplayName(String displayName) {
@@ -132,6 +138,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #percentComplete} mutator.
+	 * 
+	 * @param percentComplete	The new value to set.
 	 **/
 	@XmlElement
 	public void setPercentComplete(Integer percentComplete) {
@@ -148,6 +156,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #status} mutator.
+	 * 
+	 * @param status	The new value to set.
 	 **/
 	@XmlElement
 	public void setStatus(String status) {
@@ -164,6 +174,8 @@ return (getDisplayName()==null?"Job":getDisplayName());
 
 	/**
 	 * {@link #log} mutator.
+	 * 
+	 * @param log	The new value to set.
 	 **/
 	@XmlElement
 	public void setLog(String log) {

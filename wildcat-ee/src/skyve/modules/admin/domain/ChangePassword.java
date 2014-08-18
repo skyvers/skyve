@@ -67,6 +67,8 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #newPassword} mutator.
+	 * 
+	 * @param newPassword	The new value to set.
 	 **/
 	@XmlElement
 	public void setNewPassword(String newPassword) {
@@ -83,6 +85,8 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #confirmPassword} mutator.
+	 * 
+	 * @param confirmPassword	The new value to set.
 	 **/
 	@XmlElement
 	public void setConfirmPassword(String confirmPassword) {
@@ -99,6 +103,8 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #response} mutator.
+	 * 
+	 * @param response	The new value to set.
 	 **/
 	@XmlElement
 	public void setResponse(String response) {

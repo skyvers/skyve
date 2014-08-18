@@ -72,6 +72,8 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #contact} mutator.
+	 * 
+	 * @param contact	The new value to set.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -88,6 +90,8 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #matchScore} mutator.
+	 * 
+	 * @param matchScore	The new value to set.
 	 **/
 	@XmlElement
 	public void setMatchScore(Integer matchScore) {

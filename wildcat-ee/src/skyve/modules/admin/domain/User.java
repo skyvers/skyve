@@ -276,6 +276,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #userName} mutator.
+	 * 
+	 * @param userName	The new value to set.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -292,6 +294,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #password} mutator.
+	 * 
+	 * @param password	The new value to set.
 	 **/
 	@XmlElement
 	public void setPassword(String password) {
@@ -308,6 +312,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #createdDateTime} mutator.
+	 * 
+	 * @param createdDateTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -326,6 +332,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #homeModule} mutator.
+	 * 
+	 * @param homeModule	The new value to set.
 	 **/
 	@XmlElement
 	public void setHomeModule(String homeModule) {
@@ -342,6 +350,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #newPassword} mutator.
+	 * 
+	 * @param newPassword	The new value to set.
 	 **/
 	@XmlElement
 	public void setNewPassword(String newPassword) {
@@ -358,6 +368,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #confirmPassword} mutator.
+	 * 
+	 * @param confirmPassword	The new value to set.
 	 **/
 	@XmlElement
 	public void setConfirmPassword(String confirmPassword) {
@@ -374,6 +386,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #generated} mutator.
+	 * 
+	 * @param generated	The new value to set.
 	 **/
 	@XmlElement
 	public void setGenerated(Boolean generated) {
@@ -390,6 +404,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #legacyId} mutator.
+	 * 
+	 * @param legacyId	The new value to set.
 	 **/
 	@XmlElement
 	public void setLegacyId(String legacyId) {
@@ -406,6 +422,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #clearTextPassword} mutator.
+	 * 
+	 * @param clearTextPassword	The new value to set.
 	 **/
 	@XmlElement
 	public void setClearTextPassword(String clearTextPassword) {
@@ -422,6 +440,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #passwordExpired} mutator.
+	 * 
+	 * @param passwordExpired	The new value to set.
 	 **/
 	@XmlElement
 	public void setPasswordExpired(Boolean passwordExpired) {
@@ -438,6 +458,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #passwordLastChanged} mutator.
+	 * 
+	 * @param passwordLastChanged	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -456,6 +478,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #contact} mutator.
+	 * 
+	 * @param contact	The new value to set.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -472,6 +496,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #dataGroup} mutator.
+	 * 
+	 * @param dataGroup	The new value to set.
 	 **/
 	@XmlElement
 	public void setDataGroup(DataGroup dataGroup) {
@@ -488,10 +514,22 @@ return (getContact() == null) ?
 	}
 
 	/**
-	 * {@link #groups} mutator.
+	 * {@link #groups} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public Group getGroupsElementById(String bizId) {
-		return findElementById(groups, bizId);
+		return getElementById(groups, bizId);
+	}
+
+	/**
+	 * {@link #groups} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param groups	The new value to set.
+	 **/
+	public void setGroupsElementById(String bizId, Group element) {
+		 setElementById(groups, element);
 	}
 
 	/**
@@ -503,10 +541,22 @@ return (getContact() == null) ?
 	}
 
 	/**
-	 * {@link #roles} mutator.
+	 * {@link #roles} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public UserRole getRolesElementById(String bizId) {
-		return findElementById(roles, bizId);
+		return getElementById(roles, bizId);
+	}
+
+	/**
+	 * {@link #roles} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param roles	The new value to set.
+	 **/
+	public void setRolesElementById(String bizId, UserRole element) {
+		 setElementById(roles, element);
 	}
 
 	/**
@@ -518,6 +568,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #wizardState} mutator.
+	 * 
+	 * @param wizardState	The new value to set.
 	 **/
 	@XmlElement
 	public void setWizardState(WizardState wizardState) {
@@ -534,6 +586,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #searchContactName} mutator.
+	 * 
+	 * @param searchContactName	The new value to set.
 	 **/
 	@XmlElement
 	public void setSearchContactName(String searchContactName) {
@@ -550,6 +604,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #searchEmail} mutator.
+	 * 
+	 * @param searchEmail	The new value to set.
 	 **/
 	@XmlElement
 	public void setSearchEmail(String searchEmail) {
@@ -566,10 +622,22 @@ return (getContact() == null) ?
 	}
 
 	/**
-	 * {@link #candidateContacts} mutator.
+	 * {@link #candidateContacts} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
 	 **/
 	public UserCandidateContact getCandidateContactsElementById(String bizId) {
-		return findElementById(candidateContacts, bizId);
+		return getElementById(candidateContacts, bizId);
+	}
+
+	/**
+	 * {@link #candidateContacts} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param candidateContacts	The new value to set.
+	 **/
+	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
+		 setElementById(candidateContacts, element);
 	}
 
 	/**
@@ -581,6 +649,8 @@ return (getContact() == null) ?
 
 	/**
 	 * {@link #contactSelected} mutator.
+	 * 
+	 * @param contactSelected	The new value to set.
 	 **/
 	@XmlElement
 	public void setContactSelected(Boolean contactSelected) {

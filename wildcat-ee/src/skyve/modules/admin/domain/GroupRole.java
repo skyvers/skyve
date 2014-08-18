@@ -67,6 +67,8 @@ return (getRoleName()==null?"Group Role":getRoleName());
 
 	/**
 	 * {@link #roleName} mutator.
+	 * 
+	 * @param roleName	The new value to set.
 	 **/
 	@XmlElement
 	public void setRoleName(String roleName) {

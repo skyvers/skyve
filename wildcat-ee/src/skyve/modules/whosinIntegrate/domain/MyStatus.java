@@ -56,6 +56,8 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * {@link #myStaff} mutator.
+	 * 
+	 * @param myStaff	The new value to set.
 	 **/
 	@XmlElement
 	public void setMyStaff(Staff myStaff) {

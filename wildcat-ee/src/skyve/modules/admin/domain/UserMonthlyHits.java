@@ -70,6 +70,8 @@ return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberO
 
 	/**
 	 * {@link #userName} mutator.
+	 * 
+	 * @param userName	The new value to set.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -86,6 +88,8 @@ return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberO
 
 	/**
 	 * {@link #year} mutator.
+	 * 
+	 * @param year	The new value to set.
 	 **/
 	@XmlElement
 	public void setYear(Integer year) {
@@ -102,6 +106,8 @@ return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberO
 
 	/**
 	 * {@link #month} mutator.
+	 * 
+	 * @param month	The new value to set.
 	 **/
 	@XmlElement
 	public void setMonth(Integer month) {
@@ -118,6 +124,8 @@ return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberO
 
 	/**
 	 * {@link #numberOfHits} mutator.
+	 * 
+	 * @param numberOfHits	The new value to set.
 	 **/
 	@XmlElement
 	public void setNumberOfHits(Integer numberOfHits) {

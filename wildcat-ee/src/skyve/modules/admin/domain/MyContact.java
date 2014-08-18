@@ -56,6 +56,8 @@ public class MyContact extends AbstractTransientBean {
 
 	/**
 	 * {@link #myContact} mutator.
+	 * 
+	 * @param myContact	The new value to set.
 	 **/
 	@XmlElement
 	public void setMyContact(Contact myContact) {

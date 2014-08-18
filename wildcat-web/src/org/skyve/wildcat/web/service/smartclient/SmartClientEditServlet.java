@@ -170,7 +170,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    		Object formValue = BindUtil.get(contextBean, formBinding);
 			    		if (formValue instanceof List<?>) {
 			    			if (bizId != null) { // bizId is null if a new bean is being added to a datagrid
-			    				formBean = BindUtil.findElementInCollection(contextBean, formBinding, bizId);
+			    				formBean = BindUtil.getElementInCollection(contextBean, formBinding, bizId);
 			    				if (formBean == null) {
 			    					// Somehow the app coder has removed the form bean from its collection
 			    					// when zoomed in on the collection
@@ -198,7 +198,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	Bean processBean = null;
 			    	
 		    		if ((formBean != null) && (gridBinding != null)) {
-		    			processBean = BindUtil.findElementInCollection(formBean, gridBinding, bizId);
+		    			processBean = BindUtil.getElementInCollection(formBean, gridBinding, bizId);
 			    	}
 		    		else {
 		    			processBean = formBean;
@@ -556,7 +556,7 @@ public class SmartClientEditServlet extends HttpServlet {
     		}
     		else {
     			if (referenceValue instanceof List<?>) {
-    				processBean = BindUtil.findElementInCollection(contextBean, formBinding, bizId);
+    				processBean = BindUtil.getElementInCollection(contextBean, formBinding, bizId);
     			}
     			else {
     				processBean = (Bean) referenceValue;

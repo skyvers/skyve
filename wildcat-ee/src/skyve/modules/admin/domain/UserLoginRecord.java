@@ -68,6 +68,8 @@ return getUserName() + " @ " + getLoginDateTime();
 
 	/**
 	 * {@link #userName} mutator.
+	 * 
+	 * @param userName	The new value to set.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -84,6 +86,8 @@ return getUserName() + " @ " + getLoginDateTime();
 
 	/**
 	 * {@link #loginDateTime} mutator.
+	 * 
+	 * @param loginDateTime	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)

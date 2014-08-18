@@ -178,6 +178,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #contact} mutator.
+	 * 
+	 * @param contact	The new value to set.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -194,6 +196,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #staffCode} mutator.
+	 * 
+	 * @param staffCode	The new value to set.
 	 **/
 	@XmlElement
 	public void setStaffCode(String staffCode) {
@@ -210,6 +214,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #dateOfBirth} mutator.
+	 * 
+	 * @param dateOfBirth	The new value to set.
 	 **/
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
@@ -228,6 +234,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #roleTitle} mutator.
+	 * 
+	 * @param roleTitle	The new value to set.
 	 **/
 	@XmlElement
 	public void setRoleTitle(String roleTitle) {
@@ -244,6 +252,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #baseOffice} mutator.
+	 * 
+	 * @param baseOffice	The new value to set.
 	 **/
 	@XmlElement
 	public void setBaseOffice(Office baseOffice) {
@@ -260,6 +270,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #location} mutator.
+	 * 
+	 * @param location	The new value to set.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -277,6 +289,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #status} mutator.
+	 * 
+	 * @param status	The new value to set.
 	 **/
 	@XmlElement
 	public void setStatus(Status status) {
@@ -293,6 +307,8 @@ return getContact().getName();
 
 	/**
 	 * {@link #dueBack} mutator.
+	 * 
+	 * @param dueBack	The new value to set.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)

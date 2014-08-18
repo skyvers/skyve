@@ -86,6 +86,8 @@ StringBuilder sb = new StringBuilder();
 
 	/**
 	 * {@link #moduleName} mutator.
+	 * 
+	 * @param moduleName	The new value to set.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -102,6 +104,8 @@ StringBuilder sb = new StringBuilder();
 
 	/**
 	 * {@link #documentName} mutator.
+	 * 
+	 * @param documentName	The new value to set.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -118,6 +122,8 @@ StringBuilder sb = new StringBuilder();
 
 	/**
 	 * {@link #sequenceName} mutator.
+	 * 
+	 * @param sequenceName	The new value to set.
 	 **/
 	@XmlElement
 	public void setSequenceName(String sequenceName) {
@@ -134,6 +140,8 @@ StringBuilder sb = new StringBuilder();
 
 	/**
 	 * {@link #number} mutator.
+	 * 
+	 * @param number	The new value to set.
 	 **/
 	@XmlElement
 	public void setNumber(String number) {
