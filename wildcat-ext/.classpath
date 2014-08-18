@@ -32,8 +32,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/poi-ooxml-3.5-FINAL-20090928.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/poi-scratchpad-3.5-FINAL-20090928.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/quartz-1.6.0.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/slf4j-api-1.5.0.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/slf4j-simple-1.5.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/SuperCSV-1.52.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate-annotations.jar"/>
@@ -44,5 +42,7 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/uadetector-resources-2014.02.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/geodb-0.7.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/slf4j-simple-1.7.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
