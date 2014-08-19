@@ -264,10 +264,14 @@ public class ComponentBuilder {
 								String title,
 								boolean required,
 								String disabled,
+								Integer maxLength,
 								Converter converter,
 								Integer pixelWidth,
 								boolean applyDefaultWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
+		if (maxLength != null) {
+			result.setMaxlength(maxLength.intValue());
+		}
 		if (converter != null) {
 			result.setConverter(converter);
 		}
@@ -280,11 +284,15 @@ public class ComponentBuilder {
 								String title,
 								boolean required,
 								String disabled,
+								Integer maxLength,
 								TextFormat format,
 								Converter converter,
 								Integer pixelWidth,
 								boolean applyDefaultWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
+		if (maxLength != null) {
+			result.setMaxlength(maxLength.intValue());
+		}
 		result.setMask(determineMask(format));
 		String existingStyle = null;
 		TextCase textCase = format.getCase();
@@ -427,10 +435,14 @@ public class ComponentBuilder {
 									String title,
 									boolean required,
 									String disabled,
+									Integer maxLength,
 									Integer pixelWidth,
 									Integer pixelHeight,
 									boolean applyDefaultWidth) {
 	    InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
+	    if (maxLength != null) {
+	    	result.setMaxlength(maxLength.intValue());
+	    }
 		addSize(result, null, pixelWidth, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
