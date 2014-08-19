@@ -40,7 +40,7 @@ public abstract class FacesAction<T> {
 				}
 			}
 			else {
-				FacesMessage msg = new FacesMessage(t.getMessage(), t.getMessage());
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, t.getMessage(), t.getMessage());
 		        fc.addMessage(null, msg);
 			}
 		}
