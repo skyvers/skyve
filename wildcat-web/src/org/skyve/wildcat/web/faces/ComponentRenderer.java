@@ -11,6 +11,7 @@ import javax.el.ValueExpression;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UIParameter;
 import javax.faces.component.UISelectItems;
@@ -62,7 +63,6 @@ import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.extensions.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.mobile.component.field.Field;
 
-// TODO can't see boolean properties as value expressions - ie disabled/rendered never found if expression is "true" or "false"
 public class ComponentRenderer {
 	private static final char INDENT = '\t';
 	StringBuilder out = new StringBuilder(1024);
@@ -429,6 +429,10 @@ public class ComponentRenderer {
 					converterName = converterName.substring(0, converterName.length() - 9);
 				}
 				putValue(attributes, "converter", converterName);
+			}
+			
+			if (component instanceof UIInput) {
+				putValue(attributes, "requiredMessage", ((UIInput) component).getRequiredMessage());
 			}
 		}
 		

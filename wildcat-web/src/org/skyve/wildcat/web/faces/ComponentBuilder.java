@@ -613,9 +613,9 @@ public class ComponentBuilder {
 							String collectionName,
 							Boolean clientValidation) {
 		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionName));
-        if (Boolean.FALSE.equals(clientValidation)) {
-        	command.setValueExpression("immediate", ef.createValueExpression(Boolean.TRUE, Boolean.class));
-        }
+//        if (Boolean.FALSE.equals(clientValidation)) {
+//        	command.setValueExpression("immediate", ef.createValueExpression(Boolean.TRUE, Boolean.class));
+//        }
     }
 
     private MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName,
@@ -1078,11 +1078,13 @@ public class ComponentBuilder {
 // Cannot utilise the faces required attributes as some requests need to ignore required-ness.
 // eg - triggered actions on widget events.
 // Setting required attribute to an expression worked server-side but the client-side message integration didn't.
-//		result.setValueExpression("required", ef.createValueExpression(required ? "#{true}" : "false",
+//		result.setValueExpression("required", ef.createValueExpression(required ? "true" : "false",
 //																	    Boolean.class));
-//		result.setRequiredMessage(title + " is required");
+// So we use the requiredMessage to perform the check ourselves based on clientValidation attribute
+		if (required) {
+			result.setRequiredMessage(title + " is required");
+		}
 		addDisabled(result, disabled);
-		
 		return result;
 	}
 	

@@ -1923,6 +1923,15 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		
+		String title = (currentFormItem == null) ? null : currentFormItem.getLabel();
+		if (title != null) {
+			result.setTitle(title);
+		}
+		Boolean required = (currentFormItem == null) ? null : currentFormItem.getRequired();
+		if (required != null) {
+			result.setRequired(required.booleanValue());
+		}
+
 		return result;
 	}
 }

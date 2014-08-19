@@ -31,29 +31,31 @@ public class ZoomOutAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction");
 
-		// Call the bizlet
-		Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(currentBean.getBizModule());
-		Document document = module.getDocument(customer, currentBean.getBizDocument());
-		Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-		if (bizlet != null) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " +  facesView.getWebContext());
-			currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, facesView.getWebContext());
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+		if (FacesAction.validateRequiredFields()) {
+			// Call the bizlet
+			Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+			User user = CORE.getUser();
+			Customer customer = user.getCustomer();
+			Module module = customer.getModule(currentBean.getBizModule());
+			Document document = module.getDocument(customer, currentBean.getBizDocument());
+			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			if (bizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " +  facesView.getWebContext());
+				currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, facesView.getWebContext());
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+			}
+	
+			if (currentBean.isNotPersisted() && (! user.canCreateDocument(document))) {
+				throw new SecurityException("create this data", user.getName());
+			}
+	
+			ValidationUtil.validateBeanAgainstDocument(document, currentBean);
+			if (bizlet != null) {
+				ValidationUtil.validateBeanAgainstBizlet(bizlet, currentBean);
+			}
+	
+			zoomOut(facesView);
 		}
-
-		if (currentBean.isNotPersisted() && (! user.canCreateDocument(document))) {
-			throw new SecurityException("create this data", user.getName());
-		}
-
-		ValidationUtil.validateBeanAgainstDocument(document, currentBean);
-		if (bizlet != null) {
-			ValidationUtil.validateBeanAgainstBizlet(bizlet, currentBean);
-		}
-
-		zoomOut(facesView);
 		
 		return null;
 	}

@@ -32,31 +32,33 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("SaveAction - ok=" + ok);
 
-		AbstractPersistence persistence = AbstractPersistence.get();
-		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
-
-		// Run the bizlet
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(targetBean.getBizModule());
-		Document document = module.getDocument(customer, targetBean.getBizDocument());
-		Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-		if (bizlet != null) {
-			ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + facesView.getWebContext());
-			targetBean = bizlet.preExecute(ian, targetBean, null, facesView.getWebContext());
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
+		if (FacesAction.validateRequiredFields()) {
+			AbstractPersistence persistence = AbstractPersistence.get();
+			PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+	
+			// Run the bizlet
+			User user = CORE.getUser();
+			Customer customer = user.getCustomer();
+			Module module = customer.getModule(targetBean.getBizModule());
+			Document document = module.getDocument(customer, targetBean.getBizDocument());
+			Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			if (bizlet != null) {
+				ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + facesView.getWebContext());
+				targetBean = bizlet.preExecute(ian, targetBean, null, facesView.getWebContext());
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
+			}
+	
+			if (targetBean.isNotPersisted() && (! user.canCreateDocument(document))) {
+				throw new SecurityException("create this data", user.getName());
+			}
+			else if (targetBean.isPersisted() && (! user.canUpdateDocument(document))) {
+				throw new SecurityException("update this data", user.getName());
+			}
+	
+			targetBean = persistence.save(targetBean);
+			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 		}
-
-		if (targetBean.isNotPersisted() && (! user.canCreateDocument(document))) {
-			throw new SecurityException("create this data", user.getName());
-		}
-		else if (targetBean.isPersisted() && (! user.canUpdateDocument(document))) {
-			throw new SecurityException("update this data", user.getName());
-		}
-
-		targetBean = persistence.save(targetBean);
-		ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 		
 		return null;
 	}
