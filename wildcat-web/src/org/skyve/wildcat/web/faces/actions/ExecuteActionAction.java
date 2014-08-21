@@ -44,12 +44,18 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 		View view = targetDocument.getView(facesView.getUxUi(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
-
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
-    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
-    	
-    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
-    	
-    	return null;
+	    if (Boolean.FALSE.equals(action.getClientValidation())) {
+	    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
+	    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+	    }
+	    else {
+			if (FacesAction.validateRequiredFields()) {
+		    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
+		    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+			}	    	
+		}    	
+
+	    return null;
 	}
 }

@@ -1391,6 +1391,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				                        def.getTitle(),
 				                        def.isRequired(),
 				                        text.getDisabledConditionName(),
+				                        def.getLength(),
 				                        text.getPixelWidth(),
 				                        text.getPixelHeight(),
 				                        ! UserAgentType.phone.equals(userAgentType));
@@ -1459,6 +1460,7 @@ public class FacesViewVisitor extends ViewVisitor {
                     def.getTitle(),
                     def.isRequired(),
                     text.getDisabledConditionName(),
+                    def.getLength(),
                     format,
                     convertConverter(converter),
                     text.getPixelWidth(),
@@ -1470,6 +1472,7 @@ public class FacesViewVisitor extends ViewVisitor {
                                 def.getTitle(),
                                 def.isRequired(),
                                 text.getDisabledConditionName(),
+                                def.getLength(),
                                 convertConverter(converter),
                                 text.getPixelWidth(),
                                 ! UserAgentType.phone.equals(userAgentType));
@@ -1923,6 +1926,15 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		
+		String title = (currentFormItem == null) ? null : currentFormItem.getLabel();
+		if (title != null) {
+			result.setTitle(title);
+		}
+		Boolean required = (currentFormItem == null) ? null : currentFormItem.getRequired();
+		if (required != null) {
+			result.setRequired(required.booleanValue());
+		}
+
 		return result;
 	}
 }

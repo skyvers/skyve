@@ -38,6 +38,10 @@ public class AddAction extends FacesAction<Void> {
 		String viewBinding = facesView.getViewBinding();
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding + " : facesView.viewBinding=" + viewBinding);
 		
+		if (! FacesAction.validateRequiredFields()) {
+			return null;
+		}
+		
 		StringBuilder newViewBinding = new StringBuilder(32);
 		if (viewBinding != null) {
 			newViewBinding.append(viewBinding).append('.');

@@ -29,31 +29,33 @@ public class ZoomInAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomInAction - listBinding=" + listBinding + " : bizId=" + bizId);
 
-		String viewBinding = facesView.getViewBinding();
-		Bean parentBean = facesView.getCurrentBean().getBean();
+		if (FacesAction.validateRequiredFields()) {
+			String viewBinding = facesView.getViewBinding();
+			Bean parentBean = facesView.getCurrentBean().getBean();
+			
+			StringBuilder sb = new StringBuilder(64);
+			if (viewBinding != null) {
+				sb.append(viewBinding).append('.');
+			}
+			sb.append(listBinding).append("ElementById(").append(bizId).append(')').toString();
+			facesView.setViewBinding(sb.toString());
+	
+			Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
+	
+			// Call the bizlet
+			Customer customer = CORE.getUser().getCustomer();
+			Module collectionModule = customer.getModule(currentBean.getBizModule());
+			Document collectionDocument = collectionModule.getDocument(customer, currentBean.getBizDocument());
+			Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
+			if (bizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + facesView.getWebContext());
+				currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, parentBean, facesView.getWebContext());
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+			}
+	
+			ActionUtil.redirect(facesView, currentBean);
+		}
 		
-		StringBuilder sb = new StringBuilder(64);
-		if (viewBinding != null) {
-			sb.append(viewBinding).append('.');
-		}
-		sb.append(listBinding).append("ElementById(").append(bizId).append(')').toString();
-		facesView.setViewBinding(sb.toString());
-
-		Bean currentBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
-
-		// Call the bizlet
-		Customer customer = CORE.getUser().getCustomer();
-		Module collectionModule = customer.getModule(currentBean.getBizModule());
-		Document collectionDocument = collectionModule.getDocument(customer, currentBean.getBizDocument());
-		Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
-		if (bizlet != null) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + facesView.getWebContext());
-			currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, parentBean, facesView.getWebContext());
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
-		}
-
-		ActionUtil.redirect(facesView, currentBean);
-
 		return null;
 	}
 }
