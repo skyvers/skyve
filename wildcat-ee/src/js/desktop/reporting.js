@@ -209,8 +209,6 @@ ReportDialog.addClassProperties({
 	}),
 
 	_reportFormatForm: isc.DynamicForm.create({
-		isGroup: true,
-		groupTitle: 'Report Format',
 		valuesManager: ReportDialog._valuesManager,
 		numCols: 8,
 		padding: 15,
@@ -275,8 +273,6 @@ ReportDialog.addClassProperties({
 	}),
 	
 	_pageFormatForm: isc.DynamicForm.create({
-		isGroup: true,
-		groupTitle: 'Page Format',
 		valuesManager: ReportDialog._valuesManager,
 		numCols: 10,
 		padding: 15,
@@ -368,8 +364,6 @@ ReportDialog.addClassProperties({
 		]
 	}),
 	_marginsForm: isc.DynamicForm.create({
-		isGroup: true,
-		groupTitle: 'Margins',
 		valuesManager: ReportDialog._valuesManager,
 		numCols: 8,
 		padding: 15,
@@ -419,6 +413,13 @@ ReportDialog.addClassProperties({
 				validators: [{type: 'integerRange', min: 1, max: 9999}]
 			}
 		]
+	}),
+	
+	_submitForm: isc.DynamicForm.create({
+		autoDraw: true,
+		canSubmit: true,
+		method: 'POST',
+		items: [{name: 'values', type: 'hidden'}]
 	}),
 
 	// The entire interface
@@ -485,29 +486,44 @@ ReportDialog.addClassProperties({
 //												'&values=' + escape(isc.JSON.encode(values, {prettyPrint:false}));
 //									var reportWindow = window.open(src, "report", "location=0,status=0,scrollbars=1,resizable=1,width=800,height=600");
 
+//									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
+//									var src = 'export.' + ReportDialog._reportFormatForm.getItem("reportFormat").getValue() + '?values=' + isc.JSON.encode(values, {prettyPrint:false});
+//									if ((format === 'html') || (format === 'xhtml')) {
+//										window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
+//									}
+//									else {
+//										window.location = encodeURI(src);
+//									}
+//									if ((format === 'html') || (format === 'xhtml')) {
+//										var reportWindow = window.open('', 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
+//									    reportWindow.document.write('<form name="auto" method="post" action="export.' + format + 
+//			    								'"><input name="values" type="hidden" value="' + isc.JSON.encode(values, {prettyPrint:false}).replaceAll('"', '&quot;')
+//			    								 + 
+//			    								'"/></form>\x3Cscript type="text/javascript">\document.forms[0].submit();\x3C/script>');
+//									}
+									// Use a standard form POST, HTML/XHTML targetted to a blank window
 									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
-									var src = 'export.' + ReportDialog._reportFormatForm.getItem("reportFormat").getValue() + '?values=' + isc.JSON.encode(values, {prettyPrint:false});
-									if ((format === 'html') || (format === 'xhtml')) {
-										window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
-									}
-									else {
-										window.location = encodeURI(src);
-									}
-//								    var reportWindow = window.open('', 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
-//								    reportWindow.document.write('<form name="auto" method="post" action="export.' + 
-//								    								ReportDialog._reportFormatForm.getItem("reportFormat").getValue() + 
-//								    								'"><input name="values" type="hidden" value="' + 
-//								    								isc.JSON.encode(values, {prettyPrint:false}).replaceAll('"', '&quot;') + 
-//								    								'"/></form>\x3Cscript type="text/javascript">\document.forms[0].submit();\x3C/script>');
+									ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
+									ReportDialog._submitForm.setAction('export.' + format);
+									ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
+																		'_blank' :
+																		'_self');
+									ReportDialog._submitForm.submitForm();
 								}
 							}
 						}),
 						isc.VLayout.create({
 							margin: 0,
 							membersMargin: 5,
-							members: [ReportDialog._reportFormatForm, 
-										ReportDialog._pageFormatForm, 
-										ReportDialog._marginsForm]
+							members: [isc.VLayout.create({isGroup: true,
+															groupTitle: 'Report Format',
+															members: [ReportDialog._reportFormatForm]}), 
+										isc.VLayout.create({isGroup: true,
+																groupTitle: 'Page Format',
+																members: [ReportDialog._pageFormatForm]}),
+										isc.VLayout.create({isGroup: true,
+																	groupTitle: 'Margins',
+																	members: [ReportDialog._marginsForm]})]
 						})
 					),
 					ReportDialog._columnSelectorLayout
