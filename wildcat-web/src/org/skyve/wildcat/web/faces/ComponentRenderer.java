@@ -132,8 +132,10 @@ public class ComponentRenderer {
 		else if (component instanceof Column) {
 			tagName = "p:column";
 
+			Column column = (Column) component;
+			putValue(attributes, "headerText", column.getHeaderText());
 			putValueExpression(attributes, "sortBy", component);
-			putValue(attributes, "style", ((Column) component).getStyle());
+			putValue(attributes, "style", column.getStyle());
 		}
 		else if (component instanceof CommandButton) {
 			tagName = "p:commandButton";

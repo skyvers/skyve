@@ -324,6 +324,7 @@ public class ListGrid extends HtmlPanelGroup {
 											ELContext elc) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setHeaderText("Actions");
+		column.setStyle("width:75px;white-space:nowrap;text-align:centre");
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		outputText.setValue("Edit");
 		HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
@@ -336,7 +337,7 @@ public class ListGrid extends HtmlPanelGroup {
 		componentChildrenToAddTo.add(column);
 	}
 
-//Add sorting of columns
-//Add click to edit
-//Add filter to phone dataList
+//TODO Add sorting of columns
+//TODO Add click to edit
+//TODO Add filter to phone dataList
 }
