@@ -1865,7 +1865,13 @@ t.printStackTrace();
 			Map<String, Object> parameters = query.getParameters();
 			if (parameters != null) {
 				for (Entry<String, Object> entry : parameters.entrySet()) {
-					hibernateQuery.setParameter(entry.getKey(), entry.getValue());
+					Object value = entry.getValue();
+					if (value instanceof Geometry) {
+						hibernateQuery.setParameter(entry.getKey(), value, GeometryUserType.TYPE);
+					}
+					else {
+						hibernateQuery.setParameter(entry.getKey(), value);
+					}
 				}
 			}
 
