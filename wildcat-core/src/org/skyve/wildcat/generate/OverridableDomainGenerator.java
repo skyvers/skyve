@@ -1544,7 +1544,7 @@ joined tables
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void set").append(methodName);
-			methods.append("ElementById(String bizId, ").append(propertyClassName).append(" element) {\n");
+			methods.append("ElementById(@SuppressWarnings(\"unused\") String bizId, ").append(propertyClassName).append(" element) {\n");
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
 		}
