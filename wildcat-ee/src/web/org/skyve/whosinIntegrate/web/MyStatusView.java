@@ -1,5 +1,5 @@
 
-package modules.whosinIntegrate.web;
+package org.skyve.whosinIntegrate.web;
 
 import java.io.ByteArrayInputStream;
 

@@ -4,6 +4,7 @@
 /javaee/wildcat.ear/apps.jar
 /javaee/wildcat.ear/lib
 /javaee/wildcat.ear/wildcat.war/WEB-INF/lib
+/javaee/wildcat.ear/wildcat.war/WEB-INF/classes
 /javaee/wildcat.ear.deployed
 /javaee/wildcat-ds.xml.deployed
 /lib

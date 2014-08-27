@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
     <wb-module deploy-name="wildcat-ee">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/skyve"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/web"/>
         <property name="java-output-path" value="/wildcat-ee/bin"/>
         <property name="context-root" value="wildcat-ee"/>
     </wb-module>

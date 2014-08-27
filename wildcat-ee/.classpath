@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src/skyve"/>
+	<classpathentry kind="src" output="javaee/wildcat.ear/wildcat.war/WEB-INF/classes" path="src/web"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/wildcat-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/wildcat-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/wildcat-web"/>
