@@ -124,7 +124,7 @@ ReportDialog.addClassProperties({
 });
 ReportDialog.addClassProperties({
 	// create a report format picklist
-	_createReportFormatPickList: function(onChangeFunction) { // callback for onchange event
+	_createReportFormatPickList: function(colSpan, onChangeFunction) { // callback for onchange event
 		return {
 			name: 'reportFormat', 
 			showTitle: false, 
@@ -163,6 +163,7 @@ ReportDialog.addClassProperties({
 				'xml': 'xml'
 			},
 			defaultValue: 'pdf',
+			colSpan: colSpan,
 			change: onChangeFunction
 		};
 	}
@@ -188,7 +189,7 @@ ReportDialog.addClassProperties({
 						height: 32, 
 						click: function() {ReportDialog._selectedColumnList.transferSelectedData(ReportDialog._columnList);},
 						canHover: true,
-						getHoverHTML: function() {return "Move the selected columns into the report"}
+						getHoverHTML: function() {return "Move the selected columns into the report";}
 					}),
 					isc.IButton.create({
 						icon: "reporting/arrow_left.png",
@@ -200,7 +201,7 @@ ReportDialog.addClassProperties({
 						height: 32, 
 						click: function() {ReportDialog._columnList.transferSelectedData(ReportDialog._selectedColumnList);},
 						canHover: true,
-						getHoverHTML: function() {return "Move the selected columns out of the report"}
+						getHoverHTML: function() {return "Move the selected columns out of the report";}
 					})
 				]
 			}),
@@ -210,10 +211,12 @@ ReportDialog.addClassProperties({
 
 	_reportFormatForm: isc.DynamicForm.create({
 		valuesManager: ReportDialog._valuesManager,
-		numCols: 8,
+		numCols: 7,
+		colWidths: [60, 200, 40, 30, '*', 60, '*'],
 		padding: 15,
 		items: [
 	        ReportDialog._createReportFormatPickList(
+	        	3,
 	        	function(form, item, value, oldValue) {
 					if ((value == 'pdf') ||
 							(value == 'docx') ||
@@ -231,13 +234,21 @@ ReportDialog.addClassProperties({
 						form.getItem('isPaginated').setValue(false);
 						form.getItem('isPretty').setValue(false);
 					}
+					form.getItem('fileNameSuffix').setValue('.' + value);
 				}
 	        ),
+			{name: "isPaginated",
+				title: "Paginated Report",
+				type: "checkbox",
+				required: true,
+				defaultValue: true
+			},
 			{name: 'style',
 				title: 'Style',
 				type: 'radioGroup',
-				vertical: false,
+				vertical: true,
 				required: true,
+				rowSpan: 2,
 				valueMap: {tabular: 'Tabular', columnar: 'Columnar'},
 				defaultValue: 'tabular',
 				change: function(form, item, value, oldValue) {
@@ -257,11 +268,19 @@ ReportDialog.addClassProperties({
 					}
 				}
 			},
-			{name: "isPaginated",
-				title: "Paginated Report",
-				type: "checkbox",
+			{name: "fileNameNoSuffix",
+				title: "Filename",
+				type: "text",
 				required: true,
-				defaultValue: true
+				width: '100%',
+				defaultValue: "export"
+			},
+			{name: "fileNameSuffix",
+				showTitle: false,
+				type: "staticText",
+				startRow: false,
+				endRow: false,
+				defaultValue: ".pdf"
 			},
 			{name: "isPretty",
 				title: "Pixel Perfect",
@@ -503,8 +522,9 @@ ReportDialog.addClassProperties({
 //									}
 									// Use a standard form POST, HTML/XHTML targetted to a blank window
 									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
+									var fileNameNoSuffix = ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
 									ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
-									ReportDialog._submitForm.setAction('export.' + format);
+									ReportDialog._submitForm.setAction('export/' + fileNameNoSuffix + '.' + format);
 									ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
 																		'_blank' :
 																		'_self');
@@ -564,7 +584,7 @@ ReportDialog.addClassProperties({
 
 							// have to post to this setup URL as document.write() doesn't work in IE6
 							var format = _reportForm.getValue("reportFormat");
-							var src = 'report.rpt' +
+							var src = '/report/' + this._params['_n'] + '.' + format +
 										'?_format=' + format +
 										(c ? '&_c=' + c : '') +
 										(b ? '&_b=' + b : '') +
@@ -590,6 +610,7 @@ ReportDialog.addClassProperties({
 				        {type:'rowSpacer'}, 
 				        {type:'rowSpacer'},
 					    ReportDialog._createReportFormatPickList(
+					    	1,
 				    		function(form, item, value, oldValue) {
 				    			// do nothing
 				    		}),

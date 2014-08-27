@@ -252,59 +252,11 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>*.rpt</url-pattern>
+		<url-pattern>/report/*</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.pdf</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.docx</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.xlsx</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.pptx</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.xls</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.rtf</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.ods</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.odt</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.html</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.xhtml</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.txt</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.csv</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>ReportServlet</servlet-name>
-		<url-pattern>/export.xml</url-pattern>
+		<url-pattern>/export/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

@@ -71,8 +71,8 @@ public class ReportServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final String REPORT_PATH = "report.rpt";
-	public static final String EXPORT_PATH_FRAGMENT = "/export.";
+	public static final String REPORT_PATH = "/report";
+	public static final String EXPORT_PATH = "/export";
 	public static final String REPORT_FORMAT = "_format";
 
 	@Override
@@ -102,10 +102,10 @@ public class ReportServlet extends HttpServlet {
 //				else if (path.equals(ThinClientWebContext.SETUP_PATH)) {
 //					doSetup(request, response);
 //				}
-				if (path.equals('/' + REPORT_PATH)) {
+				if (REPORT_PATH.equals(path)) {
 					doReport(request, response);
 				}
-				else if (path.contains(EXPORT_PATH_FRAGMENT)) {
+				else if (EXPORT_PATH.equals(path)) {
 					doExport(request, response);
 				}
 				else {
@@ -217,7 +217,7 @@ public class ReportServlet extends HttpServlet {
 															bean, 
 															format,
 															baos);
-			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, request.getSession(), response);
+			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
 		}
 		catch (Exception e) {
 			System.err.println("Problem generating the report - " + e.toString());
@@ -243,66 +243,80 @@ public class ReportServlet extends HttpServlet {
 	private static void pumpOutReportFormat(byte[] bytes, 
 												JasperPrint jasperPrint,
 												ReportFormat format,
+												String fileNameNoSuffix,
 												HttpSession session,
 												HttpServletResponse response)
 	throws IOException {
 		response.setCharacterEncoding(ServletConstants.UTF8);
 
+		StringBuilder sb = new StringBuilder(64);
 		switch (format) {
 		case txt:
 			response.setContentType(MimeType.plain.toString());
 			break;
 		case csv:
 			response.setContentType(MimeType.csv.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.csv\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".csv\"");
+			response.setHeader("Content-Disposition",  sb.toString());
 			break;
 		case html:
 			response.setContentType(MimeType.html.toString());
-			response.setHeader("Content-Disposition", "inline; filename=\"export.html\"");
+			sb.append("inline; filename=\"").append(fileNameNoSuffix).append(".html\"");
+			response.setHeader("Content-Disposition", sb.toString());
 // TODO maybe I should UUEncode this thing to the client
 			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
 			break;
 		case xhtml:
 			response.setContentType(MimeType.html.toString());
-			response.setHeader("Content-Disposition", "inline; filename=\"export.html\"");
+			sb.append("inline; filename=\"").append(fileNameNoSuffix).append(".xhtml\"");
+			response.setHeader("Content-Disposition", sb.toString());
 // TODO maybe I should UUEncode this thing to the client
 			session.setAttribute(BaseHttpServlet.DEFAULT_JASPER_PRINT_SESSION_ATTRIBUTE, jasperPrint);
 			break;
 		case pdf:
 			response.setContentType(MimeType.pdf.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.pdf\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".pdf\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xls:
 			response.setContentType(MimeType.excel.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.xls\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xls\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case rtf:
 			response.setContentType(MimeType.rtf.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.rtf\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".rtf\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case odt:
 			response.setContentType(MimeType.openDocumentText.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.odt\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".odt\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case ods:
 			response.setContentType(MimeType.openDocumentSpreadsheet.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.ods\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".ods\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case docx:
 			response.setContentType(MimeType.docx.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.docx\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".docx\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xlsx:
 			response.setContentType(MimeType.xlsx.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.xlsx\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xlsx\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case pptx:
 			response.setContentType(MimeType.pptx.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.pptx\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".pptx\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		case xml:
 			response.setContentType(MimeType.xml.toString());
-			response.setHeader("Content-Disposition", "attachment; filename=\"export.xml\"");
+			sb.append("attachment; filename=\"").append(fileNameNoSuffix).append(".xml\"");
+			response.setHeader("Content-Disposition", sb.toString());
 			break;
 		default:
 			throw new IllegalStateException("Report format " + format + " not catered for.");
@@ -429,9 +443,11 @@ public class ReportServlet extends HttpServlet {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ReportFormat format = ReportFormat.valueOf((String) values.get("reportFormat"));
 				ReportUtil.runReport(jasperPrint, format, baos);
+				
 				pumpOutReportFormat(baos.toByteArray(),
 										jasperPrint, 
 										format,
+										(String) values.get("fileNameNoSuffix"),
 										request.getSession(),
 										response);
 			}
