@@ -584,7 +584,7 @@ ReportDialog.addClassProperties({
 
 							// have to post to this setup URL as document.write() doesn't work in IE6
 							var format = _reportForm.getValue("reportFormat");
-							var src = '/report/' + this._params['_n'] + '.' + format +
+							var src = 'report/' + this._params['_n'] + '.' + format +
 										'?_format=' + format +
 										(c ? '&_c=' + c : '') +
 										(b ? '&_b=' + b : '') +
