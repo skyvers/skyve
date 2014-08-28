@@ -1,5 +1,0 @@
-<Object ID="ReadOnlyRule" __autoConstruct="DataSource" inheritsFrom="Rule" Constructor="readOnly" addGlobalId="false">
-    <fields>
-        <fieldAppearance type="string"/>
-    </fields>
-</Object>

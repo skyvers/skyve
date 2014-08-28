@@ -1,6 +1,0 @@
-<Object ID="HasRelatedRecordValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="hasRelatedRecord" addGlobalId="false">
-    <fields>
-        <relatedField type="string" />
-        <relatedDataSource type="string" />
-    </fields>
-</Object>

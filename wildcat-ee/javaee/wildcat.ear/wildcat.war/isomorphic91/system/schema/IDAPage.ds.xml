@@ -1,8 +1,0 @@
-<DataSource ID="IDAPage">
-	<fields>
-		<field name="ID" type="string" />
-		<field name="operations" type="string" multiple="true"/>
-		<field name="defaultComponents" type="string" multiple="true" />
-		<field name="defaultOperations" type="expression" multiple="true" />
-	</fields>
-</DataSource>

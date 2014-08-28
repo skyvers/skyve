@@ -1,7 +1,0 @@
-<DataSource ID="Shadow">
-    <fields>
-        <field name="color" type="color" defaultValue="black"/>
-        <field name="blur" type="integer" defaultValue="10"/>
-        <field name="offset"  type="Point"/>
-    </fields>
-</DataSource>

@@ -1,5 +1,0 @@
-<Object ID="DoesntContainValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="doesntContain" addGlobalId="false">
-    <fields>
-        <substring type="string"/>
-    </fields>
-</Object>
