@@ -120,7 +120,7 @@ return (getName()==null?"Group":getName());
 	 * @param bizId	The bizId of the element in the list.
 	 * @param roles	The new value to set.
 	 **/
-	public void setRolesElementById(String bizId, GroupRole element) {
+	public void setRolesElementById(@SuppressWarnings("unused") String bizId, GroupRole element) {
 		 setElementById(roles, element);
 	}
 }
