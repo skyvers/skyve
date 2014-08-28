@@ -450,18 +450,8 @@
 			<!-- Secure dynamic image URLs -->
 			<url-pattern>/images/dynamic.png</url-pattern>
 			<!-- Secure all report URLs -->
-			<url-pattern>*.rpt</url-pattern>
-			<url-pattern>/export.pdf</url-pattern>
-			<url-pattern>/export.html</url-pattern>
-			<url-pattern>/export.odt</url-pattern>
-			<url-pattern>/export.rtf</url-pattern>
-			<url-pattern>/export.odf</url-pattern>
-			<url-pattern>/export.txt</url-pattern>
-			<url-pattern>/export.csv</url-pattern>
-			<url-pattern>/export.xls</url-pattern>
-			<url-pattern>/export.ods</url-pattern>
-			<url-pattern>/export.xmlss</url-pattern>
-			<url-pattern>/export.xml</url-pattern>
+			<url-pattern>/report/*</url-pattern>
+			<url-pattern>/export/*</url-pattern>
 			<!-- Image Servlet for HTML reporting through Jasper -->
 			<url-pattern>/image/*</url-pattern>
 			<!-- Secure customer resource servlet -->
