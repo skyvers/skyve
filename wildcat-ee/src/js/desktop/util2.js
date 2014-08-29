@@ -389,7 +389,6 @@ isc.BizMap.addMethods({
 			callback: function(rpcResponse, data, rpcRequest) {
 				var items = data.items;
 				
-console.log(1);
 				if (auto) {
 					// remove overlays not present in the data
 					for (var bizId in me._objects) {
@@ -417,7 +416,6 @@ console.log(1);
 					}
 				}
 
-console.log(2);
 				// add/update overlays from the data
 				for (var i = 0, l = items.length; i < l; i++) {
 					var item = items[i];
@@ -542,37 +540,29 @@ console.log(2);
 					}
 				}
 
-console.log(3);
 				if (fit) {
 					var bounds = new google.maps.LatLngBounds();
-console.log(bounds);
 					var someOverlays = false;
-console.log(me._objects);
 					for (var id in me._objects) {
-console.log(id);
 						someOverlays = true;
 						var object = me._objects[id];
 						var overlays = object.overlays;
 						for (var i = 0, l = overlays.length; i < l; i++) {
 							var overlay = overlays[i];
-console.log(overlay)
 				            if (overlay.getPath) {
 					            // For Polygons and Polylines - fit the bounds to the vertices
 								var path = overlay.getPath();
-console.log(path)
 								for (var j = 0, m = path.getLength(); j < m; j++) {
 									bounds.extend(path.getAt(j));
 								}
 				            }
 				            else if (overlay.getPosition) {
-console.log(overlay.getPosition());
 				            	bounds.extend(overlay.getPosition());
 				            }
 						}
 					}
 
 					if (someOverlays) {
-console.log(bounds);
 						// Don't zoom in too far on only one marker
 					    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
 					       var extendPoint1 = new google.maps.LatLng(bounds.getNorthEast().lat() + 0.01, bounds.getNorthEast().lng() + 0.01);
@@ -584,7 +574,6 @@ console.log(bounds);
 						me._map.fitBounds(bounds);
 					}
 				}
-				console.log(20);
 			}
 		});
 	},
