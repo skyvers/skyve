@@ -419,7 +419,13 @@ public class ReportServlet extends HttpServlet {
 					reportColumn.setTitle((String) column.get("title"));
 					reportColumn.setType("text");
 					reportColumn.setWidth(((Number) column.get("width")).intValue());
-					reportColumn.setAlignment(ColumnAlignment.valueOf((String) column.get("align")));
+					String align = (String) column.get("align");
+					if (align != null) {
+						reportColumn.setAlignment(ColumnAlignment.valueOf(align));
+					}
+					else {
+						reportColumn.setAlignment(ColumnAlignment.left);
+					}
 					designParams.getColumns().add(reportColumn);
 				}
 				

@@ -1669,7 +1669,7 @@ isc.BizMapPicker.addMethods({
 
 			BizUtil.loadJS('wicket/wicket.js', function() {
 				BizUtil.loadJS('wicket/wicket-gmap3.js', function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing&' +
+					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&sensor=false&libraries=drawing&' +
             						'callback=isc.BizMapPicker.initialise');
 				});
 			});
@@ -1732,6 +1732,9 @@ isc.BizMapPicker.addMethods({
             else { // But points (Markers) are different
                 if (obj.getPosition !== undefined && typeof obj.getPosition === 'function') {
                     this._map.panTo(obj.getPosition());
+                }
+                if (this._map.getZoom() < 15) {
+                    this._map.setZoom(15);
                 }
             }
         }
