@@ -190,6 +190,21 @@
 				<document name="MyContact" permission="_____" >
 					<action name="UpdateMyDetails"/>
 				</document>
+				<document name="CurrentUser" permission="CR__U" />
+				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="Snapshot" permission="CRUDU" />
+				<document name="Tag" permission="CRUDU" >	
+					<action name="Clear"/>
+					<action name="TagAll"/>
+					<action name="ExceptTag"/>
+					<action name="IntersectTag"/>
+					<action name="UnionTag"/>
+					<action name="UpdateModule"/>
+					<action name="UpdateDocument"/>
+					<action name="UploadTagCriteria"/>
+					<action name="BulkDocumentAction"/>
+				</document>
+				<document name="Tagged" permission="CRUDU" />			
 			</privileges>
 		</role>
 		<role name="ContactViewer">
@@ -266,7 +281,24 @@
 				<document name="Contact" permission="_RU_U" />
 				<document name="User" permission="_RU_U"/>
 				<document name="Group" permission="_R__C" />
-				<document name="GroupRole" permission="_R__C" />				
+				<document name="GroupRole" permission="_R__C" />
+
+				<document name="CurrentUser" permission="CR__U" />
+				<document name="DocumentNumber" permission="CRUDC" />
+				<document name="Snapshot" permission="CRUDU" />
+				<document name="Tag" permission="CRUDU" >	
+					<action name="Clear"/>
+					<action name="TagAll"/>
+					<action name="ExceptTag"/>
+					<action name="IntersectTag"/>
+					<action name="UnionTag"/>
+					<action name="UpdateModule"/>
+					<action name="UpdateDocument"/>
+					<action name="UploadTagCriteria"/>
+					<action name="BulkDocumentAction"/>
+				</document>
+				<document name="Tagged" permission="CRUDU" />
+								
 			</privileges>
 		</role>				
 	</roles>
