@@ -1,8 +1,0 @@
-<DataSource ID="FileItem" inheritsFrom="TextItem" Constructor="FileItem">
-    <fields>
-        <field name="defaultValue" napplicable="true"/>
-   		<field name="length" inapplicable="true"/>                
-        <field name="defaultDynamicValue" inapplicable="true"/>
-    </fields>
-</DataSource>
-

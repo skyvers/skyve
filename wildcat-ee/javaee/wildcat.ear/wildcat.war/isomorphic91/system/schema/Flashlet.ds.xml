@@ -1,8 +1,0 @@
-<DataSource	ID="Flashlet" inheritsFrom="BrowserPlugin" Constructor="Flashlet">
-    <fields>
-		<field name="name"         type="string"/>
-		<field name="params"	   type="object"/>
-		<field name="classID"      type="string"/>
-		<field name="codeBase"     type="URL"/>
-    </fields>
-</DataSource>

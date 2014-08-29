@@ -94,7 +94,7 @@ public class CurrentUser extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param groups	The new value to set.
 	 **/
-	public void setGroupsElementById(String bizId, Group element) {
+	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
 		 setElementById(groups, element);
 	}
 }

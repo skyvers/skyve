@@ -212,7 +212,7 @@ isc.BizMap.addMethods({
 			isc.BizMap.id = this.ID;
 			BizUtil.loadJS('wicket/wicket.js', function() {
 				BizUtil.loadJS('wicket/wicket-gmap3.js', function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=drawing&callback=isc.BizMap.initialise');
+					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&sensor=false&libraries=drawing&callback=isc.BizMap.initialise');
 				});
 			});
 		}
@@ -557,13 +557,13 @@ isc.BizMap.addMethods({
 								}
 				            }
 				            else if (overlay.getPosition) {
-								bounds.extend(overlay.getPosition());
+				            	bounds.extend(overlay.getPosition());
 				            }
 						}
 					}
 
 					if (someOverlays) {
-					    // Don't zoom in too far on only one marker
+						// Don't zoom in too far on only one marker
 					    if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
 					       var extendPoint1 = new google.maps.LatLng(bounds.getNorthEast().lat() + 0.01, bounds.getNorthEast().lng() + 0.01);
 					       var extendPoint2 = new google.maps.LatLng(bounds.getNorthEast().lat() - 0.01, bounds.getNorthEast().lng() - 0.01);

@@ -1,6 +1,0 @@
-<Object ID="ServerCustomValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="serverCustom" addGlobalId="false">
-    <fields>
-        <serverCondition type="string" />
-        <serverObject type="ServerObject" />
-    </fields>
-</Object>

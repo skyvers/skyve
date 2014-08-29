@@ -1,2 +1,0 @@
-<DataSource ID="ToolStripMenuButton" inheritsFrom="IMenuButton" Constructor="ToolStripMenuButton">
-</DataSource>

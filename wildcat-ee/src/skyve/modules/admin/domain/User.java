@@ -528,7 +528,7 @@ return (getContact() == null) ?
 	 * @param bizId	The bizId of the element in the list.
 	 * @param groups	The new value to set.
 	 **/
-	public void setGroupsElementById(String bizId, Group element) {
+	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
 		 setElementById(groups, element);
 	}
 
@@ -555,7 +555,7 @@ return (getContact() == null) ?
 	 * @param bizId	The bizId of the element in the list.
 	 * @param roles	The new value to set.
 	 **/
-	public void setRolesElementById(String bizId, UserRole element) {
+	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
 		 setElementById(roles, element);
 	}
 
@@ -636,7 +636,7 @@ return (getContact() == null) ?
 	 * @param bizId	The bizId of the element in the list.
 	 * @param candidateContacts	The new value to set.
 	 **/
-	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
+	public void setCandidateContactsElementById(@SuppressWarnings("unused") String bizId, UserCandidateContact element) {
 		 setElementById(candidateContacts, element);
 	}
 
