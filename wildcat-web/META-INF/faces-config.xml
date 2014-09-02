@@ -8,13 +8,13 @@
 		<el-resolver>
 			org.skyve.wildcat.web.faces.EmptyStringResolver
 		</el-resolver>
+		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
 	</application>
+	
 	<lifecycle>
 		<phase-listener>org.skyve.wildcat.web.faces.WildcatPhaseListener</phase-listener>
 	</lifecycle>
-	<application>
-		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
-	</application>
+
 	<!-- Converters -->
 	<converter>
 		<converter-for-class>java.lang.Boolean</converter-for-class>
