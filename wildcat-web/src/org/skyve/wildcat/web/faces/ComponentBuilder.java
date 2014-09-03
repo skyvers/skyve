@@ -26,6 +26,7 @@ import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.colorpicker.ColorPicker;
@@ -847,7 +848,8 @@ public class ComponentBuilder {
     									String displayBinding,
     									Query query,
     									Integer pixelWidth,
-    									boolean applyDefaultWidth) {
+    									boolean applyDefaultWidth,
+    									boolean dontDisplay) {
     	AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
     	result.setForceSelection(true);
     	result.setDropdown(true);
@@ -867,7 +869,24 @@ public class ComponentBuilder {
     	attributes.put("query", query.getName());
     	attributes.put("display", displayBinding);
     	
-    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? NINETY_FIVE : null);
+    	addSize(result, dontDisplay ? "display:none" : null, pixelWidth, null, null, null, applyDefaultWidth ? NINETY_FIVE : null);
+    	
+    	return result;
+    }
+    
+    public Button button(String icon,
+							String styleClass, 
+							String style) {
+    	Button result = (Button) a.createComponent(Button.COMPONENT_TYPE);
+    	if (icon != null) {
+    		result.setIcon(icon);
+    	}
+    	if (styleClass != null) {
+    		result.setStyleClass(styleClass);
+    	}
+    	if (style != null) {
+    		result.setStyle(style);
+    	}
     	
     	return result;
     }

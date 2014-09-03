@@ -14,6 +14,7 @@ import javax.faces.component.html.HtmlSelectOneMenu;
 import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
+import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
@@ -1224,7 +1225,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
 		SmartClientLookupDefinition ldef = def.getLookup();
-        UIComponentBase c = b.autoComplete(listBinding,
+		boolean phone = UserAgentType.phone.equals(userAgentType);
+		UIComponentBase c = b.autoComplete(listBinding,
 	    									lookup.getBinding(),
 	                                        def.getTitle(),
 	                                        def.isRequired(),
@@ -1232,8 +1234,34 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        ldef.getDisplayField().replace('_', '.'),
 	                                        ldef.getQuery(),
 	                                        lookup.getPixelWidth(),
-	                                        ! UserAgentType.phone.equals(userAgentType));
+	                                        ! phone,
+	                                        phone);
         eventSource = c;
+        
+        if (phone) {
+        	c = b.panelGroup(false, false, null);
+        	List<UIComponent> children = c.getChildren();
+        	children.add(eventSource);
+        	InputText text = b.textField(listBinding,
+				        					lookup.getBinding() + '.' + ldef.getDisplayField().replace('_', '.'),
+				        					def.getTitle(),
+				        					def.isRequired(),
+											"true",
+											null,
+											null,
+											null,
+											false);
+        	children.add(text);
+        	
+        	org.primefaces.component.button.Button button = b.button("ui-icon-search", 
+        																"ui-btn-right",
+    																	(def.getTitle() == null) ?
+        																	"top:1em !important" :
+        																	"top:2.3em !important");
+        	children.add(button);
+        	button.setOnclick("return WILDCAT.switchToAutoComplete(this)");
+        }
+        
         addComponent(def.getTitle(), def.isRequired(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
 	}
 

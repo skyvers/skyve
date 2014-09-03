@@ -387,27 +387,7 @@ public class ComponentRenderer {
 //			}
 		}
 		
-		if (component instanceof HtmlInputText) {
-			HtmlInputText text = (HtmlInputText) component;
-			if (text.isDisabled()) {
-				putValue(attributes, "disabled", "true");
-			}
-			if (text.isReadonly()) {
-				putValue(attributes, "readonly", "true");
-			}
-			putValue(attributes, "title", text.getTitle());
-		}
-		else if (component instanceof HtmlInputTextarea) {
-			HtmlInputTextarea text = (HtmlInputTextarea) component;
-			if (text.isDisabled()) {
-				putValue(attributes, "disabled", "true");
-			}
-			if (text.isReadonly()) {
-				putValue(attributes, "readonly", "true");
-			}
-			putValue(attributes, "title", text.getTitle());
-		}
-		else if (component instanceof UICommand) {
+		if (component instanceof UICommand) {
 			UICommand command = (UICommand) component;
 			
 			putValue(attributes, "value", command.getValue());
@@ -434,6 +414,27 @@ public class ComponentRenderer {
 			}
 			
 			if (component instanceof UIInput) {
+				if (component instanceof HtmlInputText) {
+					HtmlInputText text = (HtmlInputText) component;
+					if (text.isDisabled()) {
+						putValue(attributes, "disabled", "true");
+					}
+					if (text.isReadonly()) {
+						putValue(attributes, "readonly", "true");
+					}
+					putValue(attributes, "title", text.getTitle());
+				}
+				else if (component instanceof HtmlInputTextarea) {
+					HtmlInputTextarea text = (HtmlInputTextarea) component;
+					if (text.isDisabled()) {
+						putValue(attributes, "disabled", "true");
+					}
+					if (text.isReadonly()) {
+						putValue(attributes, "readonly", "true");
+					}
+					putValue(attributes, "title", text.getTitle());
+				}
+
 				putValue(attributes, "requiredMessage", ((UIInput) component).getRequiredMessage());
 			}
 		}
