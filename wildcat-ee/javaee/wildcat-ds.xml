@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>  
 <datasources>  
 	<datasource jndi-name="java:/H2Demo" pool-name="H2 Demo">
-		<connection-url>jdbc:h2:file:C:/_/wildcat/wildcat-ee/content/demo;IFEXISTS=TRUE</connection-url>
+		<connection-url>jdbc:h2:file:~/demo;IFEXISTS=TRUE</connection-url>
 		<driver>h2</driver>
 		<pool>
 			<min-pool-size>5</min-pool-size>
