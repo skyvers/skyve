@@ -28,7 +28,6 @@ import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
-import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
@@ -697,8 +696,6 @@ public class ComponentBuilder {
     									String href,
     									String invisible,
     									ReferenceTarget target) {
-		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValue(value);
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (listBinding != null) {
 			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, href, true, null, String.class));
@@ -706,8 +703,11 @@ public class ComponentBuilder {
 		else {
 			result.setValueExpression("value", createValueExpressionFromBinding(href, true, null, String.class));
 		}
-//		ef.createValueExpression(elc, href, String.class));
-		result.getChildren().add(outputText);
+    	if (value != null) {
+	    	UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			outputText.setValue(value);
+			result.getChildren().add(outputText);
+    	}
 		addInvisible(result, invisible, null);
 
 		if (target != null) {
@@ -723,6 +723,20 @@ public class ComponentBuilder {
 		
 		return result;
     }
+    
+	public UIOutput outputText(String expression) {
+		ValueExpression ve =  ef.createValueExpression(elc, expression, String.class);
+		UIOutput result = new UIOutput();
+		result.setValueExpression("value", ve);
+		return result;
+	}
+	
+	public UIOutput outputText(String listBinding, String binding) {
+		ValueExpression ve =  createValueExpressionFromBinding(listBinding, binding, true, null, String.class);
+		UIOutput result = new UIOutput();
+		result.setValueExpression("value", ve);
+		return result;
+	}
     
     public Spacer spacer() {
         Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
@@ -958,61 +972,6 @@ public class ComponentBuilder {
         else {
 	        result.getFacets().put("header", heading);
         }
-        
-        return result;
-    }
-
-    public Column dataTableActionColumn(String listBinding, boolean mobile) {
-		Column result = column(null,
-								null,
-								"Actions",
-				                HorizontalAlignment.centre,
-				                true,
-				                Integer.valueOf(75));
-		CommandLink link = actionLink(mobile ? "" : "Edit",
-										"Edit the record",
-										ImplicitActionName.Navigate,
-										null,
-										listBinding,
-										null,
-										null,
-										Boolean.TRUE,
-										null,
-										null);
-/*
-        HtmlOutputLink l = outputLink("./", null, null, null);
-		HtmlOutputText t = text("Edit", null);
-
-<p:column headerText="Actions" style="width:75px">
-<h:outputLink value="./">
-<h:outputText value="Edit" />
-<f:param name="a" value="#{WebAction.e.toString()}" />
-<f:param name="f" value="t" />
-<f:param name="m" value="#{row['bizModule']}" />
-<f:param name="d" value="#{row['bizDocument']}" />
-<f:param name="i" value="#{row['bizId']}" />
-</h:outputLink>
-</p:column>
-*/
-        result.getChildren().add(link);
-        
-        return result;
-    }
-    
-    public CellEditor cellEditor(String listBinding, String binding) {
-    	CellEditor result = (CellEditor) a.createComponent(CellEditor.COMPONENT_TYPE);
-
-    	String expression = null;
-    	if (binding == null) {
-    		expression = new StringBuilder(8).append('{').append(Bean.BIZ_KEY).append('}').toString();
-    	}
-    	else {
-        	expression = new StringBuilder(binding.length() + 2).append('{').append(binding).append('}').toString();
-    	}
-        ValueExpression ve = createValueExpressionFromBinding(listBinding, expression, true, null, String.class);
-        UIOutput text = new UIOutput();
-        text.setValueExpression("value", ve);
-        result.getFacets().put("output", text);
         
         return result;
     }

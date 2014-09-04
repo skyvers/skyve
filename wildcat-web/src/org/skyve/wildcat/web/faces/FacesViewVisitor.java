@@ -6,14 +6,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.component.html.HtmlSelectOneMenu;
 
-import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
+import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.panel.Panel;
@@ -44,6 +45,7 @@ import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.model.document.field.TextFormat;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.ViewVisitor;
@@ -538,7 +540,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								UIComponent component,
 								Integer pixelWidth,
 								Integer percentageWidth) {
-		if (cellEditor == null) { // not a bound column in a datagrid
+		if (gridColumnExpression == null) { // not a bound column in a datagrid
 			if (currentFormItem == null) { // not a form item
 				if (currentGrid == null) { // not a container column in a datagrid
 					// This must be a container (vbox, hbox etc)
@@ -547,7 +549,6 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 				else {
 					// This must be a data grid container column
-
 					// add a spacer, if required
 					List<UIComponent> children = current.getChildren();
 					if (! children.isEmpty()) {
@@ -626,9 +627,10 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 		}
-		else { // bound column
-	        cellEditor.getFacets().put("input", component);
-		}
+// no editable data grids yet!!
+//		else { // bound column
+//	        current.getChildren().add(component);
+//		}
 	}
 	
 	@Override
@@ -906,7 +908,8 @@ public class FacesViewVisitor extends ViewVisitor {
         addToContainer(g, grid.getPixelWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 		listBinding = grid.getBinding();
-		
+		gridColumnExpression = new StringBuilder(512);
+
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
 			fragment = g;
@@ -916,14 +919,49 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
-		if ((! UserAgentType.tablet.equals(userAgentType)) && (! Boolean.FALSE.equals(grid.getEditable()))) {
-			Column col = b.dataTableActionColumn(listBinding, UserAgentType.phone.equals(userAgentType));
+		if (UserAgentType.phone.equals(userAgentType)) {
+			UIOutput outputText = b.outputText(gridColumnExpression.toString());
+			CommandLink link = b.actionLink(null,
+												"Edit the record",
+												ImplicitActionName.Navigate,
+												null,
+												listBinding,
+												null,
+												null,
+												Boolean.TRUE,
+												null,
+												null);
+			link.getChildren().add(outputText);
+			current.getChildren().add(link);
+
+			current = current.getParent(); // finished with the single dataList column
+		}
+		else if ((! UserAgentType.tablet.equals(userAgentType)) &&
+					(! Boolean.FALSE.equals(grid.getEditable()))) {
+			Column col = b.column(null,
+									null,
+									"Actions",
+					                HorizontalAlignment.centre,
+					                true,
+					                Integer.valueOf(75));
+			CommandLink link = b.actionLink("Edit",
+												"Edit the record",
+												ImplicitActionName.Navigate,
+												null,
+												listBinding,
+												null,
+												null,
+												Boolean.TRUE,
+												null,
+												null);
+			col.getChildren().add(link);
 			current.getChildren().add(col);
 		}
 		
 	    currentGrid = null;
 	    listBinding = null;
-		completeAddToContainer();
+	    gridColumnExpression = null;
+	    completeAddToContainer();
 		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
@@ -934,45 +972,58 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 	}
 
-	private CellEditor cellEditor;
-
+	private StringBuilder gridColumnExpression;
+	
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled)
 	throws MetaDataException {
-		String title = column.getTitle();
 		String binding = column.getBinding();
-		if (title == null) {
-			StringBuilder sb = new StringBuilder(64);
-			sb.append(listBinding);
-			if (binding != null) {
-				sb.append('.').append(binding);
-			}
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
-			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					title = attribute.getDisplayName();
-				}
-			}
-		}
-		cellEditor = b.cellEditor(listBinding, binding);
-		Column col = b.column(listBinding,
-								(binding == null) ? Bean.BIZ_KEY : binding,
-								title,
-	                            column.getAlignment(),
-	                            false,
-	                            column.getPixelWidth());
-		current.getChildren().add(col);
-        current = col;
-        
-        if (UserAgentType.phone.equals(userAgentType) ||
-        		(! Boolean.FALSE.equals(((DataGrid) currentGrid).getEditable()))) {
-            col.getChildren().add(cellEditor.getFacet("output"));
+
+		if (UserAgentType.phone.equals(userAgentType)) {
+        	boolean first = false;
+        	if (gridColumnExpression.length() == 0) { // no columns processed yet
+        		first = true;
+        		Column col = b.column(null, false, false, null, null, null, null);
+    			current.getChildren().add(col);
+    	        current = col;
+        	}
+
+        	gridColumnExpression.append(first ? "<h2>" : "<p>");
+        	gridColumnExpression.append("#{").append(listBinding).append("['{");
+        	gridColumnExpression.append((binding == null) ? Bean.BIZ_KEY : binding).append("}']}");
+			gridColumnExpression.append(first ? "</h2>" : "</p>");
         }
         else {
-	        col.getChildren().add(cellEditor);
+    		String title = column.getTitle();
+    		if (title == null) {
+    			StringBuilder sb = new StringBuilder(64);
+    			sb.append(listBinding);
+    			if (binding != null) {
+    				sb.append('.').append(binding);
+    			}
+    			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
+    			if (target != null) {
+    				Attribute attribute = target.getAttribute();
+    				if (attribute != null) {
+    					title = attribute.getDisplayName();
+    				}
+    			}
+    		}
+
+    		Column col = b.column(listBinding,
+									(binding == null) ? Bean.BIZ_KEY : binding,
+									title,
+		                            column.getAlignment(),
+		                            false,
+		                            column.getPixelWidth());
+			current.getChildren().add(col);
+	        current = col;
+
+	        gridColumnExpression.setLength(0);
+	        gridColumnExpression.append('{').append((binding == null) ? Bean.BIZ_KEY : binding).append('}');
+	        col.getChildren().add(b.outputText(listBinding, gridColumnExpression.toString()));
         }
 	}
 
@@ -981,8 +1032,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled)
 	throws MetaDataException {
-		cellEditor = null;
-	    current = current.getParent();
+		if (! UserAgentType.phone.equals(userAgentType)) { // phone dataList has only 1 column
+			current = current.getParent(); // move from column to table
+		}
 	}
 
 	@Override
