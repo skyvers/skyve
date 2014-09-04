@@ -69,6 +69,7 @@ import org.skyve.wildcat.metadata.model.document.field.TextFormat;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.reference.ReferenceTarget;
 import org.skyve.wildcat.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
+import org.skyve.wildcat.web.UserAgent.UserAgentType;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 import org.skyve.wildcat.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.wildcat.web.faces.converters.select.SelectItemsBeanConverter;
@@ -152,7 +153,10 @@ public class ComponentBuilder {
 	    return result;
 	}
 
-	public HtmlPanelGroup panelGroup(boolean nowrap, boolean middle, String invisible) {
+	public HtmlPanelGroup panelGroup(boolean nowrap, 
+										boolean middle, 
+										boolean blockLayout,
+										String invisible) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		StringBuilder style = new StringBuilder(32);
 		if (nowrap) {
@@ -166,6 +170,9 @@ public class ComponentBuilder {
 		}
         addInvisible(result, invisible, null);
         setId(result);
+        if (blockLayout) {
+        	result.setLayout("block");
+        }
 		return result;
 	}
 
@@ -930,7 +937,8 @@ public class ComponentBuilder {
     	DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         setId(result);
         addInvisible(result, invisible, null);
-
+        addGridHeaderAndFooter(binding, title, newButton, result);
+        
         result.setVar(binding);
         result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
 
@@ -948,10 +956,31 @@ public class ComponentBuilder {
 	        result.addClientBehavior("rowSelect", ajax);
         }
         
-        UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(title);
+        return result;
+    }
+    
+	public DataList dataList(String binding, String title, String invisible, boolean newButton) {
+		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
+		setId(result);
+		result.getPassThroughAttributes().put("data-inset", createValueExpressionFromCondition("true", null));
+		addInvisible(result, invisible, null);
+        addGridHeaderAndFooter(binding, title, newButton, result);
+
+		result.setVar(binding);
+		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
+
+		return result;
+	}
+
+	private void addGridHeaderAndFooter(String binding, String title, boolean newButton, UIComponent dataTableOrList) {
+		if (title != null) {
+			UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+	        text.setValue(title);
+	        dataTableOrList.getFacets().put("header", text);
+		}
+
         if (newButton) {
-	        CommandButton button = actionButton("New",
+        	CommandButton button = actionButton("New",
 													"New Record",
 													ImplicitActionName.Add,
 													null,
@@ -961,38 +990,11 @@ public class ComponentBuilder {
 													Boolean.TRUE,
 													null,
 													null);
-//	        button.setStyle("float:left");
-//	        button.setStyle("position:absolute;top:5px;left:5px");
-	        OutputPanel headingPanel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
-//	        headingPanel.setStyle("width:100%;height:40px");
-	        headingPanel.getChildren().add(heading);
-	        headingPanel.getChildren().add(button);
-	        result.getFacets().put("header", headingPanel);
-        }
-        else {
-	        result.getFacets().put("header", heading);
-        }
-        
-        return result;
-    }
-    
-	public DataList dataList(String binding, String title, String invisible) {
-		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
-		setId(result);
-		result.setValueExpression("pt:data-inset", createValueExpressionFromCondition("true", null));
-		addInvisible(result, invisible, null);
-		
-        UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(title);
-        result.getFacets().put("header", heading);
-
-		result.setVar(binding);
-		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
-
-		return result;
+    		dataTableOrList.getFacets().put("footer", button);
+    	}
 	}
 
-    public AccordionPanel accordionPanel(String invisible) {
+	public AccordionPanel accordionPanel(String invisible) {
         AccordionPanel result = (AccordionPanel) a.createComponent(AccordionPanel.COMPONENT_TYPE);
         setId(result);
         addInvisible(result, invisible, null);

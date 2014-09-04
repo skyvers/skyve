@@ -21,6 +21,7 @@ import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.mobile.component.field.Field;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaData;
@@ -184,11 +185,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitView() throws MetaDataException {
 	    // Ensure visibility is set for both create and edit views
-        current = b.panelGroup(true, false, createView ? "created" : "notCreated");
+        current = b.panelGroup(true, false, false, createView ? "created" : "notCreated");
         facesView = current;
         
 		// Create the toolbar
-    	toolbar = b.panelGroup(true, false, null);
+    	toolbar = b.panelGroup(true, false, false, null);
 
         // Add the panel grid layout for the view container aspect for non-phone agents
     	if (! UserAgentType.phone.equals(userAgentType)) {
@@ -592,7 +593,7 @@ public class FacesViewVisitor extends ViewVisitor {
 														null,
 														null);
 							current.getChildren().add(columnOrField);
-							HtmlPanelGroup pg = b.panelGroup(true, true, widgetInvisible);
+							HtmlPanelGroup pg = b.panelGroup(true, true, false, widgetInvisible);
 							columnOrField.getChildren().add(pg);
 							HtmlOutputLabel l = b.label(null, null, label, component.getId());
 							pg.getChildren().add(l);
@@ -899,7 +900,8 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent g = UserAgentType.phone.equals(userAgentType) ? 
 		                    b.dataList(grid.getBinding(), 
 		                    			grid.getTitle(),
-		                    			grid.getInvisibleConditionName()) : 
+		                    			grid.getInvisibleConditionName(),
+		                    			! Boolean.FALSE.equals(grid.getEditable())) : 
 		                    b.dataTable(grid.getBinding(),
 		                    				grid.getTitle(),
 		                    				grid.getInvisibleConditionName(),
@@ -921,18 +923,24 @@ public class FacesViewVisitor extends ViewVisitor {
     throws MetaDataException {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			UIOutput outputText = b.outputText(gridColumnExpression.toString());
-			CommandLink link = b.actionLink(null,
-												"Edit the record",
-												ImplicitActionName.Navigate,
-												null,
-												listBinding,
-												null,
-												null,
-												Boolean.TRUE,
-												null,
-												null);
-			link.getChildren().add(outputText);
-			current.getChildren().add(link);
+			// If the grid is editable, add the ability to zoom
+			if (! Boolean.FALSE.equals(((DataGrid) currentGrid).getEditable())) {
+				CommandLink link = b.actionLink(null,
+													"Edit the record",
+													ImplicitActionName.Navigate,
+													null,
+													listBinding,
+													null,
+													null,
+													Boolean.TRUE,
+													null,
+													null);
+				link.getChildren().add(outputText);
+				current.getChildren().add(link);
+			}
+			else {
+				current.getChildren().add(outputText);
+			}
 
 			current = current.getParent(); // finished with the single dataList column
 		}
@@ -1291,7 +1299,7 @@ public class FacesViewVisitor extends ViewVisitor {
         eventSource = c;
         
         if (phone) {
-        	c = b.panelGroup(false, false, null);
+        	c = b.panelGroup(false, false, false, null);
         	List<UIComponent> children = c.getChildren();
         	children.add(eventSource);
         	InputText text = b.textField(listBinding,
