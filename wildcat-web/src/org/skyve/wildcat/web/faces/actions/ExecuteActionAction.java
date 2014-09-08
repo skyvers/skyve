@@ -54,7 +54,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
 		    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
 			}	    	
-		}    	
+		}
 
 	    return null;
 	}

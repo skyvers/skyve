@@ -21,7 +21,6 @@ import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.toolbar.Toolbar;
-import org.primefaces.mobile.component.field.Field;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaData;
@@ -29,6 +28,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
@@ -628,10 +629,12 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 		}
-// no editable data grids yet!!
-//		else { // bound column
-//	        current.getChildren().add(component);
-//		}
+		else { // bound column
+			if ((currentGrid instanceof DataGrid) && 
+					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+				current.getChildren().add(component);
+			}
+		}
 	}
 	
 	@Override
@@ -644,6 +647,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			                            action.getToolTip(),
 			                            action.getImplicitName(),
 			                            action.getName(),
+			                            false,
 			                            listBinding,
 			                            button.getPixelWidth(),
 			                            button.getPixelHeight(),
@@ -841,6 +845,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									null,
 									null,
 									reference.getActionName(),
+									false,
 									listBinding,
 									link.getPixelWidth(),
 									null,
@@ -897,15 +902,28 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
+		// Determine the document alias
+		String alias = null;
+		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
+		if (target != null) {
+			Collection targetCollection = (Collection) target.getAttribute();
+			if (targetCollection != null) {
+				alias = module.getDocument(customer, targetCollection.getDocumentName()).getSingularAlias();
+			}
+		}
+
+		// Create the datagrid faces component
 		UIComponent g = UserAgentType.phone.equals(userAgentType) ? 
 		                    b.dataList(grid.getBinding(), 
 		                    			grid.getTitle(),
 		                    			grid.getInvisibleConditionName(),
-		                    			! Boolean.FALSE.equals(grid.getEditable())) : 
+		                    			(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null) : 
 		                    b.dataTable(grid.getBinding(),
 		                    				grid.getTitle(),
 		                    				grid.getInvisibleConditionName(),
-		                    				! Boolean.FALSE.equals(grid.getEditable()),
+		                    				(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null,
+		                    				UserAgentType.tablet.equals(userAgentType),
+		                    				Boolean.TRUE.equals(grid.getInline()),
 		                    				UserAgentType.tablet.equals(userAgentType));
         addToContainer(g, grid.getPixelWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
@@ -929,6 +947,7 @@ public class FacesViewVisitor extends ViewVisitor {
 													"Edit the record",
 													ImplicitActionName.Navigate,
 													null,
+													false,
 													listBinding,
 													null,
 													null,
@@ -944,26 +963,75 @@ public class FacesViewVisitor extends ViewVisitor {
 
 			current = current.getParent(); // finished with the single dataList column
 		}
-		else if ((! UserAgentType.tablet.equals(userAgentType)) &&
-					(! Boolean.FALSE.equals(grid.getEditable()))) {
+		else {
 			Column col = b.column(null,
 									null,
 									"Actions",
 					                HorizontalAlignment.centre,
 					                true,
 					                Integer.valueOf(75));
-			CommandLink link = b.actionLink("Edit",
-												"Edit the record",
-												ImplicitActionName.Navigate,
-												null,
-												listBinding,
-												null,
-												null,
-												Boolean.TRUE,
-												null,
-												null);
-			col.getChildren().add(link);
-			current.getChildren().add(col);
+			List<UIComponent> children = col.getChildren();
+			if ((! UserAgentType.tablet.equals(userAgentType)) || 
+					(! Boolean.FALSE.equals(grid.getEditable()))) {
+				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
+												b.actionButton("Edit",
+																"Edit the record",
+																ImplicitActionName.Navigate,
+																null,
+																false,
+																listBinding,
+																Integer.valueOf(35),
+																null,
+																Boolean.TRUE,
+																null,
+																null) :
+												b.actionLink("Edit",
+																"Edit the record",
+																ImplicitActionName.Navigate,
+																null,
+																false,
+																listBinding,
+																null,
+																null,
+																Boolean.TRUE,
+																null,
+																null);
+				children.add(buttonOrLink);
+			}
+
+			if (! Boolean.FALSE.equals(grid.getEditable())) {
+				if (! col.getChildren().isEmpty()) {
+					children.add(b.label(null, null, " ", null));
+				}
+				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
+												b.actionButton("Remove",
+																"Remove the record",
+																ImplicitActionName.Remove,
+																null,
+																true,
+																listBinding,
+																Integer.valueOf(35),
+																null,
+																Boolean.TRUE,
+																null,
+																null) :
+												b.actionLink("Remove",
+																"Remove the record",
+																ImplicitActionName.Remove,
+																null,
+																true,
+																listBinding,
+																null,
+																null,
+																Boolean.TRUE,
+																null,
+																null);
+				children.add(buttonOrLink);
+			}
+
+			if (! col.getChildren().isEmpty()) {
+				current.getChildren().add(col);
+			}
 		}
 		
 	    currentGrid = null;
@@ -987,7 +1055,26 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled)
 	throws MetaDataException {
+		String title = column.getTitle();
 		String binding = column.getBinding();
+		if (binding == null) {
+			binding = Bean.BIZ_KEY;
+		}
+		else {
+			StringBuilder sb = new StringBuilder(64);
+			sb.append(listBinding).append('.').append(binding);
+			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
+			if (target != null) {
+				Attribute targetAttribute = target.getAttribute();
+				if (targetAttribute != null) {
+					title = targetAttribute.getDisplayName();
+					if (targetAttribute instanceof Association) {
+						sb.setLength(0);
+						binding = sb.append(binding).append('.').append(Bean.BIZ_KEY).toString();
+					}
+				}
+			}
+		}
 
 		if (UserAgentType.phone.equals(userAgentType)) {
         	boolean first = false;
@@ -1000,26 +1087,10 @@ public class FacesViewVisitor extends ViewVisitor {
 
         	gridColumnExpression.append(first ? "<h2>" : "<p>");
         	gridColumnExpression.append("#{").append(listBinding).append("['{");
-        	gridColumnExpression.append((binding == null) ? Bean.BIZ_KEY : binding).append("}']}");
+        	gridColumnExpression.append(binding).append("}']}");
 			gridColumnExpression.append(first ? "</h2>" : "</p>");
         }
         else {
-    		String title = column.getTitle();
-    		if (title == null) {
-    			StringBuilder sb = new StringBuilder(64);
-    			sb.append(listBinding);
-    			if (binding != null) {
-    				sb.append('.').append(binding);
-    			}
-    			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
-    			if (target != null) {
-    				Attribute attribute = target.getAttribute();
-    				if (attribute != null) {
-    					title = attribute.getDisplayName();
-    				}
-    			}
-    		}
-
     		Column col = b.column(listBinding,
 									(binding == null) ? Bean.BIZ_KEY : binding,
 									title,
@@ -1029,9 +1100,11 @@ public class FacesViewVisitor extends ViewVisitor {
 			current.getChildren().add(col);
 	        current = col;
 
-	        gridColumnExpression.setLength(0);
-	        gridColumnExpression.append('{').append((binding == null) ? Bean.BIZ_KEY : binding).append('}');
-	        col.getChildren().add(b.outputText(listBinding, gridColumnExpression.toString()));
+			if (! Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+		        gridColumnExpression.setLength(0);
+		        gridColumnExpression.append('{').append(binding).append('}');
+		        col.getChildren().add(b.outputText(listBinding, gridColumnExpression.toString()));
+			}
         }
 	}
 
@@ -1870,6 +1943,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												action.getToolTip(),
 												action.getImplicitName(),
 												action.getName(),
+												false,
 												listBinding,
 												null,
 												null,
@@ -1886,6 +1960,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												action.getToolTip(),
 												name,
 												null,
+												false,
 												listBinding,
 												null,
 												null,
@@ -1903,16 +1978,12 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitRemoveAction(Action action) throws MetaDataException {
-//		if (viewBinding != null) {
-			processImplicitAction(action, ImplicitActionName.Remove);
-//		}
+		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 
 	@Override
 	public void visitZoomOutAction(Action action) throws MetaDataException {
-//		if (viewBinding != null) {
-			processImplicitAction(action, ImplicitActionName.ZoomOut);
-//		}
+		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
@@ -1922,30 +1993,22 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitOKAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.OK);
-//		}
+		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
 	@Override
 	public void visitSaveAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Save);
-//		}
+		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
 	@Override
 	public void visitCancelAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Cancel);
-//		}
+		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
 	@Override
 	public void visitDeleteAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Delete);
-//		}
+		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
 	@Override

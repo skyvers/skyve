@@ -211,10 +211,10 @@ public class FacesView<T extends Bean> extends Harness {
 		navigate(listBinding, bizId);
 	}
 	
-	public void add(String listBinding) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + listBinding);
-		new AddAction(this, listBinding).execute();
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
+	public void add(String listBinding, boolean inline) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - add to " + listBinding + (inline ? " inline" : " with zoom"));
+		new AddAction(this, listBinding, inline).execute();
+		if (inline && UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - view binding now " + viewBinding);
 	}
 	
 	public void zoomout() {
@@ -225,9 +225,9 @@ public class FacesView<T extends Bean> extends Harness {
 	/**
 	 * This method only removes elements from collections, it doesn't null out associations.
 	 */
-	public void remove() {
+	public void remove(String listBinding, String bizId) {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
-		new RemoveAction(this).execute();
+		new RemoveAction(this, listBinding, bizId).execute();
 	}
 
 	public void action(String actionName, String listBinding, String bizId) {
