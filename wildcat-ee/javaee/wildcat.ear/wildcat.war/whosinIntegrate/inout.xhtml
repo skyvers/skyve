@@ -18,10 +18,8 @@
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{inOutView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<link type="text/css" media="screen" rel="stylesheet" href="#{inOutView.baseHref}whosinIntegrate/jquery.cropbox.css" />
-				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/hammer.js"></script>
+				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.panzoom.min.js"></script>
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.mousewheel.js"></script>
-				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.cropbox.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="inout">
@@ -107,29 +105,68 @@
 					                    var reader = new FileReader();
 					                    reader.onload = function (e) {
 					                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', e.target.result);
-											$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(e.target.result);
-											removeCropBox();
-											createCropBox();
+											setZoomPan();
 					                    }
 					                    reader.readAsDataURL(input.files[0]);
 					                }
 					            }
 
-					            function removeCropBox() {
-						            var crop = $(PrimeFaces.escapeClientId('staff:staffForm:photo')).data('cropbox');
-						            if (crop) {
-										crop.remove();
-								    }
-						        }
-						        
-					            function createCropBox() {
-					            	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).cropbox({width: 200, height: 200, zoom: 50, showControls: 'auto'}).on('cropbox',
-										function(event, results, img) {
-											$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(img.getDataURL());
-						            	});
-						        }
-						        
-					            $(function() {
+					            function setZoomPan() {
+									var $panzoom = $(PrimeFaces.escapeClientId('staff:staffForm:photo'));
+									if ($panzoom.panzoom) {
+										$panzoom.panzoom('destroy');
+									}
+						            var viewportWidth = $panzoom.parent().width(); // viewport width
+						            var viewportHeight = $panzoom.parent().height(); // viewport height
+									var zoomFactor = Math.max(viewportWidth / $panzoom.width(),
+																viewportHeight / $panzoom.height()); // fill the selfie are
+									$panzoom.panzoom({
+										minScale: zoomFactor,
+										contain: 'invert'
+									});
+									$panzoom.on('panzoomend', function(e, panzoom, matrix, changed) {
+										if (changed) {
+											var $this = $(this);
+											getDataUrl($this, 
+														matrix,
+														$this.parent().width(), // viewport width
+														$this.parent().height()); // viewport height
+										}
+									});
+									$panzoom.parent().on('mousewheel.focal', function(evt) {
+								        evt.preventDefault();
+								        var delta = evt.delta || evt.originalEvent.wheelDelta;
+								        var zoomOut = delta ? delta &lt; 0 : evt.originalEvent.deltaY &gt; 0;
+								        $panzoom.panzoom('zoom', zoomOut, {
+											increment: 0.1,
+											animate: false,
+											focal: evt
+								        });
+									});
+									
+									$panzoom.panzoom('zoom', zoomFactor);
+									getDataUrl($panzoom,
+												[zoomFactor, 0, 0, zoomFactor, 0, 0],
+												viewportWidth,
+												viewportHeight); // set the url to start with
+								}
+
+								function getDataUrl($panzoom, matrix, viewportWidth, viewportHeight) {
+									var canvas = document.createElement('canvas'), context = canvas.getContext('2d');
+									canvas.width = viewportWidth;
+									canvas.height = viewportHeight;
+								
+									var position = $panzoom.position();
+									context.drawImage($panzoom.get(0),
+														- position.left * 1 / matrix[0],
+														- position.top * 1 / matrix[3],
+														1 / matrix[0] * viewportWidth,
+														1 / matrix[3] * viewportHeight,
+														0, 0, viewportWidth, viewportHeight);
+									$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(canvas.toDataURL());
+								}
+
+								$(function() {
 									$('#PhotoButton').click(function() {
 										$('#PhotoPicker').trigger('click');
 											return false;
@@ -158,11 +195,13 @@
 										style="visibility: #{(inOutView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
 								Photo
 							</button>
-							<div style="width:100%;text-align:center">
-								<p:graphicImage id="photo" value="#{empty inOutView.selectedStaff.contact.image ? 
-																	'/whosinIntegrate/UnknownContact.gif' :
-																	'/content?_n='.concat(inOutView.selectedStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
-																	cache="false" />
+							<div id="focal" style="width:100%;text-align:center">
+								<div style="width:250px;height:250px;display:inline-block">
+									<p:graphicImage id="photo" value="#{empty inOutView.selectedStaff.contact.image ? 
+																		'/whosinIntegrate/UnknownContact.gif' :
+																		'/content?_n='.concat(inOutView.selectedStaff.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
+																		cache="false"  />
+								</div>
 							</div>
 							<h:inputHidden id="base64Image" value="#{inOutView.base64Image}" />
 							<pm:field>

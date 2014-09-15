@@ -28,25 +28,28 @@ import org.skyve.wildcat.web.faces.beans.FacesView;
 public class AddAction extends FacesAction<Void> {
 	private FacesView<? extends Bean> facesView;
 	private String listBinding;
-	public AddAction(FacesView<? extends Bean> facesView, String listBinding) {
+	private boolean inline;
+	public AddAction(FacesView<? extends Bean> facesView, String listBinding, boolean inline) {
 		this.facesView = facesView;
 		this.listBinding = listBinding;
+		this.inline = inline;
 	}
 
 	@Override
 	public Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding + " : facesView.viewBinding=" + viewBinding);
-		
-		if (! FacesAction.validateRequiredFields()) {
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("AddAction - listBinding=" + listBinding + 
+													" : facesView.viewBinding=" + viewBinding + 
+													" : facesView.inline=" + inline);
+		if ((! inline) && (! FacesAction.validateRequiredFields())) {
 			return null;
 		}
 		
-		StringBuilder newViewBinding = new StringBuilder(32);
+		StringBuilder collectionBinding = new StringBuilder(32);
 		if (viewBinding != null) {
-			newViewBinding.append(viewBinding).append('.');
+			collectionBinding.append(viewBinding).append('.');
 		}
-		newViewBinding.append(listBinding);
+		collectionBinding.append(listBinding);
 
 		Bean bean = facesView.getBean();
 		String bizModule = bean.getBizModule();
@@ -59,7 +62,7 @@ public class AddAction extends FacesAction<Void> {
     	Bean parentBean = facesView.getCurrentBean().getBean();
     	
     	// Create a new element
-    	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
+    	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, collectionBinding.toString());
 		Collection targetCollection = (Collection) target.getAttribute();
 		Document collectionDocument = module.getDocument(customer, targetCollection.getDocumentName());
 		Bean newBean = collectionDocument.newInstance(user);
@@ -107,14 +110,16 @@ public class AddAction extends FacesAction<Void> {
 
 		// Add the new element to the collection
 		@SuppressWarnings("unchecked")
-		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
+		List<Bean> beans = (List<Bean>) Binder.get(bean, collectionBinding.toString());
 		beans.add(newBean);
 
-		newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+		if (! inline) {
+			collectionBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+			
+	    	facesView.setViewBinding(collectionBinding.toString());
+	    	ActionUtil.redirect(facesView, newBean);
+		}
 		
-    	facesView.setViewBinding(newViewBinding.toString());
-    	ActionUtil.redirect(facesView, newBean);
-
     	return null;
 	}
 }

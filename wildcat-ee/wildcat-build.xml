@@ -67,6 +67,7 @@
 		<copy tofile="javaee/wildcat.ear/wildcat.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
 		<copy tofile="javaee/wildcat.ear/wildcat.war/desktop/upload-min.js" file="src/js/desktop/upload.js" overwrite="true"/>
 		<copy tofile="javaee/wildcat.ear/wildcat.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
+		<copy tofile="javaee/wildcat.ear/wildcat.war/phone/wildcat-min.js" file="src/js/phone/wildcat.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatWildcatJavascript">
 		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
@@ -85,6 +86,9 @@
 		</java>
 		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
 			<arg line="-o javaee/wildcat.ear/wildcat.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+			<arg line="-o javaee/wildcat.ear/wildcat.war/phone/wildcat-min.js src/js/phone/wildcat.js"/>
 		</java>
 	</target>
 	<target name="mavenLibs" xmlns:artifact="urn:maven-artifact-ant">

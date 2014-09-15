@@ -228,7 +228,7 @@ public class QueryImpl implements Query {
 				if (lastDotIndex > -1) { // binding is across documents
 					// Find the reference for the association binding
 					String associationBinding = binding.substring(0, lastDotIndex);
-	
+
 					// determine if we need to left join this reference (as it is not required)
 					// NB check each token of the binding and if ANY is optional, we need to left join the lot
 					boolean leftJoin = false;
@@ -246,9 +246,20 @@ public class QueryImpl implements Query {
 							leftJoin = true;
 							break;
 						}
-						dotIndex = associationBinding.indexOf('.', dotIndex + 1);
+						// We've checked the entire association binding - bug out
+						if (dotIndex == associationBinding.length()) {
+							dotIndex = -1;
+						}
+						else {
+							// any more '.'; if so, process them
+							dotIndex = associationBinding.indexOf('.', dotIndex + 1);
+							// no more '.' - so check the last part of the expression
+							if (dotIndex < 0) {
+								dotIndex = associationBinding.length();
+							}
+						}
 					}
-	
+
 					// Find attribute of the full binding now
 					target = BindUtil.getMetaDataForBinding(customer, owningModule, document, binding);
 					attribute = target.getAttribute();
@@ -256,9 +267,13 @@ public class QueryImpl implements Query {
 						if (! attribute.isPersistent()) {
 							continue;
 						}
-						// If we have a reference directly to a mapped document, don't process it coz it can't be joined
+						// If we have a reference directly to a mapped document, don't process it coz it can't be joined.
 						if (attribute instanceof Association) {
 							Association association = (Association) attribute;
+							// If we have a reference directly to a non-required document, add a left outer join
+							if (! association.isRequired()) {
+								result.addLeftOuterJoin(binding);
+							}
 							Document associatedDocument = owningModule.getDocument(customer, association.getDocumentName());
 							if (associatedDocument != null) {
 								Persistent associatedPersistent = associatedDocument.getPersistent();

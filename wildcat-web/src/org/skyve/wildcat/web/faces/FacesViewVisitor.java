@@ -6,14 +6,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.component.html.HtmlSelectOneMenu;
 
-import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
+import org.primefaces.component.commandlink.CommandLink;
+import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
@@ -26,6 +28,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
@@ -43,6 +47,7 @@ import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.model.document.field.TextFormat;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.ViewVisitor;
@@ -181,11 +186,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitView() throws MetaDataException {
 	    // Ensure visibility is set for both create and edit views
-        current = b.panelGroup(true, false, createView ? "created" : "notCreated");
+        current = b.panelGroup(true, false, false, createView ? "created" : "notCreated");
         facesView = current;
         
 		// Create the toolbar
-    	toolbar = b.panelGroup(true, false, null);
+    	toolbar = b.panelGroup(true, false, false, null);
 
         // Add the panel grid layout for the view container aspect for non-phone agents
     	if (! UserAgentType.phone.equals(userAgentType)) {
@@ -537,7 +542,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								UIComponent component,
 								Integer pixelWidth,
 								Integer percentageWidth) {
-		if (cellEditor == null) { // not a bound column in a datagrid
+		if (gridColumnExpression == null) { // not a bound column in a datagrid
 			if (currentFormItem == null) { // not a form item
 				if (currentGrid == null) { // not a container column in a datagrid
 					// This must be a container (vbox, hbox etc)
@@ -546,7 +551,6 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 				else {
 					// This must be a data grid container column
-
 					// add a spacer, if required
 					List<UIComponent> children = current.getChildren();
 					if (! children.isEmpty()) {
@@ -590,7 +594,7 @@ public class FacesViewVisitor extends ViewVisitor {
 														null,
 														null);
 							current.getChildren().add(columnOrField);
-							HtmlPanelGroup pg = b.panelGroup(true, true, widgetInvisible);
+							HtmlPanelGroup pg = b.panelGroup(true, true, false, widgetInvisible);
 							columnOrField.getChildren().add(pg);
 							HtmlOutputLabel l = b.label(null, null, label, component.getId());
 							pg.getChildren().add(l);
@@ -626,7 +630,10 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		else { // bound column
-	        cellEditor.getFacets().put("input", component);
+			if ((currentGrid instanceof DataGrid) && 
+					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+				current.getChildren().add(component);
+			}
 		}
 	}
 	
@@ -640,6 +647,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			                            action.getToolTip(),
 			                            action.getImplicitName(),
 			                            action.getName(),
+			                            false,
 			                            listBinding,
 			                            button.getPixelWidth(),
 			                            button.getPixelHeight(),
@@ -837,6 +845,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									null,
 									null,
 									reference.getActionName(),
+									false,
 									listBinding,
 									link.getPixelWidth(),
 									null,
@@ -893,19 +902,34 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
+		// Determine the document alias
+		String alias = null;
+		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
+		if (target != null) {
+			Collection targetCollection = (Collection) target.getAttribute();
+			if (targetCollection != null) {
+				alias = module.getDocument(customer, targetCollection.getDocumentName()).getSingularAlias();
+			}
+		}
+
+		// Create the datagrid faces component
 		UIComponent g = UserAgentType.phone.equals(userAgentType) ? 
 		                    b.dataList(grid.getBinding(), 
 		                    			grid.getTitle(),
-		                    			grid.getInvisibleConditionName()) : 
+		                    			grid.getInvisibleConditionName(),
+		                    			(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null) : 
 		                    b.dataTable(grid.getBinding(),
 		                    				grid.getTitle(),
 		                    				grid.getInvisibleConditionName(),
-		                    				! Boolean.FALSE.equals(grid.getEditable()),
+		                    				(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null,
+		                    				UserAgentType.tablet.equals(userAgentType),
+		                    				Boolean.TRUE.equals(grid.getInline()),
 		                    				UserAgentType.tablet.equals(userAgentType));
         addToContainer(g, grid.getPixelWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 		listBinding = grid.getBinding();
-		
+		gridColumnExpression = new StringBuilder(512);
+
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
 			fragment = g;
@@ -915,14 +939,105 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
-		if ((! UserAgentType.tablet.equals(userAgentType)) && (! Boolean.FALSE.equals(grid.getEditable()))) {
-			Column col = b.dataTableActionColumn(listBinding, UserAgentType.phone.equals(userAgentType));
-			current.getChildren().add(col);
+		if (UserAgentType.phone.equals(userAgentType)) {
+			UIOutput outputText = b.outputText(gridColumnExpression.toString());
+			// If the grid is editable, add the ability to zoom
+			if (! Boolean.FALSE.equals(((DataGrid) currentGrid).getEditable())) {
+				CommandLink link = b.actionLink(null,
+													"Edit the record",
+													ImplicitActionName.Navigate,
+													null,
+													false,
+													listBinding,
+													null,
+													null,
+													Boolean.TRUE,
+													null,
+													null);
+				link.getChildren().add(outputText);
+				current.getChildren().add(link);
+			}
+			else {
+				current.getChildren().add(outputText);
+			}
+
+			current = current.getParent(); // finished with the single dataList column
+		}
+		else {
+			Column col = b.column(null,
+									null,
+									"Actions",
+					                HorizontalAlignment.centre,
+					                true,
+					                Integer.valueOf(75));
+			List<UIComponent> children = col.getChildren();
+			if ((! UserAgentType.tablet.equals(userAgentType)) || 
+					(! Boolean.FALSE.equals(grid.getEditable()))) {
+				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
+												b.actionButton("Edit",
+																"Edit the record",
+																ImplicitActionName.Navigate,
+																null,
+																false,
+																listBinding,
+																Integer.valueOf(35),
+																null,
+																Boolean.TRUE,
+																null,
+																null) :
+												b.actionLink("Edit",
+																"Edit the record",
+																ImplicitActionName.Navigate,
+																null,
+																false,
+																listBinding,
+																null,
+																null,
+																Boolean.TRUE,
+																null,
+																null);
+				children.add(buttonOrLink);
+			}
+
+			if (! Boolean.FALSE.equals(grid.getEditable())) {
+				if (! col.getChildren().isEmpty()) {
+					children.add(b.label(null, null, " ", null));
+				}
+				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
+												b.actionButton("Remove",
+																"Remove the record",
+																ImplicitActionName.Remove,
+																null,
+																true,
+																listBinding,
+																Integer.valueOf(35),
+																null,
+																Boolean.TRUE,
+																null,
+																null) :
+												b.actionLink("Remove",
+																"Remove the record",
+																ImplicitActionName.Remove,
+																null,
+																true,
+																listBinding,
+																null,
+																null,
+																Boolean.TRUE,
+																null,
+																null);
+				children.add(buttonOrLink);
+			}
+
+			if (! col.getChildren().isEmpty()) {
+				current.getChildren().add(col);
+			}
 		}
 		
 	    currentGrid = null;
 	    listBinding = null;
-		completeAddToContainer();
+	    gridColumnExpression = null;
+	    completeAddToContainer();
 		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
@@ -933,8 +1048,8 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 	}
 
-	private CellEditor cellEditor;
-
+	private StringBuilder gridColumnExpression;
+	
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
@@ -942,36 +1057,54 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		String title = column.getTitle();
 		String binding = column.getBinding();
-		if (title == null) {
+		if (binding == null) {
+			binding = Bean.BIZ_KEY;
+		}
+		else {
 			StringBuilder sb = new StringBuilder(64);
-			sb.append(listBinding);
-			if (binding != null) {
-				sb.append('.').append(binding);
-			}
+			sb.append(listBinding).append('.').append(binding);
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, sb.toString());
 			if (target != null) {
-				Attribute attribute = target.getAttribute();
-				if (attribute != null) {
-					title = attribute.getDisplayName();
+				Attribute targetAttribute = target.getAttribute();
+				if (targetAttribute != null) {
+					title = targetAttribute.getDisplayName();
+					if (targetAttribute instanceof Association) {
+						sb.setLength(0);
+						binding = sb.append(binding).append('.').append(Bean.BIZ_KEY).toString();
+					}
 				}
 			}
 		}
-		cellEditor = b.cellEditor(listBinding, binding);
-		Column col = b.column(listBinding,
-								(binding == null) ? Bean.BIZ_KEY : binding,
-								title,
-	                            column.getAlignment(),
-	                            false,
-	                            column.getPixelWidth());
-		current.getChildren().add(col);
-        current = col;
-        
-        if (UserAgentType.phone.equals(userAgentType) ||
-        		(! Boolean.FALSE.equals(((DataGrid) currentGrid).getEditable()))) {
-            col.getChildren().add(cellEditor.getFacet("output"));
+
+		if (UserAgentType.phone.equals(userAgentType)) {
+        	boolean first = false;
+        	if (gridColumnExpression.length() == 0) { // no columns processed yet
+        		first = true;
+        		Column col = b.column(null, false, false, null, null, null, null);
+    			current.getChildren().add(col);
+    	        current = col;
+        	}
+
+        	gridColumnExpression.append(first ? "<h2>" : "<p>");
+        	gridColumnExpression.append("#{").append(listBinding).append("['{");
+        	gridColumnExpression.append(binding).append("}']}");
+			gridColumnExpression.append(first ? "</h2>" : "</p>");
         }
         else {
-	        col.getChildren().add(cellEditor);
+    		Column col = b.column(listBinding,
+									(binding == null) ? Bean.BIZ_KEY : binding,
+									title,
+		                            column.getAlignment(),
+		                            false,
+		                            column.getPixelWidth());
+			current.getChildren().add(col);
+	        current = col;
+
+			if (! Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+		        gridColumnExpression.setLength(0);
+		        gridColumnExpression.append('{').append(binding).append('}');
+		        col.getChildren().add(b.outputText(listBinding, gridColumnExpression.toString()));
+			}
         }
 	}
 
@@ -980,8 +1113,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled)
 	throws MetaDataException {
-		cellEditor = null;
-	    current = current.getParent();
+		if (! UserAgentType.phone.equals(userAgentType)) { // phone dataList has only 1 column
+			current = current.getParent(); // move from column to table
+		}
 	}
 
 	@Override
@@ -1224,7 +1358,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
 		SmartClientLookupDefinition ldef = def.getLookup();
-        UIComponentBase c = b.autoComplete(listBinding,
+		boolean phone = UserAgentType.phone.equals(userAgentType);
+		UIComponentBase c = b.autoComplete(listBinding,
 	    									lookup.getBinding(),
 	                                        def.getTitle(),
 	                                        def.isRequired(),
@@ -1232,8 +1367,34 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        ldef.getDisplayField().replace('_', '.'),
 	                                        ldef.getQuery(),
 	                                        lookup.getPixelWidth(),
-	                                        ! UserAgentType.phone.equals(userAgentType));
+	                                        ! phone,
+	                                        phone);
         eventSource = c;
+        
+        if (phone) {
+        	c = b.panelGroup(false, false, false, null);
+        	List<UIComponent> children = c.getChildren();
+        	children.add(eventSource);
+        	InputText text = b.textField(listBinding,
+				        					lookup.getBinding() + '.' + ldef.getDisplayField().replace('_', '.'),
+				        					def.getTitle(),
+				        					def.isRequired(),
+											"true",
+											null,
+											null,
+											null,
+											false);
+        	children.add(text);
+        	
+        	org.primefaces.component.button.Button button = b.button("ui-icon-search", 
+        																"ui-btn-right",
+    																	(def.getTitle() == null) ?
+        																	"top:1em !important" :
+        																	"top:2.3em !important");
+        	children.add(button);
+        	button.setOnclick("return WILDCAT.switchToAutoComplete(this)");
+        }
+        
         addComponent(def.getTitle(), def.isRequired(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
 	}
 
@@ -1782,6 +1943,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												action.getToolTip(),
 												action.getImplicitName(),
 												action.getName(),
+												false,
 												listBinding,
 												null,
 												null,
@@ -1798,6 +1960,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												action.getToolTip(),
 												name,
 												null,
+												false,
 												listBinding,
 												null,
 												null,
@@ -1815,16 +1978,12 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitRemoveAction(Action action) throws MetaDataException {
-//		if (viewBinding != null) {
-			processImplicitAction(action, ImplicitActionName.Remove);
-//		}
+		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 
 	@Override
 	public void visitZoomOutAction(Action action) throws MetaDataException {
-//		if (viewBinding != null) {
-			processImplicitAction(action, ImplicitActionName.ZoomOut);
-//		}
+		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
@@ -1834,30 +1993,22 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitOKAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.OK);
-//		}
+		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
 	@Override
 	public void visitSaveAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Save);
-//		}
+		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
 	@Override
 	public void visitCancelAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Cancel);
-//		}
+		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
 	@Override
 	public void visitDeleteAction(Action action) throws MetaDataException {
-//		if (viewBinding == null) {
-			processImplicitAction(action, ImplicitActionName.Delete);
-//		}
+		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
 	@Override

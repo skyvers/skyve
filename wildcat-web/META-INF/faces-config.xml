@@ -3,12 +3,18 @@
 				xmlns="http://xmlns.jcp.org/xml/ns/javaee" 
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 				xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
+	<application>
+		<!-- This EL resolver is required to ensure that String properties of value "" (empty string) are successfully coerced to null -->
+		<el-resolver>
+			org.skyve.wildcat.web.faces.EmptyStringResolver
+		</el-resolver>
+		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
+	</application>
+	
 	<lifecycle>
 		<phase-listener>org.skyve.wildcat.web.faces.WildcatPhaseListener</phase-listener>
 	</lifecycle>
-	<application>
-		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
-	</application>
+
 	<!-- Converters -->
 	<converter>
 		<converter-for-class>java.lang.Boolean</converter-for-class>

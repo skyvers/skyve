@@ -72,7 +72,7 @@
 			class: FQN of class implementing the PersistenceManager interface 
 		--> 
 		<PersistenceManager class="org.apache.jackrabbit.core.persistence.bundle.H2PersistenceManager"> 
-			<param name="url" value="jdbc:h2:file:C:/_/wildcat/wildcat-ee/content/demo;IFEXISTS=TRUE"/> 
+			<param name="url" value="jdbc:h2:file:~/demo;IFEXISTS=TRUE"/> 
 			<param name="user" value="sa"/> 
 			<param name="password" value="sa"/> 
 			<param name="schemaObjectPrefix" value="CONTENT_"/> 
@@ -112,7 +112,7 @@
             implementations.
         -->
 		<PersistenceManager class="org.apache.jackrabbit.core.persistence.bundle.H2PersistenceManager"> 
-			<param name="url" value="jdbc:h2:file:C:/_/wildcat/wildcat-ee/content/demo;IFEXISTS=TRUE"/> 
+			<param name="url" value="jdbc:h2:file:~/demo;IFEXISTS=TRUE"/> 
 			<param name="user" value="sa"/> 
 			<param name="password" value="sa"/> 
 			<param name="schemaObjectPrefix" value="CONTENT_VERSION_"/> 

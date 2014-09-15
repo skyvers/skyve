@@ -26,8 +26,8 @@ import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
-import org.primefaces.component.celleditor.CellEditor;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
@@ -43,7 +43,6 @@ import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
-import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.password.Password;
@@ -152,7 +151,10 @@ public class ComponentBuilder {
 	    return result;
 	}
 
-	public HtmlPanelGroup panelGroup(boolean nowrap, boolean middle, String invisible) {
+	public HtmlPanelGroup panelGroup(boolean nowrap, 
+										boolean middle, 
+										boolean blockLayout,
+										String invisible) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		StringBuilder style = new StringBuilder(32);
 		if (nowrap) {
@@ -166,6 +168,9 @@ public class ComponentBuilder {
 		}
         addInvisible(result, invisible, null);
         setId(result);
+        if (blockLayout) {
+        	result.setLayout("block");
+        }
 		return result;
 	}
 
@@ -494,6 +499,7 @@ public class ComponentBuilder {
 		    							String tooltip,
 		    							ImplicitActionName implicitActionName,
 		    							String actionName,
+		    							boolean inline,
 		    							String listBinding,
 		                                Integer pixelWidth,
 		                                Integer pixelHeight,
@@ -505,7 +511,7 @@ public class ComponentBuilder {
         result.setValue(title);
         result.setTitle(tooltip);
 
-        action(result, implicitActionName, actionName, listBinding, clientValidation);
+        action(result, implicitActionName, actionName, listBinding, inline);
         
         addSize(result, null, pixelWidth, null, pixelHeight, null, null);
         addDisabled(result, disabled);
@@ -532,17 +538,19 @@ public class ComponentBuilder {
     	}
     	else if (ImplicitActionName.ZoomOut.equals(implicitActionName) ||
     				ImplicitActionName.Remove.equals(implicitActionName)) {
-    		StringBuilder expression = new StringBuilder(128);
-    		expression.append("not empty ").append(managedBeanName).append(".viewBinding");
-    		if (invisible == null) {
-    			result.setValueExpression("rendered", createValueExpressionFromBinding(null,
-    																					expression.toString(),
-    																					false,
-    																					null,
-    																					Boolean.class));
-    		}
-    		else {
-    			addInvisible(result, invisible, expression.toString());
+    		if (! inline) { // inline grids don't need invisible expression on remove button or link
+	    		StringBuilder expression = new StringBuilder(128);
+	    		expression.append("not empty ").append(managedBeanName).append(".viewBinding");
+	    		if (invisible == null) {
+	    			result.setValueExpression("rendered", createValueExpressionFromBinding(null,
+	    																					expression.toString(),
+	    																					false,
+	    																					null,
+	    																					Boolean.class));
+	    		}
+	    		else {
+	    			addInvisible(result, invisible, expression.toString());
+	    		}
     		}
     	}
     	else {
@@ -571,6 +579,7 @@ public class ComponentBuilder {
 		    							String tooltip,
 		    							ImplicitActionName implicitActionName,
 		    							String actionName,
+		    							boolean inline,
 		    							String collectionName,
 		                                Integer pixelWidth,
 		                                Integer pixelHeight,
@@ -582,7 +591,7 @@ public class ComponentBuilder {
         result.setValue(title);
         result.setTitle(tooltip);
 
-        action(result, implicitActionName, actionName, collectionName, clientValidation);
+        action(result, implicitActionName, actionName, collectionName, inline);
         
         addSize(result, null, pixelWidth, null, pixelHeight, null, null);
         addDisabled(result, disabled);
@@ -605,7 +614,7 @@ public class ComponentBuilder {
 		result.setProcess(process);
 		result.setUpdate(update);
 		if (actionName != null) {
-			MethodExpression me = methodExpressionForAction(null, actionName, listBinding);
+			MethodExpression me = methodExpressionForAction(null, actionName, listBinding, false);
 			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
 		
@@ -623,16 +632,14 @@ public class ComponentBuilder {
 							ImplicitActionName implicitActionName,
 							String actionName,
 							String collectionName,
-							Boolean clientValidation) {
-		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionName));
-//        if (Boolean.FALSE.equals(clientValidation)) {
-//        	command.setValueExpression("immediate", ef.createValueExpression(Boolean.TRUE, Boolean.class));
-//        }
+							boolean inline) {
+		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionName, inline));
     }
 
     private MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName,
 														String actionName,
-														String collectionName) {
+														String collectionName,
+														boolean inline) {
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append('.');
 		Class<?>[] parameterTypes = null;
@@ -641,7 +648,12 @@ public class ComponentBuilder {
 			if (collectionName != null) {
 				if (ImplicitActionName.Add.equals(implicitActionName)) {
 					parameterTypes = new Class[] {String.class};
-					expression.append("('").append(collectionName).append("')");
+					expression.append("('").append(collectionName).append("',").append(inline).append(")");
+				}
+				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
+					parameterTypes = new Class[] {String.class, String.class};
+					expression.append("('").append(collectionName).append("',");
+					expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 				else {
 					parameterTypes = new Class[] {String.class, String.class};
@@ -649,7 +661,13 @@ public class ComponentBuilder {
 				}
 			}
 			else {
-				parameterTypes = new Class[0];
+				if (ImplicitActionName.Remove.equals(implicitActionName)) {
+					parameterTypes = new Class[] {String.class, String.class};
+					expression.append("(null,null)");
+				}
+				else {
+					parameterTypes = new Class[0];
+				}
 			}
 		}
 		else {
@@ -696,8 +714,6 @@ public class ComponentBuilder {
     									String href,
     									String invisible,
     									ReferenceTarget target) {
-		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValue(value);
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (listBinding != null) {
 			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, href, true, null, String.class));
@@ -705,8 +721,11 @@ public class ComponentBuilder {
 		else {
 			result.setValueExpression("value", createValueExpressionFromBinding(href, true, null, String.class));
 		}
-//		ef.createValueExpression(elc, href, String.class));
-		result.getChildren().add(outputText);
+    	if (value != null) {
+	    	UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			outputText.setValue(value);
+			result.getChildren().add(outputText);
+    	}
 		addInvisible(result, invisible, null);
 
 		if (target != null) {
@@ -722,6 +741,20 @@ public class ComponentBuilder {
 		
 		return result;
     }
+    
+	public UIOutput outputText(String expression) {
+		ValueExpression ve =  ef.createValueExpression(elc, expression, String.class);
+		UIOutput result = new UIOutput();
+		result.setValueExpression("value", ve);
+		return result;
+	}
+	
+	public UIOutput outputText(String listBinding, String binding) {
+		ValueExpression ve =  createValueExpressionFromBinding(listBinding, binding, true, null, String.class);
+		UIOutput result = new UIOutput();
+		result.setValueExpression("value", ve);
+		return result;
+	}
     
     public Spacer spacer() {
         Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
@@ -847,7 +880,8 @@ public class ComponentBuilder {
     									String displayBinding,
     									Query query,
     									Integer pixelWidth,
-    									boolean applyDefaultWidth) {
+    									boolean applyDefaultWidth,
+    									boolean dontDisplay) {
     	AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
     	result.setForceSelection(true);
     	result.setDropdown(true);
@@ -867,7 +901,24 @@ public class ComponentBuilder {
     	attributes.put("query", query.getName());
     	attributes.put("display", displayBinding);
     	
-    	addSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? NINETY_FIVE : null);
+    	addSize(result, dontDisplay ? "display:none" : null, pixelWidth, null, null, null, applyDefaultWidth ? NINETY_FIVE : null);
+    	
+    	return result;
+    }
+    
+    public Button button(String icon,
+							String styleClass, 
+							String style) {
+    	Button result = (Button) a.createComponent(Button.COMPONENT_TYPE);
+    	if (icon != null) {
+    		result.setIcon(icon);
+    	}
+    	if (styleClass != null) {
+    		result.setStyleClass(styleClass);
+    	}
+    	if (style != null) {
+    		result.setStyle(style);
+    	}
     	
     	return result;
     }
@@ -890,123 +941,45 @@ public class ComponentBuilder {
     }
     
     public DataTable dataTable(String binding,
-    									String title,
-    									String invisible,
-    									boolean newButton,
-    									boolean clickToNavigate) {
+								String title,
+								String invisible,
+								String singularDocumentAlias,
+								boolean buttons,
+								boolean inline,
+								boolean clickToNavigate) {
     	DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         setId(result);
         addInvisible(result, invisible, null);
-
+        addGridHeaderAndFooter(binding, title, singularDocumentAlias, buttons, inline, result);
+        
         result.setVar(binding);
         result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
 
-        if (clickToNavigate) {
-        	String id = result.getId();
-	        result.setWidgetVar(id);
-	        result.setSelectionMode("single");
-	        result.setValueExpression("rowKey", createValueExpressionFromBinding(result.getVar(), Bean.DOCUMENT_ID, true, null, String.class));
-
-	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-			StringBuilder expression = new StringBuilder(64);
-			expression.append("#{").append(managedBeanName).append('.').append(ImplicitActionName.Navigate.name().toLowerCase()).append('}');
-	        MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
-			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
-	        result.addClientBehavior("rowSelect", ajax);
+        if (! inline) {
+	        if (clickToNavigate) {
+	        	String id = result.getId();
+		        result.setWidgetVar(id);
+		        result.setSelectionMode("single");
+		        result.setValueExpression("rowKey", createValueExpressionFromBinding(result.getVar(), Bean.DOCUMENT_ID, true, null, String.class));
+	
+		        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+				StringBuilder expression = new StringBuilder(64);
+				expression.append("#{").append(managedBeanName).append('.').append(ImplicitActionName.Navigate.name().toLowerCase()).append('}');
+		        MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
+				ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+		        result.addClientBehavior("rowSelect", ajax);
+	        }
         }
-        
-        UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(title);
-        if (newButton) {
-	        CommandButton button = actionButton("New",
-													"New Record",
-													ImplicitActionName.Add,
-													null,
-													binding,
-													null,
-													null,
-													Boolean.TRUE,
-													null,
-													null);
-//	        button.setStyle("float:left");
-//	        button.setStyle("position:absolute;top:5px;left:5px");
-	        OutputPanel headingPanel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
-//	        headingPanel.setStyle("width:100%;height:40px");
-	        headingPanel.getChildren().add(heading);
-	        headingPanel.getChildren().add(button);
-	        result.getFacets().put("header", headingPanel);
-        }
-        else {
-	        result.getFacets().put("header", heading);
-        }
-        
-        return result;
-    }
-
-    public Column dataTableActionColumn(String listBinding, boolean mobile) {
-		Column result = column(null,
-								null,
-								"Actions",
-				                HorizontalAlignment.centre,
-				                true,
-				                Integer.valueOf(75));
-		CommandLink link = actionLink(mobile ? "" : "Edit",
-										"Edit the record",
-										ImplicitActionName.Navigate,
-										null,
-										listBinding,
-										null,
-										null,
-										Boolean.TRUE,
-										null,
-										null);
-/*
-        HtmlOutputLink l = outputLink("./", null, null, null);
-		HtmlOutputText t = text("Edit", null);
-
-<p:column headerText="Actions" style="width:75px">
-<h:outputLink value="./">
-<h:outputText value="Edit" />
-<f:param name="a" value="#{WebAction.e.toString()}" />
-<f:param name="f" value="t" />
-<f:param name="m" value="#{row['bizModule']}" />
-<f:param name="d" value="#{row['bizDocument']}" />
-<f:param name="i" value="#{row['bizId']}" />
-</h:outputLink>
-</p:column>
-*/
-        result.getChildren().add(link);
         
         return result;
     }
     
-    public CellEditor cellEditor(String listBinding, String binding) {
-    	CellEditor result = (CellEditor) a.createComponent(CellEditor.COMPONENT_TYPE);
-
-    	String expression = null;
-    	if (binding == null) {
-    		expression = new StringBuilder(8).append('{').append(Bean.BIZ_KEY).append('}').toString();
-    	}
-    	else {
-        	expression = new StringBuilder(binding.length() + 2).append('{').append(binding).append('}').toString();
-    	}
-        ValueExpression ve = createValueExpressionFromBinding(listBinding, expression, true, null, String.class);
-        UIOutput text = new UIOutput();
-        text.setValueExpression("value", ve);
-        result.getFacets().put("output", text);
-        
-        return result;
-    }
-    
-	public DataList dataList(String binding, String title, String invisible) {
+	public DataList dataList(String binding, String title, String invisible, String singularDocumentAlias) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result);
-		result.setValueExpression("pt:data-inset", createValueExpressionFromCondition("true", null));
+		result.getPassThroughAttributes().put("data-inset", createValueExpressionFromCondition("true", null));
 		addInvisible(result, invisible, null);
-		
-        UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(title);
-        result.getFacets().put("header", heading);
+        addGridHeaderAndFooter(binding, title, singularDocumentAlias, true, false, result);
 
 		result.setVar(binding);
 		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
@@ -1014,7 +987,47 @@ public class ComponentBuilder {
 		return result;
 	}
 
-    public AccordionPanel accordionPanel(String invisible) {
+	private void addGridHeaderAndFooter(String binding,
+											String title,
+											String singularDocumentAlias, // if null, no footer
+											boolean buttons,
+											boolean inline,
+											UIComponent dataTableOrList) {
+		if (title != null) {
+			UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+	        text.setValue(title);
+	        dataTableOrList.getFacets().put("header", text);
+		}
+
+        if (singularDocumentAlias != null) {
+        	UIComponent buttonOrLink = buttons ?
+        									actionButton("Add",
+															"Add a new " + singularDocumentAlias,
+															ImplicitActionName.Add,
+															null,
+															inline,
+															binding,
+															null,
+															null,
+															Boolean.TRUE,
+															null,
+															null) :
+        									actionLink("Add a new " + singularDocumentAlias,
+														"New Record",
+														ImplicitActionName.Add,
+														null,
+														inline,
+														binding,
+														null,
+														null,
+														Boolean.TRUE,
+														null,
+														null);
+    		dataTableOrList.getFacets().put("footer", buttonOrLink);
+    	}
+	}
+
+	public AccordionPanel accordionPanel(String invisible) {
         AccordionPanel result = (AccordionPanel) a.createComponent(AccordionPanel.COMPONENT_TYPE);
         setId(result);
         addInvisible(result, invisible, null);
