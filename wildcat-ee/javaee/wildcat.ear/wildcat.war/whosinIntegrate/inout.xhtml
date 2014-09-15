@@ -20,6 +20,7 @@
 			<ui:define name="head">
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.panzoom.min.js"></script>
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.mousewheel.js"></script>
+				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/load-image.min.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="inout">
@@ -102,12 +103,28 @@
 				
 					            function setupCropping(input) {
 					                if (input.files &amp;&amp; input.files[0]) {
-					                    var reader = new FileReader();
-					                    reader.onload = function (e) {
-					                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', e.target.result);
-											setZoomPan();
-					                    }
-					                    reader.readAsDataURL(input.files[0]);
+										var file = input.files[0];
+					                	var options = {canvas: true};
+
+					                    loadImage.parseMetaData(file, function(data) {
+					                        if (data.exif) {
+					                            options.orientation = data.exif.get('Orientation');
+					                        }
+					                        
+					                        if (! loadImage(file, 
+							                        			function(img) {
+										                            if (! (img.src || img instanceof HTMLCanvasElement)) {
+										                                alert('Loading image file failed');
+										                            }
+										                            else {
+												                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', img.src || img.toDataURL());
+																		setZoomPan();
+										                            }
+										                        },
+							                        			options)) {
+				                                alert('Your browser does not support the URL or FileReader API.');
+					                        }
+					                    });
 					                }
 					            }
 
