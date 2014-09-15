@@ -707,35 +707,46 @@ public class ModulesUtil {
 	 */
 	public static String incrementAlpha(String prefix, String lastNumber, int numberLength) throws Exception {
 
-		String newNumber = "";
-		String nonNumeric = lastNumber;
-		Integer value = new Integer(1);
-		if (lastNumber != null) {
-			String[] parts = (new StringBuilder(" ").append(lastNumber)).toString().split("\\D\\d+$");
+	     String newNumber = "";
+	     String nonNumeric = lastNumber;
+	     Integer value = new Integer(1);
+	     if (lastNumber != null) {
+	         String[] parts = (new StringBuilder(" ").append(lastNumber)).toString().split("\\D\\d+$");
 
-			if (parts.length > 0 && parts[0].length() < lastNumber.length()) {
-				String numberPart = lastNumber.substring(parts[0].length(), lastNumber.length());
-				nonNumeric = lastNumber.substring(0, parts[0].length());
+	         //cater for alpha prefix
+	         if (parts.length > 0 && parts[0].length() < lastNumber.length()) {
+	             String numberPart = lastNumber.substring(parts[0].length(),lastNumber.length());
+	             nonNumeric = lastNumber.substring(0, parts[0].length());
 
-				value = new Integer(Integer.parseInt(numberPart) + 1);
-			} else if (lastNumber.matches("^\\d+$")) {
-				nonNumeric = (prefix == null ? "" : prefix);
-				value = new Integer(Integer.parseInt(lastNumber) + 1);
-			}
-		} else {
-			nonNumeric = (prefix == null ? "" : prefix);
-		}
+	             value = new Integer(Integer.parseInt(numberPart) + 1);
+	            
+	          //cater for purely numeric prefix
+	         } else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$")  && !"0".equals(lastNumber)) {
+	             int len = prefix.length();
+	             value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
+	             nonNumeric = (prefix == null ? "" : prefix);
+	             
+	         //cater for numeric only
+	         } else if (lastNumber.matches("^\\d+$")) {
+	             nonNumeric = (prefix == null ? "" : prefix);
+	             value = new Integer(Integer.parseInt(lastNumber) + 1);
+	         }
+	     } else {
+	         nonNumeric = (prefix == null ? "" : prefix);
+	     }
 
-		// now put prefix and value together
-		int newLength = (nonNumeric.length() + value.toString().length() > numberLength ? nonNumeric.length() + value.toString().length() : numberLength);
+	     // now put prefix and value together
+	     int newLength = (nonNumeric.length() + value.toString().length() > numberLength ? nonNumeric.length() + value.toString().length() : numberLength);
 
-		StringBuilder sb = new StringBuilder(newLength + 1);
-		try (Formatter f = new Formatter(sb)) {
-			newNumber = nonNumeric + f.format(new StringBuilder("%1$").append(newLength - nonNumeric.length()).append("s").toString(), value.toString()).toString().replace(" ", "0");
-		}
-		
-		return newNumber;
+	     StringBuilder sb = new StringBuilder(newLength + 1);
+	     try (Formatter f = new Formatter(sb)) {
+	         newNumber = nonNumeric + f.format(new StringBuilder("%1$").append(newLength - nonNumeric.length()).append("s").toString(), value.toString()).toString().replace(" ", "0");
+	     }
+
+	     return newNumber;
 	}
+	
+
 
 	/** short-hand generic way to create a bean instance */
 	public static Bean newBeanInstance(String moduleName, String documentName) throws Exception {
