@@ -18,8 +18,6 @@
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{inOutView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.panzoom.min.js"></script>
-				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/jquery.mousewheel.js"></script>
 				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/load-image.min.js"></script>
 			</ui:define>
 			<ui:define name="pages">
@@ -56,7 +54,7 @@
 								        <p:graphicImage value="#{empty member.contact.image ?
 																'/whosinIntegrate/UnknownContact.gif' :								        						
 								        						'/content?_n='.concat(member.contact.image).concat('&amp;_doc=admin.Contact&amp;_b=image')}"
-								        					style="width:100px;height:100px;float:left"
+								        					style="width:70px;height:70px;float:left;border-radius:100%;margin:5px"
 								        					cache="#{inOutView.shouldCacheImage(member.contact.image)}" />
 										<h:outputText value="#{member.contact.name}" />
 										<h:outputText value="#{member.getStatus().toDescription()}" style="float:right"/>
@@ -101,11 +99,13 @@
 					                    });
 					            };
 				
-					            function setupCropping(input) {
+					            photo = function(input) {
 					                if (input.files &amp;&amp; input.files[0]) {
-										var file = input.files[0];
-					                	var options = {canvas: true};
-
+					                    var file = input.files[0];
+										var options = {maxWidth: 250,
+														maxHeight: 250,
+														canvas: true,
+														crop: true};
 					                    loadImage.parseMetaData(file, function(data) {
 					                        if (data.exif) {
 					                            options.orientation = data.exif.get('Orientation');
@@ -113,12 +113,13 @@
 					                        
 					                        if (! loadImage(file, 
 							                        			function(img) {
-										                            if (! (img.src || img instanceof HTMLCanvasElement)) {
+										                            if (! (img instanceof HTMLCanvasElement)) {
 										                                alert('Loading image file failed');
 										                            }
 										                            else {
-												                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', img.src || img.toDataURL());
-																		setZoomPan();
+											                            var dataUrl = img.toDataURL();
+												                    	$(PrimeFaces.escapeClientId('staff:staffForm:photo')).attr('src', dataUrl);
+																		$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(dataUrl);
 										                            }
 										                        },
 							                        			options)) {
@@ -128,61 +129,6 @@
 					                }
 					            }
 
-					            function setZoomPan() {
-									var $panzoom = $(PrimeFaces.escapeClientId('staff:staffForm:photo'));
-									if ($panzoom.panzoom) {
-										$panzoom.panzoom('destroy');
-									}
-						            var viewportWidth = $panzoom.parent().width(); // viewport width
-						            var viewportHeight = $panzoom.parent().height(); // viewport height
-									var zoomFactor = Math.max(viewportWidth / $panzoom.width(),
-																viewportHeight / $panzoom.height()); // fill the selfie are
-									$panzoom.panzoom({
-										minScale: zoomFactor,
-										contain: 'invert'
-									});
-									$panzoom.on('panzoomend', function(e, panzoom, matrix, changed) {
-										if (changed) {
-											var $this = $(this);
-											getDataUrl($this, 
-														matrix,
-														$this.parent().width(), // viewport width
-														$this.parent().height()); // viewport height
-										}
-									});
-									$panzoom.parent().on('mousewheel.focal', function(evt) {
-								        evt.preventDefault();
-								        var delta = evt.delta || evt.originalEvent.wheelDelta;
-								        var zoomOut = delta ? delta &lt; 0 : evt.originalEvent.deltaY &gt; 0;
-								        $panzoom.panzoom('zoom', zoomOut, {
-											increment: 0.1,
-											animate: false,
-											focal: evt
-								        });
-									});
-									
-									$panzoom.panzoom('zoom', zoomFactor);
-									getDataUrl($panzoom,
-												[zoomFactor, 0, 0, zoomFactor, 0, 0],
-												viewportWidth,
-												viewportHeight); // set the url to start with
-								}
-
-								function getDataUrl($panzoom, matrix, viewportWidth, viewportHeight) {
-									var canvas = document.createElement('canvas'), context = canvas.getContext('2d');
-									canvas.width = viewportWidth;
-									canvas.height = viewportHeight;
-								
-									var position = $panzoom.position();
-									context.drawImage($panzoom.get(0),
-														- position.left * 1 / matrix[0],
-														- position.top * 1 / matrix[3],
-														1 / matrix[0] * viewportWidth,
-														1 / matrix[3] * viewportHeight,
-														0, 0, viewportWidth, viewportHeight);
-									$(PrimeFaces.escapeClientId('staff:staffForm:base64Image')).val(canvas.toDataURL());
-								}
-
 								$(function() {
 									$('#PhotoButton').click(function() {
 										$('#PhotoPicker').trigger('click');
@@ -190,8 +136,8 @@
 										});
 							        $('#PhotoPicker').on('change', function(e) {
 							            e.preventDefault();
-							            if(this.files.length === 0) return;
-										setupCropping(this);
+							            if (this.files.length === 0) return;
+										photo(this);
 							        });
 					            });
 							</script>
@@ -212,7 +158,7 @@
 										style="visibility: #{(inOutView.uxUi eq 'phone') ? 'visible' : 'hidden'}">
 								Photo
 							</button>
-							<div id="focal" style="width:100%;text-align:center">
+							<div style="width:100%;text-align:center">
 								<div style="width:250px;height:250px;display:inline-block">
 									<p:graphicImage id="photo" value="#{empty inOutView.selectedStaff.contact.image ? 
 																		'/whosinIntegrate/UnknownContact.gif' :

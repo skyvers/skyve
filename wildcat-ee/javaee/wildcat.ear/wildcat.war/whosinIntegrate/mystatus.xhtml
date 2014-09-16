@@ -17,10 +17,7 @@
 			<ui:param name="baseHref" value="#{myStatusView.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{myStatusView.wildcatVersionComment}" />
 			<ui:define name="head">
-				<link type="text/css" media="screen" rel="stylesheet" href="#{myStatusView.baseHref}whosinIntegrate/jquery.cropbox.css" />
-				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/hammer.js"></script>
-				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/jquery.mousewheel.js"></script>
-				<script type="text/javascript" src="#{myStatusView.baseHref}whosinIntegrate/jquery.cropbox.js"></script>
+				<script type="text/javascript" src="#{inOutView.baseHref}whosinIntegrate/load-image.min.js"></script>
 			</ui:define>
 			<ui:define name="pages">
 				<pm:page id="mystatus">
@@ -60,32 +57,35 @@
 					                    });
 					            };
 				
-					            function setupCropping(input) {
+					            photo = function(input) {
 					                if (input.files &amp;&amp; input.files[0]) {
-					                    var reader = new FileReader();
-					                    reader.onload = function (e) {
-					                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).attr('src', e.target.result);
-											$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(e.target.result);
-											removeCropBox();
-											createCropBox();
-					                    }
-					                    reader.readAsDataURL(input.files[0]);
+					                    var file = input.files[0];
+										var options = {maxWidth: 250,
+														maxHeight: 250,
+														canvas: true,
+														crop: true};
+					                    loadImage.parseMetaData(file, function(data) {
+					                        if (data.exif) {
+					                            options.orientation = data.exif.get('Orientation');
+					                        }
+					                        
+					                        if (! loadImage(file, 
+							                        			function(img) {
+										                            if (! (img instanceof HTMLCanvasElement)) {
+										                                alert('Loading image file failed');
+										                            }
+										                            else {
+											                            var dataUrl = img.toDataURL();
+												                    	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).attr('src', dataUrl);
+																		$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(dataUrl);
+										                            }
+										                        },
+							                        			options)) {
+				                                alert('Your browser does not support the URL or FileReader API.');
+					                        }
+					                    });
 					                }
-					            }
-
-					            function removeCropBox() {
-						            var crop = $(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).data('cropbox');
-						            if (crop) {
-										crop.remove();
-								    }
-						        }
-						        
-					            function createCropBox() {
-					            	$(PrimeFaces.escapeClientId('mystatus:staffForm:photo')).cropbox({width: 200, height: 200, zoom: 50, showControls: 'auto'}).on('cropbox',
-										function(event, results, img) {
-											$(PrimeFaces.escapeClientId('mystatus:staffForm:base64Image')).val(img.getDataURL());
-						            	});
-						        }
+					            };
 						        
 					            $(function() {
 									$('#PhotoButton').click(function() {
@@ -94,8 +94,8 @@
 										});
 							        $('#PhotoPicker').on('change', function(e) {
 							            e.preventDefault();
-							            if(this.files.length === 0) return;
-										setupCropping(this);
+							            if (this.files.length === 0) return;
+										photo(this);
 							        });
 					            });
 							</script>
