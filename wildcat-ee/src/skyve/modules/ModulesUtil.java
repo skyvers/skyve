@@ -710,6 +710,10 @@ public class ModulesUtil {
 	     String newNumber = "";
 	     String nonNumeric = lastNumber;
 	     Integer value = new Integer(1);
+	     if(prefix==null){
+	    	 prefix="";
+	     }
+	     
 	     if (lastNumber != null) {
 	         String[] parts = (new StringBuilder(" ").append(lastNumber)).toString().split("\\D\\d+$");
 
