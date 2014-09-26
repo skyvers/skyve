@@ -28,6 +28,7 @@ import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean
@@ -38,6 +39,11 @@ public class Desktop extends Harness {
 	private String script;
 	public String getScript() {
 		return script;
+	}
+	
+	@SuppressWarnings("static-method")
+	public String getSmartClientDir() {
+		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
 	public void preRender() {

@@ -971,8 +971,10 @@ public class FacesViewVisitor extends ViewVisitor {
 					                true,
 					                Integer.valueOf(75));
 			List<UIComponent> children = col.getChildren();
-			if ((! UserAgentType.tablet.equals(userAgentType)) || 
-					(! Boolean.FALSE.equals(grid.getEditable()))) {
+			// edit link if not on tablet, grid is editable, but grid is not inline
+			if ((! UserAgentType.tablet.equals(userAgentType)) && 
+					(! Boolean.FALSE.equals(grid.getEditable()) && 
+					(! Boolean.TRUE.equals(grid.getInline())))) {
 				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
 												b.actionButton("Edit",
 																"Edit the record",

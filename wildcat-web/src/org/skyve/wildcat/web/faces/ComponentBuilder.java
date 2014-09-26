@@ -647,7 +647,7 @@ public class ComponentBuilder {
 			expression.append(implicitActionName.toString().toLowerCase());
 			if (collectionName != null) {
 				if (ImplicitActionName.Add.equals(implicitActionName)) {
-					parameterTypes = new Class[] {String.class};
+					parameterTypes = new Class[] {String.class, Boolean.class};
 					expression.append("('").append(collectionName).append("',").append(inline).append(")");
 				}
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
@@ -1056,7 +1056,7 @@ public class ComponentBuilder {
             style.append("white-space:nowrap;");
         }
         if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
-            style.append("text-align:").append(alignment).append(';');
+            style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
         }
         if (style.length() > 0) {
             result.setStyle(style.toString());
