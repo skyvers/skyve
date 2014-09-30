@@ -29,7 +29,7 @@ public class Decimal2OneDecimalPlace implements Converter<Decimal2> {
 
 	@Override
 	public AttributeType getAttributeType() {
-		return AttributeType.decimal5;
+		return AttributeType.decimal2;
 	}
 
 	@Override
