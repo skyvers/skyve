@@ -293,7 +293,13 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			formVariable = "v" + variableCounter++;
 			code.append("var ").append(formVariable);
 			code.append("=DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
-			code.append("_view:view,");
+			// SC docs says that autoFocus will focus in first focusable item
+			// in the form when it is drawn.
+			// I use it to ensure that focus is kept when an AJAX call is made
+			// from a widget event when a form is embedded in a tab.
+			// Tabs are removed and added on the fly as there is no SC show/hide API.
+			// Without autoFocus, the focus is lost when the tabs are destroyed.
+			code.append("_view:view,autoFocus:true,");
 			code.append("ID:").append(IDExpression()).append(',');
 			disabled(form.getDisabledConditionName(), code);
 //code.append("cellBorder:1,");
