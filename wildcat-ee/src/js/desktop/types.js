@@ -155,6 +155,7 @@ BizDateItem.addProperties({
     showHint: true,
     showHintInField: true,
    	hint: 'DD MM(M) YY(YY)',
+   	textFieldProperties: {selectOnFocus: true},
    	showPickerTimeItem: false,
 	inputFormat: function(value) {
 		return BizDateItem.parseInput(value);
@@ -240,6 +241,7 @@ BizDateTimeItem.addProperties({
     showHint: true,
     showHintInField: true,
    	hint: 'DD MM(M) YY(YY) HH(24):MI',
+   	textFieldProperties: {selectOnFocus: true},
 	showPickerTimeItem: true,
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false},
 	inputFormat: function(value) {
@@ -420,6 +422,7 @@ BizTimeItem.addProperties({
 	showHint: true,
     showHintInField: true,
    	hint: 'HH:MI am/pm',
+   	textFieldProperties: {selectOnFocus: true},
    	displayFormat: 'toShortTime',
    	timeFormatter: 'toShortTime'
 });
@@ -538,6 +541,7 @@ BizDecimal2Item.addProperties({
     changeOnKeypress: false, // dont perform validation on key press
     width: 100,
     showHint: false,
+    selectOnFocus: true,
     decimalPlaces: 2
 });
 BizDecimal2Item.addMethods({
@@ -754,7 +758,8 @@ BizIntegerPercentageItem.addProperties({
     width: 100,
     showHint: true,
     showHintInField: true,
-   	hint: '(+/-)99999'
+   	hint: '(+/-)99999',
+   	selectOnFocus: true
 });
 BizIntegerPercentageItem.addMethods({
 	mapValueToDisplay: function(value) {
@@ -1033,7 +1038,8 @@ BizTimeDurationItem.addProperties({
     width: 100,
     showHint: true,
     showHintInField: true,
-   	hint: '(+/-)HHH:MM'
+   	hint: '(+/-)HHH:MM',
+   	selectOnFocus: true
 });
 BizTimeDurationItem.addMethods({
 	mapValueToDisplay: function(value) {
