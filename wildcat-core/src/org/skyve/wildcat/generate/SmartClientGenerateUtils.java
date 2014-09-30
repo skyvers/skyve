@@ -10,6 +10,13 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.domain.types.converters.decimal.Decimal2Integer;
+import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
+import org.skyve.domain.types.converters.decimal.Decimal2TwoDecimalPlacesPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal5Integer;
+import org.skyve.domain.types.converters.decimal.Decimal5IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
@@ -433,11 +440,32 @@ public class SmartClientGenerateUtils {
 					if (converter instanceof Decimal2DollarsAndCents) {
 						type = "bizDollarsAndCents";
 					}
+					else if (converter instanceof Decimal2Integer) {
+						type = "bizDecimal0";
+					}
+					else if (converter instanceof Decimal2IntegerPercentage) {
+						type = "bizIntegerPercentage";
+					}
+					else if (converter instanceof Decimal2TwoDecimalPlacesPercentage) {
+						type = "bizTwoDecimalPlacesPercentage";
+					}
+					else if (converter instanceof Decimal2OneDecimalPlace) {
+						type = "bizDecimal1";
+					}
 					break;
 				case decimal5:
 					type = "bizDecimal5";
 					if (converter instanceof Decimal5DollarsAndCents) {
 						type = "bizDollarsAndCents";
+					}
+					else if (converter instanceof Decimal5Integer) {
+						type = "bizDecimal0";
+					}
+					else if (converter instanceof Decimal5IntegerPercentage) {
+						type = "bizIntegerPercentage";
+					}
+					else if (converter instanceof Decimal5OneDecimalPlace) {
+						type = "bizDecimal1";
 					}
 					else if (converter instanceof Decimal5TimeDuration) {
 						type = "bizTimeDuration";

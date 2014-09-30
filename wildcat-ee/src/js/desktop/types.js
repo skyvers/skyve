@@ -632,6 +632,46 @@ isc.SimpleType.create({
 	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
 });
 
+isc.ClassFactory.defineClass("BizDecimal0Item", "BizDecimal2Item");
+BizDecimal0Item.addProperties({
+    decimalPlaces: 0
+});
+isc.SimpleType.create({
+	name: "bizDecimal0",
+	inheritsFrom: "float",
+	editorType: "BizDecimal0Item",
+	editFormatter: function(internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+	normalDisplayFormatter: function(internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+	shortDisplayFormatter: function(internalValue, field, component, record) {
+		return BizDecimal2Item.format(internalValue, 0);
+	},
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+});
+
+isc.ClassFactory.defineClass("BizDecimal1Item", "BizDecimal2Item");
+BizDecimal1Item.addProperties({
+    decimalPlaces: 1
+});
+isc.SimpleType.create({
+	name: "bizDecimal1",
+	inheritsFrom: "float",
+	editorType: "BizDecimal1Item",
+	editFormatter: function(internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+	normalDisplayFormatter: function(internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+	shortDisplayFormatter: function(internalValue, field, component, record) {
+		return BizDecimal2Item.format(internalValue, 1);
+	},
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+});
+
 isc.ClassFactory.defineClass("BizDollarsAndCentsItem", "BizDecimal2Item");
 BizDollarsAndCentsItem.addProperties({
     showHint: true,

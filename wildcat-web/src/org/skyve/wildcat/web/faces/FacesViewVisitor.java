@@ -124,7 +124,12 @@ import org.skyve.wildcat.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI;
 import org.skyve.wildcat.web.faces.converters.datetime.DD_MMM_YYYY_HH_MI;
 import org.skyve.wildcat.web.faces.converters.datetime.DD_MM_YYYY_HH24_MI;
 import org.skyve.wildcat.web.faces.converters.datetime.DD_MM_YYYY_HH_MI;
+import org.skyve.wildcat.web.faces.converters.decimal.Decimal2Integer;
+import org.skyve.wildcat.web.faces.converters.decimal.Decimal2IntegerPercentage;
+import org.skyve.wildcat.web.faces.converters.decimal.Decimal2OneDecimalPlace;
+import org.skyve.wildcat.web.faces.converters.decimal.Decimal5Integer;
 import org.skyve.wildcat.web.faces.converters.decimal.Decimal5IntegerPercentage;
+import org.skyve.wildcat.web.faces.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.wildcat.web.faces.converters.decimal.Decimal5TimeDuration;
 import org.skyve.wildcat.web.faces.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.wildcat.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
@@ -1672,14 +1677,29 @@ public class FacesViewVisitor extends ViewVisitor {
 	        else if ("DD_MMM_YYYY_HH24_MI".equals(converterName)) {
 	            result = new DD_MMM_YYYY_HH24_MI();
 	        }
-	        else if ("Decimal5DollarsAndCents".equals(converterName)) {
-	            result = new Decimal5DollarsAndCents();
-	        }
 	        else if ("Decimal2DollarsAndCents".equals(converterName)) {
 	            result = new Decimal2DollarsAndCents();
 	        }
+	        else if ("Decimal5DollarsAndCents".equals(converterName)) {
+	            result = new Decimal5DollarsAndCents();
+	        }
+	        else if ("Decimal2Integer".equals(converterName)) {
+	            result = new Decimal2Integer();
+	        }
+	        else if ("Decimal2IntegerPercentage".equals(converterName)) {
+	            result = new Decimal2IntegerPercentage();
+	        }
+	        else if ("Decimal2OneDecimalPlace".equals(converterName)) {
+	            result = new Decimal2OneDecimalPlace();
+	        }
+	        else if ("Decimal5Integer".equals(converterName)) {
+	            result = new Decimal5Integer();
+	        }
 	        else if ("Decimal5IntegerPercentage".equals(converterName)) {
 	            result = new Decimal5IntegerPercentage();
+	        }
+	        else if ("Decimal5OneDecimalPlace".equals(converterName)) {
+	            result = new Decimal5OneDecimalPlace();
 	        }
 	        else if ("Decimal5TimeDuration".equals(converterName)) {
 	            result = new Decimal5TimeDuration();

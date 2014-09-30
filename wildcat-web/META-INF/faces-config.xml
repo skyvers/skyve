@@ -105,8 +105,28 @@
 		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.currency.Decimal5DollarsAndCents</converter-class>
 	</converter>
 	<converter>
+		<converter-id>Decimal2Integer</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal2Integer</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal2IntegerPercentage</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal2IntegerPercentage</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal2OneDecimalPlace</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal2OneDecimalPlace</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal5Integer</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal5Integer</converter-class>
+	</converter>
+	<converter>
 		<converter-id>Decimal5IntegerPercentage</converter-id>
 		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal5IntegerPercentage</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal5OneDecimalPlace</converter-id>
+		<converter-class>org.skyve.wildcat.web.faces.converters.decimal.Decimal5OneDecimalPlace</converter-class>
 	</converter>
 	<converter>
 		<converter-id>Decimal5TimeDuration</converter-id>
