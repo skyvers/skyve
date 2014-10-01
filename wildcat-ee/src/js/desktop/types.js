@@ -1303,7 +1303,12 @@ BizLookupDescriptionItem.addMethods({
 //NEVER USE THIS AS IT SCREWS WITH VALUES COMING FROM THE SERVER AT POPULATE TIME
 //				addUnknownValues: false,
 			getPickListFilterCriteria: function() {
-				return isc.addProperties({}, me._evaluateParameters(config.params), this.Super("getPickListFilterCriteria", arguments));
+				var result = this.Super("getPickListFilterCriteria", arguments);
+				if (config.params) {
+					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
+				}
+
+				return result;
 			},
 			// ensure that the canvasItem value is changed when the combo box value is
 			changed: function(form, item, value) {
@@ -1357,8 +1362,16 @@ BizLookupDescriptionItem.addMethods({
 				 {title: 'New', 
 					icon: "icons/new.png",
 					click: function(event) {
-						var newParams = me._evaluateParameters(config.params);
-						me.zoom(true, newParams);
+						if (config && config.params) {
+							var newParams = {};
+							BizUtil.addFilterRequestParams(newParams, 
+															config.params,
+															me._view);
+							me.zoom(true, newParams);
+						}
+						else {
+							me.zoom(true);
+						}
 					},
 					enableIf: function(target, menu, item) {
 						return me.canCreate && me.canAdd;
@@ -1391,21 +1404,6 @@ BizLookupDescriptionItem.addMethods({
 
 		this.canvas = this._form;
 		this.Super("init", arguments);
-	},
-	
-	_evaluateParameters: function(params) {
-		var result = null;
-		if (params) {
-			result = {};
-			var instance = this._view.gather(false); // no validate
-			for (var binding in params) {
-				var expression = params[binding];
-				var value = this._view.toDisplay(expression, instance);
-				result[binding] = value;
-			}
-		}
-		
-		return result;
 	},
 	
 	// Override setValue to update the combo selection

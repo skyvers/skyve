@@ -13,6 +13,7 @@ import org.skyve.metadata.view.Editable;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.wildcat.metadata.view.AbsoluteWidth;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -66,7 +67,7 @@ public class ContentLink extends InputWidget implements Editable, Parameterizabl
 
 	@Override
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "parameters")
-	@XmlElement(name = "parameter", type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class, required = false)
+	@XmlElement(name = "parameter", type = ParameterImpl.class, required = false)
 	public List<Parameter> getParameters() {
 		return parameters;
 	}

@@ -8,6 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.view.actions.AddAction;
@@ -28,7 +29,7 @@ import org.skyve.wildcat.metadata.repository.view.actions.SaveAction;
 import org.skyve.wildcat.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.wildcat.web.AbstractWebContext;
 
-public class Action implements org.skyve.metadata.view.Action {
+public class ActionImpl implements Action {
 	/**
 	 * For Serialization
 	 */

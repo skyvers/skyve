@@ -10,6 +10,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -24,7 +25,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
-import org.skyve.metadata.module.query.QueryColumn.OperatorType;
 import org.skyve.metadata.module.query.Querylet;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -400,7 +400,7 @@ public class QueryImpl implements Query {
 				}
 			}
 
-			OperatorType filterOperator = column.getFilterOperator();
+			FilterOperator filterOperator = column.getFilterOperator();
 			if (filterOperator != null) {
 				Object operand = null;
 

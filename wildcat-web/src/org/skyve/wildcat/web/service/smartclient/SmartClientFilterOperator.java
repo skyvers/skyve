@@ -1,6 +1,8 @@
 package org.skyve.wildcat.web.service.smartclient;
 
-public enum FilterOperator {
+import org.skyve.metadata.FilterOperator;
+
+public enum SmartClientFilterOperator {
 	// text match style for filtering
 	substring, startsWith, exact, // both case insensitive
 	
@@ -43,5 +45,69 @@ public enum FilterOperator {
 	gIntersects, // the geometry field intersects the operand geometry
 	gTouches, // the geometry field touches (but does not intersect) the operand geometry
 	gCrosses, // not sure???
-	gEquals // the geometry field is equivalent to the operand geometry
+	gEquals; // the geometry field is equivalent to the operand geometry
+	
+	public static SmartClientFilterOperator fromFilterOperator(FilterOperator operator) {
+		SmartClientFilterOperator result = null;
+		
+		switch (operator) {
+		case equal:
+			result = equals;
+			break;
+		case greater:
+			result = greaterThan;
+			break;
+		case greaterEqual:
+			result = greaterOrEqual;
+			break;
+		case isNull:
+			result = isNull;
+			break;
+		case less:
+			result = lessThan;
+			break;
+		case lessEqual:
+			result = lessOrEqual;
+			break;
+		case like:
+			result = iContains;
+			break;
+		case notEqual:
+			result = iNotEqual;
+			break;
+		case notLike:
+			result = iNotContains;
+			break;
+		case notNull:
+			result = notNull;
+			break;
+		case nullOrEqual:
+			result = equals;
+			break;
+		case nullOrGreater:
+			result = greaterThan;
+			break;
+		case nullOrGreaterEqual:
+			result = greaterOrEqual;
+			break;
+		case nullOrLess:
+			result = lessThan;
+			break;
+		case nullOrLessEqual:
+			result = lessOrEqual;
+			break;
+		case nullOrLike:
+			result = iContains;
+			break;
+		case nullOrNotEqual:
+			result = notEqual;
+			break;
+		case nullOrNotLike:
+			result = iNotContains;
+			break;
+		default:
+		}
+		
+		return result;
+	}
 }

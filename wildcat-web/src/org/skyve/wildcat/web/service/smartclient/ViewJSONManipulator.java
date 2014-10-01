@@ -31,6 +31,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.ComparisonComposite;
 import org.skyve.metadata.view.model.ComparisonModel;
 import org.skyve.metadata.view.model.ComparisonProperty;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -40,6 +41,7 @@ import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.InjectBinding;
@@ -1305,6 +1307,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitFilterParameter(FilterParameter parameter,
+										boolean parentVisible,
+										boolean parentEnabled)
+	throws MetaDataException {
+		visitParameter(parameter, parentVisible, parentEnabled);
+	}
+
+	@Override
 	public void visitProgressBar(ProgressBar progressBar,
 									boolean parentVisible,
 									boolean parentEnabled)
@@ -2056,77 +2066,77 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitAddAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitRemoveAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNavigateAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitOKAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitSaveAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitCancelAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitDeleteAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitReportAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizExportAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizImportAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitUploadAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNewAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitEditAction(org.skyve.wildcat.metadata.view.Action action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}
 

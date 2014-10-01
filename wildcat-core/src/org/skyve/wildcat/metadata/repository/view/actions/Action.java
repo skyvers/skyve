@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -94,8 +95,8 @@ public abstract class Action {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 	
-	public org.skyve.wildcat.metadata.view.Action toMetaDataAction() {
-		org.skyve.wildcat.metadata.view.Action result = new org.skyve.wildcat.metadata.view.Action();
+	public ActionImpl toMetaDataAction() {
+		ActionImpl result = new ActionImpl();
 
 		result.setConfirmationText(confirmationText);
 		result.setDisabledConditionName(disabledConditionName);

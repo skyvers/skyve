@@ -3,11 +3,12 @@ package org.skyve.wildcat.metadata.view.widget.bound;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, propOrder = {"name", "value", "clientId"})
-public final class Parameter extends AbstractBound implements org.skyve.metadata.view.widget.bound.Parameter {
+@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, propOrder = {"name", "value"})
+public class ParameterImpl extends AbstractBound implements Parameter {
 	/**
 	 * For Serialization
 	 */
@@ -23,11 +24,6 @@ public final class Parameter extends AbstractBound implements org.skyve.metadata
 	 */
 	private String value;
 
-	/**
-	 * ID of client widget to get value from (client side).
-	 */
-	private String clientId;
-
 	@Override
 	public String getName() {
 		return name;
@@ -36,16 +32,6 @@ public final class Parameter extends AbstractBound implements org.skyve.metadata
 	@XmlAttribute(required = true)
 	public void setName(String name) {
 		this.name = UtilImpl.processStringValue(name);
-	}
-
-	@Override
-	public String getClientId() {
-		return clientId;
-	}
-
-	@XmlAttribute(required = false)
-	public void setClientId(String clientId) {
-		this.clientId = UtilImpl.processStringValue(clientId);
 	}
 
 	@Override

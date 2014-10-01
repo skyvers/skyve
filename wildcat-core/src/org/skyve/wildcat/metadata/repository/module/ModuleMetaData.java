@@ -11,11 +11,11 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.QueryColumn.OperatorType;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.wildcat.metadata.module.Job;
@@ -272,19 +272,19 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 						queryColumn.setBinding(binding);
 						queryColumn.setExpression(expression);
 						queryColumn.setDisplayName(column.getDisplayName());
-						OperatorType filterOperator = column.getFilterOperator();
+						FilterOperator filterOperator = column.getFilterOperator();
 						String filterExpression = column.getFilterExpression();
 						if ((filterOperator != null) && 
-								(! filterOperator.equals(OperatorType.isNull)) &&
-								(! filterOperator.equals(OperatorType.notNull)) && 
+								(! filterOperator.equals(FilterOperator.isNull)) &&
+								(! filterOperator.equals(FilterOperator.notNull)) && 
 								(filterExpression == null)) {
 							throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
 															" in column " + column.getBinding() + 
 															" in query " + query.getName() + " requires an [expression].");
 						}
 						if (((filterOperator == null) || 
-								filterOperator.equals(OperatorType.isNull) || 
-								filterOperator.equals(OperatorType.notNull)) &&
+								filterOperator.equals(FilterOperator.isNull) || 
+								filterOperator.equals(FilterOperator.notNull)) &&
 								(filterExpression != null)) {
 							throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
 															" in column " + column.getBinding() + 

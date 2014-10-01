@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.wildcat.metadata.view.ActionImpl;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
@@ -17,15 +19,15 @@ public abstract class ParameterizableAction extends PositionableAction implement
 	@Override
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, 
 					name = "parameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = ParameterImpl.class,
 					required = false)
 	public List<Parameter> getParameters() {
 		return parameters;
 	}
 
 	@Override
-	public org.skyve.wildcat.metadata.view.Action toMetaDataAction() {
-		org.skyve.wildcat.metadata.view.Action result = super.toMetaDataAction();
+	public ActionImpl toMetaDataAction() {
+		ActionImpl result = super.toMetaDataAction();
 		result.getParameters().addAll(parameters);
 		return result;
 	}

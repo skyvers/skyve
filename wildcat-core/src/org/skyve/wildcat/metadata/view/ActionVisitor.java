@@ -4,15 +4,17 @@ import java.util.List;
 
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 public abstract class ActionVisitor {
 	public final void visitActions(ViewImpl view) throws MetaDataException {
 		ViewType type = view.getType();
 		for (org.skyve.metadata.view.Action action : view.getActions()) {
-			visit(type, (Action) action);
+			visit(type, (ActionImpl) action);
 			visitParameterizable(action, true, true);
 		}
 	}
@@ -29,27 +31,43 @@ public abstract class ActionVisitor {
 		}
 	}
 
-	public abstract void visitAction(Action action) throws MetaDataException;
-	public abstract void visitAddAction(Action action) throws MetaDataException;
-	public abstract void visitRemoveAction(Action action) throws MetaDataException;
-	public abstract void visitZoomOutAction(Action action) throws MetaDataException;
-	public abstract void visitNavigateAction(Action action) throws MetaDataException;
-	public abstract void visitOKAction(Action action) throws MetaDataException;
-	public abstract void visitSaveAction(Action action) throws MetaDataException;
-	public abstract void visitCancelAction(Action action) throws MetaDataException;
-	public abstract void visitDeleteAction(Action action) throws MetaDataException;
-	public abstract void visitReportAction(Action action) throws MetaDataException;
-	public abstract void visitBizExportAction(Action action) throws MetaDataException;
-	public abstract void visitBizImportAction(Action action) throws MetaDataException;
-	public abstract void visitUploadAction(Action action) throws MetaDataException;
-	public abstract void visitNewAction(Action action) throws MetaDataException;
-	public abstract void visitEditAction(Action action) throws MetaDataException;
+	protected void visitFilterable(Filterable filterable,
+									boolean parentVisible,
+									boolean parentEnabled)
+	throws MetaDataException {
+		List<FilterParameter> parameters = filterable.getParameters();
+		if (parameters != null) {
+			for (FilterParameter parameter : parameters) {
+				visitFilterParameter(parameter, parentVisible, parentEnabled);
+			}
+		}
+	}
+
+	public abstract void visitAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitAddAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitRemoveAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitZoomOutAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitNavigateAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitOKAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitSaveAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitCancelAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitDeleteAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitReportAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitBizExportAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitBizImportAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitUploadAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitNewAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitEditAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitParameter(Parameter parameter,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException;
+	public abstract void visitFilterParameter(FilterParameter parameter,
+												boolean parentVisible,
+												boolean parentEnabled)
+	throws MetaDataException;
 
-	private void visit(ViewType viewType, Action action) 
+	private void visit(ViewType viewType, ActionImpl action) 
 	throws MetaDataException {
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (implicitName != null) {
@@ -60,7 +78,7 @@ public abstract class ActionVisitor {
 		}
 	}
 
-	private void visit(ViewType viewType, ImplicitActionName implicitName, Action action) 
+	private void visit(ViewType viewType, ImplicitActionName implicitName, ActionImpl action) 
 	throws MetaDataException {
 		if (implicitName == ImplicitActionName.DEFAULTS) {
 			if (viewType == ViewType.list) {

@@ -38,6 +38,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -1346,7 +1347,7 @@ public class SmartClientGenerateUtils {
 			hiddenBindingsList.add(((LookupDescription) forLookup).getDescriptionBinding());
 		}
 		if (forLookup != null) {
-			List<Parameter> parameters = forLookup.getParameters();
+			List<FilterParameter> parameters = forLookup.getParameters();
 			if (parameters != null) {
 				for (Parameter parameter : parameters) {
 					hiddenBindingsList.add(parameter.getName());

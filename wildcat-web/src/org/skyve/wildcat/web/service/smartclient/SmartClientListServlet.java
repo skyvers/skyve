@@ -168,9 +168,9 @@ public class SmartClientListServlet extends HttpServlet {
 						String _endRow = request.getParameter("_endRow");
 						int endRow = (_endRow == null) ? Integer.MAX_VALUE : Integer.parseInt(_endRow);
 						String textMatchStyle = request.getParameter("_textMatchStyle");
-						FilterOperator operator = null;
+						SmartClientFilterOperator operator = null;
 						if (textMatchStyle != null) {
-							operator = FilterOperator.valueOf(textMatchStyle);
+							operator = SmartClientFilterOperator.valueOf(textMatchStyle);
 						}
 	
 						
@@ -286,7 +286,7 @@ public class SmartClientListServlet extends HttpServlet {
 		    					Query query, 
 								int startRow,
 								int endRow,
-								FilterOperator operator,
+								SmartClientFilterOperator operator,
 								String[] criteria,
 								SortParameter[] sortParameters,
 								AggregateFunction summaryType,
@@ -387,7 +387,7 @@ public class SmartClientListServlet extends HttpServlet {
 													Document document,
 													DocumentQuery query,
 		    										User user,
-		    										FilterOperator filterOperator,
+		    										SmartClientFilterOperator filterOperator,
 		    										String[] criteria,
 		    										SortedMap<String, Object> parameters,
 		    										String tagId) 
@@ -449,7 +449,7 @@ public class SmartClientListServlet extends HttpServlet {
 														Document document,
 														User user,
 														DocumentQuery query,
-			    										FilterOperator filterOperator,
+			    										SmartClientFilterOperator filterOperator,
 			    										Map<String, Object> criteria,
 			    										String tagId) 
     throws Exception {
@@ -533,7 +533,7 @@ public class SmartClientListServlet extends HttpServlet {
 											(value instanceof Boolean);
 				addCriteriumToFilter(topLevelFilter, 
 										binding, 
-										equalsOperatorRequired ? FilterOperator.equals : filterOperator, 
+										equalsOperatorRequired ? SmartClientFilterOperator.equals : filterOperator, 
 										value, 
 										null, 
 										null,
@@ -589,7 +589,7 @@ System.out.println(criterium);
 				if (binding != null) {
 					binding = binding.replace('_', '.');
 				}
-				FilterOperator filterOperator = FilterOperator.valueOf((String) criterium.get("operator"));
+				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterium.get("operator"));
 
 				if (binding == null) { // advanced criteria
 					DocumentFilter subFilter = query.newDocumentFilter();
@@ -714,87 +714,87 @@ System.out.println(criterium);
 		    			switch (filterOperator) {
 		    			case substring:
 		    			case iContains:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iNotContains, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotContains, value, start, end, user, tagId);
 		    				break;
 		    			case iNotContains:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iContains, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iContains, value, start, end, user, tagId);
 		    				break;
 		    			case startsWith:
 		    			case iStartsWith:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iNotStartsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, user, tagId);
 		    				break;
 		    			case iNotStartsWith:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iStartsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iStartsWith, value, start, end, user, tagId);
 		    				break;
 		    			case iEndsWith:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iNotEndsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, user, tagId);
 		    				break;
 		    			case iNotEndsWith:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iEndsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iEndsWith, value, start, end, user, tagId);
 		    				break;
 		    			case exact:
 		    			case equals:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.notEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notEqual, value, start, end, user, tagId);
 		    				break;
 		    			case iEquals:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iNotEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotEqual, value, start, end, user, tagId);
 		    				break;
 		    			case notEqual:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.equals, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.equals, value, start, end, user, tagId);
 		    				break;
 		    			case iNotEqual:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.iEquals, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iEquals, value, start, end, user, tagId);
 		    				break;
 		    			case greaterThan:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.lessOrEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqual, value, start, end, user, tagId);
 		    				break;
 		    			case greaterOrEqual:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.lessThan, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessThan, value, start, end, user, tagId);
 		    				break;
 		    			case lessThan:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.greaterOrEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, user, tagId);
 		    				break;
 		    			case lessOrEqual:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.greaterThan, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThan, value, start, end, user, tagId);
 		    				break;
 		    			case betweenInclusive:
 		    			case iBetweenInclusive:
 		    				if (start != null) {
-				    			addCriteriumToFilter(currentFilter, binding, FilterOperator.lessOrEqual, start, null, null, user, tagId);
+				    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqual, start, null, null, user, tagId);
 		    				}
 		    				if (end != null) {
-				    			addCriteriumToFilter(currentFilter, binding, FilterOperator.greaterThan, end, null, null, user, tagId);
+				    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThan, end, null, null, user, tagId);
 		    				}
 		    				break;
 		    			case isNull:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.notNull, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notNull, value, start, end, user, tagId);
 		    				break;
 		    			case notNull:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.isNull, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.isNull, value, start, end, user, tagId);
 		    				break;
 		    			case equalsField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.notEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notEqualField, value, start, end, user, tagId);
 		    				break;
 		    			case notEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.equalsField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.equalsField, value, start, end, user, tagId);
 		    				break;
 		    			case greaterThanField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.lessOrEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, user, tagId);
 		    				break;
 		    			case greaterOrEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.lessThanField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessThanField, value, start, end, user, tagId);
 		    				break;
 		    			case lessThanField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.greaterOrEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, user, tagId);
 		    				break;
 		    			case lessOrEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.greaterThanField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThanField, value, start, end, user, tagId);
 		    				break;
 						case inSet:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.notInSet, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notInSet, value, start, end, user, tagId);
 		    				break;
 						case notInSet:
-			    			addCriteriumToFilter(currentFilter, binding, FilterOperator.inSet, value, start, end, user, tagId);
+			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.inSet, value, start, end, user, tagId);
 		    				break;
 						case regexp:
 						case iregexp:
@@ -869,7 +869,7 @@ System.out.println(criterium);
     
     private static void addCriteriumToFilter(DocumentFilter filter, 
     											String binding,
-    											FilterOperator filterOperator, 
+    											SmartClientFilterOperator filterOperator, 
     											Object value,
     											Object start,
     											Object end,

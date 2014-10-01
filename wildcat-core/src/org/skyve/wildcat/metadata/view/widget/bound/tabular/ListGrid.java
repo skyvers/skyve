@@ -10,10 +10,11 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
+import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.metadata.view.Parameterizable;
-import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -32,7 +33,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableRemoveConditionName",
 							"queryName", 
 							"parameters"})
-public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible, Parameterizable, DisableableCRUDGrid {
+public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible, Filterable, DisableableCRUDGrid {
 	/**
 	 * For Serialization
 	 */
@@ -55,7 +56,7 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 
 	private String queryName;
 	
-	private List<Parameter> parameters = new ArrayList<>();
+	private List<FilterParameter> parameters = new ArrayList<>();
 	
 	public String getQueryName() {
 		return queryName;
@@ -69,9 +70,9 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 	@Override
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, 
 					name = "filterParameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = FilterParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public List<FilterParameter> getParameters() {
 		return parameters;
 	}
 	

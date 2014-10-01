@@ -228,7 +228,7 @@ public class SmartClientTagServlet extends HttpServlet {
 																		document,
 																		user,
 																		documentQuery,
-																		FilterOperator.substring,
+																		SmartClientFilterOperator.substring,
 																		criteria,
 																		tagId);
 			}

@@ -11,13 +11,14 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.metadata.view.Parameterizable;
-import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.metadata.view.Filterable;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
+import org.skyve.wildcat.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -33,7 +34,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"editedActions",
 							"addedActions",
 							"parameters"})
-public class Lookup extends InputWidget implements Parameterizable {
+public class Lookup extends InputWidget implements Filterable {
 	/**
 	 * For Serialization
 	 */
@@ -51,7 +52,7 @@ public class Lookup extends InputWidget implements Parameterizable {
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> addedActions = new ArrayList<>();
 
-	private List<Parameter> parameters = new ArrayList<>();
+	private List<FilterParameter> parameters = new ArrayList<>();
 	
 	public String getQuery() {
 		return query;
@@ -101,9 +102,9 @@ public class Lookup extends InputWidget implements Parameterizable {
 	@Override
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
 					name = "filterParameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = FilterParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public List<FilterParameter> getParameters() {
 		return parameters;
 	}
 	

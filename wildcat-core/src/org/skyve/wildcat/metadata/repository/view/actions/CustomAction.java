@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
@@ -22,8 +22,8 @@ public class CustomAction extends ClassAction {
 	}
 
 	@Override
-	public Action toMetaDataAction() {
-		Action result = super.toMetaDataAction();
+	public ActionImpl toMetaDataAction() {
+		ActionImpl result = super.toMetaDataAction();
 		result.setClientValidation(clientValidation);
 		return result;
 	}

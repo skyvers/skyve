@@ -62,7 +62,7 @@ import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.ReportUtil;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.service.smartclient.CompoundFilterOperator;
-import org.skyve.wildcat.web.service.smartclient.FilterOperator;
+import org.skyve.wildcat.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.wildcat.web.service.smartclient.SmartClientListServlet;
 
 public class ReportServlet extends HttpServlet {
@@ -388,7 +388,7 @@ public class ReportServlet extends HttpServlet {
 																				document,
 																				user,
 																				documentQuery,
-																				FilterOperator.substring,
+																				SmartClientFilterOperator.substring,
 																				criteria,
 																				tagId);
 					}

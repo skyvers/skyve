@@ -4,8 +4,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.module.query.QueryColumn.OperatorType;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -39,7 +39,7 @@ public class Column {
 	private SortDirection sortOrder;
 
 	// The conditional operator to filter with
-	private OperatorType filterOperator;
+	private FilterOperator filterOperator;
 
 	// The conditional expression to filter with
 	private String filterExpression;
@@ -95,12 +95,12 @@ public class Column {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
-	public OperatorType getFilterOperator() {
+	public FilterOperator getFilterOperator() {
 		return filterOperator;
 	}
 
 	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
-	public void setFilterOperator(OperatorType filterOperator) {
+	public void setFilterOperator(FilterOperator filterOperator) {
 		this.filterOperator = filterOperator;
 	}
 

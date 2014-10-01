@@ -16,6 +16,7 @@ import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -23,7 +24,7 @@ import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.ViewVisitor;
@@ -229,7 +230,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateParameterBindings(List<Parameter> parameters, String parentWidgetIdentifier)
+	private void validateParameterBindings(List<? extends Parameter> parameters, String parentWidgetIdentifier)
 	throws MetaDataException {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
@@ -921,6 +922,12 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled)
+	throws MetaDataException {
+		// no validation required as parameters are checked by their parent widgets
+	}
+
+	@Override
 	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = password.getBinding();
@@ -1517,7 +1524,7 @@ class ViewValidator extends ViewVisitor {
 		// nothing to do here
 	}
 
-	private void validateAction(Action action)
+	private void validateAction(ActionImpl action)
 	throws MetaDataException {
 		String actionIdentifier = "Action " + action.getName();
 		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
@@ -1528,91 +1535,91 @@ class ViewValidator extends ViewVisitor {
 	// TODO if an action has a class name, ensure we can load the class
 	
 	@Override
-	public void visitAction(Action action) throws MetaDataException {
+	public void visitAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitAddAction(Action action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizExportAction(Action action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizImportAction(Action action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitUploadAction(Action action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitCancelAction(Action action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitDeleteAction(Action action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitEditAction(Action action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNavigateAction(Action action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNewAction(Action action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitOKAction(Action action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitRemoveAction(Action action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitReportAction(Action action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitSaveAction(Action action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(Action action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);
 	}

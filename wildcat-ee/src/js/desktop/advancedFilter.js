@@ -81,10 +81,8 @@ isc.AdvancedFilter.addMethods({
 	toggleButtonClick: function() {
 		if (this.toggleButton.selected) {
 			// copy simple criteria to the advanced criteria object
-			// TODO DOESNT WORK - WHY NOT??
-//alert(this.filterableComponent.grid.getDataSource().convertCriteria); // DNE
-//			var newCriteria = this.filterableComponent.grid.getDataSource().convertCriteria(this.filterableComponent.grid.getCriteria());
-//			this._filterBuilder.setCriteria(newCriteria);
+			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria());
+			this._filterBuilder.setCriteria(newCriteria);
 
 			this.filterableComponent.grid.setShowFilterEditor(false);
 			// ensure we show and hide the whole panel 
@@ -92,18 +90,10 @@ isc.AdvancedFilter.addMethods({
 			this.show();
 		}
 		else {
+			// copy advanced criteria to the simple criteria object
+			this.filterableComponent.grid.setFilterEditorCriteria(this._filterBuilder.getCriteria());
+
 			this.filterableComponent.grid.setShowFilterEditor(true);
-			var params = {_summary: this.filterableComponent.summaryType};
-			if (this.filterableComponentConfig && this.filterableComponentConfig.params) {
-				var instance = this.filterableComponent._view.gather(false); // no validate
-				for (var binding in this.filterableComponentConfig.params) {
-					var expression = this.filterableComponentConfig.params[binding];
-					var value = this.filterableComponent._view.toDisplay(expression, instance);
-					params[binding] = value;
-				}
-			}
-			
-			this.filterableComponent.grid.clearCriteria(null, {params: params});
 			// ensure we show and hide the whole panel 
 			// otherwise mouse gestures don't work on well on the list filter editor in IE7
 			this.hide();

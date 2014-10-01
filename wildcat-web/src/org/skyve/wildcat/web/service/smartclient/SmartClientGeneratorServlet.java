@@ -30,6 +30,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
@@ -42,6 +43,7 @@ import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
 import org.skyve.wildcat.metadata.view.AbsoluteWidth;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.Bordered;
 import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
@@ -839,6 +841,14 @@ code.append("_view:view})");
 									boolean parentEnabled) {
 			// do nothing - parameters are handled separately
 		}
+		
+		@Override
+		public void visitFilterParameter(FilterParameter parameter,
+											boolean parentVisible,
+											boolean parentEnabled)
+		throws MetaDataException {
+			// do nothing - parameters are handled separately
+		}
 
 		// TODO implement
 		@Override
@@ -1048,7 +1058,7 @@ code.append("_view:view})");
 		public void visitedListGrid(ListGrid grid,
 										boolean parentVisible,
 										boolean parentEnabled) {
-			appendParameters(grid.getParameters(), code);
+			appendFilterParameters(grid.getParameters(), code);
 			code.append("_view:view});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(listGridVariable).append(");\n");
 			listGridVariable = null;
@@ -1374,7 +1384,7 @@ code.append("_view:view})");
         	code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
 
 			code.append(",_view:view,");
-			appendParameters(lookup.getParameters(), code);
+			appendFilterParameters(lookup.getParameters(), code);
 
 			Query query = def.getLookup().getQuery();
 
@@ -1416,7 +1426,7 @@ code.append("_view:view})");
 			code.append("type:'blurb',defaultValue:'lookup ");
 			code.append(lookup.getBinding()).append("',");
 			disableLookupComponents(lookup, code);
-			appendParameters(lookup.getParameters(), code);
+			appendFilterParameters(lookup.getParameters(), code);
 		}
 
 		@Override
@@ -1716,7 +1726,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitAction(ActionImpl action) {
 			addAction(action.getResourceName(), 
 						null, 
 						action.getDisplayName(),
@@ -1731,7 +1741,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitAddAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitAddAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Add,
 						action.getDisplayName(),
@@ -1746,7 +1756,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitRemoveAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitRemoveAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Remove,
 						action.getDisplayName(),
@@ -1761,7 +1771,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitZoomOutAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitZoomOutAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.ZoomOut,
 						action.getDisplayName(),
@@ -1776,7 +1786,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitNavigateAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitNavigateAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Navigate,
 						action.getDisplayName(),
@@ -1791,7 +1801,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitOKAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitOKAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.OK,
 						action.getDisplayName(),
@@ -1806,7 +1816,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitSaveAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitSaveAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Save,
 						action.getDisplayName(),
@@ -1821,7 +1831,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitCancelAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitCancelAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Cancel,
 						action.getDisplayName(),
@@ -1836,7 +1846,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitDeleteAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitDeleteAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Delete,
 						action.getDisplayName(),
@@ -1851,7 +1861,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitReportAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitReportAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Report,
 						action.getDisplayName(),
@@ -1866,7 +1876,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitBizExportAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitBizExportAction(ActionImpl action) {
 			addAction(action.getResourceName(),
 						ImplicitActionName.BizExport,
 						action.getDisplayName(),
@@ -1881,7 +1891,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitBizImportAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitBizImportAction(ActionImpl action) {
 			addAction(action.getResourceName(),
 						ImplicitActionName.BizImport,
 						action.getDisplayName(),
@@ -1896,7 +1906,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitUploadAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitUploadAction(ActionImpl action) {
 			addAction(action.getResourceName(),
 						ImplicitActionName.Upload,
 						action.getDisplayName(),
@@ -1911,7 +1921,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitNewAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitNewAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.New,
 						action.getDisplayName(),
@@ -1926,7 +1936,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitEditAction(org.skyve.wildcat.metadata.view.Action action) {
+		public void visitEditAction(ActionImpl action) {
 			addAction(null,
 						ImplicitActionName.Edit,
 						action.getDisplayName(),
@@ -2490,6 +2500,25 @@ pickListFields:[{name:'value'}],
 					}
 					else {
 						builder.append(parameter.getValue()).append("',");
+					}
+				}
+				builder.setLength(builder.length() - 1); // remove comma
+				builder.append("},");
+			}
+		}
+
+		private static void appendFilterParameters(List<FilterParameter> parameters, StringBuilder builder) {
+			if ((parameters != null) && (! parameters.isEmpty())) {
+				builder.append("params:{");
+				for (FilterParameter parameter : parameters) {
+					builder.append("'").append(parameter.getName().replace('.', '_')).append("':{");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append(":'");
+					String binding = parameter.getBinding();
+					if (binding != null) {
+						builder.append('{').append(binding).append("}'},");
+					}
+					else {
+						builder.append(parameter.getValue()).append("'},");
 					}
 				}
 				builder.setLength(builder.length() - 1); // remove comma

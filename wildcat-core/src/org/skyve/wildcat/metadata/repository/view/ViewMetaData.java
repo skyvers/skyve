@@ -35,6 +35,7 @@ import org.skyve.wildcat.metadata.repository.view.actions.SaveAction;
 import org.skyve.wildcat.metadata.repository.view.actions.UploadAction;
 import org.skyve.wildcat.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.wildcat.metadata.view.ViewImpl;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -135,7 +136,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "newParameters")
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
 					name = "parameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = ParameterImpl.class,
 					required = false)
 	public List<Parameter> getParameters() {
 		return parameters;

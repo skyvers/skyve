@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -32,7 +33,7 @@ import org.skyve.wildcat.metadata.model.document.field.Field;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.repository.view.ViewMetaData;
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.WidgetReference;
@@ -92,7 +93,7 @@ public class ViewGenerator {
 		result.setType(ViewType.pick);
 		result.setTitle("Pick a " + document.getSingularAlias());
 
-		Action action = new Action();
+		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.Cancel);
 		result.putAction(action);
 
@@ -161,7 +162,7 @@ public class ViewGenerator {
 		}
 		result.setTitle(title.toString());
 
-		Action action = new Action();
+		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
 
@@ -183,7 +184,7 @@ public class ViewGenerator {
 
 		result.setTitle(document.getSingularAlias());
 
-		Action action = new Action();
+		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
 
@@ -191,7 +192,7 @@ public class ViewGenerator {
 
 		// Add any actions that have privileges
 		for (String actionName : ((DocumentImpl) document).getDefinedActionNames()) {
-			action = new Action();
+			action = new ActionImpl();
 			try {
 				repository.getAction(customer, document, actionName);
 			}
@@ -453,8 +454,8 @@ public class ViewGenerator {
 
 		repositoryView.getContained().addAll(view.getContained());
 
-		for (org.skyve.metadata.view.Action action : view.getActions()) {
-			repositoryView.getActions().add(((Action) action).toRepositoryAction());
+		for (Action action : view.getActions()) {
+			repositoryView.getActions().add(((ActionImpl) action).toRepositoryAction());
 		}
 
 		return XMLUtil.marshalView(repositoryView, customerOverridden, uxuiOverridden);

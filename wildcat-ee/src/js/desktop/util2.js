@@ -665,6 +665,53 @@ isc.BizUtil.addClassMethods({
 	    }
 	},
 
+	// Change something like {poo: {equals: 'wee'}} filter params to 
+	// {poo: 'wee', _o_poo: 'equals'} request params for the list servlet
+	//
+	// requestParams - sent to list servlet - this is what is populated
+	// filterParams - set usually on the config object of a widget
+	// view - the associated view
+	addFilterRequestParams: function(requestParams, filterParams, view) {
+		var instance = view.gather(false); // no validate
+		for (var binding in filterParams) {
+			for (var operator in filterParams[binding]) {
+				var expression = filterParams[binding][operator];
+				var value = view.toDisplay(expression, instance);
+				requestParams[binding] = value;
+			}
+		}
+	},
+	
+	// Add extra criteria defined in filterParams to the criteria parameter given
+	// Add filterParams like {poo: {equals: 'wee'}} to the criteria
+	//
+	// criteria - simple or advanced criteria object
+	// filterParams - set usually on the config object of a widget
+	// view - the associated view
+	// return - an advanced criteria object with the extra filter parameters and'd
+	completeFilterCriteria: function(criteria, filterParams, view) {
+		// NB criteria can come through as undefined from SC framework on occasions
+		var result = isc.addProperties({}, criteria); // make a defensive copy
+		
+		// convert simple criteria to advanced criteria
+		if (result.operator) {} else {
+			result = DataSource.convertCriteria(result, 'substring');
+		}
+
+		result = {_constructor: 'AdvancedCriteria', operator: 'and', criteria:[result]};
+		 
+		var instance = view.gather(false); // no validate
+		for (var binding in filterParams) {
+			for (var operator in filterParams[binding]) {
+				var expression = filterParams[binding][operator];
+				var value = view.toDisplay(expression, instance);
+				result.criteria.add({fieldName: binding, operator: operator, value: value});
+			}
+		}
+
+		return result;
+	},
+	
 	// returns an IButton
 	createImageButton: function(icon, // src relative to isomorphic directory - use ../images/ etc
 								hasDisabledIcon, // true to look for disabled icon ie icon_Disabled

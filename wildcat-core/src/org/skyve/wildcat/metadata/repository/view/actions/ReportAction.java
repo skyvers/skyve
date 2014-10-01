@@ -8,7 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.XMLUtil;
 import org.skyve.wildcat.web.AbstractWebContext;
 
@@ -41,19 +42,19 @@ public class ReportAction extends ParameterizableAction {
 	}
 
 	@Override
-	public Action toMetaDataAction() {
-		Action result = super.toMetaDataAction();
+	public ActionImpl toMetaDataAction() {
+		ActionImpl result = super.toMetaDataAction();
 		result.setResourceName(reportName);
 		if (ImplicitActionName.Report.toString().equals(result.getName())) {
 			result.setName(reportName);
 		}
 
 		List<Parameter> parameters = result.getParameters();
-		org.skyve.wildcat.metadata.view.widget.bound.Parameter p = new org.skyve.wildcat.metadata.view.widget.bound.Parameter();
+		ParameterImpl p = new ParameterImpl();
 		p.setName(AbstractWebContext.REPORT_NAME);
 		p.setValue(reportName);
 		parameters.add(p);
-		p = new org.skyve.wildcat.metadata.view.widget.bound.Parameter();
+		p = new ParameterImpl();
 		p.setName(AbstractWebContext.DOCUMENT_NAME);
 		p.setValue(doc);
 		parameters.add(p);

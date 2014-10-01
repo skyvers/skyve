@@ -14,6 +14,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -48,7 +49,7 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "parameters")
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
 					name = "parameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = ParameterImpl.class,
 					required = false)
 	public List<Parameter> getParameters() {
 		return parameters;

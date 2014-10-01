@@ -223,29 +223,19 @@ BizListGrid.addMethods({
 		// TODO test me.grid.getCriteria() - is this only changed when advanced criteria or filter editor criteria are applied?
 		// does it change when me.grid.filterData() is called? - does this matter
 		var getAllCriteria = function() {
-			// Put the filter parameters into this call also
-			var allCriteria = isc.addProperties({}, me._advancedFilter.toggleButton.selected ?
-														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria());
+			// Get the list criteria for advanced filter or for header filter as appropriate
+			// If we have defined filter criteria on a listgrid, convert to an advanced criteria
+			var result = me._advancedFilter.toggleButton.selected ?
+							me._advancedFilter.getCriteria() :
+							me.grid.getFilterEditorCriteria();
 
 			// if params are defined, ensure they are added to the filter criteria
 			// NB only listgrid's have config.params (and thus me._view is defined)
 			if (config && config.params) {
-				var instance = me._view.gather(false); // no validate
-				for (var binding in config.params) {
-					var expression = config.params[binding];
-					var value = me._view.toDisplay(expression, instance);
-					if (allCriteria.operator) { // advanced criteria
-						var advancedCriterium = {fieldName: binding, operator: 'equals', value: value};
-						allCriteria.criteria.add(advancedCriterium);
-					}
-					else { // simple criteria
-						allCriteria[binding] = value;
-					}
-				}
+				result = BizUtil.completeFilterCriteria(result, config.params, me._view);
 			}
 			
-			return allCriteria;
+			return result;
 		};
 
 		// action items
@@ -259,13 +249,9 @@ BizListGrid.addMethods({
 				// only list grids (embedded in edit views) have config.params defined
 				if (config && config.params) {
 					var newParams = {};
-					var instance = me._view.gather(false); // no validate
-					for (var binding in config.params) {
-						var expression = config.params[binding];
-						// NB the listgrid's view is defined here
-						var value = me._view.toDisplay(expression, instance);
-						newParams[binding] = value;
-					}
+					BizUtil.addFilterRequestParams(newParams, 
+													config.params,
+													me._view);
 					me.zoom(true, newParams);
 				}
 				else {
@@ -333,19 +319,7 @@ BizListGrid.addMethods({
 			click: function() {
 				me.grid.setFilterEditorCriteria({});
 				me._advancedFilter.clearCriteria();
-				var params = {_summary: me.summaryType, _tagId: me.tagId};
-				// only list grids (embedded in edit views) have config.params defined
-				if (config && config.params) {
-					var instance = me._view.gather(false); // no validate
-					for (var binding in config.params) {
-						var expression = config.params[binding];
-						// NB the listgrid's view is defined here
-						var value = me._view.toDisplay(expression, instance);
-						params[binding] = value;
-					}
-				}
-
-				me.grid.clearCriteria(null, {params: params});
+				me.refresh();
 			}
 		};
 		var refreshItem = {title: "Refresh", 
@@ -909,11 +883,11 @@ BizListGrid.addMethods({
 			// This ensures that the server sends back an extra summary row
 			// grid.dataProperties.transformData() is overridden to expect the summary row
 			filterData: function(criteria, callback, requestProperties) {
+				var result = criteria;
+				
 				// ensure summaryType & tagId are sent down in the requestProperties
 				if (requestProperties) {
-					if (requestProperties.params) {
-					}
-					else {
+					if (requestProperties.params) {} else {
 						requestProperties.params = {};
 					}
 				}
@@ -927,14 +901,24 @@ BizListGrid.addMethods({
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
 				if (config && config.params) {
-					var instance = me._view.gather(false); // no validate
-					for (var binding in config.params) {
-						var expression = config.params[binding];
-						requestProperties.params[binding] = me._view.toDisplay(expression, instance);
-					}
+					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
 				
-				this.Super("filterData", [criteria, callback, requestProperties]);
+				this.Super("filterData", [result, callback, requestProperties]);
+				
+				// The super call sets the grid's filter editor data, 
+				// but the result could have been an advanced criteria, so reset it
+				if (criteria) {
+					if (criteria.operator) {
+						this.setFilterEditorCriteria({});
+					}
+					else {
+						this.setFilterEditorCriteria(criteria);
+					}
+				}
+				else {
+					this.setFilterEditorCriteria({});
+				}
 			},
 	
 			dataProperties: {

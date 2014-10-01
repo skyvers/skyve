@@ -33,6 +33,7 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
@@ -46,7 +47,7 @@ import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.model.document.field.TextFormat;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.ViewImpl;
@@ -1959,7 +1960,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitAction(Action action) throws MetaDataException {
+	public void visitAction(ActionImpl action) throws MetaDataException {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			CommandButton cb = b.actionButton(action.getDisplayName(),
 												action.getToolTip(),
@@ -1976,7 +1977,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 	}
 
-	private void processImplicitAction(Action action, ImplicitActionName name) {
+	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			CommandButton cb = b.actionButton(name.getDisplayName(),
 												action.getToolTip(),
@@ -1994,72 +1995,72 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitAddAction(Action action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) throws MetaDataException {
 //		processImplicitAction(action, ImplicitActionName.Add);
 	}
 
 	@Override
-	public void visitRemoveAction(Action action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 
 	@Override
-	public void visitZoomOutAction(Action action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
-	public void visitNavigateAction(Action action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
 //		processImplicitAction(action, ImplicitActionName.Navigate);
 	}
 
 	@Override
-	public void visitOKAction(Action action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
 	@Override
-	public void visitSaveAction(Action action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
 	@Override
-	public void visitCancelAction(Action action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
 	@Override
-	public void visitDeleteAction(Action action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
 	@Override
-	public void visitReportAction(Action action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Report);
 	}
 
 	@Override
-	public void visitBizExportAction(Action action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.BizExport);
 	}
 
 	@Override
-	public void visitBizImportAction(Action action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.BizImport);
 	}
 
 	@Override
-	public void visitUploadAction(Action action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Upload);
 	}
 
 	@Override
-	public void visitNewAction(Action action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) throws MetaDataException {
 //		processImplicitAction(action, ImplicitActionName.New);
 	}
 
 	@Override
-	public void visitEditAction(Action action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) throws MetaDataException {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
@@ -2072,6 +2073,13 @@ public class FacesViewVisitor extends ViewVisitor {
 		
 	}
 	
+	@Override
+	public void visitFilterParameter(FilterParameter parameter,
+			boolean parentVisible, boolean parentEnabled)
+			throws MetaDataException {
+		// TODO Auto-generated method stub
+	}
+
 	private SmartClientDataGridFieldDefinition getFieldDef(InputWidget inputWidget)
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition result = null;

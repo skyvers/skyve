@@ -3,7 +3,7 @@ package org.skyve.wildcat.metadata.repository.view.actions;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.metadata.view.Action;
+import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -21,8 +21,8 @@ public abstract class ClassAction extends PositionableAction {
 	}
 
 	@Override
-	public Action toMetaDataAction() {
-		Action result = super.toMetaDataAction();
+	public ActionImpl toMetaDataAction() {
+		ActionImpl result = super.toMetaDataAction();
 		
 		result.setResourceName(className);
 		if (getName() == null) {

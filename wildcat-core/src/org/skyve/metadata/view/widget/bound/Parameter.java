@@ -10,11 +10,5 @@ public interface Parameter extends Bound, NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getClientId();
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public String getValue();
 }

@@ -599,7 +599,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		else if (widget instanceof ListGrid) {
 			ListGrid grid = (ListGrid) widget;
 			visitListGrid(grid, parentVisible, parentEnabled);
-			visitParameterizable(grid, parentVisible, parentEnabled);
+			visitFilterable(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof DataGrid) {
@@ -749,14 +749,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 			LookupDescription lookup = (LookupDescription) widget;
 			visitLookupDescription(lookup, parentVisible, parentEnabled);
 			visitLookupActions(lookup, parentVisible, parentEnabled);
-			visitParameterizable(lookup, parentVisible, parentEnabled);
+			visitFilterable(lookup, parentVisible, parentEnabled);
 			visitedLookupDescription(lookup, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof Lookup) {
 			Lookup lookup = (Lookup) widget;
 			visitLookup(lookup, parentVisible, parentEnabled);
 			visitLookupActions(lookup, parentVisible, parentEnabled);
-			visitParameterizable(lookup, parentVisible, parentEnabled);
+			visitFilterable(lookup, parentVisible, parentEnabled);
 			visitedLookup(lookup, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof Password) {

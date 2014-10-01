@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
+import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -74,7 +75,7 @@ public class ReportReference implements Reference, Parameterizable {
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "parameters")
 	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
 					name = "parameter",
-					type = org.skyve.wildcat.metadata.view.widget.bound.Parameter.class,
+					type = ParameterImpl.class,
 					required = false)
 	public List<Parameter> getParameters() {
 		return parameters;

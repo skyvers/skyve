@@ -1,5 +1,6 @@
 package org.skyve.wildcat.metadata.module.query;
 
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 
 public class QueryColumn implements org.skyve.metadata.module.query.QueryColumn {
@@ -14,7 +15,7 @@ public class QueryColumn implements org.skyve.metadata.module.query.QueryColumn 
 
 	private String expression;
 
-	private OperatorType filterOperator;
+	private FilterOperator filterOperator;
 
 	private String filterExpression;
 
@@ -69,11 +70,11 @@ public class QueryColumn implements org.skyve.metadata.module.query.QueryColumn 
 	}
 
 	@Override
-	public OperatorType getFilterOperator() {
+	public FilterOperator getFilterOperator() {
 		return filterOperator;
 	}
 
-	public void setFilterOperator(OperatorType filterOperator) {
+	public void setFilterOperator(FilterOperator filterOperator) {
 		this.filterOperator = filterOperator;
 	}
 

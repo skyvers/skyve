@@ -1,111 +1,13 @@
 package org.skyve.metadata.module.query;
 
-import javax.xml.bind.annotation.XmlType;
-
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.SortDirection;
-import org.skyve.wildcat.util.XMLUtil;
 
 /**
  * 
  */
 public interface QueryColumn extends NamedMetaData {
-	/**
-	 * 
-	 */
-	@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
-	public enum OperatorType {
-		/**
-		 * 
-		 */
-		equal,
-		
-		/**
-		 * 
-		 */
-		greater,
-		
-		/**
-		 * 
-		 */
-		less,
-		
-		/**
-		 * 
-		 */
-		greaterEqual,
-		
-		/**
-		 * 
-		 */
-		lessEqual,
-		
-		/**
-		 * 
-		 */
-		notEqual,
-		
-		/**
-		 * 
-		 */
-		like, 
-		
-		/**
-		 * 
-		 */
-		notLike, 
-		
-		/**
-		 * 
-		 */
-		notNull,
-		
-		/**
-		 * 
-		 */
-		isNull,
-		
-		/**
-		 * 
-		 */
-		nullOrEqual,
-		
-		/**
-		 * 
-		 */
-		nullOrGreater, 
-		
-		/**
-		 * 
-		 */
-		nullOrLess,
-		
-		/**
-		 * 
-		 */
-		nullOrGreaterEqual, 
-		
-		/**
-		 * 
-		 */
-		nullOrLessEqual, 
-		
-		/**
-		 * 
-		 */
-		nullOrNotEqual,
-		
-		/**
-		 * 
-		 */
-		nullOrLike, 
-		
-		/**
-		 * 
-		 */
-		nullOrNotLike;
-	}
-
 	/**
 	 * 
 	 * @return
@@ -128,7 +30,7 @@ public interface QueryColumn extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public OperatorType getFilterOperator();
+	public FilterOperator getFilterOperator();
 	
 	/**
 	 * 
