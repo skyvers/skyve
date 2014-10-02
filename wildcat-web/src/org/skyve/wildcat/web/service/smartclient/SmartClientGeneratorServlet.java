@@ -169,10 +169,14 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			}
 		}
 
+		// This is a stack in case he have a tab pane inside a tab pane
+		private Stack<Integer> tabNumbers = new Stack<>();
+		
 		@Override
 		public void visitTabPane(TabPane tabPane, 
 									boolean parentVisible,
 									boolean parentEnabled) {
+			tabNumbers.push(Integer.valueOf(0));
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizTabPane.create({");
 			size(tabPane, code);
@@ -189,6 +193,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 									boolean parentEnabled) {
 			String variable = containerVariables.pop();
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+			tabNumbers.pop();
 		}
 
 		@Override
@@ -207,8 +212,10 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentEnabled) {
 			String paneVariable = containerVariables.pop();
 			String tabPaneVariable = containerVariables.peek();
-			code.append(tabPaneVariable).append(".addBizTab({title:'");
+			Integer tabNumber = tabNumbers.pop();
+			code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber).append("',title:'");
 			code.append(SmartClientGenerateUtils.processString(tab.getTitle())).append("',pane:").append(paneVariable).append(',');
+			tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 			disabled(tab.getDisabledConditionName(), code);
 			invisible(tab.getInvisibleConditionName(), code);
 			String selected = tab.getSelectedConditionName();
@@ -297,11 +304,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			code.append("=DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
 			// SC docs says that autoFocus will focus in first focusable item
 			// in the form when it is drawn.
-			// I use it to ensure that focus is kept when an AJAX call is made
-			// from a widget event when a form is embedded in a tab.
-			// Tabs are removed and added on the fly as there is no SC show/hide API.
-			// Without autoFocus, the focus is lost when the tabs are destroyed.
-			code.append("_view:view,autoFocus:true,");
+			// Don't use autoFocus as we have multiple dynamic forms that can be declared
+			// in some views which doesn't work.
+			code.append("_view:view,");
 			code.append("ID:").append(IDExpression()).append(',');
 			disabled(form.getDisabledConditionName(), code);
 //code.append("cellBorder:1,");

@@ -861,11 +861,6 @@ isc.EditView.addMethods({
 				var selectedTab = contained.getSelectedTab();
 				var selectedTabPane = selectedTab ? selectedTab.pane : null;
 				
-				// remove all tabs from the tab pane, ready for show/hide
-				if (contained.tabs) {
-					contained.removeTabs(contained.tabs);
-				}
-
 				// for each bizTab, show/hide and enable disable
 				for (var j = 0, m = contained.bizTabs.length; j < m; j++) {
 					var bizTab = contained.bizTabs[j];
@@ -1355,24 +1350,43 @@ BizTabPane.addMethods({
 	// use this instead of addTab() as it keeps track of the bizTabs
 	addBizTab: function(bizTab) { // tab definition
 		this.bizTabs.add(bizTab);
-		this.addTab({title: bizTab.title,
+		this.addTab({name: bizTab.name,
+						title: bizTab.title,
 						pane: bizTab.pane,
 						disabledConditionName: bizTab.disabledConditionName,
 						invisibleConditionName: bizTab.invisibleConditionName,
 						selectedConditionName: bizTab.selectedConditionName});
 	},
 	
-	showMember: function(tab) { // the bizTab to show
-		this.addTab({title: tab.title,
-						pane: tab.pane,
-						disabledConditionName: tab.disabledConditionName,
-						invisibleConditionName: tab.invisibleConditionName,
-						selectedConditionName: tab.selectedConditionName});
+	showMember: function(bizTab) { // the bizTab to show
+		var existingTabPosition = this.getTabNumber(bizTab.name); 
+		if (existingTabPosition < 0) { // not a member yet
+			// Try to find an existing tab that is already shown in the tabPane
+			// The first 1 we find (searching backwards) is the place after which to insert this tab
+			var tabPosition = 0; // the final position to insert the tab to
+			var tabNumber = parseInt(bizTab.name);
+			tabNumber--; // start at 1 less than the tab we are trying to insert
+			while (tabNumber >= 0) {
+				existingTabPosition = this.getTabNumber('' + tabNumber);
+				if (existingTabPosition >= 0) {
+					tabPosition = existingTabPosition + 1;
+					break;
+				}
+				tabNumber--;
+			}
+			this.addTab({name: bizTab.name,
+							title: bizTab.title,
+							pane: bizTab.pane,
+							disabledConditionName: bizTab.disabledConditionName,
+							invisibleConditionName: bizTab.invisibleConditionName,
+							selectedConditionName: bizTab.selectedConditionName},
+							tabPosition);
+		}
 	},
 	
-	hideMember: function(tab) { // the bizTab to hide
-		if (this.getTabNumber(tab) >= 0) {
-			this.removeTab(tab);
+	hideMember: function(bizTab) { // the bizTab to hide
+		if (this.getTabNumber(bizTab.name) >= 0) {
+			this.removeTab(bizTab.name);
 		}
 	}
 });
