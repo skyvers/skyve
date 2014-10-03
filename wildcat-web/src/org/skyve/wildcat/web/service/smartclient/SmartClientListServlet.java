@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -660,12 +661,15 @@ System.out.println(criterium);
 	    					}
 	    					else if (attribute instanceof Association) {
 	    						type = String.class;
-	    						StringBuilder sb = new StringBuilder(64);
-	    						sb.append(binding).append('.').append(Bean.DOCUMENT_ID);
-	    						binding = sb.toString();
+	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 	    					}
 	    				}
+		    			else if (binding.endsWith('.' + ChildBean.PARENT_NAME)) {
+		    				type = String.class;
+		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+		    			}
 	    			}
+	    			
 	    			value = fromString(binding, "value", valueString, customer, converter, type);
 	
 	    			if (queryParameter) {
