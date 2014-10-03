@@ -2514,10 +2514,10 @@ pickListFields:[{name:'value'}],
 
 		private static void appendFilterParameters(List<FilterParameter> parameters, StringBuilder builder) {
 			if ((parameters != null) && (! parameters.isEmpty())) {
-				builder.append("params:{");
+				builder.append("params:[");
 				for (FilterParameter parameter : parameters) {
-					builder.append("'").append(parameter.getName().replace('.', '_')).append("':{");
-					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append(":'");
+					builder.append("{name:'").append(parameter.getName().replace('.', '_')).append("',operator:'");
+					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
 					String binding = parameter.getBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}'},");
@@ -2527,7 +2527,7 @@ pickListFields:[{name:'value'}],
 					}
 				}
 				builder.setLength(builder.length() - 1); // remove comma
-				builder.append("},");
+				builder.append("],");
 			}
 		}
 

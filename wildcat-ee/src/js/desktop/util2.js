@@ -665,25 +665,23 @@ isc.BizUtil.addClassMethods({
 	    }
 	},
 
-	// Change something like {poo: {equals: 'wee'}} filter params to 
-	// {poo: 'wee', _o_poo: 'equals'} request params for the list servlet
+	// Change something like [{name: 'poo', operator: 'equals', value 'wee'}] filter params to 
+	// {poo: 'wee'} request params for the list servlet
 	//
 	// requestParams - sent to list servlet - this is what is populated
 	// filterParams - set usually on the config object of a widget
 	// view - the associated view
 	addFilterRequestParams: function(requestParams, filterParams, view) {
 		var instance = view.gather(false); // no validate
-		for (var binding in filterParams) {
-			for (var operator in filterParams[binding]) {
-				var expression = filterParams[binding][operator];
-				var value = view.toDisplay(expression, instance);
-				requestParams[binding] = value;
-			}
+		for (var i = 0, l = filterParams.length; i < l; i++) {
+			var filterParam = filterParams[i];
+			var value = view.toDisplay(filterParam.value, instance);
+			requestParams[filterParam.name] = value;
 		}
 	},
 	
 	// Add extra criteria defined in filterParams to the criteria parameter given
-	// Add filterParams like {poo: {equals: 'wee'}} to the criteria
+	// Add filterParams like [{fileName: 'poo', operator: 'equals', value 'wee'}] to the criteria
 	//
 	// criteria - simple or advanced criteria object
 	// filterParams - set usually on the config object of a widget
@@ -701,12 +699,10 @@ isc.BizUtil.addClassMethods({
 		result = {_constructor: 'AdvancedCriteria', operator: 'and', criteria:[result]};
 		 
 		var instance = view.gather(false); // no validate
-		for (var binding in filterParams) {
-			for (var operator in filterParams[binding]) {
-				var expression = filterParams[binding][operator];
-				var value = view.toDisplay(expression, instance);
-				result.criteria.add({fieldName: binding, operator: operator, value: value});
-			}
+		for (var i = 0, l = filterParams.length; i < l; i++) {
+			var filterParam = filterParams[i];
+			var value = view.toDisplay(filterParam.value, instance);
+			result.criteria.add({fieldName: filterParam.name, operator: filterParam.operator, value: value});
 		}
 
 		return result;
