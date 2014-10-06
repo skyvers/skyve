@@ -138,9 +138,7 @@ BizListGrid.addProperties({
 // OR
 //
 // For ListGrid functionality
-// "query" - the name of the bizhub metadata query to use as a data source
-// AND
-// "params" - an associative array of binding name to string expressions to evaluate with "EditView.toDisplay()" when a view is populated.
+// "params" - an array of binding names, operators and string expressions to evaluate with "EditView.toDisplay()" when a view is populated.
 //                These parameter evaluations are sent down as filter criteria to the server
 // AND
 // "_view" - the view that owns this BizListGrid
@@ -220,8 +218,6 @@ BizListGrid.addMethods({
 			height: 265
 		});
 
-		// TODO test me.grid.getCriteria() - is this only changed when advanced criteria or filter editor criteria are applied?
-		// does it change when me.grid.filterData() is called? - does this matter
 		var getAllCriteria = function() {
 			// Get the list criteria for advanced filter or for header filter as appropriate
 			// If we have defined filter criteria on a listgrid, convert to an advanced criteria
@@ -277,6 +273,24 @@ BizListGrid.addMethods({
 			},
 			click: function() {
 				if (me.grid.anySelected()) {
+					// Ensure that embedded list grids use their parent view's conversation to edit data
+					// in the same way as when zooming in
+					if (me._view) { // this is an embedded list grid
+						if (me.grid.saveRequestProperties) {} else {
+							me.grid.saveRequestProperties = {};
+						}
+						if (me.grid.saveRequestProperties.params) {} else {
+							me.grid.saveRequestProperties.params = {};
+						}
+						var instance = me._view.gather(false); // don't validate
+						me.grid.saveRequestProperties.params._c = instance._c;
+					}
+					else { // 
+						if (me.grid.saveRequestProperties && me.grid.saveRequestProperties.params) {
+							delete me.grid.saveRequestProperties.params._c;
+						}
+					}
+
 					me.grid.startEditing(me._eventRowNum, me._eventColNum);
 				}
 			}
@@ -292,7 +306,7 @@ BizListGrid.addMethods({
 			}
 		};
 
-		// tollbar buttons
+		// toolbar buttons
 		me._newButton = BizUtil.createImageButton(newItem.icon, 
 													true, 
 													"<b>New</b> record.",
