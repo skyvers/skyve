@@ -7,6 +7,7 @@
 	<form>
 		<column percentageWidth="20" />
 		<column/>
+		<column/>
 		<row><item><password binding="newPassword" /></item></row>
 		<row><item><password binding="confirmPassword" /></item></row>
 		<row><item><label binding="response" /></item></row>
