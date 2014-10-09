@@ -29,6 +29,11 @@
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Production</param-value>
     </context-param>
+	<!-- sam, redmond, smoothness, bootstrap -->
+	<context-param>
+		<param-name>primefaces.THEME</param-name>
+		<param-value>casablanca</param-value>
+	</context-param>
 
     <filter>
         <filter-name>PrimeFaces FileUpload Filter</filter-name>
