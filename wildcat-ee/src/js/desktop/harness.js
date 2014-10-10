@@ -87,8 +87,12 @@ BizUtil.addClassProperties({
 							details.hideMember(ListView.contents);
 						}
 						else {
-							details.hideMember(BizUtil._currentView);
-							BizUtil.relinquishEditView(BizUtil._currentView);
+							if (BizUtil._currentView) {
+								if (details.hasMember(BizUtil._currentView)) {
+									details.hideMember(BizUtil._currentView);
+								}
+								BizUtil.relinquishEditView(BizUtil._currentView);
+							}
 						}
 
 						// get the new view and edit a new record
@@ -102,8 +106,12 @@ BizUtil.addClassProperties({
 					}
 					else {
 						if (BizUtil._currentView != ListView.contents) {
-							details.hideMember(BizUtil._currentView);
-							BizUtil.relinquishEditView(BizUtil._currentView);
+							if (BizUtil._currentView) {
+								if (details.hasMember(BizUtil._currentView)) {
+									details.hideMember(BizUtil._currentView);
+								}
+								BizUtil.relinquishEditView(BizUtil._currentView);
+							}
 							BizUtil._currentView = ListView.contents;
 							details.showMember(ListView.contents);
 						}
@@ -368,17 +376,17 @@ var eventData = [
 	},
 	
 	showPortal: function() {
-		var members = details.getMembers();
-		for (var i = 0, l = members.length; i < l; i++) {
-			var member = members[i];
-			if (member == ListView.contents) {
-				details.showMember(ListView.contents);
-			}
-			else {
-				details.removeMember(BizUtil._currentView);
+		if (BizUtil._currentView != ListView.contents) {
+			if (BizUtil._currentView) {
+				if (details.hasMember(BizUtil._currentView)) {
+					details.hideMember(BizUtil._currentView);
+				}
 				BizUtil.relinquishEditView(BizUtil._currentView);
 			}
+			BizUtil._currentView = ListView.contents;
+			details.showMember(ListView.contents);
 		}
+
 		ListView.showPortal();
 	},
 	
