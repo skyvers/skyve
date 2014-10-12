@@ -32,6 +32,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableEditConditionName",
 							"disableRemoveConditionName",
 							"queryName", 
+							"continueConversation",
 							"parameters"})
 public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible, Filterable, DisableableCRUDGrid {
 	/**
@@ -55,6 +56,7 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 	private String disableRemoveConditionName;
 
 	private String queryName;
+	private boolean continueConversation;
 	
 	private List<FilterParameter> parameters = new ArrayList<>();
 	
@@ -65,6 +67,15 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 	@XmlAttribute(name = "query", required = true)
 	public void setQueryName(String queryName) {
 		this.queryName = queryName;
+	}
+
+	public boolean getContinueConversation() {
+		return continueConversation;
+	}
+
+	@XmlAttribute(name = "continueConversation", required = true)
+	public void setContinueConversation(boolean continueConversation) {
+		this.continueConversation = continueConversation;
 	}
 
 	@Override

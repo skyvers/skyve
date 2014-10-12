@@ -142,6 +142,8 @@ BizListGrid.addProperties({
 //                These parameter evaluations are sent down as filter criteria to the server
 // AND
 // "_view" - the view that owns this BizListGrid
+// AND
+// "contConv" - true = use the owning view's conversation for updates, false = start a new conversation when editing
 BizListGrid.addMethods({
 	initWidget: function(config) { // has 4 properties - see above
 		this.Super("initWidget", arguments);
@@ -242,27 +244,57 @@ BizListGrid.addMethods({
 				return ((! me._disabled) && me.canCreate && me.canAdd);
 			},
 			click: function() {
-				// only list grids (embedded in edit views) have config.params defined
-				if (config && config.params) {
+				// only list grids (embedded in edit views) have config.contConv & config.params defined
+				if (config) {
+					var contConv = false;
+					if (config.contConv) {
+						contConv = config.contConv;
+					}
+
+					if (contConv) {
+						if (me._view._vm.valuesHaveChanged()) {
+							isc.say("There are unsaved changes.  Save your changes first.",
+										null,
+										{title:'Unsaved Changes!'}
+							);
+							return;
+						}
+					}
+
 					var newParams = {};
-					BizUtil.addFilterRequestParams(newParams, 
-													config.params,
-													me._view);
-					me.zoom(true, newParams);
+					if (config.params) {
+						BizUtil.addFilterRequestParams(newParams, 
+														config.params,
+														me._view);
+					}
+					me.zoom(true, contConv, newParams);
 				}
 				else {
-					me.zoom(true);
+					me.zoom(true, false);
 				}
 			}
 		};
-		var zoomItem = {
+		me._zoomItem = {
 			title: "Zoom", 
 			icon: "../images/icons/zoom.gif",
 			enableIf: function(target, menu, item) {
 				return (me.canZoom && me.grid.anySelected());
 			},
 			click: function() {
-				me.zoom(false);
+				if (config && config.contConv) {
+					if (me._view._vm.valuesHaveChanged()) {
+						isc.say("There are unsaved changes.  Save your changes first.",
+									null,
+									{title:'Unsaved Changes!'}
+						);
+					}
+					else {
+						me.zoom(false, true);
+					}
+				}
+				else {
+					me.zoom(false, false);
+				}
 			}
 		};
 		var editItem = {
@@ -282,16 +314,28 @@ BizListGrid.addMethods({
 						if (me.grid.saveRequestProperties.params) {} else {
 							me.grid.saveRequestProperties.params = {};
 						}
-						var instance = me._view.gather(false); // don't validate
-						me.grid.saveRequestProperties.params._c = instance._c;
+						if (config && config.contConv) {
+							if (me._view._vm.valuesHaveChanged()) {
+								isc.say("There are unsaved changes.  Save your changes first.",
+											null,
+											{title:'Unsaved Changes!'}
+								);
+							}
+							else {
+								var instance = me._view.gather(false); // don't validate
+								me.grid.saveRequestProperties.params._c = instance._c;
+
+								me.grid.startEditing(me._eventRowNum, me._eventColNum);
+							}
+						}
 					}
-					else { // 
+					else {
 						if (me.grid.saveRequestProperties && me.grid.saveRequestProperties.params) {
 							delete me.grid.saveRequestProperties.params._c;
 						}
-					}
 
-					me.grid.startEditing(me._eventRowNum, me._eventColNum);
+						me.grid.startEditing(me._eventRowNum, me._eventColNum);
+					}
 				}
 			}
 		};
@@ -311,10 +355,10 @@ BizListGrid.addMethods({
 													true, 
 													"<b>New</b> record.",
 													newItem.click);
-		me._zoomButton = BizUtil.createImageButton(zoomItem.icon, 
+		me._zoomButton = BizUtil.createImageButton(me._zoomItem.icon, 
 													true, 
 													"<b>Zoom</b> into record.",
-													zoomItem.click);
+													me._zoomItem.click);
 		me._zoomButton.setDisabled(true);
 		me._editButton = BizUtil.createImageButton(editItem.icon, 
 													true,
@@ -394,7 +438,7 @@ BizListGrid.addMethods({
 
 		var contextMenuData = (config && config.isPickList) ? [pickItem] : [];
 		contextMenuData.addList([newItem,
-		                         	zoomItem,
+		                         	me._zoomItem,
 									editItem,
 									this.deleteSelectionItem,
 									{isSeparator: true},
@@ -871,7 +915,7 @@ BizListGrid.addMethods({
 					}
 					else {
 						if (me.canZoom) {
-							me.zoom(false);
+							me._zoomItem.click();
 						}
 					}
 				}
@@ -1259,6 +1303,7 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 	
 	// goes to edit view (on either the context menu or double click)
 	zoom: function(zoomToNew, // boolean - do we want a new record or an existing one
+					contConv, // boolean - continue the owning view's conversation or start a new one
 					newParams) { // a map of parameter names to expressions to evaluate - can be null or undefined
 		var me = this;
 		var module = null;
@@ -1287,7 +1332,9 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 									if (me._view) {
 										var instance = me._view.gather(true); // validate
 										if (instance) {
-											_c = instance._c;
+											if (contConv) {
+												_c = instance._c;
+											}
 										}
 										else {
 											isc.warn('You cannot zoom in until you fix the problems found');

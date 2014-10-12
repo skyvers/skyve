@@ -1263,6 +1263,7 @@
     <xs:attribute name="disableEdit" type="xs:string"/>
     <xs:attribute name="disableRemove" type="xs:string"/>
     <xs:attribute name="query" type="xs:string" use="required"/>
+    <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:simpleType name="viewType">

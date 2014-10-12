@@ -1054,6 +1054,7 @@ code.append("_view:view})");
 			}
 			code.append("dataSource:'").append(dataSourceId).append("',");
 			code.append("name:'").append(listGridVariable).append("',");
+			code.append("contConv:").append(grid.getContinueConversation()).append(",");
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			disableCRUD(grid, code);
