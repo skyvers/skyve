@@ -81,8 +81,9 @@ isc.AdvancedFilter.addMethods({
 	toggleButtonClick: function() {
 		if (this.toggleButton.selected) {
 			// copy simple criteria to the advanced criteria object
-			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria());
-			this._filterBuilder.setCriteria(newCriteria);
+// CRITERIA CONVERSION DOESN'T WORK TERRIBLY WELL - it leaves the filter builder in an inconsistent state
+//			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria());
+//			this._filterBuilder.setCriteria(newCriteria);
 
 			this.filterableComponent.grid.setShowFilterEditor(false);
 			// ensure we show and hide the whole panel 

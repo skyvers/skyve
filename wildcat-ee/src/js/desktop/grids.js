@@ -963,7 +963,8 @@ BizListGrid.addMethods({
 				}
 				
 				this.Super("filterData", [result, callback, requestProperties]);
-				
+
+/* Removed this as geometry grid filter line searches produce an advanced criteria
 				// The super call sets the grid's filter editor data, 
 				// but the result could have been an advanced criteria, so reset it
 				if (criteria) {
@@ -977,6 +978,7 @@ BizListGrid.addMethods({
 				else {
 					this.setFilterEditorCriteria({});
 				}
+*/
 			},
 	
 			dataProperties: {
