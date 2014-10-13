@@ -958,18 +958,19 @@ BizListGrid.addMethods({
 	
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
+				// NB result could be an advanced criteria after this call whereas critiera could be a simple criteria still
 				if (config && config.params) {
 					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
 				
 				this.Super("filterData", [result, callback, requestProperties]);
 
-/* Removed this as geometry grid filter line searches produce an advanced criteria
-				// The super call sets the grid's filter editor data, 
-				// but the result could have been an advanced criteria, so reset it
+				// The super call above sets the grid's filter editor data, 
+				// but 'result' could be an advanced criteria, so reset it if and only if it was a simple criteria to start with
 				if (criteria) {
 					if (criteria.operator) {
-						this.setFilterEditorCriteria({});
+						// Commented this out as a geometry critiera in the grid filter line searches produces an advanced criteria
+						// this.setFilterEditorCriteria({});
 					}
 					else {
 						this.setFilterEditorCriteria(criteria);
@@ -978,7 +979,6 @@ BizListGrid.addMethods({
 				else {
 					this.setFilterEditorCriteria({});
 				}
-*/
 			},
 	
 			dataProperties: {
