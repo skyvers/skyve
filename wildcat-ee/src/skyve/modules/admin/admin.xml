@@ -267,6 +267,7 @@
 				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
+					<action name="Refresh" />
 				</document>
 			</privileges>
 		</role>

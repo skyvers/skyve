@@ -1,5 +1,7 @@
 package modules.admin.Jobs;
 
+import java.util.List;
+
 import modules.admin.domain.Job;
 import modules.admin.domain.Jobs;
 
@@ -21,11 +23,19 @@ public class JobsBizlet extends Bizlet<Jobs> {
 
 	@Override
 	public Jobs newInstance(Jobs jobs) throws Exception {
+		refresh(jobs);
+		return jobs;
+	}
+	
+	public static final void refresh(Jobs jobs) throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(Job.MODULE_NAME);
 		Document document = module.getDocument(customer, Job.DOCUMENT_NAME);
+		
+		List<Job> runningJobs = jobs.getRunningJobs();
+		runningJobs.clear();
 		
 		for (JobDescription jd : JobScheduler.getCustomerRunningJobs()) {
 			// the job could be finished but the thread is still sleeping waiting for the last UI poll
@@ -36,10 +46,8 @@ public class JobsBizlet extends Bizlet<Jobs> {
 				job.setPercentComplete(new Integer(jd.getPercentComplete()));
 				job.setLog(jd.getLogging());
 				
-				jobs.getRunningJobs().add(job);
+				runningJobs.add(job);
 			}
 		}
-		
-		return jobs;
 	}
 }

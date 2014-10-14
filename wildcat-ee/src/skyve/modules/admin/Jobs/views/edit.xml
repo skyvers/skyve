@@ -7,12 +7,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Actual">
-			<!-- form needs to be included for the client to make a call to the server -->
-			<form>
-				<column percentageWidth="100" />
-				<row><item><spacer/></item></row>
-			</form>
-			<dataGrid binding="runningJobs" title="Running Jobs">
+			<dataGrid binding="runningJobs" title="Running Jobs" disableAdd="true" disableRemove="true">
 				<boundColumn binding="startTime" title="Start Time" />
 				<boundColumn binding="displayName" title="Name" />
 				<boundColumn binding="percentComplete" title="Percent Complete" />
@@ -25,6 +20,7 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" />
+		<action className="Refresh" displayName="Refresh" />
+		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" confirm="This will delete all completed jobs.  Are you sure?" />
 	</actions>
 </view>
