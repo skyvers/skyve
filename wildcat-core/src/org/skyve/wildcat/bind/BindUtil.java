@@ -703,7 +703,23 @@ public final class BindUtil {
 			if (finallySortByOrdinal) {
 				comparatorChain.addComparator(new NullTolerantBeanComparator(ChildBean.ORDINAL_KEY), false);
 			}
-			Collections.sort(beans, comparatorChain);
+			
+			// Test if the collection is sorted before sorting as 
+			// Collections.sort() will affect the dirtiness of a hibernate collection
+			boolean unsorted = false;
+			Object smallerBean = null;
+			for (Object bean : beans) {
+				if (smallerBean != null) {
+					if (comparatorChain.compare(smallerBean, bean) > 0) {
+						unsorted = true;
+						break;
+					}
+				}
+				smallerBean = bean;
+			}
+			if (unsorted) {
+				Collections.sort(beans, comparatorChain);
+			}
 		}
 	}
 

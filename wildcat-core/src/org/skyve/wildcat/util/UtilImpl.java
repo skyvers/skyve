@@ -171,7 +171,7 @@ public class UtilImpl {
 	 */
 	public static void populateFully(Bean bean) 
 	throws DomainException, MetaDataException {
-		User user = CORE.getPersistence().getUser();
+		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 
 		Module module = customer.getModule(bean.getBizModule());
@@ -191,6 +191,54 @@ public class UtilImpl {
 				return true;
 			}
 		}.visit(document, bean, customer);
+	}
+
+	/**
+	 * Recurse a bean to determine if anything has changed
+	 */
+	private static class ChangedBeanVisitor extends BeanVisitor {
+		private boolean changed = false;
+		
+		@Override
+		protected boolean accept(String binding,
+									Document documentAccepted,
+									Document owningDocument,
+									Reference owningReference,
+									Bean beanAccepted,
+									boolean visitingInheritedDocument) 
+		throws DomainException, MetaDataException {
+			if (beanAccepted.isChanged()) {
+				changed = true;
+				return false;
+			}
+			return true;
+		}
+		
+		boolean isChanged() {
+			return changed;
+		}
+	}
+	
+	/**
+	 * Recurse the bean to determine if anything has changed.
+	 * 
+	 * @param bean The bean to test.
+	 * @return if the bean, its collections or its aggregated beans have mutated or not
+	 * @throws DomainException
+	 * @throws MetaDataException
+	 */
+	public static boolean hasChanged(Bean bean) 
+	throws DomainException, MetaDataException {
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+
+		@SuppressWarnings("synthetic-access")
+		ChangedBeanVisitor cbv = new ChangedBeanVisitor();
+		cbv.visit(document, bean, customer);
+		return cbv.isChanged();
 	}
 
 	/**

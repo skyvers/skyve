@@ -307,6 +307,9 @@ class ViewJSONManipulator extends ViewVisitor {
 											view.getTitle(), 
 											bean));
 
+		// put the view changed/dirty flag in
+		result.put("_changed", Boolean.valueOf(UtilImpl.hasChanged(webContextToReference.getCurrentBean())));
+		
 		constructJSONObjectFromBinding(bindingTree, result, webId);
 		
 		if (! valueMaps.isEmpty()) {
@@ -501,10 +504,15 @@ class ViewJSONManipulator extends ViewVisitor {
 								parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
 							((ChildBean<Bean>) thisBean).setParent(appliedTo);
 						}
+						beanList.add(newIndex, thisBean);
 					}
 					else { // found
-						// remove the bean in the collection if required, it'll be readded in the right place
-						beanList.remove(thisBean);
+						// Only move the bean in the collection if required
+						// NB We do this conditionally so we don't upset hibernate collection dirtiness
+						if (beanList.indexOf(thisBean) != newIndex) {
+							beanList.remove(thisBean);
+							beanList.add(newIndex, thisBean);
+						}
 
 						// apply the properties from the JSON to the bean element, if its not a reference
 						if (thisMap != null) {
@@ -515,7 +523,6 @@ class ViewJSONManipulator extends ViewVisitor {
 										persistence);
 						}
 					}
-					beanList.add(newIndex, thisBean);
 					newIndex++;
 				}
 
@@ -527,84 +534,6 @@ class ViewJSONManipulator extends ViewVisitor {
 				if (relation instanceof Collection) { // NB it could be an inverse
 					BindUtil.sortCollectionByMetaData(appliedTo, (Collection) relation);
 				}
-/*
-				// iterate over each bean in the list
-				Iterator<Bean> beanIterator = beanList.iterator();
-				while (beanIterator.hasNext()) {
-					Bean thisBean = beanIterator.next();
-
-					// find the corresponding one in the requestList from the JSON
-					Iterator<Object> requestListIterator = requestList.iterator();
-					boolean found = false;
-					while (requestListIterator.hasNext()) {
-						Object requestListItem = requestListIterator.next();
-						if (requestListItem instanceof String) { // reference
-							String thisBizId = (String) requestListItem;
-							if (thisBean.getBizId().equals(thisBizId)) {
-								// found a match
-								found = true;
-
-								requestListIterator.remove();
-								break;
-							}
-						}
-						else {
-							Map<String, Object> thisMap = (Map<String, Object>) requestListItem;
-							if (thisBean.getBizId().equals(thisMap.get(Bean.DOCUMENT_ID))) {
-								// found a match, apply the properties from the JSON to the bean element
-								found = true;
-								applyJSON(childBindings,
-											relatedDocument,
-											thisMap,
-											thisBean,
-											persistence);
-								
-								requestListIterator.remove();
-								break;
-							}
-						}
-					}
-					if (! found) { // bean is not in the JSON values, so delete it
-						beanIterator.remove();
-					}
-				}
-				
-				// for any remaining JSON elements in requestList, add a bean to the beanList
-				if (! requestList.isEmpty()) {
-					for (Object requestListItem : requestList) {
-						Bean beanToAdd = null;
-						if (requestListItem instanceof String) { // a bizId
-							String thisBizId = (String) requestListItem;
-							// find the existing bean with retrieve
-							beanToAdd = findReferencedBean(relatedDocument, thisBizId, persistence);
-						}
-						else { // a JSON object
-							Map<String, Object> thisMap = (Map<String, Object>) requestListItem;
-							
-							// create a new one with new Instance
-							beanToAdd = relatedDocument.newInstance(user);
-							applyJSON(childBindings,
-										relatedDocument,
-										thisMap,
-										beanToAdd,
-										persistence);
-						}
-
-						beanList.add(beanToAdd);
-						
-						// Determine if we should link the bean in as the parent
-						String parentDocumentName = relatedDocument.getParentDocumentName();
-						if ((parentDocumentName != null) && // is a child document
-								parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
-							((ChildBean<Bean>) beanToAdd).setParent(appliedTo);
-						}
-					}
-				}
-				
-				if (relation instanceof Collection) {
-					BindUtil.sortCollectionByMetaData(appliedTo, (Collection) relation);
-				}
-*/
 			}
 			else { // relation is an association
 				// Get the existing bean referenced

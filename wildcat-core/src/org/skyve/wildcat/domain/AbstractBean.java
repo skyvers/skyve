@@ -59,20 +59,22 @@ public abstract class AbstractBean implements Bean {
 	
 	@Override
 	public final boolean isChanged() {
-		boolean result = (! originalValues.isEmpty());
-		
-		// if unchanged, check the collections to see if they're dirty
-		if (! result) {
+		// if this bean is unchanged, check the collections to see if they're dirty
+		if (originalValues.isEmpty()) {
 			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(getClass())) {
 				Class<?> propertyType = descriptor.getPropertyType();
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
 						Object collection = BindUtil.get(this, descriptor.getName());
 						if (collection instanceof PersistentCollection) { // persistent
-							result = ((PersistentCollection) collection).isDirty();
+							if (((PersistentCollection) collection).isDirty()) {
+								return true;
+							}
 						}
 						else { // transient
-							result = (! ((Collection<?>) collection).isEmpty());
+							if (! ((Collection<?>) collection).isEmpty()) {
+								return true;
+							}
 						}
 					}
 					catch (Exception e) {
@@ -81,8 +83,11 @@ public abstract class AbstractBean implements Bean {
 				}
 			}
 		}
+		else {
+			return true;
+		}
 		
-		return result;
+		return false;
 	}
 	
 	@Override

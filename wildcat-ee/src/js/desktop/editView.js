@@ -1154,7 +1154,8 @@ BizButton.addMethods({
 			// TODO this is probably not required
 			else if (this.type == "C") { // Cancel on edit view and child edit view
 				var me = this;
-				if (this._view._vm.valuesHaveChanged()) {
+				var changedOnServer = this._view.gather(false)._changed;
+				if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 					isc.ask("There are unsaved changes.  Do you wish to cancel?",
 							function(value) {
 								if (value) {

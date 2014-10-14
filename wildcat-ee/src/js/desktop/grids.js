@@ -252,7 +252,8 @@ BizListGrid.addMethods({
 					}
 
 					if (contConv) {
-						if (me._view._vm.valuesHaveChanged()) {
+						var changedOnServer = me._view.gather(false)._changed;
+						if (changedOnServer || me._view._vm.valuesHaveChanged()) {
 							isc.say("There are unsaved changes.  Save your changes first.",
 										null,
 										{title:'Unsaved Changes!'}
@@ -282,7 +283,8 @@ BizListGrid.addMethods({
 			},
 			click: function() {
 				if (config && config.contConv) {
-					if (me._view._vm.valuesHaveChanged()) {
+					var changedOnServer = me._view.gather(false)._changed;
+					if (changedOnServer || me._view._vm.valuesHaveChanged()) {
 						isc.say("There are unsaved changes.  Save your changes first.",
 									null,
 									{title:'Unsaved Changes!'}
@@ -315,16 +317,15 @@ BizListGrid.addMethods({
 							me.grid.saveRequestProperties.params = {};
 						}
 						if (config && config.contConv) {
-							if (me._view._vm.valuesHaveChanged()) {
+							var instance = me._view.gather(false); // don't validate
+							if (instance._changed || me._view._vm.valuesHaveChanged()) {
 								isc.say("There are unsaved changes.  Save your changes first.",
 											null,
 											{title:'Unsaved Changes!'}
 								);
 							}
 							else {
-								var instance = me._view.gather(false); // don't validate
 								me.grid.saveRequestProperties.params._c = instance._c;
-
 								me.grid.startEditing(me._eventRowNum, me._eventColNum);
 							}
 						}
@@ -1563,6 +1564,11 @@ BizDataGrid.addMethods({
 			
 			canEditCell: function(rowNum, colNum) {
 				return ! me._disabled;
+			},
+			
+			// set the view dirty on the client-side when an edit is made in the data grid
+			editComplete: function (rowNum, colNum, newValues, oldValues, editCompletionEvent) {
+				me._view._vm.setValue('_changed', true); // make the form dirty
 			}
 
 /*

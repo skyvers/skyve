@@ -60,6 +60,19 @@ public class Util {
 	}
 
 	/**
+	 * Recurse the bean to determine if anything has changed.
+	 * 
+	 * @param bean The bean to test.
+	 * @return if the bean, its collections or its aggregated beans have mutated or not
+	 * @throws DomainException
+	 * @throws MetaDataException
+	 */
+	public static boolean hasChanged(Bean bean) 
+	throws DomainException, MetaDataException {
+		return UtilImpl.hasChanged(bean);
+	}
+
+	/**
 	 * Utility method that tries to properly initialise the persistence layer proxies used by lazy loading. 
 	 * 
 	 * @param <T>
