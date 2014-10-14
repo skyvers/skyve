@@ -54,6 +54,7 @@ import org.skyve.wildcat.persistence.DocumentQueryImpl;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.TagUtil;
 import org.skyve.wildcat.util.UtilImpl;
+import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.SortParameter;
 import org.skyve.wildcat.web.WebUtil;
@@ -101,11 +102,24 @@ public class SmartClientListServlet extends HttpServlet {
 	        	return;
 	        }
 	        Operation operation = Operation.valueOf(operationType);
-
-	        AbstractPersistence persistence = AbstractPersistence.get();
+	        AbstractPersistence persistence = null;
+	        
 	        try {
 				try {
-			    	persistence.begin();
+					// use the view's conversation if it was sent down from the client
+					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+					AbstractWebContext webContext = WebUtil.getCachedConversation(webId, request, response);
+					if (webContext != null) {
+			        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
+			            persistence = webContext.getConversation();
+			        }
+			        // if no conversation to use, start a new one
+			        if (persistence == null) {
+			            persistence = AbstractPersistence.get();
+			            persistence.evictAllCached();
+			        }
+
+			        persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
 			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 					if (user == null) {
@@ -159,6 +173,7 @@ public class SmartClientListServlet extends HttpServlet {
 					for (String name : parameters.keySet()) {
 						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
 					}
+
 					switch (operation) {
 					case fetch:
 						if (! user.canReadDocument(queryDocument)) {
@@ -263,6 +278,11 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					default:
 					}
+					
+					// serialize and cache conversation, if applicable
+			    	if (webContext != null) {
+			    		WebUtil.putConversationInCache(webContext);
+			    	}
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -270,7 +290,9 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			catch (Throwable t) {
 		    	t.printStackTrace();
-		    	persistence.rollback();
+		    	if (persistence != null) {
+		    		persistence.rollback();
+		    	}
 	
 		    	SmartClientEditServlet.produceErrorResponse(t, operation, false, pw);
 			}
