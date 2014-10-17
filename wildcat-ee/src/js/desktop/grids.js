@@ -60,6 +60,12 @@ BizGrid.addMethods({
 								me._eventRowNum = null;
 								me._eventColumnNum = null;
 								me._eventRecord = null;
+								if (me._view) { // could be data grid or embedded list grid
+									if (me._b) { // is a data grid
+										me._view._vm.setValue('_changed', true); // make the view dirty
+										me._view._vm.setValue('_apply', true); // post view changes before zooming
+									}
+								}
 							});
 						}
 					}
@@ -1331,32 +1337,47 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		BizUtil.getEditView(module, 
 								document,
 								function(view) { // the view
-									var _c = null;
-									if (me._view) {
-										var instance = me._view.gather(true); // validate
-										if (instance) {
-											if (contConv) {
-												_c = instance._c;
+									if (me._view) { // data grid or embedded list grid
+										var instance = me._view.gather(false); // don't validate
+										// NB bean must have been saved earlier as checked in the 
+										// calling event if using the same conversation
+										if (contConv) { // continuing conversation
+											me._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
+										}
+										else { // no conversation propagation
+											// if there are any changes in the form, apply them
+											if (instance._apply || me._view._vm.valuesHaveChanged()) {
+												delete instance._apply;
+												// apply changes to curent form before zoom in
+												me._view.rerender(function() {
+													// now zoom in, after changes applied
+													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
+												});
+											}
+											else { // no changes - just zoom right in there
+												me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 											}
 										}
-										else {
-											isc.warn('You cannot zoom in until you fix the problems found');
-											return;
-										}
-									}
-									if (zoomToNew) {
-										WindowStack.popup(gridRect, "New", true, [view]);
-										view.newInstance(newParams, null, _c);
 									}
 									else {
-										var rowRect = [gridRect[0],
-								                		me.grid.body.getRowPageTop(me._eventRowNum),
-								                		gridRect[2],
-								                		me.grid.body.getRowSize(me._eventRowNum)];
-										WindowStack.popup(rowRect, "Edit", true, [view]);
-										view.editInstance(bizId, null, _c);
+										me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 									}
 								});
+	},
+	
+	_zoom: function(zoomToNew, view, newParams, bizId, _c, gridRect) {
+		if (zoomToNew) {
+			WindowStack.popup(gridRect, "New", true, [view]);
+			view.newInstance(newParams, null, _c);
+		}
+		else {
+			var rowRect = [gridRect[0],
+	                		this.grid.body.getRowPageTop(this._eventRowNum),
+	                		gridRect[2],
+	                		this.grid.body.getRowSize(this._eventRowNum)];
+			WindowStack.popup(rowRect, "Edit", true, [view]);
+			view.editInstance(bizId, null, _c);
+		}
 	},
 	
 	// pick the record in a picklist
@@ -1568,7 +1589,8 @@ BizDataGrid.addMethods({
 			
 			// set the view dirty on the client-side when an edit is made in the data grid
 			editComplete: function (rowNum, colNum, newValues, oldValues, editCompletionEvent) {
-				me._view._vm.setValue('_changed', true); // make the form dirty
+				me._view._vm.setValue('_changed', true); // make the view dirty
+				me._view._vm.setValue('_apply', true); // post view changes before zooming
 			}
 
 /*
@@ -1648,37 +1670,60 @@ BizDataGrid.addMethods({
 									var viewBinding = ((me._view._b) ? me._view._b + '.' + me._b : me._b);
 									var zoomToBizId = (zoomToNew ? null : me._eventRecord.bizId);
 
-									var gridRect = me.grid.body.getPageRect();
-									// these next 2 must be evaluated before the rerender occurs
-									var rowTop = me.grid.body.getRowPageTop(me._eventRowNum);
-									var rowHeight = me.grid.body.getRowSize(me._eventRowNum);
+									var instance = me._view.gather(true); // validate
+									if (instance) { // no form errors
+										var gridRect = me.grid.body.getPageRect();
+										// these next 2 must be evaluated before a rerender occurs
+										var rowTop = me.grid.body.getRowPageTop(me._eventRowNum);
+										var rowHeight = me.grid.body.getRowSize(me._eventRowNum);
 
-									me._view.rerender(function() {
-										var instance = me._view.gather(true); // validate
-										if (instance) { // no form errors
-											if (zoomToNew) {
-												WindowStack.popup(gridRect, "New", false, [view]);
-											}
-											else {
-												var rowRect = [gridRect[0],
-										                		rowTop,
-										                		gridRect[2],
-										                		rowHeight];
-												WindowStack.popup(rowRect, "Edit", false, [view]);
-											}
-
-											// apply changes on parent form
-											view.editInstance(zoomToBizId,
-																viewBinding, 
-																instance._c,
-																true);
+										if (instance._apply || me._view._vm.valuesHaveChanged()) {
+											delete instance._apply;
+											me._view.rerender(function() {
+												me._zoom(zoomToNew,
+															zoomToBizId,
+															viewBinding,
+															view,
+															instance._c,
+															gridRect,
+															rowTop,
+															rowHeight);
+											});
 										}
 										else {
-											isc.warn('You cannot zoom in until you fix the problems found');
+											me._zoom(zoomToNew,
+														zoomToBizId,
+														viewBinding,
+														view,
+														instance._c,
+														gridRect,
+														rowTop,
+														rowHeight);
 										}
-
-									}); 
+									}
+									else {
+										isc.warn('You cannot zoom in until you fix the problems found');
+									}
 								});
+	},
+	
+	_zoom: function(zoomToNew, zoomToBizId, viewBinding, view, _c, gridRect, rowTop, rowHeight) {
+		if (zoomToNew) {
+			WindowStack.popup(gridRect, "New", false, [view]);
+		}
+		else {
+			var rowRect = [gridRect[0],
+	                		rowTop,
+	                		gridRect[2],
+	                		rowHeight];
+			WindowStack.popup(rowRect, "Edit", false, [view]);
+		}
+
+		// apply changes on child form
+		view.editInstance(zoomToBizId,
+							viewBinding, 
+							_c,
+							true);
 	},
 	
 	add: function() {

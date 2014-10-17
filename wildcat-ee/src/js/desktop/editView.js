@@ -1149,9 +1149,14 @@ BizButton.addMethods({
 			else if (this.type == "A") { // Add on child edit view
 			}
 			else if (this.type == "Z") { // Change on child edit view
-				this._view.saveInstance(this.actionName);
+				var apply = this._view.gather(false)._apply;
+				if (apply || this._view._vm.valuesHaveChanged()) {
+					this._view.saveInstance(this.actionName);
+				}
+				else {
+					WindowStack.popoff(false);
+				}
 			}
-			// TODO this is probably not required
 			else if (this.type == "C") { // Cancel on edit view and child edit view
 				var me = this;
 				var changedOnServer = this._view.gather(false)._changed;
