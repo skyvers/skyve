@@ -1554,6 +1554,8 @@ t.printStackTrace();
 		if (bizlet != null) {
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
 			bizlet.postLoad(loadedBean);
+			// clear the object's dirtiness
+			loadedBean.originalValues().clear();
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
 		}
 	}

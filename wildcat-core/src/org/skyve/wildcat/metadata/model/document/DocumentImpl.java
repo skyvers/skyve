@@ -92,6 +92,8 @@ public final class DocumentImpl extends Model implements Document {
 		if (bizlet != null) {
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Entering " + bizlet.getClass().getName() + ".newInstance: " + result);
 			result = bizlet.newInstance(result);
+			// clear the object's dirtiness
+			result.originalValues().clear();
 			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Exiting " + bizlet.getClass().getName() + ".newInstance: " + result);
 		}
 
