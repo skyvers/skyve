@@ -17,6 +17,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
+import org.skyve.metadata.user.User;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.module.ContentPermission;
 import org.skyve.wildcat.metadata.repository.module.ContentRestriction;
@@ -24,7 +25,7 @@ import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.SQLImpl;
 import org.skyve.wildcat.util.UtilImpl;
 
-public class User implements org.skyve.metadata.user.User {
+public class UserImpl implements User {
 	/**
 	 * For Serialization.
 	 */
@@ -163,7 +164,7 @@ public class User implements org.skyve.metadata.user.User {
 		this.homeModuleName = homeModuleName;
 	}
 
-	public void addRole(Role role) {
+	public void addRole(RoleImpl role) {
 		StringBuilder sb = new StringBuilder(64);
 
 		sb.append(role.getOwningModule().getName()).append('.').append(role.getName());

@@ -122,6 +122,7 @@ import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.model.document.field.Field;
 import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.BizQLImpl;
 import org.skyve.wildcat.persistence.ProjectionQuery;
@@ -584,7 +585,7 @@ t.printStackTrace();
 	@Override
 	public void setDocumentPermissionScopes(DocumentPermissionScope scope)
 	throws MetaDataException {
-		Set<String> accessibleModuleNames = ((org.skyve.wildcat.metadata.user.User) user).getAccessibleModuleNames(); 
+		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 
 		// Enable all filters required for this user
@@ -607,7 +608,7 @@ t.printStackTrace();
 
 	@Override
 	public void resetDocumentPermissionScopes() throws MetaDataException {
-		Set<String> accessibleModuleNames = ((org.skyve.wildcat.metadata.user.User) user).getAccessibleModuleNames(); 
+		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 		Customer customer = user.getCustomer();
 
@@ -643,7 +644,7 @@ t.printStackTrace();
 	 */
 	private void setFilters(Document document, DocumentPermissionScope scope)
 	throws MetaDataException {
-		Set<String> accessibleModuleNames = ((org.skyve.wildcat.metadata.user.User) user).getAccessibleModuleNames(); 
+		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 		String userDataGroupId = user.getDataGroupId();
 		Customer customer = user.getCustomer();

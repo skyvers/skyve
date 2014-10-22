@@ -31,6 +31,7 @@ import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
@@ -58,7 +59,7 @@ public class Desktop extends Harness {
 				@SuppressWarnings("synthetic-access")
 				public String callback() throws Exception {
 					AbstractPersistence persistence = AbstractPersistence.get();
-			    	org.skyve.wildcat.metadata.user.User user = (org.skyve.wildcat.metadata.user.User) persistence.getUser();
+			    	UserImpl user = (UserImpl) persistence.getUser();
 			    	Customer customer = user.getCustomer();
 			    	
 			    	initialise(customer, user);
@@ -123,7 +124,7 @@ public class Desktop extends Harness {
 	}
 
 	private void constructMenu(Customer customer, 
-								org.skyve.wildcat.metadata.user.User user, 
+								UserImpl user, 
 								String moduleName,
 								String uxui,
 								StringBuilder result)
@@ -174,7 +175,7 @@ public class Desktop extends Harness {
 		result.append(']');
 	}
 
-	private static void listDataSources(Customer customer, org.skyve.wildcat.metadata.user.User user, StringBuilder result) 
+	private static void listDataSources(Customer customer, UserImpl user, StringBuilder result) 
 	throws MetaDataException {
 		StringBuilder dataSources = new StringBuilder(1024);
 
@@ -201,7 +202,7 @@ public class Desktop extends Harness {
 		result.append("]);");
 	}
 
-	private static void listDataSourcesForMenuItems(org.skyve.wildcat.metadata.user.User user,
+	private static void listDataSourcesForMenuItems(UserImpl user,
 														Customer customer, 
 														String moduleName, 
 														Module module, 

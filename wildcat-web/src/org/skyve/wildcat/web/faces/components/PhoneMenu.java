@@ -24,6 +24,7 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Binder;
 import org.skyve.wildcat.metadata.repository.router.Router;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.Menu;
 
@@ -53,7 +54,7 @@ public class PhoneMenu extends HtmlPanelGroup {
 	}
 	
 	void addMenuPage() throws MetaDataException {
-		org.skyve.wildcat.metadata.user.User user = (org.skyve.wildcat.metadata.user.User) CORE.getUser();
+		UserImpl user = (UserImpl) CORE.getUser();
 		Customer customer = user.getCustomer();
 
 		FacesContext fc = FacesContext.getCurrentInstance();
@@ -111,7 +112,7 @@ public class PhoneMenu extends HtmlPanelGroup {
 	}
 
 	void addModulePages(String uxui) throws MetaDataException {
-		org.skyve.wildcat.metadata.user.User user = (org.skyve.wildcat.metadata.user.User) CORE.getUser();
+		UserImpl user = (UserImpl) CORE.getUser();
 		Customer customer = user.getCustomer();
 
 		for (Module module : customer.getModules()) {

@@ -16,7 +16,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.SuperUser;
-import org.skyve.wildcat.metadata.user.User;
+import org.skyve.wildcat.metadata.user.UserImpl;
 
 @SuppressWarnings("deprecation")
 public class WildcatDocumentExecuterFactory implements JRQueryExecuterFactory {
@@ -44,7 +44,7 @@ public class WildcatDocumentExecuterFactory implements JRQueryExecuterFactory {
 		return true;
 	}
 	
-	private static User user;
+	private static UserImpl user;
 	public static org.skyve.metadata.user.User getUser() {
 		if (user == null) {
 			AbstractRepository repository = new LocalDesignRepository() {

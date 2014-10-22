@@ -52,6 +52,8 @@ import org.skyve.wildcat.metadata.repository.router.UxUi;
 import org.skyve.wildcat.metadata.repository.view.ViewMetaData;
 import org.skyve.wildcat.metadata.user.ActionPrivilege;
 import org.skyve.wildcat.metadata.user.Privilege;
+import org.skyve.wildcat.metadata.user.RoleImpl;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -573,7 +575,7 @@ public class LocalDesignRepository extends AbstractRepository {
 
 						// Add actions in privileges to the document to enable good view generation
 						for (Role role : module.getRoles()) {
-							for (Privilege privilege : ((org.skyve.wildcat.metadata.user.Role) role).getPrivileges()) {
+							for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
 								if (privilege instanceof ActionPrivilege) {
 									ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 									if (actionPrivilege.getDocumentName().equals(result.getName())) {
@@ -777,7 +779,7 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	public final void resetMenus(User user) throws MetaDataException {
-		org.skyve.wildcat.metadata.user.User internalUser = (org.skyve.wildcat.metadata.user.User) user;
+		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
 			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
 			removeInaccessibleItems(module.getName(), menu, user);
@@ -872,7 +874,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		
 		// check action privilege references an action in the given document view
 		for (Role role : module.getRoles()) {
-			for (Privilege privilege : ((org.skyve.wildcat.metadata.user.Role) role).getPrivileges()) {
+			for (Privilege privilege : ((RoleImpl) role).getPrivileges()) {
 				if (privilege instanceof ActionPrivilege) {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();

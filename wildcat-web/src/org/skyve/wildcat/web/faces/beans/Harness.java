@@ -11,7 +11,7 @@ import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.domain.messages.SecurityException;
-import org.skyve.wildcat.metadata.user.User;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.UtilImpl;
 
 public abstract class Harness implements Serializable {
@@ -81,7 +81,7 @@ public abstract class Harness implements Serializable {
 		return org.skyve.util.Util.getWildcatContextUrl() + '/';
 	}
 	
-	public final void initialise(Customer customer, User user)
+	public final void initialise(Customer customer, UserImpl user)
 	throws MetaDataException, SecurityException {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");

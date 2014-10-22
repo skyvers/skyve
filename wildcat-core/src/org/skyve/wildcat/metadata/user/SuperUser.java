@@ -8,7 +8,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 
-public class SuperUser extends User {
+public class SuperUser extends UserImpl {
 	/**
 	 * For Serialization
 	 */

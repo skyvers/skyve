@@ -6,6 +6,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
@@ -22,7 +23,7 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction");
 		
 		AbstractPersistence persistence = (AbstractPersistence) CORE.getPersistence();
-		org.skyve.wildcat.metadata.user.User internalUser = (org.skyve.wildcat.metadata.user.User) persistence.getUser();
+		UserImpl internalUser = (UserImpl) persistence.getUser();
 		Customer customer = internalUser.getCustomer();
 
 		facesView.initialise(customer, internalUser);

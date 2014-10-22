@@ -15,6 +15,8 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.wildcat.domain.MapBean;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.RoleImpl;
+import org.skyve.wildcat.metadata.user.UserImpl;
 
 public class SQLMetaDataUtil {
 	/**
@@ -25,7 +27,7 @@ public class SQLMetaDataUtil {
 	}
 
 	public static void populateUser(User user) throws MetaDataException {
-		org.skyve.wildcat.metadata.user.User internalUser = (org.skyve.wildcat.metadata.user.User) user;
+		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
 			AbstractRepository repository = AbstractRepository.get();
@@ -90,7 +92,7 @@ public class SQLMetaDataUtil {
 				Module module = user.getCustomer().getModule(moduleName);
 				Role role = module.getRole(roleName);
 				if (role != null) {
-					internalUser.addRole((org.skyve.wildcat.metadata.user.Role) role);
+					internalUser.addRole((RoleImpl) role);
 				}
 			}
 			if (firstRow) { // no data for this user

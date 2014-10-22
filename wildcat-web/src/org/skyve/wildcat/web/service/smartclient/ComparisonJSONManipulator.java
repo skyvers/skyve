@@ -20,7 +20,7 @@ import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientFieldDefin
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
-import org.skyve.wildcat.metadata.user.User;
+import org.skyve.wildcat.metadata.user.UserImpl;
 
 /**
  * Creates something like :-
@@ -45,7 +45,7 @@ import org.skyve.wildcat.metadata.user.User;
  *           ]
  */
 public final class ComparisonJSONManipulator {
-	private User user;
+	private UserImpl user;
 	private CustomerImpl customer;
 	private ModuleImpl module;
 	private Document document;
@@ -73,7 +73,7 @@ public final class ComparisonJSONManipulator {
 	private static final String DELETED_ICON = "icons/comparisonDeleted.png";
 	private static final String UPDATED_ICON = "icons/comparisonUpdated.png";
 
-	public ComparisonJSONManipulator(User user,
+	public ComparisonJSONManipulator(UserImpl user,
 													CustomerImpl customer,
 													ModuleImpl module,
 													Document document,

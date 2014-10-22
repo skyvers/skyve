@@ -20,6 +20,7 @@ public class Group extends Action {
 						@XmlElementRef(type = MapItem.class),
 						@XmlElementRef(type = CalendarItem.class),
 						@XmlElementRef(type = TreeItem.class),
+						@XmlElementRef(type = LinkItem.class),
 						@XmlElementRef(type = Group.class)})
 	public List<Action> getActions() {
 		return actions;

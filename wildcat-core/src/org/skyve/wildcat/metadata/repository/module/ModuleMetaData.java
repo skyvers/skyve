@@ -26,7 +26,8 @@ import org.skyve.wildcat.metadata.module.query.QueryColumn;
 import org.skyve.wildcat.metadata.module.query.QueryImpl;
 import org.skyve.wildcat.metadata.repository.NamedMetaData;
 import org.skyve.wildcat.metadata.repository.PersistentMetaData;
-import org.skyve.wildcat.metadata.user.User;
+import org.skyve.wildcat.metadata.user.RoleImpl;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -331,7 +332,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		List<Role> repositoryRoles = getRoles();
 		if (repositoryRoles != null) {
 			for (Role roleMetaData : repositoryRoles) {
-				org.skyve.wildcat.metadata.user.Role role = new org.skyve.wildcat.metadata.user.Role();
+				RoleImpl role = new RoleImpl();
 				value = roleMetaData.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
@@ -698,7 +699,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 			}
 			if (! validRoleNames.contains(value)) {
 				// allow implicit data administrator role through
-				if (! User.DATA_ADMINISTRATOR_ROLE.equals(getName() + '.' + value)) {
+				if (! UserImpl.DATA_ADMINISTRATOR_ROLE.equals(getName() + '.' + value)) {
 					throw new MetaDataException(metaDataName + " : The role " + value + " granted in menu item " +
 													result.getName() + " is not defined in this module");
 				}

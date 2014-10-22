@@ -24,6 +24,7 @@ import org.skyve.wildcat.metadata.AbstractMetaDataMap;
 import org.skyve.wildcat.metadata.model.document.field.Field;
 import org.skyve.wildcat.metadata.module.query.QueryImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.RoleImpl;
 
 public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	/**
@@ -236,7 +237,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 
 	public void putRole(Role role) {
-		((org.skyve.wildcat.metadata.user.Role) role).setOwningModule(this);
+		((RoleImpl) role).setOwningModule(this);
 		putMetaData(role.getName(), role);
 		roles.add(role);
 	}

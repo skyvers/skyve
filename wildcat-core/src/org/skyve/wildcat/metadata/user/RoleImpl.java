@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.Role;
 import org.skyve.wildcat.metadata.repository.module.ContentPermission;
 import org.skyve.wildcat.metadata.repository.module.ContentRestriction;
 
-public class Role implements org.skyve.metadata.user.Role {
+public class RoleImpl implements Role {
 	/**
 	 * For Serialization
 	 */

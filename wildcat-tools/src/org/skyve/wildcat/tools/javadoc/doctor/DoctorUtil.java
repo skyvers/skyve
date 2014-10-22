@@ -25,6 +25,7 @@ import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.ActionPrivilege;
 import org.skyve.wildcat.metadata.user.DocumentPrivilege;
 import org.skyve.wildcat.metadata.user.Privilege;
+import org.skyve.wildcat.metadata.user.RoleImpl;
 import org.skyve.wildcat.tools.javadoc.doctor.DocSection.SectionType;
 
 /**
@@ -410,13 +411,13 @@ public class DoctorUtil {
 		table.getHtmlContent().add("The role " + r.getName() + " has the following privileges:");
 
 		table.setHeaderValues("Document", "Read", "Create", "Update", "Delete", "Actions");
-		for (Privilege p : ((org.skyve.wildcat.metadata.user.Role) r).getPrivileges()) {
+		for (Privilege p : ((RoleImpl) r).getPrivileges()) {
 			if (p instanceof DocumentPrivilege) {
 				DocumentPermission permission = ((DocumentPrivilege) p).getPermission();
 
 				// generate Action permissions for this document
 				DocList actionList = new DocList(false);
-				for (Privilege ap : ((org.skyve.wildcat.metadata.user.Role) r).getPrivileges()) {
+				for (Privilege ap : ((RoleImpl) r).getPrivileges()) {
 					if (ap instanceof ActionPrivilege) {
 						if (p.getName().equals(((ActionPrivilege) ap).getDocumentName())) {
 							actionList.getItems().add(ap.getName());

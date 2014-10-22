@@ -41,6 +41,7 @@ import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
@@ -1675,11 +1676,11 @@ class ViewJSONManipulator extends ViewVisitor {
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, comparisonBinding));
 				if (! forApply) {
 					comparisons.put(referenceName, 
-										new ComparisonJSONManipulator((org.skyve.wildcat.metadata.user.User) user, 
-																					customer,
-																					module,
-																					referenceDocument,
-																					root).toJSONStructure());
+										new ComparisonJSONManipulator((UserImpl) user, 
+																		customer,
+																		module,
+																		referenceDocument,
+																		root).toJSONStructure());
 				}
 				else if (forApply && parentEnabled && enabled(comparison)) {
 			        currentBindings = currentBindings.putOrGetChild(comparison.getBinding(), referenceDocument);

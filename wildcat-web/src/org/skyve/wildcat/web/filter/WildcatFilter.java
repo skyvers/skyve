@@ -12,7 +12,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.skyve.web.WebContext;
-import org.skyve.wildcat.metadata.user.User;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.WebStatsUtil;
 import org.skyve.wildcat.web.WebUtil;
@@ -61,7 +61,7 @@ public class WildcatFilter implements Filter {
 			WebUtil.logConversationsStats();
 		}
 
-		User user = (User) ((HttpServletRequest) request).getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		UserImpl user = (UserImpl) ((HttpServletRequest) request).getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 
 		try {
 			// It is possible that the user has not been determined for

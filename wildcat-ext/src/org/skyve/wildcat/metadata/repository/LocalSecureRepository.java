@@ -2,6 +2,7 @@ package org.skyve.wildcat.metadata.repository;
 
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.SQLMetaDataUtil;
 import org.skyve.wildcat.util.UtilImpl;
 
@@ -13,7 +14,7 @@ import org.skyve.wildcat.util.UtilImpl;
 public class LocalSecureRepository extends LocalDesignRepository {
 	@Override
 	public User retrieveUser(String userPrincipal) throws MetaDataException {
-		org.skyve.wildcat.metadata.user.User result = new org.skyve.wildcat.metadata.user.User();
+		UserImpl result = new UserImpl();
 
 		if (userPrincipal == null) {
 			throw new IllegalStateException("No-one is logged in - cannot retrieve the WILDCAT user.");

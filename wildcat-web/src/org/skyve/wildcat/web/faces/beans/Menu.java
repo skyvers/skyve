@@ -30,6 +30,7 @@ import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.web.faces.FacesAction;
 
@@ -52,7 +53,7 @@ public class Menu extends Harness {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
 					AbstractPersistence persistence = AbstractPersistence.get();
-					org.skyve.wildcat.metadata.user.User internalUser = (org.skyve.wildcat.metadata.user.User) persistence.getUser();
+					UserImpl internalUser = (UserImpl) persistence.getUser();
 					Customer customer = internalUser.getCustomer();
 
 					initialise(customer, internalUser);
@@ -71,7 +72,7 @@ public class Menu extends Harness {
 	private static MenuModel createMenuModel(String bizModule, String uxui) throws MetaDataException {
 		MenuModel result = new DefaultMenuModel();
 
-		org.skyve.wildcat.metadata.user.User user = (org.skyve.wildcat.metadata.user.User) CORE.getUser();
+		UserImpl user = (UserImpl) CORE.getUser();
 		Customer customer = user.getCustomer();
 
 		// determine if the first menu should be open - ie no default
