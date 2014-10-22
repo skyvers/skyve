@@ -13,7 +13,7 @@ import org.skyve.wildcat.util.XMLUtil;
 public class Menu {
 	private List<Action> actions = new ArrayList<>();
 
-	@XmlElementRefs( {@XmlElementRef(type = Item.class), @XmlElementRef(type = Group.class)})
+	@XmlElementRefs({@XmlElementRef(type = Item.class), @XmlElementRef(type = Group.class)})
 	public List<Action> getActions() {
 		return actions;
 	}

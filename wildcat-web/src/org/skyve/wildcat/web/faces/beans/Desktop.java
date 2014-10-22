@@ -1,6 +1,8 @@
 package org.skyve.wildcat.web.faces.beans;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,10 +22,12 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.metadata.module.menu.CalendarItem;
 import org.skyve.wildcat.metadata.module.menu.EditItem;
 import org.skyve.wildcat.metadata.module.menu.GridItem;
+import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
@@ -301,6 +305,27 @@ public class Desktop extends Harness {
 					else if (item instanceof EditItem) {
 						result.append(((EditItem) item).getDocumentName());
 						ref = "edit";
+					}
+					else if (item instanceof LinkItem) {
+						ref = "link";
+						String href = ((LinkItem) item).getHref();
+						boolean relative = true;
+						try {
+							if (new URI(href).isAbsolute()) {
+								result.append(href);
+								relative = false;
+							}
+						} catch (URISyntaxException e) {
+							// do nothing here if its not know to be absolute
+						}
+			        	
+						if (relative) {
+							result.append(Util.getWildcatContextUrl());
+				    		if (href.charAt(0) != '/') {
+				    			result.append('/');
+				    		}
+				    		result.append(href);
+						}
 					}
 					result.append("',desc:'");
 					result.append(SmartClientGenerateUtils.processString(item.getName()));

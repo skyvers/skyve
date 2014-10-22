@@ -15,6 +15,8 @@
 
   <xs:element name="item" type="tns:item"/>
 
+  <xs:element name="link" type="tns:link"/>
+
   <xs:element name="map" type="tns:map"/>
 
   <xs:element name="module" type="tns:module"/>
@@ -173,6 +175,15 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="link">
+    <xs:complexContent>
+      <xs:extension base="tns:item">
+        <xs:sequence/>
+        <xs:attribute name="href" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="menu">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -182,6 +193,7 @@
         <xs:element ref="tns:grid"/>
         <xs:element ref="tns:map"/>
         <xs:element ref="tns:tree"/>
+        <xs:element ref="tns:link"/>
         <xs:element ref="tns:group"/>
       </xs:choice>
     </xs:sequence>
@@ -289,38 +301,38 @@
 
   <xs:simpleType name="documentPermission">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="_R_DU"/>
-      <xs:enumeration value="_RU_U"/>
-      <xs:enumeration value="CR__G"/>
       <xs:enumeration value="_R__U"/>
+      <xs:enumeration value="_R_DD"/>
+      <xs:enumeration value="_RUDC"/>
       <xs:enumeration value="_RUDU"/>
-      <xs:enumeration value="CRU_U"/>
-      <xs:enumeration value="_R__G"/>
-      <xs:enumeration value="CRU_C"/>
       <xs:enumeration value="CRUDD"/>
       <xs:enumeration value="CR__D"/>
-      <xs:enumeration value="CR_DG"/>
-      <xs:enumeration value="_____"/>
-      <xs:enumeration value="_RUDD"/>
-      <xs:enumeration value="CRUDC"/>
-      <xs:enumeration value="_RU_G"/>
-      <xs:enumeration value="_RU_C"/>
-      <xs:enumeration value="CR__U"/>
-      <xs:enumeration value="CR_DD"/>
-      <xs:enumeration value="CR__C"/>
-      <xs:enumeration value="CRUDG"/>
-      <xs:enumeration value="_R_DG"/>
-      <xs:enumeration value="CRU_G"/>
-      <xs:enumeration value="_R_DC"/>
-      <xs:enumeration value="CRUDU"/>
-      <xs:enumeration value="_RUDG"/>
-      <xs:enumeration value="_R_DD"/>
-      <xs:enumeration value="CRU_D"/>
       <xs:enumeration value="_R__D"/>
-      <xs:enumeration value="_R__C"/>
-      <xs:enumeration value="_RUDC"/>
+      <xs:enumeration value="CRU_D"/>
+      <xs:enumeration value="_R_DC"/>
+      <xs:enumeration value="_RUDG"/>
+      <xs:enumeration value="CR_DD"/>
+      <xs:enumeration value="CR__U"/>
+      <xs:enumeration value="_RU_U"/>
+      <xs:enumeration value="CRUDU"/>
+      <xs:enumeration value="CRU_C"/>
+      <xs:enumeration value="_R_DG"/>
+      <xs:enumeration value="CR__G"/>
+      <xs:enumeration value="CRU_G"/>
+      <xs:enumeration value="CR__C"/>
       <xs:enumeration value="_RU_D"/>
+      <xs:enumeration value="_R__G"/>
+      <xs:enumeration value="_RUDD"/>
       <xs:enumeration value="CR_DU"/>
+      <xs:enumeration value="_____"/>
+      <xs:enumeration value="CR_DG"/>
+      <xs:enumeration value="_RU_G"/>
+      <xs:enumeration value="CRUDG"/>
+      <xs:enumeration value="CRU_U"/>
+      <xs:enumeration value="_R_DU"/>
+      <xs:enumeration value="_R__C"/>
+      <xs:enumeration value="_RU_C"/>
+      <xs:enumeration value="CRUDC"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

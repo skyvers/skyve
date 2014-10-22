@@ -512,6 +512,19 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
+			else if (action instanceof LinkItem) {
+				LinkItem item = (LinkItem) action;
+				org.skyve.wildcat.metadata.module.menu.LinkItem result = new org.skyve.wildcat.metadata.module.menu.LinkItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+				
+				String href = item.getHref();
+				if (href == null) {
+					throw new MetaDataException(metaDataName + " : [href] is required for menu item " + item.getName());
+				}
+				result.setHref(href);
+				
+				items.add(result);
+			}
 			else if (action instanceof EditItem) {
 				EditItem item = (EditItem) action;
 				org.skyve.wildcat.metadata.module.menu.EditItem result = new org.skyve.wildcat.metadata.module.menu.EditItem();
@@ -521,7 +534,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				if (documentName == null) {
 					throw new MetaDataException(metaDataName + " : [document] is required for menu item " + item.getName());
 				}
-				result.setDocumentName(item.getDocumentName());
+				result.setDocumentName(documentName);
 				
 				items.add(result);
 			}

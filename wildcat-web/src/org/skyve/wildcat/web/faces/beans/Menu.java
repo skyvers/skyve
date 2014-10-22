@@ -1,5 +1,7 @@
 package org.skyve.wildcat.web.faces.beans;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
@@ -24,6 +26,7 @@ import org.skyve.web.WebAction;
 import org.skyve.wildcat.metadata.module.menu.CalendarItem;
 import org.skyve.wildcat.metadata.module.menu.EditItem;
 import org.skyve.wildcat.metadata.module.menu.GridItem;
+import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
@@ -148,9 +151,9 @@ public class Menu extends Harness {
 	
 	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) throws MetaDataException {
 		StringBuilder url = new StringBuilder(64);
-		url.append(Util.getWildcatContextUrl());
 		if (item instanceof GridItem) {
 			GridItem gridItem = (GridItem) item;
+			url.append(Util.getWildcatContextUrl());
 			url.append("/?a=").append(WebAction.g.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveQueryName(customer,
 																module,
@@ -159,11 +162,13 @@ public class Menu extends Harness {
 																gridItem.getDocumentName()));
 		}
 		else if (item instanceof EditItem) {
+			url.append(Util.getWildcatContextUrl());
 			url.append("/?a=").append(WebAction.e.toString()).append("&m=").append(module.getName());
 			url.append("&d=").append(((EditItem) item).getDocumentName());
 		}
 		else if (item instanceof CalendarItem) {
             CalendarItem calendarItem = (CalendarItem) item;
+    		url.append(Util.getWildcatContextUrl());
             url.append("/?a=").append(WebAction.c.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveQueryName(customer,
 																module,
@@ -173,6 +178,7 @@ public class Menu extends Harness {
         }
         else if (item instanceof TreeItem) {
     		TreeItem treeItem = (TreeItem) item;
+    		url.append(Util.getWildcatContextUrl());
     		url.append("/?a=").append(WebAction.t.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveQueryName(customer,
 																module,
@@ -182,6 +188,7 @@ public class Menu extends Harness {
         }
         else if (item instanceof MapItem) {
             MapItem mapItem = (MapItem) item;
+    		url.append(Util.getWildcatContextUrl());
             url.append("/?a=").append(WebAction.m.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveQueryName(customer,
 																module,
@@ -189,6 +196,22 @@ public class Menu extends Harness {
 																mapItem.getQueryName(),
 																mapItem.getDocumentName()));
 			url.append("&b=").append(mapItem.getGeometryBinding());
+        }
+        else if (item instanceof LinkItem) {
+        	String href = ((LinkItem) item).getHref();
+        	try {
+				if (new URI(href).isAbsolute()) {
+					return href;
+				}
+			} catch (URISyntaxException e) {
+				// do nothing here if its not know to be absolute
+			}
+        	
+    		url.append(Util.getWildcatContextUrl());
+    		if (href.charAt(0) != '/') {
+    			url.append('/');
+    		}
+    		url.append(href);
         }
 
 		return url.toString();

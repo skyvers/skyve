@@ -81,7 +81,10 @@ BizUtil.addClassProperties({
 			    }),
 				// Called when a menu item is selected
 			    leafClick: function(viewer, leaf, recordNum) {
-					if (leaf.ref == 'edit') {
+					if (leaf.ref == 'link') {
+						window.location = leaf.name;
+					}
+					else if (leaf.ref == 'edit') {
 						// remove the old view
 						if (BizUtil._currentView == ListView.contents) {
 							details.hideMember(ListView.contents);
