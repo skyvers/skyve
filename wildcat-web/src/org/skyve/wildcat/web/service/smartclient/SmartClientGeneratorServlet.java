@@ -880,7 +880,10 @@ code.append("_view:view})");
 		private String dataGridVariable = null;
 		private Document dataGridDocument = null;
 		private String dataGridBinding = null;
-
+		// Indicates whether the field definition array has been completed and closed off
+		// Its used to ensure the last ']' is appended before adding events or closing the grid definition
+		private boolean dataGridFieldsIncomplete = false;
+		
 		@Override
 		public void visitDataGrid(DataGrid grid,
 									boolean parentVisible,
@@ -925,19 +928,27 @@ code.append("_view:view})");
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			editable(grid.getEditable(), code);
+			dataGridFieldsIncomplete = true;
 			code.append("_fields:[");
+			
+			eventsWithNoForm = true;
 		}
 
 		@Override
 		public void visitedDataGrid(DataGrid grid,
 										boolean parentVisible,
 										boolean parentEnabled) {
-			code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
-			code.append("],_view:view});\n");
+			if (dataGridFieldsIncomplete) {
+				code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
+				code.append("],");
+			}
+			code.append("_view:view});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(dataGridVariable).append(");\n");
 			dataGridVariable = null;
 			dataGridDocument = null;
 			dataGridBinding = null;
+			dataGridFieldsIncomplete = false;
+			eventsWithNoForm = false;
 		}
 
 		private InputWidget dataGridColumnInputWidget;
@@ -1061,6 +1072,8 @@ code.append("_view:view})");
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			disableCRUD(grid, code);
+			
+			eventsWithNoForm = true;
 		}
 
 		@Override
@@ -1071,6 +1084,7 @@ code.append("_view:view})");
 			code.append("_view:view});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(listGridVariable).append(");\n");
 			listGridVariable = null;
+			eventsWithNoForm = false;
 		}
 
 		@Override
@@ -1296,16 +1310,16 @@ code.append("_view:view})");
 			invisible(html.getInvisibleConditionName(), code);
 		}
 
-		// indicates if we are visiting a list member widget.
-		// this allow specific javascript for events to be generated since this widget lives outside of a form
-		private boolean visitingListMembership = false;
+		// indicates if we are visiting a list membership, list grid or data grid widget.
+		// this allow specific javascript for events to be generated since these widgets live outside of a form
+		private boolean eventsWithNoForm = false;
 		
 		@Override
 		public void visitListMembership(ListMembership membership,
 											boolean parentVisible,
 											boolean parentEnabled)
 		throws MetaDataException {
-			visitingListMembership = true;
+			eventsWithNoForm = true;
 			
 			String membershipBinding = membership.getBinding();
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
@@ -1350,7 +1364,7 @@ code.append("_view:view})");
 			String variable = containerVariables.pop();
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 
-			visitingListMembership = false;
+			eventsWithNoForm = false;
 		}
 
 		@Override
@@ -1964,11 +1978,11 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			if (visitingListMembership) {
-				code.append("changed:function(){");
+			if (eventsWithNoForm) {
+				code.append("changed:function(){var view=this._view;");
 			}
 			else {
-				code.append("changed:function(form,item,value){");
+				code.append("changed:function(form,item,value){var view=form._view;");
 			}
 		}
 
@@ -1985,7 +1999,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("focus:function(form,item){");
+			code.append("focus:function(form,item){var view=form._view;");
 		}
 
 		@Override
@@ -2001,7 +2015,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("blur:function(form,item){");
+			code.append("blur:function(form,item){var view=form._view;");
 		}
 
 		@Override
@@ -2020,8 +2034,18 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
+			if (dataGridFieldsIncomplete) {
+				code.setLength(code.length() - 1);
+				code.append("],");
+				dataGridFieldsIncomplete = false;
+			}
 			inOnAddedEventHandler = true;
-			code.append("bizAdded:function(form,item,value){");
+			if (eventsWithNoForm) {
+				code.append("bizAdded:function(){var view=this._view;");
+			}
+			else {
+				code.append("bizAdded:function(form,item,value){var view=form._view;");
+			}
 		}
 
 		@Override
@@ -2041,8 +2065,18 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
+			if (dataGridFieldsIncomplete) {
+				code.setLength(code.length() - 1);
+				code.append("],");
+				dataGridFieldsIncomplete = false;
+			}
 			inOnEditedEventHandler = true;
-			code.append("bizEdited:function(form,item,value){");
+			if (eventsWithNoForm) {
+				code.append("bizEdited:function(){var view=this._view;");
+			}
+			else {
+				code.append("bizEdited:function(form,item,value){var view=form._view;");
+			}
 		}
 
 		@Override
@@ -2062,8 +2096,18 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
+			if (dataGridFieldsIncomplete) {
+				code.setLength(code.length() - 1);
+				code.append("],");
+				dataGridFieldsIncomplete = false;
+			}
 			inOnRemovedEventHandler = true;
-			code.append("bizRemoved:function(form,item,value){");
+			if (eventsWithNoForm) {
+				code.append("bizRemoved:function(){var view=this._view;");
+			}
+			else {
+				code.append("bizRemoved:function(form,item,value){var view=form._view;");
+			}
 		}
 
 		@Override
@@ -2080,7 +2124,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("bizPicked:function(form,item,value){");
+			code.append("bizPicked:function(form,item,value){var view=form._view;");
 		}
 
 		@Override
@@ -2096,7 +2140,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("bizCleared:function(form,item,value){");
+			code.append("bizCleared:function(form,item,value){var view=form._view;");
 		}
 
 		@Override
@@ -2109,13 +2153,13 @@ pickListFields:[{name:'value'}],
 
 		private void writeOutServerSideCallbackMethodIfNecessary() {
 			if (inOnAddedEventHandler) {
-				code.append("},bizAddedForServer:function(form,item,value){");
+				code.append("},bizAddedForServer:function(form,item,value){var view=form._view;");
 			}
 			if (inOnEditedEventHandler) {
-				code.append("},bizEditedForServer:function(form,item,value){");
+				code.append("},bizEditedForServer:function(form,item,value){var view=form._view;");
 			}
 			if (inOnRemovedEventHandler) {
-				code.append("},bizRemovedForServer:function(form,item,value){");
+				code.append("},bizRemovedForServer:function(form,item,value){var view=form._view;");
 			}
 		}
 		
@@ -2124,13 +2168,10 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			if (visitingListMembership) {
-				code.append("this._view.rerender();");
-			}
-			else {
+			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
-				code.append("form._view.rerender();");
 			}
+			code.append("view.rerender();");
 		}
 
 		@Override
@@ -2138,9 +2179,11 @@ pickListFields:[{name:'value'}],
 														boolean parentVisible,
 														boolean parentEnabled)
 		throws MetaDataException {
-			writeOutServerSideCallbackMethodIfNecessary();
+			if (! eventsWithNoForm) {
+				writeOutServerSideCallbackMethodIfNecessary();
+			}
 			Action action = view.getAction(server.getActionName());
-			code.append("form._view.doAction('").append(server.getActionName()).append("',");
+			code.append("view.doAction('").append(server.getActionName()).append("',");
 			code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 		}
 
@@ -2149,7 +2192,7 @@ pickListFields:[{name:'value'}],
 													boolean parentVisible,
 													boolean parentEnabled)
 		throws MetaDataException {
-			code.append("form._view.setDisabled('").append(setDisabled.getBinding().replace('.', '_'));
+			code.append("view.setDisabled('").append(setDisabled.getBinding().replace('.', '_'));
 			code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
 		}
 
@@ -2158,7 +2201,7 @@ pickListFields:[{name:'value'}],
 													boolean parentVisible,
 													boolean parentEnabled)
 		throws MetaDataException {
-			code.append("form._view.setInvisible('").append(setInvisible.getBinding().replace('.', '_'));
+			code.append("view.setInvisible('").append(setInvisible.getBinding().replace('.', '_'));
 			code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
 		}
 
@@ -2167,7 +2210,7 @@ pickListFields:[{name:'value'}],
 													boolean parentVisible,
 													boolean parentEnabled)
 		throws MetaDataException {
-			code.append("form._view.toggleDisabled('").append(toggleDisabled.getBinding().replace('.', '_'));
+			code.append("view.toggleDisabled('").append(toggleDisabled.getBinding().replace('.', '_'));
 			code.append("');");
 		}
 
