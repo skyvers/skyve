@@ -60,9 +60,12 @@ import org.skyve.wildcat.metadata.view.container.form.Form;
 import org.skyve.wildcat.metadata.view.container.form.FormColumn;
 import org.skyve.wildcat.metadata.view.container.form.FormItem;
 import org.skyve.wildcat.metadata.view.container.form.FormRow;
+import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
+import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
+import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
@@ -1856,35 +1859,57 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnEditedEventHandler(Lookup lookup,
+	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitedOnEditedEventHandler(Lookup lookup,
+	public void visitedOnAddedEventHandler(Addable addable,
+											boolean parentVisible,
+											boolean parentEnabled)
+	throws MetaDataException {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
+	}
+
+	@Override
+	public void visitOnEditedEventHandler(Editable editable,
+											boolean parentVisible,
+											boolean parentEnabled)
+	throws MetaDataException {
+		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
+	}
+
+	@Override
+	public void visitedOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
 												boolean parentEnabled)
 	throws MetaDataException {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitOnAddedEventHandler(Lookup lookup,
+	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override
-	public void visitedOnAddedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled)
+	public void visitedOnRemovedEventHandler(Removable removable,
+												boolean parentVisible,
+												boolean parentEnabled)
 	throws MetaDataException {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
+		// TODO - need to account for data/list grids in here
 	}
 
 	@Override

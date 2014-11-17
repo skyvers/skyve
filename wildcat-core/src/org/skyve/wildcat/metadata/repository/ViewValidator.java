@@ -36,9 +36,12 @@ import org.skyve.wildcat.metadata.view.container.form.Form;
 import org.skyve.wildcat.metadata.view.container.form.FormColumn;
 import org.skyve.wildcat.metadata.view.container.form.FormItem;
 import org.skyve.wildcat.metadata.view.container.form.FormRow;
+import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
+import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
+import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
@@ -1701,17 +1704,45 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnEditedEventHandler(Lookup lookup,
+	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		validateEventHandlerSequence(lookup.getEditedActions(),
-										"[onEdited] event handler for lookup with binding " + 
-											lookup.getBinding());
+		String widgetIdentifier = "Unknown widget";
+		if (addable instanceof Bound) {
+			widgetIdentifier = "[onAdded] event handler for widget with binding " + ((Bound) addable).getBinding();
+		}
+		else if (addable instanceof ListGrid) {
+			widgetIdentifier = "[onAdded] event handler for list grid with query " + ((ListGrid) addable).getQueryName();
+		}
+		validateEventHandlerSequence(addable.getAddedActions(), widgetIdentifier);
 	}
 
 	@Override
-	public void visitedOnEditedEventHandler(Lookup lookup,
+	public void visitedOnAddedEventHandler(Addable addable,
+											boolean parentVisible,
+											boolean parentEnabled)
+	throws MetaDataException {
+		// nothing to do here
+	}
+
+	@Override
+	public void visitOnEditedEventHandler(Editable editable,
+											boolean parentVisible,
+											boolean parentEnabled)
+	throws MetaDataException {
+		String widgetIdentifier = "Unknown widget";
+		if (editable instanceof Bound) {
+			widgetIdentifier = "[onEdited] event handler for widget with binding " + ((Bound) editable).getBinding();
+		}
+		else if (editable instanceof ListGrid) {
+			widgetIdentifier = "[onEdited] event handler for list grid with query " + ((ListGrid) editable).getQueryName();
+		}
+		validateEventHandlerSequence(editable.getEditedActions(), widgetIdentifier);
+	}
+
+	@Override
+	public void visitedOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
 												boolean parentEnabled)
 	throws MetaDataException {
@@ -1719,19 +1750,24 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnAddedEventHandler(Lookup lookup,
+	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		validateEventHandlerSequence(lookup.getAddedActions(),
-										"[onAdded] event handler for lookup with binding " + 
-											lookup.getBinding());
+		String widgetIdentifier = "Unknown widget";
+		if (removable instanceof Bound) {
+			widgetIdentifier = "[onRemoved] event handler for widget with binding " + ((Bound) removable).getBinding();
+		}
+		else if (removable instanceof ListGrid) {
+			widgetIdentifier = "[onRemoved] event handler for list grid with query " + ((ListGrid) removable).getQueryName();
+		}
+		validateEventHandlerSequence(removable.getRemovedActions(), widgetIdentifier);
 	}
 
 	@Override
-	public void visitedOnAddedEventHandler(Lookup lookup,
-											boolean parentVisible,
-											boolean parentEnabled)
+	public void visitedOnRemovedEventHandler(Removable removable,
+												boolean parentVisible,
+												boolean parentEnabled)
 	throws MetaDataException {
 		// nothing to do here
 	}

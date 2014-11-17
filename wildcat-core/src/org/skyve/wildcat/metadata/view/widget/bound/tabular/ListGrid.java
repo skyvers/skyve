@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -14,6 +17,14 @@ import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.event.Addable;
+import org.skyve.wildcat.metadata.view.event.Editable;
+import org.skyve.wildcat.metadata.view.event.EventAction;
+import org.skyve.wildcat.metadata.view.event.Removable;
+import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
+import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
+import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.wildcat.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -33,8 +44,12 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableRemoveConditionName",
 							"queryName", 
 							"continueConversation",
+							"addedActions",
+							"editedActions",
+							"removedActions",							
 							"parameters"})
-public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible, Filterable, DisableableCRUDGrid {
+public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible, Filterable, DisableableCRUDGrid,
+									Addable, Editable, Removable {
 	/**
 	 * For Serialization
 	 */
@@ -58,6 +73,10 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 	private String queryName;
 	private boolean continueConversation;
 	
+	private List<EventAction> addedActions = new ArrayList<>();
+	private List<EventAction> editedActions = new ArrayList<>();
+	private List<EventAction> removedActions = new ArrayList<>();
+
 	private List<FilterParameter> parameters = new ArrayList<>();
 	
 	public String getQueryName() {
@@ -204,5 +223,35 @@ public class ListGrid implements MetaData, RelativeSize, Disableable, Invisible,
 	@XmlAttribute(name = "disableRemove", required = false)
 	public void setDisableRemoveConditionName(String disableRemoveConditionName) {
 		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
+	}
+	
+	@Override
+	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onAddedHandlers")
+	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
+						@XmlElementRef(type = ServerSideActionEventAction.class),
+						@XmlElementRef(type = SetDisabledEventAction.class),
+						@XmlElementRef(type = SetInvisibleEventAction.class)})
+	public List<EventAction> getAddedActions() {
+		return addedActions;
+	}
+
+	@Override
+	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onEditedHandlers")
+	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
+						@XmlElementRef(type = ServerSideActionEventAction.class),
+						@XmlElementRef(type = SetDisabledEventAction.class),
+						@XmlElementRef(type = SetInvisibleEventAction.class)})
+	public List<EventAction> getEditedActions() {
+		return editedActions;
+	}
+
+	@Override
+	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onDeletedHandlers")
+	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
+						@XmlElementRef(type = ServerSideActionEventAction.class),
+						@XmlElementRef(type = SetDisabledEventAction.class),
+						@XmlElementRef(type = SetInvisibleEventAction.class)})
+	public List<EventAction> getRemovedActions() {
+		return removedActions;
 	}
 }

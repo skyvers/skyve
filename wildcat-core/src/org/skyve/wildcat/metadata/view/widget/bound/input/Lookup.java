@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.wildcat.metadata.view.event.Addable;
+import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
@@ -34,7 +36,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"editedActions",
 							"addedActions",
 							"parameters"})
-public class Lookup extends InputWidget implements Filterable {
+public class Lookup extends InputWidget implements Filterable, Addable, Editable {
 	/**
 	 * For Serialization
 	 */
@@ -126,6 +128,7 @@ public class Lookup extends InputWidget implements Filterable {
 		return clearedActions;
 	}
 
+	@Override
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onEditedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
@@ -135,6 +138,7 @@ public class Lookup extends InputWidget implements Filterable {
 		return editedActions;
 	}
 
+	@Override
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onAddedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),

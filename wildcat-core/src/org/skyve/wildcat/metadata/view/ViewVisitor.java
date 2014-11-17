@@ -23,9 +23,12 @@ import org.skyve.wildcat.metadata.view.container.form.Form;
 import org.skyve.wildcat.metadata.view.container.form.FormColumn;
 import org.skyve.wildcat.metadata.view.container.form.FormItem;
 import org.skyve.wildcat.metadata.view.container.form.FormRow;
+import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
+import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
+import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
@@ -409,19 +412,27 @@ public abstract class ViewVisitor extends ActionVisitor {
 													boolean parentVisible,
 													boolean parentEnabled)
 	throws MetaDataException;
-	public abstract void visitOnEditedEventHandler(Lookup lookup,
+	public abstract void visitOnAddedEventHandler(Addable addable,
 													boolean parentVisible,
 													boolean parentEnabled)
 	throws MetaDataException;
-	public abstract void visitedOnEditedEventHandler(Lookup lookup,
+	public abstract void visitedOnAddedEventHandler(Addable addable,
 														boolean parentVisible,
 														boolean parentEnabled)
 	throws MetaDataException;
-	public abstract void visitOnAddedEventHandler(Lookup lookup,
+	public abstract void visitOnEditedEventHandler(Editable editable,
 													boolean parentVisible,
 													boolean parentEnabled)
 	throws MetaDataException;
-	public abstract void visitedOnAddedEventHandler(Lookup lookup,
+	public abstract void visitedOnEditedEventHandler(Editable editable,
+														boolean parentVisible,
+														boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitOnRemovedEventHandler(Removable removable,
+													boolean parentVisible,
+													boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitedOnRemovedEventHandler(Removable removable,
 														boolean parentVisible,
 														boolean parentEnabled)
 	throws MetaDataException;
@@ -600,6 +611,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 			ListGrid grid = (ListGrid) widget;
 			visitListGrid(grid, parentVisible, parentEnabled);
 			visitFilterable(grid, parentVisible, parentEnabled);
+			visitAddableActions(grid, parentVisible, parentEnabled);
+			visitEditableActions(grid, parentVisible, parentEnabled);
+			visitRemovableActions(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof DataGrid) {
@@ -681,6 +695,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 					visitedDataGridContainerColumn(containerColumn, parentVisible, parentEnabled);
 				}
 			}
+			visitAddableActions(grid, parentVisible, parentEnabled);
+			visitEditableActions(grid, parentVisible, parentEnabled);
+			visitRemovableActions(grid, parentVisible, parentEnabled);
 			visitedDataGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof PickList) {
@@ -896,19 +913,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 										boolean parentVisible,
 										boolean parentEnabled)
 	throws MetaDataException {
-		List<EventAction> actions = lookup.getEditedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
-			visitOnEditedEventHandler(lookup, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
-			visitedOnEditedEventHandler(lookup, parentVisible, parentEnabled);
-		}
-		actions = lookup.getAddedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
-			visitOnAddedEventHandler(lookup, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
-			visitedOnAddedEventHandler(lookup, parentVisible, parentEnabled);
-		}
-		actions = lookup.getPickedActions();
+		visitAddableActions(lookup, parentVisible, parentEnabled);
+		visitEditableActions(lookup, parentVisible, parentEnabled);
+
+		List<EventAction> actions = lookup.getPickedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnPickedEventHandler(lookup, parentVisible, parentEnabled);
 			visitActions(actions, parentVisible, parentEnabled);
@@ -919,6 +927,42 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitOnClearedEventHandler(lookup, parentVisible, parentEnabled);
 			visitActions(actions, parentVisible, parentEnabled);
 			visitedOnClearedEventHandler(lookup, parentVisible, parentEnabled);
+		}
+	}
+
+	private void visitAddableActions(Addable addable,
+										boolean parentVisible,
+										boolean parentEnabled) 
+	throws MetaDataException {
+		List<EventAction> actions = addable.getAddedActions();
+		if ((actions != null) && (! actions.isEmpty())) {
+			visitOnAddedEventHandler(addable, parentVisible, parentEnabled);
+			visitActions(actions, parentVisible, parentEnabled);
+			visitedOnAddedEventHandler(addable, parentVisible, parentEnabled);
+		}
+	}
+
+	private void visitEditableActions(Editable editable,
+										boolean parentVisible,
+										boolean parentEnabled) 
+	throws MetaDataException {
+		List<EventAction> actions = editable.getEditedActions();
+		if ((actions != null) && (! actions.isEmpty())) {
+			visitOnEditedEventHandler(editable, parentVisible, parentEnabled);
+			visitActions(actions, parentVisible, parentEnabled);
+			visitedOnEditedEventHandler(editable, parentVisible, parentEnabled);
+		}
+	}
+
+	private void visitRemovableActions(Removable removable,
+										boolean parentVisible,
+										boolean parentEnabled) 
+	throws MetaDataException {
+		List<EventAction> actions = removable.getRemovedActions();
+		if ((actions != null) && (! actions.isEmpty())) {
+			visitOnRemovedEventHandler(removable, parentVisible, parentEnabled);
+			visitActions(actions, parentVisible, parentEnabled);
+			visitedOnRemovedEventHandler(removable, parentVisible, parentEnabled);
 		}
 	}
 
