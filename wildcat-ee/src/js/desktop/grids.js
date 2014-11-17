@@ -60,10 +60,16 @@ BizGrid.addMethods({
 								me._eventRowNum = null;
 								me._eventColumnNum = null;
 								me._eventRecord = null;
+
 								if (me._view) { // could be data grid or embedded list grid
 									if (me._b) { // is a data grid
 										me._view._vm.setValue('_changed', true); // make the view dirty
 										me._view._vm.setValue('_apply', true); // post view changes before zooming
+									}
+
+									// run any registered event callbacks
+									if (me.bizRemoved) {
+										me.bizRemoved();
 									}
 								}
 							});
@@ -150,6 +156,8 @@ BizListGrid.addProperties({
 // "_view" - the view that owns this BizListGrid
 // AND
 // "contConv" - true = use the owning view's conversation for updates, false = start a new conversation when editing
+// AND optionally
+// bizAdded, bizEdited, bizRemoved event callback functions
 BizListGrid.addMethods({
 	initWidget: function(config) { // has 4 properties - see above
 		this.Super("initWidget", arguments);
@@ -316,12 +324,6 @@ BizListGrid.addMethods({
 					// Ensure that embedded list grids use their parent view's conversation to edit data
 					// in the same way as when zooming in
 					if (me._view) { // this is an embedded list grid
-						if (me.grid.saveRequestProperties) {} else {
-							me.grid.saveRequestProperties = {};
-						}
-						if (me.grid.saveRequestProperties.params) {} else {
-							me.grid.saveRequestProperties.params = {};
-						}
 						if (config && config.contConv) {
 							var instance = me._view.gather(false); // don't validate
 							if (instance._changed || me._view._vm.valuesHaveChanged()) {
@@ -331,9 +333,18 @@ BizListGrid.addMethods({
 								);
 							}
 							else {
+								if (me.grid.saveRequestProperties) {} else {
+									me.grid.saveRequestProperties = {};
+								}
+								if (me.grid.saveRequestProperties.params) {} else {
+									me.grid.saveRequestProperties.params = {};
+								}
 								me.grid.saveRequestProperties.params._c = instance._c;
 								me.grid.startEditing(me._eventRowNum, me._eventColNum);
 							}
+						}
+						else {
+							me.grid.startEditing(me._eventRowNum, me._eventColNum);
 						}
 					}
 					else {
@@ -943,6 +954,11 @@ BizListGrid.addMethods({
 					me.deleteSelectionButton.setDisabled(true);
 				}
 				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
+			},
+			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
+				if (me.bizEdited) {
+					me.bizEdited();
+				}
 			},
 			// override to put summaryRow into the request parameters
 			// This ensures that the server sends back an extra summary row
@@ -1586,11 +1602,15 @@ BizDataGrid.addMethods({
 			canEditCell: function(rowNum, colNum) {
 				return ! me._disabled;
 			},
-			
+
 			// set the view dirty on the client-side when an edit is made in the data grid
 			editComplete: function (rowNum, colNum, newValues, oldValues, editCompletionEvent) {
 				me._view._vm.setValue('_changed', true); // make the view dirty
 				me._view._vm.setValue('_apply', true); // post view changes before zooming
+
+				if (me.bizEdited) {
+					me.bizEdited();
+				}
 			}
 
 /*
@@ -1727,6 +1747,10 @@ BizDataGrid.addMethods({
 	},
 	
 	add: function() {
+//		if (this.bizAdded) {
+//			
+//		}
+
 //		var me = this;
 //		RPCManager.sendRequest({
 //			showPrompt: true,

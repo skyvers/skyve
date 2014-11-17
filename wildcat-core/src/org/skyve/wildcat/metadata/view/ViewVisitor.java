@@ -611,7 +611,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 			ListGrid grid = (ListGrid) widget;
 			visitListGrid(grid, parentVisible, parentEnabled);
 			visitFilterable(grid, parentVisible, parentEnabled);
-			visitAddableActions(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
 			visitRemovableActions(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);

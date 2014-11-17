@@ -553,26 +553,26 @@
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="verhoeffCheckDigit"/>
       <xs:enumeration value="url"/>
-      <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="email"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="isinCheckDigit"/>
       <xs:enumeration value="isbnCheckDigit"/>
       <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="ipAddress"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="variant"/>
-      <xs:enumeration value="constant"/>
       <xs:enumeration value="dynamic"/>
+      <xs:enumeration value="constant"/>
+      <xs:enumeration value="variant"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -593,16 +593,16 @@
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="child"/>
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="customer"/>
       <xs:enumeration value="dataGroup"/>
       <xs:enumeration value="user"/>
+      <xs:enumeration value="customer"/>
       <xs:enumeration value="global"/>
     </xs:restriction>
   </xs:simpleType>

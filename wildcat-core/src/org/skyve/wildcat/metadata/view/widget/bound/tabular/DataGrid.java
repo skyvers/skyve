@@ -38,8 +38,13 @@ import org.skyve.wildcat.util.XMLUtil;
 							"addedActions",
 							"editedActions",
 							"removedActions"})
-public class DataGrid extends TabularWidget implements Identifiable, Disableable, Editable, DisableableCRUDGrid, 
-														Addable, org.skyve.wildcat.metadata.view.event.Editable, Removable {
+public class DataGrid extends TabularWidget implements Identifiable,
+														Disableable,
+														Editable,
+														DisableableCRUDGrid, 
+														Addable,
+														org.skyve.wildcat.metadata.view.event.Editable,
+														Removable {
 	/**
 	 * For Serialization
 	 */

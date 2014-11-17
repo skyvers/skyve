@@ -18,33 +18,33 @@
 
   <xs:simpleType name="converterName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
       <xs:enumeration value="HH_MI_SS"/>
-      <xs:enumeration value="Decimal2TwoDecimalPlacesPercentage"/>
-      <xs:enumeration value="SimplePercentage"/>
-      <xs:enumeration value="Decimal5OneDecimalPlace"/>
-      <xs:enumeration value="HH24_MI_SS"/>
-      <xs:enumeration value="Decimal5TimeDuration"/>
-      <xs:enumeration value="Decimal2DollarsAndCents"/>
-      <xs:enumeration value="DD_MMM_YYYY"/>
-      <xs:enumeration value="HH24_MI"/>
-      <xs:enumeration value="Decimal5Integer"/>
-      <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
       <xs:enumeration value="DD_MMM_YYYY_HH24_MI_SS"/>
-      <xs:enumeration value="Decimal5DollarsAndCents"/>
-      <xs:enumeration value="Decimal2OneDecimalPlace"/>
-      <xs:enumeration value="Decimal2IntegerPercentage"/>
-      <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
-      <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
-      <xs:enumeration value="DD_MM_YYYY"/>
-      <xs:enumeration value="Decimal5TwoDecimalPlaces"/>
       <xs:enumeration value="Decimal5TwoDecimalPlacesPercentage"/>
-      <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
-      <xs:enumeration value="HH_MI"/>
+      <xs:enumeration value="Decimal2DollarsAndCents"/>
+      <xs:enumeration value="Decimal5TimeDuration"/>
+      <xs:enumeration value="Decimal5Integer"/>
+      <xs:enumeration value="SimplePercentage"/>
+      <xs:enumeration value="Decimal2TwoDecimalPlacesPercentage"/>
       <xs:enumeration value="DD_MM_YYYY_HH_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI_SS"/>
       <xs:enumeration value="DD_MM_YYYY_HH24_MI_SS"/>
+      <xs:enumeration value="Decimal5TwoDecimalPlaces"/>
       <xs:enumeration value="Decimal2Integer"/>
+      <xs:enumeration value="HH24_MI_SS"/>
+      <xs:enumeration value="Decimal2OneDecimalPlace"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH24_MI"/>
+      <xs:enumeration value="DD_MMM_YYYY_HH_MI"/>
+      <xs:enumeration value="HH_MI"/>
+      <xs:enumeration value="DD_MM_YYYY"/>
       <xs:enumeration value="Decimal5IntegerPercentage"/>
+      <xs:enumeration value="Decimal5DollarsAndCents"/>
+      <xs:enumeration value="DD_MMM_YYYY"/>
+      <xs:enumeration value="Decimal5OneDecimalPlace"/>
+      <xs:enumeration value="DD_MM_YYYY_HH_MI_SS"/>
+      <xs:enumeration value="DD_MM_YYYY_HH24_MI"/>
+      <xs:enumeration value="HH24_MI"/>
+      <xs:enumeration value="Decimal2IntegerPercentage"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -57,42 +57,42 @@
 
   <xs:simpleType name="filterOperator">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="notEqual"/>
-      <xs:enumeration value="nullOrLessEqual"/>
-      <xs:enumeration value="isNull"/>
       <xs:enumeration value="greater"/>
-      <xs:enumeration value="notLike"/>
-      <xs:enumeration value="nullOrNotEqual"/>
-      <xs:enumeration value="nullOrLess"/>
-      <xs:enumeration value="like"/>
-      <xs:enumeration value="nullOrEqual"/>
       <xs:enumeration value="nullOrNotLike"/>
-      <xs:enumeration value="equal"/>
-      <xs:enumeration value="nullOrGreaterEqual"/>
-      <xs:enumeration value="notNull"/>
-      <xs:enumeration value="lessEqual"/>
-      <xs:enumeration value="nullOrLike"/>
+      <xs:enumeration value="notEqual"/>
+      <xs:enumeration value="nullOrEqual"/>
       <xs:enumeration value="greaterEqual"/>
       <xs:enumeration value="nullOrGreater"/>
       <xs:enumeration value="less"/>
+      <xs:enumeration value="notNull"/>
+      <xs:enumeration value="like"/>
+      <xs:enumeration value="nullOrGreaterEqual"/>
+      <xs:enumeration value="isNull"/>
+      <xs:enumeration value="lessEqual"/>
+      <xs:enumeration value="nullOrNotEqual"/>
+      <xs:enumeration value="equal"/>
+      <xs:enumeration value="nullOrLike"/>
+      <xs:enumeration value="nullOrLess"/>
+      <xs:enumeration value="notLike"/>
+      <xs:enumeration value="nullOrLessEqual"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="reportFormat">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="xhtml"/>
-      <xs:enumeration value="rtf"/>
+      <xs:enumeration value="txt"/>
+      <xs:enumeration value="xls"/>
+      <xs:enumeration value="csv"/>
       <xs:enumeration value="docx"/>
+      <xs:enumeration value="pptx"/>
+      <xs:enumeration value="html"/>
+      <xs:enumeration value="rtf"/>
+      <xs:enumeration value="xhtml"/>
+      <xs:enumeration value="xml"/>
+      <xs:enumeration value="odt"/>
+      <xs:enumeration value="xlsx"/>
       <xs:enumeration value="pdf"/>
       <xs:enumeration value="ods"/>
-      <xs:enumeration value="csv"/>
-      <xs:enumeration value="xml"/>
-      <xs:enumeration value="xls"/>
-      <xs:enumeration value="pptx"/>
-      <xs:enumeration value="xlsx"/>
-      <xs:enumeration value="odt"/>
-      <xs:enumeration value="txt"/>
-      <xs:enumeration value="html"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

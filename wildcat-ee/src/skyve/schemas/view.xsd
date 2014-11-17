@@ -1183,6 +1183,42 @@
             <xs:element ref="tns:boundColumn"/>
             <xs:element ref="tns:containerColumn"/>
           </xs:choice>
+          <xs:element name="onAddedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onRemovedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="inline" type="xs:boolean"/>
@@ -1249,6 +1285,30 @@
 
   <xs:complexType name="listGrid">
     <xs:sequence>
+      <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element ref="tns:rerender"/>
+              <xs:element ref="tns:server"/>
+              <xs:element ref="tns:setDisabled"/>
+              <xs:element ref="tns:setInvisible"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="onDeletedHandlers" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element ref="tns:rerender"/>
+              <xs:element ref="tns:server"/>
+              <xs:element ref="tns:setDisabled"/>
+              <xs:element ref="tns:setInvisible"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
@@ -1268,49 +1328,49 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="list"/>
-      <xs:enumeration value="pick"/>
+      <xs:enumeration value="create"/>
       <xs:enumeration value="edit"/>
       <xs:enumeration value="params"/>
-      <xs:enumeration value="create"/>
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="pick"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
       <xs:enumeration value="left"/>
-      <xs:enumeration value="centre"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Add"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="New"/>
       <xs:enumeration value="Remove"/>
       <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="Upload"/>
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="Save"/>
       <xs:enumeration value="Delete"/>
-      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Add"/>
       <xs:enumeration value="OK"/>
+      <xs:enumeration value="Save"/>
+      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="BizExport"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="self"/>
-      <xs:enumeration value="blankFrame"/>
-      <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="self"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
