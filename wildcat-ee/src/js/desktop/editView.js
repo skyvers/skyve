@@ -177,8 +177,11 @@ isc.EditView.addMethods({
 	// re-render the edit view.
 	// this is NOT refresh/reload - but just re-evaluate all conditions server-side and render the form again
 	// this is called from windowStack
-	rerender: function(successCallback) { // a function to callback on when the operation is successful
-		this.saveInstance(null, successCallback);
+	rerender: function() {
+		var instance = this.gather(false); // no validation
+		if (instance) {
+			this._editInstance('ZoomOut', instance.bizId, this._b, instance._c, this._openedFromDataGrid);
+		}
 	},
 	
 	newInstance: function(newParams, // a map of parameter names to values used to seed the new instance - can be null or undefined
@@ -259,8 +262,6 @@ isc.EditView.addMethods({
 			this.hide();
 			this._b = formBinding;
 
-			var me = this;
-			
 			var params = {bizId: bizId, _mod: this._mod, _doc: this._doc, _ecnt: this._ecnt, _ccnt: this._ccnt};
 			if (action) {
 				params._a = action;
@@ -272,6 +273,7 @@ isc.EditView.addMethods({
 				params._c = parentContext;
 			}
 			
+			var me = this;
 			this._vm.fetchData(
 				null, // no criteria required
 				function(dsResponse, // metadata about the returned data
@@ -292,6 +294,11 @@ isc.EditView.addMethods({
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
+					}
+
+					// ensure that zoom out of a child view of a "new" document refreshes the parent view
+					if (bizId) {} else {
+						me._vm.setValue('_apply', true);
 					}
 
 					me.show();
@@ -370,21 +377,13 @@ isc.EditView.addMethods({
 								}
 							}
 
-							// if we have zoomed in from a grid, remove the grid data from the openerValues
-							// we just sent our new updates to the server anyway, and other values were posted
-							// to the server from the opener on the zoom in navigation action.
-							// Removing them makes sure that the old values still present in the opener aren't
-							// sent and applied to the server-side context object.
+							
 							var openerValue = openerValues[childBinding];
-							if (isc.isAn.Array(openerValue)) {
-								// Can't use popoff(true) to rerender the opener view as this will post the original forms values
-								// We need the potentially updated object values from the server to be displayed via a 
-								// fetch operation through editInstance().
-								WindowStack.popoff(false);
-								opener._editInstance('ZoomOut', openerValues.bizId, parentBinding, openerValues._c, opener._openedFromDataGrid);
+							if (isc.isAn.Array(openerValue)) { // we have zoomed in from a grid, so refresh the parent
+								WindowStack.popoff(true);
 								return;
 							}
-							else {
+							else { // we have zoomed in from a lookup description, so call the event
 								openerValues[childBinding] = data.bizId;
 								lookupDescription = opener._vm.getItem(childBinding);
 								if (lookupDescription) {
@@ -425,11 +424,7 @@ isc.EditView.addMethods({
 																					data.bizId);
 										}
 										else {
-											// Can't use popoff(true) to rerender the opener view as this will post the original forms values
-											// We need the potentially updated object values from the server to be displayed via a 
-											// fetch operation through editInstance().
-											WindowStack.popoff(false);
-											opener._editInstance('ZoomOut', openerValues.bizId, parentBinding, openerValues._c, opener._openedFromDataGrid);
+											WindowStack.popoff(true);
 										}
 									}
 									else {
@@ -440,11 +435,7 @@ isc.EditView.addMethods({
 																					data.bizId);
 										}
 										else {
-											// Can't use popoff(true) to rerender the opener view as this will post the original forms values
-											// We need the potentially updated object values from the server to be displayed via a 
-											// fetch operation through editInstance().
-											WindowStack.popoff(false);
-											opener._editInstance('ZoomOut', openerValues.bizId, parentBinding, openerValues._c, opener._openedFromDataGrid);
+											WindowStack.popoff(true);
 										}
 									}
 								}
@@ -1193,6 +1184,7 @@ BizButton.addMethods({
 				var gridBinding = this._view._b;
 				gridBinding = gridBinding.substring(gridBinding.lastIndexOf('.') + 1, 
 														gridBinding.lastIndexOf('ElementById'));
+
 				var opener = WindowStack.getOpener();
 				if (opener) {
 					var openerListGrids = opener._grids[gridBinding];
@@ -1200,10 +1192,16 @@ BizButton.addMethods({
 						for (var openerListGridID in openerListGrids) {
 							var openerListGrid = openerListGrids[openerListGridID];
 							openerListGrid.remove(bizId);
+							if (openerListGrid._view) { // could be data grid or embedded list grid
+								// run any registered event callbacks
+								if (openerListGrid.bizRemoved) {
+									openerListGrid.bizRemoved();
+								}
+							}
 						}
 					}
 				}
-				WindowStack.popoff(false); // dont rerender
+				WindowStack.popoff(false); // don't rerender
 			}
 			else if (this.type == "P") { // Invoke a report
 				ReportDialog.popupReport(this._view, this.params);
@@ -1212,7 +1210,8 @@ BizButton.addMethods({
 				var me = this;
 				// Popup on the mouse click event - to default popup blockers
 				BizUtil.popupFrame('images/blank.gif', 'Export', 800, 630);
-				me._view.rerender(function() {
+				// apply changes to current form before exporting
+				me._view.saveInstance(null, function() {
 					var instance = me._view.gather(false); // don't validate
 					if (instance) {
 						// window is already popped up, 
@@ -1240,10 +1239,11 @@ BizButton.addMethods({
 				}
 			}
 			else if (this.type == "U") { // Upload Action
-				var instance = this._view.gather(false); // don't validate - rerender() call will validate below
+				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {
 					var me = this;
-					this._view.rerender(function() {
+					// apply changes to current form before uploading
+					this._view.saveInstance(null, function() {
 						var url = 'fileUpload.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {
