@@ -1505,14 +1505,21 @@ BizLookupDescriptionItem.addMethods({
 										if (instance) {} else {
 											isc.warn('You cannot zoom in until you fix the problems found');
 										}
-										me._view.rerender(function() {
-											me.setRequired(required); // reset form item's required-ness
 
-											// No need to validate here as we just validated during the rerender operation above
-											var instance = me._view.gather(false);
+										if (instance._apply || me._view._vm.valuesHaveChanged()) {
+											delete instance._apply;
+											// apply changes to current form before zoom in
+											me._view.saveInstance(null, function() {
+												me.setRequired(required); // reset form item's required-ness
+												WindowStack.popup(fromRect, "New", false, [view]);
+												view.newInstance(newParams, viewBinding, instance._c, false);
+											});
+										}
+										else {
+											me.setRequired(required); // reset form item's required-ness
 											WindowStack.popup(fromRect, "New", false, [view]);
 											view.newInstance(newParams, viewBinding, instance._c, false);
-										});
+										}
 									}
 									else {
 										// Validate here so we can put out the zoom message if required
@@ -1520,16 +1527,25 @@ BizLookupDescriptionItem.addMethods({
 										if (instance) {} else {
 											isc.warn('You cannot zoom in until you fix the problems found');
 										}
-										me._view.rerender(function() {
-											// No need to validate here as we just validated during the rerender operation above
-											var instance = me._view.gather(false);
+										
+										if (instance._apply || me._view._vm.valuesHaveChanged()) {
+											delete instance._apply;
+											// apply changes to current form before zoom in
+											me._view.saveInstance(null, function() {
+												WindowStack.popup(fromRect, "Edit", false, [view]);
+												view.editInstance(me.getValue(),
+																	viewBinding,
+																	instance._c,
+																	false);
+											});
+										}
+										else {
 											WindowStack.popup(fromRect, "Edit", false, [view]);
-											// apply changes on parent form
 											view.editInstance(me.getValue(),
 																viewBinding,
 																instance._c,
 																false);
-										});
+										}
 									}
 								});
 	}

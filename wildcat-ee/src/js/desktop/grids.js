@@ -1364,8 +1364,8 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 											// if there are any changes in the form, apply them
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
-												// apply changes to curent form before zoom in
-												me._view.rerender(function() {
+												// apply changes to current form before zoom in
+												me._view.saveInstance(null, function() {
 													// now zoom in, after changes applied
 													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 												});
@@ -1693,13 +1693,14 @@ BizDataGrid.addMethods({
 									var instance = me._view.gather(true); // validate
 									if (instance) { // no form errors
 										var gridRect = me.grid.body.getPageRect();
-										// these next 2 must be evaluated before a rerender occurs
+										// these next 2 must be evaluated before a repaint occurs
 										var rowTop = me.grid.body.getRowPageTop(me._eventRowNum);
 										var rowHeight = me.grid.body.getRowSize(me._eventRowNum);
 
 										if (instance._apply || me._view._vm.valuesHaveChanged()) {
 											delete instance._apply;
-											me._view.rerender(function() {
+											// apply changes to current form before zoom in
+											me._view.saveInstance(null, function() {
 												me._zoom(zoomToNew,
 															zoomToBizId,
 															viewBinding,
