@@ -303,7 +303,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		// Encode the context bean
 		String webId = webContextToReference.getWebId();
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
-		WebUtil.putConversationInCache(webContextToReference);
 		
 		// put the view title in
 		result.put("_title", 

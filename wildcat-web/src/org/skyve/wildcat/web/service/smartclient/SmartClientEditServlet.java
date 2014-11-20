@@ -581,6 +581,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																	false);
 		manipulator.visit();
 		webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
+		WebUtil.putConversationInCache(webContext);
 		message.append(manipulator.toJSON(webContext));
 		message.append("]}}");
 
@@ -781,6 +782,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																	false);
 		manipulator.visit();
 		result.append("{response:{status:0,data:");
+		WebUtil.putConversationInCache(webContext);
 		result.append(manipulator.toJSON(webContext));
 		result.append("}}");
 		
@@ -836,6 +838,8 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 		
 		persistence.delete(processDocument, persistentBeanToDelete);
+
+		WebUtil.putConversationInCache(webContext);
 
 		pw.append("{response:{status:0}}");
 	}
