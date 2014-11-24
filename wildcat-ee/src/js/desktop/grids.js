@@ -54,6 +54,13 @@ BizGrid.addMethods({
 					"Do you want to delete/remove the selected rows?",
 					function(value) {
 						if (value) {
+							var dsRequest = {};
+							
+							if (me._view) {
+								var instance = me._view.gather(false);
+								dsRequest.params = {_c: instance._c};
+							}
+							
 							// There are no DSCallback arguments here even though they are documented.
 							me.grid.removeSelectedData(function() {
 								me.grid.selectionChanged(null, false);
@@ -72,7 +79,8 @@ BizGrid.addMethods({
 										me.bizRemoved();
 									}
 								}
-							});
+							},
+							dsRequest);
 						}
 					}
 				);

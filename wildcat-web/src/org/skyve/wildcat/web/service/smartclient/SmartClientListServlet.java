@@ -112,6 +112,7 @@ public class SmartClientListServlet extends HttpServlet {
 					if (webContext != null) {
 			        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
+			            persistence.setForThread();
 			        }
 			        // if no conversation to use, start a new one
 			        if (persistence == null) {
