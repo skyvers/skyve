@@ -276,7 +276,8 @@ BizListGrid.addMethods({
 					if (contConv) {
 						var changedOnServer = me._view.gather(false)._changed;
 						if (changedOnServer || me._view._vm.valuesHaveChanged()) {
-							isc.say("There are unsaved changes.  Save your changes first.",
+							isc.say('There are unsaved changes in the ' + me._view._singular + 
+											'.  Save your changes to the ' + me._view._singular + ' first.',
 										null,
 										{title:'Unsaved Changes!'}
 							);
@@ -307,7 +308,8 @@ BizListGrid.addMethods({
 				if (config && config.contConv) {
 					var changedOnServer = me._view.gather(false)._changed;
 					if (changedOnServer || me._view._vm.valuesHaveChanged()) {
-						isc.say("There are unsaved changes.  Save your changes first.",
+						isc.say('There are unsaved changes in the ' + me._view._singular + 
+										'.  Save your changes to the ' + me._view._singular + ' first.',
 									null,
 									{title:'Unsaved Changes!'}
 						);
@@ -335,7 +337,8 @@ BizListGrid.addMethods({
 						if (config && config.contConv) {
 							var instance = me._view.gather(false); // don't validate
 							if (instance._changed || me._view._vm.valuesHaveChanged()) {
-								isc.say("There are unsaved changes.  Save your changes first.",
+								isc.say('There are unsaved changes in the ' + me._view._singular + 
+												'.  Save your changes to the ' + me._view._singular + ' first.',
 											null,
 											{title:'Unsaved Changes!'}
 								);

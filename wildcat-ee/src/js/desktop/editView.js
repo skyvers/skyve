@@ -1152,7 +1152,7 @@ BizButton.addMethods({
 				var me = this;
 				var changedOnServer = this._view.gather(false)._changed;
 				if (changedOnServer || this._view._vm.valuesHaveChanged()) {
-					isc.ask("There are unsaved changes.  Do you wish to cancel?",
+					isc.ask('There are unsaved changes in the ' + this._view._singular + '.  Do you wish to cancel?',
 							function(value) {
 								if (value) {
 									WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
@@ -1167,7 +1167,7 @@ BizButton.addMethods({
 			}
 			else if (this.type == "D") { // Delete on edit view
 				var me = this;
-				isc.ask("Do you want to delete this data?",
+				isc.ask('Do you want to delete this ' + this._view._singular + '?',
 							function(value) {
 								if (value) {
 									me._view.deleteInstance();

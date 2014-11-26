@@ -2171,7 +2171,7 @@ pickListFields:[{name:'value'}],
 			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
-			code.append("view.rerender();");
+			code.append("view.saveInstance(null);");
 		}
 
 		@Override
@@ -2705,6 +2705,7 @@ pickListFields:[{name:'value'}],
 				pw.append(module.getName()).append(".create").append(document.getName()).append("=function(){");
 				pw.append("var view=EditView.create({width:'100%',height:'100%',title:'");
 				pw.append("',_mod:'").append(module.getName()).append("',_doc:'").append(document.getName());
+				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getSingularAlias()));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 
