@@ -3,6 +3,7 @@ package org.skyve.wildcat.web.service.smartclient;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.primefaces.push.EventBusFactory;
 import org.skyve.wildcat.web.AbstractWebContext;
 
 public final class SmartClientWebContext extends AbstractWebContext {
@@ -18,5 +19,10 @@ public final class SmartClientWebContext extends AbstractWebContext {
 									HttpServletRequest request, 
 									HttpServletResponse response) {
 		super(key, request, response);
+	}
+	
+	@Override
+	public void push(String path, Object o) {
+		EventBusFactory.getDefault().eventBus().publish(path, o);
 	}
 }

@@ -80,4 +80,11 @@ public interface WebContext {
 	// get a view to change its binding?
 	// does an edit view needs its list view as a parent?
 	// should the state of the views (ie history) be available for server-side interrogation?
+	
+	/**
+	 * This method is used to push to all clients using atmosphere.
+	 * @param path	The path (topic) that the message is intended for
+	 * @param o	The object to push
+	 */
+	public void push(String path, Object o);
 }

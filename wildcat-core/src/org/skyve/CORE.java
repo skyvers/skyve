@@ -59,7 +59,7 @@ public class CORE {
 
 	/**
 	 * A place (thread-local), where state can be stashed for the duration of the conversation.
-	 * Bear in mind that this map is serialised and cached in the conversation so manage its size aggresively.
+	 * Bear in mind that this map is serialised and cached in the conversation so manage its size aggressively.
 	 */
 	public static SortedMap<String, Object> getStash() {
 		return AbstractPersistence.get().getStash();

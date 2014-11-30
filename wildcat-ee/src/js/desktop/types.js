@@ -1656,7 +1656,7 @@ BizHTMLItem.addMethods({
 													title: 'Apply',
 													click: function(applyEvent) {
 														me.setValue(me._editor.getData());
-														WindowStack.popoff();
+														WindowStack.popoff(false);
 													}
 												}),
 												isc.IButton.create({
@@ -1664,7 +1664,7 @@ BizHTMLItem.addMethods({
 													width: 60, 
 													title: 'Cancel',
 													click: function(applyEvent) {
-														WindowStack.popoff();
+														WindowStack.popoff(false);
 													}
 												})
 											]

@@ -1145,7 +1145,7 @@ BizButton.addMethods({
 					this._view.saveInstance(this.actionName);
 				}
 				else {
-					WindowStack.popoff(false);
+					WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action was taken
 				}
 			}
 			else if (this.type == "C") { // Cancel on edit view and child edit view
