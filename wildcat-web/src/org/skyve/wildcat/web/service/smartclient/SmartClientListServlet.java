@@ -596,6 +596,8 @@ public class SmartClientListServlet extends HttpServlet {
 											tagId);
 	}
     
+	private static final String PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+
 	private static void addAdvancedFilterCriteriaToQuery(Module module,
 															Document document,
 															User user,
@@ -669,7 +671,7 @@ System.out.println(criterium);
 		    				throw e;
 		    			}
 		    		}
-	    			if (target != null) {
+		    		if (target != null) {
 	    				Attribute attribute = target.getAttribute();
 	    				if (attribute != null) {
 							if (attribute instanceof Enumeration) {
@@ -687,7 +689,7 @@ System.out.println(criterium);
 	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 	    					}
 	    				}
-		    			else if (binding.endsWith('.' + ChildBean.PARENT_NAME)) {
+		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(PARENT_NAME_SUFFIX)) {
 		    				type = String.class;
 		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 		    			}
