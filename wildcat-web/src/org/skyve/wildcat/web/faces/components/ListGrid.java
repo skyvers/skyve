@@ -51,6 +51,8 @@ public class ListGrid extends HtmlPanelGroup {
 			final String queryName = (String) attributes.get("query");
 			final String managedBeanName = (String) attributes.get("managedBean");
 			final UserAgentType type = UserAgentType.valueOf((String) attributes.get("type"));
+			Object canCreateAttribute = attributes.get("canCreate");
+			final boolean canCreate = (canCreateAttribute == null) || "true".equals(canCreateAttribute);
 			final boolean paginator = "true".equals(attributes.get("paginator"));
 			
 			new FacesAction<Void>() {
@@ -72,7 +74,7 @@ public class ListGrid extends HtmlPanelGroup {
 //					form.setPrependId(false);
 //					form.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, true, paginator, type));
 //					ListGrid.this.getChildren().add(form);
-				    ListGrid.this.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, true, paginator, type));
+				    ListGrid.this.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, canCreate, paginator, type));
 				    
 					return null;
 				}

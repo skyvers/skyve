@@ -141,5 +141,11 @@
 			<required>true</required>
 			<type>org.skyve.wildcat.web.UserAgent.UserAgentType</type>
 		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should allow creation of a new document bean (New Button).</description>
+			<name>canCreate</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
 	</tag>
 </facelet-taglib>
