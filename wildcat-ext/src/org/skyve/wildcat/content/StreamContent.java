@@ -1,5 +1,8 @@
 package org.skyve.wildcat.content;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Stack;
@@ -56,6 +59,19 @@ public final class StreamContent extends Content {
 
 	public void setStream(InputStream stream) {
 		this.stream = stream;
+	}
+	
+	public byte[] getBytes() throws IOException {
+		try (BufferedInputStream bis = new BufferedInputStream(stream)) {
+			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+				byte[] bytes = new byte[1024]; // 1K
+				int bytesRead = 0;
+				while ((bytesRead = bis.read(bytes)) > 0) {
+					baos.write(bytes, 0, bytesRead);
+				}
+				return baos.toByteArray();
+			}
+		}
 	}
 
 	public Date getLastModified() {
