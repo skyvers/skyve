@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="template" basedir=".">
+	<property name="wildcat-ear-path" value="${wildcat-ee-path}/javaee/wildcat.ear" />
+	<property name="wildcat-war-path" value="${wildcat-ear-path}/wildcat.war" />
+
 	<path id="classpath">
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
@@ -70,7 +73,6 @@
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
-		<delete dir="src/modules/design" includes="**" />
 		<delete dir="src/resources" includes="**" />
 		<delete dir="src/schemas" includes="**" />
 	</target>
@@ -133,9 +135,6 @@
 		<copy todir="src/skyve/modules/admin" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-ee-path}/src/skyve/modules/admin" includes="**" excludes="**/*.class" />
 		</copy>
-		<copy todir="src/skyve/modules/design" overwrite="${assemble.overwrite}">
-			<fileset dir="../../bizhub/Apps/src/skyve/modules/design" includes="**" excludes="**/*.class" />
-		</copy>
 		<copy todir="src/skyve/resources" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-ee-path}/src/skyve/resources" includes="**" />
 		</copy>
@@ -152,10 +151,14 @@
 		<copy todir="prod/backup/lib">
 			<fileset dir="${wildcat-ear-path}/lib" includes="**.jar" />
 			<fileset dir="${wildcat-ee-path}/lib" includes="**.jar" />
-			<fileset dir="${wildcat-ee-path}/tools" includes="build-template.xml" />
 			<fileset dir="${wildcat-ee-path}/tools/lib" includes="wildcat-tools.jar" />
 		</copy>
-		
+
+		<!-- Assemble build template -->
+		<copy todir="tools" overwrite="true">
+			<fileset dir="${wildcat-ee-path}/tools" includes="build-template.xml" />
+		</copy>
+				
 		<!-- Assemble javadoc -->
 		<copy todir="tools/lib" overwrite="true">
 			<fileset dir="${wildcat-ee-path}/tools/lib" includes="UmlGraph.jar,wildcat-tools.jar" />
@@ -174,25 +177,19 @@
 		</copy>
 	</target>
 	
-	<target name="_javadoc" description="Create javadoc website">
-		<java fork="true" classname="org.skyve.wildcat.tools.javadoc.doctor.DoctorUtil">
-			<classpath refid="classpath"/>
-			<arg value="src/" />
-			<arg value="sydney" />
-			<arg value="admin" />
-		</java>
-        <javadoc sourcepath="src" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
+	<target name="umlJavadoc">
+        <javadoc sourcepath="src\skyve" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
 			<classpath refid="classpath"/>
             <doclet name="org.skyve.wildcat.tools.javadoc.WildcatDoclet" path="tools/lib/UMLGraph.jar:tools/lib/wildcat-tools.jar">
                     <param name="-hide" value="org.skyve.*|java.*|org.skyve.wildcat.*"/>
 
             		<param name="-nodefontsize" value="9"/>
                     <param name="-nodefontpackagesize" value="7"/>
-                    <param name="-link" value="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/doclet/spec"/>
-                    <param name="-link" value="http://java.sun.com/j2se/1.5/docs/api"/>
+                    <param name="-link" value="http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/"/>
+                    <param name="-link" value="http://docs.oracle.com/javase/8/docs/api/"/>
             </doclet>
         </javadoc>
-		<delete dir="src/" includes="**/package.html" />
+		<delete dir="src/skyve" includes="**/package.html" />
 	</target>
 	
 	<target name="MANIFEST.MF">
