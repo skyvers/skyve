@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="template" basedir=".">
+	<path id="classpath">
+		<fileset dir="tools/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${ear-path}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="${war-path}/WEB-INF/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<!-- don't use a file element here - doesn't work in old ant -->
+		<pathelement path="${ear-path}/apps.jar/" />
+	</path>
+
+	<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask"> 
+		<classpath refid="classpath"/>
+	</taskdef>
+
+	<target name="_deprecationReport" description="Report of Deprecated Attributes">
+		<java fork="true" classname="modules.DeprecationReport">
+			<classpath refid="classpath" />
+			<arg value="src/" />
+		</java>
+	</target>
+	
+	<target name="_compileReports" description="Mass compile all reports">
+		<touch> 
+			<fileset dir="src/">
+				<include name="**/*.jrxml"/>
+			</fileset>
+		</touch>
+		<jrc keepjava="false" xmlvalidation="true">
+			<classpath refid="classpath"/>
+			<include name="**/*.jrxml"/>
+			<src>
+				<fileset dir="src/">
+					<include name="**/*.jrxml"/>
+				</fileset>
+			</src>
+		</jrc>
+	</target>
+
+	<target name="_generateDomain" description="Domain Class Generation">
+		<java fork="true" classname="org.skyve.wildcat.generate.DomainGenerator">
+			<classpath refid="classpath" />
+			<arg value="src/skyve/" />
+<!--
+			<arg value="debug!" />
+-->
+		</java>
+	</target>
+
+	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
+		<delete dir="${ear-path}/lib" includes="**" />
+		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
+		<delete dir="${war-path}/ckeditor332" includes="**" />
+		<delete dir="${war-path}/LABjs-1.0.2rc1" includes="**" />
+		<delete dir="${war-path}/css" includes="*-min.css" />
+		<delete dir="${war-path}/images" includes="**" />
+		<delete dir="${war-path}/isomorphic10a" includes="**" />
+		<delete dir="${war-path}/pages" includes="**" />
+		<delete dir="${war-path}/wicket" includes="**" />
+		<delete dir="${war-path}/desktop" includes="**" />
+		<delete dir="${war-path}/public" includes="**" />
+		<delete dir="${war-path}/tablet" includes="**" />
+		<delete dir="${war-path}/phone" includes="**" />
+		<delete dir="${war-path}" includes="*.xhtml,*.jsp" />
+
+		<delete dir="src/modules" includes="*.java" />
+		<delete dir="src/modules/admin" includes="**" />
+		<delete dir="src/modules/design" includes="**" />
+		<delete dir="src/resources" includes="**" />
+		<delete dir="src/schemas" includes="**" />
+	</target>
+	
+	<target name="assemble" depends="clearBeforeAssemble">
+		<!-- Web App -->
+		<copy todir="lib" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ee-path}/lib" includes="wildcat*.jar" />
+		</copy>
+		<copy todir="${ear-path}/lib" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ear-path}/lib" includes="**" excludes="geodb*.jar" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/WEB-INF/" includes="wildcat.taglib.xml,faces-config.xml" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/WEB-INF/lib/" includes="**" />
+		</copy>
+		<copy todir="${war-path}/ckeditor332" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/ckeditor332" includes="**" />
+		</copy>
+		<copy todir="${war-path}/LABjs-1.0.2rc1" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/LABjs-1.0.2rc1" includes="**.js" />
+		</copy>
+		<copy todir="${war-path}/wicket" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/wicket" includes="**" />
+		</copy>
+		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/desktop" includes="**.xhtml,**-min.js" />
+		</copy>
+		<copy todir="${war-path}/public" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/public" includes="**" />
+		</copy>
+		<copy todir="${war-path}/phone" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/phone" includes="**" />
+		</copy>
+		<copy todir="${war-path}/tablet" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/tablet" includes="**" />
+		</copy>
+		<copy todir="${war-path}/css" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/css" includes="*-min.css" />
+		</copy>
+		<copy todir="${war-path}/images" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/images" includes="**" />
+		</copy>
+		<copy todir="${war-path}/isomorphic10a" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/isomorphic10a" includes="**" />
+		</copy>
+		<copy todir="${war-path}/pages" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/pages" includes="**" />
+		</copy>
+		<copy todir="${war-path}" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}" includes="*.xhtml,*.jsp" />
+		</copy>
+
+		<!-- App -->
+		<copy todir="src/skyve/modules" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ee-path}/src/skyve/modules" includes="*.java" excludes="**/*.class" />
+		</copy>
+		<copy todir="src/skyve/modules/admin" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ee-path}/src/skyve/modules/admin" includes="**" excludes="**/*.class" />
+		</copy>
+		<copy todir="src/skyve/modules/design" overwrite="${assemble.overwrite}">
+			<fileset dir="../../bizhub/Apps/src/skyve/modules/design" includes="**" excludes="**/*.class" />
+		</copy>
+		<copy todir="src/skyve/resources" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ee-path}/src/skyve/resources" includes="**" />
+		</copy>
+		<copy todir="src/skyve/schemas" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ee-path}/src/skyve/schemas" includes="**" />
+		</copy>
+	</target>
+	
+	<target name="assembleTools">
+		<!-- Assemble backup -->
+		<delete failonerror="false"> <!-- prod/backup/lib may not exist yet -->
+			<fileset dir="prod/backup/lib" includes="**.jar"/>
+		</delete>
+		<copy todir="prod/backup/lib">
+			<fileset dir="${wildcat-ear-path}/lib" includes="**.jar" />
+			<fileset dir="${wildcat-ee-path}/lib" includes="**.jar" />
+			<fileset dir="${wildcat-ee-path}/tools" includes="build-template.xml" />
+			<fileset dir="${wildcat-ee-path}/tools/lib" includes="wildcat-tools.jar" />
+		</copy>
+		
+		<!-- Assemble javadoc -->
+		<copy todir="tools/lib" overwrite="true">
+			<fileset dir="${wildcat-ee-path}/tools/lib" includes="UmlGraph.jar,wildcat-tools.jar" />
+		</copy>
+	</target>
+
+	<target name="_touch" description="Touch the app to enable redeploy">
+		<delete file="javaee/*.failed" />
+		<touch file="${ear-path}.dodeploy" />
+	</target>
+	
+	<target name="_copyProdEAR" description="Create exploded ear file in prod/">
+		<delete dir="prod/${ear-name}" />
+		<copy todir="prod/${ear-name}">
+			<fileset dir="${ear-path}" includes="**" />
+		</copy>
+	</target>
+	
+	<target name="_javadoc" description="Create javadoc website">
+		<java fork="true" classname="org.skyve.wildcat.tools.javadoc.doctor.DoctorUtil">
+			<classpath refid="classpath"/>
+			<arg value="src/" />
+			<arg value="sydney" />
+			<arg value="admin" />
+		</java>
+        <javadoc sourcepath="src" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
+			<classpath refid="classpath"/>
+            <doclet name="org.skyve.wildcat.tools.javadoc.WildcatDoclet" path="tools/lib/UMLGraph.jar:tools/lib/wildcat-tools.jar">
+                    <param name="-hide" value="org.skyve.*|java.*|org.skyve.wildcat.*"/>
+
+            		<param name="-nodefontsize" value="9"/>
+                    <param name="-nodefontpackagesize" value="7"/>
+                    <param name="-link" value="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/doclet/spec"/>
+                    <param name="-link" value="http://java.sun.com/j2se/1.5/docs/api"/>
+            </doclet>
+        </javadoc>
+		<delete dir="src/" includes="**/package.html" />
+	</target>
+	
+	<target name="MANIFEST.MF">
+		<!-- create a property containing all .jar files, prefix lib/, and separated with a space -->
+		<pathconvert property="libs.deploy" pathsep=" ">
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<flattenmapper />
+					<!-- add lib/ prefix -->
+					<globmapper from="*" to="lib/*" />
+				</chainedmapper>
+			</mapper>
+			<path>
+				<fileset dir="${ear-path}/lib">
+					<include name="**/*wildcat-core.jar" />
+					<include name="**/*wildcat-ext.jar" />
+				</fileset>
+				<fileset dir="${ear-path}/lib">
+					<include name="**/*.jar" />
+					<exclude name="**/*wildcat*.jar" />
+				</fileset>
+			</path>
+		</pathconvert>
+		<manifest file="${war-path}/META-INF/MANIFEST.MF">
+			<!-- finally, use the magically generated libs path -->
+			<attribute name="Class-Path" value="${libs.deploy}" />
+		</manifest>
+	</target>
+</project>
