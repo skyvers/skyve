@@ -184,7 +184,6 @@ isc.ClassFactory.defineClass("BizMap", "Canvas");
 isc.BizMap.addClassMethods({
 	v: 0,
 	initialise: function() {
-console.log('initialise - build');
 		eval(isc.BizMap.id + '.build()');
 	}
 });
@@ -207,10 +206,8 @@ isc.BizMap.addMethods({
 	},
 
 	draw: function() {
-console.log('draw');
 		if (window.google && window.google.maps) {
 			if (! this.isDrawn()) {
-console.log('draw - build');
 				this.build();
 				return this.Super('draw', arguments);
 			}
@@ -253,7 +250,6 @@ console.log('draw - build');
 
 				this._modelName = null;
 			}
-console.log('set datasource - _refresh');
 			this._refresh(true, false);
 		}
 		else {
@@ -282,19 +278,18 @@ console.log('set datasource - _refresh');
 			control.id = this.ID + '_form';
 			control.style.width = '300px';
 */
-console.log('build map');
 			this._map = new google.maps.Map(document.getElementById(this.ID + '_map'), mapOptions);
 /* TODO reinstate
 			this._map.controls[google.maps.ControlPosition.TOP].push(control);
 */
 			this._refresh(true, false);
-//			this.delayCall('_addForm', null, 1000);
+			this.delayCall('_addForm', null, 1000);
 		}
 		else {
-console.log('build - delay call - build');
 			this.delayCall('build', null, 100);
 		}
 	},
+	
 	_addForm: function() {
 /* TODO reinstate
 		var me = this;
@@ -336,7 +331,6 @@ console.log('build - delay call - build');
 	},
 
 	rerender: function() {
-console.log('rerender - _refresh');
 		this._refresh(false, false);
 	},
 	
@@ -345,7 +339,6 @@ console.log('rerender - _refresh');
 	},
 	
 	_refresh: function(fit, auto) {
-console.log('refresh ' + this._refreshRequired + " : " + this._zoomed + " : " + this.isVisible());
 /* TODO reinstate
 		if (auto) {
 			this.delayCall('_refresh', [false, true], this._refreshTime * 1000);
@@ -356,23 +349,18 @@ console.log('refresh ' + this._refreshRequired + " : " + this._zoomed + " : " + 
 		}
 */
 		if (! this._refreshRequired) { // map UI has refresh checked off
-console.log('return - no refresh required');
 			return;
 		}
 		if (this._zoomed) { // operator is zoomed-in so no point refreshing this now
-console.log('return - zoomed');
 			return;
 		}
 		if (this._refreshing) { // already triggered a refresh - waiting on XHR response
-console.log('return - refreshing already');
 			return;
 		}
 		if (! this.isDrawn()) { // widget isn't even drawn yet
-console.log('return - not drawn');
 			return;
 		}
 		if (! this.isVisible()) { // widget is invisible (from condition on the UI)
-console.log('return - not visible');
 			return;
 		}
 		
@@ -393,7 +381,6 @@ console.log('return - not visible');
 				url += '_c=' + instance._c + '&_m=' + this._modelName;
 			}
 			else {
-console.log('return - no model name');
 				return;
 			}
 		}
@@ -401,7 +388,6 @@ console.log('return - no model name');
 			url += '_mod=' + this._moduleName + '&_q=' + this._queryName + '&_geo=' + this._geometryBinding;
 		}
 		else {
-console.log('return - no query name');
 			return;
 		}
 
@@ -453,8 +439,6 @@ console.log('return - no query name');
 					var item = items[i];
 
 					var object = me._objects[item.bizId];
-//console.log("object = ");
-//console.log(object);
 					if (object) {
 						// if the wkts have changed delete the overlay and recreate it
 						var same = (object.overlays.length == item.features.length);
@@ -475,15 +459,12 @@ console.log('return - no query name');
 							delete me._objects[bizId];
 							object = null;
 						}
-//console.log("object = ");
-//console.log(object);
 					}
 					if (object) {} else {
 						object = {overlays: []};
 						for (var j = 0, m = item.features.length; j < m; j++) {
 							var feature = item.features[j];
-//console.log("feature = ");
-//console.log(feature);
+
 							try { // Catch any malformed WKT strings
 					        	wkt.read(feature.geometry);
 					        }
