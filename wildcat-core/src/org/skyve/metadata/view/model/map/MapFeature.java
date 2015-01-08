@@ -4,7 +4,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class MapFeature {
 	private Geometry geometry;
-	private boolean editable;
+	private boolean zoomable = true;
+	private boolean editable = false;
 	private String strokeColour;
 	private String fillColour;
 	private String fillOpacity;
@@ -16,6 +17,7 @@ public class MapFeature {
 	}
 
 	public MapFeature(Geometry geometry,
+						boolean zoomable,
 						boolean editable,
 						String strokeColour,
 						String fillColour,
@@ -24,6 +26,7 @@ public class MapFeature {
 						Integer iconAnchorX,
 						Integer iconAnchorY) {
 		this.geometry = geometry;
+		this.zoomable = zoomable;
 		this.editable = editable;
 		this.strokeColour = strokeColour;
 		this.fillColour = fillColour;
@@ -39,6 +42,14 @@ public class MapFeature {
 
 	public void setGeometry(Geometry geometry) {
 		this.geometry = geometry;
+	}
+
+	public boolean isZoomable() {
+		return zoomable;
+	}
+
+	public void setZoomable(boolean zoomable) {
+		this.zoomable = zoomable;
 	}
 
 	public boolean isEditable() {
