@@ -30,7 +30,7 @@ public class UserAgent {
 		}
 	}
 
-	private static Map<String, UserAgentType> cache = new TreeMap<>();
+	private static Map<String, UserAgentType> typeCache = new TreeMap<>();
 
 	public static UserAgentType getType(HttpServletRequest request) {
 		String agentString = request.getHeader("User-Agent");
@@ -38,7 +38,7 @@ public class UserAgent {
 			agentString = "";
 		}
 
-		UserAgentType result = cache.get(agentString);
+		UserAgentType result = typeCache.get(agentString);
 		if (result == null) {
 			UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
 			ReadableUserAgent agent = parser.parse(agentString);
@@ -63,7 +63,61 @@ public class UserAgent {
 				result = UserAgentType.tablet;
 			}
 
-			cache.put(agentString, result);
+			typeCache.put(agentString, result);
+		}
+		
+		return result;
+	}
+	
+	private static Map<String, OperatingSystem> osCache = new TreeMap<>();
+
+	public static enum OperatingSystem {
+		ANDROID, BLACKBERRY, IOS, LINUX, MACOS, UNIX, WINDOWS, OTHER
+	}
+	
+	public static OperatingSystem getOS(HttpServletRequest request) {
+System.out.println("GET OS");
+		String agentString = request.getHeader("User-Agent");
+		if (agentString == null) {
+			agentString = "";
+		}
+
+		OperatingSystem result = osCache.get(agentString);
+		if (result == null) {
+			UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
+			ReadableUserAgent agent = parser.parse(agentString);
+			switch(agent.getOperatingSystem().getFamily()) {
+				case ANDROID:
+					result = OperatingSystem.ANDROID;
+					break;
+				case BLACKBERRY_OS:
+					result = OperatingSystem.BLACKBERRY;
+					break;
+				case IOS:
+					result = OperatingSystem.IOS;
+					break;
+				case LINUX:
+					result = OperatingSystem.LINUX;
+					break;
+				case MAC_OS:
+				case OS_X:
+					result = OperatingSystem.MACOS;
+					break;
+				case AIX:
+				case BSD:
+				case HPUX:
+				case IRIX:
+				case MINIX:
+				case SOLARIS:
+					result = OperatingSystem.UNIX;
+					break;
+				case WINDOWS:
+					result = OperatingSystem.WINDOWS;
+					break;
+				default:
+					result = OperatingSystem.OTHER;
+			}
+			osCache.put(agentString, result);
 		}
 		
 		return result;
