@@ -232,8 +232,9 @@ public class ReportServlet extends HttpServlet {
 		for (String paramName : request.getParameterMap().keySet()) {
     		String paramValue = request.getParameter(paramName);
 			if ((! paramName.equals(AbstractWebContext.DOCUMENT_NAME)) &&
-				(! paramName.equals(AbstractWebContext.REPORT_NAME))) {
+					(! paramName.equals(AbstractWebContext.REPORT_NAME))) {
 				params.put(paramName, paramValue);
+				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
 			}
     	}
 

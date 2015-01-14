@@ -46,6 +46,7 @@ public class UtilImpl {
 	public static boolean CONTENT_TRACE = false;
 	public static boolean SECURITY_TRACE = false;
 	public static boolean BIZLET_TRACE = false;
+	public static boolean DIRTY_TRACE = false;
 	public static boolean PRETTY_SQL_OUTPUT = false;
 	public static final Logger LOGGER = Logger.getLogger("WILDCAT");
 	
@@ -209,6 +210,7 @@ public class UtilImpl {
 		throws DomainException, MetaDataException {
 			if (beanAccepted.isChanged()) {
 				changed = true;
+				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + toString() + " with binding " + binding + " is DIRTY");
 				return false;
 			}
 			return true;

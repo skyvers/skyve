@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.HibernateException;
+import org.hibernate.collection.PersistentCollection;
 import org.hibernate.event.FlushEntityEvent;
 import org.hibernate.event.FlushEntityEventListener;
 import org.hibernate.event.InitializeCollectionEvent;
@@ -120,8 +121,8 @@ public class HibernateListener implements PostUpdateEventListener,
 		try {
 			AbstractPersistence persistence = AbstractPersistence.get();
 			AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getAffectedOwnerOrNull();
-			@SuppressWarnings("unchecked")
-			List<Bean> list = (List<Bean>) event.getCollection();
+
+			PersistentCollection list = event.getCollection();
 			Customer customer = persistence.getUser().getCustomer();
 			Module module = customer.getModule(eventBean.getBizModule());
 			Document document = module.getDocument(customer, eventBean.getBizDocument());
@@ -130,6 +131,7 @@ public class HibernateListener implements PostUpdateEventListener,
 					Collection collection = (Collection) document.getReferenceByName(referenceName);
 					if (collection.isComplexOrdering()) {
 						BindUtil.sortCollectionByMetaData(eventBean, collection);
+						list.clearDirty();
 					}
 					break;
 				}

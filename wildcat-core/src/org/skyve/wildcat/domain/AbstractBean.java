@@ -12,6 +12,7 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 
 public abstract class AbstractBean implements Bean {
 	/**
@@ -36,6 +37,7 @@ public abstract class AbstractBean implements Bean {
 				if (propertyValue != null) {
 					if (! originalValues.containsKey(propertyName)) {
 						originalValues.put(propertyName,  oldValue);
+						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue);
 					}
 				}
 			}
@@ -43,6 +45,7 @@ public abstract class AbstractBean implements Bean {
 				if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
 					if (! originalValues.containsKey(propertyName)) {
 						originalValues.put(propertyName,  oldValue);
+						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue);
 					}
 				}
 			}
@@ -65,14 +68,17 @@ public abstract class AbstractBean implements Bean {
 				Class<?> propertyType = descriptor.getPropertyType();
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
-						Object collection = BindUtil.get(this, descriptor.getName());
+						String propertyName = descriptor.getName();
+						Object collection = BindUtil.get(this, propertyName);
 						if (collection instanceof PersistentCollection) { // persistent
 							if (((PersistentCollection) collection).isDirty()) {
+								if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : persistent collection " + propertyName + " is dirty ");
 								return true;
 							}
 						}
 						else { // transient
 							if (! ((Collection<?>) collection).isEmpty()) {
+								if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
 								return true;
 							}
 						}
@@ -84,6 +90,7 @@ public abstract class AbstractBean implements Bean {
 			}
 		}
 		else {
+			if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : originalValues is not empty");
 			return true;
 		}
 		
