@@ -69,7 +69,7 @@
 		<delete dir="${war-path}/public" includes="**" />
 		<delete dir="${war-path}/tablet" includes="**" />
 		<delete dir="${war-path}/phone" includes="**" />
-		<delete dir="${war-path}" includes="*.xhtml,*.jsp" />
+		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp" />
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
