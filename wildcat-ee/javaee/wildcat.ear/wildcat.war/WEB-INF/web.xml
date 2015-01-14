@@ -128,10 +128,6 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
-		<servlet-name>BizportImportServlet</servlet-name>
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
 		<servlet-name>BizportExportServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
@@ -161,6 +157,7 @@
 		<filter-name>NeverExpiresFilter</filter-name>
 		<url-pattern>*.js</url-pattern>
 	</filter-mapping>
+
 	<!-- Firefox requires public to cache resources to disk when using SSL -->
 	<filter>
 		<filter-name>PublicCacheControlFilter</filter-name>
@@ -261,17 +258,8 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>BizportImportServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.bizport.BizportImportServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>BizportImportServlet</servlet-name>
-		<url-pattern>/bizimport</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>BizportExportServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.bizport.BizportExportServlet</servlet-class>
+		<servlet-class>org.skyve.wildcat.web.BizportExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BizportExportServlet</servlet-name>
@@ -289,15 +277,6 @@
 	<servlet-mapping>
 		<servlet-name>ImageServlet</servlet-name>
 		<url-pattern>/image</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>ContentUploadServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.ContentUploadServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ContentUploadServlet</servlet-name>
-		<url-pattern>/upload</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -474,19 +453,14 @@
 			<url-pattern>/smartgen/*</url-pattern>
 			<!-- Secure map servlet -->
 			<url-pattern>/map/*</url-pattern>
+			<!-- Secure the Bizport Export Servlet -->
+			<url-pattern>/bizexport.xls</url-pattern>
+			<url-pattern>/bizexport.xlsx</url-pattern>
 			<!-- Do not Secure trackmate servlet - it handles authentication itself -->
 			<!-- secure the systems JSPs and HTMLs -->
 			<url-pattern>/home.jsp</url-pattern>
 			<url-pattern>/pages/htmlEdit/browseImages.jsp</url-pattern>
 			<url-pattern>/pages/map/geolocate.jsp</url-pattern>
-			<url-pattern>/pages/upload/bizimport.jsp</url-pattern>
-			<url-pattern>/pages/upload/blank.jsp</url-pattern>
-			<url-pattern>/pages/upload/filePicker.jsp</url-pattern>
-			<url-pattern>/pages/upload/progress.jsp</url-pattern>
-			<url-pattern>/pages/upload/upload.jsp</url-pattern>
-			<!-- secure the upload servlets -->
-			<url-pattern>/upload</url-pattern>
-			<url-pattern>/bizimport</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>Nobody</role-name>

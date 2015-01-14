@@ -1,6 +1,8 @@
 package org.skyve.wildcat.web.faces.beans;
 
-import java.text.DecimalFormat;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -11,27 +13,29 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
-import org.skyve.content.MimeType;
+import org.skyve.bizport.BizPortException;
+import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.domain.Bean;
-import org.skyve.metadata.controller.UploadAction;
+import org.skyve.metadata.controller.BizImportAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.bizport.POIWorkbook;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.util.ThreadSafeFactory;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
 
-@ManagedBean(name = "_wildcatUpload")
+@ManagedBean(name = "_wildcatBizImport")
 @RequestScoped
-public class FileUpload {
+public class BizportImport {
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
     private String context;
     
@@ -65,6 +69,11 @@ public class FileUpload {
 		this.action = UtilImpl.processStringValue(action);
 	}
 
+	private List<Problem> problems = new ArrayList<>();
+	public List<Problem> getProblems() {
+		return problems;
+	}
+	
 	/**
 	 * Process the file upload
 	 * 
@@ -113,44 +122,71 @@ public class FileUpload {
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			
-			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
-																			document, 
+			BizImportAction bizPortAction = repository.getBizImportAction(customer, 
+																			document,
 																			action);
-			MimeType mimeType = null;
+
+			BizPortException exception = new BizPortException();
 			try {
-				MimeType.valueOf(file.getContentType());
+				try (InputStream fis = file.getInputstream()) {
+					POIWorkbook workbook = new POIWorkbook(customer,
+															WorkbookFactory.create(fis), 
+															exception);
+					bizPortAction.bizImport(workbook, exception);
+		
+					// throw if we have errors found, to ensure rollback
+					if (exception.hasErrors()) {
+						throw exception;
+					}
+				}
 			}
-			catch (Exception e) {
-				// do nothing
+			catch (BizPortException e) {
+				e.printStackTrace();
+				persistence.rollback();
+				exception = e;
 			}
-			UploadAction.UploadedFile bizFile = 
-					new UploadAction.UploadedFile(file.getFileName(),
-													file.getInputstream(),
-													mimeType);
-			uploadAction.upload(bean, bizFile, webContext);
-			
+
 			// only put conversation in cache if we have been successful in executing
 			WebUtil.putConversationInCache(webContext);
 
-			long size = file.getSize();
-	        StringBuilder message = new StringBuilder(128);
-	        message.append(file.getFileName()).append(" is uploaded. File Size is ");
-
-			DecimalFormat format = ThreadSafeFactory.getDecimalFormat("###,##0.00");
-			if (size > 1048576) {
-	            message.append(format.format(size / 1048576.0)).append(" MB");
-	        }
-	        else {
-	            message.append(format.format(size / 1024.0)).append(" KB");
-	        }
-
-	        FacesMessage msg = new FacesMessage("Successful", message.toString());
-	        FacesContext.getCurrentInstance().addMessage(null, msg);
+			
+			if (exception.hasProblems()) {
+				for (Problem error : exception.getErrors()) {
+					problems.add(error);
+				}
+				for (Problem warning : exception.getWarnings()) {
+					problems.add(warning);
+				}
+				
+				if (exception.hasErrors()) {
+					String message = "The import did <b>NOT</b> complete successfully.<br/>" +
+										"No data has changed as a result of this import.<br/>" +
+										"Please review the errors and warnings displayed before closing this window.<br/>" + 
+										"The above list includes only the first 50 errors and warnings, there may be more.<br/>" + 
+										"If the nature of the problem is not clear from the message, it may be because it is caused by another issue being compounded.<br/>" + 
+										"In this case, you may find that fixing one or two problems you can easily identify, may resolve a number of related issues.";
+			        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Unsuccessful", message);
+			        fc.addMessage(null, msg);
+				}
+				else {
+					String message = "The import completed successfully with warnings.<br/>" +
+										"Please review the warnings displayed before closing this window.<br/>" + 
+										"The above list includes only the first 50 errors and warnings, there may be more.<br/>" + 
+										"If the nature of the problem is not clear from the message, it may be because it is caused by another issue being compounded.<br/>" + 
+										"In this case, you may find that fixing one or two problems you can easily identify, may resolve a number of related issues.";
+			        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Successful", message);
+			        fc.addMessage(null, msg);
+				}
+			}
+			else {
+		        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "The import completed successfully.");
+		        fc.addMessage(null, msg);
+			}
 		}
-		catch (Exception e) {
+		catch (Throwable t) {
 			persistence.rollback();
-			e.printStackTrace();
-			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
+			t.printStackTrace();
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", t.getMessage());
 	        fc.addMessage(null, msg);
 		}
 		finally {

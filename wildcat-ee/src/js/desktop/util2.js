@@ -791,18 +791,12 @@ isc.BizUtil.addClassMethods({
 			false, 
 			'Upload content', 
 			function() {
-// TODO This is a bit bogus - should not let the client dictate to upload.jsp what the values for _dg and _u are
 				var instance = contentFormItem.form._view.gather(false);
-				var value = contentFormItem.getValue();
-				var url = BizUtil.URL_PREFIX;
-				url += "pages/upload/upload.jsp?_id=" + (instance.bizId ? instance.bizId : '');
-				url += "&_doc=" + (instance.bizModule ? instance.bizModule : '');
-				url += (instance.bizDocument ? '.' + instance.bizDocument : '');
-				url += "&_dg=" + (instance.bizDataGroupId ? instance.bizDataGroupId : '');
-				url += "&_u=" + (instance.bizUserId ? instance.bizUserId : '');
-				url += "&_b=" + contentFormItem.name.replaceAll('_', '.');
-				url += "&_cid=" + (value ? value : '');
-				
+				var url = 'contentUpload.xhtml?_n=' + contentFormItem.name.replaceAll('_', '.') + 
+							'&_c=' + instance._c;
+				if (contentFormItem.form._view._b) {
+					url += '&_b=' + contentFormItem.form._view._b.replaceAll('_', '.');
+				}
 				WindowStack.popup(null,
 									"Upload Content",
 									true,

@@ -15,6 +15,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.Message;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -551,13 +552,15 @@ public class StandardLoader {
 		beansBySheetKey.put(key, bean);
 	}
 	
-	public void addError(Customer customer, Module module, Document document, Bean bean, DomainException e)
-	throws BizPortException {
+	public void addError(Customer customer, Bean bean, DomainException e)
+	throws BizPortException, MetaDataException {
 		BizPortSheet sheet = workbook.getSheet(new SheetKey(bean.getBizModule(), bean.getBizDocument()));
 		BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 		Object sheetId = refs.get(bean.getBizId());
 		sheet.moveToRow(sheetId);
 		if (e instanceof MessageException) {
+			Module module = customer.getModule(bean.getBizModule());
+			Document document = module.getDocument(customer, bean.getBizDocument());
 			for (Message em : ((MessageException) e).getMessages()) {
 				addError(customer, module, document, bean, sheet, em);
 			}

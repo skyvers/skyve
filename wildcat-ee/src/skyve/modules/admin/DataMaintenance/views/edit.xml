@@ -8,11 +8,18 @@
         <column percentageWidth="20"/>
         <column/>
         <column/>
-        <row><item><combo binding="modDocName"/></item></row>
+        <row>
+        	<item>
+        		<combo binding="modDocName"/>
+       		</item>
+       		<item>
+       			<button actionName="DataMaintenanceExportAction" />
+       		</item>
+      	</row>
     </form>
     <actions>
         <defaults />
-		<export className="DataMaintenanceExportAction" displayName="Export Data" />
+		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="Import Data" />
     </actions>
 </view>

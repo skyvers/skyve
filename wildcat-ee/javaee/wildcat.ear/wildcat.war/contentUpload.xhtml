@@ -6,7 +6,7 @@
 		xmlns:p="http://primefaces.org/ui">
     <f:view contentType="text/html">
 		<h:head>
-			<title>File Upload</title>
+			<title>Content Upload</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -23,12 +23,14 @@
 		</h:head>
 		<h:body>
 			<h:form enctype="multipart/form-data" prependId="false">
-				<h:inputHidden id="_c" value="#{_wildcatUpload.context}" />
-				<h:inputHidden id="_b" value="#{_wildcatUpload.binding}" />
-				<h:inputHidden id="_a" value="#{_wildcatUpload.action}" />
-				<p:fileUpload fileUploadListener="#{_wildcatUpload.handleFileUpload}" 
-								update="messages" 
-								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
+				<h:inputHidden id="_c" value="#{_wildcatContent.context}" />
+				<h:inputHidden id="_b" value="#{_wildcatContent.binding}" />
+				<h:inputHidden id="_n" value="#{_wildcatContent.contentBinding}" />
+				<p:fileUpload fileUploadListener="#{_wildcatContent.handleFileUpload}" 
+								update="messages"
+								multiple="false"
+								fileLimit="1"
+								fileLimitMessage="Only 1 file allowed.  Remove the existing file first" />
 			    <p:growl id="messages" showDetail="true" />
 			</h:form>
 		</h:body>

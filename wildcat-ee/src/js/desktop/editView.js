@@ -1207,35 +1207,38 @@ BizButton.addMethods({
 				ReportDialog.popupReport(this._view, this.params);
 			}
 			else if (this.type == "X") { // BizExport
-				var me = this;
-				// Popup on the mouse click event - to default popup blockers
-				BizUtil.popupFrame('images/blank.gif', 'Export', 800, 630);
-				// apply changes to current form before exporting
-				me._view.saveInstance(null, function() {
-					var instance = me._view.gather(false); // don't validate
-					if (instance) {
-						// window is already popped up, 
-						// so popup wont block even though we're on the arse end of an XHR
-						BizUtil.popupFrame('bizexport.xls?_n=' + me.actionName + 
-													'&_doc=' + me._view._mod + '.' + me._view._doc + 
-													'&_c=' + instance._c +
-													'&_ctim=' + new Date().getTime(),
-													'Export', 
-													800, 
-													630);
-					}
-				});
+				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
+				if (instance) {
+					var me = this;
+					// apply changes to current form before exporting
+					this._view.saveInstance(null, function() {
+						window.location.assign('bizexport.xls?_n=' + me.actionName + 
+												'&_doc=' + me._view._mod + '.' + me._view._doc + 
+												'&_c=' + instance._c +
+												'&_ctim=' + new Date().getTime());
+					});
+				}
 			}
 			else if (this.type == "I") { // BizImport
-				var instance = this._view.gather(false); // don't validate
+				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {
-					BizUtil.popupFrame('pages/upload/bizimport.jsp?_n=' + this.actionName + 
-											'&_doc=' + this._view._mod + '.' + this._view._doc + 
-											'&_c=' + instance._c +
-											'&_ctim=' + new Date().getTime(),
-										'Export', 
-										800, 
-										630);
+					var me = this;
+					// apply changes to current form before importing
+					this._view.saveInstance(null, function() {
+						var url = 'bizImport.xhtml?_a=' + me.actionName + 
+									'&_c=' + instance._c;
+						if (me._view._b) {
+							url += '&_b=' + me._view._b.replaceAll('_', '.');
+						}
+						WindowStack.popup(null,
+											"BizPort Import",
+											true,
+											[isc.HTMLPane.create({
+												contentsType: 'page',
+												contents: 'Loading Page...',
+												contentsURL: url
+											})]);
+					});
 				}
 			}
 			else if (this.type == "U") { // Upload Action
@@ -1247,7 +1250,7 @@ BizButton.addMethods({
 						var url = 'fileUpload.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {
-							url += '&_b=' + me._view._b;
+							url += '&_b=' + me._view._b.replaceAll('_', '.');
 						}
 						WindowStack.popup(null,
 											"Upload",
@@ -1915,7 +1918,7 @@ BizDynamicImage.addMethods({
 			src += "&_c=" + c;
 		}
 		if (b) {
-			src += "&_b=" + b;
+			src += "&_b=" + b.replaceAll('_', '.');
 		}
 		if (bizId) {
 			src += "&bizId=" + bizId;

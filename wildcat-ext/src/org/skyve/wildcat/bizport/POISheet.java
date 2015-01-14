@@ -225,7 +225,9 @@ public final class POISheet implements BizPortSheet {
 		if (currentRow != null) { // we have data to index
 			if (collectionBinding == null) { // have a document sheet
 				String id = getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
-				indices.put(id, new Integer(nextRow));
+				if (id != null) {
+					indices.put(id, new Integer(nextRow));
+				}
 				while (nextRow()) {
 					id = getValue(Bean.DOCUMENT_ID, AttributeType.text, problems);
 					if (id != null) {
@@ -237,7 +239,9 @@ public final class POISheet implements BizPortSheet {
 // TODO key columns should be stored in the spread sheet?
 				String ownerId = getValue(StandardGenerator.OWNER_ID, AttributeType.text, problems);
 				String elementId = getValue(StandardGenerator.ELEMENT_ID, AttributeType.text, problems);
-				indices.put(ownerId + elementId, new Integer(nextRow));
+				if ((ownerId != null) && (elementId != null)) {
+					indices.put(ownerId + elementId, new Integer(nextRow));
+				}
 				while (nextRow()) {
 					ownerId = getValue(StandardGenerator.OWNER_ID, AttributeType.text, problems);
 					elementId = getValue(StandardGenerator.ELEMENT_ID, AttributeType.text, problems);

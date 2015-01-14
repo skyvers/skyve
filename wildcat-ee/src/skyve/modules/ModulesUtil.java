@@ -1017,29 +1017,22 @@ public class ModulesUtil {
 		return result;
 	}
 
-	public static void standardBeanBizImport(BizPortWorkbook workbook, BizPortException problems, String moduleName) throws Exception {
+	public static void standardBeanBizImport(BizPortWorkbook workbook, BizPortException problems) throws Exception {
 		final Persistence persistence = CORE.getPersistence();
 		final Customer customer = persistence.getUser().getCustomer();
 		StandardLoader loader = new StandardLoader(workbook, problems);
 		List<Bean> bs = loader.populate(persistence);
 
-		Module module = customer.getModule(moduleName);
-		Document document = null;
-		Bean bean = null;
-		String documentName = null;
-
-		// System.out.println("Validate everything " + new Date());
 		for (String key : loader.getBeanKeys()) {
-			bean = loader.getBean(key);
-			document = module.getDocument(customer, bean.getBizDocument());
-			if (documentName == null) {
-				documentName = document.getName();
-			}
+			Bean bean = loader.getBean(key);
+			Module module = customer.getModule(bean.getBizModule());
+			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			try {
 				persistence.preFlush(document, bean);
-			} catch (DomainException e) {
-				loader.addError(customer, module, document, bean, e);
+			}
+			catch (DomainException e) {
+				loader.addError(customer, bean, e);
 			}
 		}
 
@@ -1049,14 +1042,17 @@ public class ModulesUtil {
 		}
 
 		// do the insert as 1 operation, bugging out if we encounter any errors
+		PersistentBean pb = null;
 		try {
-			document = module.getDocument(customer, documentName);
 			for (Bean b : bs) {
-				PersistentBean pb = (PersistentBean) b;
-				pb = persistence.save(document, pb);
+				pb = (PersistentBean) b;
+				pb = persistence.save(pb);
 			}
-		} catch (DomainException e) {
-			loader.addError(customer, module, document, bean, e);
+		}
+		catch (DomainException e) {
+			if (pb != null) {
+				loader.addError(customer, pb, e);
+			}
 			throw problems;
 		}
 	}

@@ -108,8 +108,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20140108";
-	public static final String WILDCAT_VERSION = "20150108";
+	public static final String JAVASCRIPT_FILE_VERSION = "20140114";
+	public static final String WILDCAT_VERSION = "20150114";
 	public static final String SMART_CLIENT_DIR = "isomorphic10a";
 	
 	private static String absoluteBasePath;

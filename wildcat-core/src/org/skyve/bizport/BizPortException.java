@@ -20,6 +20,7 @@ public final class BizPortException extends Exception {
 	public static final class Problem implements Comparable<Problem> {
 		private String what;
 		private String where;
+		boolean error = false;
 		private String string;
 		
 		/**
@@ -48,6 +49,10 @@ public final class BizPortException extends Exception {
 			return where;
 		}
 
+		public boolean isError() {
+			return error;
+		}
+		
 		/**
 		 * 
 		 */
@@ -87,7 +92,7 @@ public final class BizPortException extends Exception {
 		@Override
 		public String toString() {
 			if (string == null) {
-				string = new StringBuilder(128).append(what).append(" : ").append(where).toString();
+				string = new StringBuilder(128).append(error ? "Error " : "Warning ").append(what).append(" : ").append(where).toString();
 			}
 			
 			return string;
@@ -130,6 +135,7 @@ public final class BizPortException extends Exception {
 	 */
 	public void addErrors(List<Problem> problems) throws BizPortException {
 		for (Problem problem : problems) {
+			problem.error = true;
 			addError(problem);
 		}
 	}

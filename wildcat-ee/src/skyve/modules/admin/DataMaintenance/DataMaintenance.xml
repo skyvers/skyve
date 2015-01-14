@@ -12,7 +12,7 @@
 		]]>
 	</bizKey>
 	<attributes>
-		<text name="modDocName" >
+		<text name="modDocName">
 			<displayName>Module.Document</displayName>
 			<domain>variant</domain>
 			<length>100</length>

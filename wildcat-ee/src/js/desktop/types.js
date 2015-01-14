@@ -1142,7 +1142,7 @@ BizContentLinkItem.addMethods({
 				var url = BizUtil.URL_PREFIX + 
 				"content?_n=" + newValue +
 				"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
-				"&_b=" + this.name +
+				"&_b=" + this.name.replaceAll('_', '.') +
 				"&_ctim=" + new Date().getTime();
 
 				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">' + this.canvas.linkHTML(url, "Content", "_blank") + '</div>');
