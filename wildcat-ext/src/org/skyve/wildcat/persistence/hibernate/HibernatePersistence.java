@@ -104,6 +104,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingBeanIterable;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
@@ -128,7 +129,7 @@ import org.skyve.wildcat.persistence.BizQLImpl;
 import org.skyve.wildcat.persistence.ProjectionQuery;
 import org.skyve.wildcat.persistence.SQLImpl;
 import org.skyve.wildcat.util.BeanVisitor;
-import org.skyve.wildcat.util.HibernateBeanIterable;
+import org.skyve.wildcat.util.HibernateAutoClosingBeanIterable;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.ValidationUtil;
 
@@ -1602,7 +1603,6 @@ t.printStackTrace();
 		}
 	}
 
-	@Override
 	public void index(AbstractPersistentBean beanToIndex,
 							String[] propertyNames,
 							Type[] propertyTypes,
@@ -1848,9 +1848,9 @@ t.printStackTrace();
 	}
 
 	@Override
-	public <T extends Bean> Iterable<T> iterate(org.skyve.persistence.Query query, 
-													Integer firstResult, 
-													Integer maxResults)
+	public <T extends Bean> AutoClosingBeanIterable<T> iterate(org.skyve.persistence.Query query, 
+																Integer firstResult, 
+																Integer maxResults)
 	throws DomainException {
 		try {
 			ProjectionQuery internalQuery = (ProjectionQuery) query;
@@ -1886,20 +1886,14 @@ t.printStackTrace();
 
 			ScrollableResults results = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 
-			return new HibernateBeanIterable<>(internalQuery.getDrivingModuleName(), 
-												internalQuery.getDrivingDocumentName(), 
-												results, 
-												aliases);
+			return new HibernateAutoClosingBeanIterable<>(internalQuery.getDrivingModuleName(), 
+															internalQuery.getDrivingDocumentName(), 
+															results, 
+															aliases);
 		}
 		catch (Exception e) {
 			throw new DomainException(e);
 		}
-	}
-
-	@Override
-	public final void closeIterable(Iterable<? extends Bean> iterable)
-	throws DomainException {
-		((HibernateBeanIterable<?>) iterable).close();
 	}
 
 	@Override

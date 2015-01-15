@@ -1,7 +1,6 @@
 package org.skyve.wildcat.persistence.hibernate;
 
 import java.util.Date;
-import java.util.List;
 
 import org.hibernate.HibernateException;
 import org.hibernate.collection.PersistentCollection;
@@ -18,7 +17,6 @@ import org.hibernate.event.PreUpdateEventListener;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.type.Type;
-import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.customer.Customer;
@@ -70,7 +68,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	 */
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
-		AbstractPersistence persistence = AbstractPersistence.get();
+		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
 		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();
@@ -93,7 +91,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	 */
 	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
-		AbstractPersistence persistence = AbstractPersistence.get();
+		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
 		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();

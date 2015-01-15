@@ -203,16 +203,33 @@ public interface Persistence extends Serializable {
 	throws DomainException;
 
 	/**
+	 * Use a scrollable result set to iterate over a query, thus not instantiating thousands of objects up front.
+	 * 
+	 * Use like this
+	 * <code><pre>
+	 * try (AutoClosingBeanIterable&lt;MyBean&gt; beans = persistence.iterate(beansQuery)) {
+	 *     for (MyBean bean : beans) {
+	 *     }
+	 * }
+	 * </pre></code>
 	 * 
 	 * @param query
 	 * @return
 	 * @throws DomainException
 	 */
-	public <T extends Bean> Iterable<T> iterate(Query query)
+	public <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query)
 	throws DomainException;
 	
 	/**
 	 * Use a scrollable result set to iterate over a query, thus not instantiating thousands of objects up front.
+	 * 
+	 * Use like this
+	 * <code><pre>
+	 * try (AutoClosingBeanIterable&lt;MyBean&gt; beans = persistence.iterate(beansQuery, Integer.valueOf(0), Integer.valueOf(100)) {
+	 *     for (MyBean bean : beans) {
+	 *     }
+	 * }
+	 * </pre></code>
 	 * 
 	 * @param <T> extends Bean. The type of bean the iterable will yield.
 	 * @param query The query to run.
@@ -221,20 +238,8 @@ public interface Persistence extends Serializable {
 	 * @return An Iterable<T>.
 	 * @throws DomainException
 	 */
-	public <T extends Bean> Iterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
+	public <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
 	throws DomainException;
-
-	/**
-	 * Close the iterable. 
-	 * This closes the result set resources. 
-	 * This is done automatically when using the Java for-each (iterator for loop) construct. 
-	 * This is used to check foreign keys which require a read lock (on all records), 
-	 * but just needs to check for existance of any record.
-	 * 
-	 * @param iterable The iterable to close.
-	 * @throws DomainException
-	 */
-	public void closeIterable(Iterable<? extends Bean> iterable) throws DomainException;
 
 	/**
 	 * 
@@ -307,7 +312,7 @@ public interface Persistence extends Serializable {
 	throws Exception;
 	
 	/**
-	 * Allow acces to the SQL connection.
+	 * Allow access to the SQL connection.
 	 * If an emergency, break the glass.  Good for calling stored procedures etc.
 	 * Use the Persistence API to retrieve SQL and execute DML.
 	 * @return

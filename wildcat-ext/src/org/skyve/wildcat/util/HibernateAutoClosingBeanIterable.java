@@ -7,16 +7,17 @@ import java.util.TreeMap;
 import org.hibernate.ScrollableResults;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.persistence.AutoClosingBeanIterable;
 import org.skyve.wildcat.domain.MapBean;
 
-public class HibernateBeanIterable<T extends Bean> implements Iterable<T> {
+public class HibernateAutoClosingBeanIterable<T extends Bean> implements AutoClosingBeanIterable<T> {
 	private String moduleName = null;
 	private String documentName = null;
 	private ScrollableResults results = null;
 	private String[] aliases = null;
 	boolean closed = false;
 
-	public HibernateBeanIterable(String moduleName, 
+	public HibernateAutoClosingBeanIterable(String moduleName, 
 									String documentName, 
 									ScrollableResults results, 
 									String[] aliases) {
@@ -104,6 +105,7 @@ public class HibernateBeanIterable<T extends Bean> implements Iterable<T> {
 		return i;
 	}
 
+	@Override
 	public void close() throws DomainException {
 		try {
 			if (! closed) {

@@ -10,7 +10,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import org.hibernate.type.Type;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
@@ -19,6 +18,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingBeanIterable;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -117,10 +117,9 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public final <T extends Bean> Iterable<T> iterate(Query query) 
+	public final <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query) 
 	throws DomainException {
-		return (Iterable<T>) iterate(query, null, null);
+		return iterate(query, null, null);
 	}
 
 	/**
@@ -134,7 +133,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @throws DomainException
 	 */
 	@Override
-	public abstract <T extends Bean> Iterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
+	public abstract <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
 	throws DomainException;
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
@@ -143,13 +142,6 @@ public abstract class AbstractPersistence implements Persistence {
 
 	public abstract void preRemove(AbstractPersistentBean bean) throws Exception;
 	public abstract void postRemove(AbstractPersistentBean bean) throws Exception;
-
-	public abstract void index(AbstractPersistentBean beanToIndex,
-								String[] propertyNames,
-								Type[] propertyTypes,
-								Object[] oldState,
-								Object[] state) 
-	throws Exception;
 
 	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean) 
 	throws DomainException, MetaDataException;
