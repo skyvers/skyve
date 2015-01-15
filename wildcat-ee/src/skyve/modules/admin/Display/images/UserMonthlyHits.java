@@ -10,8 +10,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.jdbc.JDBCCategoryDataset;
-
-import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
@@ -34,7 +33,7 @@ public class UserMonthlyHits implements DynamicImage<Display> {
 			sb.append("\'");
 			sb.append(" order by userMonthAndYear");
 
-			connection = CORE.getPooledConnection();
+			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, sb.toString());
 			JFreeChart chart = ChartFactory.createBarChart3D("Hits", "User", "Hits", data, PlotOrientation.VERTICAL, true, false, false);
 			chart.setBackgroundImageAlpha(0F);

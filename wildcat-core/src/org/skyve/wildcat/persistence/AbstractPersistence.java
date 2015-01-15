@@ -1,14 +1,8 @@
 package org.skyve.wildcat.persistence;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -25,7 +19,6 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.Query;
 import org.skyve.persistence.SQL;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.util.UtilImpl;
 
 public abstract class AbstractPersistence implements Persistence {
 	/**
@@ -146,27 +139,6 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean) 
 	throws DomainException, MetaDataException;
 
-	@Override
-	public abstract Connection getConnection();
-
-	public static Connection getPooledConnection() throws IllegalStateException {
-		Connection result = null;
-		try {
-			InitialContext ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup(UtilImpl.DATASOURCE);
-			result = ds.getConnection();
-			result.setAutoCommit(false);
-		}
-		catch (SQLException e) {
-			throw new IllegalStateException("Could not get a database connection", e);
-		}
-		catch (NamingException e) {
-			throw new IllegalStateException("Could not find the JDBC connection pool", e);
-		}
-
-		return result;
-	}
-	
 	@Override
 	public SQL newSQL(String query) {
 		return new SQLImpl(query);

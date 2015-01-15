@@ -59,7 +59,7 @@ class CreateAction extends AbstractAction {
 			user.setCustomerName(panel.getCustomer());
 			user.setName(panel.getUser());
 			
-			AbstractPersistence persistence = AbstractPersistence.get();
+			HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
 			persistence.setUser(user);
 
 			Connection connection = null;

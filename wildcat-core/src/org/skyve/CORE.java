@@ -1,6 +1,5 @@
 package org.skyve;
 
-import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.SortedMap;
@@ -75,21 +74,6 @@ public class CORE {
 	 */
 	public static Repository getRepository() {
 		return org.skyve.wildcat.metadata.repository.AbstractRepository.get();
-	}
-	
-	/**
-	 * Get a JDBC connection from the wildcat connection pool.
-	 * Wildcat uses a container provided JNDI data source for connections.
-	 * All servlet and Java EE App stacks can provision this service.
-	 * The connection pool used by wildcat is configured in each web app as a context parameter in web.xml.
-	 * This method should be used sparingly.
-	 * For SQL queries, {@link org.skyve.persistence.Persistence} can be used in conjunction with 
-	 * {@link org.skyve.persistence.SQL}.
-	 * 
-	 * @return a database connection from the container supplied pool.
-	 */
-	public static Connection getPooledConnection() {
-		return AbstractPersistence.getPooledConnection();
 	}
 	
 	/**

@@ -1896,7 +1896,6 @@ t.printStackTrace();
 		}
 	}
 
-	@Override
 	@SuppressWarnings("deprecation")
 	public final Connection getConnection() {
 		return session.connection();

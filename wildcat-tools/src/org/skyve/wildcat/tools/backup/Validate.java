@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
 
 class ForeignKey {
 	private String table;
@@ -53,7 +54,7 @@ public class Validate {
 		File directory = new File(BACKUP_DIR_PREFIX + customerName + File.separator);
 		directory.mkdirs();
 
-		AbstractPersistence persistence = AbstractPersistence.get();
+		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
 		try {
 			StringBuilder fullDiff = new StringBuilder();
 			StringBuilder alter = new StringBuilder();

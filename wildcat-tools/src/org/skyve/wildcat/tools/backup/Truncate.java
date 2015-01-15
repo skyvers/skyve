@@ -16,6 +16,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.ContentUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.SQLImpl;
+import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class Truncate {
@@ -98,7 +99,7 @@ public class Truncate {
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();
 
-		try (Connection c = AbstractPersistence.get().getConnection()) {
+		try (Connection c = ((HibernatePersistence) AbstractPersistence.get()).getConnection()) {
 			DatabaseMetaData dmd = c.getMetaData();
 			try (ResultSet tableResultSet = dmd.getTables(c.getCatalog(), schema, "%", null)) {
 				while (tableResultSet.next()) {

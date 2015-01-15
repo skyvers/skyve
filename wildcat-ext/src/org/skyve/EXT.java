@@ -1,8 +1,14 @@
 package org.skyve;
 
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -29,6 +35,7 @@ import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.wildcat.util.MailUtil;
 import org.skyve.wildcat.util.ReportUtil;
 import org.skyve.wildcat.util.TagUtil;
+import org.skyve.wildcat.util.UtilImpl;
 
 /**
  * The central factory for creating all objects required in wildcat ext.
@@ -460,5 +467,34 @@ public class EXT {
 									OutputStream out)
 	throws JRException {
 		ReportUtil.runReport(jasperPrint, format, out);
+	}
+	
+	/**
+	 * Get a JDBC connection from the wildcat connection pool.
+	 * Wildcat uses a container provided JNDI data source for connections.
+	 * All servlet and Java EE App stacks can provision this service.
+	 * The connection pool used by wildcat is configured in each web app as a context parameter in web.xml.
+	 * This method should be used sparingly.
+	 * For SQL queries, {@link org.skyve.persistence.Persistence} can be used in conjunction with 
+	 * {@link org.skyve.persistence.SQL}.
+	 * 
+	 * @return a database connection from the container supplied pool.
+	 */
+	public static Connection getPooledJDBCConnection() throws IllegalStateException {
+		Connection result = null;
+		try {
+			InitialContext ctx = new InitialContext();
+			DataSource ds = (DataSource) ctx.lookup(UtilImpl.DATASOURCE);
+			result = ds.getConnection();
+			result.setAutoCommit(false);
+		}
+		catch (SQLException e) {
+			throw new IllegalStateException("Could not get a database connection", e);
+		}
+		catch (NamingException e) {
+			throw new IllegalStateException("Could not find the JDBC connection pool", e);
+		}
+
+		return result;
 	}
 }

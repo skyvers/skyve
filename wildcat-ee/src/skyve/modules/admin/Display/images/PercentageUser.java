@@ -9,8 +9,7 @@ import modules.admin.domain.Display;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.jdbc.JDBCPieDataset;
-
-import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
@@ -33,7 +32,7 @@ public class PercentageUser implements DynamicImage<Display> {
 			sb.append("\'");
 			sb.append(" group by User");
 
-			connection = CORE.getPooledConnection();
+			connection = EXT.getPooledJDBCConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());
 			JFreeChart chart = ChartFactory.createPieChart3D("User", data, true, false, false);
 			chart.setBackgroundImageAlpha(0F);

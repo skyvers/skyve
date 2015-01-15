@@ -1,7 +1,6 @@
 package org.skyve.persistence;
 
 import java.io.Serializable;
-import java.sql.Connection;
 import java.util.List;
 
 import org.skyve.domain.Bean;
@@ -310,12 +309,4 @@ public interface Persistence extends Serializable {
 	 */
 	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
 	throws Exception;
-	
-	/**
-	 * Allow access to the SQL connection.
-	 * If an emergency, break the glass.  Good for calling stored procedures etc.
-	 * Use the Persistence API to retrieve SQL and execute DML.
-	 * @return
-	 */
-	public Connection getConnection();
 }
