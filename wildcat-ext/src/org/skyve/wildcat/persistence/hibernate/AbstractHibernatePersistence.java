@@ -22,7 +22,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
-import javax.jcr.RepositoryException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
@@ -77,11 +76,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -112,7 +111,6 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.BeanContent;
-import org.skyve.wildcat.content.ContentUtil;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.domain.MapBean;
 import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
@@ -135,7 +133,7 @@ import org.skyve.wildcat.util.ValidationUtil;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class HibernatePersistence extends AbstractPersistence {
+public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	/**
 	 * For Serialization
 	 */
@@ -156,14 +154,20 @@ public class HibernatePersistence extends AbstractPersistence {
 
 	private EntityManager em = null;
 	private Session session = null;
-	private transient javax.jcr.Session jcrSession = null;
 
-	public HibernatePersistence() {
+	public AbstractHibernatePersistence() {
 		em = emf.createEntityManager();
 		session = ((HibernateEntityManager) em).getSession();
 		session.setFlushMode(FlushMode.MANUAL);
 	}
 
+	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
+	protected abstract void putContent(BeanContent content) throws Exception;
+	protected abstract void moveContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
+	protected abstract void removeStreamContent(PersistentBean bean, String fieldName) throws Exception;
+
+	protected abstract void commitContent();
+	
 	@Override
 	public final void disposeAllPersistenceInstances() 
 	throws MetaDataException {
@@ -173,7 +177,7 @@ public class HibernatePersistence extends AbstractPersistence {
 		emf.close();
 		emf = null;
 
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernatePersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
 
 		configure();
 	}
@@ -745,18 +749,7 @@ t.printStackTrace();
 		}
 		finally {
 			try {
-				if (jcrSession != null) {
-					try {
-						jcrSession.save();
-					}
-					catch (RepositoryException e) {
-						System.err.println("Cannot save content repository changes.");
-					}
-					finally {
-						jcrSession.logout();
-						jcrSession = null;
-					}
-				}
+				commitContent();
 			}
 			finally {
 				if (close) {
@@ -1589,17 +1582,13 @@ t.printStackTrace();
 			}
 		}
 
-		if (jcrSession == null) {
-			jcrSession = ContentUtil.getFullSession(customer.getName());
-		}
-
 		if (properties.isEmpty()) {
 			if (! hasContent) {
-				ContentUtil.remove(jcrSession, beanToReindex);
+				removeBeanContent(beanToReindex);
 			}
 		}
 		else {
-			ContentUtil.put(jcrSession, content);
+			putContent(content);
 		}
 	}
 
@@ -1660,11 +1649,8 @@ t.printStackTrace();
 				if (AttributeType.content.equals(type)) {
 					if (oldState != null) { // an update
 						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
-							if (jcrSession == null) {
-								jcrSession = ContentUtil.getFullSession(customer.getName());
-							}
 							// Remove the stream content
-							ContentUtil.remove(jcrSession, beanToIndex, field.getName());
+							removeStreamContent(beanToIndex, field.getName());
 						}
 					}
 				}
@@ -1680,20 +1666,12 @@ t.printStackTrace();
 					((bizDataGroupId != null) && (! bizDataGroupId.equals(oldBizDataGroupId))) || // not the same
 					((bizUserId == null) && (oldBizUserId != null)) || // null to not null
 					((bizUserId != null) && (! bizUserId.equals(oldBizUserId)))) { // not the same
-				if (jcrSession == null) {
-					jcrSession = ContentUtil.getFullSession(customer.getName());
-				}
-
-				ContentUtil.move(jcrSession, content, oldBizDataGroupId, oldBizUserId);
+				moveContent(content, oldBizDataGroupId, oldBizUserId);
 			}
 		}
 
 		if (! properties.isEmpty()) {
-			if (jcrSession == null) {
-				jcrSession = ContentUtil.getFullSession(customer.getName());
-			}
-
-			ContentUtil.put(jcrSession, content);
+			putContent(content);
 		}
 	}
 
@@ -1727,7 +1705,7 @@ t.printStackTrace();
 		new DeleteValidationBeanVisitor() {
 			@Override
 			void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) {
-				String entityName = HibernatePersistence.this.getDocumentEntityName(documentToCascade.getOwningModuleName(),
+				String entityName = AbstractHibernatePersistence.this.getDocumentEntityName(documentToCascade.getOwningModuleName(),
 																						documentToCascade.getName());
 				Set<Bean> theseBeansToDelete = beansToDelete.get(entityName);
 				if (theseBeansToDelete == null) {
@@ -1764,15 +1742,7 @@ t.printStackTrace();
 	@Override
 	public void postRemove(AbstractPersistentBean loadedBean)
 	throws Exception {
-		// Remove the bean content
-		StringBuilder sb = new StringBuilder(64);
-		sb.append(loadedBean.getBizModule()).append('/');
-		sb.append(loadedBean.getBizDocument()).append('/');
-		sb.append(loadedBean.getBizId()).append('/');
-		if (jcrSession == null) {
-			jcrSession = ContentUtil.getFullSession(user.getCustomerName());
-		}
-		ContentUtil.remove(jcrSession, loadedBean);
+		removeBeanContent(loadedBean);
 	}
 	
 	@Override

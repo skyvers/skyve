@@ -18,7 +18,7 @@ import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.SuperUser;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 class CreateAction extends AbstractAction {
@@ -44,7 +44,7 @@ class CreateAction extends AbstractAction {
 		try {
 			UIUtil.startWaitCursor(panel);
 
-			AbstractPersistence.IMPLEMENTATION_CLASS = HibernatePersistence.class;
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
 //			UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 			UtilImpl.DIALECT = panel.getDBDialect();
 			UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = panel.getDBDriver();
@@ -59,7 +59,7 @@ class CreateAction extends AbstractAction {
 			user.setCustomerName(panel.getCustomer());
 			user.setName(panel.getUser());
 			
-			HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+			HibernateJackrabbitPersistence persistence = (HibernateJackrabbitPersistence) AbstractPersistence.get();
 			persistence.setUser(user);
 
 			Connection connection = null;

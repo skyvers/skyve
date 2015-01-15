@@ -19,7 +19,7 @@ import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.SuperUser;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 final class BackupUtil {
@@ -35,7 +35,7 @@ final class BackupUtil {
 							String databaseUsername,
 							String databasePassword) 
 	throws MetaDataException {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernatePersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.DIALECT = databaseDialect;
 		UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = databaseJdbcDriver;

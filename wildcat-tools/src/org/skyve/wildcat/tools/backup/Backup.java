@@ -24,7 +24,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.ContentUtil;
 import org.skyve.wildcat.content.StreamContent;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
+import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -52,7 +52,7 @@ public class Backup {
 
 		UserType geometryUserType = null; // this is only created when we come across a geometry
 		
-		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
 			Session jcrSession = null;
 

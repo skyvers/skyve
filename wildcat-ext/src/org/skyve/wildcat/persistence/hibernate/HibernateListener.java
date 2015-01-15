@@ -68,7 +68,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	 */
 	@Override
 	public void onPostInsert(PostInsertEvent event) {
-		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
 		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();
@@ -91,7 +91,7 @@ public class HibernateListener implements PostUpdateEventListener,
 	 */
 	@Override
 	public void onPostUpdate(PostUpdateEvent event) {
-		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
 		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();

@@ -14,7 +14,7 @@ import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalSecureRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class WildcatContextListener implements ServletContextListener {
@@ -109,7 +109,7 @@ public class WildcatContextListener implements ServletContextListener {
 		UtilImpl.WILDCAT_PERSISTENCE_CLASS = properties.getProperty("WILDCAT_PERSISTENCE_CLASS");
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
-				AbstractPersistence.IMPLEMENTATION_CLASS = HibernatePersistence.class;
+				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
 			}
 			else {
 				try {

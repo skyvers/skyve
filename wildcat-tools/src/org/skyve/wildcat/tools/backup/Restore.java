@@ -23,7 +23,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.ContentUtil;
 import org.skyve.wildcat.content.StreamContent;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernatePersistence;
+import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -72,7 +72,7 @@ public class Restore {
 	throws Exception {
 		UserType geometryUserType = null; // this is only created when we come across a geometry
 
-		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
 			persistence.begin();
 			Session jcrSession = null;
@@ -279,7 +279,7 @@ public class Restore {
 	}
 
 	private static void restoreForeignKeys(File backupDirectory, Collection<Table> tables) throws Exception {
-		HibernatePersistence persistence = (HibernatePersistence) AbstractPersistence.get();
+		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
 			persistence.begin();
 			// Don't close this connection
