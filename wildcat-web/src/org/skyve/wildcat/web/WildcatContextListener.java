@@ -106,20 +106,7 @@ public class WildcatContextListener implements ServletContextListener {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = passwordHashingAlgorithm;
 		}
 		
-		UtilImpl.WILDCAT_PERSISTENCE_CLASS = properties.getProperty("WILDCAT_PERSISTENCE_CLASS");
-		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
-			if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
-				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
-			}
-			else {
-				try {
-					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.WILDCAT_PERSISTENCE_CLASS);
-				}
-				catch (ClassNotFoundException e) {
-					throw new IllegalStateException("Could not find WILDCAT_PERSISTENCE_CLASS " + UtilImpl.WILDCAT_PERSISTENCE_CLASS, e);
-				}
-			}
-		}
+		// NB Need the repository set before setting persistence
 		UtilImpl.WILDCAT_REPOSITORY_CLASS = properties.getProperty("WILDCAT_REPOSITORY_CLASS");
 		if (AbstractRepository.get() == null) {
 			if (UtilImpl.WILDCAT_REPOSITORY_CLASS == null) {
@@ -133,6 +120,21 @@ public class WildcatContextListener implements ServletContextListener {
 				}
 				catch (Exception e) {
 					throw new IllegalStateException("Could not create WILDCAT_REPOSITORY_CLASS " + UtilImpl.WILDCAT_REPOSITORY_CLASS, e);
+				}
+			}
+		}
+
+		UtilImpl.WILDCAT_PERSISTENCE_CLASS = properties.getProperty("WILDCAT_PERSISTENCE_CLASS");
+		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
+			if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
+				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+			}
+			else {
+				try {
+					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.WILDCAT_PERSISTENCE_CLASS);
+				}
+				catch (ClassNotFoundException e) {
+					throw new IllegalStateException("Could not find WILDCAT_PERSISTENCE_CLASS " + UtilImpl.WILDCAT_PERSISTENCE_CLASS, e);
 				}
 			}
 		}

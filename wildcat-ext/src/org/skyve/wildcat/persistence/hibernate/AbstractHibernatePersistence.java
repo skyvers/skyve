@@ -165,7 +165,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	protected abstract void putContent(BeanContent content) throws Exception;
 	protected abstract void moveContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
 	protected abstract void removeStreamContent(PersistentBean bean, String fieldName) throws Exception;
-
 	protected abstract void commitContent();
 	
 	@Override
@@ -177,7 +176,17 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		emf.close();
 		emf = null;
 
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+		if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+		}
+		else {
+			try {
+				AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.WILDCAT_PERSISTENCE_CLASS);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Could not find WILDCAT_PERSISTENCE_CLASS " + UtilImpl.WILDCAT_PERSISTENCE_CLASS, e);
+			}
+		}
 
 		configure();
 	}
