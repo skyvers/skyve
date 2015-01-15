@@ -24,13 +24,13 @@ public class PercentageUser implements DynamicImage<Display> {
 	throws Exception {
 		Connection connection = null;
 		try {
-			StringBuilder sb = new StringBuilder("SELECT userName as User");
+			StringBuilder sb = new StringBuilder("SELECT userName");
 			sb.append(", sum(numberofhits) ");
 			sb.append(" FROM adm_usermonthlyhits");
 			sb.append(" where bizCustomer = '");
 			sb.append(user.getCustomer().getName());
 			sb.append("\'");
-			sb.append(" group by User");
+			sb.append(" group by userName");
 
 			connection = EXT.getPooledJDBCConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());

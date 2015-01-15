@@ -26,7 +26,7 @@ public class UserMonthlyHits implements DynamicImage<Display> {
 		Connection connection = null;
 		try {
 			StringBuilder sb = new StringBuilder("SELECT concat(concat(concat(concat(userName, ' - '), month), '/'), year) as userMonthAndYear");
-			sb.append(", numberofHits ");
+			sb.append(", numberofHits as Hits");
 			sb.append(" FROM adm_usermonthlyhits ");
 			sb.append(" where bizCustomer = '");
 			sb.append(user.getCustomer().getName());
