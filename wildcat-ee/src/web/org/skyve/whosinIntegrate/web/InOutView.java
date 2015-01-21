@@ -1,12 +1,10 @@
 package org.skyve.whosinIntegrate.web;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
-import javax.jcr.Session;
 
 import modules.admin.domain.Contact;
 import modules.whosinIntegrate.domain.Office;
@@ -14,6 +12,7 @@ import modules.whosinIntegrate.domain.Staff;
 
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.user.User;
@@ -22,8 +21,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.FacesView;
 
@@ -106,26 +105,22 @@ public class InOutView extends FacesView<Office> {
 
 						String bizCustomer = u.getCustomerName();
 						Contact contact = selectedStaff.getContact();
-						Session session = ContentUtil.getFullSession(bizCustomer);
-						try {
-							StreamContent content = new StreamContent(bizCustomer, 
-																		Contact.MODULE_NAME, 
-																		Contact.DOCUMENT_NAME,
-																		u.getDataGroupId(), 
-																		u.getId(), 
-																		contact.getBizId(), 
-																		Contact.imagePropertyName);
-							content.setUuid(contact.getImage());
-							content.setVersionable(false);
-							content.setMimeType(MimeType.png);
-							content.setStream(new ByteArrayInputStream(bytes));
-							content = ContentUtil.put(session, content, false);
-							contact.setImage(content.getUuid());
+						
+						try (ContentManager cm = EXT.newContentManager()) {
+							AttachmentContent content = new AttachmentContent(bizCustomer, 
+																				Contact.MODULE_NAME, 
+																				Contact.DOCUMENT_NAME,
+																				u.getDataGroupId(), 
+																				u.getId(),
+																				contact.getBizId(), 
+																				Contact.imagePropertyName,
+																				MimeType.png,
+																				bytes);
+							content.setContentId(contact.getImage());
+							cm.put(content);
+							contact.setImage(content.getContentId());
 							changedContactImageId = contact.getImage(); // the next render of graphic image will drop the cache
 							base64Image = null;
-						}
-						finally {
-							session.logout();
 						}
 					}
 				}

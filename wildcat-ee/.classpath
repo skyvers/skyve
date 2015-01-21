@@ -8,16 +8,17 @@
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jts-1.13.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/wildcat-core.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/wildcat-ext.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jfreechart-1.0.12.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/quartz-1.6.0.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-3.5-FINAL-20090928.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-contrib-3.5-FINAL-20090928.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-ooxml-3.5-FINAL-20090928.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-scratchpad-3.5-FINAL-20090928.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jcr-1.0.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.1.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-ooxml-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-scratchpad-3.10.1.jar"/>
+	<classpathentry kind="lib" path="lib/mapdb/mapdb-1.0.6.jar"/>
+	<classpathentry kind="lib" path="lib/h2-1.3.173.jar"/>
 	<classpathentry kind="output" path="javaee/wildcat.ear/apps.jar"/>
 </classpath>

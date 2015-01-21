@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.jcr.Session;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -24,12 +24,13 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.view.DownloadAreaType;
 import org.skyve.wildcat.persistence.AbstractPersistence;
+import org.skyve.wildcat.util.UtilImpl;
 		
 public class CustomerResourceServlet extends HttpServlet {
 	/**
@@ -38,14 +39,14 @@ public class CustomerResourceServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	private static final class Resource {
-		private Session session;
-		private StreamContent content;
+		private ContentManager cm;
+		private AttachmentContent content;
 		private File file;
 
-		void dispose() {
-			if (session != null) {
-				session.logout();
-				session = null;
+		void dispose() throws Exception {
+			if (cm != null) {
+				cm.close();
+				cm = null;
 			}
 		}
 
@@ -71,7 +72,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				result = new FileInputStream(file);
 			}
 			if (content != null) {
-				result = content.getStream();
+				result = content.getContentStream();
 			}
 
 			return result;
@@ -144,8 +145,8 @@ public class CustomerResourceServlet extends HttpServlet {
 																				module,
 																				document,
 																				binding);
-						session = ContentUtil.getFullSession(customerName);
-						content = ContentUtil.get(session, resourceFileName);
+						cm = EXT.newContentManager();
+						content = cm.get(resourceFileName);
 						if (content != null) {
 							// Check that the user has access
 							if (! user.canAccessContent(content.getBizId(),
@@ -203,8 +204,16 @@ public class CustomerResourceServlet extends HttpServlet {
 		finally {
 			Resource resource = RESOURCES.get();
 			if (resource != null) {
-				resource.dispose();
-				RESOURCES.remove();
+				try {
+					resource.dispose();
+				}
+				catch (Exception e) {
+					UtilImpl.LOGGER.severe("Could not dispose of the thread-local content resource properly.  It has been removed from the thread local storage.");
+					e.printStackTrace();
+				}
+				finally {
+					RESOURCES.remove();
+				}
 			}
 		}
 	}

@@ -384,8 +384,7 @@ public class UserImpl implements User {
 					SQLImpl sql = new SQLImpl(sb.toString());
 					sql.putParameter(Bean.DOCUMENT_ID, beanBizId);
 					List<Object> rows = AbstractPersistence.get().retrieveInsecureSQL(sql);
-					if (rows.isEmpty()) // bean is still transient - user hasn't saved
-					{
+					if (rows.isEmpty()) { // bean is still transient - user hasn't saved
 						result = true;
 					}
 					else {

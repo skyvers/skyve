@@ -15,14 +15,12 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.jcr.Session;
-
-import org.apache.jackrabbit.core.data.DataStoreException;
 import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
+import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -54,9 +52,7 @@ public class Backup {
 		
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
-			Session jcrSession = null;
-
-			try {
+			try (ContentManager cm = EXT.newContentManager()) {
 				// Don't close this connection
 				@SuppressWarnings("resource")
 				Connection connection = persistence.getConnection();
@@ -167,25 +163,26 @@ public class Backup {
 												else {
 													// TODO backup content versions
 													value = stringValue;
-													if (jcrSession == null) {
-														jcrSession = ContentUtil.getFullSession(customerName);
-													}
-													StreamContent content = null;
+													AttachmentContent content = null;
 													try {
-														content = ContentUtil.get(jcrSession, stringValue);
-														try (InputStream cis = content.getStream()) {
+														content = cm.get(stringValue);
+														try (InputStream cis = content.getContentStream()) {
 															File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
 																								content.getBizModule() + File.separator +
 																								content.getBizDocument() + File.separator +
 																								stringValue.substring(0, 2) + File.separator +
 																								stringValue.substring(2, 4) + File.separator +
-																								stringValue.substring(4, 6));
+																								stringValue.substring(4, 6) + File.separator + 
+																								stringValue);
 															if (! contentDirectory.exists()) {
 																contentDirectory.mkdirs();
 															}
+															String fileName = content.getFileName();
+															if (fileName == null) {
+																fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
+															}
 															try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
-																												File.separator + stringValue + '.' +
-																												content.getMimeType().getStandardFileSuffix())) {
+																												File.separator + fileName)) {
 																try (BufferedOutputStream bos = new BufferedOutputStream(cos)) {
 																	byte[] bytes = new byte[1024]; // 1K
 																	int bytesRead = 0;
@@ -197,8 +194,8 @@ public class Backup {
 															}
 														}
 													}
-													catch (DataStoreException e) {
-														if (e.getCause() instanceof FileNotFoundException) {
+													catch (Exception e) {
+														if (e instanceof FileNotFoundException) {
 															System.err.println("*** ALTHOUGH THE FOLLOWING STACK TRACE DID NOT STOP THE BACKUP THIS IS SERIOUS");
 															e.printStackTrace();
 														}
@@ -221,11 +218,6 @@ public class Backup {
 							}
 						}
 					}
-				}
-			}
-			finally {
-				if (jcrSession != null) {
-					jcrSession.logout();
 				}
 			}
 		}

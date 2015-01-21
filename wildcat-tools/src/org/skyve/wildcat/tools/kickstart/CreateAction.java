@@ -12,13 +12,13 @@ import java.util.Date;
 import javax.swing.AbstractAction;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.jackrabbit.uuid.UUID;
+import java.util.UUID;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.SuperUser;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 class CreateAction extends AbstractAction {
@@ -44,7 +44,7 @@ class CreateAction extends AbstractAction {
 		try {
 			UIUtil.startWaitCursor(panel);
 
-			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 //			UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 			UtilImpl.DIALECT = panel.getDBDialect();
 			UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = panel.getDBDriver();
@@ -59,7 +59,7 @@ class CreateAction extends AbstractAction {
 			user.setCustomerName(panel.getCustomer());
 			user.setName(panel.getUser());
 			
-			HibernateJackrabbitPersistence persistence = (HibernateJackrabbitPersistence) AbstractPersistence.get();
+			HibernateElasticSearchPersistence persistence = (HibernateElasticSearchPersistence) AbstractPersistence.get();
 			persistence.setUser(user);
 
 			Connection connection = null;

@@ -4,19 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class SearchResults {
-	private long totalResults;
 	private String searchTimeInSecs;
 	private String suggestion;
 
 	private List<SearchResult> results = new ArrayList<>();
-
-	public long getTotalResults() {
-		return totalResults;
-	}
-
-	public void setTotalResults(long totalResults) {
-		this.totalResults = totalResults;
-	}
 
 	public String getSearchTimeInSecs() {
 		return searchTimeInSecs;

@@ -121,6 +121,7 @@
 -->
 
         <!-- Jackrabbit -->
+<!--
         <dependency>
             <groupId>org.apache.jackrabbit</groupId>
             <artifactId>jackrabbit-core</artifactId>
@@ -156,7 +157,7 @@
             <artifactId>fontbox</artifactId>
             <version>1.7.1</version>
         </dependency>
-
+-->
         <!-- Hibernate -->
         <dependency>
         	<groupId>org.hibernate</groupId>

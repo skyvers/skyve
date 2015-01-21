@@ -13,13 +13,15 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.wildcat.content.AbstractContentManager;
+import org.skyve.wildcat.content.elasticsearch.ESClient;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.SuperUser;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 final class BackupUtil {
@@ -35,7 +37,8 @@ final class BackupUtil {
 							String databaseUsername,
 							String databasePassword) 
 	throws MetaDataException {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+		AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.DIALECT = databaseDialect;
 		UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = databaseJdbcDriver;

@@ -1,6 +1,5 @@
 package org.skyve.wildcat.persistence.hibernate;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +30,8 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 import javax.sql.DataSource;
 
-import org.apache.jackrabbit.extractor.HTMLTextExtractor;
-import org.apache.jackrabbit.extractor.TextExtractor;
+import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
 import org.hibernate.EntityMode;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
@@ -71,7 +70,6 @@ import org.hibernate.tool.hbm2ddl.TableMetadata;
 import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
 import org.hibernatespatial.GeometryUserType;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
@@ -162,10 +160,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
-	protected abstract void putContent(BeanContent content) throws Exception;
-	protected abstract void moveContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
-	protected abstract void removeStreamContent(PersistentBean bean, String fieldName) throws Exception;
-	protected abstract void commitContent();
+	protected abstract void putBeanContent(BeanContent content) throws Exception;
+	protected abstract void moveBeanContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
+	protected abstract void removeAttachmentContent(String contentId) throws Exception;
+	protected abstract void commitContent() throws Exception;
 	
 	@Override
 	public final void disposeAllPersistenceInstances() 
@@ -177,7 +175,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		emf = null;
 
 		if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
-			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 		}
 		else {
 			try {
@@ -754,11 +752,15 @@ t.printStackTrace();
 			}
 		}
 		catch (RollbackException e) {
-			System.err.println("Cannot commit as transaction was rolled back earlier....");
+			UtilImpl.LOGGER.warning("Cannot commit as transaction was rolled back earlier....");
 		}
 		finally {
 			try {
 				commitContent();
+			}
+			catch (Exception e) {
+				UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());
+				e.printStackTrace();
 			}
 			finally {
 				if (close) {
@@ -1597,7 +1599,7 @@ t.printStackTrace();
 			}
 		}
 		else {
-			putContent(content);
+			putBeanContent(content);
 		}
 	}
 
@@ -1658,8 +1660,8 @@ t.printStackTrace();
 				if (AttributeType.content.equals(type)) {
 					if (oldState != null) { // an update
 						if ((state[i] == null) && (oldState[i] != null)) { // removed the content link
-							// Remove the stream content
-							removeStreamContent(beanToIndex, field.getName());
+							// Remove the attachment content
+							removeAttachmentContent((String) oldState[i]);
 						}
 					}
 				}
@@ -1675,30 +1677,19 @@ t.printStackTrace();
 					((bizDataGroupId != null) && (! bizDataGroupId.equals(oldBizDataGroupId))) || // not the same
 					((bizUserId == null) && (oldBizUserId != null)) || // null to not null
 					((bizUserId != null) && (! bizUserId.equals(oldBizUserId)))) { // not the same
-				moveContent(content, oldBizDataGroupId, oldBizUserId);
+				moveBeanContent(content, oldBizDataGroupId, oldBizUserId);
 			}
 		}
 
 		if (! properties.isEmpty()) {
-			putContent(content);
+			putBeanContent(content);
 		}
 	}
 
-	private static String extractTextFromMarkup(String value) throws IOException {
-		TextExtractor extractor = new HTMLTextExtractor();
-		StringBuilder result = new StringBuilder(1024);
-		try (BufferedReader reader = new BufferedReader(extractor.extractText(new ByteArrayInputStream(value.getBytes()), 
-																			MimeType.html.toString(), 
-																			null))) {
-	        char[] buf = new char[1024];
-	        int numRead = 0;
-	        while((numRead = reader.read(buf)) != -1) {
-	            String data = String.valueOf(buf, 0, numRead);
-	            result.append(data);
-	            buf = new char[1024];
-	        }
-		}
-        return result.toString();
+	private static final Tika TIKA = new Tika();
+	
+	private static String extractTextFromMarkup(String value) throws IOException, TikaException {
+		return TIKA.parseToString(new ByteArrayInputStream(value.getBytes()));
 	}
 	
 	// Need the callback because an element deleted from a collection will be deleted and only this event will pick it up

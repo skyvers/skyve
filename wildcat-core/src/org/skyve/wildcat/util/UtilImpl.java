@@ -75,6 +75,7 @@ public class UtilImpl {
 	// Implementations of Key WILDCAT classes
 	public static String WILDCAT_REPOSITORY_CLASS = null;
 	public static String WILDCAT_PERSISTENCE_CLASS = null;
+	public static String WILDCAT_CONTENT_MANAGER_CLASS = null;
 	
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");

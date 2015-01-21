@@ -14,7 +14,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.wildcat.jasperreports.WildcatDataSource;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateElasticSearchPersistence;
 
 public class WildcatQueryExecuter implements JRQueryExecuter {
 	private String moduleDotQuery;
@@ -52,7 +52,7 @@ public class WildcatQueryExecuter implements JRQueryExecuter {
 	
 	public static Query getQuery(String moduleDotQuery)
 	throws MetaDataException {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 		UserImpl user = new UserImpl();
 		user.setCustomerName("bizhub");
 		user.setName("mike");

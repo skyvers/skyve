@@ -30,6 +30,8 @@ import org.skyve.report.ReportFormat;
 import org.skyve.wildcat.bizport.POISheet;
 import org.skyve.wildcat.bizport.POIWorkbook;
 import org.skyve.wildcat.bizport.StandardGenerator;
+import org.skyve.wildcat.content.AbstractContentManager;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.job.JobDescription;
 import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.wildcat.util.MailUtil;
@@ -496,5 +498,9 @@ public class EXT {
 		}
 
 		return result;
+	}
+	
+	public static ContentManager newContentManager() {
+		return AbstractContentManager.get();
 	}
 }

@@ -7,15 +7,14 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.DVConstraint.OperatorType;
-import org.apache.poi.hssf.usermodel.DVConstraint.ValidationType;
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.hssf.usermodel.HSSFDataValidation.ErrorStyle;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.DataValidation;
+import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Hyperlink;
@@ -360,14 +359,14 @@ public final class POISheet implements BizPortSheet {
 					case dateTime:
 					case time:
 					case timestamp:
-						DVConstraint dateConstraint = DVConstraint.createDateConstraint(OperatorType.IGNORED, 
+						DVConstraint dateConstraint = DVConstraint.createDateConstraint(DataValidationConstraint.OperatorType.IGNORED, 
 																							"01/01/1900", 
 																							"31/12/2999", 
 																							"d/M/yy");
 						HSSFDataValidation dateValidation = new HSSFDataValidation(addresslist, dateConstraint);
 						dateValidation.setSuppressDropDownArrow(true);
 						dateValidation.setShowErrorBox(true);
-						dateValidation.setErrorStyle(ErrorStyle.STOP);
+						dateValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
 						dateValidation.createErrorBox("Not a valid value", "Please enter a valid data value between .");
 						dateValidation.setEmptyCellAllowed(true);
 						((HSSFSheet) sheet).addValidationData(dateValidation);
@@ -375,14 +374,14 @@ public final class POISheet implements BizPortSheet {
 					case integer:
 					case longInteger:
 // TODO look at string length and date ValidationTypes
-						DVConstraint longConstraint = DVConstraint.createNumericConstraint(ValidationType.INTEGER,
-																							OperatorType.BETWEEN, 
+						DVConstraint longConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.INTEGER,
+																							DataValidationConstraint.OperatorType.BETWEEN, 
 																							Integer.toString(Integer.MIN_VALUE), 
 																							Integer.toString(Integer.MAX_VALUE));
 						HSSFDataValidation longValidation = new HSSFDataValidation(addresslist, longConstraint);
 						longValidation.setSuppressDropDownArrow(true);
 						longValidation.setShowErrorBox(true);
-						longValidation.setErrorStyle(ErrorStyle.STOP);
+						longValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
 						longValidation.createErrorBox("Not a valid value", "Please enter a valid value.");
 						longValidation.setEmptyCellAllowed(true);
 						((HSSFSheet) sheet).addValidationData(longValidation);
@@ -390,14 +389,14 @@ public final class POISheet implements BizPortSheet {
 					case decimal2:
 					case decimal5:
 					case decimal10:
-						DVConstraint floatConstraint = DVConstraint.createNumericConstraint(ValidationType.DECIMAL,
-																								OperatorType.BETWEEN, 
+						DVConstraint floatConstraint = DVConstraint.createNumericConstraint(DataValidationConstraint.ValidationType.DECIMAL,
+																								DataValidationConstraint.OperatorType.BETWEEN, 
 																								Integer.toString(Integer.MIN_VALUE), 
 																								Integer.toString(Integer.MAX_VALUE));
 						HSSFDataValidation floatValidation = new HSSFDataValidation(addresslist, floatConstraint);
 						floatValidation.setSuppressDropDownArrow(true);
 						floatValidation.setShowErrorBox(true);
-						floatValidation.setErrorStyle(ErrorStyle.STOP);
+						floatValidation.setErrorStyle(DataValidation.ErrorStyle.STOP);
 						floatValidation.createErrorBox("Not a valid value", "Please enter a valid value.");
 						floatValidation.setEmptyCellAllowed(true);
 						((HSSFSheet) sheet).addValidationData(floatValidation);
@@ -454,7 +453,7 @@ public final class POISheet implements BizPortSheet {
 		HSSFDataValidation validation = new HSSFDataValidation(addresslist, constraint);
 		validation.setSuppressDropDownArrow(false);
 		validation.setShowErrorBox(true);
-		validation.setErrorStyle(ErrorStyle.STOP);
+		validation.setErrorStyle(DataValidation.ErrorStyle.STOP);
 		validation.createErrorBox("Pick a valid value", "Please pick a valid value from the drop down");
 		validation.setEmptyCellAllowed(true);
 		((HSSFSheet) sheet).addValidationData(validation);

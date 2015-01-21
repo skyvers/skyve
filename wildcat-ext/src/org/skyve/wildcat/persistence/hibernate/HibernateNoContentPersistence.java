@@ -17,20 +17,20 @@ public class HibernateNoContentPersistence extends AbstractHibernatePersistence 
 	}
 
 	@Override
-	protected void putContent(BeanContent content) throws Exception {
+	protected void putBeanContent(BeanContent content) throws Exception {
 		// no-op
 	}
 
 	@Override
-	protected void moveContent(BeanContent content,
-								String oldBizDataGroupId,
-								String oldBizUserId)
+	protected void moveBeanContent(BeanContent content,
+									String oldBizDataGroupId,
+									String oldBizUserId)
 	throws Exception {
 		// no-op
 	}
 
 	@Override
-	protected void removeStreamContent(PersistentBean bean, String fieldName)
+	protected void removeAttachmentContent(String contentId)
 	throws Exception {
 		// no-op
 	}

@@ -15,13 +15,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.imageio.ImageIO;
-import javax.jcr.Session;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
+import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -39,8 +39,8 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
@@ -420,16 +420,19 @@ public class TrackmateServlet extends HttpServlet {
 				}
 			}
 
-			Session session = ContentUtil.getFullSession(customerName);
-			try {
-				StreamContent content = new StreamContent(customerName, TRACK_MODULE_NAME, TRACK_DOCUMENT_NAME, null, user.getId(), track.getBizId(), PHOTO_PROPERTY_NAME);
-				content.setVersionable(false);
-				content.setMimeType(MimeType.jpeg);
-				content.setStream(new ByteArrayInputStream(bytes));
-				content = ContentUtil.put(session, content, false);
-				Binder.set(track, PHOTO_PROPERTY_NAME, content.getUuid());
-			} finally {
-				session.logout();
+			try (ContentManager cm = EXT.newContentManager()) {
+				AttachmentContent content = new AttachmentContent(customerName,
+																	TRACK_MODULE_NAME,
+																	TRACK_DOCUMENT_NAME,
+																	null,
+																	user.getId(),
+																	track.getBizId(),
+																	PHOTO_PROPERTY_NAME,
+																	MimeType.jpeg,
+																	bytes);
+				content.setContentId((String) Binder.get(track, PHOTO_PROPERTY_NAME));
+				cm.put(content);
+				Binder.set(track, PHOTO_PROPERTY_NAME, content.getContentId());
 			}
 		}
 

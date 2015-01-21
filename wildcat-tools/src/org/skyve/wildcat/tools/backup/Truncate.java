@@ -7,13 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.jcr.Node;
-import javax.jcr.Session;
-
-import org.apache.jackrabbit.core.SessionImpl;
-import org.apache.jackrabbit.core.data.GarbageCollector;
+import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.wildcat.content.ContentUtil;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.SQLImpl;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
@@ -73,25 +69,9 @@ public class Truncate {
 		finally {
 			persistence.commit(true);
 		}
-
-		Session jcrSession = ContentUtil.getFullSession(customerName);
-		try {
-			Node rootNode = jcrSession.getRootNode();
-			if (rootNode.hasNode(customerName)) {
-				Node customerNode = rootNode.getNode(customerName);
-				customerNode.remove();
-				jcrSession.save();
-
-				GarbageCollector gc = ((SessionImpl) jcrSession).createDataStoreGarbageCollector();
-				gc.scan();
-				gc.stopScan();
-				gc.deleteUnused();
-			}
-		}
-		finally {
-			if (jcrSession != null) {
-				jcrSession.logout();
-			}
+		
+		try (ContentManager cm = EXT.newContentManager()) {
+			cm.truncate(customerName);
 		}
 	}
 
@@ -158,7 +138,6 @@ public class Truncate {
 			System.exit(1);
 		}
 		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-//		Collection<Table> tables = BackupUtil.getTables();
 		Collection<Table> tables = getTables(args[7]);
 		truncate(tables, args[0]);
 	}

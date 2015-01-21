@@ -4,24 +4,20 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
-
-import javax.jcr.Session;
 
 import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
-import org.skyve.content.MimeType;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -55,9 +51,9 @@ public class Restore {
 								databasePassword);
 		Collection<Table> tables = BackupUtil.getTables();
 
-		restoreData(customerName, backupDirectory, tables, false);
+		restoreData(backupDirectory, tables, false);
 		restoreForeignKeys(backupDirectory, tables);
-		restoreData(customerName, backupDirectory, tables, true);
+		restoreData(backupDirectory, tables, true);
 	}
 
 //	update bizKeys
@@ -65,8 +61,7 @@ public class Restore {
 //	validate by updating bizLock and rolling back
 //	check commit points
 
-	private static void restoreData(String customerName,
-										File backupDirectory,
+	private static void restoreData(File backupDirectory,
 										Collection<Table> tables,
 										boolean joinTables) 
 	throws Exception {
@@ -75,8 +70,7 @@ public class Restore {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
 			persistence.begin();
-			Session jcrSession = null;
-			try {
+			try (ContentManager cm = EXT.newContentManager()) {
 				// Don't close this connection
 				@SuppressWarnings("resource")
 				Connection connection = persistence.getConnection();
@@ -202,13 +196,9 @@ public class Restore {
 																					relativeContentPath + File.separator + 
 																					stringValue.substring(0, 2) + File.separator + 
 																					stringValue.substring(2, 4) + File.separator +
-																					stringValue.substring(4, 6));
-												File[] files = candidateDirectory.listFiles(new FilenameFilter() {
-													@Override
-													public boolean accept(File dir, String name) {
-														return (name.contains(fileName));
-													}
-												});
+																					stringValue.substring(4, 6) + File.separator +
+																					stringValue);
+												File[] files = candidateDirectory.listFiles();
 												if ((files != null) && // directory exists
 														(files.length == 1)) { // has the file in it
 													contentFile = files[0];
@@ -223,31 +213,25 @@ public class Restore {
 												statement.setString(index++, null);
 											}
 											else {
-												if (jcrSession == null) {
-													jcrSession = ContentUtil.getFullSession(customerName);
-												}
-	
 												String dataGroupId = values.get(Bean.DATA_GROUP_ID);
 												if (dataGroupId.isEmpty()) {
 													dataGroupId = null;
 												}
-												// TODO restore content versions
-												StreamContent content = new StreamContent(values.get(Bean.CUSTOMER_NAME), 
-																							moduleName,
-																							documentName, 
-																							dataGroupId, 
-																							values.get(Bean.USER_ID), 
-																							values.get(Bean.DOCUMENT_ID), 
-																							header);
 												try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(contentFile))) {
-													content.setStream(stream);
-													content.setLastModified(new Date());
-													content.setMimeType(MimeType.fromFileName(contentFile.getName()));
-													content.setUuid(fileName);
-													ContentUtil.put(jcrSession, content, true);
+													// TODO restore content versions
+													AttachmentContent content = new AttachmentContent(values.get(Bean.CUSTOMER_NAME), 
+																										moduleName,
+																										documentName, 
+																										dataGroupId, 
+																										values.get(Bean.USER_ID), 
+																										values.get(Bean.DOCUMENT_ID),
+																										header,
+																										contentFile.getName(),
+																										stream);
+													content.setContentId(fileName);
+													cm.put(content);
+													statement.setString(index++, content.getContentId());
 												}
-	
-												statement.setString(index++, content.getUuid());
 											}
 										}
 										else {
@@ -266,11 +250,6 @@ public class Restore {
 						}
 					}
 				} // for (each table)
-			}
-			finally {
-				if (jcrSession != null) {
-					jcrSession.logout();
-				}
 			}
 		}
 		finally {

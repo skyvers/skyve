@@ -6,22 +6,21 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.jcr.Session;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
-import org.skyve.content.MimeType;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.content.ContentUtil;
-import org.skyve.wildcat.content.StreamContent;
+import org.skyve.wildcat.content.AttachmentContent;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
@@ -107,26 +106,22 @@ public class ContentUpload {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
 
+			String fileName = file.getFileName();
 			String customerName = customer.getName();
-			Session session = ContentUtil.getFullSession(customerName);
-			String contentUuid = (String) Binder.get(bean, contentBinding);
-			try {
-				StreamContent content = new StreamContent(customerName, 
+			String contentId = (String) Binder.get(bean, contentBinding);
+			try (ContentManager cm = EXT.newContentManager()) {
+				AttachmentContent content = new AttachmentContent(customerName, 
 															bean.getBizModule(), 
 															bean.getBizDocument(),
 															bean.getBizDataGroupId(), 
 															bean.getBizUserId(), 
-															bean.getBizId(), 
-															contentBinding);
-				content.setUuid(contentUuid);
-				content.setVersionable(false);
-				content.setMimeType(MimeType.fromFileName(file.getFileName()));
-				content.setStream(file.getInputstream());
-				content = ContentUtil.put(session, content, false);
-				contentUuid = content.getUuid();
-			}
-			finally {
-				session.logout();
+															bean.getBizId(),
+															contentBinding,
+															fileName,
+															file.getInputstream());
+				content.setContentId(contentId);
+				cm.put(content);
+				contentId = content.getContentId();
 			}
 
 			// only put conversation in cache if we have been successful in executing
@@ -136,7 +131,7 @@ public class ContentUpload {
 			RequestContext rc = RequestContext.getCurrentInstance();
 			StringBuilder js = new StringBuilder(128);
 			js.append("top.WindowStack.getOpener()._vm.setValue('").append(contentBinding.replace('.', '_'));
-			js.append("','").append(contentUuid).append("');top.WindowStack.popoff(false);");
+			js.append("','").append(contentId).append("');top.WindowStack.popoff(false);");
 	        rc.execute(js.toString());
 		}
 		catch (Exception e) {

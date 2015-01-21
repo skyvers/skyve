@@ -342,6 +342,7 @@ var eventData = [
 			height:"100%", 
 			alternateRecordStyles: true,
 			dataSource: 'textSearch',
+			dataFetchMode: 'basic', // no paging
 			wrapCells: true,
 		    fixedRecordHeights: false,
 		    canEdit: false,
@@ -376,6 +377,7 @@ var eventData = [
 	popupSearch: function() {
 		WindowStack.popup(null, 'Text Search', true, [textSearchForm, textSearchResults]);
 		textSearchForm.focusInItem('query');
+		textSearchForm.clearValues();
 	},
 	
 	showPortal: function() {

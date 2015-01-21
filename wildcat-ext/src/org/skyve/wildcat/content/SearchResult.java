@@ -4,10 +4,10 @@ public final class SearchResult {
 	private String contentId;
 	private String excerpt;
 	private int score;
+	private String customerName;
 	private String moduleName;
 	private String documentName;
 	private String bizId;
-	private String bizKey;
 	private String binding;
 
 	public String getContentId() {
@@ -34,6 +34,14 @@ public final class SearchResult {
 		this.score = score;
 	}
 
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
 	public String getModuleName() {
 		return moduleName;
 	}
@@ -56,14 +64,6 @@ public final class SearchResult {
 
 	public void setBizId(String bizId) {
 		this.bizId = bizId;
-	}
-
-	public String getBizKey() {
-		return bizKey;
-	}
-
-	public void setBizKey(String bizKey) {
-		this.bizKey = bizKey;
 	}
 
 	public String getBinding() {

@@ -17,8 +17,8 @@ import org.quartz.Trigger;
 import org.quartz.TriggerUtils;
 import org.quartz.impl.StdSchedulerFactory;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Job;
@@ -90,7 +90,7 @@ public class JobScheduler {
 	throws Exception {
 		JobDetail detail = new JobDetail("CMS Garbage Collection",
 											Scheduler.DEFAULT_GROUP,
-											ContentRepositoryGarbageCollectionJob.class);
+											ContentGarbageCollectionJob.class);
 		detail.setDurability(true);
 		SimpleTrigger trigger = new SimpleTrigger("CMS Garbage Collection Trigger",
 													Scheduler.DEFAULT_GROUP,

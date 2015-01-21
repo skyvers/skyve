@@ -9,12 +9,15 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.persistence.Persistence;
+import org.skyve.wildcat.content.AbstractContentManager;
+import org.skyve.wildcat.content.elasticsearch.ESClient;
 import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalSecureRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernateJackrabbitPersistence;
+import org.skyve.wildcat.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class WildcatContextListener implements ServletContextListener {
@@ -50,64 +53,73 @@ public class WildcatContextListener implements ServletContextListener {
 			throw new IllegalStateException("Could not find app properties file " + propertiesFilePath, e);
 		}
 
-		UtilImpl.XML_TRACE = Boolean.parseBoolean(properties.getProperty("XML_TRACE"));
-		UtilImpl.HTTP_TRACE = Boolean.parseBoolean(properties.getProperty("HTTP_TRACE"));
-		UtilImpl.COMMAND_TRACE = Boolean.parseBoolean(properties.getProperty("COMMAND_TRACE"));
-		UtilImpl.COMMAND_TRACE = Boolean.parseBoolean(properties.getProperty("FACES_TRACE"));
-		UtilImpl.QUERY_TRACE = Boolean.parseBoolean(properties.getProperty("QUERY_TRACE"));
-		UtilImpl.FACES_TRACE = Boolean.parseBoolean(properties.getProperty("FACES_TRACE"));
-		UtilImpl.SQL_TRACE = Boolean.parseBoolean(properties.getProperty("SQL_TRACE"));
-		UtilImpl.CONTENT_TRACE = Boolean.parseBoolean(properties.getProperty("CONTENT_TRACE"));
-		UtilImpl.SECURITY_TRACE = Boolean.parseBoolean(properties.getProperty("SECURITY_TRACE"));
-		UtilImpl.BIZLET_TRACE = Boolean.parseBoolean(properties.getProperty("BIZLET_TRACE"));
-		UtilImpl.DIRTY_TRACE = Boolean.parseBoolean(properties.getProperty("DIRTY_TRACE"));
-		UtilImpl.PRETTY_SQL_OUTPUT = Boolean.parseBoolean(properties.getProperty("PRETTY_SQL_OUTPUT"));
-		UtilImpl.APPS_JAR_DIRECTORY = properties.getProperty("APPS_JAR_DIRECTORY");
-		UtilImpl.CONTENT_DIRECTORY = properties.getProperty("CONTENT_DIRECTORY");
+		String value = UtilImpl.processStringValue(properties.getProperty("XML_TRACE"));
+		UtilImpl.XML_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("HTTP_TRACE"));
+		UtilImpl.HTTP_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("COMMAND_TRACE"));
+		UtilImpl.COMMAND_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("FACES_TRACE"));
+		UtilImpl.FACES_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("QUERY_TRACE"));
+		UtilImpl.QUERY_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("SQL_TRACE"));
+		UtilImpl.SQL_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_TRACE"));
+		UtilImpl.CONTENT_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("SECURITY_TRACE"));
+		UtilImpl.SECURITY_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("BIZLET_TRACE"));
+		UtilImpl.BIZLET_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("DIRTY_TRACE"));
+		UtilImpl.DIRTY_TRACE = (value != null) && Boolean.parseBoolean(value);
+		value = UtilImpl.processStringValue(properties.getProperty("PRETTY_SQL_OUTPUT"));
+		UtilImpl.PRETTY_SQL_OUTPUT = (value != null) && Boolean.parseBoolean(value);
 
-		String devMode = properties.getProperty("DEV_MODE");
-		if (devMode != null) {
-			UtilImpl.DEV_MODE = Boolean.parseBoolean(devMode);
-		}
+		UtilImpl.APPS_JAR_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("APPS_JAR_DIRECTORY"));
+		UtilImpl.CONTENT_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("CONTENT_DIRECTORY"));
+
+		value = UtilImpl.processStringValue(properties.getProperty("DEV_MODE"));
+		UtilImpl.DEV_MODE = (value != null) && Boolean.parseBoolean(value);
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
 		// There are container specific ways but we don't want that.
-		UtilImpl.SERVER_URL = properties.getProperty("SERVER_URL");
-		UtilImpl.WILDCAT_CONTEXT = properties.getProperty("WILDCAT_CONTEXT");
-		UtilImpl.HOME_URI = properties.getProperty("HOME_URI");
+		UtilImpl.SERVER_URL = UtilImpl.processStringValue(properties.getProperty("SERVER_URL"));
+		UtilImpl.WILDCAT_CONTEXT = UtilImpl.processStringValue(properties.getProperty("WILDCAT_CONTEXT"));
+		UtilImpl.HOME_URI = UtilImpl.processStringValue(properties.getProperty("HOME_URI"));
 		
-		String maxConversations = properties.getProperty("MAX_CONVERSATIONS_IN_MEMORY");
-		if (maxConversations != null) {
-			UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = Integer.parseInt(maxConversations);
+		value = UtilImpl.processStringValue(properties.getProperty("MAX_CONVERSATIONS_IN_MEMORY"));
+		if (value != null) {
+			UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = Integer.parseInt(value);
 		}
-		String conversationEvictionTime = properties.getProperty("CONVERSATION_EVICTION_TIME_MINUTES");
-		if (conversationEvictionTime != null) {
-			UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = Integer.parseInt(conversationEvictionTime);
+		value = UtilImpl.processStringValue(properties.getProperty("CONVERSATION_EVICTION_TIME_MINUTES"));
+		if (value != null) {
+			UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = Integer.parseInt(value);
 		}
-		UtilImpl.DATASOURCE = properties.getProperty("DATASOURCE");
-		UtilImpl.DIALECT = properties.getProperty("DIALECT");
-		String ddlSync = properties.getProperty("DDL_SYNC");
-		if (ddlSync != null) {
-			UtilImpl.DDL_SYNC = Boolean.parseBoolean(ddlSync);
+		UtilImpl.DATASOURCE = UtilImpl.processStringValue(properties.getProperty("DATASOURCE"));
+		UtilImpl.DIALECT = UtilImpl.processStringValue(properties.getProperty("DIALECT"));
+		value = UtilImpl.processStringValue(properties.getProperty("DDL_SYNC"));
+		if (value != null) {
+			UtilImpl.DDL_SYNC = Boolean.parseBoolean(value);
 		}
-		UtilImpl.SMTP = properties.getProperty("SMTP");
-		UtilImpl.SMTP_PORT = properties.getProperty("SMTP_PORT");
-		UtilImpl.SMTP_UID = properties.getProperty("SMTP_UID");
-		UtilImpl.SMTP_PWD = properties.getProperty("SMTP_PWD");
-		UtilImpl.SMTP_SENDER = properties.getProperty("SMTP_SENDER");
-		UtilImpl.SMTP_TEST_RECIPIENT = properties.getProperty("SMTP_TEST_RECIPIENT");
-		String smtpTestBogusSend = properties.getProperty("SMTP_TEST_BOGUS_SEND");
-		if (smtpTestBogusSend != null) {
-			UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean(smtpTestBogusSend);
+		UtilImpl.SMTP = UtilImpl.processStringValue(properties.getProperty("SMTP"));
+		UtilImpl.SMTP_PORT = UtilImpl.processStringValue(properties.getProperty("SMTP_PORT"));
+		UtilImpl.SMTP_UID = UtilImpl.processStringValue(properties.getProperty("SMTP_UID"));
+		UtilImpl.SMTP_PWD = UtilImpl.processStringValue(properties.getProperty("SMTP_PWD"));
+		UtilImpl.SMTP_SENDER = UtilImpl.processStringValue(properties.getProperty("SMTP_SENDER"));
+		UtilImpl.SMTP_TEST_RECIPIENT = UtilImpl.processStringValue(properties.getProperty("SMTP_TEST_RECIPIENT"));
+		value = UtilImpl.processStringValue(properties.getProperty("SMTP_TEST_BOGUS_SEND"));
+		if (value != null) {
+			UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean(value);
 		}
-		UtilImpl.CUSTOMER = properties.getProperty("CUSTOMER");
-		String passwordHashingAlgorithm = properties.getProperty("PASSWORD_HASHING_ALGORITHM");
-		if (passwordHashingAlgorithm != null) {
-			UtilImpl.PASSWORD_HASHING_ALGORITHM = passwordHashingAlgorithm;
+		UtilImpl.CUSTOMER = UtilImpl.processStringValue(properties.getProperty("CUSTOMER"));
+		value = UtilImpl.processStringValue(properties.getProperty("PASSWORD_HASHING_ALGORITHM"));
+		if (value != null) {
+			UtilImpl.PASSWORD_HASHING_ALGORITHM = value;
 		}
 		
 		// NB Need the repository set before setting persistence
-		UtilImpl.WILDCAT_REPOSITORY_CLASS = properties.getProperty("WILDCAT_REPOSITORY_CLASS");
+		UtilImpl.WILDCAT_REPOSITORY_CLASS = UtilImpl.processStringValue(properties.getProperty("WILDCAT_REPOSITORY_CLASS"));
 		if (AbstractRepository.get() == null) {
 			if (UtilImpl.WILDCAT_REPOSITORY_CLASS == null) {
 				UtilImpl.LOGGER.info("SET WILDCAT REPOSITORY CLASS TO DEFAULT");
@@ -124,10 +136,10 @@ public class WildcatContextListener implements ServletContextListener {
 			}
 		}
 
-		UtilImpl.WILDCAT_PERSISTENCE_CLASS = properties.getProperty("WILDCAT_PERSISTENCE_CLASS");
+		UtilImpl.WILDCAT_PERSISTENCE_CLASS = UtilImpl.processStringValue(properties.getProperty("WILDCAT_PERSISTENCE_CLASS"));
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.WILDCAT_PERSISTENCE_CLASS == null) {
-				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateJackrabbitPersistence.class;
+				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 			}
 			else {
 				try {
@@ -136,6 +148,19 @@ public class WildcatContextListener implements ServletContextListener {
 				catch (ClassNotFoundException e) {
 					throw new IllegalStateException("Could not find WILDCAT_PERSISTENCE_CLASS " + UtilImpl.WILDCAT_PERSISTENCE_CLASS, e);
 				}
+			}
+		}
+
+		UtilImpl.WILDCAT_CONTENT_MANAGER_CLASS = UtilImpl.processStringValue(properties.getProperty("WILDCAT_CONTENT_MANAGER_CLASS"));
+		if (UtilImpl.WILDCAT_CONTENT_MANAGER_CLASS == null) {
+			AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
+		}
+		else {
+			try {
+				AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Class.forName(UtilImpl.WILDCAT_CONTENT_MANAGER_CLASS);
+			}
+			catch (ClassNotFoundException e) {
+				throw new IllegalStateException("Could not find WILDCAT_CONTENT_MANAGER_CLASS " + UtilImpl.WILDCAT_CONTENT_MANAGER_CLASS, e);
 			}
 		}
 
@@ -151,13 +176,31 @@ public class WildcatContextListener implements ServletContextListener {
 		}
 		
 		JobScheduler.init();
-
 		WebUtil.initConversationsCache();
+		
+		try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
+			cm.init();
+		}
+		catch (Exception e) {
+			UtilImpl.LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
 		WebUtil.destroyConversationsCache();
+		
+		@SuppressWarnings("resource")
+		AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager();
+		try {
+			cm.close();
+			cm.dispose();
+		}
+		catch (Exception e) {
+			UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
+			e.printStackTrace();
+		}
 	}
 }

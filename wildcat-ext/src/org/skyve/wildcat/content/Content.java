@@ -1,95 +1,57 @@
 package org.skyve.wildcat.content;
 
+import java.io.Serializable;
+
 /**
- * Content has a path /customer/module/document/dataGroupId/userId/id (where customer is set in the workspace).
+ * Content.
  * 
  * @author Mike
  */
-public abstract class Content {
-	private String path;
+abstract class Content implements Serializable {
+	private static final long serialVersionUID = -4098739421963456076L;
+
 	protected String bizCustomer;
 	protected String bizModule;
 	protected String bizDocument;
 	protected String bizDataGroupId;
 	protected String bizUserId;
 	protected String bizId;
-	protected String attributeName;
 
-	public String getPath() {
-		if (path == null) {
-			path = Content.createPathString(bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName);
-		}
-
-		return path;
+	protected Content(String bizCustomer, 
+						String bizModule,
+						String bizDocument,
+						String bizDataGroupId,
+						String bizUserId,
+						String bizId) {
+		this.bizCustomer = bizCustomer;
+		this.bizModule = bizModule;
+		this.bizDocument = bizDocument;
+		this.bizDataGroupId = bizDataGroupId;
+		this.bizUserId = bizUserId;
+		this.bizId = bizId;
 	}
 
-	static String createPathString(String bizModule,
-									String bizDocument,
-									String bizDataGroupId,
-									String bizUserId,
-									String bizId,
-									String attributeName) {
-		StringBuilder sb = new StringBuilder(128);
-		sb.append('/').append(bizModule).append('/');
-		sb.append(bizDocument).append('/');
-		sb.append(bizDataGroupId).append('/');
-		sb.append(bizUserId).append('/');
-		sb.append(bizId);
-		if (attributeName != null) {
-			sb.append('/').append(attributeName);
-		}
-		return sb.toString();
-	}
-
-	protected void setPath(String customerName, String path) {
-		this.path = path;
-		bizCustomer = customerName;
-		String[] tokens = path.split("\\/");
-		int length = tokens.length;
-		if (length > 2) {
-			bizModule = tokens[2];
-		}
-		if (length > 3) {
-			bizDocument = tokens[3];
-		}
-		if (length > 4) {
-			bizDataGroupId = tokens[4];
-		}
-		if ("null".equals(bizDataGroupId)) {
-			bizDataGroupId = null;
-		}
-		if (length > 5) {
-			bizUserId = tokens[5];
-		}
-		if (length > 6) {
-			bizId = tokens[6];
-		}
-		if (length > 7) {
-			attributeName = tokens[7];
-		}
-	}
-
-	public String getBizCustomer() {
+	public final String getBizCustomer() {
 		return bizCustomer;
 	}
 
-	public String getBizDataGroupId() {
+	public final String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
-	public String getBizDocument() {
+	public final String getBizDocument() {
 		return bizDocument;
 	}
 
-	public String getBizModule() {
+	public final String getBizModule() {
 		return bizModule;
 	}
 
-	public String getBizUserId() {
+	public final String getBizUserId() {
 		return bizUserId;
 	}
 
-	public String getBizId() {
+	public final String getBizId() {
 		return bizId;
 	}
 }

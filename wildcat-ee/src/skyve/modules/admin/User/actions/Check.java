@@ -4,17 +4,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.jcr.Session;
-
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
 import modules.admin.domain.UserCandidateContact;
 
-import org.skyve.wildcat.content.ContentUtil;
+import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.content.SearchResult;
 import org.skyve.wildcat.content.SearchResults;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -63,9 +62,8 @@ public class Check implements ServerSideAction<User> {
 		
 		String searchName = adminUser.getSearchContactName();
 		if (searchName != null) { 
-			Session session = ContentUtil.getSearchSession(customer.getName());
-			try {
-				SearchResults nameMatches = ContentUtil.search(session, searchName, null, Integer.valueOf(10));
+			try (ContentManager cm = EXT.newContentManager()) {
+				SearchResults nameMatches = cm.google(searchName, 10);
 				for (SearchResult nameMatch : nameMatches.getResults()) {
 					String bizId = nameMatch.getBizId();
 					if (bizId != null) { // this is data, not content
@@ -75,9 +73,6 @@ public class Check implements ServerSideAction<User> {
 						}
 					}
 				}
-			}
-			finally {
-				session.logout();
 			}
 		}
 		
