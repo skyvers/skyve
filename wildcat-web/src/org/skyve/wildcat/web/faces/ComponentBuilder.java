@@ -795,6 +795,27 @@ public class ComponentBuilder {
 		return result;
 	}
 
+	public HtmlOutputLink contentLink(Integer pixelWidth, String text, String binding) {
+		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+
+		StringBuilder expression = new StringBuilder(64);
+		expression.append("#{").append(managedBeanName).append(".getResourceUrl('");
+		expression.append(binding).append("')}");
+		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
+    	
+		if (text != null) {
+	    	UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			outputText.setValue(text);
+			result.getChildren().add(outputText);
+    	}
+
+		result.setTarget("_blank");
+		addSize(result, null, pixelWidth, null, null, null, null);
+		setId(result);
+
+		return result;
+	}
+	
     public ProgressBar progressBar() {
         ProgressBar result = (ProgressBar) a.createComponent(ProgressBar.COMPONENT_TYPE);
         setId(result);
