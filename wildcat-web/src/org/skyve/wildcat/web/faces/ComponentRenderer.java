@@ -252,7 +252,7 @@ public class ComponentRenderer {
 			tagName = "p:inputMask";
 			
 			InputMask mask = (InputMask) component;
-			putValue(attributes, "target", mask.getMask());
+			putValue(attributes, "mask", mask.getMask());
 			putValue(attributes, "style", mask.getStyle());
 		}
 		else if (component instanceof InputText) {
@@ -325,7 +325,7 @@ public class ComponentRenderer {
 			putValue(attributes, "style", ((SelectOneMenu) component).getStyle());
 		}
 		else if (component instanceof SelectOneRadio) {
-			tagName = "p:selectManyRadio";
+			tagName = "p:selectOneRadio";
 
 			putValue(attributes, "style", ((SelectOneRadio) component).getStyle());
 		}

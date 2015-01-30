@@ -102,23 +102,15 @@ public class WildcatPhaseListener implements PhaseListener {
 	
 	private static void afterResponseRendered(PhaseEvent event)
 	throws Exception {
-		try {
-			UIViewRoot vr = event.getFacesContext().getViewRoot();
-			if (vr != null) {
-				String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
-				if (managedBeanName != null) {
-					FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
-					AbstractWebContext webContext = view.getWebContext();
-					WebUtil.putConversationInCache(webContext);
-					view.dehydrate();
-				}
+		UIViewRoot vr = event.getFacesContext().getViewRoot();
+		if (vr != null) {
+			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
+			if (managedBeanName != null) {
+				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+				AbstractWebContext webContext = view.getWebContext();
+				WebUtil.putConversationInCache(webContext);
+				view.dehydrate();
 			}
-		}
-		finally {
-			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("WildcatPhaseListener - DISCONNECT PERSISTENCE");
-			AbstractPersistence persistence = AbstractPersistence.get();
-			persistence.commit(true);
-			if (UtilImpl.FACES_TRACE) WebUtil.logConversationsStats();
 		}
 	}
 }
