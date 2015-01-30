@@ -1299,12 +1299,16 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(image);
-		UIComponent c = b.contentGraphicImage(image.getPixelWidth(), 
-												null, 
-												image.getPixelHeight(), 
-												null, 
-												image.getBinding(), 
-												null);
+		UIComponent c = b.panelGroup(true, true, false, null);
+		c.getChildren().add(b.contentGraphicImage(image.getPixelWidth(), 
+													null, 
+													image.getPixelHeight(), 
+													null, 
+													image.getBinding(), 
+													null));
+		if (! Boolean.FALSE.equals(image.getEditable())) {
+			c.getChildren().add(b.label(null, null, "Upload", null));
+		}
         addComponent(def.getTitle(), false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
 	}
 
@@ -1314,7 +1318,16 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
-        UIComponent c = b.label(null, null, "contentLink", null); // TODO content link
+		String text = link.getValue();
+		if (text == null) {
+			text = "Content";
+		}
+
+		UIComponent c = b.panelGroup(true, true, false, null);
+		c.getChildren().add(b.contentLink(link.getPixelWidth(), text, link.getBinding()));
+		if (! Boolean.FALSE.equals(link.getEditable())) {
+			c.getChildren().add(b.label(null, null, "Upload", null));
+		}
         addComponent(def.getTitle(), def.isRequired(), link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
 	}
 

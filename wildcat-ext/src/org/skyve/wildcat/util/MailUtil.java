@@ -132,15 +132,23 @@ public class MailUtil {
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 
 		// Get system properties and add our mail server
-		Properties props = System.getProperties();
-		Authenticator authenticator = new Authenticator();
-		props.setProperty("mail.smtp.submitter", authenticator.getPasswordAuthentication().getUserName());
-		props.setProperty("mail.smtp.auth", "true");
-		props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
-		props.setProperty("mail.smtp.host", UtilImpl.SMTP);
-
-		// Get session
-		Session session = Session.getInstance(props, authenticator);
+		Session session = null;
+		if (UtilImpl.processStringValue(UtilImpl.SMTP_UID) == null) {
+			Properties props = System.getProperties();
+			props.setProperty("mail.smtp.auth", "false");
+			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
+			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
+			session = Session.getInstance(props);
+		}
+		else {
+			Authenticator authenticator = new Authenticator();
+			Properties props = System.getProperties();
+			props.setProperty("mail.smtp.submitter", authenticator.getPasswordAuthentication().getUserName());
+			props.setProperty("mail.smtp.auth", "true");
+			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
+			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
+			session = Session.getInstance(props, authenticator);
+		}
 
 		// Define message
 		MimeMessage message = new MimeMessage(session);
