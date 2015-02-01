@@ -55,9 +55,9 @@
 	</servlet-mapping>
 
     <filter>
-        <display-name>FacesSecurityFilter</display-name>
-        <filter-name>FacesSecurityFilter</filter-name>
-        <filter-class>org.skyve.wildcat.web.faces.filters.FacesSecurityFilter</filter-class>
+        <display-name>WildcatFacesFilter</display-name>
+        <filter-name>WildcatFacesFilter</filter-name>
+        <filter-class>org.skyve.wildcat.web.faces.WildcatFacesFilter</filter-class>
         <init-param>
         	<param-name>forward</param-name>
         	<param-value>/home.jsp</param-value>
@@ -65,6 +65,10 @@
         <init-param>
         	<param-name>error</param-name>
         	<param-value>/pages/error.jsp</param-value>
+        </init-param>
+        <init-param>
+        	<param-name>expired</param-name>
+        	<param-value>/pages/expired.jsp</param-value>
         </init-param>
         <init-param>
         	<param-name>unsecured</param-name>
@@ -76,7 +80,7 @@
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>FacesSecurityFilter</filter-name>
+        <filter-name>WildcatFacesFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
     </filter-mapping>
 

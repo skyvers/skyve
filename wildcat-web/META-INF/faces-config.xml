@@ -10,7 +10,11 @@
 		</el-resolver>
 		<navigation-handler>org.primefaces.mobile.application.MobileNavigationHandler</navigation-handler>
 	</application>
-	
+
+    <factory>
+        <exception-handler-factory>org.skyve.wildcat.web.faces.WildcatExceptionHandlerFactory</exception-handler-factory>
+    </factory>
+    	
 	<lifecycle>
 		<phase-listener>org.skyve.wildcat.web.faces.WildcatPhaseListener</phase-listener>
 	</lifecycle>
