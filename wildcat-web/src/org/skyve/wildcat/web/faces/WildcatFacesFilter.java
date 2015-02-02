@@ -29,6 +29,8 @@ public class WildcatFacesFilter implements Filter {
     private String expiredURI;
     // A list of all unsecured public pages
     private String[] unsecuredURLPrefixes;
+    // The value of javax.faces.DEFAULT_SUFFIX or ".jsf";
+    private String facesSuffix = ".jsf";
     
     @Override
     public void init(FilterConfig config) throws ServletException {
@@ -41,6 +43,11 @@ public class WildcatFacesFilter implements Filter {
 			for (int i = 0, l = unsecuredURLPrefixes.length; i < l; i++) {
 				unsecuredURLPrefixes[i] = Util.processStringValue(unsecuredURLPrefixes[i]);
 			}
+    	}
+
+    	String facesSuffixParameter = config.getServletContext().getInitParameter("javax.faces.DEFAULT_SUFFIX");
+    	if ((facesSuffixParameter != null) && (! facesSuffixParameter.isEmpty())) {
+    		facesSuffix = facesSuffixParameter;
     	}
     }
 
@@ -63,9 +70,15 @@ public class WildcatFacesFilter implements Filter {
         absoluteContextURL.append(':').append(request.getServerPort()).append(request.getContextPath());
     
     	try {
+	        String pathToTest = request.getServletPath();
+
+	        // If this ain't a faces page then bug out
+	        if (! pathToTest.endsWith(facesSuffix)) {
+    			chain.doFilter(req, resp);
+        		return;
+	        }
 	        // Test if this URL is unsecured, and bug out if so
 	        // NB can't use queryString here as there could be AJAX posts etc in faces so not good practice
-	        String pathToTest = request.getServletPath();
 	        if (unsecuredURLPrefixes != null) {
 		        for (String unsecuredURLPrefix : unsecuredURLPrefixes) {
 		        	if (pathToTest.startsWith(unsecuredURLPrefix)) {
