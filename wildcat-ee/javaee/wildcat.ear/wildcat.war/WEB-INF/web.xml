@@ -83,6 +83,11 @@
         <filter-name>WildcatFacesFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
     </filter-mapping>
+    <!-- JSPs can server-side forward to faces pages -->
+    <filter-mapping>
+        <filter-name>WildcatFacesFilter</filter-name>
+		<url-pattern>*.jsp</url-pattern>
+    </filter-mapping>
 
 	<listener>
 		<listener-class>org.skyve.wildcat.web.WildcatContextListener</listener-class>
@@ -94,12 +99,14 @@
 	</filter>
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
-		<servlet-name>*.xhtml</servlet-name> <!-- just filter xhtml resources, not other resources served by faces servlet -->
+		<url-pattern>*.xhtml</url-pattern>  <!-- just filter xhtml resources, not other resources served by faces servlet -->
 	</filter-mapping>
+<!-- TODO FIX THIS
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
-		<servlet-name>/home.jsp</servlet-name>
+		<url-pattern>/home.jsp</url-pattern>
 	</filter-mapping>
+-->
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
 		<servlet-name>DynamicImageServlet</servlet-name>
