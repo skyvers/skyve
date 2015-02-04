@@ -101,12 +101,10 @@
 		<filter-name>WildcatFilter</filter-name>
 		<url-pattern>*.xhtml</url-pattern>  <!-- just filter xhtml resources, not other resources served by faces servlet -->
 	</filter-mapping>
-<!-- TODO FIX THIS
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
-		<url-pattern>/home.jsp</url-pattern>
+		<url-pattern>*.jsp</url-pattern>
 	</filter-mapping>
--->
 	<filter-mapping>
 		<filter-name>WildcatFilter</filter-name>
 		<servlet-name>DynamicImageServlet</servlet-name>
