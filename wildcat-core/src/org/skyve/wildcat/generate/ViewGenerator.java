@@ -284,53 +284,55 @@ public class ViewGenerator {
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
-			String attributeName = attribute.getName();
-
-			if (attribute instanceof Collection) {
-				Collection collection = (Collection) attribute;
-				Document detailDocument = module.getDocument(customer, collection.getDocumentName());
-
-				List<String> propertyNames = new ArrayList<>();
-				populatePropertyNames(customer, module, detailDocument, propertyNames);
-				
-				if (collection.getDomainType() == null) {
-					details.add(generateDataGrid(collection.getType(), 
+			if (! attribute.isDeprecated()) {
+				String attributeName = attribute.getName();
+	
+				if (attribute instanceof Collection) {
+					Collection collection = (Collection) attribute;
+					Document detailDocument = module.getDocument(customer, collection.getDocumentName());
+	
+					List<String> propertyNames = new ArrayList<>();
+					populatePropertyNames(customer, module, detailDocument, propertyNames);
+					
+					if (collection.getDomainType() == null) {
+						details.add(generateDataGrid(collection.getType(), 
+														customer,
+														module,
+														detailDocument, 
+														attributeName, 
+														propertyNames));
+					}
+					else {
+						ListMembership membership = new ListMembership();
+						membership.setBinding(attribute.getName());
+						membership.setCandidatesHeading("Candidates");
+						membership.setMembersHeading("Members");
+						details.add(membership);
+					}
+				}
+				else if (attribute instanceof Inverse) {
+					Inverse inverse = (Inverse) attribute;
+					Document detailDocument = module.getDocument(customer, inverse.getDocumentName());
+	
+					List<String> propertyNames = new ArrayList<>();
+					populatePropertyNames(customer, module, detailDocument, propertyNames);
+					
+					details.add(generateDataGrid(CollectionType.composition,
 													customer,
 													module,
 													detailDocument, 
 													attributeName, 
 													propertyNames));
 				}
-				else {
-					ListMembership membership = new ListMembership();
-					membership.setBinding(attribute.getName());
-					membership.setCandidatesHeading("Candidates");
-					membership.setMembersHeading("Members");
-					details.add(membership);
+				else { // field or association
+					FormItem item = new FormItem();
+					DefaultWidget widget = new DefaultWidget();
+					widget.setBinding(attributeName);
+					item.setWidget(widget);
+					FormRow row = new FormRow();
+					row.getItems().add(item);
+					form.getRows().add(row);
 				}
-			}
-			else if (attribute instanceof Inverse) {
-				Inverse inverse = (Inverse) attribute;
-				Document detailDocument = module.getDocument(customer, inverse.getDocumentName());
-
-				List<String> propertyNames = new ArrayList<>();
-				populatePropertyNames(customer, module, detailDocument, propertyNames);
-				
-				details.add(generateDataGrid(CollectionType.composition,
-												customer,
-												module,
-												detailDocument, 
-												attributeName, 
-												propertyNames));
-			}
-			else { // field or association
-				FormItem item = new FormItem();
-				DefaultWidget widget = new DefaultWidget();
-				widget.setBinding(attributeName);
-				item.setWidget(widget);
-				FormRow row = new FormRow();
-				row.getItems().add(item);
-				form.getRows().add(row);
 			}
 		}
 	}

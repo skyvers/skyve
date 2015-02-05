@@ -145,7 +145,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		}
 
 		for (Attribute attribute : document.getAttributes()) {
-			if (attribute.isPersistent()) {
+			if (attribute.isPersistent() && (! attribute.isDeprecated())) {
 				// Note - collections not included in generated queries
 				if (attribute instanceof Field) {
 					org.skyve.wildcat.metadata.module.query.QueryColumn column = new org.skyve.wildcat.metadata.module.query.QueryColumn();
