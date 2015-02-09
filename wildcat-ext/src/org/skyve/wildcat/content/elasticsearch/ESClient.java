@@ -61,9 +61,8 @@ public class ESClient extends AbstractContentManager {
     private static final String FILENAME = "filename";
     private static final String FILE_FILENAME = "file.filename";
     public static final String FILE_LAST_MODIFIED = "file.last_modified";
-    private static final String LAST_MODIFIED = "last_modified";
+    public static final String LAST_MODIFIED = "last_modified";
     private static final String CONTENT_TYPE = "content_type";
-    private static final String URL = "url";
     private static final String FILESIZE = "filesize";
 
     private static final String META = "meta";
@@ -73,21 +72,15 @@ public class ESClient extends AbstractContentManager {
     private static final String DATE = "date";
     private static final String KEYWORDS = "keywords";
 
-	private static final String PATH = "path";
-    private static final String ENCODED = "encoded";
-    private static final String ROOT = "root";
-    private static final String VIRTUAL = "virtual";
-    private static final String REAL = "real";
-    
     private static final String BEAN = "bean";
-    private static final String BINDING = "binding";
+    private static final String ATTRIBUTE_NAME = "attribute";
     static final String BEAN_CUSTOMER_NAME = "bean." + Bean.CUSTOMER_NAME;
     static final String BEAN_MODULE_KEY = "bean." + Bean.MODULE_KEY;
     static final String BEAN_DOCUMENT_KEY = "bean." + Bean.DOCUMENT_KEY;
     static final String BEAN_DATA_GROUP_ID = "bean." + Bean.DATA_GROUP_ID;
     static final String BEAN_USER_ID = "bean." + Bean.USER_ID;
     static final String BEAN_DOCUMENT_ID = "bean." + Bean.DOCUMENT_ID;
-    static final String BEAN_BINDING = "bean.binding";
+    static final String BEAN_ATTRIBUTE_NAME = "bean.attribute";
 	
 	private static Node node = ESUtil.localNode();
 	private static final Tika TIKA = new Tika();
@@ -143,6 +136,9 @@ public class ESClient extends AbstractContentManager {
 					.field(Bean.DOCUMENT_ID, content.getBizId())
 					.endObject(); // Bean
 
+			// Last modified
+			source.field(LAST_MODIFIED, new Date());
+			
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.put(): " + source.string());
 			client.prepareIndex(BEAN_INDEX_NAME, 
 									BEAN_INDEX_TYPE,
@@ -170,7 +166,6 @@ public class ESClient extends AbstractContentManager {
 								(contentType != null) ? 
 									contentType.toString() : 
 									metadata.get(HttpHeaders.CONTENT_TYPE));
-//						.field(URL, "file://" + (new File(".", document.getName())).toString());
 				if (metadata.get(HttpHeaders.CONTENT_LENGTH) != null) {
 					// We try to get CONTENT_LENGTH from Tika first
 					source.field(FILESIZE, metadata.get(HttpHeaders.CONTENT_LENGTH));
@@ -180,14 +175,6 @@ public class ESClient extends AbstractContentManager {
 					source.field(FILESIZE, content.length);
 				}
 				source.endObject(); // File
-
-				// Path
-				source.startObject(PATH)
-						.field(ENCODED, ESUtil.hash("."))
-						.field(ROOT, ".")
-						.field(VIRTUAL, ".")
-//						.field(REAL, (new File(".", document.getName())).toString())
-						.endObject(); // Path
 
 				// Meta
 				String title = metadata.get(TikaCoreProperties.TITLE);
@@ -208,7 +195,7 @@ public class ESClient extends AbstractContentManager {
 						.field(Bean.MODULE_KEY, attachment.getBizModule())
 						.field(Bean.DOCUMENT_KEY, attachment.getBizDocument())
 						.field(Bean.DOCUMENT_ID, attachment.getBizId())
-						.field(BINDING, attachment.getBinding())
+						.field(ATTRIBUTE_NAME, attachment.getAttributeName())
 						.endObject(); // Bean
 	
 				// Doc content
@@ -244,7 +231,7 @@ public class ESClient extends AbstractContentManager {
 												BEAN_DATA_GROUP_ID,
 												BEAN_USER_ID,
 												BEAN_DOCUMENT_ID,
-												BEAN_BINDING).get();
+												BEAN_ATTRIBUTE_NAME).get();
 		if (! response.isExists()) {
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + "): DNE");
 			return null;
@@ -274,7 +261,7 @@ public class ESClient extends AbstractContentManager {
 		}
 		String bizUserId = (String) response.getField(BEAN_USER_ID).getValue();
 		String bizId = (String) response.getField(BEAN_DOCUMENT_ID).getValue();
-		String binding = (String) response.getField(BEAN_BINDING).getValue();
+		String binding = (String) response.getField(BEAN_ATTRIBUTE_NAME).getValue();
 
 		AttachmentContent result = new AttachmentContent(bizCustomer,
 															bizModule,
@@ -345,7 +332,9 @@ public class ESClient extends AbstractContentManager {
 														BEAN_DATA_GROUP_ID,
 														BEAN_USER_ID,
 														BEAN_DOCUMENT_ID,
-														BEAN_BINDING)
+														BEAN_ATTRIBUTE_NAME,
+														LAST_MODIFIED,
+														FILE_LAST_MODIFIED)
 											.execute().actionGet();
 
 		SearchResults results = new SearchResults();
@@ -377,9 +366,17 @@ public class ESClient extends AbstractContentManager {
 				hit.setBizId(bizId);
 				hit.setScore((int) (searchHit.score() * 100.0));
 	
-				field = searchHit.field(BEAN_BINDING);
+				field = searchHit.field(BEAN_ATTRIBUTE_NAME);
 				if (field != null) {
-					hit.setBinding((String) field.getValue());
+					hit.setAttributeName((String) field.getValue());
+				}
+				field = searchHit.field(LAST_MODIFIED);
+				if (field != null) {
+					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+				}
+				field = searchHit.field(FILE_LAST_MODIFIED);
+				if (field != null) {
+					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
 				}
 				hit.setContentId(searchHit.getId());
 /*			
@@ -456,7 +453,7 @@ public class ESClient extends AbstractContentManager {
 	static List<String> complete(Client client, String query) {
 		List<String> results = new ArrayList<>();
 
-		QueryBuilder qb = QueryBuilders.matchAllQuery();
+//		QueryBuilder qb = QueryBuilders.matchAllQuery();
 		FilterBuilder fb = FilterBuilders.prefixFilter("file", query);
 
 		SearchResponse searchHits = client.prepareSearch()

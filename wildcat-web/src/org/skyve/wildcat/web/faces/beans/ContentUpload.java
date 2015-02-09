@@ -108,17 +108,25 @@ public class ContentUpload {
 
 			String fileName = file.getFileName();
 			String customerName = customer.getName();
-			String contentId = (String) Binder.get(bean, contentBinding);
+			Bean contentOwner = bean;
+			String contentAttributeName = contentBinding;
+			int contentBindingLastDotIndex = contentBinding.lastIndexOf('.');
+			if (contentBindingLastDotIndex >= 0) { // compound binding
+				contentOwner = (Bean) BindUtil.get(bean, contentBinding.substring(0, contentBindingLastDotIndex));
+				contentAttributeName = contentBinding.substring(contentBindingLastDotIndex + 1);
+			}
+
+			String contentId = (String) Binder.get(contentOwner, contentAttributeName);
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = new AttachmentContent(customerName, 
-															bean.getBizModule(), 
-															bean.getBizDocument(),
-															bean.getBizDataGroupId(), 
-															bean.getBizUserId(), 
-															bean.getBizId(),
-															contentBinding,
-															fileName,
-															file.getInputstream());
+																	contentOwner.getBizModule(), 
+																	contentOwner.getBizDocument(),
+																	contentOwner.getBizDataGroupId(), 
+																	contentOwner.getBizUserId(), 
+																	contentOwner.getBizId(),
+																	contentAttributeName,
+																	fileName,
+																	file.getInputstream());
 				content.setContentId(contentId);
 				cm.put(content);
 				contentId = content.getContentId();

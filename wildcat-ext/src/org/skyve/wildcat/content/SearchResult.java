@@ -1,5 +1,7 @@
 package org.skyve.wildcat.content;
 
+import java.util.Date;
+
 public final class SearchResult {
 	private String contentId;
 	private String excerpt;
@@ -8,7 +10,8 @@ public final class SearchResult {
 	private String moduleName;
 	private String documentName;
 	private String bizId;
-	private String binding;
+	private String attributeName;
+	private Date lastModified;
 
 	public String getContentId() {
 		return contentId;
@@ -66,11 +69,19 @@ public final class SearchResult {
 		this.bizId = bizId;
 	}
 
-	public String getBinding() {
-		return binding;
+	public String getAttributeName() {
+		return attributeName;
 	}
 
-	public void setBinding(String binding) {
-		this.binding = binding;
+	public void setAttributeName(String attributeName) {
+		this.attributeName = attributeName;
+	}
+
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
 	}
 }

@@ -1,5 +1,6 @@
 package org.skyve.wildcat.content.elasticsearch;
 
+import java.text.ParseException;
 import java.util.Iterator;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -10,6 +11,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.skyve.wildcat.content.SearchResult;
+import org.skyve.wildcat.util.TimeUtil;
+import org.skyve.wildcat.util.UtilImpl;
 
 class ESIterable implements Iterable<SearchResult> {
 	private Client client = null;
@@ -34,7 +37,9 @@ class ESIterable implements Iterable<SearchResult> {
 													ESClient.BEAN_MODULE_KEY,
 													ESClient.BEAN_DOCUMENT_KEY,
 													ESClient.BEAN_DOCUMENT_ID,
-													ESClient.BEAN_BINDING)
+													ESClient.BEAN_ATTRIBUTE_NAME,
+													ESClient.LAST_MODIFIED,
+													ESClient.FILE_LAST_MODIFIED)
 								        .execute()
 								        .actionGet();
 			scrollId = response.getScrollId();
@@ -84,9 +89,27 @@ class ESIterable implements Iterable<SearchResult> {
 			hit.setDocumentName(bizDocument);
 			hit.setBizId(bizId);
 
-			SearchHitField field = searchHit.field(ESClient.BEAN_BINDING);
+			SearchHitField field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
 			if (field != null) {
-				hit.setBinding((String) field.getValue());
+				hit.setAttributeName((String) field.getValue());
+			}
+			field = searchHit.field(ESClient.LAST_MODIFIED);
+			if (field != null) {
+				try {
+					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+				}
+				catch (ParseException e) {
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + field.getValue() + " for content ID = " + searchHit.getId());
+				}
+			}
+			field = searchHit.field(ESClient.FILE_LAST_MODIFIED);
+			if (field != null) {
+				try {
+					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+				}
+				catch (ParseException e) {
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + field.getValue() + " for content ID = " + searchHit.getId());
+				}
 			}
 			hit.setContentId(searchHit.getId());
 

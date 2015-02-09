@@ -12,7 +12,7 @@ import org.skyve.content.MimeType;
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
 
-	private String binding;
+	private String attributeName;
 	private String contentId;
 	private String fileName;
 	private MimeType mimeType = MimeType.plain;
@@ -26,11 +26,14 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								String fileName,
 								MimeType mimeType) {
 		super(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId);
-		this.binding = binding;
+		if ((attributeName == null) || (attributeName.indexOf('.') >= 0)) {
+			throw new IllegalArgumentException("No complex/compound bindings allowed in AttachmentContent - use the correct Document and attribute combination");
+		}
+		this.attributeName = attributeName;
 		this.fileName = fileName;
 		this.mimeType = mimeType;
 		if ((fileName != null) && (mimeType == null)) {
@@ -44,11 +47,11 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								String fileName,
 								MimeType mimeType,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, fileName, mimeType);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, mimeType);
 		this.bytes = bytes;
 	}
 
@@ -58,10 +61,10 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								MimeType mimeType,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, null, mimeType);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, null, mimeType);
 		this.bytes = bytes;
 	}
 
@@ -71,10 +74,10 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								String fileName,
 								byte[] bytes) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, fileName, (MimeType) null);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, (MimeType) null);
 		this.bytes = bytes;
 	}
 	
@@ -84,11 +87,11 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								String fileName,
 								MimeType mimeType,
 								InputStream stream) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, fileName, mimeType);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, mimeType);
 		this.stream = stream;
 	}
 	
@@ -98,10 +101,10 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								MimeType mimeType,
 								InputStream stream) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, null, mimeType);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, null, mimeType);
 		this.stream = stream;
 	}
 	
@@ -111,15 +114,15 @@ public class AttachmentContent extends Content {
 								String bizDataGroupId, 
 								String bizUserId,
 								String bizId,
-								String binding,
+								String attributeName,
 								String fileName,
 								InputStream stream) {
-		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, binding, fileName, (MimeType) null);
+		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, (MimeType) null);
 		this.stream = stream;
 	}
 
-	public final String getBinding() {
-		return binding;
+	public final String getAttributeName() {
+		return attributeName;
 	}
 	
 	public final String getContentId() {

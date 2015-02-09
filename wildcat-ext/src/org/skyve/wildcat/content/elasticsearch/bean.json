@@ -1,0 +1,54 @@
+{
+	"bean" : {
+		"properties" : {
+			"bean" : {
+				"properties" : {
+					"bizCustomer" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"bizDataGroupId" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"bizUserId" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"bizModule" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"bizDocument" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"bizId" : {
+						"type" : "string",
+						"index" : "not_analyzed",
+						"store" : "yes"
+					},
+					"attribute" : {
+						"type" : "string",
+						"index" : "no",
+						"store" : "yes"
+					}
+				}
+			},
+			"last_modified" : {
+				"type" : "date",
+				"format" : "dateOptionalTime",
+				"store" : "yes"
+			},
+			"content" : {
+				"type" : "string",
+				"store" : "yes"
+			}
+		}
+	}
+}

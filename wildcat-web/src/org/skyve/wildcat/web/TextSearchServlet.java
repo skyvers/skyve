@@ -87,8 +87,8 @@ public class TextSearchServlet extends HttpServlet {
 		                    url.append("&i=").append(bizId);
 				            row.put("data", url.toString());
 		
-				            String binding = result.getBinding();
-				            if (binding == null) { // bean content
+				            String attributeName = result.getAttributeName();
+				            if (attributeName == null) { // bean content
 				            	row.put("content", null);
 				            }
 				            else { // attachment content
@@ -96,7 +96,7 @@ public class TextSearchServlet extends HttpServlet {
 			                    url.append("content?_doc=");
 			                    url.append(moduleName).append('.').append(documentName);
 			                    url.append("&_n=").append(result.getContentId());
-			                    url.append("&_b=").append(binding);
+			                    url.append("&_b=").append(attributeName);
 					            row.put("content", url.toString());
 				            }
 				            message.append(JSONUtil.marshall(customer, row, null)).append(',');

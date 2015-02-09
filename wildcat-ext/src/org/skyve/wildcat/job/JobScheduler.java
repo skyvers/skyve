@@ -94,7 +94,7 @@ public class JobScheduler {
 		detail.setDurability(true);
 		SimpleTrigger trigger = new SimpleTrigger("CMS Garbage Collection Trigger",
 													Scheduler.DEFAULT_GROUP,
-													new Date(),
+													new Date(new Date().getTime() + 60000), // start in 1 minute once the CMS has settled down
 													null,
 													SimpleTrigger.REPEAT_INDEFINITELY,
 													3607000L); // note: 1 hr 7 secs

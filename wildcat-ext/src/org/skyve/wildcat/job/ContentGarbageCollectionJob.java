@@ -1,5 +1,6 @@
 package org.skyve.wildcat.job;
 
+import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -22,8 +23,8 @@ import org.skyve.wildcat.util.UtilImpl;
 
 /**
  * This job removes orphaned uploads and any textually indexed data left from delete/truncate SQL statements issued.
+ * 
  * @author sandsm01
- *
  */
 public class ContentGarbageCollectionJob implements Job {
 	private Set<String> orphanedContentIds = new TreeSet<>();
@@ -37,31 +38,42 @@ public class ContentGarbageCollectionJob implements Job {
 			try {
 				try (ContentManager cm = EXT.newContentManager()) {
 					for (SearchResult result : cm.all()) {
-						Customer customer = r.getCustomer(result.getCustomerName());
-						Module module = customer.getModule(result.getModuleName());
-						Document document = module.getDocument(customer, result.getDocumentName());
-						
-						SQL query = null;
-						StringBuilder sql = new StringBuilder(128);
-						sql.append("select 1 from ").append(document.getPersistent().getPersistentIdentifier());
-						sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
-						
-						// check if we have a record
-						String binding = result.getBinding();
-						if (binding != null) { // attachment
-							sql.append(" and ").append(binding).append(" = :").append(binding);
-
-							query = p.newSQL(sql.toString());
-							query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
-							query.putParameter(binding, result.getContentId());
-						}
-						else { // bean
-							query = p.newSQL(sql.toString());
-							query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
-						}
-						
-						if (p.retrieve(query).isEmpty()) {
-							orphanedContentIds.add(result.getContentId());
+						if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: FOUND customer=" + result.getCustomerName() + 
+																			" : module=" + result.getModuleName() + 
+																			" : document=" + result.getDocumentName() + 
+																			" : bizId=" + result.getBizId() + 
+																			" : attribute=" + result.getAttributeName() + 
+																			" : lastModified=" + result.getLastModified());
+						Date lastModified = result.getLastModified();
+						// only process this if its at least a day old.
+						if ((lastModified == null) || ((System.currentTimeMillis() - lastModified.getTime()) > 86400000)) {
+							Customer customer = r.getCustomer(result.getCustomerName());
+							Module module = customer.getModule(result.getModuleName());
+							Document document = module.getDocument(customer, result.getDocumentName());
+							
+							SQL query = null;
+							StringBuilder sql = new StringBuilder(128);
+							sql.append("select 1 from ").append(document.getPersistent().getPersistentIdentifier());
+							sql.append(" where ").append(Bean.DOCUMENT_ID).append(" = :").append(Bean.DOCUMENT_ID);
+							
+							// check if we have a record
+							String attributeName = result.getAttributeName();
+							if (attributeName != null) { // attachment
+								sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
+	
+								query = p.newSQL(sql.toString());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
+								query.putParameter(attributeName, result.getContentId());
+							}
+							else { // bean
+								query = p.newSQL(sql.toString());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
+							}
+							
+							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
+							if (p.retrieveInsecureSQL(query).isEmpty()) {
+								orphanedContentIds.add(result.getContentId());
+							}
 						}
 					}
 					

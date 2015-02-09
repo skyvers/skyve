@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
@@ -19,6 +21,7 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 import org.elasticsearch.indices.IndexAlreadyExistsException;
 import org.elasticsearch.node.Node;
@@ -134,7 +137,7 @@ public class ESUtil {
 	}
 
 	private static String readJsonDefinition(String type) throws Exception {
-		return readFileInClasspath("/estemplate/" + type + ".json");
+		return readFileInClasspath("/org/skyve/wildcat/content/elasticsearch/" + type + ".json");
 	}	
 
 	private static String readFileInClasspath(String url) throws Exception {
@@ -161,9 +164,10 @@ public class ESUtil {
 
 	static void createIndex(Client client, String index)
 	throws Exception {
-		CreateIndexResponse dir = client.admin().indices().prepareCreate(index).execute().actionGet();
+		String settings = "{\"analysis\": {\"analyzer\": {\"default\": {\"type\": \"english\"}}}}";
+		CreateIndexResponse dir = client.admin().indices().prepareCreate(index).setSettings(settings).execute().actionGet();
 		if (! dir.isAcknowledged()) {
-			throw new Exception("ES did not acknowledge index removal...");
+			throw new Exception("ES did not acknowledge index creation...");
 		}
 	}
 
@@ -172,6 +176,14 @@ public class ESUtil {
 		DeleteIndexResponse dir = client.admin().indices().prepareDelete(index).execute().actionGet();
 		if (! dir.isAcknowledged()) {
 			throw new Exception("ES did not acknowledge index removal...");
+		}
+	}
+	
+	static String analyze(Client client) throws Exception {
+		try (XContentBuilder xcb = XContentFactory.jsonBuilder()) {
+			AnalyzeRequest req = new AnalyzeRequest(ESClient.BEAN_INDEX_NAME, "this is a tests");//.analyzer("english");
+			AnalyzeResponse analyzeResponse = client.admin().indices().analyze(req).actionGet();
+			return analyzeResponse.toXContent(xcb, null).string();
 		}
 	}
 	
@@ -198,50 +210,17 @@ public class ESUtil {
 		}
 		return ((String) obj.get(0));
 	}
-/*
+
 	public static void main(String[] args) 
 	throws Exception {
-//		Node n = localNode();
-//		Client c = localClient(node);
-
-		Node n = remoteNode();
-		Client c = remoteClient();
-		
-		String content;
-		try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream("/Users/mike/Bill_everyone_2.csv"))) {
-			try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-				byte[] bytes = new byte[1024]; // 1K
-				int bytesRead = 0;
-				while ((bytesRead = bis.read(bytes)) > 0) {
-					baos.write(bytes, 0, bytesRead);
-				}
-				content = new String(new Base64().encode(baos.toByteArray()));
+		UtilImpl.CONTENT_DIRECTORY = "/C:/revback/wildcat/wildcat-ee/content/";
+		try (Node n = localNode()) {
+			try (Client c = localClient(n)) {
+				ESUtil.prepareIndex(c, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
+				ESUtil.prepareIndex(c, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
+				Thread.sleep(10000);
+				System.out.println(analyze(c));
 			}
 		}
-
-		ESAttachmentContent d = new ESAttachmentContent("poo", content);
-		putDocument(c, d);
-		System.out.println("ID = " + d.getId());
-		System.out.println("TYPE = " + d.getType());
-		System.out.println("CONTENT = " + d.getContent());
-		System.out.println("CONTENT TYPE = " + d.getContentType());
-		d = getDocument(c, null, null, d.getId());
-		System.out.println("ID = " + d.getId());
-		System.out.println("TYPE = " + d.getType());
-		System.out.println("CONTENT = " + d.getContent());
-		System.out.println("CONTENT TYPE = " + d.getContentType());
-
-		SearchResults r = google(c, "ina", 0, 10);
-		System.out.println(r.getTotalHits());
-		for (Hit h : r.getHits()) {
-			System.out.println('X');
-			for (String hl : h.getHighlights()) {
-				System.out.println(hl);
-			}
-		}
-		close(n);
-		
-//		c = transportClient();
 	}
-*/
 }
