@@ -219,4 +219,29 @@
 			<attribute name="Class-Path" value="${libs.deploy}" />
 		</manifest>
 	</target>
+	<target name="backupClasspath">
+		<!-- create a property containing all .jar files, prefix lib/, and separated with a space -->
+		<pathconvert property="libs.deploy" pathsep=":">
+			<mapper>
+				<chainedmapper>
+					<!-- remove absolute path -->
+					<flattenmapper />
+					<!-- add lib/ prefix -->
+					<globmapper from="*" to="lib/*" />
+				</chainedmapper>
+			</mapper>
+			<path>
+				<fileset dir="${ear-path}/lib">
+					<include name="**/*wildcat-core.jar" />
+					<include name="**/*wildcat-ext.jar" />
+				</fileset>
+				<file name="tools/lib/wildcat-tools.jar" />
+				<fileset dir="${ear-path}/lib">
+					<include name="**/*.jar" />
+					<exclude name="**/*wildcat*.jar" />
+				</fileset>
+			</path>
+		</pathconvert>
+		<echo message="CLASSPATH=${libs.deploy}" file="prod/backup/classpath.txt"/>
+	</target>
 </project>

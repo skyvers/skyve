@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
@@ -67,6 +69,8 @@ public class ESClient extends AbstractContentManager {
 
     private static final String META = "meta";
     private static final String META_TITLE = "meta.title";
+    private static final String META_AUTHOR = "meta.author";
+    private static final String META_KEYWORDS = "meta.keywords";
     private static final String AUTHOR = "author";
     private static final String TITLE = "title";
     private static final String DATE = "date";
@@ -155,7 +159,15 @@ public class ESClient extends AbstractContentManager {
 			byte[] content = attachment.getContentBytes();
 			try (BytesStreamInput contentStream = new BytesStreamInput(content, false)) {
 				Metadata metadata = new Metadata();
-				String parsedContent = TIKA.parseToString(contentStream, metadata, 100000);
+				String parsedContent = "";
+				try {
+					parsedContent = TIKA.parseToString(contentStream, metadata, 100000);
+				}
+				catch (TikaException e) {
+					UtilImpl.LOGGER.log(Level.SEVERE, 
+											"ESClient.put(): Attachment could not be parsed by TIKA and so has not been textually indexed",
+											e);
+				}
 				
 				// File
 				MimeType contentType = attachment.getMimeType();
@@ -313,7 +325,12 @@ public class ESClient extends AbstractContentManager {
 			qb = QueryBuilders.matchAllQuery();
 		}
 		else {
-			qb = QueryBuilders.queryString(search).defaultField("_all");
+			qb = QueryBuilders.queryString(search)
+					.field(CONTENT)
+					.field(FILE_FILENAME)
+					.field(META_TITLE)
+					.field(META_KEYWORDS)
+					.field(META_AUTHOR);
 		}
 
 		SearchResponse searchResponse = client.prepareSearch()
@@ -321,9 +338,11 @@ public class ESClient extends AbstractContentManager {
 											.setTypes(ATTACHMENT_INDEX_TYPE, BEAN_INDEX_TYPE)
 											.setSearchType(SearchType.DFS_QUERY_THEN_FETCH).setQuery(qb)
 											.setFrom(0).setSize(10000)
-											.addHighlightedField(FILE_FILENAME)
 											.addHighlightedField(CONTENT)
+											.addHighlightedField(FILE_FILENAME)
 											.addHighlightedField(META_TITLE)
+											.addHighlightedField(META_KEYWORDS)
+											.addHighlightedField(META_AUTHOR)
 											.setHighlighterPreTags("<strong>")
 											.setHighlighterPostTags("</strong>")
 											.addFields(BEAN_CUSTOMER_NAME,

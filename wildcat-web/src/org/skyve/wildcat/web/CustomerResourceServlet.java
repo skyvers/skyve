@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.servlet.ServletException;
@@ -63,16 +62,24 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 
-		@SuppressWarnings("resource") // This is closed by the servlet once it is read
-		InputStream getStream() 
-		throws FileNotFoundException {
-			InputStream result = null;
+		byte[] getBytes() 
+		throws FileNotFoundException, IOException {
+			byte[] result = null;
 
 			if (file != null) {
-				result = new FileInputStream(file);
+				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
+					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+						result = new byte[1024]; // 1K
+						int bytesRead = 0;
+						while ((bytesRead = bis.read(result)) > 0) {
+							baos.write(result, 0, bytesRead);
+						}
+						result = baos.toByteArray();
+					}
+				}
 			}
 			if (content != null) {
-				result = content.getContentStream();
+				result = content.getContentBytes();
 			}
 
 			return result;
@@ -92,6 +99,19 @@ public class CustomerResourceServlet extends HttpServlet {
 				result = content.getMimeType();
 			}
 			
+			return result;
+		}
+		
+		String getFileName() {
+			String result = null;
+			
+			if (file != null) {
+				result = file.getName();
+			}
+			if (content != null) {
+				result = content.getFileName();
+			}
+
 			return result;
 		}
 
@@ -249,43 +269,30 @@ public class CustomerResourceServlet extends HttpServlet {
 			response.setCharacterEncoding(ServletConstants.UTF8);
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
-				disposition.append("inline; filename=\"content.");
-				disposition.append(resource.getMimeType().getStandardFileSuffix());
+				disposition.append("inline; filename=\"");
+				disposition.append(resource.getFileName());
 				disposition.append('"');
 				response.setHeader("Content-Disposition", disposition.toString());
 			}
-
-			try (InputStream resourceStream = resource.getStream()) {
-				if (resourceStream == null) {
-					response.sendError(404);
-					return;
-				}
+			
+			byte[] bytes = resource.getBytes();
+			if (bytes == null) {
+				response.sendError(404);
+				return;
+			}
 	
-				try (OutputStream out = response.getOutputStream()) {
-					try (BufferedInputStream bis = new BufferedInputStream(resourceStream)) {
-						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-							byte[] bytes = new byte[1024]; // 1K
-							int bytesRead = 0;
-							while ((bytesRead = bis.read(bytes)) > 0) {
-								baos.write(bytes, 0, bytesRead);
-							}
-							bytes = baos.toByteArray();
-			
-							response.setContentLength(bytes.length);
-			
-							if (resource.isContent()) {
-								// NOTE - the image is not cached unless there is a content length, and the header following headers
-								// NOTE - THIS MUST BE SET FIRST BEFORE WRITING TO THE STREAM
-								response.setHeader("Cache-Control", "cache");
-						        response.setHeader("Pragma", "cache");
-						        response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-							}
-			
-							out.write(bytes, 0, bytes.length);
-							out.flush();
-						}
-					}
+			response.setContentLength(bytes.length);
+			try (OutputStream out = response.getOutputStream()) {
+				if (resource.isContent()) {
+					// NOTE - the image is not cached unless there is a content length, and the header following headers
+					// NOTE - THIS MUST BE SET FIRST BEFORE WRITING TO THE STREAM
+					response.setHeader("Cache-Control", "cache");
+			        response.setHeader("Pragma", "cache");
+			        response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
 				}
+
+				out.write(bytes, 0, bytes.length);
+				out.flush();
 			}
 		} 
 		catch (Exception e) {

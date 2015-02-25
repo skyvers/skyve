@@ -30,7 +30,7 @@
 					},
 					"bizId" : {
 						"type" : "string",
-						"index" : "not_analyzed",
+						"index" : "no",
 						"store" : "yes"
 					},
 					"attribute" : {
@@ -47,7 +47,8 @@
 			},
 			"content" : {
 				"type" : "string",
-				"store" : "yes"
+				"store" : "yes",
+				"analyzer" : "english"
 			}
 		}
 	}

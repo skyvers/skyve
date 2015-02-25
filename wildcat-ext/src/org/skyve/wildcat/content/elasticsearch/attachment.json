@@ -28,11 +28,13 @@
 				"properties" : {
 					"author" : {
 						"type" : "string",
-						"store" : "yes"
+						"store" : "yes",
+						"analyzer" : "english"
 					},
 					"title" : {
 						"type" : "string",
-						"store" : "yes"
+						"store" : "yes",
+						"analyzer" : "english"
 					},
 					"date" : {
 						"type" : "date",
@@ -41,7 +43,8 @@
 					},
 					"keywords" : {
 						"type" : "string",
-						"store" : "yes"
+						"store" : "yes",
+						"analyzer" : "english"
 					}
 				}
 			},
@@ -86,7 +89,8 @@
 			},
 			"content" : {
 				"type" : "string",
-				"store" : "yes"
+				"store" : "yes",
+				"analyzer" : "english"
 			},
 			"attachment" : {
 				"type" : "string",
