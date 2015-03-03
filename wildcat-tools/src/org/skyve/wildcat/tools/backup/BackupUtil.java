@@ -73,6 +73,7 @@ final class BackupUtil {
 		Persistent persistent = document.getPersistent();
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
 			String persistentIdentifier = persistent.getPersistentIdentifier();
+System.out.println(persistentIdentifier);
 			Table table = tables.get(persistentIdentifier);
 			if (table == null) {
 				table = new Table(persistentIdentifier);

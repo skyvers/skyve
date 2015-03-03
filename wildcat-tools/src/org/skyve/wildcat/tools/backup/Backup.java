@@ -15,9 +15,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.jcr.ItemNotFoundException;
 import javax.jcr.Session;
 
-import org.apache.jackrabbit.core.data.DataStoreException;
 import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -61,6 +61,7 @@ public class Backup {
 				@SuppressWarnings("resource")
 				Connection connection = persistence.getConnection();
 				for (Table table : tables) {
+System.out.println("BACKUP " + table.name + " : " + customerName);
 					try (Statement statement = connection.createStatement()) {
 						StringBuilder sql = new StringBuilder(128);
 						sql.append("select * from ").append(table.name);
@@ -197,8 +198,12 @@ public class Backup {
 															}
 														}
 													}
-													catch (DataStoreException e) {
-														if (e.getCause() instanceof FileNotFoundException) {
+													catch (Exception e) {
+														if (e instanceof ItemNotFoundException) {
+															System.err.println("*** ALTHOUGH THE FOLLOWING STACK TRACE DID NOT STOP THE BACKUP THIS IS SERIOUS");
+															e.printStackTrace();
+														}
+														else if (e.getCause() instanceof FileNotFoundException) {
 															System.err.println("*** ALTHOUGH THE FOLLOWING STACK TRACE DID NOT STOP THE BACKUP THIS IS SERIOUS");
 															e.printStackTrace();
 														}
@@ -241,6 +246,9 @@ public class Backup {
 		}
 		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 		Collection<Table> tables = BackupUtil.getTables();
+		for (Table table : tables) {
+			System.out.println(table.name);
+		}
 		backup(tables, args[0]);
 	}
 }
