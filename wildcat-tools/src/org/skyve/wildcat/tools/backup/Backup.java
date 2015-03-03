@@ -8,9 +8,9 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
@@ -123,12 +123,12 @@ System.out.println("BACKUP " + table.name + " : " + customerName);
 														(attributeType == AttributeType.dateTime) ||
 														(attributeType == AttributeType.time) ||
 														(attributeType == AttributeType.timestamp)) {
-												Timestamp timestamp = resultSet.getTimestamp(name);
+												Date date = resultSet.getDate(name);
 												if (resultSet.wasNull()) {
 													value = "";
 												}
 												else {
-													value = new Long(timestamp.getTime());
+													value = new Long(date.getTime());
 												}
 											}
 											else if ((attributeType == AttributeType.decimal2) ||

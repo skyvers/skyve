@@ -55,7 +55,7 @@ class Table {
 				if (attributeType == AttributeType.association) {
 					fields.put(attribute.getName() + "_id", attribute.getAttributeType());
 				}
-				else if (attributeType != AttributeType.collection) {
+				else if ((attributeType != AttributeType.collection) && (attributeType != AttributeType.inverse)) {
 					fields.put(attribute.getName(), attributeType);
 				}
 			}
