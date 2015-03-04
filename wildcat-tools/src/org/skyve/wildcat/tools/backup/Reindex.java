@@ -27,7 +27,7 @@ public class Reindex {
 							// Dont check if a document has indexable fields as we
 							// may need to have nodes deleted
 							// (ie, a document field used to be indexed but now is not)
-							UtilImpl.LOGGER.info("Reindex document " + documentName);
+							UtilImpl.LOGGER.info("Reindex document " + module.getName() + '.' + documentName);
 							DocumentQueryImpl query = new DocumentQueryImpl(document);
 							for (Bean bean : persistence.iterate(query)) {
 								persistence.reindex((PersistentBean) bean);
@@ -51,5 +51,7 @@ public class Reindex {
 		}
 		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
 		reindex();
+		// This is required to stop the process hanging at the end on a mac bash shell
+		System.exit(0);
 	}
 }

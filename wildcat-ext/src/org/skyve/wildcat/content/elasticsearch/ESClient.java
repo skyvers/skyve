@@ -361,16 +361,12 @@ public class ESClient extends AbstractContentManager {
 
 		List<SearchResult> hits = results.getResults();
 		for (SearchHit searchHit : searchResponse.getHits()) {
-			String bizCustomer = (String) searchHit.field(BEAN_CUSTOMER_NAME).value();
-			String bizModule = (String) searchHit.field(BEAN_MODULE_KEY).value();
-			String bizDocument = (String) searchHit.field(BEAN_DOCUMENT_KEY).value();
-			String bizDataGroupId = null;
-			SearchHitField field = searchHit.field(BEAN_DATA_GROUP_ID);
-			if (field != null) {
-				bizDataGroupId = (String) field.value();
-			}
-			String bizUserId = (String) searchHit.field(BEAN_USER_ID).value();
-			String bizId = (String) searchHit.field(BEAN_DOCUMENT_ID).value();
+			String bizCustomer = (String) fieldValue(searchHit, BEAN_CUSTOMER_NAME);
+			String bizModule = (String) fieldValue(searchHit, BEAN_MODULE_KEY);
+			String bizDocument = (String) fieldValue(searchHit, BEAN_DOCUMENT_KEY);
+			String bizDataGroupId = (String) fieldValue(searchHit, BEAN_DATA_GROUP_ID);
+			String bizUserId = (String) fieldValue(searchHit, BEAN_USER_ID);
+			String bizId = (String) fieldValue(searchHit, BEAN_DOCUMENT_ID);
 			if (allow(bizCustomer,
 						bizModule,
 						bizDocument,
@@ -385,17 +381,14 @@ public class ESClient extends AbstractContentManager {
 				hit.setBizId(bizId);
 				hit.setScore((int) (searchHit.score() * 100.0));
 	
-				field = searchHit.field(BEAN_ATTRIBUTE_NAME);
-				if (field != null) {
-					hit.setAttributeName((String) field.getValue());
+				hit.setAttributeName((String) fieldValue(searchHit, BEAN_ATTRIBUTE_NAME));
+				String isoDate = (String) fieldValue(searchHit, LAST_MODIFIED);
+				if (isoDate != null) {
+					hit.setLastModified(TimeUtil.parseISODate(isoDate));
 				}
-				field = searchHit.field(LAST_MODIFIED);
-				if (field != null) {
-					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
-				}
-				field = searchHit.field(FILE_LAST_MODIFIED);
-				if (field != null) {
-					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+				isoDate = (String) fieldValue(searchHit, FILE_LAST_MODIFIED);
+				if (isoDate != null) {
+					hit.setLastModified(TimeUtil.parseISODate(isoDate));
 				}
 				hit.setContentId(searchHit.getId());
 /*			
@@ -433,6 +426,14 @@ public class ESClient extends AbstractContentManager {
 		return results;
 	}
 
+	private static Object fieldValue(SearchHit hit, String fieldName) {
+		SearchHitField field = hit.field(fieldName);
+		if (field != null) {
+			return field.value();
+		}
+		return null;
+	}
+	
 	private static boolean allow(String bizCustomer,
 									String bizModule,
 									String bizDocument,
