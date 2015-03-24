@@ -90,14 +90,20 @@ public final class DocumentImpl extends Model implements Document {
 		// Run bizlet newInstance()
 		Bizlet<T> bizlet = getBizlet(customer);
 		if (bizlet != null) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Entering " + bizlet.getClass().getName() + ".newInstance: " + result);
-			result = bizlet.newInstance(result);
-			if (result == null) {
-				throw new IllegalStateException(bizlet.getClass().getName() + ".newInstance() returned null");
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforeNewInstance(result);
+			if (! vetoed) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Entering " + bizlet.getClass().getName() + ".newInstance: " + result);
+				result = bizlet.newInstance(result);
+				if (result == null) {
+					throw new IllegalStateException(bizlet.getClass().getName() + ".newInstance() returned null");
+				}
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Exiting " + bizlet.getClass().getName() + ".newInstance: " + result);
+				internalCustomer.interceptAfterNewInstance(result);
 			}
+
 			// clear the object's dirtiness
 			result.originalValues().clear();
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "newInstance", "Exiting " + bizlet.getClass().getName() + ".newInstance: " + result);
 		}
 
 		// Set implicit properties
@@ -273,7 +279,7 @@ public final class DocumentImpl extends Model implements Document {
 		return AbstractRepository.get().getBizlet(customer, this);
 	}
 
-	public <T extends Bean> List<DomainValue> getDomainValues(Customer customer,
+	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,
 																T owningBean)
@@ -290,14 +296,22 @@ public final class DocumentImpl extends Model implements Document {
 					String attributeName = attribute.getName();
 					if (bizlet != null) {
 						if (DomainType.variant.equals(domainType)) {
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Entering " + bizlet.getClass().getName() + ".getVariantDomainValues: " + attributeName);
-							result = bizlet.getVariantDomainValues(attributeName);
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getVariantDomainValues: " + result);
+							boolean vetoed = customer.interceptBeforeGetVariantDomainValues(attributeName);
+							if (! vetoed) {
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Entering " + bizlet.getClass().getName() + ".getVariantDomainValues: " + attributeName);
+								result = bizlet.getVariantDomainValues(attributeName);
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getVariantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getVariantDomainValues: " + result);
+								customer.interceptAfterGetVariantDomainValues(attributeName, result);
+							}
 						}
 						else if (DomainType.dynamic.equals(domainType)) {
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
-							result = bizlet.getDynamicDomainValues(attributeName, owningBean);
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+							boolean vetoed = customer.interceptBeforeGetDynamicDomainValues(attributeName, owningBean);
+							if (! vetoed) {
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Entering " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + attributeName + ", " + owningBean);
+								result = bizlet.getDynamicDomainValues(attributeName, owningBean);
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getDynamicDomainValues", "Exiting " + bizlet.getClass().getName() + ".getDynamicDomainValues: " + result);
+								customer.interceptAfterGetDynamicDomainValues(attributeName, owningBean, result);
+							}
 						}
 					}
 					if (result == null) {

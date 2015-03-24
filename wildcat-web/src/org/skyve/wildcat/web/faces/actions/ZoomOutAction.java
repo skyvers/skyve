@@ -11,7 +11,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 import org.skyve.wildcat.domain.messages.SecurityException;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.ValidationUtil;
@@ -40,9 +42,15 @@ public class ZoomOutAction extends FacesAction<Void> {
 			Document document = module.getDocument(customer, currentBean.getBizDocument());
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " +  facesView.getWebContext());
-				currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, facesView.getWebContext());
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+				WebContext webContext = facesView.getWebContext();
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+				if (! vetoed) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " + webContext);
+					currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
+					internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+				}
 			}
 	
 			if (currentBean.isNotPersisted() && (! user.canCreateDocument(document))) {

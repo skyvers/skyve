@@ -3,21 +3,30 @@ package org.skyve.wildcat.metadata.customer;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import org.skyve.bizport.BizPortException;
+import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.metadata.controller.UploadAction.UploadedFile;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.HTMLResources;
+import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.customer.Service;
 import org.skyve.metadata.customer.UIResources;
@@ -34,6 +43,7 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.view.Action;
+import org.skyve.web.WebContext;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
@@ -159,6 +169,8 @@ public class CustomerImpl implements Customer {
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
 	private Map<String, Service> services = new TreeMap<>();
+	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
+	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
 
 	/**
@@ -297,6 +309,19 @@ public class CustomerImpl implements Customer {
 	@Override
 	public java.util.Collection<Service> getServices() {
 		return Collections.unmodifiableCollection(services.values());
+	}
+
+	public boolean putInterceptor(InterceptorMetaData interceptor) {
+		boolean result = (interceptors.put(interceptor.getClassName(), interceptor) == null);
+		if (result) {
+			reversedInterceptors.add(0, interceptor);
+		}
+		return result;
+	}
+	
+	@Override
+	public java.util.Collection<InterceptorMetaData> getInterceptors() {
+		return Collections.unmodifiableCollection(interceptors.values());
 	}
 
 	public void setHomeModuleName(String homeModuleName) {
@@ -446,12 +471,292 @@ public class CustomerImpl implements Customer {
 			domainValueCache.put(key, result);
 		}
 		else if ((bizlet != null) && (result == null)) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
-			result = bizlet.getConstantDomainValues(attributeName);
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
+			boolean vetoed = interceptBeforeGetConstantDomainValues(attributeName);
+			if (! vetoed) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
+				result = bizlet.getConstantDomainValues(attributeName);
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
+				interceptAfterGetConstantDomainValues(attributeName, result);
+			}
 			domainValueCache.put(key, result);
 		}
 
 		return result;
+	}
+	
+	public boolean interceptBeforeNewInstance(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeNewInstance(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterNewInstance(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterNewInstance(bean);
+		}
+	}
+	
+	public boolean interceptBeforeValidate(Bean bean, ValidationException e) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeValidate(bean, e)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterValidate(Bean bean, ValidationException e) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterValidate(bean, e);
+		}
+	}
+	
+	public boolean interceptBeforeGetConstantDomainValues(String attributeName) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeGetConstantDomainValues(attributeName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterGetConstantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterGetConstantDomainValues(attributeName, result);
+		}
+	}
+
+	public boolean interceptBeforeGetVariantDomainValues(String attributeName) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeGetVariantDomainValues(attributeName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterGetVariantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterGetVariantDomainValues(attributeName, result);
+		}
+	}
+
+	public boolean interceptBeforeGetDynamicDomainValues(String attributeName, Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeGetDynamicDomainValues(attributeName, bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterGetDynamicDomainValues(String attributeName, Bean bean, List<DomainValue> result) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterGetDynamicDomainValues(attributeName, bean, result);
+		}
+	}
+
+	public boolean interceptBeforeSave(Document document, PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeSave(document, bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterSave(Document document, PersistentBean result) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterSave(document, result);
+		}
+	}
+	
+	public boolean interceptBeforePreSave(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePreSave(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterPreSave(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPreSave(bean);
+		}
+	}
+	
+	public boolean interceptBeforePostSave(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePostSave(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterPostSave(Bean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPostSave(bean);
+		}
+	}
+
+	public boolean interceptBeforeDelete(Document document, PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeDelete(document, bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterDelete(Document document, PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterDelete(document, bean);
+		}
+	}
+
+	public boolean interceptBeforePreDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePreDelete(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterPreDelete(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPreDelete(bean);
+		}
+	}
+
+	public boolean interceptBeforePostLoad(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePostLoad(bean)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterPostLoad(PersistentBean bean) throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPostLoad(bean);
+		}
+	}
+	
+	public boolean interceptBeforePreExecute(ImplicitActionName actionName, Bean bean, Bean parentBean, WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePreExecute(actionName, bean, parentBean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterPreExecute(ImplicitActionName actionName,
+											Bean result,
+											Bean parentBean,
+											WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPreExecute(actionName, result, parentBean, webContext);
+		}
+	}
+
+	public boolean interceptBeforeServerSideAction(Document document,
+													String actionName, 
+													Bean bean,
+													WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeServerSideAction(document, actionName, bean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterServerSideAction(Document document, 
+												String actionName, 
+												ServerSideActionResult result, 
+												WebContext webContext) 
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterServerSideAction(document, actionName, result, webContext);
+		}
+	}
+
+	public boolean interceptBeforeUploadAction(Document document,
+												String actionName,
+												Bean bean,
+												UploadedFile file,
+												WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeUploadAction(document, actionName, bean, file, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterUploadAction(Document document,
+											String actionName,
+											Bean bean,
+											UploadedFile file,
+											WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterUploadAction(document, actionName, bean, file, webContext);
+		}
+	}
+	
+	public boolean interceptBeforeBizImportAction(Document document,
+													String actionName,
+													BizPortWorkbook bizPortable,
+													BizPortException problems)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeBizImportAction(document, actionName, bizPortable, problems)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterBizImportAction(Document document,
+												String actionName,
+												BizPortWorkbook bizPortable,
+												BizPortException problems)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterBizImportAction(document, actionName, bizPortable, problems);
+		}
+	}
+
+	public boolean interceptBeforeBizExportAction(Document document, String actionName, WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeBizExportAction(document, actionName, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterBizExportAction(Document document,
+												String actionName,
+												BizPortWorkbook result,
+												WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterBizExportAction(document, actionName, result, webContext);
+		}
 	}
 }

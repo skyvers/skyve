@@ -50,6 +50,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.domain.MapBean;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Field;
@@ -518,15 +519,15 @@ public final class BindUtil {
 							Bean owningBean = (Bean) get(realBean, binding.substring(0, lastDotIndex));
 							if ((owningBean != null) && (target != null)) {
 								internalDocument = (DocumentImpl) target.getDocument();
-								domainValues = internalDocument.getDomainValues(customer, domainType, field, owningBean);
+								domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, owningBean);
 							}
 						}
 						else {
-							domainValues = internalDocument.getDomainValues(customer, domainType, field, realBean);							
+							domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, realBean);							
 						}
 					}
 					else {
-						domainValues = internalDocument.getDomainValues(customer, domainType, field, null);
+						domainValues = internalDocument.getDomainValues((CustomerImpl) customer, domainType, field, null);
 					}
 				}
 			}

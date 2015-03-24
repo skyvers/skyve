@@ -14,4 +14,7 @@
 		<module name="whosinIntegrate" />
 	</modules>
 	<homeModule>whosinIntegrate</homeModule>
+	<interceptors>
+		<interceptor className="customers.demo.LoggingInterceptor" />
+	</interceptors>
 </customer>

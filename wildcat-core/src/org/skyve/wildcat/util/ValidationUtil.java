@@ -24,6 +24,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Date;
 import org.skyve.wildcat.metadata.model.document.field.DateTime;
@@ -305,9 +306,14 @@ public class ValidationUtil {
 		ValidationException e = new ValidationException();
 
 		try {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Entering " + bizlet.getClass().getName() + ".validate: " + bean);
-			bizlet.validate(bean, e);
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Exiting " + bizlet.getClass().getName() + ".validate: " + bean);
+			CustomerImpl internalCustomer = (CustomerImpl) CORE.getUser().getCustomer();
+			boolean vetoed = internalCustomer.interceptBeforeValidate(bean, e);
+			if (! vetoed) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Entering " + bizlet.getClass().getName() + ".validate: " + bean);
+				bizlet.validate(bean, e);
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "validate", "Exiting " + bizlet.getClass().getName() + ".validate: " + bean);
+				internalCustomer.interceptAfterValidate(bean, e);
+			}
 		}
 		catch (ValidationException ve) {
 			// validation method has thrown a validation exception that is not the e parameter passed in

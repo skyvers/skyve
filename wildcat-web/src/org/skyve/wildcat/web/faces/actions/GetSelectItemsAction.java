@@ -16,6 +16,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.Association;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
@@ -57,11 +58,10 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             	owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
             }
 
-            List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues(
-																					            				customer,
-																					                            domainType,
-																					                            targetAttribute,
-																					                            owningBean);
+            List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
+																	                            domainType,
+																	                            targetAttribute,
+																	                            owningBean);
             if (includeEmptyItem) {
 	            result = new ArrayList<>(domainValues.size() + 1);
 	        	// add an empty select item so that a null value 

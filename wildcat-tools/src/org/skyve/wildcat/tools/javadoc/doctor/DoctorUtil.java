@@ -19,6 +19,7 @@ import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
@@ -258,7 +259,7 @@ public class DoctorUtil {
 					DocList valueList = new DocList(false);
 					if(AttributeType.enumeration.equals(attribute.getAttributeType())
 							|| DomainType.constant.equals(attribute.getDomainType())){
-						for(DomainValue val: ((DocumentImpl) document).getDomainValues(customer, attribute.getDomainType(), attribute, null) ){
+						for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null) ){
 							StringBuilder sb = new StringBuilder();
 							sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
 							valueList.getItems().add(sb.toString());

@@ -13,6 +13,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.WildcatJob;
 import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -20,6 +21,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 
 public class PerformDocumentActionForTagJob extends WildcatJob {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -48,11 +50,12 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 
 			// get action from actionname
 			Repository rep = CORE.getRepository();
+			String documentActionName = tag.getDocumentAction();
 			ServerSideAction<Bean> act  = null;
-			if(!TagBizlet.WILDCAT_SAVE_ACTION.equals(tag.getDocumentAction()) 
-					&& !TagBizlet.WILDCAT_DELETE_ACTION.equals(tag.getDocumentAction())
-					&& !TagBizlet.WILDCAT_VALIDATE_ACTION.equals(tag.getDocumentAction())){
-				act = rep.getAction(customer, document, tag.getDocumentAction());
+			if(!TagBizlet.WILDCAT_SAVE_ACTION.equals(documentActionName) 
+					&& !TagBizlet.WILDCAT_DELETE_ACTION.equals(documentActionName)
+					&& !TagBizlet.WILDCAT_VALIDATE_ACTION.equals(documentActionName)){
+				act = rep.getAction(customer, document, documentActionName);
 			}
 
 			List<Bean> beans = new ArrayList<>();
@@ -70,7 +73,7 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 				PersistentBean pb = (PersistentBean) it.next();
 			
 				StringBuilder sb=  new StringBuilder();
-				sb.append("Action request for [").append(tag.getDocumentAction());
+				sb.append("Action request for [").append(documentActionName);
 				sb.append("] for document [").append(tag.getDocumentName()).append("] - ");
 				if(tag.getDocumentCondition()!=null){
 					sb.append(" with condition [").append(tag.getDocumentCondition()).append("] - ");
@@ -85,7 +88,19 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 					}
 					if(conditionSatisfied){
 						if(act!=null){
-							act.execute(pb, null);
+							CustomerImpl internalCustomer = (CustomerImpl) customer;
+							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, 
+																								documentActionName,
+																								pb,
+																								null);
+							if (! vetoed) {
+								ServerSideActionResult result = act.execute(pb, null);	
+								internalCustomer.interceptAfterServerSideAction(document, 
+																					documentActionName,
+																					result,
+																					null);
+								pb = (PersistentBean) result.getBean();
+							}
 						} 
 						//remove successfully validated beans
 						if(Boolean.TRUE.equals(tag.getUnTagSuccessful())){

@@ -79,6 +79,12 @@ public interface Customer extends NamedMetaData {
 	 * 
 	 * @return
 	 */
+	public Collection<InterceptorMetaData> getInterceptors();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public UIResources getUiResources();
 	
 	/**

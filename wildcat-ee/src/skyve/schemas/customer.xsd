@@ -31,6 +31,13 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="interceptors" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="interceptor" type="tns:interceptor" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
@@ -69,6 +76,11 @@
         <xs:attribute name="className" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="interceptor">
+    <xs:sequence/>
+    <xs:attribute name="className" type="xs:string" use="required"/>
   </xs:complexType>
 </xs:schema>
 

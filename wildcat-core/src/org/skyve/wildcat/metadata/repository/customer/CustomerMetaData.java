@@ -36,7 +36,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"defaultTimestampConverter", 
 							"modules", 
 							"homeModule", 
-							"services"})
+							"services",
+							"interceptors"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private UIResources uiResources;
 	private HTMLResources htmlResources;
@@ -47,6 +48,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private ConverterName defaultTimestampConverter;
 	private List<CustomerModuleMetaData> modules = new ArrayList<>();
 	private List<Service> services = new ArrayList<>();
+	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private String homeModule;
 
 	public UIResources getUiResources() {
@@ -122,6 +124,12 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "service", required = true)
 	public List<Service> getServices() {
 		return services;
+	}
+
+	@XmlElementWrapper(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "interceptors")
+	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
+	public List<InterceptorMetaDataImpl> getInterceptors() {
+		return interceptors;
 	}
 
 	public String getHomeModule() {
@@ -215,7 +223,20 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 				if (! result.putService(service)) {
 					throw new MetaDataException(metaDataName + " : Duplicate service named " + value);
 				}
-				result.putService(service);
+			}
+		}
+
+		// Populate Interceptors
+		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();
+		if (repositoryInterceptors != null) {
+			for (InterceptorMetaDataImpl interceptor : repositoryInterceptors) {
+				value = interceptor.getClassName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [className] for an interceptor is required");
+				}
+				if (! result.putInterceptor(interceptor)) {
+					throw new MetaDataException(metaDataName + " : Duplicate interceptor " + value);
+				}
 			}
 		}
 

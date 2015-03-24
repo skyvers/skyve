@@ -27,6 +27,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.bizport.POIWorkbook;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -132,7 +133,12 @@ public class BizportImport {
 					POIWorkbook workbook = new POIWorkbook(customer,
 															WorkbookFactory.create(fis), 
 															exception);
-					bizPortAction.bizImport(workbook, exception);
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforeBizImportAction(document, action, workbook, exception);
+					if (! vetoed) {
+						bizPortAction.bizImport(workbook, exception);
+						internalCustomer.interceptAfterBizImportAction(document, action, workbook, exception);
+					}
 		
 					// throw if we have errors found, to ensure rollback
 					if (exception.hasErrors()) {

@@ -868,9 +868,14 @@ t.printStackTrace();
 					if ((! visitingInheritedDocument) && 
 							(persistentName != null) && 
 							(bizlet != null)) { // persistent and concrete for this bean graph with a bizlet
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
-						bizlet.preSave(bean);
-						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Exiting " + bizlet.getClass().getName() + ".preSave");
+						CustomerImpl internalCustomer = (CustomerImpl) customer;
+						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
+						if (! vetoed) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
+							bizlet.preSave(bean);
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Exiting " + bizlet.getClass().getName() + ".preSave");
+							internalCustomer.interceptAfterPreSave(bean);
+						}
 					}
 					
 					ValidationUtil.validateBeanAgainstDocument(document, bean);
@@ -915,22 +920,31 @@ t.printStackTrace();
 	public final <T extends PersistentBean> T save(Document document, T bean)
 	throws DomainException, MetaDataException {
 		T result = null;
-
+		
 		try {
+			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
+			boolean vetoed = false;
+			
 			// We need to replace transient properties before calling postFlush as
 			// Bizlet.postSave() implementations could manipulate these transients for display after save.
 			try {
-				preFlush(document, bean);
-				String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-				result = (T) session.merge(entityName, bean);
-				em.flush();
+				vetoed = internalCustomer.interceptBeforeSave(document, bean);
+				if (! vetoed) {
+					preFlush(document, bean);
+					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+					result = (T) session.merge(entityName, bean);
+					em.flush();
+				}
 			}
 			finally {
 				if (result != null) { // only do if we got a result from the merge
 					replaceTransientProperties(document, result, bean);
 				}
 			}
-			postFlush(document, result);
+			if (! vetoed) {
+				postFlush(document, result);
+				internalCustomer.interceptAfterSave(document, result);
+			}
 		}
 		catch (Throwable t) {
 			treatPersistenceThrowable(t, OperationType.update, bean.getBizLock());
@@ -960,9 +974,14 @@ t.printStackTrace();
 					try {
 						Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 						if (bizlet != null) {
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
-							bizlet.postSave(bean);
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Exiting " + bizlet.getClass().getName() + ".postSave");
+							CustomerImpl internalCustomer = (CustomerImpl) customer;
+							boolean vetoed = internalCustomer.interceptBeforePostSave(bean);
+							if (! vetoed) {
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
+								bizlet.postSave(bean);
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Exiting " + bizlet.getClass().getName() + ".postSave");
+								internalCustomer.interceptAfterPostSave(bean);
+							}
 						}
 					}
 					catch (ValidationException e) {
@@ -1182,14 +1201,20 @@ t.printStackTrace();
 		
 		if (isPersisted(newBean)) {
 			try {
-				// need to merge before validation to ensure that the FK constraints
-				// can check for members of collections etc - need the persistent version for this
-				String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
-				newBean = (T) session.merge(entityName, newBean);
-				em.flush();
-
-				session.delete(entityName, newBean);
-				em.flush();
+				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
+				boolean vetoed = internalCustomer.interceptBeforeDelete(document, newBean);
+				if (! vetoed) {
+					// need to merge before validation to ensure that the FK constraints
+					// can check for members of collections etc - need the persistent version for this
+					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
+					newBean = (T) session.merge(entityName, newBean);
+					em.flush();
+	
+					session.delete(entityName, newBean);
+					em.flush();
+				
+					internalCustomer.interceptAfterDelete(document, newBean);
+				}
 			}
 			catch (Throwable t) {
 				treatPersistenceThrowable(t, OperationType.update, newBean.getBizLock());
@@ -1558,11 +1583,16 @@ t.printStackTrace();
 		Document document = customer.getModule(loadedBean.getBizModule()).getDocument(customer, loadedBean.getBizDocument());
 		Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 		if (bizlet != null) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
-			bizlet.postLoad(loadedBean);
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
+			if (! vetoed) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
+				bizlet.postLoad(loadedBean);
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
+				internalCustomer.interceptAfterPostLoad(loadedBean);
+			}
 			// clear the object's dirtiness
 			loadedBean.originalValues().clear();
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
 		}
 	}
 
@@ -1719,9 +1749,14 @@ t.printStackTrace();
 		try {
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
-				bizlet.preDelete(beanToDelete);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				boolean vetoed = internalCustomer.interceptBeforePreDelete(beanToDelete);
+				if (! vetoed) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
+					bizlet.preDelete(beanToDelete);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
+					internalCustomer.interceptAfterPreDelete(beanToDelete);
+				}
 			}
 
 			Set<String> documentsVisited = new TreeSet<>();
@@ -1877,7 +1912,7 @@ t.printStackTrace();
 	@Override
 	public void upsertBeanTuple(PersistentBean bean)
 	throws DomainException, MetaDataException {
-		Customer customer = user.getCustomer();
+		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		StringBuilder query = new StringBuilder(256);

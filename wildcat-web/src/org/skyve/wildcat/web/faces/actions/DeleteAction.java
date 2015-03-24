@@ -15,7 +15,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 import org.skyve.wildcat.domain.messages.SecurityException;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -70,12 +72,15 @@ public class DeleteAction extends FacesAction<Void> {
 		// Run preExecute after the copy is taken, in case we rollback
 		Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 		if (bizlet != null) {
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + ", " + facesView.getWebContext());
-			persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
-														persistentBeanToDelete, 
-														null,
-														facesView.getWebContext());
-			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
+			WebContext webContext = facesView.getWebContext();
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
+			if (! vetoed) {
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + ", " + webContext);
+				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
+				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
+			}
 		}
 
 		persistence.delete(document, persistentBeanToDelete);

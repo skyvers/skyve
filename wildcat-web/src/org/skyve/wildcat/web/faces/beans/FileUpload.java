@@ -16,12 +16,12 @@ import org.primefaces.model.UploadedFile;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.UploadAction;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.ThreadSafeFactory;
@@ -93,7 +93,7 @@ public class FileUpload {
 		persistence.begin();
 		try {
 			AbstractRepository repository = AbstractRepository.get();
-			Customer customer = user.getCustomer();
+			CustomerImpl customer = (CustomerImpl) user.getCustomer();
 	
 			AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
 			if (webContext == null) {
@@ -127,7 +127,11 @@ public class FileUpload {
 					new UploadAction.UploadedFile(file.getFileName(),
 													file.getInputstream(),
 													mimeType);
-			uploadAction.upload(bean, bizFile, webContext);
+			boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
+			if (! vetoed) {
+				uploadAction.upload(bean, bizFile, webContext);
+				customer.interceptAfterUploadAction(document, action, bean, bizFile, webContext);
+			}
 			
 			// only put conversation in cache if we have been successful in executing
 			WebUtil.putConversationInCache(webContext);

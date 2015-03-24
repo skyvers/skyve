@@ -11,6 +11,8 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
@@ -51,8 +53,17 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	    }
 	    else {
 			if (FacesAction.validateRequiredFields()) {
-		    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
-		    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				WebContext webContext = facesView.getWebContext();
+				boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
+																					actionName,
+																					targetBean,
+																					webContext);
+				if (! vetoed) {
+					ServerSideActionResult result = serverSideAction.execute(targetBean, webContext);
+					internalCustomer.interceptAfterServerSideAction(targetDocument, actionName, result, webContext);
+					ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+				}
 			}	    	
 		}
 

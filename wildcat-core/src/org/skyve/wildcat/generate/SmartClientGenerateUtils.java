@@ -43,6 +43,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Date;
@@ -1123,7 +1124,10 @@ public class SmartClientGenerateUtils {
 															Document document,
 															Attribute attribute) 
 	throws MetaDataException {
-		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, DomainType.constant, attribute, null);
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
+																				DomainType.constant, 
+																				attribute, 
+																				null);
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append('{');
@@ -1145,7 +1149,10 @@ public class SmartClientGenerateUtils {
 																	Document document,
 																	Attribute attribute)
 	throws MetaDataException {
-		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, DomainType.constant, attribute, null);
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
+																				DomainType.constant, 
+																				attribute, 
+																				null);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
 			result.put(value.getCode(), processString(value.getDescription()));

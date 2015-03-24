@@ -14,13 +14,12 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.metadata.controller.BizExportAction;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.web.AbstractWebContext;
 
 public class BizportExportServlet extends HttpServlet {
 	/**
@@ -43,7 +42,7 @@ public class BizportExportServlet extends HttpServlet {
 					persistence.setUser(user);
 
 					AbstractRepository repository = AbstractRepository.get();
-					Customer customer = user.getCustomer();
+					CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		
 					String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
 					int dotIndex = documentName.indexOf('.');
@@ -51,26 +50,35 @@ public class BizportExportServlet extends HttpServlet {
 					documentName = documentName.substring(dotIndex + 1);
 					Module module = customer.getModule(moduleName);
 					Document document = module.getDocument(customer, documentName);
+					String actionName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
 					BizExportAction bizPortAction = repository.getBizExportAction(customer, 
 																					document, 
-																					request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME));
+																					actionName);
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			        BizPortWorkbook result = bizPortAction.bizExport(context);
-					result.write(baos);
+
+					boolean vetoed = customer.interceptBeforeBizExportAction(document, actionName, context);
+					BizPortWorkbook result = null;
+					if (! vetoed) {
+						result = bizPortAction.bizExport(context);
+						customer.interceptAfterBizExportAction(document, actionName, result, context);
+						result.write(baos);
+					}
 		            byte[] bytes = baos.toByteArray();
 		            
-					switch (result.getFormat()) {
-					case xls:
-						response.setContentType(MimeType.excel.toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
-						response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
-						break;
-					case xlsx:
-						break;
-					default:
-					}
+		            if (result != null) {
+						switch (result.getFormat()) {
+						case xls:
+							response.setContentType(MimeType.excel.toString());
+							response.setCharacterEncoding(ServletConstants.UTF8);
+							response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
+							break;
+						case xlsx:
+							break;
+						default:
+						}
+		            }
 		
 		            response.setContentLength(bytes.length);
 		            

@@ -12,7 +12,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 import org.skyve.wildcat.domain.messages.SecurityException;
+import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -44,9 +46,15 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 			Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 			if (bizlet != null) {
 				ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + facesView.getWebContext());
-				targetBean = bizlet.preExecute(ian, targetBean, null, facesView.getWebContext());
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
+				WebContext webContext = facesView.getWebContext();
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
+				if (! vetoed) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + webContext);
+					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
+					internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
+				}
 			}
 	
 			if (targetBean.isNotPersisted() && (! user.canCreateDocument(document))) {
