@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view type="edit" title="Audit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <form>
+        <column percentageWidth="20"/>
+        <column/>
+        <column/>
+        <row>
+            <item>
+                <default binding="auditModuleName"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="auditDocumentName"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="auditBizId"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="auditBizKey"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="timestamp"/>
+            </item>
+        </row>
+        <row>
+            <item>
+                <default binding="audit"/>
+            </item>
+        </row>
+    </form>
+    <comparison binding="current" modelName="AuditComparisonModel" />
+    <actions>
+        <defaults/>
+    </actions>
+    <newParameters/>
+</view>
+

@@ -10,6 +10,7 @@
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 	</jobs>	
 	<documents>
+		<document ref="Audit" />
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
@@ -150,6 +151,7 @@
 				Enough privileges and permissions to login and operate BizHub with access to the admin module only.
 			</description>
 			<privileges>
+				<document name="Audit" permission="_R__C" />
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
@@ -354,6 +356,9 @@
 		<grid name="Tags" document="Tag">
 			<uxui name="desktop"/>
 			<uxui name="tablet"/>		
+			<role name="BasicUser" />
+		</grid>
+		<grid name="Audits" document="Audit">
 			<role name="BasicUser" />
 		</grid>
 		<edit document="Display" name="Web Stats">

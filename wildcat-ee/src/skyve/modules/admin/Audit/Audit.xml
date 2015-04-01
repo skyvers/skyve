@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Audit"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Audit" />
+	<singularAlias>Audit</singularAlias>
+	<pluralAlias>Audits</pluralAlias>
+	<bizKey>
+		<![CDATA[
+			return auditBizKey;
+		]]>
+	</bizKey>
+	<attributes>
+		<text name="auditModuleName" required="true">
+			<displayName>Module Name</displayName>
+			<length>128</length>
+		</text>
+		<text name="auditDocumentName" required="true">
+			<displayName>Document Name</displayName>
+			<length>128</length>
+		</text>
+		<text name="auditBizId" required="true">
+			<displayName>BizId</displayName>
+			<length>36</length>
+		</text>
+		<text name="auditBizKey" required="true">
+			<displayName>Description</displayName>
+			<length>128</length>
+		</text>
+		<timestamp name="timestamp" required="true">
+			<displayName>Timestamp</displayName>
+		</timestamp>
+		<memo name="audit" required="true">
+			<displayName>Audit</displayName>
+		</memo>
+		<association name="current" type="aggregation" persistent="false">
+			<displayName>Current</displayName>
+			<documentName>Audit</documentName>
+		</association>
+	</attributes>
+</document>

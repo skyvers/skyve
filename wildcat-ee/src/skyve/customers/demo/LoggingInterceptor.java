@@ -3,19 +3,28 @@ package customers.demo;
 import java.util.List;
 import java.util.logging.Level;
 
+import modules.admin.domain.Audit;
+
+import org.skyve.CORE;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.Interceptor;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.UploadAction.UploadedFile;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+import org.skyve.wildcat.util.JSONUtil;
 
 public class LoggingInterceptor extends Interceptor {
 	private static final long serialVersionUID = 8908343342043112903L;
@@ -84,7 +93,23 @@ public class LoggingInterceptor extends Interceptor {
 	}
 
 	@Override
-	public void afterSave(Document document, PersistentBean result) {
+	public void afterSave(Document document, PersistentBean result) throws Exception {
+
+		System.out.println();
+		Persistence p = CORE.getPersistence();
+		User u = p.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(Audit.MODULE_NAME);
+		Document d = m.getDocument(c, Audit.DOCUMENT_NAME);
+		Audit a = d.newInstance(u);
+		
+		a.setAudit(JSONUtil.marshall(CORE.getUser().getCustomer(), result, null));
+		a.setAuditModuleName(result.getBizModule());
+		a.setAuditDocumentName(result.getBizDocument());
+		a.setAuditBizId(result.getBizId());
+		a.setAuditBizKey(result.getBizKey());
+		a.setTimestamp(new Timestamp());
+		p.upsertBeanTuple(a);
 		Util.LOGGER.log(Level.INFO, "afterSave - {0}", result);
 	}
 
