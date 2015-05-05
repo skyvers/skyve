@@ -88,16 +88,26 @@ public class JobScheduler {
 
 	private static void scheduleInternalJobs()
 	throws Exception {
-		JobDetail detail = new JobDetail("CMS Garbage Collection",
+		// initialise the CMS in a 1 shot immediate job
+		JobDetail detail = new JobDetail("CMS Init",
 											Scheduler.DEFAULT_GROUP,
-											ContentGarbageCollectionJob.class);
+											ContentInitJob.class);
+		detail.setDurability(false);
+		SimpleTrigger trigger = new SimpleTrigger("CMS Init Trigger",
+													Scheduler.DEFAULT_GROUP);
+		JOB_SCHEDULER.scheduleJob(detail, trigger);
+
+		// Do CMS garbage collection every 1 hour and 7 seconds
+		detail = new JobDetail("CMS Garbage Collection",
+								Scheduler.DEFAULT_GROUP,
+								ContentGarbageCollectionJob.class);
 		detail.setDurability(true);
-		SimpleTrigger trigger = new SimpleTrigger("CMS Garbage Collection Trigger",
-													Scheduler.DEFAULT_GROUP,
-													new Date(new Date().getTime() + 60000), // start in 1 minute once the CMS has settled down
-													null,
-													SimpleTrigger.REPEAT_INDEFINITELY,
-													3607000L); // note: 1 hr 7 secs
+		trigger = new SimpleTrigger("CMS Garbage Collection Trigger",
+										Scheduler.DEFAULT_GROUP,
+										new Date(new Date().getTime() + 60000), // start in 1 minute once the CMS has settled down
+										null,
+										SimpleTrigger.REPEAT_INDEFINITELY,
+										3607000L); // note: 1 hr 7 secs
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 	}
 

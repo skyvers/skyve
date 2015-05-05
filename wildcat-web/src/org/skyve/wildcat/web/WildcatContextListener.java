@@ -177,14 +177,6 @@ public class WildcatContextListener implements ServletContextListener {
 		
 		JobScheduler.init();
 		WebUtil.initConversationsCache();
-		
-		try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
-			cm.init();
-		}
-		catch (Exception e) {
-			UtilImpl.LOGGER.info("Could not startup the content manager - this is non-fatal but requires investigation");
-			e.printStackTrace();
-		}
 	}
 
 	@Override
