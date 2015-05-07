@@ -122,7 +122,6 @@ import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.DynamicImageServlet;
-import org.skyve.wildcat.web.WebUtil;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
@@ -1680,8 +1679,6 @@ class ViewJSONManipulator extends ViewVisitor {
 					comparisons.put(referenceName, 
 										new ComparisonJSONManipulator((UserImpl) user, 
 																		customer,
-																		module,
-																		referenceDocument,
 																		root).toJSONStructure());
 				}
 				else if (forApply && parentEnabled && enabled(comparison)) {

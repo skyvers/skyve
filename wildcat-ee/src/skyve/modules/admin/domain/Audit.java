@@ -1,18 +1,24 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
 
 /**
  * Audit
  * 
- * @navhas n current 0..1 Audit
+ * @depend - - - Operation
+ * @navhas n me 0..1 Audit
  * @stereotype "persistent"
  */
 @XmlType
@@ -37,19 +43,100 @@ public class Audit extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String auditBizKeyPropertyName = "auditBizKey";
 	/** @hidden */
+	public static final String auditBizVersionPropertyName = "auditBizVersion";
+	/** @hidden */
+	public static final String operationPropertyName = "operation";
+	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
+	/** @hidden */
+	public static final String userPropertyName = "user";
 	/** @hidden */
 	public static final String auditPropertyName = "audit";
 	/** @hidden */
-	public static final String currentPropertyName = "current";
+	public static final String comparisonVersionPropertyName = "comparisonVersion";
+	/** @hidden */
+	public static final String mePropertyName = "me";
+
+	/**
+	 * Operation
+	 **/
+	@XmlEnum
+	public static enum Operation implements Enumeration {
+		insert("I", "Insert"),
+		update("U", "Update"),
+		delete("D", "Delete");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private Operation(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static Operation fromCode(String code) {
+			Operation result = null;
+
+			for (Operation value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static Operation fromDescription(String description) {
+			Operation result = null;
+
+			for (Operation value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				Operation[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (Operation value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	private String auditModuleName;
 	private String auditDocumentName;
 	private String auditBizId;
 	private String auditBizKey;
+	private Integer auditBizVersion;
+	private Operation operation;
 	private Timestamp timestamp;
+	private String user;
 	private String audit;
-	private Audit current = null;
+	private String comparisonVersion;
+	private Audit me = null;
 
 	@Override
 	@XmlTransient
@@ -66,7 +153,14 @@ public class Audit extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return auditBizKey;
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{auditBizVersion} - {operation} by {user} at {timestamp}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override
@@ -148,6 +242,42 @@ return auditBizKey;
 	}
 
 	/**
+	 * {@link #auditBizVersion} accessor.
+	 **/
+	public Integer getAuditBizVersion() {
+		return auditBizVersion;
+	}
+
+	/**
+	 * {@link #auditBizVersion} mutator.
+	 * 
+	 * @param auditBizVersion	The new value to set.
+	 **/
+	@XmlElement
+	public void setAuditBizVersion(Integer auditBizVersion) {
+		preset(auditBizVersionPropertyName, auditBizVersion);
+		this.auditBizVersion = auditBizVersion;
+	}
+
+	/**
+	 * {@link #operation} accessor.
+	 **/
+	public Operation getOperation() {
+		return operation;
+	}
+
+	/**
+	 * {@link #operation} mutator.
+	 * 
+	 * @param operation	The new value to set.
+	 **/
+	@XmlElement
+	public void setOperation(Operation operation) {
+		preset(operationPropertyName, operation);
+		this.operation = operation;
+	}
+
+	/**
 	 * {@link #timestamp} accessor.
 	 **/
 	public Timestamp getTimestamp() {
@@ -165,6 +295,24 @@ return auditBizKey;
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
+	}
+
+	/**
+	 * {@link #user} accessor.
+	 **/
+	public String getUser() {
+		return user;
+	}
+
+	/**
+	 * {@link #user} mutator.
+	 * 
+	 * @param user	The new value to set.
+	 **/
+	@XmlElement
+	public void setUser(String user) {
+		preset(userPropertyName, user);
+		this.user = user;
 	}
 
 	/**
@@ -186,20 +334,38 @@ return auditBizKey;
 	}
 
 	/**
-	 * {@link #current} accessor.
+	 * {@link #comparisonVersion} accessor.
 	 **/
-	public Audit getCurrent() {
-		return current;
+	public String getComparisonVersion() {
+		return comparisonVersion;
 	}
 
 	/**
-	 * {@link #current} mutator.
+	 * {@link #comparisonVersion} mutator.
 	 * 
-	 * @param current	The new value to set.
+	 * @param comparisonVersion	The new value to set.
 	 **/
 	@XmlElement
-	public void setCurrent(Audit current) {
-		preset(currentPropertyName, current);
-		this.current = current;
+	public void setComparisonVersion(String comparisonVersion) {
+		preset(comparisonVersionPropertyName, comparisonVersion);
+		this.comparisonVersion = comparisonVersion;
+	}
+
+	/**
+	 * {@link #me} accessor.
+	 **/
+	public Audit getMe() {
+		return me;
+	}
+
+	/**
+	 * {@link #me} mutator.
+	 * 
+	 * @param me	The new value to set.
+	 **/
+	@XmlElement
+	public void setMe(Audit me) {
+		preset(mePropertyName, me);
+		this.me = me;
 	}
 }

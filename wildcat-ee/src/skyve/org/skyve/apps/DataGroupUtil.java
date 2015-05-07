@@ -1,4 +1,4 @@
-package modules;
+package org.skyve.apps;
 
 import java.util.ArrayList;
 import java.util.List;

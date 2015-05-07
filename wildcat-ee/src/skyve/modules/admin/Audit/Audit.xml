@@ -6,18 +6,14 @@
 	<persistent name="ADM_Audit" />
 	<singularAlias>Audit</singularAlias>
 	<pluralAlias>Audits</pluralAlias>
-	<bizKey>
-		<![CDATA[
-			return auditBizKey;
-		]]>
-	</bizKey>
+	<bizKey expression="{auditBizVersion} - {operation} by {user} at {timestamp}" />
 	<attributes>
 		<text name="auditModuleName" required="true">
-			<displayName>Module Name</displayName>
+			<displayName>Module</displayName>
 			<length>128</length>
 		</text>
 		<text name="auditDocumentName" required="true">
-			<displayName>Document Name</displayName>
+			<displayName>Document</displayName>
 			<length>128</length>
 		</text>
 		<text name="auditBizId" required="true">
@@ -28,13 +24,33 @@
 			<displayName>Description</displayName>
 			<length>128</length>
 		</text>
+		<integer name="auditBizVersion" required="true">
+			<displayName>Version</displayName>
+		</integer>
+		<enum name="operation" required="true">
+			<displayName>Operation</displayName>
+			<values>
+				<value code="I" description="Insert" />
+				<value code="U" description="Update" />
+				<value code="D" description="Delete" />
+			</values>
+		</enum>
 		<timestamp name="timestamp" required="true">
 			<displayName>Timestamp</displayName>
 		</timestamp>
+		<text name="user" required="true">
+			<displayName>User</displayName>
+			<length>50</length>
+		</text>
 		<memo name="audit" required="true">
 			<displayName>Audit</displayName>
 		</memo>
-		<association name="current" type="aggregation" persistent="false">
+		<text name="comparisonVersion" persistent="false" required="true">
+			<displayName>Version To Compare</displayName>
+			<domain>dynamic</domain>
+			<length>9</length>
+		</text>
+		<association name="me" type="aggregation" persistent="false">
 			<displayName>Current</displayName>
 			<documentName>Audit</documentName>
 		</association>

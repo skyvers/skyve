@@ -1,17 +1,29 @@
 package modules.admin.Audit.models;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import modules.admin.domain.Audit;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.ComparisonComposite;
 import org.skyve.metadata.view.model.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.ComparisonModel;
+import org.skyve.metadata.view.model.ComparisonProperty;
 import org.skyve.persistence.Persistence;
+import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.model.document.field.Enumeration;
+import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.JSONUtil;
 
 public class AuditComparisonModel implements ComparisonModel<Audit> {
@@ -22,56 +34,192 @@ public class AuditComparisonModel implements ComparisonModel<Audit> {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		Module m = c.getModule(Audit.MODULE_NAME);
-		Document d = m.getDocument(c, Audit.DOCUMENT_NAME);
 		
-		PersistentBean current = CORE.getPersistence().retrieve(d, audit.getAuditBizId(), false);
+		Module am = c.getModule(audit.getAuditModuleName());
+		Document ad = am.getDocument(c, audit.getAuditDocumentName());
+		PersistentBean current = CORE.getPersistence().retrieve(ad, audit.getAuditBizId(), false);
+
+		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
-//		System.out.println(JSONUtil.unmarshall(u, audit.getAudit()));
+		// Visit the current bean and add in the model structure
+		new BeanVisitor() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			protected boolean accept(String binding,
+										Document currentDocument,
+										Document owningDocument,
+										Reference owningReference,
+										Bean bean,
+										boolean visitingInheritedDocument)
+			throws Exception {
+System.out.println("OB = " + binding + " -> " + bean.getBizId());
+				bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, true));
 
-		ComparisonComposite result = new ComparisonComposite(audit.getBizId(),
-																current.getBizKey(),
-																null,
-																Mutation.unchanged,
-																d.getSingularAlias());
+				return true;
+			}
+		}.visit(ad, current, c);
 
+		// Visit oldBean and add/modify the resulting model.
+		@SuppressWarnings("unchecked")
+		Map<String, Object> old = (Map<String, Object>) JSONUtil.unmarshall(u, audit.getAudit());
+System.out.println(old);
+		for (String binding : old.keySet()) {
+			ComparisonComposite node = bindingToNodes.get(binding);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> oldValues = (Map<String, Object>) old.get(binding);
+			// null when the node exists in the new version but not in the old version
+			if (oldValues == null) {
+				node.setMutation(Mutation.added);
+			}
+			else {
+				boolean nodeDirty = false;
+
+				List<ComparisonProperty> properties = node.getProperties();
+				for (ComparisonProperty property : properties) {
+					Object oldValue = oldValues.remove(property.getName());
+					Attribute attribute = node.getDocument().getAttribute(property.getName());
+					Class<?> type = null;
+					if (attribute instanceof Enumeration) {
+						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+					}
+					else {
+						type = attribute.getAttributeType().getImplementingType();
+					}
+
+					if (oldValue instanceof String) {
+						oldValue = BindUtil.fromString(c, null, type, (String) oldValue, true);
+					}
+					else {
+						oldValue = BindUtil.convert(type, oldValue);
+					}
+					property.setOldValue(oldValue);
+					if ((! nodeDirty) && property.isDirty()) {
+						nodeDirty = true;
+					}
+				}
+
+				// Process any extra old properties not present in the new version
+				for (String name : oldValues.keySet()) {
+					ComparisonProperty property = new ComparisonProperty();
+					property.setName(name);
+					property.setTitle(name);
+					property.setOldValue(oldValues.get(name));
+					properties.add(property);
+					nodeDirty = true;
+				}
+				node.setMutation(nodeDirty ? Mutation.updated : Mutation.unchanged);
+			}
+		}
+
+		// need to process any extra nodes in the old data
 /*
-		ComparisonProperty urlProperty = new ComparisonProperty(returnDoc.getAttribute(GrowerReturn.urlPropertyName), oldGrowerReturn, newGrowerReturn);
-		result.getProperties().add(urlProperty);
-		
-		// Add any added or updated vineyards
-		for (Vineyard newVineyard : newGrowerReturn.getVineyards()) {
-			// Find old vineyard
-			Integer vineyardNo = newVineyard.getVineyardNo();
-			Vineyard oldVineyard = null;
-			for (Vineyard vineyard : oldGrowerReturn.getVineyards()) {
-				if (vineyardNo.equals(vineyard.getVineyardNo())) {
-					oldVineyard = vineyard;
-					break;
+		new BeanVisitor() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			protected boolean accept(String binding,
+										Document currentDocument,
+										Document owningDocument,
+										Reference owningReference,
+										Bean bean,
+										boolean visitingInheritedDocument)
+			throws Exception {
+				ComparisonComposite node = bindingToNodes.get(binding);
+				if (node == null) { // deleted entry
+					bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, false));
+				}
+				else { // existing entry
+					updateNode(bean, node);
+				}
+
+				return true;
+			}
+		}.visit(ad, old, c);
+*/
+		ComparisonComposite result = null;
+		for (String binding : bindingToNodes.keySet()) {
+			ComparisonComposite node = bindingToNodes.get(binding);
+			if ("".equals(binding)) {
+				result = node;
+			}
+			else {
+				int lastDotIndex = binding.lastIndexOf('.');
+				if (lastDotIndex > 0) {
+					String parentBinding = binding.substring(0, lastDotIndex);
+					bindingToNodes.get(parentBinding).getChildren().add(node);
+				}
+				else {
+					if (result != null) {
+						result.getChildren().add(node);
+					}
 				}
 			}
-			if (oldVineyard != null) {
-				oldGrowerReturn.getVineyards().remove(oldVineyard);
-			}
-
-			result.getChildren().add(createVineyard(vineyardDoc,
-														existingPlantingDoc,
-														newPlantingDoc,
-														oldVineyard,
-														newVineyard));
 		}
-
-		// Add any deleted vineyards
-		for (Vineyard deletedVineyard : oldGrowerReturn.getVineyards()) {
-			result.getChildren().add(createVineyard(vineyardDoc,
-														existingPlantingDoc,
-														newPlantingDoc,
-														deletedVineyard,
-														null));
-		}
-*/		
+		
 		return result;
 	}
+/*	
+	private static void visit(String binding, 
+								Document currentDcument,
+								Customer customer,
+								Map<String, Object> bean,
+								Map<String, ComparisonComposite> bindingToNodes)
+	throws Exception {
+		ComparisonComposite node = bindingToNodes.get(binding);
+		if (node == null) { // deleted entry
+//			bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, false));
+		}
+		else { // existing entry
+			updateNode(bean, node);
+		}
+	}
+*/	
+	private static ComparisonComposite createNode(Reference owningReference,
+													Document currentDocument,
+													Bean bean,
+													boolean newNode)
+	throws Exception {
+		ComparisonComposite result = new ComparisonComposite();
+		result.setBizId(bean.getBizId());
+		result.setBusinessKeyDescription((bean instanceof PersistentBean) ? 
+											((PersistentBean) bean).getBizKey() : 
+											currentDocument.getSingularAlias());
+		if (owningReference == null) {
+			result.setReferenceName(null);
+			result.setRelationshipDescription(currentDocument.getSingularAlias());
+		}
+		else {
+			result.setReferenceName(owningReference.getName());
+			result.setRelationshipDescription(owningReference.getDisplayName());
+		}
+		result.setMutation(newNode ? Mutation.added : Mutation.deleted);
+		result.setDocument(currentDocument);
+		addProperties(result, currentDocument, bean, newNode);
+
+		return result;
+	}
+
+	private static void addProperties(ComparisonComposite node,
+								Document beanDocument,
+								Bean bean,
+								boolean newEntry)
+	throws Exception {
+		for (Attribute attribute : beanDocument.getAttributes()) {
+			if (! (attribute instanceof Reference)) {
+				ComparisonProperty property = new ComparisonProperty();
+				String name = attribute.getName();
+				property.setName(name);
+				property.setTitle(attribute.getDisplayName());
+				property.setWidget(attribute.getDefaultInputWidget());
+
+				Object value = BindUtil.get(bean, name);
+				property.setNewValue(newEntry ? value : null);
+				property.setOldValue(newEntry ? null : value);
+
+				node.getProperties().add(property);
+			}
+		}
+	}
+
 /*
 	private static ComparisonComposite createVineyard(Document vineyardDoc,
 														Document existingPlantingDoc,

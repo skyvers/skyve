@@ -14,6 +14,7 @@ import net.sf.ehcache.Element;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.metadata.user.User;
+import org.skyve.util.StateUtil;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;

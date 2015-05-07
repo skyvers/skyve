@@ -82,7 +82,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String pluralAlias;
 	private String shortDescription;
 	private String parentDocument;
-	private String bizKey;
+	private BizKey bizKey;
 	private List<Attribute> attributes = new ArrayList<>();
 	private List<Condition> conditions = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
@@ -142,13 +142,13 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.parentDocument = UtilImpl.processStringValue(parentDocument);
 	}
 
-	public String getBizKey() {
+	public BizKey getBizKey() {
 		return bizKey;
 	}
 
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-	public void setBizKey(String bizKey) {
-		this.bizKey = UtilImpl.processStringValue(bizKey);
+	public void setBizKey(BizKey bizKey) {
+		this.bizKey = bizKey;
 	}
 
 	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "attributes", required = true)
@@ -224,17 +224,35 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		
 		result.setParentDocumentName(getParentDocument());
 
-		value = getBizKey();
 		Persistent resultPersistent = result.getPersistent();
 		if (resultPersistent != null) {
-			if (value == null) {
-				throw new MetaDataException(metaDataName + " : The document [bizKey] expression is required for a persistent or mapped document");
+			if (bizKey == null) {
+				throw new MetaDataException(metaDataName + " : The document [bizKey] is required for a persistent or mapped document");
 			}
-			result.setBizKeyMethodCode(value);
+			String expression = bizKey.getExpression();
+			String code = bizKey.getCode();
+			if (code != null) {
+				result.setBizKeyMethodCode(code);
+			}
+			else if (expression != null) {
+				StringBuilder sb = new StringBuilder(128);
+				sb.append("\t\ttry {\n");
+				sb.append("\t\t\treturn org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),\n");
+				sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\"").append(expression).append("\",\n");
+				sb.append("\t\t\t\t\t\t\t\t\t\t\t\t\t\tthis);\n");
+				sb.append("\t\t}\n");
+				sb.append("\t\tcatch (Exception e) {\n");
+				sb.append("\t\t\treturn \"Unknown\";\n");
+				sb.append("\t\t}");
+				result.setBizKeyMethodCode(sb.toString());
+			}
+			else {
+				throw new MetaDataException(metaDataName + " : The document [bizKey] requires either some code or an expression defined.");
+			}
 		}
 
-		if ((result.getPersistent() == null) && (result.getBizKeyMethodCode() != null)) {
-			throw new MetaDataException(metaDataName + " : The document [bizKey] expression is NOT required for a transient document");
+		if ((resultPersistent == null) && (result.getBizKeyMethodCode() != null)) {
+			throw new MetaDataException(metaDataName + " : The document [bizKey] is NOT required for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();
 
@@ -262,6 +280,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 					Field field = (Field) attribute;
 					Converter<?> converter = null;
 					Class<?> implementingType = type.getImplementingType();
+					// NB can't get the actual enumeration type here as the repository is under construction
+					// Any default value enumeration type will be a compile error in the domain object anyway.
 					
 					if ((AttributeType.memo.equals(type) || AttributeType.markup.equals(type)) && 
 							(field.getIndex() == null)) {

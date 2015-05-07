@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import modules.ModulesUtil.DomainValueSortByCode;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.CORE;
+import org.skyve.apps.ModulesUtil.DomainValueSortByCode;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;

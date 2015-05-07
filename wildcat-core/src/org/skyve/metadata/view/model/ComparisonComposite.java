@@ -3,6 +3,8 @@ package org.skyve.metadata.view.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.metadata.model.document.Document;
+
 public class ComparisonComposite {
 	public static enum Mutation {
 		unchanged,
@@ -16,6 +18,7 @@ public class ComparisonComposite {
 	private String referenceName;
 	private String relationshipDescription;
 	private Mutation mutation;
+	private Document document;
 	private List<ComparisonProperty> properties = new ArrayList<>();
 	private List<ComparisonComposite> children = new ArrayList<>();
 
@@ -64,6 +67,12 @@ public class ComparisonComposite {
 	}
 	public void setMutation(Mutation mutation) {
 		this.mutation = mutation;
+	}
+	public Document getDocument() {
+		return document;
+	}
+	public void setDocument(Document document) {
+		this.document = document;
 	}
 	public List<ComparisonProperty> getProperties() {
 		return properties;

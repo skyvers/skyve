@@ -7,10 +7,12 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.model.ComparisonComposite;
 import org.skyve.metadata.view.model.ComparisonProperty;
 import org.skyve.util.Binder;
@@ -19,8 +21,8 @@ import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
-import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.user.UserImpl;
+import org.skyve.wildcat.metadata.view.widget.bound.input.InputWidget;
 
 /**
  * Creates something like :-
@@ -47,8 +49,6 @@ import org.skyve.wildcat.metadata.user.UserImpl;
 public final class ComparisonJSONManipulator {
 	private UserImpl user;
 	private CustomerImpl customer;
-	private ModuleImpl module;
-	private Document document;
 	private ComparisonComposite root;
 
 	private static final String PARENT_KEY = "parent";
@@ -75,26 +75,21 @@ public final class ComparisonJSONManipulator {
 
 	public ComparisonJSONManipulator(UserImpl user,
 													CustomerImpl customer,
-													ModuleImpl module,
-													Document document,
 													ComparisonComposite root) {
 		this.user = user;
 		this.customer = customer;
-		this.module = module;
-		this.document = document;
 		this.root = root;
 	}
 
 	public Iterable<Map<String, Object>> toJSONStructure() throws Exception {
 		List<Map<String, Object>> result = new ArrayList<>();
 		root.determineMutations();
-		processNode(root, document, "", null, result);
+		processNode(root, "", null, result);
 		return result;
 	}
 
 	@SuppressWarnings("incomplete-switch")
 	private void processNode(ComparisonComposite node,
-								Document nodeDocument,
 								String referenceType,
 								ComparisonComposite parent,
 								List<Map<String, Object>> json)
@@ -124,18 +119,20 @@ public final class ComparisonJSONManipulator {
 			break;
 		}
 		entry.put(RELATIONSHIP_KEY, node.getRelationshipDescription());
-		entry.put(PROPERTIES_KEY, listOfMapOfProperties(node.getProperties(), nodeDocument));
+		entry.put(PROPERTIES_KEY, listOfMapOfProperties(node.getProperties(), node.getDocument()));
 		
 		json.add(entry);
 		
 		for (ComparisonComposite child : node.getChildren()) {
-			Reference reference = nodeDocument.getReferenceByName(child.getReferenceName());
-			Document childDocument = module.getDocument(customer, reference.getDocumentName());
-			processNode(child, 
-							childDocument, 
-							(reference instanceof org.skyve.wildcat.metadata.model.document.Collection) ? "C" : "A",
-							node, 
-							json);
+			String childReferenceType = "A";
+			Document childDocument = child.getDocument();
+			if (childDocument != null) {
+				Reference childReference = childDocument.getReferenceByName(child.getReferenceName());
+				if (childReference instanceof org.skyve.wildcat.metadata.model.document.Collection) {
+					childReferenceType = "C";
+				}
+			}
+			processNode(child, childReferenceType, node, json);
 		}
 	}
 
@@ -152,59 +149,82 @@ public final class ComparisonJSONManipulator {
 			item.put(NAME_KEY, propertyName);
 			item.put(TITLE_KEY, property.isDirty() ? showDirty(property.getTitle()) : property.getTitle());
 			
-			// NB Need to use getMetaDataFroBinding() to ensure we find any attributes in base documents inherited
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, propertyName);
-			Attribute attribute = target.getAttribute();
-			SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, property.getWidget());
-			String type = field.getType();
-			item.put(TYPE_KEY, type);
-			String editorType = field.getEditorType();
-			if (editorType != null) {
-				item.put(EDITOR_TYPE_KEY, editorType);
+			if (nodeDocument != null) {
+				// NB Need to use getMetaDataFroBinding() to ensure we find any attributes in base documents inherited
+				Module module = customer.getModule(nodeDocument.getOwningModuleName());
+				try {
+					TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, propertyName);
+					Attribute attribute = target.getAttribute();
+					InputWidget propertyWidget = property.getWidget();
+					if (propertyWidget == null) {
+						if (attribute == null) {
+							throw new MetaDataException("No widget or attribute is defined");
+						}
+						
+						propertyWidget = attribute.getDefaultInputWidget();
+					}
+					SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, propertyWidget);
+					String type = field.getType();
+					item.put(TYPE_KEY, type);
+					String editorType = field.getEditorType();
+					if (editorType != null) {
+						item.put(EDITOR_TYPE_KEY, editorType);
+					}
+					Integer length = field.getLength();
+		            if (length != null) {
+						item.put(LENGTH_KEY, length);
+		            }
+		            if ((attribute != null) && DomainType.constant.equals(attribute.getDomainType())) {
+			            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(customer, nodeDocument, attribute);
+			            if (valueMap != null) {
+							item.put(VALUE_MAP_KEY, valueMap);
+			            }
+		            }
+		            if (field.isRequired()) {
+		            	item.put(REQUIRED_KEY, Boolean.TRUE);
+		            }
+		            else {
+		                if ("select".equals(type) || "enum".equals(type)) {
+			            	item.put(ALLOW_EMPTY_VALUE_KEY, Boolean.TRUE);
+		                }
+		            }
+		
+		            SmartClientLookupDefinition lookup = field.getLookup();
+		            if (lookup != null) {
+		        		PersistentBean oldValue = (PersistentBean) property.getOldValue();
+		        		PersistentBean newValue = (PersistentBean) property.getNewValue();
+		        		
+		        		Map<String, String> valueMap = new TreeMap<>();
+		        		if (oldValue != null) {
+		        			String bizId = oldValue.getBizId();
+		        			valueMap.put(bizId, oldValue.getBizKey());
+		        			item.put(OLD_VALUE_KEY, bizId);
+		        		}
+		        		if (newValue != null) {
+		        			String bizId = newValue.getBizId();
+		        			valueMap.put(bizId, newValue.getBizKey());
+		    				item.put(NEW_VALUE_KEY, bizId);
+		        		}
+						item.put(VALUE_MAP_KEY, valueMap);
+						
+		            }
+		            else {
+		    			item.put(NEW_VALUE_KEY, property.getNewValue());
+		    			item.put(OLD_VALUE_KEY, property.getOldValue());
+		            }
+				}
+				catch (MetaDataException e) { // not a real property, so bake something
+	    			item.put(NEW_VALUE_KEY, property.getNewValue());
+	    			item.put(OLD_VALUE_KEY, property.getOldValue());
+					item.put(TYPE_KEY, "text");
+				}
 			}
-			Integer length = field.getLength();
-            if (length != null) {
-				item.put(LENGTH_KEY, length);
-            }
-            if (DomainType.constant.equals(attribute.getDomainType())) {
-	            Map<String, String> valueMap = SmartClientGenerateUtils.getConstantDomainValueMap(customer, nodeDocument, attribute);
-	            if (valueMap != null) {
-					item.put(VALUE_MAP_KEY, valueMap);
-	            }
-            }
-            if (field.isRequired()) {
-            	item.put(REQUIRED_KEY, Boolean.TRUE);
-            }
-            else {
-                if ("select".equals(type) || "enum".equals(type)) {
-	            	item.put(ALLOW_EMPTY_VALUE_KEY, Boolean.TRUE);
-                }
-            }
-
-            SmartClientLookupDefinition lookup = field.getLookup();
-            if (lookup != null) {
-        		PersistentBean oldValue = (PersistentBean) property.getOldValue();
-        		PersistentBean newValue = (PersistentBean) property.getNewValue();
-        		
-        		Map<String, String> valueMap = new TreeMap<>();
-        		if (oldValue != null) {
-        			String bizId = oldValue.getBizId();
-        			valueMap.put(bizId, oldValue.getBizKey());
-        			item.put(OLD_VALUE_KEY, bizId);
-        		}
-        		if (newValue != null) {
-        			String bizId = newValue.getBizId();
-        			valueMap.put(bizId, newValue.getBizKey());
-    				item.put(NEW_VALUE_KEY, bizId);
-        		}
-				item.put(VALUE_MAP_KEY, valueMap);
-				
-            }
-            else {
+			else {
     			item.put(NEW_VALUE_KEY, property.getNewValue());
     			item.put(OLD_VALUE_KEY, property.getOldValue());
-            }
-
+				item.put(TYPE_KEY, "text");
+			}
+			
 			result.add(item);
 		}
 

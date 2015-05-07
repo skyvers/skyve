@@ -1,4 +1,4 @@
-package org.skyve.wildcat.web;
+package org.skyve.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
