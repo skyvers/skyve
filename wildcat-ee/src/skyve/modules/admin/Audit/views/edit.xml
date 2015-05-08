@@ -36,9 +36,5 @@
         </row>
     </form>
     <comparison binding="me" modelName="AuditComparisonModel" />
-    <actions>
-        <defaults/>
-    </actions>
-    <newParameters/>
 </view>
 

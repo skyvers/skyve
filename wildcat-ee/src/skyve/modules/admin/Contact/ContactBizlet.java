@@ -2,13 +2,13 @@ package modules.admin.Contact;
 
 import java.util.List;
 
+import modules.ModulesUtil;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.User;
 
 import org.skyve.CORE;
-import org.skyve.app.ModulesUtil;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;

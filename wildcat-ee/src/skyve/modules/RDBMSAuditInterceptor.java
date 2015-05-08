@@ -1,11 +1,11 @@
-package org.skyve.app.interceptor;
+package modules;
 
+import modules.AuditJSONGenerator;
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.UserLoginRecord;
 
 import org.skyve.CORE;
-import org.skyve.app.interceptor.AuditJSONGenerator;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.controller.Interceptor;
@@ -70,7 +70,9 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		a.setAuditDocumentName(bean.getBizDocument());
 		a.setAuditBizId(bean.getBizId());
 		a.setAuditBizKey(bean.getBizKey());
-		a.setAuditBizVersion(bean.getBizVersion());
+		a.setAuditBizVersion(Operation.delete.equals(operation) ?
+								Integer.valueOf(bean.getBizVersion().intValue() + 1) :
+								bean.getBizVersion());
 		a.setTimestamp(new Timestamp());
 		a.setOperation(operation);
 		a.setUser(u.getName());

@@ -10,7 +10,7 @@
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 	</jobs>	
 	<documents>
-		<document ref="Audit" />
+		<document ref="Audit" defaultQueryName="qAudits" />
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
@@ -142,6 +142,19 @@
 			<columns>
 				<column binding="name" sortOrder ="ascending" />
 				<column binding="visible" />
+			</columns>
+		</query>
+		<query name="qAudits" documentName="Audit">
+			<displayName>Audit</displayName>
+			<description>The list of all Audits.</description>
+			<columns>
+				<column binding="timestamp" sortOrder="descending" />
+				<column binding="user" />
+				<column binding="operation" />
+				<column binding="auditModuleName" />
+				<column binding="auditDocumentName" />
+				<column binding="auditBizKey" />
+				<column binding="auditBizVersion" />
 			</columns>
 		</query>
 	</queries>

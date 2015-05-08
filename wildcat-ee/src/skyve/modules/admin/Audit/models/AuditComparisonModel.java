@@ -37,8 +37,12 @@ public class AuditComparisonModel implements ComparisonModel<Audit> {
 		
 		Module am = c.getModule(audit.getAuditModuleName());
 		Document ad = am.getDocument(c, audit.getAuditDocumentName());
-		PersistentBean current = CORE.getPersistence().retrieve(ad, audit.getAuditBizId(), false);
-
+		PersistentBean current = p.retrieve(ad, audit.getAuditBizId(), false);
+		final boolean deleted = (current == null);
+		if (deleted) {
+			current = ad.newInstance(u);
+		}
+		
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the current bean and add in the model structure
@@ -53,7 +57,7 @@ public class AuditComparisonModel implements ComparisonModel<Audit> {
 										boolean visitingInheritedDocument)
 			throws Exception {
 System.out.println("OB = " + binding + " -> " + bean.getBizId());
-				bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, true));
+				bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, deleted));
 
 				return true;
 			}
@@ -176,13 +180,15 @@ System.out.println(old);
 	private static ComparisonComposite createNode(Reference owningReference,
 													Document currentDocument,
 													Bean bean,
-													boolean newNode)
+													boolean deleted)
 	throws Exception {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
-		result.setBusinessKeyDescription((bean instanceof PersistentBean) ? 
-											((PersistentBean) bean).getBizKey() : 
-											currentDocument.getSingularAlias());
+		result.setBusinessKeyDescription(deleted ? 
+											"Deleted" : 
+											(bean instanceof PersistentBean) ? 
+												((PersistentBean) bean).getBizKey() : 
+												currentDocument.getSingularAlias());
 		if (owningReference == null) {
 			result.setReferenceName(null);
 			result.setRelationshipDescription(currentDocument.getSingularAlias());
@@ -191,9 +197,9 @@ System.out.println(old);
 			result.setReferenceName(owningReference.getName());
 			result.setRelationshipDescription(owningReference.getDisplayName());
 		}
-		result.setMutation(newNode ? Mutation.added : Mutation.deleted);
+		result.setMutation(deleted ? Mutation.deleted : Mutation.added);
 		result.setDocument(currentDocument);
-		addProperties(result, currentDocument, bean, newNode);
+		addProperties(result, currentDocument, bean, deleted);
 
 		return result;
 	}
@@ -201,7 +207,7 @@ System.out.println(old);
 	private static void addProperties(ComparisonComposite node,
 								Document beanDocument,
 								Bean bean,
-								boolean newEntry)
+								boolean deleted)
 	throws Exception {
 		for (Attribute attribute : beanDocument.getAttributes()) {
 			if (! (attribute instanceof Reference)) {
@@ -212,8 +218,8 @@ System.out.println(old);
 				property.setWidget(attribute.getDefaultInputWidget());
 
 				Object value = BindUtil.get(bean, name);
-				property.setNewValue(newEntry ? value : null);
-				property.setOldValue(newEntry ? null : value);
+				property.setNewValue(deleted ? null : value);
+				property.setOldValue(deleted ? value : null);
 
 				node.getProperties().add(property);
 			}
