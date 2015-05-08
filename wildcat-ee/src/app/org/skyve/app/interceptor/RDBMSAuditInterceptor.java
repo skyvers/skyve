@@ -1,10 +1,11 @@
-package org.skyve.apps.interceptor;
+package org.skyve.app.interceptor;
 
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.UserLoginRecord;
 
 import org.skyve.CORE;
+import org.skyve.app.interceptor.AuditJSONGenerator;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.controller.Interceptor;

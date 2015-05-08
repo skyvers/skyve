@@ -1,21 +1,24 @@
+package org.skyve.app.web.whosinIntegrate;
 
-package org.skyve.whosinIntegrate.web;
+import java.util.List;
 
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import modules.admin.domain.Contact;
-import modules.whosinIntegrate.domain.MyStatus;
+import modules.whosinIntegrate.domain.Office;
 import modules.whosinIntegrate.domain.Staff;
 
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.content.AttachmentContent;
@@ -25,18 +28,57 @@ import org.skyve.wildcat.web.faces.beans.FacesView;
 
 @ViewScoped
 @ManagedBean
-public class MyStatusView extends FacesView<MyStatus> {
+public class InOutView extends FacesView<Office> {
 	private static final long serialVersionUID = -6668236628273137985L;
 
 	@Override
 	public void preRender() {
-		if (! FacesContext.getCurrentInstance().isPostback()) {
+		boolean postback = FacesContext.getCurrentInstance().isPostback();
+		if (! postback) {
+			// set the standard parameters ready for retrieval
+			setBizModuleParameter(Office.MODULE_NAME);
+			setBizDocumentParameter(Office.DOCUMENT_NAME);
 			setWebActionParameter(WebAction.e);
-			setBizModuleParameter(MyStatus.MODULE_NAME);
-			setBizDocumentParameter(MyStatus.DOCUMENT_NAME);
 		}
 		
+		// This loads the bean from the parameters and sets up ready for action
 		super.preRender();
+		
+		if (! postback) {
+			// Get all staff for this office
+			staff = new FacesAction<List<Staff>>() {
+				@Override
+				@SuppressWarnings("synthetic-access")
+				public List<Staff> callback()
+				throws Exception {
+					return retrieveStaff();
+				}
+			}.execute();
+		}
+	}
+
+	private List<Staff> retrieveStaff()
+	throws Exception {
+		Persistence p = CORE.getPersistence();
+		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
+		q.getFilter().addEquals(Binder.createCompoundBinding(Staff.baseOfficePropertyName,
+																Bean.DOCUMENT_ID),
+									getBean().getBizId());
+		q.addOrdering(Binder.createCompoundBinding(Staff.contactPropertyName, Contact.namePropertyName));
+		return p.retrieve(q);
+	}
+	
+	private List<Staff> staff = null;
+	public List<Staff> getStaff() {
+		return staff;
+	}
+	
+	private Staff selectedStaff = null;
+	public Staff getSelectedStaff() {
+		return selectedStaff;
+	}
+	public void setSelectedStaff(Staff selectedStaff) {
+		this.selectedStaff = selectedStaff;
 	}
 
 	private String base64Image = null;
@@ -47,24 +89,13 @@ public class MyStatusView extends FacesView<MyStatus> {
 		this.base64Image = base64Image;
 	}
 
-	public void saveStaff() {
-		new FacesAction<Void>() {
+	public String saveSelectedStaff() {
+		return new FacesAction<String>() {
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public Void callback() throws Exception {
-				FacesContext ctx = FacesContext.getCurrentInstance();
+			public String callback() throws Exception {
 				Persistence p = CORE.getPersistence();
 				User u = p.getUser();
-
-				MyStatus bean = getBean();
-				Staff staff = bean.getMyStaff();
-				if (staff == null) {
-					ctx.addMessage(null, 
-									new FacesMessage(FacesMessage.SEVERITY_ERROR, 
-														"Your user does not have a staff member assigned",
-														null));
-					return null;
-				}
 				
 				if (base64Image != null) {
 					// remove "data:image/png;base64," from the start
@@ -73,13 +104,14 @@ public class MyStatusView extends FacesView<MyStatus> {
 						byte[] bytes = Base64.decodeBase64(base64Image.substring(start).getBytes());
 
 						String bizCustomer = u.getCustomerName();
-						Contact contact = staff.getContact();
+						Contact contact = selectedStaff.getContact();
+						
 						try (ContentManager cm = EXT.newContentManager()) {
 							AttachmentContent content = new AttachmentContent(bizCustomer, 
 																				Contact.MODULE_NAME, 
 																				Contact.DOCUMENT_NAME,
 																				u.getDataGroupId(), 
-																				u.getId(), 
+																				u.getId(),
 																				contact.getBizId(), 
 																				Contact.imagePropertyName,
 																				MimeType.png,
@@ -93,10 +125,11 @@ public class MyStatusView extends FacesView<MyStatus> {
 					}
 				}
 
-				staff = p.save(staff);
-				bean.setMyStaff(staff);
+				p.save(selectedStaff);
+				selectedStaff = null;
+				staff = retrieveStaff();
 				
-				return null;
+				return "pm:inout";
 			}
 		}.execute();
 	}

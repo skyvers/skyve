@@ -1,4 +1,4 @@
-package org.skyve.apps.interceptor;
+package org.skyve.app.interceptor;
 
 import java.util.Map;
 import java.util.TreeMap;

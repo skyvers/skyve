@@ -1,4 +1,4 @@
-package org.skyve.apps;
+package org.skyve.app;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

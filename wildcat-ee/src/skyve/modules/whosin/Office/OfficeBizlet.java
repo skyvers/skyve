@@ -2,7 +2,7 @@ package modules.whosin.Office;
 
 import modules.whosin.domain.Office;
 
-import org.skyve.apps.ModulesUtil;
+import org.skyve.app.ModulesUtil;
 import org.skyve.metadata.model.document.Bizlet;
 
 public class OfficeBizlet extends Bizlet<Office> {

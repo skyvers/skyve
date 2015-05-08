@@ -1,6 +1,6 @@
 package modules.admin.DataMaintenance.actions;
 
-import org.skyve.apps.ModulesUtil;
+import org.skyve.app.ModulesUtil;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.metadata.controller.BizImportAction;

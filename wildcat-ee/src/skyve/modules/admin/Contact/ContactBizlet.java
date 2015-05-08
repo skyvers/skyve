@@ -8,7 +8,7 @@ import modules.admin.domain.DataGroup;
 import modules.admin.domain.User;
 
 import org.skyve.CORE;
-import org.skyve.apps.ModulesUtil;
+import org.skyve.app.ModulesUtil;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;

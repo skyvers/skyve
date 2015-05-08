@@ -7,7 +7,7 @@ import java.util.List;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.CORE;
-import org.skyve.apps.ModulesUtil.DomainValueSortByCode;
+import org.skyve.app.ModulesUtil.DomainValueSortByCode;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
