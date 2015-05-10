@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view type="edit" title="Audit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+        <column pixelWidth="100" />
+        <column />
+        <column pixelWidth="100" />
+        <column />
+        <row>
+        	<item>
+        		<combo binding="sourceVersion">
+					<onChangedHandlers>
+						<server action="SourceVersionChanged" />
+					</onChangedHandlers>
+        		</combo>
+        	</item>
+        	<item>
+        		<combo binding="comparisonVersion" />
+        	</item>
+        </row>
+	</form>
     <form>
         <column pixelWidth="100" />
         <column />
@@ -29,12 +47,10 @@
                 <textField binding="auditBizKey" disabled="true" />
             </item>
         </row>
-        <row>
-        	<item>
-        		<combo binding="comparisonVersion" />
-        	</item>
-        </row>
     </form>
     <comparison binding="me" modelName="AuditComparisonModel" />
+    <actions>
+    	<action className="SourceVersionChanged" displayName="Do Not Expose" clientValidation="false" inActionPanel="false" />
+    </actions>
 </view>
 

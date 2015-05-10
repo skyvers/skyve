@@ -45,6 +45,10 @@ public class AuditComparisonModel implements ComparisonModel<Audit> {
 		
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
+		// Visit this audit record
+//		@SuppressWarnings("unchecked")
+//		Map<String, Object> old = (Map<String, Object>) JSONUtil.unmarshall(u, audit.getAudit());
+//		for (String binding : )
 		// Visit the current bean and add in the model structure
 		new BeanVisitor() {
 			@Override

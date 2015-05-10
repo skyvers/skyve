@@ -18,6 +18,8 @@ import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
  * Audit
  * 
  * @depend - - - Operation
+ * @navhas n comparisonVersion 0..1 Audit
+ * @navhas n sourceVersion 1 Audit
  * @navhas n me 0..1 Audit
  * @stereotype "persistent"
  */
@@ -52,6 +54,8 @@ public class Audit extends AbstractPersistentBean {
 	public static final String userPropertyName = "user";
 	/** @hidden */
 	public static final String auditPropertyName = "audit";
+	/** @hidden */
+	public static final String sourceVersionPropertyName = "sourceVersion";
 	/** @hidden */
 	public static final String comparisonVersionPropertyName = "comparisonVersion";
 	/** @hidden */
@@ -135,7 +139,8 @@ public class Audit extends AbstractPersistentBean {
 	private Timestamp timestamp;
 	private String user;
 	private String audit;
-	private String comparisonVersion;
+	private Audit sourceVersion = null;
+	private Audit comparisonVersion = null;
 	private Audit me = null;
 
 	@Override
@@ -334,9 +339,27 @@ public class Audit extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #sourceVersion} accessor.
+	 **/
+	public Audit getSourceVersion() {
+		return sourceVersion;
+	}
+
+	/**
+	 * {@link #sourceVersion} mutator.
+	 * 
+	 * @param sourceVersion	The new value to set.
+	 **/
+	@XmlElement
+	public void setSourceVersion(Audit sourceVersion) {
+		preset(sourceVersionPropertyName, sourceVersion);
+		this.sourceVersion = sourceVersion;
+	}
+
+	/**
 	 * {@link #comparisonVersion} accessor.
 	 **/
-	public String getComparisonVersion() {
+	public Audit getComparisonVersion() {
 		return comparisonVersion;
 	}
 
@@ -346,7 +369,7 @@ public class Audit extends AbstractPersistentBean {
 	 * @param comparisonVersion	The new value to set.
 	 **/
 	@XmlElement
-	public void setComparisonVersion(String comparisonVersion) {
+	public void setComparisonVersion(Audit comparisonVersion) {
 		preset(comparisonVersionPropertyName, comparisonVersion);
 		this.comparisonVersion = comparisonVersion;
 	}

@@ -45,13 +45,18 @@
 		<memo name="audit" required="true">
 			<displayName>Audit</displayName>
 		</memo>
-		<text name="comparisonVersion" persistent="false" required="true">
-			<displayName>Version To Compare</displayName>
+		<association name="sourceVersion" type="aggregation" persistent="false" required="true">
+			<displayName>Source Version To Compare</displayName>
 			<domain>dynamic</domain>
-			<length>9</length>
-		</text>
+			<documentName>Audit</documentName>
+		</association>
+		<association name="comparisonVersion" type="aggregation" persistent="false">
+			<displayName>Source Version To Compare</displayName>
+			<domain>dynamic</domain>
+			<documentName>Audit</documentName>
+		</association>
 		<association name="me" type="aggregation" persistent="false">
-			<displayName>Current</displayName>
+			<displayName>Me</displayName>
 			<documentName>Audit</documentName>
 		</association>
 	</attributes>
