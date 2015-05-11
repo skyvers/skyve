@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.view.Editable;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -11,17 +12,19 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
 			propOrder = {"modelName",
+							"editable",
 							"pixelWidth",
 							"percentageWidth",
 							"pixelHeight",
 							"percentageHeight"})
-public class Comparison extends InputWidget implements RelativeSize {
+public class Comparison extends InputWidget implements Editable, RelativeSize {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -8947146232520711674L;
 	
 	private String modelName;
+	private Boolean editable;
 
 	private Integer pixelWidth;
 	private Integer percentageWidth;
@@ -37,7 +40,17 @@ public class Comparison extends InputWidget implements RelativeSize {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
-	
+	@Override
+	public Boolean getEditable() {
+		return editable;
+	}
+
+	@Override
+	@XmlAttribute(name = "editable", required = false)
+	public void setEditable(Boolean editable) {
+		this.editable = editable;
+	}
+
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view type="edit" title="Audit" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view type="edit" 
+		title="Audit" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<form>
         <column pixelWidth="100" />
         <column />
@@ -14,43 +18,47 @@
         		</combo>
         	</item>
         	<item>
-        		<combo binding="comparisonVersion" />
+        		<combo binding="comparisonVersion">
+					<onChangedHandlers>
+						<rerender />
+					</onChangedHandlers>
+				</combo>
         	</item>
         </row>
 	</form>
-    <form>
+    <form border="true" borderTitle="Source Version Details" pixelHeight="100">
         <column pixelWidth="100" />
         <column />
         <column pixelWidth="100" />
         <column />
         <row>
             <item>
-                <textField binding="timestamp" disabled="true" />
+                <textField binding="sourceVersion.timestamp" disabled="true" />
             </item>
             <item>
-                <combo binding="operation" disabled="true" />
-            </item>
-        </row>
-        <row>
-            <item>
-                <textField binding="auditModuleName" disabled="true" />
-            </item>
-            <item>
-                <textField binding="auditDocumentName" disabled="true" />
+                <combo binding="sourceVersion.operation" disabled="true" />
             </item>
         </row>
         <row>
             <item>
-                <textField binding="auditBizVersion" disabled="true" />
+                <textField binding="sourceVersion.auditModuleName" disabled="true" />
             </item>
             <item>
-                <textField binding="auditBizKey" disabled="true" />
+                <textField binding="sourceVersion.auditDocumentName" disabled="true" />
+            </item>
+        </row>
+        <row>
+            <item>
+                <textField binding="sourceVersion.auditBizVersion" disabled="true" />
+            </item>
+            <item>
+                <textField binding="sourceVersion.auditBizKey" disabled="true" />
             </item>
         </row>
     </form>
     <comparison binding="me" modelName="AuditComparisonModel" />
     <actions>
+		<cancel />
     	<action className="SourceVersionChanged" displayName="Do Not Expose" clientValidation="false" inActionPanel="false" />
     </actions>
 </view>
-

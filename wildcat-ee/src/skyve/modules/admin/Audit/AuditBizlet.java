@@ -9,7 +9,6 @@ import modules.admin.domain.Audit.Operation;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
@@ -32,14 +31,15 @@ public class AuditBizlet extends Bizlet<Audit> {
 			bean.setSourceVersion(bean);
 			SourceVersionChanged.sourceVersionChanged(bean);
 		}
+		
 		return bean;
 	}
-
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Audit bean)
 	throws Exception {
 		if (Audit.sourceVersionPropertyName.equals(attributeName)) {
+			bean.originalValues().clear();
 			return getVersions(bean, false);
 		}
 		else if (Audit.comparisonVersionPropertyName.equals(attributeName) && 
@@ -50,30 +50,37 @@ public class AuditBizlet extends Bizlet<Audit> {
 		return null;
 	}
 	
-	public static List<DomainValue> getVersions(Audit audit, boolean lessThanVersions)
+	public static List<DomainValue> getVersions(Audit audit, boolean forComparison)
 	throws Exception {
-		Persistence p = CORE.getPersistence();
+		List<DomainValue> result = null;
 		
-		DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.addBoundProjection(Bean.DOCUMENT_ID);
-		q.addBoundProjection(Bean.BIZ_KEY);
-		
-		DocumentFilter f = q.getFilter();
-		f.addEquals(Audit.auditModuleNamePropertyName, audit.getAuditModuleName());
-		f.addEquals(Audit.auditDocumentNamePropertyName, audit.getAuditDocumentName());
-		f.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
-		if (lessThanVersions) {
-			f.addLessThan(Audit.auditBizVersionPropertyName, audit.getAuditBizVersion());
+		if (forComparison && (! Operation.update.equals(audit.getOperation()))) {
+			result = new ArrayList<>();
 		}
-		q.addOrdering(PersistentBean.VERSION_NAME, SortDirection.descending);
-		
-		List<Bean> versions = p.retrieve(q, Integer.valueOf(0), Integer.valueOf(100));
-		List<DomainValue> result = new ArrayList<>(versions.size());
-		for (Bean version : versions) {
-			result.add(new DomainValue((String) Binder.get(version, Bean.DOCUMENT_ID),
-										(String) Binder.get(version, Bean.BIZ_KEY)));
+		else {
+			Persistence p = CORE.getPersistence();
+			
+			DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
+			q.addBoundProjection(Bean.DOCUMENT_ID);
+			q.addBoundProjection(Bean.BIZ_KEY);
+			
+			DocumentFilter f = q.getFilter();
+			f.addEquals(Audit.auditModuleNamePropertyName, audit.getAuditModuleName());
+			f.addEquals(Audit.auditDocumentNamePropertyName, audit.getAuditDocumentName());
+			f.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
+			if (forComparison) {
+				f.addLessThan(Audit.auditBizVersionPropertyName, audit.getAuditBizVersion());
+			}
+			q.addOrdering(Audit.auditBizVersionPropertyName, SortDirection.descending);
+			
+			List<Bean> versions = p.retrieve(q, Integer.valueOf(0), Integer.valueOf(100));
+			result = new ArrayList<>(versions.size());
+			for (Bean version : versions) {
+				result.add(new DomainValue((String) Binder.get(version, Bean.DOCUMENT_ID),
+											(String) Binder.get(version, Bean.BIZ_KEY)));
+			}
 		}
-
+		
 		return result;
 	}
 }

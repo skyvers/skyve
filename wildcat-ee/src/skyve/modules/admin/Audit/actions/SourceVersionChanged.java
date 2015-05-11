@@ -22,9 +22,10 @@ public class SourceVersionChanged implements ServerSideAction<Audit> {
 	}
 	
 	public static void sourceVersionChanged(Audit bean) throws Exception {
-		bean.setMe(bean.getSourceVersion());
-		if (Operation.update.equals(bean.getOperation())) {
-			List<DomainValue> lesserVersions = AuditBizlet.getVersions(bean.getSourceVersion(), true);
+		Audit source = bean.getSourceVersion();
+		bean.setMe(bean);
+		if (Operation.update.equals(source.getOperation())) {
+			List<DomainValue> lesserVersions = AuditBizlet.getVersions(source, true);
 			if (lesserVersions.isEmpty()) {
 				bean.setComparisonVersion(null);
 			}
@@ -35,6 +36,9 @@ public class SourceVersionChanged implements ServerSideAction<Audit> {
 																	false);
 				bean.setComparisonVersion(comparison);
 			}
+		}
+		else {
+			bean.setComparisonVersion(null);
 		}
 	}
 }

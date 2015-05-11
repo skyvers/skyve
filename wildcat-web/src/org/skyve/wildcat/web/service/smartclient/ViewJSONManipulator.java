@@ -1673,16 +1673,18 @@ class ViewJSONManipulator extends ViewVisitor {
 				ComparisonModel<Bean> model = repository.getComparisonModel(customer, 
 																				document,
 																				comparison.getModelName());
-				String comparisonBinding = comparison.getBinding();
-				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, comparisonBinding));
+				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
 					comparisons.put(referenceName, 
 										new ComparisonJSONManipulator((UserImpl) user, 
 																		customer,
 																		root).toJSONStructure());
 				}
-				else if (forApply && parentEnabled && enabled(comparison)) {
-			        currentBindings = currentBindings.putOrGetChild(comparison.getBinding(), referenceDocument);
+				else if (forApply && 
+							(! Boolean.FALSE.equals(comparison.getEditable())) && 
+							parentEnabled && 
+							enabled(comparison)) {
+			        currentBindings = currentBindings.putOrGetChild(referenceName, referenceDocument);
 			        addComparisonBindingsForApply(root, referenceDocument);
 			        currentBindings = currentBindings.getParent();
 				}

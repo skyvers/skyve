@@ -1375,6 +1375,7 @@ code.append("_view:view})");
 			code.append("var ").append(variable).append("=BizComparison.create({_b:'");
 			code.append(comparison.getBinding().replace('.', '_'));
 			code.append("',_view:view,");
+			editable(comparison.getEditable(), code);
 			disabled(comparison.getDisabledConditionName(), code);
 			invisible(comparison.getInvisibleConditionName(), code);
 			size(comparison, code);
@@ -1624,7 +1625,11 @@ code.append("_view:view})");
 			size(text, code);
 			disabled(text.getDisabledConditionName(), code);
 			invisible(text.getInvisibleConditionName(), code);
-			
+
+			if (Boolean.FALSE.equals(text.getEditable())) {
+				code.append("canEdit:false,");
+			}
+
 			// Highlight text on focus
 			code.append("selectOnFocus:true,");
 		}
@@ -1685,6 +1690,10 @@ pickListFields:[{name:'value'}],
 			size(text, code);
 			disabled(text.getDisabledConditionName(), code);
 			invisible(text.getInvisibleConditionName(), code);
+			
+			if (Boolean.FALSE.equals(text.getEditable())) {
+				code.append("canEdit:false,");
+			}
 			
 			// Highlight text on focus
 			code.append("selectOnFocus:true,");

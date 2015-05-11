@@ -51,7 +51,7 @@
 			<documentName>Audit</documentName>
 		</association>
 		<association name="comparisonVersion" type="aggregation" persistent="false">
-			<displayName>Source Version To Compare</displayName>
+			<displayName>Other Version To Compare</displayName>
 			<domain>dynamic</domain>
 			<documentName>Audit</documentName>
 		</association>

@@ -4,19 +4,21 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.view.Editable;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
-			propOrder = {"wordWrap", "pixelWidth", "pixelHeight"})
-public class TextArea extends ChangeableInputWidget implements AbsoluteSize {
+			propOrder = {"wordWrap", "editable", "pixelWidth", "pixelHeight"})
+public class TextArea extends ChangeableInputWidget implements Editable, AbsoluteSize {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 7376326511023184723L;
 
 	private Boolean wordWrap;
+	private Boolean editable;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 
@@ -27,6 +29,17 @@ public class TextArea extends ChangeableInputWidget implements AbsoluteSize {
 	@XmlAttribute(name = "wrap", required = false)
 	public void setWordWrap(Boolean wordWrap) {
 		this.wordWrap = wordWrap;
+	}
+
+	@Override
+	public Boolean getEditable() {
+		return editable;
+	}
+
+	@Override
+	@XmlAttribute(name = "editable", required = false)
+	public void setEditable(Boolean editable) {
+		this.editable = editable;
 	}
 
 	@Override

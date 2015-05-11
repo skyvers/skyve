@@ -94,6 +94,8 @@ public final class ComparisonJSONManipulator {
 								ComparisonComposite parent,
 								List<Map<String, Object>> json)
 	throws Exception {
+		Document nodeDocument = node.getDocument();
+		
 		Map<String, Object> entry = new TreeMap<>();
 
 		entry.put(Bean.DOCUMENT_ID, node.getBizId());
@@ -119,18 +121,15 @@ public final class ComparisonJSONManipulator {
 			break;
 		}
 		entry.put(RELATIONSHIP_KEY, node.getRelationshipDescription());
-		entry.put(PROPERTIES_KEY, listOfMapOfProperties(node.getProperties(), node.getDocument()));
+		entry.put(PROPERTIES_KEY, listOfMapOfProperties(node.getProperties(), nodeDocument));
 		
 		json.add(entry);
 		
 		for (ComparisonComposite child : node.getChildren()) {
 			String childReferenceType = "A";
-			Document childDocument = child.getDocument();
-			if (childDocument != null) {
-				Reference childReference = childDocument.getReferenceByName(child.getReferenceName());
-				if (childReference instanceof org.skyve.wildcat.metadata.model.document.Collection) {
-					childReferenceType = "C";
-				}
+			Reference childReference = nodeDocument.getReferenceByName(child.getReferenceName());
+			if (childReference instanceof org.skyve.wildcat.metadata.model.document.Collection) {
+				childReferenceType = "C";
 			}
 			processNode(child, childReferenceType, node, json);
 		}

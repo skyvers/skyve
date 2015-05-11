@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import modules.admin.domain.Audit;
+import modules.admin.domain.Audit.Operation;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -20,129 +21,89 @@ import org.skyve.metadata.view.model.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.ComparisonModel;
 import org.skyve.metadata.view.model.ComparisonProperty;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.util.BeanVisitor;
+import org.skyve.wildcat.metadata.view.widget.bound.input.TextField;
 import org.skyve.wildcat.util.JSONUtil;
 
 public class AuditComparisonModel implements ComparisonModel<Audit> {
 	private static final long serialVersionUID = 5964879680504956032L;
 
 	@Override
-	public ComparisonComposite getComparisonComposite(Audit audit) throws Exception {
+	public ComparisonComposite getComparisonComposite(Audit me) throws Exception {
+		Audit sourceVersion = me.getSourceVersion();
+		Audit comparisonVersion = me.getComparisonVersion();
+		
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		
-		Module am = c.getModule(audit.getAuditModuleName());
-		Document ad = am.getDocument(c, audit.getAuditDocumentName());
-		PersistentBean current = p.retrieve(ad, audit.getAuditBizId(), false);
-		final boolean deleted = (current == null);
-		if (deleted) {
-			current = ad.newInstance(u);
-		}
-		
+		Module am = c.getModule(sourceVersion.getAuditModuleName());
+		Document ad = am.getDocument(c, sourceVersion.getAuditDocumentName());
+		boolean deleted = Operation.delete.equals(sourceVersion.getOperation());
+
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
-		// Visit this audit record
-//		@SuppressWarnings("unchecked")
-//		Map<String, Object> old = (Map<String, Object>) JSONUtil.unmarshall(u, audit.getAudit());
-//		for (String binding : )
-		// Visit the current bean and add in the model structure
-		new BeanVisitor() {
-			@Override
-			@SuppressWarnings("synthetic-access")
-			protected boolean accept(String binding,
-										Document currentDocument,
-										Document owningDocument,
-										Reference owningReference,
-										Bean bean,
-										boolean visitingInheritedDocument)
-			throws Exception {
-System.out.println("OB = " + binding + " -> " + bean.getBizId());
-				bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, deleted));
+		// Visit the source audit record
+		Map<String, Object> source = (Map<String, Object>) JSONUtil.unmarshall(u, sourceVersion.getAudit());
+		for (String binding : source.keySet()) {
+			Map<String, Object> sourceValues = (Map<String, Object>) source.get(binding);
 
-				return true;
-			}
-		}.visit(ad, current, c);
-
-		// Visit oldBean and add/modify the resulting model.
-		@SuppressWarnings("unchecked")
-		Map<String, Object> old = (Map<String, Object>) JSONUtil.unmarshall(u, audit.getAudit());
-System.out.println(old);
-		for (String binding : old.keySet()) {
-			ComparisonComposite node = bindingToNodes.get(binding);
-			@SuppressWarnings("unchecked")
-			Map<String, Object> oldValues = (Map<String, Object>) old.get(binding);
-			// null when the node exists in the new version but not in the old version
-			if (oldValues == null) {
-				node.setMutation(Mutation.added);
+			if (binding.isEmpty()) {
+				bindingToNodes.put(binding, createNode(c, null, ad, sourceValues, deleted));
 			}
 			else {
-				boolean nodeDirty = false;
+				TargetMetaData target = null;
+				try {
+					target = Binder.getMetaDataForBinding(c, am, ad, binding);
+					Reference reference = (Reference) target.getAttribute();
+					Document referenceDocument = am.getDocument(c, reference.getDocumentName());
+					bindingToNodes.put(binding, createNode(c, reference, referenceDocument, sourceValues, deleted));
+				}
+				catch (MetaDataException e) {
+					bindingToNodes.put(binding, createNode(c, null, null, sourceValues, deleted));
+				}
+			}
+		}
+		
+		// Visit the comparison audit record, if there is one
+		if (comparisonVersion != null) {
+			Map<String, Object> compare = (Map<String, Object>) JSONUtil.unmarshall(u, comparisonVersion.getAudit());
+			for (String binding : compare.keySet()) {
+				ComparisonComposite node = bindingToNodes.get(binding);
+				Map<String, Object> compareValues = (Map<String, Object>) compare.get(binding);
 
-				List<ComparisonProperty> properties = node.getProperties();
-				for (ComparisonProperty property : properties) {
-					Object oldValue = oldValues.remove(property.getName());
-					Attribute attribute = node.getDocument().getAttribute(property.getName());
-					Class<?> type = null;
-					if (attribute instanceof Enumeration) {
-						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+				if (binding.isEmpty()) {
+					if (node == null) {
+						bindingToNodes.put(binding, createNode(c, null, ad, compareValues, true));
 					}
 					else {
-						type = attribute.getAttributeType().getImplementingType();
+						updateNode(node, c, compareValues);
 					}
-
-					if (oldValue instanceof String) {
-						oldValue = BindUtil.fromString(c, null, type, (String) oldValue, true);
+				}
+				else {
+					if (node == null) {
+						TargetMetaData target = null;
+						try {
+							target = Binder.getMetaDataForBinding(c, am, ad, binding);
+							Reference reference = (Reference) target.getAttribute();
+							Document referenceDocument = am.getDocument(c, reference.getDocumentName());
+							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
+						}
+						catch (MetaDataException e) {
+							bindingToNodes.put(binding, createNode(c, null, null, compareValues, true));
+						}
 					}
 					else {
-						oldValue = BindUtil.convert(type, oldValue);
-					}
-					property.setOldValue(oldValue);
-					if ((! nodeDirty) && property.isDirty()) {
-						nodeDirty = true;
+						updateNode(node, c, compareValues);
 					}
 				}
-
-				// Process any extra old properties not present in the new version
-				for (String name : oldValues.keySet()) {
-					ComparisonProperty property = new ComparisonProperty();
-					property.setName(name);
-					property.setTitle(name);
-					property.setOldValue(oldValues.get(name));
-					properties.add(property);
-					nodeDirty = true;
-				}
-				node.setMutation(nodeDirty ? Mutation.updated : Mutation.unchanged);
 			}
 		}
 
-		// need to process any extra nodes in the old data
-/*
-		new BeanVisitor() {
-			@Override
-			@SuppressWarnings("synthetic-access")
-			protected boolean accept(String binding,
-										Document currentDocument,
-										Document owningDocument,
-										Reference owningReference,
-										Bean bean,
-										boolean visitingInheritedDocument)
-			throws Exception {
-				ComparisonComposite node = bindingToNodes.get(binding);
-				if (node == null) { // deleted entry
-					bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, false));
-				}
-				else { // existing entry
-					updateNode(bean, node);
-				}
-
-				return true;
-			}
-		}.visit(ad, old, c);
-*/
+		// Link it all together
 		ComparisonComposite result = null;
 		for (String binding : bindingToNodes.keySet()) {
 			ComparisonComposite node = bindingToNodes.get(binding);
@@ -165,190 +126,130 @@ System.out.println(old);
 		
 		return result;
 	}
-/*	
-	private static void visit(String binding, 
-								Document currentDcument,
-								Customer customer,
-								Map<String, Object> bean,
-								Map<String, ComparisonComposite> bindingToNodes)
-	throws Exception {
-		ComparisonComposite node = bindingToNodes.get(binding);
-		if (node == null) { // deleted entry
-//			bindingToNodes.put(binding, createNode(owningReference, currentDocument, bean, false));
-		}
-		else { // existing entry
-			updateNode(bean, node);
-		}
-	}
-*/	
-	private static ComparisonComposite createNode(Reference owningReference,
-													Document currentDocument,
-													Bean bean,
+
+	private static ComparisonComposite createNode(Customer c,
+													Reference owningReference,
+													Document referenceDocument,
+													Map<String, Object> values,
 													boolean deleted)
 	throws Exception {
 		ComparisonComposite result = new ComparisonComposite();
-		result.setBizId(bean.getBizId());
-		result.setBusinessKeyDescription(deleted ? 
-											"Deleted" : 
-											(bean instanceof PersistentBean) ? 
-												((PersistentBean) bean).getBizKey() : 
-												currentDocument.getSingularAlias());
+		result.setBizId((String) values.remove(Bean.DOCUMENT_ID));
+		String description = (String) values.remove(Bean.BIZ_KEY);
+		if (description == null) {
+			description = (referenceDocument == null) ? "" : referenceDocument.getSingularAlias();
+		}
+		result.setBusinessKeyDescription(description);
+
 		if (owningReference == null) {
 			result.setReferenceName(null);
-			result.setRelationshipDescription(currentDocument.getSingularAlias());
+			result.setRelationshipDescription((referenceDocument == null) ? "" : referenceDocument.getSingularAlias());
 		}
 		else {
 			result.setReferenceName(owningReference.getName());
 			result.setRelationshipDescription(owningReference.getDisplayName());
 		}
-		result.setMutation(deleted ? Mutation.deleted : Mutation.added);
-		result.setDocument(currentDocument);
-		addProperties(result, currentDocument, bean, deleted);
+		result.setMutation(deleted ? Mutation.deleted:  Mutation.added);
+		result.setDocument(referenceDocument);
+		addProperties(c, result, values, deleted);
 
 		return result;
 	}
 
-	private static void addProperties(ComparisonComposite node,
-								Document beanDocument,
-								Bean bean,
-								boolean deleted)
+	private static void addProperties(Customer c,
+										ComparisonComposite node,
+										Map<String, Object> values,
+										boolean deleted)
 	throws Exception {
-		for (Attribute attribute : beanDocument.getAttributes()) {
-			if (! (attribute instanceof Reference)) {
-				ComparisonProperty property = new ComparisonProperty();
-				String name = attribute.getName();
-				property.setName(name);
+		Document nodeDocument = node.getDocument();
+		List<ComparisonProperty> properties = node.getProperties();
+		
+		for (String name : values.keySet()) {
+			Object value = values.get(name);
+
+			ComparisonProperty property = new ComparisonProperty();
+			property.setName(name);
+
+			// Coerce the value to the attributes type if the attribute still exists
+			Attribute attribute = nodeDocument.getAttribute(name);
+			if (attribute == null) { // attribute DNE
+				property.setTitle(name);
+				property.setWidget(new TextField());
+			}
+			else { // attribute exists
 				property.setTitle(attribute.getDisplayName());
 				property.setWidget(attribute.getDefaultInputWidget());
 
-				Object value = BindUtil.get(bean, name);
-				property.setNewValue(deleted ? null : value);
-				property.setOldValue(deleted ? value : null);
+				Class<?> type = null;
+				if (attribute instanceof Enumeration) {
+					type = AbstractRepository.get().getEnum((Enumeration) attribute);
+				}
+				else {
+					type = attribute.getAttributeType().getImplementingType();
+				}
 
-				node.getProperties().add(property);
+				if (value instanceof String) {
+					value = BindUtil.fromString(c, null, type, (String) value, true);
+				}
+				else {
+					value = BindUtil.convert(type, value);
+				}
 			}
+
+			property.setNewValue(deleted ? null : value);
+			property.setOldValue(deleted ? value : null);
+
+			properties.add(property);
 		}
 	}
 
-/*
-	private static ComparisonComposite createVineyard(Document vineyardDoc,
-														Document existingPlantingDoc,
-														Document newPlantingDoc,
-														Vineyard oldVineyard,
-														Vineyard newVineyard)
+	private static void updateNode(ComparisonComposite node,
+									Customer c,
+									Map<String, Object> values)
 	throws Exception {
-		ComparisonComposite result = null;
-		if (newVineyard != null) { // added or updated
-			result = new ComparisonComposite(newVineyard.getBizId(), 
-												newVineyard.getBizKey(),
-												GrowerReturn.vineyardsPropertyName,
-												(oldVineyard == null) ? Mutation.added : Mutation.unchanged,
-												"Vineyard");
-		}
-		else {
-			result = new ComparisonComposite(oldVineyard.getBizId(), 
-												oldVineyard.getBizKey(),
-												GrowerReturn.vineyardsPropertyName,
-												Mutation.deleted,
-												"Vineyard");
-		}
-		List<ComparisonProperty> properties = result.getProperties();
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.vineyardNoPropertyName), oldVineyard, newVineyard));
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.namePropertyName), oldVineyard, newVineyard));
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.regionPropertyName), oldVineyard, newVineyard));
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.urlPropertyName), oldVineyard, newVineyard));
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.existingPlantingsCommentPropertyName), oldVineyard, newVineyard));
-		properties.add(new ComparisonProperty(vineyardDoc.getAttribute(Vineyard.newPlantingsCommentPropertyName), oldVineyard, newVineyard));
-		
-		// we will remove processed ones from this list, not the original list
-		List<ExistingPlanting> newPlantingsClone = null;
-		if (newVineyard == null) {
-			newPlantingsClone = new ArrayList<ExistingPlanting>(0);
-		}
-		else {
-			newPlantingsClone = new ArrayList<ExistingPlanting>(newVineyard.getExistingPlantings());
-		}
-		
-		if (oldVineyard != null) {
-			for (ExistingPlanting oldPlanting : oldVineyard.getExistingPlantings()) {
-				String vineyardPlantingId = oldPlanting.getVineyardPlantingBizId();
-				ExistingPlanting newPlanting = null;
-				for (ExistingPlanting planting : newPlantingsClone) {
-					if (vineyardPlantingId.equals(planting.getVineyardPlantingBizId())) {
-						newPlanting = planting;
-						break;
+		if (values != null) {
+			boolean nodeDirty = false;
+			
+			List<ComparisonProperty> properties = node.getProperties();
+			for (ComparisonProperty property : properties) {
+				Object value = values.remove(property.getName());
+				Attribute attribute = node.getDocument().getAttribute(property.getName());
+				if (attribute != null) {
+					Class<?> type = null;
+					if (attribute instanceof Enumeration) {
+						type = AbstractRepository.get().getEnum((Enumeration) attribute);
+					}
+					else {
+						type = attribute.getAttributeType().getImplementingType();
+					}
+
+					if (value instanceof String) {
+						value = BindUtil.fromString(c, null, type, (String) value, true);
+					}
+					else {
+						value = BindUtil.convert(type, value);
 					}
 				}
-				if (newPlanting != null) {
-					newPlantingsClone.remove(newPlanting);
-				}
-	
-				result.getChildren().add(createExistingPlanting(existingPlantingDoc, oldPlanting, newPlanting));
-			}
-		}
-		
-		// Add any added plantings
-		for (ExistingPlanting addedPlanting : newPlantingsClone) {
-			result.getChildren().add(createExistingPlanting(existingPlantingDoc, null, addedPlanting));
-		}
 
-		if (newVineyard != null) {
-			for (NewPlanting newPlanting : newVineyard.getNewPlantings()) {
-				result.getChildren().add(createNewPlanting(newPlantingDoc, newPlanting));
+				property.setOldValue(value);
+				if ((! nodeDirty) && property.isDirty()) {
+					nodeDirty = true;
+				}
 			}
+
+			values.remove(Bean.DOCUMENT_ID);
+			values.remove(Bean.BIZ_KEY);
+			
+			// Process any extra old properties not present in the new version
+			for (String name : values.keySet()) {
+				ComparisonProperty property = new ComparisonProperty();
+				property.setName(name);
+				property.setTitle(name);
+				property.setOldValue(values.get(name));
+				properties.add(property);
+				nodeDirty = true;
+			}
+			node.setMutation(nodeDirty ? Mutation.updated : Mutation.unchanged);
 		}
-		
-		return result;
 	}
-	
-	private static ComparisonComposite createExistingPlanting(Document existingPlantingDoc,
-																ExistingPlanting oldPlanting,
-																ExistingPlanting newPlanting)
-	throws Exception {
-		ComparisonComposite result = null;
-		if (newPlanting != null) { // added or updated
-			result = new ComparisonComposite(newPlanting.getBizId(), 
-												(oldPlanting == null) ? newPlanting.getBizKey() : oldPlanting.getSerialNo().toString(),
-												Vineyard.existingPlantingsPropertyName,
-												(oldPlanting == null) ? Mutation.added : Mutation.unchanged,
-												"Existing Planting");
-		}
-		else {
-			result = new ComparisonComposite(oldPlanting.getBizId(), 
-												oldPlanting.getSerialNo().toString(),
-												Vineyard.existingPlantingsPropertyName,
-												Mutation.deleted,
-												"Existing Planting");
-		}
-		List<ComparisonProperty> properties = result.getProperties();
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.varietyNamePropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.blockIdPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.areaInHectaresPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.yearPlantedPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.rootstockPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.statusPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.returnCommentPropertyName), oldPlanting, newPlanting));
-		properties.add(new ComparisonProperty(existingPlantingDoc.getAttribute(ExistingPlanting.parcelIdPropertyName), oldPlanting, newPlanting));
-		return result;
-	}
-	
-	private static ComparisonComposite createNewPlanting(Document newPlantingDoc,
-															NewPlanting newPlanting)
-	throws Exception {
-		ComparisonComposite result = new ComparisonComposite(newPlanting.getBizId(), 
-																newPlanting.getBizKey(),
-																Vineyard.newPlantingsPropertyName,
-																Mutation.added,
-																"New Planting");
-		List<ComparisonProperty> properties = result.getProperties();
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.varietyPropertyName), null, newPlanting));
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.blockIdPropertyName), null, newPlanting));
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.areaInHectaresPropertyName), null, newPlanting));
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.yearPlantedPropertyName), null, newPlanting));
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.rootstockPropertyName), null, newPlanting));
-		properties.add(new ComparisonProperty(newPlantingDoc.getAttribute(NewPlanting.parcelIdPropertyName), null, newPlanting));
-		
-		return result;
-	}
-*/
 }

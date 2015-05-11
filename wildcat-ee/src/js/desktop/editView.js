@@ -1542,6 +1542,7 @@ isc.ClassFactory.defineClass("BizComparison", "HLayout");
 // Properties
 // 
 // _view: null, // the containing view
+// editable: true/false // whether the thing has apply buttons and will post it's changes
 
 BizComparison.addMethods({
 	initWidget : function () {
@@ -1549,7 +1550,7 @@ BizComparison.addMethods({
 //		this.height = '100%';
 		this.canDragResize = true;
 		this.resizeFrom = ['L', 'R'];
-
+		
 		var me = this;
 
 		this._comparisonTree = isc.TreeGrid.create({
@@ -1579,8 +1580,8 @@ BizComparison.addMethods({
 		this._comparisonForm = isc.PropertySheet.create({
 			width: '100%',
 			height: '100%',
-			numCols: 4,
-			colWidths: [150, '*', 50, '*'],
+			numCols: me.editable ? 4 : 3,
+			colWidths: me.editable ? [150, '*', 50, '*'] : [150, '*', '*'],
 			border: '1px solid #A7ABB4',
 			fields: []
 		});
@@ -1612,9 +1613,11 @@ BizComparison.addMethods({
 	setFormFields: function(properties) {
 		var me = this;
 		var fields = [
-		              	{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Property', startRow: false, endRow: false, cellStyle:"propSheetTitle"},
-						{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'New', startRow: false, endRow: false, cellStyle:"propSheetTitle"},
-						{title: "<<-",
+	          	{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Property', startRow: false, endRow: false, cellStyle:"propSheetTitle"},
+				{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'New', startRow: false, endRow: false, cellStyle:"propSheetTitle"}
+      	];
+		if (this.editable) {
+			fields.add({title: "<<-",
 							type: "button",
 							// start from field 4 (field 0 - 3 are the header fields)
 							// end at fields length - 5 (last 4 fields are spacers and the apply button) {4 + 1 (for last _old_ field)}
@@ -1624,9 +1627,9 @@ BizComparison.addMethods({
 							align: 'center',
 							cellStyle:"propSheetValue",
 							titleStyle:null,
-							textBoxStyle:null},
-						{type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Old', startRow: false, endRow: false, cellStyle:"propSheetTitle"},
-		];
+							textBoxStyle:null});
+		}
+		fields.add({type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Old', startRow: false, endRow: false, cellStyle:"propSheetTitle"});
 					
 		for (var i = 0; i < properties.length; i++) {
 			var name = properties[i].name;
@@ -1638,7 +1641,7 @@ BizComparison.addMethods({
 			var required = properties[i].required;
 			var allowEmptyValue = properties[i].allowEmptyValue;
 			
-			var field = {name: name, title: title, type: type, width: '*', defaultValue: properties[i].newValue};
+			var field = {name: name, title: title, type: type, width: '*', canEdit: this.editable, defaultValue: properties[i].newValue};
 			var oldField = {name: "_old_" + name, type: type, width: '*', showTitle: false, canEdit: false, defaultValue: properties[i].oldValue};
 			if (editorType) {
 				field.editorType = editorType;
@@ -1660,44 +1663,48 @@ BizComparison.addMethods({
 			
 			fields.add(field);
 			
-			fields.add({title: "<-",
-	    		 type: "button",
-	    		 click: "var old = form.getField('_old_" + name + "').getValue(); form.getField('" + name + "').setValue(old ? old : '')",
-	    		 align: 'center',
-	    		 startRow: false,
-	    		 endRow: false,
-	    		 cellStyle:"propSheetValue",
-	    		 titleStyle:null,
-	    		 textBoxStyle:null
-			});
+			if (this.editable) {
+				fields.add({title: "<-",
+		    		 type: "button",
+		    		 click: "var old = form.getField('_old_" + name + "').getValue(); form.getField('" + name + "').setValue(old ? old : '')",
+		    		 align: 'center',
+		    		 startRow: false,
+		    		 endRow: false,
+		    		 cellStyle:"propSheetValue",
+		    		 titleStyle:null,
+		    		 textBoxStyle:null
+				});
+			}
 			
 			fields.add(oldField);
 		}
 		
-		fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
-		fields.add({type: 'spacer', colSpan: 3, cellStyle: null, titleStyle: null, textBoxStyle: null});
-		fields.add({
-			title: "Apply Changes",
-			type: "button",
-			startRow: false,
-			endRow: false,
-			align: 'center',
-			cellStyle: null,
-			titleStyle: null,
-			textBoxStyle:null,
-			click: function(form, item) {
-				var values = form.getValues();
-				var properties = me._comparisonTree.getSelectedRecord().properties;
-				for (var i = 0; i < properties.length; i++) {
-					var property = properties[i];
-					property.newValue = values[property.name];
+		if (this.editable) {
+			fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
+			fields.add({type: 'spacer', colSpan: 3, cellStyle: null, titleStyle: null, textBoxStyle: null});
+			fields.add({
+				title: "Apply Changes",
+				type: "button",
+				startRow: false,
+				endRow: false,
+				align: 'center',
+				cellStyle: null,
+				titleStyle: null,
+				textBoxStyle:null,
+				click: function(form, item) {
+					var values = form.getValues();
+					var properties = me._comparisonTree.getSelectedRecord().properties;
+					for (var i = 0; i < properties.length; i++) {
+						var property = properties[i];
+						property.newValue = values[property.name];
+					}
+					isc.showPrompt("Changes Applied");
+					Timer.setTimeout("isc.clearPrompt()", 500);
 				}
-				isc.showPrompt("Changes Applied");
-				Timer.setTimeout("isc.clearPrompt()", 500);
-			}
-		});
-		fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
-
+			});
+			fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
+		}
+		
 //alert(isc.JSON.encode(fields, {prettyPrint:false}));
 		this._comparisonForm.setFields(fields);
 		this._comparisonForm.clearValues();

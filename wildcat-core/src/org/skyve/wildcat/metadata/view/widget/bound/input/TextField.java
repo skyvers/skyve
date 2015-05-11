@@ -4,20 +4,34 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.view.Editable;
 import org.skyve.wildcat.metadata.view.AbsoluteWidth;
 import org.skyve.wildcat.util.XMLUtil;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+			propOrder = {"editable", "previousValues", "pixelWidth"})
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-public class TextField extends ChangeableInputWidget implements AbsoluteWidth {
+public class TextField extends ChangeableInputWidget implements Editable, AbsoluteWidth {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -5061565177091806441L;
 
-	private Integer pixelWidth;
+	private Boolean editable;
 	private Boolean previousValues;
+	private Integer pixelWidth;
 	
+	@Override
+	public Boolean getEditable() {
+		return editable;
+	}
+
+	@Override
+	@XmlAttribute(name = "editable", required = false)
+	public void setEditable(Boolean editable) {
+		this.editable = editable;
+	}
+
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
@@ -33,7 +47,7 @@ public class TextField extends ChangeableInputWidget implements AbsoluteWidth {
 		return previousValues;
 	}
 
-	@XmlAttribute
+	@XmlAttribute(required = false)
 	public void setPreviousValues(Boolean previousValues) {
 		this.previousValues = previousValues;
 	}
