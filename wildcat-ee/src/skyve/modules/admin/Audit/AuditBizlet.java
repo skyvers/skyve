@@ -65,8 +65,6 @@ public class AuditBizlet extends Bizlet<Audit> {
 			q.addBoundProjection(Bean.BIZ_KEY);
 			
 			DocumentFilter f = q.getFilter();
-			f.addEquals(Audit.auditModuleNamePropertyName, audit.getAuditModuleName());
-			f.addEquals(Audit.auditDocumentNamePropertyName, audit.getAuditDocumentName());
 			f.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
 			if (forComparison) {
 				f.addLessThan(Audit.auditBizVersionPropertyName, audit.getAuditBizVersion());

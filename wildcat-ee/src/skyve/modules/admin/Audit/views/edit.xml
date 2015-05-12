@@ -56,7 +56,7 @@
             </item>
         </row>
     </form>
-    <comparison binding="me" modelName="AuditComparisonModel" />
+    <comparison binding="me" modelName="AuditComparisonModel" editable="false" />
     <actions>
 		<cancel />
     	<action className="SourceVersionChanged" displayName="Do Not Expose" clientValidation="false" inActionPanel="false" />
