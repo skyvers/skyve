@@ -88,14 +88,20 @@ public class WildcatFacesFilter implements Filter {
 		        }
 	        }
 	        
-            if (request.getUserPrincipal() == null) { // not logged in
+	        if (request.getUserPrincipal() == null) { // not logged in
                 HttpServletResponse response = (HttpServletResponse) resp;
+                // NB Can't use the referer header as if we traverse a data grid, 
+                // the URL does not represent all of the state required to perform a get and redisplay the page.
+                // This is because part of the state is temporarily saved in the session.
+                // String redirect = request.getHeader("Referer");
+                String redirect = absoluteContextURL.toString() + forwardURI;
+                redirect = response.encodeRedirectURL(redirect);
                 if (isAjax(request)) {
-                    response.getWriter().print(xmlPartialRedirectToPage(absoluteContextURL.toString() + forwardURI));
+                	response.getWriter().print(xmlPartialRedirectToPage(redirect.replace("&", "&amp;")));
                     response.flushBuffer();
                 }
                 else {
-                	response.sendRedirect(absoluteContextURL.toString() + forwardURI);
+                	response.sendRedirect(redirect);
                 }
             }
             else {
