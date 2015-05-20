@@ -38,7 +38,7 @@
 		<timestamp name="timestamp" required="true">
 			<displayName>Timestamp</displayName>
 		</timestamp>
-		<text name="user" required="true">
+		<text name="userName" required="true">
 			<displayName>User</displayName>
 			<length>50</length>
 		</text>

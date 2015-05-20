@@ -85,8 +85,11 @@
 		<copy todir="${ear-path}/lib" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-ear-path}/lib" includes="**" excludes="geodb*.jar" />
 		</copy>
+		<copy todir="${ear-path}/META-INF" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-ear-path}/META-INF" includes="**" excludes="application.xml" />
+		</copy>
 		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/WEB-INF/" includes="wildcat.taglib.xml,faces-config.xml" />
+			<fileset dir="${wildcat-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
 		</copy>
 		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/WEB-INF/lib/" includes="**" />
