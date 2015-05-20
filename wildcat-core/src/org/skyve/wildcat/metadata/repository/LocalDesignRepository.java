@@ -978,6 +978,15 @@ public class LocalDesignRepository extends AbstractRepository {
 			}
 		}
 		
+		// Check the bizKey expression bindings, if defined
+		String bizKeyExpression = ((DocumentImpl) document).getBizKeyExpression();
+		if (bizKeyExpression != null) {
+			Module module = getModule(customer, document.getOwningModuleName());
+			if (! BindUtil.messageBindingsAreValid(customer, module, document, bizKeyExpression)) {
+				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier);
+			}
+		}
+		
 		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 /*		
 		Persistent persistent = document.getPersistent();

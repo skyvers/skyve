@@ -245,6 +245,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				sb.append("\t\t\treturn \"Unknown\";\n");
 				sb.append("\t\t}");
 				result.setBizKeyMethodCode(sb.toString());
+				result.setBizKeyExpression(expression);
 			}
 			else {
 				throw new MetaDataException(metaDataName + " : The document [bizKey] requires either some code or an expression defined.");

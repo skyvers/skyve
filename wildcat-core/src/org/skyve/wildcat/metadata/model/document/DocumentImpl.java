@@ -61,6 +61,10 @@ public final class DocumentImpl extends Model implements Document {
 	private String parentDocumentName;
 
 	private String bizKeyMethodCode;
+	// Although this is code generated into the domain class, we need it here
+	// so that it can be checked by the repository implementor, as only then
+	// will all the references be resolved enough to check the bindings.
+	private String bizKeyExpression;
 
 	/**
 	 * A map of condition name -> condition code.
@@ -246,6 +250,14 @@ public final class DocumentImpl extends Model implements Document {
 		this.bizKeyMethodCode = bizKeyMethodCode;
 	}
 
+	public String getBizKeyExpression() {
+		return bizKeyExpression;
+	}
+
+	public void setBizKeyExpression(String bizKeyExpression) {
+		this.bizKeyExpression = bizKeyExpression;
+	}
+	
 	@Override
 	public boolean isOrdered() {
 		return ordered;
