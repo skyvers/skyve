@@ -33,7 +33,7 @@
 			</type>
 		</property>
 		<property name="timestamp" type="Timestamp" />
-		<property name="user" length="50" />
+		<property name="userName" length="50" />
 		<property name="audit" type="text" />
 		<filter name="adminAuditNoneFilter" condition="1=0"/>
 		<filter name="adminAuditCustomerFilter" condition="bizCustomer=:customerParam"/>

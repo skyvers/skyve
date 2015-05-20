@@ -249,6 +249,18 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
+	private void validateMessageBindings(String message, 
+											String widgetIdentifier,
+											String description)
+	throws MetaDataException {
+		if (message != null) {
+			if (! BindUtil.messageBindingsAreValid(customer, module, document, message)) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+												" has " + description + " containing malformed binding expressions.");
+			}
+		}
+	}
+	
 	private void validateQueryName(String queryName, String widgetIdentifier)
 	throws MetaDataException {
 		if ((queryName != null) && (module.getQuery(queryName) == null)) {
@@ -691,6 +703,7 @@ class ViewValidator extends ViewVisitor {
 							boolean parentEnabled)
 	throws MetaDataException {
 		String blurbIdentifier = "A Blurb";
+		validateMessageBindings(blurb.getMarkup(), blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 	}
 
@@ -714,6 +727,7 @@ class ViewValidator extends ViewVisitor {
 							true,
 							labelIdentifier,
 							null);
+		validateMessageBindings(label.getValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
 	}
 
@@ -1456,6 +1470,7 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitView() throws MetaDataException {
+		validateMessageBindings(view.getTitle(), viewIdentifier, "a title");
 		validateParameterBindings(view.getParameters(), viewIdentifier);
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
 		validateConditionName(view.getRefreshConditionName(), viewIdentifier);

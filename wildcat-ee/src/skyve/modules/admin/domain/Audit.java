@@ -51,7 +51,7 @@ public class Audit extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
 	/** @hidden */
-	public static final String userPropertyName = "user";
+	public static final String userNamePropertyName = "userName";
 	/** @hidden */
 	public static final String auditPropertyName = "audit";
 	/** @hidden */
@@ -137,7 +137,7 @@ public class Audit extends AbstractPersistentBean {
 	private Integer auditBizVersion;
 	private Operation operation;
 	private Timestamp timestamp;
-	private String user;
+	private String userName;
 	private String audit;
 	private Audit sourceVersion = null;
 	private Audit comparisonVersion = null;
@@ -160,7 +160,7 @@ public class Audit extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{auditBizVersion} - {operation} by {user} at {timestamp}",
+														"{auditBizVersion} - {operation} by {userName} at {timestamp}",
 														this);
 		}
 		catch (Exception e) {
@@ -303,21 +303,21 @@ public class Audit extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #user} accessor.
+	 * {@link #userName} accessor.
 	 **/
-	public String getUser() {
-		return user;
+	public String getUserName() {
+		return userName;
 	}
 
 	/**
-	 * {@link #user} mutator.
+	 * {@link #userName} mutator.
 	 * 
-	 * @param user	The new value to set.
+	 * @param userName	The new value to set.
 	 **/
 	@XmlElement
-	public void setUser(String user) {
-		preset(userPropertyName, user);
-		this.user = user;
+	public void setUserName(String userName) {
+		preset(userNamePropertyName, userName);
+		this.userName = userName;
 	}
 
 	/**

@@ -19,8 +19,8 @@ import org.apache.commons.collections.comparators.ComparatorChain;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
@@ -78,25 +78,25 @@ public final class BindUtil {
 				String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
 				boolean found = false;
 				Exception cause = null;
-				for (Bean bean : beans) {
-					String documentName = bean.getBizDocument();
-					if (documentName != null) {
-						try {
-							// Try to get the value from this bean
-							// Do not use Binder.getMetaDataForBinding as it may not be a document
-							// property, it could be a condition or an implicit property.
-							String displayValue = BindUtil.getDisplay(customer, bean, binding);
-							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
-							found = true;
-							
-							break;
-						}
-						catch (Exception e) {
-							cause = e;
+					for (Bean bean : beans) {
+						String documentName = bean.getBizDocument();
+						if (documentName != null) {
+							try {
+								// Try to get the value from this bean
+								// Do not use BindUtil.getMetaDataForBinding as it may not be a document
+								// property, it could be a condition or an implicit property.
+								String displayValue = BindUtil.getDisplay(customer, bean, binding);
+								result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
+								openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+								found = true;
+								
+								break;
+							}
+							catch (Exception e) {
+								cause = e;
+							}
 						}
 					}
-				}
 				
 				if (! found) {
 					StringBuilder exMessage = new StringBuilder();
@@ -148,6 +148,49 @@ public final class BindUtil {
 		}
 		
 		return bound;
+	}
+	
+	public static boolean messageBindingsAreValid(Customer customer, Module module, Document document, String message) {
+		boolean valid = true;
+		
+		StringBuilder result = new StringBuilder(message);
+		int openCurlyBraceIndex = result.indexOf("{");
+		while (valid && (openCurlyBraceIndex >= 0)) {
+			if ((openCurlyBraceIndex == 0) || // first char is '{' 
+					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
+					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
+
+				int closedCurlyBraceIndex = result.indexOf("}", openCurlyBraceIndex);
+				if (closedCurlyBraceIndex < 0) {
+					valid = false;
+				}
+				else {
+					String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
+					if (binding.isEmpty()) {
+						valid = false;
+					}
+					else {
+						try {
+							// Check the binding in this bean
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+							if (target == null) {
+								valid = false;
+							}
+							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+						}
+						catch (Exception e) {
+							valid = false;
+						}
+					}
+				}
+			}
+			else { // escaped { found - ie "\{" - remove the escape chars and move on to the next pair of {}
+				result.replace(openCurlyBraceIndex - 1, openCurlyBraceIndex, "");
+				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex); // NB openCurlyBracedIndex was not decremented but a char was removed
+			}
+		}
+
+		return valid;
 	}
 	
 	public static String negateCondition(String condition) {

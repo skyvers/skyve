@@ -149,7 +149,7 @@
 			<description>The list of all Audits.</description>
 			<columns>
 				<column binding="timestamp" sortOrder="descending" />
-				<column binding="user" />
+				<column binding="userName" />
 				<column binding="operation" />
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />

@@ -1039,25 +1039,12 @@ public class LocalDesignRepository extends AbstractRepository {
 		// Check the message binding expressions, if present
 		List<UniqueConstraint> constraints = document.getUniqueConstraints();
 		if (constraints != null) {
+			Module owningModule = getModule(customer, document.getOwningModuleName());
 			for (UniqueConstraint constraint : constraints) {
 				String message = constraint.getMessage();
-				int openCurlyBraceIndex = message.indexOf("{");
-				while (openCurlyBraceIndex >= 0) {
-					int closedCurlyBraceIndex = message.indexOf("}");
-					if (closedCurlyBraceIndex <= openCurlyBraceIndex) {
-						throw new MetaDataException("The unique constraint [message] does not have matching curly braces in constraint " +
-														constraint.getName() + " in document " + documentIdentifier);
-					}
-					String binding = message.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
-					/*
-					 * TODO check binding expression here using BindUtil if (! attributeNames.contains(binding)) { throw new
-					 * MetaDataException(
-					 * "The unique constraint [message] has a substitution parameter for an attribute that does not exist in the document in constraint "
-					 * + constraint.getName() + " in document " + result.getName()); }
-					 */
-
-					message = message.replace(new StringBuilder(64).append('{').append(binding).append('}'), "");
-					openCurlyBraceIndex = message.indexOf("{");
+				if (! BindUtil.messageBindingsAreValid(customer, owningModule, document, message)) {
+					throw new MetaDataException("The unique constraint [message] contains malformed binding expressions in constraint " +
+							constraint.getName() + " in document " + documentIdentifier);
 				}
 			}
 		}

@@ -75,7 +75,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 								bean.getBizVersion());
 		a.setTimestamp(new Timestamp());
 		a.setOperation(operation);
-		a.setUser(u.getName());
+		a.setUserName(u.getName());
 		p.upsertBeanTuple(a);
 	}
 }
