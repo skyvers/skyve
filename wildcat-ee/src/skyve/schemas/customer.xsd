@@ -24,13 +24,6 @@
             </xs:complexType>
           </xs:element>
           <xs:element name="homeModule" type="xs:string" form="qualified"/>
-          <xs:element name="services" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="service" type="tns:service" form="qualified" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
           <xs:element name="interceptors" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -65,15 +58,6 @@
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="service">
-    <xs:complexContent>
-      <xs:extension base="ns1:namedMetaData">
-        <xs:sequence/>
-        <xs:attribute name="className" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

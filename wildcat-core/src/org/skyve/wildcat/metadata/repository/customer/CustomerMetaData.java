@@ -36,7 +36,6 @@ import org.skyve.wildcat.util.XMLUtil;
 							"defaultTimestampConverter", 
 							"modules", 
 							"homeModule", 
-							"services",
 							"interceptors"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private UIResources uiResources;
@@ -47,7 +46,6 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private ConverterName defaultDateTimeConverter;
 	private ConverterName defaultTimestampConverter;
 	private List<CustomerModuleMetaData> modules = new ArrayList<>();
-	private List<Service> services = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private String homeModule;
 
@@ -118,12 +116,6 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "module", required = true)
 	public List<CustomerModuleMetaData> getModules() {
 		return modules;
-	}
-
-	@XmlElementWrapper(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "services")
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "service", required = true)
-	public List<Service> getServices() {
-		return services;
 	}
 
 	@XmlElementWrapper(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "interceptors")
@@ -211,20 +203,6 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 			throw new MetaDataException(metaDataName + " : The customer [homeModule] is required");
 		}
 		result.setHomeModuleName(value);
-
-		// Populate Services
-		List<Service> repositoryServices = getServices();
-		if (repositoryServices != null) {
-			for (Service service : repositoryServices) {
-				value = service.getName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a service is required");
-				}
-				if (! result.putService(service)) {
-					throw new MetaDataException(metaDataName + " : Duplicate service named " + value);
-				}
-			}
-		}
 
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();

@@ -1964,6 +1964,7 @@ joined tables
 		}
 
 		imports.add("javax.xml.bind.annotation.XmlType");
+		imports.add("javax.xml.bind.annotation.XmlRootElement");
 
 		for (String importClassName : imports) {
 			fw.append("import ").append(importClassName).append(";\n");
@@ -2041,6 +2042,7 @@ joined tables
 		
 		// generate class body
 		fw.append("@XmlType");
+		fw.append("\n@XmlRootElement");
 		fw.append("\npublic ");
 		if (baseDocumentName == null) {
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());

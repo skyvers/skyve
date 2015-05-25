@@ -171,7 +171,7 @@ public class UtilImpl {
 	 * @throws DomainException
 	 * @throws MetaDataException
 	 */
-	public static void populateFully(Bean bean) 
+	public static void populateFully(final Bean bean) 
 	throws DomainException, MetaDataException {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
@@ -190,6 +190,15 @@ public class UtilImpl {
 										boolean visitingInheritedDocument) 
 			throws DomainException, MetaDataException {
 				// do nothing - just visiting loads the instance from the database
+				try {
+					if (beanAccepted != bean) {
+						if (beanAccepted instanceof HibernateProxy) {
+							BindUtil.set(bean, binding, ((HibernateProxy) beanAccepted).getHibernateLazyInitializer().getImplementation());
+						}
+					}
+				} catch (Exception e) {
+					throw new DomainException(e);
+				}
 				return true;
 			}
 		}.visit(document, bean, customer);

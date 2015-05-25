@@ -387,16 +387,6 @@
 		<servlet-name>MapServlet</servlet-name>
 		<url-pattern>/map</url-pattern>
 	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>ServicesServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.ServicesServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ServicesServlet</servlet-name>
-		<url-pattern>/services/*</url-pattern>
-	</servlet-mapping>
-	
 	<servlet>
 		<servlet-name>TrackmateServlet</servlet-name>
 		<servlet-class>org.skyve.wildcat.web.service.TrackmateServlet</servlet-class>
@@ -472,6 +462,8 @@
 			<url-pattern>/smartgen/*</url-pattern>
 			<!-- Secure map servlet -->
 			<url-pattern>/map/*</url-pattern>
+			<!-- Secure rest services -->
+			<url-pattern>/rest/*</url-pattern>
 			<!-- Secure the Bizport Export Servlet -->
 			<url-pattern>/bizexport.xls</url-pattern>
 			<url-pattern>/bizexport.xlsx</url-pattern>

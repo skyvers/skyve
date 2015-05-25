@@ -4,7 +4,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/wildcat-ext"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/cxf-2.5.2.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/ehcache-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/quartz-1.6.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate3.jar"/>

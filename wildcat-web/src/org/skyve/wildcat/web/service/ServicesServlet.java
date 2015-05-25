@@ -1,21 +1,26 @@
 package org.skyve.wildcat.web.service;
 
 import javax.servlet.ServletConfig;
-
+/*
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.frontend.ServerFactoryBean;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
+*/
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.customer.Service;
+//import org.skyve.metadata.customer.Service;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 
-public class ServicesServlet extends CXFNonSpringServlet {
+/**
+ * Java EE Restful or SOAP services are used now instead of this...
+ */
+@Deprecated
+public class ServicesServlet /* extends CXFNonSpringServlet */ {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 1L;
-
+/*
 	@Override
 	public void loadBus(ServletConfig servletConfig) {
 		super.loadBus(servletConfig);

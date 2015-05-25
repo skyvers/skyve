@@ -64,19 +64,6 @@ public interface Customer extends NamedMetaData {
 	
 	/**
 	 * 
-	 * @param serviceName
-	 * @return
-	 */
-	public Service getService(String serviceName);
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public Collection<Service> getServices();
-
-	/**
-	 * 
 	 * @return
 	 */
 	public Collection<InterceptorMetaData> getInterceptors();

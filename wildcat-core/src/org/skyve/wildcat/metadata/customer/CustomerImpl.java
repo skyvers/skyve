@@ -28,7 +28,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.LoginResources;
-import org.skyve.metadata.customer.Service;
 import org.skyve.metadata.customer.UIResources;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -168,7 +167,6 @@ public class CustomerImpl implements Customer {
 	private Converter<Timestamp> defaultTimestampConverter;
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
-	private Map<String, Service> services = new TreeMap<>();
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
@@ -295,20 +293,6 @@ public class CustomerImpl implements Customer {
 		}
 
 		return result;
-	}
-
-	@Override
-	public Service getService(String serviceName) {
-		return services.get(serviceName);
-	}
-
-	public boolean putService(Service service) {
-		return (services.put(service.getName(), service) == null);
-	}
-	
-	@Override
-	public java.util.Collection<Service> getServices() {
-		return Collections.unmodifiableCollection(services.values());
 	}
 
 	public boolean putInterceptor(InterceptorMetaData interceptor) {
