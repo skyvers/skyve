@@ -652,6 +652,9 @@ isc.EditView.addMethods({
 		
 		// enable/disable the actions on the form
 		var members = this._actionPanel.getMembers();
+		if (members.length == 0) {
+			this._actionPanel.hide();
+		}
 		for (var i = 0, l = members.length; i < l; i++) {
 			var tool = members[i];
 
