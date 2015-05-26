@@ -1737,7 +1737,7 @@ pickListFields:[{name:'value'}],
 			}
 			if (! viewHasAtLeastOneForm) {
 				String var = "v" + variableCounter++;
-				code.append("var ").append(var).append("=DynamicForm.create({});");
+				code.append("var ").append(var).append("=DynamicForm.create({invisibleConditionName:'true'});");
 				code.append("view._vm.addMember(").append(var).append(");");
 				code.append("view.addContained(").append(var).append(");\n");
 			}
