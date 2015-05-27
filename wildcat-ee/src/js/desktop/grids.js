@@ -909,6 +909,8 @@ BizListGrid.addMethods({
 			canFreezeFields: false,
 			contextMenu: me._contextMenu,
 			showRollOver: true,
+			canExpandRecords: false,
+			expansionMode: 'details',
 //			autoFitWidthApproach: 'both', - The summary row doesn't scroll in sync with the list
 //gridComponents:[isc.Canvas.create({width: '100%', height:1}), "header", "filterEditor", "body"],
 			rowClick: function(record, rowNum, colNum) {
@@ -1287,12 +1289,14 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		}];
 
 		var fieldNames = me._dataSource.getFieldNames(true);
+		var hasDetailFields = false;
 		for (var i = 2; i < fieldNames.length; i++) { // don't include bizTag and bizFlag
 			var dsField = me._dataSource.getField(fieldNames[i]);
 			var gridField = {name: dsField.name, autoFitWidth: false, canToggle: false}; // don't allow toggling of boolean checkboxes without going into edit mode
 			if (dsField.canSave == false) {
 				gridField.canEdit = false;
 			}
+			hasDetailFields = (hasDetailFields || dsField.detail);
 			fields.add(gridField);
 		}
 
@@ -1309,8 +1313,10 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 			me.grid.destroy();
 		}
 		me._createGrid(me._config, fields);
+		// Set if the grid can expand based on whether there are detail fields defined
+		me.grid.setCanExpandRecords(hasDetailFields);
 		me.addMember(me.grid, me.getMembers().length - 1);
-
+		
 		me.grid.filterData();
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
