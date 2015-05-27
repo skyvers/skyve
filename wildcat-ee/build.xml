@@ -45,7 +45,7 @@
 	<target name="generateDomain" description="Domain Class Generation">
 		<java fork="true" classname="org.skyve.wildcat.generate.DomainGenerator">
 			<classpath refid="classpath" />
-			<arg value="src/skyve/" />
+			<arg value="src/skyve/" /> <!-- source path -->
 			<arg value="debug!" />
 		</java>
 	</target>
@@ -53,19 +53,20 @@
 	<target name="generateEditView" description="Edit View Generation">
 		<java fork="true" classname="org.skyve.wildcat.generate.ViewGenerator">
 			<classpath refid="classpath" />
-			<arg value="demo" />
-			<arg value="admin" />
-			<arg value="Contact" />
-			<arg value="false" />
-			<arg value="false" />
+			<arg value="src/skyve/" /> <!-- source path -->
+			<arg value="demo" /> <!-- customerName -->
+			<arg value="admin" /> <!-- moduleName -->
+			<arg value="Contact" /> <!-- documentName -->
+			<arg value="false" /> <!-- customer overridden view -->
+			<arg value="" /> <!-- uxui overridden view name -->
 		</java>
 	</target>
 	
 	<target name="generateDefaultQueries" description="Default Query Generation">
 		<java fork="true" classname="org.skyve.wildcat.generate.QueryGenerator">
 			<classpath refid="classpath"/>
-			<arg value="bizhub" />
-			<arg value="admin" />
+			<arg value="bizhub" /> <!-- customerName -->
+			<arg value="admin" /> <!-- moduleName -->
 		</java>
 	</target>
 </project>

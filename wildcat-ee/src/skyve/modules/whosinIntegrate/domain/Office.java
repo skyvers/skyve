@@ -2,6 +2,7 @@ package modules.whosinIntegrate.domain;
 
 import com.vividsolutions.jts.geom.Geometry;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -14,6 +15,7 @@ import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
  * @stereotype "persistent"
  */
 @XmlType
+@XmlRootElement
 public class Office extends AbstractPersistentBean {
 	/**
 	 * For Serialization

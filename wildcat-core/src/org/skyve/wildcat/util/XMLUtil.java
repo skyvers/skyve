@@ -194,7 +194,7 @@ public class XMLUtil {
 			StringBuilder location = new StringBuilder(64);
 			location.append(VIEW_NAMESPACE).append(' ');
 			if (customerOverridden) {
-				location.append("../");
+				location.append("../../");
 			}
 			if (uxuiOverridden) {
 				location.append("../");

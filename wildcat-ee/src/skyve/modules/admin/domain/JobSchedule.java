@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -16,6 +17,7 @@ import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
  * @stereotype "persistent"
  */
 @XmlType
+@XmlRootElement
 public class JobSchedule extends AbstractPersistentBean {
 	/**
 	 * For Serialization

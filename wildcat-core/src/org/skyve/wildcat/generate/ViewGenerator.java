@@ -464,21 +464,32 @@ public class ViewGenerator {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		String srcPath = null;
 		String customerName = null;
 		String moduleName = null;
 		String documentName = null;
-		String customerOverridden = null;
-		String uxuiOverridden = null;
-		
-		if (args.length == 5) {
-			customerName = args[0];
-			moduleName = args[1];
-			documentName = args[2];
-			customerOverridden = args[3];
-			uxuiOverridden = args[4];
+		String uxui = null;
+		boolean customerOverridden = false;
+		boolean validArgs = true;
+
+		if (args.length >= 5) {
+			srcPath = args[0];
+			customerName = args[1];
+			moduleName = args[2];
+			documentName = args[3];
+			customerOverridden = Boolean.parseBoolean(args[4]);
+			if (args.length == 6) {
+				uxui = args[5];
+			}
+			if (args.length > 6) {
+				validArgs = false;
+			}
 		}
 		else {
-			System.err.println("Usage: org.skyve.wildcat.generate.ViewGenerator customerName moduleName documentName customerOverridden (boolean) uxuiOverridden (boolean)");
+			validArgs = false;
+		}
+		if (! validArgs) {
+			System.err.println("Usage: org.skyve.wildcat.generate.ViewGenerator sourcePath (usually \"src/skyve/\") customerName moduleName documentName customerOverridden (boolean) uxui (optional)");
 			System.exit(1);
 		}
 
@@ -487,13 +498,25 @@ public class ViewGenerator {
 		Customer customer = repository.getCustomer(customerName);
 		Module module = repository.getModule(customer, moduleName);
 		Document document = repository.getDocument(customer, module, documentName);
-		File file = new File("./generatedEdit.xml");
+		StringBuilder filePath = new StringBuilder(64);
+		filePath.append(srcPath);
+		if (customerOverridden) {
+			filePath.append("customers/").append(customerName).append("/modules/");
+		}
+		else {
+			filePath.append("modules/");
+		}
+		filePath.append(moduleName).append('/').append(documentName).append("/views/");
+		if (uxui != null) {
+			filePath.append(uxui).append('/');
+		}
+		File file = new File(filePath.toString());
+		file.mkdirs();
+		filePath.append("generatedEdit.xml");
+		file = new File(filePath.toString());
 		UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
 		try (PrintWriter out = new PrintWriter(file)) {
-			out.println(generateEditViewXML(customer, 
-												document, 
-												Boolean.parseBoolean(customerOverridden), 
-												Boolean.parseBoolean(uxuiOverridden)));
+			out.println(generateEditViewXML(customer, document, customerOverridden, uxui != null));
 			out.flush();
 		}
 	}

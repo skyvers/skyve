@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.Group;
@@ -13,6 +14,7 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
  * @stereotype "persistent child"
  */
 @XmlType
+@XmlRootElement
 public class GroupRole extends AbstractPersistentBean implements ChildBean<Group> {
 	/**
 	 * For Serialization

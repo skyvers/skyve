@@ -64,7 +64,7 @@ public abstract class DomainGenerator {
 			SRC_PATH = args[0];
 		}
 		else {
-			System.err.println("You must have at least the src path as an argument - usually \"src/\"");
+			System.err.println("You must have at least the src path as an argument - usually \"src/skyve/\"");
 			System.exit(1);
 		}
 

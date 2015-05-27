@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -23,11 +24,12 @@ import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
  * Someone who works for this organisation
  * 
  * @depend - - - Status
- * @navhas n baseOffice 0..1 Office
  * @navhas n contact 0..1 Contact
+ * @navhas n baseOffice 0..1 Office
  * @stereotype "persistent"
  */
 @XmlType
+@XmlRootElement
 public class Staff extends AbstractPersistentBean {
 	/**
 	 * For Serialization

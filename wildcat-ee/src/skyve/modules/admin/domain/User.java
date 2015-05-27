@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
@@ -18,14 +19,15 @@ import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
  * User
  * 
  * @depend - - - WizardState
- * @navcomposed 1 candidateContacts 0..n UserCandidateContact
- * @navcomposed 1 roles 0..n UserRole
- * @navhas n contact 1 Contact
- * @navhas n groups 0..n Group
  * @navhas n dataGroup 0..1 DataGroup
+ * @navhas n contact 1 Contact
+ * @navcomposed 1 roles 0..n UserRole
+ * @navhas n groups 0..n Group
+ * @navcomposed 1 candidateContacts 0..n UserCandidateContact
  * @stereotype "persistent"
  */
 @XmlType
+@XmlRootElement
 public class User extends AbstractPersistentBean {
 	/**
 	 * For Serialization

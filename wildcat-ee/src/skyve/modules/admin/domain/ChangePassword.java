@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.wildcat.domain.AbstractTransientBean;
@@ -11,6 +12,7 @@ import org.skyve.wildcat.domain.AbstractTransientBean;
  * @stereotype "transient"
  */
 @XmlType
+@XmlRootElement
 public class ChangePassword extends AbstractTransientBean {
 	/**
 	 * For Serialization
