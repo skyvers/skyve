@@ -684,6 +684,7 @@ code.append("_view:view})");
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append('=');
 				addStaticImage(image);
+				code.append(";\n");
 				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 			}
 			else {
@@ -694,9 +695,11 @@ code.append("_view:view})");
 		}
 
 		private void addStaticImage(StaticImage image) {
-			code.append("BizImage.create({file: '").append(image.getRelativeFile()).append('\'');
+			code.append("BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
+			code.append("',file:'").append(image.getRelativeFile()).append("',");
 			size(image, code);
-			code.append("});\n");
+			removeTrailingComma(code);
+			code.append("})");
 		}
 
 		@Override

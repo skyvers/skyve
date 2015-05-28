@@ -117,7 +117,14 @@ public class CustomerResourceServlet extends HttpServlet {
 
 		Resource(HttpServletRequest request)
 		throws Exception {
-			String resourceArea = request.getServletPath().substring(1); // get rid of slash at front
+			String resourceArea = request.getServletPath();
+			if (resourceArea.startsWith("/images/")) { // SC looks for images in /images
+				resourceArea = resourceArea.substring(8); // get rid of slash at front
+			}
+			else {
+				resourceArea = resourceArea.substring(1); // get rid of slash at front
+			}
+			
 			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
 			String moduleName = null;
 			if ((documentName == null) || (documentName.length() == 0)) {
