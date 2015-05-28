@@ -3,7 +3,9 @@ isc.ClassFactory.defineClass("BizContainer", "VLayout");
 // contained - an array of members added to this container
 BizContainer.addMethods({
 	initWidget: function () {
-	    this.Super("initWidget", arguments);
+		this.backgroundImage = 'background.png';
+		this.backgroundRepeat = 'repeat';
+		this.Super("initWidget", arguments);
 	    this.contained = [];
 	},
 	
@@ -53,7 +55,7 @@ isc.EditView.addMethods({
 		this.addMember(this._heading);
 
 		// the action panel - not contained as it is implicit
-		this._actionPanel = isc.ToolStrip.create({layoutMargin: 2, membersMargin: 5, width: '100%', margin: 2});
+		this._actionPanel = isc.ToolStrip.create({layoutMargin: 2, membersMargin: 5, width: '100%'});
 		this.addMember(this._actionPanel);
 
 		// the edit panel - not contained as it is implicit
@@ -1286,21 +1288,10 @@ BizButton.addMethods({
 // Container renderer
 isc.ClassFactory.defineClass("BizVBox", "VLayout");
 // contained: [] - the contained widgets
-// bizBorder: false - whether to display a border or not
-// bizBorderTitle: null - the title of the border if any
 // invisibleConditionName: null - the invisible condition 
 BizVBox.addMethods({
 	initWidget: function() {
 		this.contained = [];
-		if (this.bizBorder) {
-			if (this.bizBorderTitle) {
-				this.isGroup = true;
-				this.groupTitle = this.bizBorderTitle;
-			}
-			else {
-				this.border = "1px";
-			}
-		}
 		this.Super("initWidget", arguments);
 	},
 	
@@ -1313,21 +1304,10 @@ BizVBox.addMethods({
 // HBox
 isc.ClassFactory.defineClass("BizHBox", "HLayout");
 // contained: [] - the contained widgets
-// bizBorder: false - whether to display a border or not
-// bizBorderTitle: null - the title of the border if any
 // invisibleConditionName: null - the invisble condition 
 BizHBox.addMethods({
 	initWidget: function() {
 		this.contained = [];
-		if (this.bizBorder) {
-			if (this.bizBorderTitle) {
-				this.isGroup = true;
-				this.groupTitle = this.bizBorderTitle;
-			}
-			else {
-				this.border = "1px";
-			}
-		}
 		this.Super("initWidget", arguments);
 	},
 	

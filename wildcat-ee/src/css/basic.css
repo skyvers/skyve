@@ -118,6 +118,16 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 	text-transform:capitalize;
 }
 
+.bizhubRoundedBorder {
+	border-radius: 5px;
+}
+
+.bizhubBorderLabel {
+	color: darkslategrey;
+	background: transparent url(../images/background.png);
+	font-weight: bold;
+}
+
 /*
 **************************************
 FORM styles

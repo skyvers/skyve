@@ -2326,11 +2326,9 @@ pickListFields:[{name:'value'}],
 		private static void bordered(Bordered bordered, StringBuilder builder) {
 			if (Boolean.TRUE.equals(bordered.getBorder())) {
 				String borderTitle = bordered.getBorderTitle();
+				builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 				if (borderTitle != null) {
-					builder.append("isGroup:true,margin:1,groupTitle:'").append(borderTitle).append("',");
-				}
-				else {
-					builder.append("border:'1px solid #A7ABB4;',margin:1,");
+					builder.append("groupTitle:'&nbsp;&nbsp;").append(borderTitle).append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 				}
 			}
 		}
