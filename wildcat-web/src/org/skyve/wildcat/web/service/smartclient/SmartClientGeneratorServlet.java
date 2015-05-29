@@ -217,7 +217,12 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			String tabPaneVariable = containerVariables.peek();
 			Integer tabNumber = tabNumbers.pop();
 			code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber).append("',title:'");
-			code.append(SmartClientGenerateUtils.processString(tab.getTitle())).append("',pane:").append(paneVariable).append(',');
+			code.append(SmartClientGenerateUtils.processString(tab.getTitle()));
+			String icon16 = tab.getIcon16x16RelativeFileName();
+			if (icon16 != null) {
+				code.append("',icon:'../resources?_n=").append(icon16);
+			}
+			code.append("',pane:").append(paneVariable).append(',');
 			tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 			disabled(tab.getDisabledConditionName(), code);
 			invisible(tab.getInvisibleConditionName(), code);
@@ -2715,6 +2720,11 @@ pickListFields:[{name:'value'}],
 				pw.append(module.getName()).append(".create").append(document.getName()).append("=function(){");
 				pw.append("var view=EditView.create({width:'100%',height:'100%',title:'");
 				pw.append("',_mod:'").append(module.getName()).append("',_doc:'").append(document.getName());
+				String icon = editView.getIcon32x32RelativeFileName();
+				if (icon == null) {
+					icon = document.getIcon32x32RelativeFileName();
+				}
+				pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon));
 				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getSingularAlias()));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");

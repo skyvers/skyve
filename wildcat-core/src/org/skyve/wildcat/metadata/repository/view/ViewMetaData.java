@@ -45,7 +45,8 @@ import org.skyve.wildcat.util.XMLUtil;
 			propOrder = {"documentation",
 							"actions", 
 							"type", 
-							"title", 
+							"title",
+							"icon32x32RelativeFileName",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
@@ -58,6 +59,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 
 	private ViewType type;
 	private String title;
+	private String icon32x32RelativeFileName;
 	private List<Action> actions = new ArrayList<>();
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -81,6 +83,15 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	public String getIcon32x32RelativeFileName() {
+		return icon32x32RelativeFileName;
+	}
+
+	@XmlAttribute(name = "icon32x32RelativeFileName")
+	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
+		this.icon32x32RelativeFileName = UtilImpl.processStringValue(icon32x32RelativeFileName);
 	}
 
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "actions")
@@ -159,6 +170,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 			throw new MetaDataException(metaDataName + " : The view [title] is required for view " + metaDataName);
 		}
 		result.setTitle(value);
+
+		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
 
 		ViewType theType = getType();
 		if (theType == null) {

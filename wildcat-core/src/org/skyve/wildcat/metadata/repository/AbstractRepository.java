@@ -162,7 +162,10 @@ public abstract class AbstractRepository implements Repository {
 	}
 
 	/**
-	 * Check in customer module folder, check in module folder, check in customer images folder, check in images folder.
+	 * Check in &lt;customer-name&gt;/&lt;module-name&gt;/resources folder, 
+	 * check in &lt;module-name&gt;/resources folder, 
+	 * check in &lt;customer-name&gt;/resources folder, 
+	 * check in resources folder.
 	 * 
 	 * @param imagePath The relative path to the image
 	 * @param customerName The name of the customer.

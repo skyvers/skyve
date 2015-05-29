@@ -12,7 +12,7 @@ import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE, 
-			propOrder = {"title", "disabledConditionName", "invisibleConditionName", "selectedConditionName"})
+			propOrder = {"title", "icon16x16RelativeFileName", "disabledConditionName", "invisibleConditionName", "selectedConditionName"})
 public final class Tab extends Container implements Disableable, Invisible {
 	/**
 	 * For Serialization
@@ -20,6 +20,7 @@ public final class Tab extends Container implements Disableable, Invisible {
 	private static final long serialVersionUID = -3216551162394859248L;
 
 	private String title;
+	private String icon16x16RelativeFileName;
 	private String disabledConditionName;
 	private String invisibleConditionName;
 	private String selectedConditionName;
@@ -31,6 +32,15 @@ public final class Tab extends Container implements Disableable, Invisible {
 	@XmlAttribute(required = true)
 	public void setTitle(String title) {
 		this.title = UtilImpl.processStringValue(title);
+	}
+
+	public String getIcon16x16RelativeFileName() {
+		return icon16x16RelativeFileName;
+	}
+
+	@XmlAttribute(name = "icon16x16RelativeFileName")
+	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
+		this.icon16x16RelativeFileName = UtilImpl.processStringValue(icon16x16RelativeFileName);
 	}
 
 	@Override

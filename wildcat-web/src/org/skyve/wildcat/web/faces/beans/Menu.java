@@ -156,11 +156,11 @@ public class Menu extends Harness {
 			GridItem gridItem = (GridItem) item;
 			url.append(Util.getWildcatContextUrl());
 			url.append("/?a=").append(WebAction.g.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(Harness.deriveQueryName(customer,
-																module,
-																item,
-																gridItem.getQueryName(),
-																gridItem.getDocumentName()));
+			url.append("&q=").append(Harness.deriveQuery(customer,
+															module,
+															item,
+															gridItem.getQueryName(),
+															gridItem.getDocumentName()).getName());
 		}
 		else if (item instanceof EditItem) {
 			url.append(Util.getWildcatContextUrl());
@@ -171,31 +171,31 @@ public class Menu extends Harness {
             CalendarItem calendarItem = (CalendarItem) item;
     		url.append(Util.getWildcatContextUrl());
             url.append("/?a=").append(WebAction.c.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(Harness.deriveQueryName(customer,
-																module,
-																item,
-																calendarItem.getQueryName(),
-																calendarItem.getDocumentName()));
+			url.append("&q=").append(Harness.deriveQuery(customer,
+															module,
+															item,
+															calendarItem.getQueryName(),
+															calendarItem.getDocumentName()).getName());
         }
         else if (item instanceof TreeItem) {
     		TreeItem treeItem = (TreeItem) item;
     		url.append(Util.getWildcatContextUrl());
     		url.append("/?a=").append(WebAction.t.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(Harness.deriveQueryName(customer,
-																module,
-																item,
-																treeItem.getQueryName(),
-																treeItem.getDocumentName()));
+			url.append("&q=").append(Harness.deriveQuery(customer,
+															module,
+															item,
+															treeItem.getQueryName(),
+															treeItem.getDocumentName()).getName());
         }
         else if (item instanceof MapItem) {
             MapItem mapItem = (MapItem) item;
     		url.append(Util.getWildcatContextUrl());
             url.append("/?a=").append(WebAction.m.toString()).append("&m=").append(module.getName());
-			url.append("&q=").append(Harness.deriveQueryName(customer,
-																module,
-																item,
-																mapItem.getQueryName(),
-																mapItem.getDocumentName()));
+			url.append("&q=").append(Harness.deriveQuery(customer,
+															module,
+															item,
+															mapItem.getQueryName(),
+															mapItem.getDocumentName()).getName());
 			url.append("&b=").append(mapItem.getGeometryBinding());
         }
         else if (item instanceof LinkItem) {

@@ -110,7 +110,7 @@ public class Desktop extends Harness {
 		result.append("<div>");
     	result.append("<table style=\"");
 		result.append("width:100%;background:url(images/bg-body.gif) repeat-x 0 0;");
-    	result.append("\"><tr height=\"46px\"><td><strong>{title}</strong>{link}</td>");
+    	result.append("\"><tr height=\"46px\"><td width=\"1%\"><img style=\"width:32px;height:32px\" src=\"resources?_n={icon}\"/></td><td><strong>{title}</strong>{link}</td>");
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/bizhub_menu_logo.gif\" alt=\"Get Organized\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/help.png\"/></a></td>");
@@ -266,45 +266,56 @@ public class Desktop extends Harness {
 				else {
 					result.append("{name:'");
 					String ref = null;
+					String icon16 = null;
 					if (item instanceof GridItem) {
 						GridItem gridItem = (GridItem) item;
-						result.append(deriveQueryName(customer,
-						                                module,
-						                                item,
-						                                gridItem.getQueryName(),
-						                                gridItem.getDocumentName()));
+						Query query = deriveQuery(customer,
+					                                module,
+					                                item,
+					                                gridItem.getQueryName(),
+					                                gridItem.getDocumentName());
+						result.append(query.getName());
+						icon16 = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName()).getIcon16x16RelativeFileName();
 						ref = "grid";
 					}
 					else if (item instanceof CalendarItem) {
 	                    CalendarItem calendarItem = (CalendarItem) item;
-	                    result.append(deriveQueryName(customer,
-	                                                    module,
-	                                                    item,
-	                                                    calendarItem.getQueryName(),
-	                                                    calendarItem.getDocumentName()));
+						Query query = deriveQuery(customer,
+					                                module,
+					                                item,
+					                                calendarItem.getQueryName(),
+					                                calendarItem.getDocumentName());
+						result.append(query.getName());
+						icon16 = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName()).getIcon16x16RelativeFileName();
 	                    ref = "cal";
 	                }
 	                else if (item instanceof TreeItem) {
 	                    TreeItem treeItem = (TreeItem) item;
-	                    result.append(deriveQueryName(customer,
-	                                                    module,
-	                                                    item,
-	                                                    treeItem.getQueryName(),
-	                                                    treeItem.getDocumentName()));
+						Query query = deriveQuery(customer,
+					                                module,
+					                                item,
+					                                treeItem.getQueryName(),
+					                                treeItem.getDocumentName());
+						result.append(query.getName());
+						icon16 = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName()).getIcon16x16RelativeFileName();
 	                    ref = "tree";
 	                }
 	                else if (item instanceof MapItem) {
 	                    MapItem mapItem = (MapItem) item;
-	                    result.append(deriveQueryName(customer,
-	                                                    module,
-	                                                    item,
-	                                                    mapItem.getQueryName(),
-	                                                    mapItem.getDocumentName()));
+						Query query = deriveQuery(customer,
+					                                module,
+					                                item,
+					                                mapItem.getQueryName(),
+					                                mapItem.getDocumentName());
+						result.append(query.getName());
 	                    result.append('_').append(mapItem.getGeometryBinding());
+						icon16 = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName()).getIcon16x16RelativeFileName();
 	                    ref = "map";
 	                }
 					else if (item instanceof EditItem) {
-						result.append(((EditItem) item).getDocumentName());
+						String documentName = ((EditItem) item).getDocumentName();
+						result.append(documentName);
+						icon16 = module.getDocument(customer, documentName).getIcon16x16RelativeFileName();
 						ref = "edit";
 					}
 					else if (item instanceof LinkItem) {
@@ -332,7 +343,9 @@ public class Desktop extends Harness {
 					result.append(SmartClientGenerateUtils.processString(item.getName()));
 					result.append("',ref:'");
 					result.append(ref);
-					// ,icon:'../images/pooHead.png' - use a document icon here or a  menu/action icon?
+					if (icon16 != null) {
+						result.append("',icon:'../resources?_n=").append(icon16);
+					}
 					// print a comma if not the last module being processed
 					result.append((i < (l - 1)) ? "'},\n" : "'}\n");
 				}

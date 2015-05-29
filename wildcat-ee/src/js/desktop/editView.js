@@ -26,6 +26,7 @@ isc.EditView.addClassProperties({
 });
 // Properties
 // title: null - the title of the view
+// icon: null - the 32x32 icon to display in the heading
 // refreshTimeInSeconds: null - number of seconds until a refresh is required
 // refreshConditionName: null - server-side condition name to enable refresh or not
 // refreshActionName: null - action to run on the server when doing the refresh
@@ -566,7 +567,7 @@ isc.EditView.addMethods({
 		}
 		
 		var header = BizUtil.headerTemplate;
-		header = header.replace('{title}', values._title).replace('{link}', link);
+		header = header.replace('{icon}', this._icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
 
 		// remove the form title so it is not subsequently posted
@@ -1344,6 +1345,7 @@ BizTabPane.addMethods({
 		this.bizTabs.add(bizTab);
 		this.addTab({name: bizTab.name,
 						title: bizTab.title,
+						icon: bizTab.icon,
 						pane: bizTab.pane,
 						disabledConditionName: bizTab.disabledConditionName,
 						invisibleConditionName: bizTab.invisibleConditionName,

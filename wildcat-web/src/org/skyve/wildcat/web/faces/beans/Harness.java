@@ -129,11 +129,11 @@ public abstract class Harness implements Serializable {
 		}
 	}
 	
-	public static String deriveQueryName(Customer customer,
-	                                        Module module,
-                                            MenuItem item,
-                                            String queryName,
-                                            String documentName)
+	public static Query deriveQuery(Customer customer,
+                                        Module module,
+                                        MenuItem item,
+                                        String queryName,
+                                        String documentName)
 	throws MetaDataException {
         Query query = null;
 		if (queryName != null) {
@@ -153,6 +153,6 @@ public abstract class Harness implements Serializable {
             }
         }
 
-        return query.getName();
+        return query;
 	}
 }

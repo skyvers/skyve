@@ -570,6 +570,7 @@
         </xs:sequence>
         <xs:attribute name="type" type="tns:viewType" use="required"/>
         <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
         <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
         <xs:attribute name="refreshIf" type="xs:string"/>
         <xs:attribute name="refreshAction" type="xs:string"/>
@@ -1092,6 +1093,7 @@
       <xs:extension base="tns:container">
         <xs:sequence/>
         <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="icon16x16RelativeFileName" type="xs:string"/>
         <xs:attribute name="disabled" type="xs:string"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="selected" type="xs:string"/>
@@ -1333,8 +1335,8 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="list"/>
       <xs:enumeration value="create"/>
-      <xs:enumeration value="pick"/>
       <xs:enumeration value="params"/>
+      <xs:enumeration value="pick"/>
       <xs:enumeration value="edit"/>
     </xs:restriction>
   </xs:simpleType>
@@ -1349,31 +1351,31 @@
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Delete"/>
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="Edit"/>
       <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="Upload"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="OK"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Add"/>
       <xs:enumeration value="DEFAULTS"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="Remove"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="Add"/>
       <xs:enumeration value="Save"/>
       <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Delete"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="modalWindow"/>
-      <xs:enumeration value="namedFame"/>
-      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="self"/>
+      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="namedFame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

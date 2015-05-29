@@ -173,6 +173,7 @@ BizUtil.addClassProperties({
 										criteriaPolicy: "dropOnChange",
 										title: item.title,
 										modoc: item.modoc,
+										icon: item.icon,
 										canCreate: item.canCreate,
 										canUpdate: item.canUpdate,
 										canDelete: item.canDelete,
@@ -282,6 +283,8 @@ var eventData = [
 			// ensure all queries are performed server-side
 			criteriaPolicy: "dropOnChange",
 			fields: [
+				{name: 'icon', title: 'Icon'},
+				{name: 'doc', title: 'Document'},
 				{name: 'bizKey', title: 'Desciption'},
 // {name: 'lastPost', mapping: 'post_time', type: 'date', dateFormat: 'timestamp'},
 				{name: 'excerpt', title: 'Excerpt'},
@@ -351,8 +354,10 @@ var eventData = [
 		    canPickFields: false,
 		    canSort: false,
 		    fields:[
+				{name: 'icon', type: 'image', align: 'center', imageURLPrefix: '../resources?_n=', width: 30},
+				{name: 'doc', width: '15%'},
 				{name: 'bizKey', width: '30%'},
-				{name: 'excerpt', width: '70%'},
+				{name: 'excerpt', width: '55%'},
 				{name: 'score', width: 75},
 				{name: 'data', width: 40, align: 'center', linkText: 'Data'},
 				{name: 'content', width: 60, align: 'center', linkText: 'Content'}

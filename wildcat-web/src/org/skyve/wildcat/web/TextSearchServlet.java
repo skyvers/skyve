@@ -78,6 +78,8 @@ public class TextSearchServlet extends HttpServlet {
 							// Use JSONUtil here to ensure that everything is escaped properly
 							
 				            Map<String, Object> row = new TreeMap<>();
+				            row.put("icon", document.getIcon16x16RelativeFileName());
+				            row.put("doc", document.getSingularAlias());
 				            row.put(Bean.BIZ_KEY, (bean != null) ? bean.getBizKey() : null);
 				            row.put("excerpt", result.getExcerpt());
 				            row.put("score", new Integer(result.getScore()));

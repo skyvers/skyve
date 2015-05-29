@@ -73,6 +73,12 @@ public interface View extends MetaData, Parameterizable {
 	 * @return
 	 */
 	public String getTitle();
+
+	/**
+	 * 
+	 * @return
+	 */
+	public String getIcon32x32RelativeFileName();
 	
 	/**
 	 * 

@@ -1332,6 +1332,7 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(documentModule.getName());
 		toAppendTo.append('.');
 		toAppendTo.append(documentName);
+		toAppendTo.append("',icon:'").append(document.getIcon32x32RelativeFileName());
 		if (! config) {
 			// ensure all filtering is server-side
 			// this enables the summary row to always stay in sync

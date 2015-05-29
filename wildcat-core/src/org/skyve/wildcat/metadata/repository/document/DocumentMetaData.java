@@ -69,6 +69,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"persistent", 
 							"singularAlias", 
 							"pluralAlias",
+							"icon16x16RelativeFilePath",
+							"icon32x32RelativeFilePath",
 							"shortDescription",
 							"parentDocument", 
 							"bizKey", 
@@ -76,10 +78,15 @@ import org.skyve.wildcat.util.XMLUtil;
 							"conditions", 
 							"uniqueConstraints"})
 public class DocumentMetaData extends NamedMetaData implements PersistentMetaData<Document> {
+	private static final String DEFAULT_DOCUMENT_ICON_16_PATH = "shared/icons/DefaultDocument16x16.png";
+	private static final String DEFAULT_DOCUMENT_ICON_32_PATH = "shared/icons/DefaultDocument32x32.png";
+
 	private Extends inherits;
 	private Persistent persistent;
 	private String singularAlias;
 	private String pluralAlias;
+	private String icon16x16RelativeFilePath;
+	private String icon32x32RelativeFilePath;
 	private String shortDescription;
 	private String parentDocument;
 	private BizKey bizKey;
@@ -122,6 +129,24 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
 	public void setPluralAlias(String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
+	}
+
+	public String getIcon16x16RelativeFilePath() {
+		return icon16x16RelativeFilePath;
+	}
+
+	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
+		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
+	}
+
+	public String getIcon32x32RelativeFilePath() {
+		return icon32x32RelativeFilePath;
+	}
+
+	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
+		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
 	public String getShortDescription() {
@@ -220,6 +245,25 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			throw new MetaDataException(metaDataName + " : The document [pluralAlias] is required");
 		}
 		result.setPluralAlias(value);
+
+		String icon16 = getIcon16x16RelativeFilePath();
+		String icon32 = getIcon32x32RelativeFilePath();
+		if ((icon16 == null) && (icon32 == null)) {
+			icon16 = DEFAULT_DOCUMENT_ICON_16_PATH;
+			icon32 = DEFAULT_DOCUMENT_ICON_32_PATH;
+		}
+		else {
+			if (icon16 == null) {
+				icon16 = icon32;
+			}
+			else if (icon32 == null) {
+				icon32 = icon16;
+			}
+		}
+
+		result.setIcon16x16RelativeFileName(icon16);
+		result.setIcon32x32RelativeFileName(icon32);
+		
 		result.setShortDescription(getShortDescription());
 		
 		result.setParentDocumentName(getParentDocument());

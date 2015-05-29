@@ -25,6 +25,8 @@ public abstract class Model extends AbstractMetaDataMap implements org.skyve.met
 	private Persistent persistent;
 	private Extends inherits;
 	private String pluralAlias;
+	private String icon16x16RelativeFileName;
+	private String icon32x32RelativeFileName;
 	private String name;
 	private String shortDescription;
 
@@ -68,6 +70,24 @@ public abstract class Model extends AbstractMetaDataMap implements org.skyve.met
 
 	public void setSingularAlias(String singularAlias) {
 		this.singularAlias = singularAlias;
+	}
+
+	@Override
+	public String getIcon16x16RelativeFileName() {
+		return icon16x16RelativeFileName;
+	}
+
+	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
+		this.icon16x16RelativeFileName = icon16x16RelativeFileName;
+	}
+
+	@Override
+	public String getIcon32x32RelativeFileName() {
+		return icon32x32RelativeFileName;
+	}
+
+	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
+		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
 	}
 
 	@Override

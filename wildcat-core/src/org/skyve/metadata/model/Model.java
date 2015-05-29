@@ -56,4 +56,8 @@ public interface Model extends NamedMetaData {
 	 * @return
 	 */
 	public Extends getExtends();
+	
+	public String getIcon16x16RelativeFileName();
+
+	public String getIcon32x32RelativeFileName();
 }
