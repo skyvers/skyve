@@ -453,23 +453,27 @@ ReportDialog.addClassProperties({
 	_createReportPanel: function(buttonDefn, // the button to include in the panel
 									formDefn) { // the RHS form
 		return isc.HLayout.create({
+			backgroundImage: 'background.png',
+			backgroundRepeat: 'repeat',
 			membersMargin: 5,
 			margin: 5,
 			layoutAlign: "center",
 			members: [
 				isc.VLayout.create({
+					backgroundImage: 'background.png',
+					backgroundRepeat: 'repeat',
 					width: 120,
-					height: 120,
+					height: 140,
 					layoutAlign: "center",
 					margin: 0,
 					membersMargin: 10,
 					members: [
 						isc.Img.create({
 						    imageType: "normal",
-						    src: "reporting/reporting.jpeg",
+						    src: "reporting/reporting.png",
 						    layoutAlign: "center"
 						}),
-						buttonDefn
+						isc.HLayout.create({width: 134, align: 'center', members: [buttonDefn]})
 					]
 				}),
 				formDefn
@@ -481,6 +485,8 @@ ReportDialog.addClassProperties({
 	_createExport: function() {
 		if (ReportDialog._exportLayout == null) {
 			ReportDialog._exportLayout = isc.VLayout.create({
+				backgroundImage: 'background.png',
+				backgroundRepeat: 'repeat',
 				height: "100%",
 				width: "100%",
 				autoDraw: true,
@@ -533,17 +539,40 @@ ReportDialog.addClassProperties({
 							}
 						}),
 						isc.VLayout.create({
+							backgroundImage: 'background.png',
+							backgroundRepeat: 'repeat',
 							margin: 0,
 							membersMargin: 5,
 							members: [isc.VLayout.create({isGroup: true,
 															groupTitle: 'Report Format',
+															styleName: 'bizhubRoundedBorder',
+															groupBorderCSS: '1px solid #bfbfbf',
+															margin: 1,
+															groupLabelBackgroundColor: 'transparent',
+															groupLabelStyleName:'bizhubBorderLabel',
+															backgroundImage: 'background.png',
+															backgroundRepeat: 'repeat',
 															members: [ReportDialog._reportFormatForm]}), 
 										isc.VLayout.create({isGroup: true,
 																groupTitle: 'Page Format',
+																styleName: 'bizhubRoundedBorder',
+																groupBorderCSS: '1px solid #bfbfbf',
+																margin: 1,
+																groupLabelBackgroundColor: 'transparent',
+																groupLabelStyleName:'bizhubBorderLabel',
+																backgroundImage: 'background.png',
+																backgroundRepeat: 'repeat',
 																members: [ReportDialog._pageFormatForm]}),
 										isc.VLayout.create({isGroup: true,
-																	groupTitle: 'Margins',
-																	members: [ReportDialog._marginsForm]})]
+																groupTitle: 'Margins',
+																styleName: 'bizhubRoundedBorder',
+																groupBorderCSS: '1px solid #bfbfbf',
+																margin: 1,
+																groupLabelBackgroundColor: 'transparent',
+																groupLabelStyleName:'bizhubBorderLabel',
+																backgroundImage: 'background.png',
+																backgroundRepeat: 'repeat',
+																members: [ReportDialog._marginsForm]})]
 						})
 					),
 					ReportDialog._columnSelectorLayout
