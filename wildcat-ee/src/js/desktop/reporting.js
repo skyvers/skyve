@@ -453,23 +453,27 @@ ReportDialog.addClassProperties({
 	_createReportPanel: function(buttonDefn, // the button to include in the panel
 									formDefn) { // the RHS form
 		return isc.HLayout.create({
+			backgroundImage: 'background.png',
+			backgroundRepeat: 'repeat',
 			membersMargin: 5,
 			margin: 5,
 			layoutAlign: "center",
 			members: [
 				isc.VLayout.create({
+					backgroundImage: 'background.png',
+					backgroundRepeat: 'repeat',
 					width: 120,
-					height: 120,
+					height: 140,
 					layoutAlign: "center",
 					margin: 0,
 					membersMargin: 10,
 					members: [
 						isc.Img.create({
 						    imageType: "normal",
-						    src: "reporting/reporting.jpeg",
+						    src: "reporting/reporting.png",
 						    layoutAlign: "center"
 						}),
-						buttonDefn
+						isc.HLayout.create({width: 134, align: 'center', members: [buttonDefn]})
 					]
 				}),
 				formDefn
@@ -481,6 +485,8 @@ ReportDialog.addClassProperties({
 	_createExport: function() {
 		if (ReportDialog._exportLayout == null) {
 			ReportDialog._exportLayout = isc.VLayout.create({
+				backgroundImage: 'background.png',
+				backgroundRepeat: 'repeat',
 				height: "100%",
 				width: "100%",
 				autoDraw: true,
@@ -499,27 +505,6 @@ ReportDialog.addClassProperties({
 										values.criteria = ReportDialog._criteria;
 									}
 
-									// have to request to this setup URL as document.write() doesn't work in IE6
-//									var src = 'setup.rpt' +
-//												'?format=' + ReportDialog._reportFormatForm.getItem("reportFormat").getValue() +
-//												'&values=' + escape(isc.JSON.encode(values, {prettyPrint:false}));
-//									var reportWindow = window.open(src, "report", "location=0,status=0,scrollbars=1,resizable=1,width=800,height=600");
-
-//									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
-//									var src = 'export.' + ReportDialog._reportFormatForm.getItem("reportFormat").getValue() + '?values=' + isc.JSON.encode(values, {prettyPrint:false});
-//									if ((format === 'html') || (format === 'xhtml')) {
-//										window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
-//									}
-//									else {
-//										window.location = encodeURI(src);
-//									}
-//									if ((format === 'html') || (format === 'xhtml')) {
-//										var reportWindow = window.open('', 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
-//									    reportWindow.document.write('<form name="auto" method="post" action="export.' + format + 
-//			    								'"><input name="values" type="hidden" value="' + isc.JSON.encode(values, {prettyPrint:false}).replaceAll('"', '&quot;')
-//			    								 + 
-//			    								'"/></form>\x3Cscript type="text/javascript">\document.forms[0].submit();\x3C/script>');
-//									}
 									// Use a standard form POST, HTML/XHTML targetted to a blank window
 									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
 									var fileNameNoSuffix = ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
@@ -533,17 +518,40 @@ ReportDialog.addClassProperties({
 							}
 						}),
 						isc.VLayout.create({
+							backgroundImage: 'background.png',
+							backgroundRepeat: 'repeat',
 							margin: 0,
 							membersMargin: 5,
 							members: [isc.VLayout.create({isGroup: true,
 															groupTitle: 'Report Format',
+															styleName: 'bizhubRoundedBorder',
+															groupBorderCSS: '1px solid #bfbfbf',
+															margin: 1,
+															groupLabelBackgroundColor: 'transparent',
+															groupLabelStyleName:'bizhubBorderLabel',
+															backgroundImage: 'background.png',
+															backgroundRepeat: 'repeat',
 															members: [ReportDialog._reportFormatForm]}), 
 										isc.VLayout.create({isGroup: true,
 																groupTitle: 'Page Format',
+																styleName: 'bizhubRoundedBorder',
+																groupBorderCSS: '1px solid #bfbfbf',
+																margin: 1,
+																groupLabelBackgroundColor: 'transparent',
+																groupLabelStyleName:'bizhubBorderLabel',
+																backgroundImage: 'background.png',
+																backgroundRepeat: 'repeat',
 																members: [ReportDialog._pageFormatForm]}),
 										isc.VLayout.create({isGroup: true,
-																	groupTitle: 'Margins',
-																	members: [ReportDialog._marginsForm]})]
+																groupTitle: 'Margins',
+																styleName: 'bizhubRoundedBorder',
+																groupBorderCSS: '1px solid #bfbfbf',
+																margin: 1,
+																groupLabelBackgroundColor: 'transparent',
+																groupLabelStyleName:'bizhubBorderLabel',
+																backgroundImage: 'background.png',
+																backgroundRepeat: 'repeat',
+																members: [ReportDialog._marginsForm]})]
 						})
 					),
 					ReportDialog._columnSelectorLayout
