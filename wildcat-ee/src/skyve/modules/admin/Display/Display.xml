@@ -5,4 +5,6 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Display</singularAlias>
 	<pluralAlias>Display</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/chart16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/chart32.png</icon32x32RelativeFilePath>
 </document>

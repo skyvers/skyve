@@ -6,6 +6,8 @@
 	<persistent name="ADM_Contact" />
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/contact16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/contact32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 		  	return modules.admin.Contact.ContactBizlet.bizKey(this);

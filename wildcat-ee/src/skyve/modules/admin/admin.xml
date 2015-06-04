@@ -321,9 +321,10 @@
 		</role>				
 	</roles>
 	<menu>
-		<edit document="ChangePassword" name="Password">
+		<edit document="ChangePassword" name="Password" >
 			<role name="BasicUser" />
 			<role name="ViewUser" />
+			
 		</edit>
 		<edit document="MyContact" name="My Details">
 			<role name="BasicUser" />

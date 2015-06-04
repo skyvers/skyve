@@ -6,6 +6,8 @@
 	<persistent name="ADM_Tag" />
 	<singularAlias>Tag</singularAlias>
 	<pluralAlias>Tags</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/tag16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/tag32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		return (name == null ? "Tag" : name);
 	</bizKey>

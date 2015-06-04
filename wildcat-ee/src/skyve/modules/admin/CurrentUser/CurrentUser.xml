@@ -5,6 +5,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Current User</singularAlias>
 	<pluralAlias>Current Users</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/user32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 			return "Current User";

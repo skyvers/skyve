@@ -13,6 +13,6 @@
 		<row><item><label binding="response" /></item></row>
 	</form>
 	<actions>
-		<action className="MakePasswordChange" displayName="Change Password" toolTip="Change password" />
+		<action className="MakePasswordChange" displayName="Change Password" toolTip="Change password"  />
 	</actions>
 </view>

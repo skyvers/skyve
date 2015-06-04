@@ -6,6 +6,8 @@
 	<persistent name="ADM_SecurityUser" />
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/user32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 			return (getContact() == null) ?

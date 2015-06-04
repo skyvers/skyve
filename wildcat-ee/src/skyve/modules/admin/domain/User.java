@@ -19,11 +19,11 @@ import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
  * User
  * 
  * @depend - - - WizardState
- * @navhas n dataGroup 0..1 DataGroup
- * @navhas n contact 1 Contact
- * @navcomposed 1 roles 0..n UserRole
- * @navhas n groups 0..n Group
  * @navcomposed 1 candidateContacts 0..n UserCandidateContact
+ * @navcomposed 1 roles 0..n UserRole
+ * @navhas n contact 1 Contact
+ * @navhas n groups 0..n Group
+ * @navhas n dataGroup 0..1 DataGroup
  * @stereotype "persistent"
  */
 @XmlType

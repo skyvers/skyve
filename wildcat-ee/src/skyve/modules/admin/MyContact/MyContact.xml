@@ -5,6 +5,8 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>My Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/contact16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/contact32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 		  	return "My Contact Details";

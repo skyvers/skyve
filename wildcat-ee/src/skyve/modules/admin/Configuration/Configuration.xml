@@ -6,6 +6,8 @@
 	<persistent name="ADM_Configuration" />
 	<singularAlias>Setup</singularAlias>
 	<pluralAlias>Setup</pluralAlias>
+	<icon16x16RelativeFilePath>documentIcons/configuration16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>documentIcons/configuration32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 			return "Admin Setup";
