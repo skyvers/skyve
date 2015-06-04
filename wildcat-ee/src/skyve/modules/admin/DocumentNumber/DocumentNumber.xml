@@ -6,9 +6,6 @@
 	<persistent name="ADM_DocumentNumber" />
 	<singularAlias>Document Number</singularAlias>
 	<pluralAlias>Document Numbers</pluralAlias>
-	<icon16x16RelativeFilePath>icons/document/default16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/default32.png</icon32x32RelativeFilePath>
-	
 	<bizKey>
 		<![CDATA[
 			StringBuilder sb = new StringBuilder();
