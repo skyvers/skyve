@@ -6,8 +6,8 @@
 	<persistent name="ADM_DataMaintenance" />
 	<singularAlias>Data Maintenance</singularAlias>
 	<pluralAlias>Data Maintenance</pluralAlias>
-	<icon16x16RelativeFilePath>documentIcons/maintenance16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>documentIcons/maintenance32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/maintenance16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/maintenance32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 			return "Data Maintenance";

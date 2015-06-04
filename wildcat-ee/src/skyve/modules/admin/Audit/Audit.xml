@@ -6,8 +6,8 @@
 	<persistent name="ADM_Audit" />
 	<singularAlias>Audit</singularAlias>
 	<pluralAlias>Audits</pluralAlias>
-	<icon16x16RelativeFilePath>documentIcons/audit16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>documentIcons/audit32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/audit16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/audit32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{auditBizVersion} - {operation} by {userName} at {timestamp}" />
 	<attributes>
 		<text name="auditModuleName" required="true">

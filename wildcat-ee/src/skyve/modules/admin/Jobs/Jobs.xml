@@ -5,8 +5,8 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Jobs</singularAlias>
 	<pluralAlias>Jobs</pluralAlias>
-	<icon16x16RelativeFilePath>documentIcons/job16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>documentIcons/job32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
 	<attributes>
 		<collection name="runningJobs" type="aggregation">
 			<displayName>Running Jobs</displayName>

@@ -567,7 +567,7 @@ isc.EditView.addMethods({
 		}
 		
 		var header = BizUtil.headerTemplate;
-		header = header.replace('{icon}', this._icon).replace('{title}', values._title).replace('{link}', link);
+		header = header.replace('{modoc}', this._mod + '.' + this._doc).replace('{icon}', this._icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
 
 		// remove the form title so it is not subsequently posted

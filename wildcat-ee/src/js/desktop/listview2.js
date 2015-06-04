@@ -104,9 +104,9 @@ ListView.addClassProperties({
 	    }
 	}),
 	
-	_setHeading: function(title, icon) {
+	_setHeading: function(title, icon, modoc) {
 		var header = BizUtil.headerTemplate;
-		header = header.replace('{icon}', icon).replace('{title}', title).replace('{link}', '');
+		header = header.replace('{modoc}', modoc).replace('{icon}', icon).replace('{title}', title).replace('{link}', '');
 		ListView._heading.setContents(header);
 	},
 	
@@ -127,7 +127,8 @@ ListView.addClassProperties({
 		}
 		ListView.contents.hideMember(ListView._portal);
 		ListView.contents.showMember(ListView._grid);
-		ListView._setHeading(ListView._grid.setDataSource(ID), eval(ID + '.icon'));
+		var ds = eval(ID);
+		ListView._setHeading(ListView._grid.setDataSource(ds), ds.icon, ds.modoc);
 	},
 	
 	// set the data source for the list view calendar
@@ -148,8 +149,9 @@ ListView.addClassProperties({
 		ListView.contents.hideMember(ListView._portal);
 		ListView.contents.showMember(ListView._calendar);
 
-		ListView._calendar.setDataSource(ID);
-		ListView._setHeading("NOT IMPLEMENTED", eval(ID + '.icon'));
+		var ds = eval(ID);
+		ListView._calendar.setDataSource(ds);
+		ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
 	},
 	
 	// set the data source for the list view tree
@@ -170,8 +172,9 @@ ListView.addClassProperties({
 		ListView.contents.hideMember(ListView._portal);
 		ListView.contents.showMember(ListView._tree);
 
-		ListView._tree.setDataSource(ID);
-		ListView._setHeading("NOT IMPLEMENTED", eval(ID + '.icon'));
+		var ds = eval(ID);
+		ListView._tree.setDataSource(ds);
+		ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
 	},
 
 	// set the data source for the list view map
@@ -192,8 +195,9 @@ ListView.addClassProperties({
 		ListView.contents.hideMember(ListView._portal);
 		ListView.contents.showMember(ListView._map);
 
-		ListView._map.setDataSource(ID);
-		ListView._setHeading("MAP", eval(ID + '.icon'));
+		var ds = eval(ID);
+		ListView._map.setDataSource(ds);
+		ListView._setHeading("MAP", ds.icon, ds.modoc);
 	},
 	
 	showPortal: function() {
@@ -211,7 +215,7 @@ ListView.addClassProperties({
 		}
 		ListView.contents.showMember(ListView._portal);
 
-		ListView._setHeading("DASHBOARD", "shared/icons/Home.png");
+		ListView._setHeading("DASHBOARD", "shared/icons/Home.png", '');
 	}
 });
 ListView.contents.addMember(ListView._heading);

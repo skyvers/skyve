@@ -6,8 +6,8 @@
 	<persistent name="ADM_DataGroup" />
 	<singularAlias>Data Group</singularAlias>
 	<pluralAlias>Data Groups</pluralAlias>
-	<icon16x16RelativeFilePath>documentIcons/group16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>documentIcons/group32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/group16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 			return (getName()==null?"Datagroup":getName());
