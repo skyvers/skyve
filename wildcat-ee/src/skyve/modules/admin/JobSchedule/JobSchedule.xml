@@ -6,6 +6,8 @@
 	<persistent name="ADM_JobSchedule" />
 	<singularAlias>Job Schedule Entry</singularAlias>
 	<pluralAlias>Job Schedule</pluralAlias>
+	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	</bizKey>
