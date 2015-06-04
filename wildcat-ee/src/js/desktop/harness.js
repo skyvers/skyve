@@ -354,7 +354,7 @@ var eventData = [
 		    canPickFields: false,
 		    canSort: false,
 		    fields:[
-				{name: 'icon', type: 'image', align: 'center', imageURLPrefix: '../resources?_n=', width: 30},
+				{name: 'icon', type: 'image', align: 'center', imageURLPrefix: '../resources', width: 30},
 				{name: 'doc', width: '15%'},
 				{name: 'bizKey', width: '30%'},
 				{name: 'excerpt', width: '55%'},
