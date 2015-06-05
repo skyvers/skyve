@@ -80,6 +80,11 @@ public enum ImplicitActionName {
 	BizExport("Export"),
 	
 	/**
+	 * Create and stream a file for Download
+	 */
+	Download("Download"),
+
+	/**
 	 * Upload and process a file
 	 */
 	Upload("Upload");

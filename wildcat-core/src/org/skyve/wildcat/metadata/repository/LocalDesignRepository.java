@@ -13,6 +13,7 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
+import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
@@ -761,6 +762,14 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(importActionName);
+		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+	}
+
+	@Override
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String uploadActionName) throws MetaDataException {
+		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
+		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
+		fullyQualifiedActionName.append(".actions.").append(uploadActionName);
 		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
 	}
 

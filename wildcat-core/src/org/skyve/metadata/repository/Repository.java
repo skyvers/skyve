@@ -7,6 +7,7 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
+import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
@@ -143,6 +144,17 @@ public interface Repository {
 	 * @throws MetaDataException
 	 */
 	public BizImportAction getBizImportAction(Customer customer, Document document, String className)
+	throws MetaDataException;
+
+	/**
+	 * 
+	 * @param customer
+	 * @param document
+	 * @param className
+	 * @return
+	 * @throws MetaDataException
+	 */
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className)
 	throws MetaDataException;
 
 	/**

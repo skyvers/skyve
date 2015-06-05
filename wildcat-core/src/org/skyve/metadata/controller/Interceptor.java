@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.controller.UploadAction.UploadedFile;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -178,6 +179,25 @@ public abstract class Interceptor implements MetaData {
 	public void afterServerSideAction(Document document, 
 										String actionName, 
 										ServerSideActionResult result, 
+										WebContext webContext)
+	throws Exception {
+		// no-op
+	}
+
+	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforeDownloadAction(Document document, 
+											String actionName,
+											Bean bean, 
+											WebContext webContext)
+	throws Exception {
+		return false;
+	}
+	
+	@SuppressWarnings("unused")
+	public void afterDownloadAction(Document document,
+										String actionName,
+										Bean bean, 
+										Download download, 
 										WebContext webContext)
 	throws Exception {
 		// no-op

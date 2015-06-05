@@ -21,6 +21,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.UploadAction.UploadedFile;
@@ -673,6 +674,30 @@ public class CustomerImpl implements Customer {
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor(this).afterServerSideAction(document, actionName, result, webContext);
+		}
+	}
+
+	public boolean interceptBeforeDownloadAction(Document document,
+													String actionName,
+													Bean bean,
+													WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforeDownloadAction(document, actionName, bean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void interceptAfterDownloadAction(Document document,
+												String actionName,
+												Bean bean,
+												Download download,
+												WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterDownloadAction(document, actionName, bean, download, webContext);
 		}
 	}
 
