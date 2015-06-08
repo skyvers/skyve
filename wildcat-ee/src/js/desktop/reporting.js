@@ -505,7 +505,7 @@ ReportDialog.addClassProperties({
 										values.criteria = ReportDialog._criteria;
 									}
 
-									// Use a standard form POST, HTML/XHTML targetted to a blank window
+									// Use a standard form POST, HTML/XHTML targeted to a blank window
 									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
 									var fileNameNoSuffix = ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
 									ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));

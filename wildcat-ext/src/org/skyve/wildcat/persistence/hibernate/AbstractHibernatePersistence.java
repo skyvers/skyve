@@ -2094,4 +2094,18 @@ t.printStackTrace();
 			}
 		}
 	}
+	
+	/**
+	 * In case of emergency, break glass
+	 */
+	public final EntityManager getEntityManager() {
+		return em;
+	}
+	
+	/**
+	 * In case of emergency, break glass
+	 */
+	public final Session getSession() {
+		return session;
+	}
 }

@@ -29,10 +29,20 @@
         <param-name>javax.faces.PROJECT_STAGE</param-name>
         <param-value>Production</param-value>
     </context-param>
+	<context-param>
+	<param-name>
+			javax.faces.WEBAPP_RESOURCES_DIRECTORY
+		</param-name>
+		<param-value>/WEB-INF/resources</param-value>
+		</context-param>
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
 		<param-value>casablanca</param-value>
+	</context-param>
+	<context-param>
+		<param-name>primefaces.mobile.THEME</param-name>
+		<param-value>water</param-value>
 	</context-param>
 
     <filter>
@@ -287,6 +297,15 @@
 	<servlet-mapping>
 		<servlet-name>BizportExportServlet</servlet-name>
 		<url-pattern>/bizexport.xlsx</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>DownloadServlet</servlet-name>
+		<servlet-class>org.skyve.wildcat.web.DownloadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DownloadServlet</servlet-name>
+		<url-pattern>/download</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

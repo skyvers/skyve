@@ -1577,6 +1577,12 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+		// TODO
+		validateAction(action);
+	}
+
+	@Override
 	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		// TODO
 		validateAction(action);

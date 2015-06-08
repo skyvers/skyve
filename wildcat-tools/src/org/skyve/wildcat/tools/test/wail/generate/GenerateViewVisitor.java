@@ -841,6 +841,12 @@ class GenerateViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		// TODO Auto-generated method stub
 		

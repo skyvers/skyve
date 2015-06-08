@@ -1946,6 +1946,21 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
+		public void visitDownloadAction(ActionImpl action) {
+			addAction(action.getResourceName(),
+						ImplicitActionName.Download,
+						action.getDisplayName(),
+						action.getInActionPanel(),
+						action.getClientValidation(),
+						action.getRelativeIconFileName(),
+						action.getToolTip(),
+						action.getConfirmationText(),
+						action.getParameters(),
+						action.getDisabledConditionName(),
+						action.getInvisibleConditionName());
+		}
+
+		@Override
 		public void visitUploadAction(ActionImpl action) {
 			addAction(action.getResourceName(),
 						ImplicitActionName.Upload,
@@ -2439,7 +2454,7 @@ pickListFields:[{name:'value'}],
 					result.append(implicitName);
 					break;
 				case BizExport:
-					if (! user.canReadDocument(document)) {
+					if (! user.canExecuteAction(document, actionName)) {
 						return null;
 					}
 					if (revisedRelativeIconFileName == null) {
@@ -2449,8 +2464,7 @@ pickListFields:[{name:'value'}],
 					result.append(actionName);
 					break;
 				case BizImport:
-					if ((! user.canCreateDocument(document)) || 
-							(! user.canUpdateDocument(document))) {
+					if (! user.canExecuteAction(document, actionName)) {
 						return null;
 					}
 					if (revisedRelativeIconFileName == null) {
@@ -2459,7 +2473,20 @@ pickListFields:[{name:'value'}],
 					actionType = 'I';
 					result.append(actionName);
 					break;
+				case Download:
+					if (! user.canExecuteAction(document, actionName)) {
+						return null; // cannot execute this action
+					}
+					if (revisedRelativeIconFileName == null) {
+						revisedRelativeIconFileName = "actions/Download.png";
+					}
+					actionType = 'L';
+					result.append(actionName);
+					break;
 				case Upload:
+					if (! user.canExecuteAction(document, actionName)) {
+						return null; // cannot execute this action
+					}
 					if (revisedRelativeIconFileName == null) {
 						revisedRelativeIconFileName = "actions/Upload.png";
 					}

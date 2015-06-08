@@ -17,6 +17,7 @@ import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -50,7 +51,12 @@ public class BizportExportServlet extends HttpServlet {
 					documentName = documentName.substring(dotIndex + 1);
 					Module module = customer.getModule(moduleName);
 					Document document = module.getDocument(customer, documentName);
+
 					String actionName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+					if (! user.canExecuteAction(document, actionName)) {
+						throw new SecurityException(actionName, user.getName());
+					}
+
 					BizExportAction bizPortAction = repository.getBizExportAction(customer, 
 																					document, 
 																					actionName);
@@ -63,7 +69,9 @@ public class BizportExportServlet extends HttpServlet {
 					if (! vetoed) {
 						result = bizPortAction.bizExport(context);
 						customer.interceptAfterBizExportAction(document, actionName, result, context);
-						result.write(baos);
+						if (result != null) {
+							result.write(baos);
+						}
 					}
 		            byte[] bytes = baos.toByteArray();
 		            

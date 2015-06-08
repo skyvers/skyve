@@ -21,6 +21,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -113,6 +114,9 @@ public class FileUpload {
 			Module module = customer.getModule(bean.getBizModule());
 			Document document = module.getDocument(customer, bean.getBizDocument());
 			
+			if (! user.canExecuteAction(document, action)) {
+				throw new SecurityException(action, user.getName());
+			}
 			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
 																			document, 
 																			action);

@@ -2,6 +2,7 @@ package org.skyve.metadata.controller;
 
 import java.io.InputStream;
 
+import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
@@ -24,7 +25,22 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 		private String fileName;
 		private InputStream is;
 		private MimeType mimeType;
+		private Disposition disposition;
 		
+		/**
+		 * 
+		 * @param fileName
+		 * @param is
+		 * @param mimeType
+		 * @param disposition
+		 */
+		public Download(String fileName, InputStream is, MimeType mimeType, Disposition disposition) {
+			this.fileName = fileName;
+			this.is = is;
+			this.mimeType = mimeType;
+			this.disposition = disposition;
+		}
+
 		/**
 		 * 
 		 * @param fileName
@@ -32,9 +48,7 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 		 * @param mimeType
 		 */
 		public Download(String fileName, InputStream is, MimeType mimeType) {
-			this.fileName = fileName;
-			this.is = is;
-			this.mimeType = mimeType;
+			this(fileName, is, mimeType, Disposition.attachment);
 		}
 
 		/**
@@ -83,6 +97,22 @@ public abstract class DownloadAction<T extends Bean> implements MetaData {
 		 */
 		public void setMimeType(MimeType mimeType) {
 			this.mimeType = mimeType;
+		}
+
+		/**
+		 * 
+		 * @return
+		 */
+		public Disposition getDisposition() {
+			return disposition;
+		}
+
+		/**
+		 * 
+		 * @param disposition
+		 */
+		public void setDisposition(Disposition disposition) {
+			this.disposition = disposition;
 		}
 	}
 	

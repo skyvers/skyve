@@ -2057,6 +2057,11 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+		visitActionInternal(action);
+	}
+
+	@Override
 	public void visitUploadAction(ActionImpl action) throws MetaDataException {
 		visitActionInternal(action);
 	}

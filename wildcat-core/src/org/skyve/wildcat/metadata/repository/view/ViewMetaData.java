@@ -27,6 +27,7 @@ import org.skyve.wildcat.metadata.repository.view.actions.CancelAction;
 import org.skyve.wildcat.metadata.repository.view.actions.CustomAction;
 import org.skyve.wildcat.metadata.repository.view.actions.DefaultsAction;
 import org.skyve.wildcat.metadata.repository.view.actions.DeleteAction;
+import org.skyve.wildcat.metadata.repository.view.actions.DownloadAction;
 import org.skyve.wildcat.metadata.repository.view.actions.NewAction;
 import org.skyve.wildcat.metadata.repository.view.actions.OKAction;
 import org.skyve.wildcat.metadata.repository.view.actions.RemoveAction;
@@ -107,6 +108,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 						@XmlElementRef(type = RemoveAction.class),
 						@XmlElementRef(type = ReportAction.class),
 						@XmlElementRef(type = SaveAction.class),
+						@XmlElementRef(type = DownloadAction.class),
 						@XmlElementRef(type = UploadAction.class),
 						@XmlElementRef(type = ZoomOutAction.class)})
 	public List<Action> getActions() {

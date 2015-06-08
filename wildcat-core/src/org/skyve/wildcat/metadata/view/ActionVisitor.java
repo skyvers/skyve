@@ -55,6 +55,7 @@ public abstract class ActionVisitor {
 	public abstract void visitReportAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitBizExportAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitBizImportAction(ActionImpl action) throws MetaDataException;
+	public abstract void visitDownloadAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitUploadAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitNewAction(ActionImpl action) throws MetaDataException;
 	public abstract void visitEditAction(ActionImpl action) throws MetaDataException;
@@ -92,6 +93,7 @@ public abstract class ActionVisitor {
 							(value != ImplicitActionName.Report) && 
 							(value != ImplicitActionName.BizExport) &&
 							(value != ImplicitActionName.BizImport) && 
+							(value != ImplicitActionName.Download) && 
 							(value != ImplicitActionName.Upload) && 
 							(value != ImplicitActionName.Navigate)) {
 						visit(viewType, value, action);
@@ -131,6 +133,9 @@ public abstract class ActionVisitor {
 		}
 		else if (implicitName == ImplicitActionName.BizImport) {
 			visitBizImportAction(action);
+		}
+		else if (implicitName == ImplicitActionName.Download) {
+			visitDownloadAction(action);
 		}
 		else if (implicitName == ImplicitActionName.Upload) {
 			visitUploadAction(action);

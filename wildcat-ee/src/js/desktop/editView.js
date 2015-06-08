@@ -1247,6 +1247,19 @@ BizButton.addMethods({
 					});
 				}
 			}
+			else if (this.type == "L") { // Download Action
+				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
+				if (instance) {
+					var me = this;
+					// apply changes to current form before exporting
+					this._view.saveInstance(null, function() {
+						window.location.assign('download?_n=' + me.actionName + 
+												'&_doc=' + me._view._mod + '.' + me._view._doc + 
+												'&_c=' + instance._c +
+												'&_ctim=' + new Date().getTime());
+					});
+				}
+			}
 			else if (this.type == "U") { // Upload Action
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
 				if (instance) {

@@ -7,7 +7,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "upload")
+@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "download")
 public class DownloadAction extends ClassAction {
 	public DownloadAction() {
 		implicitName = ImplicitActionName.Download;

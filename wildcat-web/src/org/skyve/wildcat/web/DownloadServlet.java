@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -19,6 +20,7 @@ import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -53,6 +55,9 @@ public class DownloadServlet extends HttpServlet {
 					Module module = customer.getModule(moduleName);
 					Document document = module.getDocument(customer, documentName);
 					String actionName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+					if (! user.canExecuteAction(document, actionName)) {
+						throw new SecurityException(actionName, user.getName());
+					}
 					DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
 																						document, 
 																						actionName);
@@ -82,7 +87,13 @@ public class DownloadServlet extends HttpServlet {
 		            if (result != null) {
 						response.setContentType(result.getMimeType().toString());
 						response.setCharacterEncoding(ServletConstants.UTF8);
-						response.setHeader("Content-Disposition", "attachment; filename=\"" + result.getFileName() + '"');
+						StringBuilder header = new StringBuilder(64);
+						Disposition disposition = result.getDisposition();
+						header.append((disposition == null) ? 
+										Disposition.attachment.toString() : 
+										disposition.toString());
+						header.append("; filename=\"").append(result.getFileName()).append('"');
+						response.setHeader("Content-Disposition",  header.toString());
 		            }
 		
 		            response.setContentLength((bytes != null) ? bytes.length : 0);

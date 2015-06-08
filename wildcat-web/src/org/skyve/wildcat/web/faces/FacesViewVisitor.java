@@ -2093,6 +2093,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+		processImplicitAction(action, ImplicitActionName.Download);
+	}
+
+	@Override
 	public void visitNewAction(ActionImpl action) throws MetaDataException {
 //		processImplicitAction(action, ImplicitActionName.New);
 	}
