@@ -31,11 +31,10 @@
 				</td>
 			</tr>
 		</table>
-		<%request.getSession().invalidate();
-
-			%>
-
-
+		<%
+			request.getSession().invalidate();
+			request.logout();
+		%>
 		<form>
 			<table align="center">
 				<tr>
