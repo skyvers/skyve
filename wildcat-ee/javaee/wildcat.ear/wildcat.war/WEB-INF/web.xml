@@ -486,6 +486,8 @@
 			<!-- Secure the Bizport Export Servlet -->
 			<url-pattern>/bizexport.xls</url-pattern>
 			<url-pattern>/bizexport.xlsx</url-pattern>
+			<!-- Secure the Download Servlet -->
+			<url-pattern>/download/*</url-pattern>
 			<!-- Do not Secure trackmate servlet - it handles authentication itself -->
 			<!-- secure the systems JSPs and HTMLs -->
 			<url-pattern>/home.jsp</url-pattern>
