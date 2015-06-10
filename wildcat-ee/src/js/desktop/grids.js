@@ -1090,7 +1090,7 @@ BizListGrid.addMethods({
 	
 			canEditCell: function(rowNum, colNum) {
 				// column zero = tag, column 1 = flag
-				return (! me._disabled) && (colNum > 1);
+				return (! me._disabled) && (colNum > 1) && this.Super("canEditCell", arguments);
 			},
 	
 			fieldStateChanged: function() {
@@ -1615,7 +1615,7 @@ BizDataGrid.addMethods({
 			},
 			
 			canEditCell: function(rowNum, colNum) {
-				return ! me._disabled;
+				return (! me._disabled) && this.Super("canEditCell", arguments);
 			},
 
 			// set the view dirty on the client-side when an edit is made in the data grid
