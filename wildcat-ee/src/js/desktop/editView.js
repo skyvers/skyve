@@ -1575,13 +1575,58 @@ BizComparison.addMethods({
 		    showResizeBar: true
 		});
 
+		var hoverHTML = function(item) {
+			if (item.type != 'boolean') {
+				if (this.diff_match_patch) { // could still be loading the script on demand
+					var newItem = item;
+					var oldItem = item;
+					if (item.name.startsWith('_old_')) {
+						newItem = this.getItem(item.name.substring(5));
+					}
+					else {
+						oldItem = this.getItem('_old_' + item.name);
+					}
+					
+					var newDisplayValue = newItem.getDisplayValue();
+					if (newDisplayValue) {
+						if (newDisplayValue.startsWith('<')) {
+							newDisplayValue = '';
+						}
+					}
+					else {
+						newDisplayValue = '';
+					}
+					var oldDisplayValue = oldItem.getDisplayValue();
+					if (oldDisplayValue) {
+						if (oldDisplayValue.startsWith('<')) {
+							oldDisplayValue = '';
+						}
+					}
+					else {
+						oldDisplayValue = '';
+					}
+					var diffs = this.diff_match_patch.diff_main(oldDisplayValue, newDisplayValue, false);
+					this.diff_match_patch.diff_cleanupEfficiency(diffs);
+					return this.diff_match_patch.diff_prettyHtml(diffs);
+				}
+			}
+			
+			return null;
+		};
+		
 		this._comparisonForm = isc.PropertySheet.create({
 			width: '100%',
 			height: '100%',
-			numCols: me.editable ? 4 : 3,
-			colWidths: me.editable ? [150, '*', 50, '*'] : [150, '*', '*'],
+			numCols: me.editable ? 5 : 4,
+			colWidths: me.editable ? [150, '*', 50, '*', 30] : [150, '*', '*', 30],
 			border: '1px solid #A7ABB4',
+			titleHoverHTML: hoverHTML,
 			fields: []
+		});
+
+		BizUtil.loadJS('desktop/diff_match_patch.js', function() {
+			me._comparisonForm.diff_match_patch = new diff_match_patch();
+			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});
 
 		this.members = [this._comparisonTree, isc.VLayout.create({overflow: 'auto', members: [this._comparisonForm]})];
@@ -1617,9 +1662,9 @@ BizComparison.addMethods({
 		if (this.editable) {
 			fields.add({title: "<<-",
 							type: "button",
-							// start from field 4 (field 0 - 3 are the header fields)
-							// end at fields length - 5 (last 4 fields are spacers and the apply button) {4 + 1 (for last _old_ field)}
-							click: "for (var i = 4; i < form.getFields().length - 5; i += 3) {var old = form.getField(i + 2).getValue(); form.getField(i).setValue(old ? old : '')}",
+							// start from field 5 (field 0 - 4 are the header fields)
+							// end at fields length - 4 (last 3 fields are spacers and the apply button) {3 + 1 (for last _old_ field)}
+							click: "for (var i = 5; i < form.getFields().length - 4; i += 4) {var old = form.getField(i + 2).getValue();form.getField(i).setValue(old ? old : '')}",
 							startRow: false,
 							endRow: false,
 							align: 'center',
@@ -1628,7 +1673,8 @@ BizComparison.addMethods({
 							textBoxStyle:null});
 		}
 		fields.add({type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Old', startRow: false, endRow: false, cellStyle:"propSheetTitle"});
-					
+		fields.add({type: 'blurb', align: 'center', colSpan: 1, defaultValue: 'Diff', startRow: false, endRow: false, cellStyle:"propSheetTitle"});
+		
 		for (var i = 0; i < properties.length; i++) {
 			var name = properties[i].name;
 			var title = properties[i].title;
@@ -1675,17 +1721,28 @@ BizComparison.addMethods({
 			}
 			
 			fields.add(oldField);
+
+			fields.add({title: "...",
+	    		 type: "button",
+	    		 click: "isc.say(form.titleHoverHTML(form.getField('" + name + "')),null,{title:'Diff'})",
+	    		 align: 'center',
+	    		 startRow: false,
+	    		 endRow: false,
+	    		 cellStyle:"propSheetValue",
+	    		 titleStyle:null,
+	    		 textBoxStyle:null
+			});
 		}
 		
 		if (this.editable) {
-			fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
-			fields.add({type: 'spacer', colSpan: 3, cellStyle: null, titleStyle: null, textBoxStyle: null});
+			fields.add({type: 'spacer', colSpan: 5, cellStyle: null, titleStyle: null, textBoxStyle: null});
 			fields.add({
 				title: "Apply Changes",
 				type: "button",
+				colSpan: 4,
 				startRow: false,
-				endRow: false,
-				align: 'center',
+				endRow: true,
+				align: 'right',
 				cellStyle: null,
 				titleStyle: null,
 				textBoxStyle:null,
@@ -1696,11 +1753,11 @@ BizComparison.addMethods({
 						var property = properties[i];
 						property.newValue = values[property.name];
 					}
-					isc.showPrompt("Changes Applied");
+					isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
 					Timer.setTimeout("isc.clearPrompt()", 500);
 				}
 			});
-			fields.add({type: 'spacer', colSpan: 4, cellStyle: null, titleStyle: null, textBoxStyle: null});
+			fields.add({type: 'spacer', colSpan: 5, cellStyle: null, titleStyle: null, textBoxStyle: null});
 		}
 		
 //alert(isc.JSON.encode(fields, {prettyPrint:false}));
