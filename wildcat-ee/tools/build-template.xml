@@ -104,7 +104,7 @@
 			<fileset dir="${wildcat-war-path}/wicket" includes="**" />
 		</copy>
 		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/desktop" includes="**.xhtml,**-min.js" />
+			<fileset dir="${wildcat-war-path}/desktop" includes="**.xhtml,**-min.js,diff_match_patch.js" />
 		</copy>
 		<copy todir="${war-path}/public" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/public" includes="**" />
