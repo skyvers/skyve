@@ -167,7 +167,7 @@ public class FacesView<T extends Bean> extends Harness {
 		
 		FacesContext c = FacesContext.getCurrentInstance();
 		if (c.getMessageList().isEmpty()) {
-			c.addMessage(null, new FacesMessage("Saved"));
+			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
 		}
 	}
 	
