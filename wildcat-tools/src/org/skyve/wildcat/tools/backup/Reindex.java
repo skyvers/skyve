@@ -9,7 +9,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.DocumentQueryImpl;
+import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class Reindex {
@@ -28,7 +28,7 @@ public class Reindex {
 							// may need to have nodes deleted
 							// (ie, a document field used to be indexed but now is not)
 							UtilImpl.LOGGER.info("Reindex document " + module.getName() + '.' + documentName);
-							DocumentQueryImpl query = new DocumentQueryImpl(document);
+							AbstractDocumentQuery query = new AbstractDocumentQuery(document);
 							for (Bean bean : persistence.iterate(query)) {
 								persistence.reindex((PersistentBean) bean);
 								persistence.evictCached(bean);

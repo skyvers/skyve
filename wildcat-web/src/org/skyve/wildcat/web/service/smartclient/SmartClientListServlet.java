@@ -50,7 +50,7 @@ import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.DocumentQueryImpl;
+import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.TagUtil;
 import org.skyve.wildcat.util.UtilImpl;
@@ -369,12 +369,12 @@ public class SmartClientListServlet extends HttpServlet {
 		List<Bean> beans = persistence.retrieve(detailQuery, new Integer(startRow), new Integer(endRow - startRow));
 		if (summaryType == null) {
 			try {
-    			summaryQuery = ((DocumentQueryImpl) detailQuery).clone();
+    			summaryQuery = ((AbstractDocumentQuery) detailQuery).clone();
     		} 
     		catch (CloneNotSupportedException e) {
     			throw new DomainException("Could not clone the detailQuery to make a summaryQuery");
     		}
-			DocumentQueryImpl internalSummaryQuery = (org.skyve.wildcat.persistence.DocumentQueryImpl) summaryQuery;
+			AbstractDocumentQuery internalSummaryQuery = (org.skyve.wildcat.persistence.AbstractDocumentQuery) summaryQuery;
 			internalSummaryQuery.clearProjections();
 			internalSummaryQuery.clearOrderings();
 		}

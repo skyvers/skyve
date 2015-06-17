@@ -11,7 +11,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.SQLImpl;
+import org.skyve.wildcat.persistence.AbstractSQL;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
@@ -39,7 +39,7 @@ public class Truncate {
 					sql.setLength(sql.length() - 1); // remove the comma
 
 					BackupUtil.secureSQL(sql, table, customerName);
-					persistence.executeInsecureSQLDML(new SQLImpl(sql.toString()));
+					persistence.executeInsecureSQLDML(new AbstractSQL(sql.toString()));
 				}
 			}
 
@@ -50,7 +50,7 @@ public class Truncate {
 					sql.append("delete from ").append(table.name);
 					BackupUtil.secureSQL(sql, table, customerName);
 					UtilImpl.LOGGER.info("delete table " + table.name);
-					persistence.executeInsecureSQLDML(new SQLImpl(sql.toString()));
+					persistence.executeInsecureSQLDML(new AbstractSQL(sql.toString()));
 				}
 			}
 			
@@ -63,7 +63,7 @@ public class Truncate {
 				sql.append("delete from ").append(table.name);
 				BackupUtil.secureSQL(sql, table, customerName);
 				UtilImpl.LOGGER.info("delete table " + table.name);
-				persistence.executeInsecureSQLDML(new SQLImpl(sql.toString()));
+				persistence.executeInsecureSQLDML(new AbstractSQL(sql.toString()));
 			}
 		}
 		finally {
