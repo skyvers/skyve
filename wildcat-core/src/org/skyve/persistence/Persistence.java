@@ -185,6 +185,21 @@ public interface Persistence extends Serializable {
 	 * @param query
 	 * @return
 	 */
+	public SQL newSQL(String moduleName, String documentName, String query);	
+
+	
+	/**
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public SQL newSQL(Document document, String query);	
+
+	/**
+	 * 
+	 * @param query
+	 * @return
+	 */
 	public BizQL newBizQL(String query);	
 	
 	/**

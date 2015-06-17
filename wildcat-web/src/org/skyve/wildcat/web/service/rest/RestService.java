@@ -158,7 +158,9 @@ public class RestService {
 		    	persistence.setUser(user);
 		    	
 		    	DocumentQuery q = persistence.newDocumentQuery(module, document);
-		    	List<Bean> beans = persistence.retrieve(q, Integer.valueOf(start), Integer.valueOf(end - start - 1));
+		    	q.setFirstResult(start);
+		    	q.setMaxResults(end - start - 1);
+		    	List<Bean> beans = q.projectedResults();
 		    	for (Bean bean : beans) {
 		    		Util.populateFully(bean);
 		    	}

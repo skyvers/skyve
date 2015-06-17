@@ -120,7 +120,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 			}
 			
 			//add values to tagged			
-			List<Bean> matches = persistence.retrieve(q);
+			List<Bean> matches = q.projectedResults();
 			for(Bean b:matches){
 				Integer numberMatched = tag.getNumberMatched();
 				tag.setNumberMatched((numberMatched == null) ? Integer.valueOf(1) : Integer.valueOf(numberMatched.intValue() + 1));
@@ -141,7 +141,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 					qTagged.getFilter().addEquals(Tagged.taggedDocumentPropertyName, tag.getDocumentName());
 					qTagged.getFilter().addEquals(Tagged.taggedBizIdPropertyName, b.getBizId());
 					
-					List<Tagged> taggeds = persistence.retrieve(qTagged);
+					List<Tagged> taggeds = qTagged.beanResults();
 					for(Tagged tagged: taggeds){
 						persistence.delete(docTagged, tagged);
 						Integer numberTagged = tag.getNumberTagged();

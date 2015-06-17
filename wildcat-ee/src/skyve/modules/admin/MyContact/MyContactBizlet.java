@@ -27,7 +27,7 @@ public class MyContactBizlet extends Bizlet<MyContact> {
 		DocumentQuery q = pers.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 		q.getFilter().addEquals(Bean.DOCUMENT_ID, pers.getUser().getContactId());
 		
-		List<Contact> contacts= pers.retrieve(q);
+		List<Contact> contacts = q.beanResults();
 		if(!contacts.isEmpty()){
 			bean.setMyContact(contacts.get(0));
 		}

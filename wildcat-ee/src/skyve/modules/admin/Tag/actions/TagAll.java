@@ -39,7 +39,7 @@ public class TagAll implements ServerSideAction<Tag> {
 		
 		DocumentQuery q = pers.newDocumentQuery(bean.getModuleName(), bean.getDocumentName());
 		
-		List<Bean> beans = pers.retrieve(q);
+		List<Bean> beans = q.projectedResults();
 		for(Bean b: beans){
 			//add bean to tagged
 			Tagged tagged = docTagged.newInstance(user);

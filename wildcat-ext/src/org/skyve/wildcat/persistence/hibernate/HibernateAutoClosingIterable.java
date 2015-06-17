@@ -74,11 +74,13 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 
 			Object[] tuple = results.get();
 
-			if (tuple.length == 1) {
-				result = (Z) tuple[0];
-			}
-			else if (moduleName == null) {
-				result = (Z) tuple;
+			if (moduleName == null) {
+				if (tuple.length == 1) {
+					result = (Z) tuple[0];
+				}
+				else {
+					result = (Z) tuple;
+				}
 			}
 			else {
 				Map<String, Object> properties = new TreeMap<>();

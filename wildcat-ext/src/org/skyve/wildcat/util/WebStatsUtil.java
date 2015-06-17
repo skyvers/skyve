@@ -70,7 +70,7 @@ public class WebStatsUtil {
 			sql.putParameter("year", year);
 			sql.putParameter("userName", user.getName());
 			sql.putParameter("customer", user.getCustomer().getName());
-			List<Object> results = persistence.retrieveInsecureSQL(sql);
+			List<String> results = sql.scalarResults(String.class);
 			if (results.isEmpty()) {
 				query.setLength(0);
 				query.append("insert into ").append(ADM_UserMonthlyHits);
@@ -86,7 +86,7 @@ public class WebStatsUtil {
 				sql.putParameter("month", month);
 				sql.putParameter("bizKey", "bizKey");
 				
-				persistence.executeInsecureSQLDML(sql);
+				sql.execute();
 			}
 			else {
 				query.setLength(0);
@@ -95,7 +95,7 @@ public class WebStatsUtil {
 				query.append("where bizId = :bizId");
 				sql = persistence.newSQL(query.toString());
 				sql.putParameter(Bean.DOCUMENT_ID, results.get(0));
-				persistence.executeInsecureSQLDML(sql);
+				sql.execute();
 			}
 		}
 		catch (Exception e) {

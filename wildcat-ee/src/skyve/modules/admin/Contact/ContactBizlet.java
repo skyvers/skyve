@@ -79,7 +79,7 @@ public class ContactBizlet extends Bizlet<Contact> {
 			DocumentQuery qUser = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 			qUser.getFilter().addEquals(Binder.createCompoundBinding(User.contactPropertyName, Bean.DOCUMENT_ID), contactBizId);
 			
-			List<User> users = pers.retrieve(qUser);
+			List<User> users = qUser.beanResults();
 			if (users.size() > 0) {
 				User user = users.get(0);
 				if (!ModulesUtil.bothNullOrEqual(contactBizDataGroupId, user.getBizDataGroupId())) {
@@ -90,7 +90,7 @@ public class ContactBizlet extends Bizlet<Contact> {
 					DocumentQuery qDG = pers.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 					qDG.getFilter().addEquals(Bean.DATA_GROUP_ID, contactBizDataGroupId);
 
-					DataGroup dg = (DataGroup) pers.retrieve(qDG).get(0);
+					DataGroup dg = qDG.beanResult();
 					user.setDataGroup(dg);
 
 					// save User

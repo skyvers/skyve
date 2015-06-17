@@ -54,7 +54,7 @@ public class Check implements ServerSideAction<User> {
 			searchEmail = searchEmail.replace(' ', '%').replace('@', '%');
 			DocumentQuery q = persistence.newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 			q.getFilter().addLike(Contact.email1PropertyName, searchEmail);
-			List<Contact> emailMatches = persistence.retrieve(q);
+			List<Contact> emailMatches = q.beanResults();
 			for (Contact emailMatch : emailMatches) {
 				distinctContacts.put(emailMatch, Integer.valueOf(1));
 			}

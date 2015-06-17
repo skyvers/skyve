@@ -71,7 +71,8 @@ public class AuditBizlet extends Bizlet<Audit> {
 			}
 			q.addOrdering(Audit.auditBizVersionPropertyName, SortDirection.descending);
 			
-			List<Bean> versions = p.retrieve(q, Integer.valueOf(0), Integer.valueOf(100));
+			q.setFirstResult(0).setMaxResults(100);
+			List<Bean> versions = q.projectedResults();
 			result = new ArrayList<>(versions.size());
 			for (Bean version : versions) {
 				result.add(new DomainValue((String) Binder.get(version, Bean.DOCUMENT_ID),

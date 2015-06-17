@@ -8,7 +8,6 @@ import org.skyve.metadata.module.query.Query;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
-import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 
@@ -27,7 +26,7 @@ public class GetBeansAction extends FacesAction<List<Bean>> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetBeansAction - bizModule=" + bizModule + " : queryName=" + queryName);
 
 		Query query = ActionUtil.getQuery(bizModule, queryName);
-		DocumentQuery documentQuery = query.constructDocumentQuery(null, null);
+		DocumentQuery documentQuery = query.constructDocumentQuery(null, null).setFirstResult(0).setMaxResults(250);
 		
 		if (parameters != null) {
 			StringBuilder substring = new StringBuilder(32);
@@ -39,10 +38,6 @@ public class GetBeansAction extends FacesAction<List<Bean>> {
 			}
 		}
 
-		AbstractPersistence persistence = AbstractPersistence.get();
-		return persistence.retrieve(documentQuery,
-										Integer.valueOf(0),
-										Integer.valueOf(250));
+		return documentQuery.projectedResults();
 	}
-
 }

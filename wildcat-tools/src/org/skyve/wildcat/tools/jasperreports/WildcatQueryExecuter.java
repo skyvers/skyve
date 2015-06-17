@@ -43,7 +43,7 @@ public class WildcatQueryExecuter implements JRQueryExecuter {
 			DocumentQuery documentQuery = query.constructDocumentQuery(null, null);
 			Persistence persistence = CORE.getPersistence();
 			return new WildcatDataSource(persistence.getUser(),
-											persistence.iterate(documentQuery).iterator());
+											documentQuery.projectedIterable().iterator());
         }
         catch (Exception e) {
         	throw new JRException("Could not create a BizHubQueryDataSource for " + moduleDotQuery, e);

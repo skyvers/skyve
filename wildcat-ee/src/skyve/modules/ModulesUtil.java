@@ -620,7 +620,7 @@ public class ModulesUtil {
 			qN.getFilter().addEquals(DocumentNumber.documentNamePropertyName, documentName);
 			qN.getFilter().addEquals(DocumentNumber.sequenceNamePropertyName, fieldName);
 
-			List<DocumentNumber> num = pers.retrieve(qN);
+			List<DocumentNumber> num = qN.beanResults();
 			if (num.isEmpty()) {
 
 				// System.out.println("DOCUMENT NUMBER: No previous found - source from table");
@@ -639,7 +639,7 @@ public class ModulesUtil {
 					DocumentQuery query = pers.newDocumentQuery(moduleName, documentName);
 					query.addAggregateProjection(AggregateFunction.Max, fieldName, "MaxNumber");
 
-					List<Bean> beans = pers.retrieve(query);
+					List<Bean> beans = query.projectedResults();
 					if (!beans.isEmpty()) {
 						Object o = Binder.get(beans.get(0), "MaxNumber");
 						if (o instanceof Integer) {
@@ -1012,7 +1012,7 @@ public class ModulesUtil {
 			// filter for this project if provided
 			query.getFilter().addEquals(Bean.DOCUMENT_ID, b.getBizId());
 		}
-		bgBean.generateData(result, persistence.retrieve(query));
+		bgBean.generateData(result, query.beanIterable());
 
 		return result;
 	}
@@ -1062,7 +1062,7 @@ public class ModulesUtil {
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery qBean = persistence.newDocumentQuery(moduleName, documentName);
 		qBean.getFilter().addEquals(propertyName, objValue);
-		List<Bean> beans = persistence.retrieve(qBean);
+		List<Bean> beans = qBean.beanResults();
 		Bean bean = null;
 		if (!beans.isEmpty()) {
 			bean = beans.get(0);

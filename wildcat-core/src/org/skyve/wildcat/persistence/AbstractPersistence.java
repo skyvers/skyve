@@ -108,39 +108,6 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean) 
 	throws DomainException, MetaDataException;
 
-/*	
-	@Override
-	public SQL newSQL(String query) {
-		return new AbstractSQL(query);
-	}
-
-	@Override
-	public BizQL newBizQL(String query) {
-		return new AbstractBizQL(query);
-	}
-
-	@Override
-	public DocumentQuery newDocumentQuery(Document document) {
-		return new AbstractDocumentQuery(document);
-	}
-
-	@Override
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName)
-	throws MetaDataException {
-		return new AbstractDocumentQuery(moduleName, documentName);
-	}
-	
-	@Override
-	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause) {
-		return new AbstractDocumentQuery(document, fromClause, filterClause);
-	}
-
-	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
-	throws Exception {
-		return new AbstractDocumentQuery(queryByExampleBean);
-	}
-*/
 	@Override
 	public final <T extends PersistentBean> T save(T bean)
 	throws DomainException, MetaDataException {

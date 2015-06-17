@@ -118,7 +118,7 @@ public final class TagUtil {
 		deleteStatement.putParameter("taggedDocument", taggedDocumentName);
 		deleteStatement.putParameter("taggedBizId", taggedBizId);
 
-		persistence.executeDML(deleteStatement);
+		deleteStatement.execute();
 	}
 
 	/**
@@ -162,7 +162,7 @@ public final class TagUtil {
         query.getFilter().addEquals("name", tagName);
         query.getFilter().addEquals(Bean.USER_ID, user.getId());
 
-        List<Bean> results = persistence.retrieve(query);
+        List<Bean> results = query.projectedResults();
         String result = null;
         if (! results.isEmpty()) {
         	result = (String) BindUtil.get(results.get(0), Bean.DOCUMENT_ID);
@@ -182,7 +182,7 @@ public final class TagUtil {
         query.getFilter().addEquals(Bean.USER_ID, user.getId());
         query.addOrdering("name");
         
-        List<Bean> tags = persistence.retrieve(query);
+        List<Bean> tags = query.projectedResults();
         List<DomainValue> result = new ArrayList<>(tags.size());
         for (Bean tag : tags) {
             result.add(new DomainValue(tag.getBizId(), (String) BindUtil.get(tag, "name")));
@@ -256,7 +256,7 @@ public final class TagUtil {
 		deleteStatement.putParameter("tagId", tagId);
 		deleteStatement.putParameter("bizUserId", user.getId());
 
-		persistence.executeDML(deleteStatement);
+		deleteStatement.execute();
 	}
 
 	private static class TaggedIterable implements Iterable<Bean> {
@@ -353,6 +353,6 @@ public final class TagUtil {
 		query.putParameter("tagId", tagId);
 		query.putParameter("bizUserId", user.getId());
 
-		return new TaggedIterable(persistence.iterate(query).iterator());
+		return new TaggedIterable(query.projectedIterable().iterator());
 	}
 }

@@ -39,9 +39,9 @@ public abstract class AbstractQuery implements Query {
 	public abstract String toQueryString();
 
 	@Override
-	public final <T extends Bean> T beanResult(Class<T> type)
+	public final <T extends Bean> T beanResult()
 	throws DomainException {
-		List<T> results = beanResults(type);
+		List<T> results = beanResults();
 		if (results.size() == 1) {
 			return results.get(0);
 		}

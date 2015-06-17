@@ -11,7 +11,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernatespatial.GeometryUserType;
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.domain.MapBean;
@@ -40,9 +39,14 @@ class HibernateQueryDelegate {
 	}
 	
 	Query createHibernateQuery(AbstractQuery query) {
-		
+		// This needs to be be before we set the driving document (below)
+		// as it sets the driving document in a BizQL
 		String queryString = query.toQueryString();
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(queryString + " executed on thread " + Thread.currentThread());
+
+		drivingModuleName = query.getDrivingModuleName();
+		drivingDocumentName = query.getDrivingDocumentName();
+		
 
 		Query result = session.createQuery(queryString);
 		if (firstResult >= 0) {
@@ -68,16 +72,17 @@ class HibernateQueryDelegate {
 		return result;
 	}
 	
-	<T> List<T> list(Query query, boolean asIs)
-	throws DomainException {
-		return list(null, null, query, asIs);
-	}
-	
 	@SuppressWarnings("unchecked")
-	<T> List<T> list(String drivingModuleName, String drivingDocumentName, Query query, boolean asIs)
+	<T> List<T> list(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple)
 	throws DomainException {
 		try {
 			if (asIs) {
+				if (assertSingle && (query.getReturnAliases().length != 1)) {
+					throw new DomainException("There should be only 1 projected value in the query");
+				}
+				else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
+					throw new DomainException("There should be more than 1 projected value in the query");
+				}
 				return query.list();
 			}
 
@@ -91,29 +96,24 @@ class HibernateQueryDelegate {
 			List<T> beans = new ArrayList<>(results.size());
 
 			for (Object result : results) {
-				if (result instanceof Bean) {
-					beans.add((T) result);
+				Map<String, Object> properties = new TreeMap<>();
+
+				if (result instanceof Object[]) {
+					Object[] resultArray = (Object[]) result;
+
+					int index = 0;
+					while (index < aliases.length) {
+						properties.put(aliases[index], resultArray[index]);
+						index++;
+					}
 				}
 				else {
-					Map<String, Object> properties = new TreeMap<>();
-
-					if (result instanceof Object[]) {
-						Object[] resultArray = (Object[]) result;
-
-						int index = 0;
-						while (index < aliases.length) {
-							properties.put(aliases[index], resultArray[index]);
-							index++;
-						}
-					}
-					else {
-						properties.put(aliases[0], result);
-					}
-
-					beans.add((T) new MapBean(drivingModuleName, 
-												drivingDocumentName, 
-												properties));
+					properties.put(aliases[0], result);
 				}
+
+				beans.add((T) new MapBean(drivingModuleName, 
+											drivingDocumentName, 
+											properties));
 			}
 
 			return beans;
@@ -123,32 +123,45 @@ class HibernateQueryDelegate {
 		}
 	}
 
-	public <T> AutoClosingIterable<T> iterate(AbstractQuery query, boolean asIs)
+	<T> AutoClosingIterable<T> iterate(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple)
 	throws DomainException {
 		try {
-			Query hibernateQuery = createHibernateQuery(query);
-
-			ScrollableResults results = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			if (asIs) {
-				return new HibernateAutoClosingIterable<>(null, 
-															null, 
-															results, 
-															null);
+				if (assertSingle && (query.getReturnAliases().length != 1)) {
+					throw new DomainException("There should be only 1 projected value in the query");
+				}
+				else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
+					throw new DomainException("There should be more than 1 projected value in the query");
+				}
+				return new HibernateAutoClosingIterable<>(results);
 			}
 
 			// Replace bogus _ property names with the dot
-			String[] aliases = hibernateQuery.getReturnAliases().clone();
+			String[] aliases = query.getReturnAliases().clone();
 			for (int i = 0, length = aliases.length; i < length; i++) {
 				aliases[i] = aliases[i].replace('_', '.');
 			}
 
-			return new HibernateAutoClosingIterable<>(query.getDrivingModuleName(), 
-															query.getDrivingDocumentName(), 
-															results, 
-															aliases);
+			return new HibernateAutoClosingIterable<>(drivingModuleName, 
+														drivingDocumentName, 
+														results, 
+														aliases);
 		}
 		catch (Exception e) {
 			throw new DomainException(e);
 		}
+	}
+	
+	int execute(AbstractQuery query) {
+		Query hibernateQuery = session.createQuery(query.toQueryString());
+		Map<String, Object> parameters = query.getParameters();
+		if (parameters != null) {
+			for (Entry<String, Object> entry : parameters.entrySet()) {
+				hibernateQuery.setParameter(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return hibernateQuery.executeUpdate();
 	}
 }

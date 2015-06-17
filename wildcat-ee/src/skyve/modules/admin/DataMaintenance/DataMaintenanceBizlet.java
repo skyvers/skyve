@@ -27,7 +27,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 		DataMaintenance result = bean;
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery q = persistence.newDocumentQuery(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
-		List<DataMaintenance> d = persistence.retrieve(q);
+		List<DataMaintenance> d = q.beanResults();
 		if (d.size() > 0) {
 			result = d.get(0);
 		}

@@ -50,7 +50,7 @@ public class OfficeMap extends MapModel<Office> {
 			Persistence p = CORE.getPersistence();
 			DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 			q.getFilter().addEquals(Staff.baseOfficePropertyName, office);
-			List<Staff> staff = p.retrieve(q);
+			List<Staff> staff = q.beanResults();
 			for (Staff member : staff) {
 				MapItem item = new MapItem();
 				item.setBizId(member.getBizId());

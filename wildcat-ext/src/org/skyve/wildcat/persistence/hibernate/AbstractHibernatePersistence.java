@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -69,7 +68,6 @@ import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.tool.hbm2ddl.TableMetadata;
 import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
-import org.hibernatespatial.GeometryUserType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
@@ -101,7 +99,6 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
@@ -111,7 +108,6 @@ import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.BeanContent;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.MapBean;
 import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.customer.CustomerImpl.ExportedReference;
@@ -122,13 +118,9 @@ import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.AbstractBizQL;
-import org.skyve.wildcat.persistence.AbstractSQL;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.ValidationUtil;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
@@ -1883,7 +1875,7 @@ t.printStackTrace();
 		}
 
 		// execute it
-		executeInsecureSQLDML(sql);
+		sql.execute();
 	}
 
 	@Override
@@ -1913,7 +1905,7 @@ t.printStackTrace();
 			sql.putParameter("owner_id", owningBean.getBizId());
 			sql.putParameter("element_id", elementBean.getBizId());
 
-			boolean notExists = retrieveInsecureSQL(sql).isEmpty();
+			boolean notExists = sql.tupleResults().isEmpty();
 			query.setLength(0);
 			if (notExists) {
 				query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
@@ -1923,7 +1915,7 @@ t.printStackTrace();
 				sql.putParameter("owner_id", owningBean.getBizId());
 				sql.putParameter("element_id", elementBean.getBizId());
 
-				executeInsecureSQLDML(sql);
+				sql.execute();
 				query.setLength(0);
 			}
 		}
@@ -1946,6 +1938,16 @@ t.printStackTrace();
 	@Override
 	public SQL newSQL(String query) {
 		return new HibernateSQL(query, this);
+	}
+
+	@Override
+	public SQL newSQL(String moduleName, String documentName, String query) {
+		return new HibernateSQL(moduleName, documentName, query, this);
+	}
+
+	@Override
+	public SQL newSQL(Document document, String query) {
+		return new HibernateSQL(document, query, this);
 	}
 
 	@Override

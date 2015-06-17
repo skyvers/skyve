@@ -78,55 +78,64 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults(Class<T> type) {
+	public <T extends Bean> List<T> beanResults()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable(Class<T> type) {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults() {
+	public <T extends Bean> List<T> projectedResults()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public <T> List<T> scalarResults(Class<T> type)
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public List<Object[]> tupleResults() {
+	public List<Object[]> tupleResults()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public AutoClosingIterable<Object[]> tupleIterable()
+	throws DomainException {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public int execute() {
+	public int execute()
+	throws DomainException {
 		// No-op
 		return 0;
 	}

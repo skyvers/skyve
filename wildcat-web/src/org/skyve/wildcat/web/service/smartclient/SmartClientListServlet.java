@@ -366,7 +366,9 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 		}
 
-		List<Bean> beans = persistence.retrieve(detailQuery, new Integer(startRow), new Integer(endRow - startRow));
+		detailQuery.setFirstResult(startRow);
+		detailQuery.setMaxResults(endRow - startRow);
+		List<Bean> beans = detailQuery.projectedResults();
 		if (summaryType == null) {
 			try {
     			summaryQuery = ((AbstractDocumentQuery) detailQuery).clone();
@@ -387,7 +389,7 @@ public class SmartClientListServlet extends HttpServlet {
 		summaryQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, Bean.DOCUMENT_ID);
 		summaryQuery.addAggregateProjection(AggregateFunction.Min, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
 		
-		Bean summaryBean = persistence.retrieve(summaryQuery).get(0);
+		Bean summaryBean = summaryQuery.projectedResults().get(0);
 		if (includeExtraSummaryRow) {
 			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
@@ -1192,7 +1194,7 @@ System.out.println(criterium);
 
 		// return the updated row
 		
-		pw.append(returnUpdatedMessage(customer, module, document, bizId, query, tagId, rowIsTagged, persistence));
+		pw.append(returnUpdatedMessage(customer, module, document, bizId, query, tagId, rowIsTagged));
 	}
 
 	private static void tag(Customer customer,
@@ -1239,8 +1241,7 @@ System.out.println(criterium);
 												String bizId,
 												Query query, 
 												String tagId,
-												boolean rowIstagged,
-												AbstractPersistence persistence)
+												boolean rowIstagged)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{response:{status:0,data:");
@@ -1273,7 +1274,7 @@ System.out.println(criterium);
 		DocumentQuery detailQuery = query.constructDocumentQuery(null, tagId);
 		detailQuery.getFilter().addEquals(Bean.DOCUMENT_ID, bizId);
 		
-		List<Bean> beans = persistence.retrieve(detailQuery);
+		List<Bean> beans = detailQuery.projectedResults();
 		
 		// reinstate whether the record is tagged or not.
 		

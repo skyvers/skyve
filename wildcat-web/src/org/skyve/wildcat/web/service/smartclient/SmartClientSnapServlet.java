@@ -156,7 +156,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    f.addEquals(SNAPSHOT_QUERY_NAME_PROPERTY_NAME, queryName);
 	    q.addOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
 
-	    for (Bean bean : p.retrieve(q)) {
+	    for (Bean bean : q.projectedResults()) {
         	String escapedCode = SmartClientGenerateUtils.processString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
         	String escapedDescription = SmartClientGenerateUtils.processString((String) BindUtil.get(bean, SNAPSHOT_NAME_PROPERTY_NAME));
         	String snapshot = (String) BindUtil.get(bean, SNAPSHOT_SNAPSHOT_PROPERTY_NAME);

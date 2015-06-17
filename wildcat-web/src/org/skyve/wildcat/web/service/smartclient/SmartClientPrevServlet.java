@@ -105,7 +105,7 @@ public class SmartClientPrevServlet extends HttpServlet {
 					if (value != null) {
 						bizQL.append(" where bean.").append(field).append(" like '%").append(value).append("%'");
 					}
-					Bean total = persistence.retrieve(persistence.newBizQL(bizQL.toString())).get(0);
+					Bean total = persistence.newBizQL(bizQL.toString()).projectedResult();
 					long totalRows = ((Number) BindUtil.get(total, "totalRows")).longValue();
 					
 					bizQL.setLength(0);
@@ -115,9 +115,8 @@ public class SmartClientPrevServlet extends HttpServlet {
 					if (value != null) {
 						bizQL.append(" where bean.").append(field).append(" like '%").append(value).append("%'");
 					}
-					List<Bean> values = persistence.retrieve(persistence.newBizQL(bizQL.toString()),
-			                                                    new Integer(startRow),
-			                                                    new Integer(endRow - startRow));
+					
+					List<Bean> values = persistence.newBizQL(bizQL.toString()).setFirstResult(startRow).setMaxResults(endRow - startRow).projectedResults();
 					
 					StringBuilder message = new StringBuilder(1024);
 					message.append("{response:{");

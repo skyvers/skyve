@@ -20,7 +20,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
-import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
 public class TagBizlet extends Bizlet<Tag> {
@@ -65,7 +64,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, bean.getBizId());
 			q.addOrdering(Tag.namePropertyName);
 
-			List<Tag> tags = pers.retrieve(q);
+			List<Tag> tags = q.beanResults();
 			for (Tag t : tags) {
 				result.add(new DomainValue(t.getBizId(), t.getName()));
 			}
@@ -151,12 +150,7 @@ public class TagBizlet extends Bizlet<Tag> {
 		q.getFilter().addEquals(Tagged.tagPropertyName, bean);
 		q.addAggregateProjection(AggregateFunction.Count, Tagged.taggedBizIdPropertyName, "CountOfTagged");
 
-		List<Bean> beans = persistence.retrieve(q);
-		if (!beans.isEmpty()) {
-			Long number = (Long) Binder.get(beans.get(0), "CountOfTagged");
-			bean.setNumberTagged(new Integer(number.intValue()));
-		}
-
+		bean.setNumberTagged(Integer.valueOf(q.scalarResult(Number.class).intValue()));
 	}
 
 	/**
@@ -189,7 +183,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			union.append(")");
 
 			SQL sql = pers.newSQL(union.toString());
-			pers.executeInsecureSQLDML(sql);
+			sql.execute();
 		}
 
 	}
@@ -219,7 +213,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			intersect.append(" and bizCustomer='").append(subject.getBizCustomer()).append("'");
 
 			SQL sql = pers.newSQL(intersect.toString());
-			pers.executeInsecureSQLDML(sql);
+			sql.execute();
 		}
 	}
 
@@ -247,8 +241,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			except.append(" and bizCustomer='").append(subject.getBizCustomer()).append("'");
 
 			SQL sql = pers.newSQL(except.toString());
-			pers.executeInsecureSQLDML(sql);
+			sql.execute();
 		}
 	}
-
 }

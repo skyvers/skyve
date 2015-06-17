@@ -3,7 +3,6 @@ package modules.admin.Configuration;
 import java.util.List;
 
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -23,9 +22,9 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 		Configuration result = bean;
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery q = persistence.newDocumentQuery(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
-		List<Bean> parameters = persistence.retrieve(q);
+		List<Configuration> parameters = q.beanResults();
 		if (parameters.size() > 0) {
-			result= (Configuration) parameters.get(0);
+			result = parameters.get(0);
 		}
 
 		if (result.getPasswordComplexityModel() == null) {

@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jfreechart-1.0.12.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/quartz-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/poi-ooxml-3.10.1.jar"/>
@@ -22,5 +21,10 @@
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jackson-core-2.5.2.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jackson-databind-2.5.2.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="javaee/wildcat.ear/apps.jar"/>
 </classpath>

@@ -166,7 +166,7 @@ public class TrackmateServlet extends HttpServlet {
 						DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
 						q.addOrdering(Bean.BIZ_KEY);
 
-						List<Bean> beans = persistence.retrieve(q);
+						List<Bean> beans = q.projectedResults();
 						int i = 0;
 						
 						sb.append("[");
@@ -205,7 +205,7 @@ public class TrackmateServlet extends HttpServlet {
 					List<Map<String, Object>> userPositions = new ArrayList<>();
 					
 					//get max timestamp for each user, and then find associated track
-					List<Bean> beans = persistence.retrieve(q);
+					List<Bean> beans = q.projectedResults();
 					for(Bean bean: beans){
 						
 						Bean u = (Bean) Binder.get(bean, TRACK_USER_PROPERTY_NAME);
@@ -215,7 +215,7 @@ public class TrackmateServlet extends HttpServlet {
 						uq.getFilter().addEquals(TRACK_USER_PROPERTY_NAME, u);
 						uq.getFilter().addEquals(TRACK_TIMESTAMP_PROPERTY_NAME, t);
 						
-						List<Bean> tracks = persistence.retrieve(uq);
+						List<Bean> tracks = uq.projectedResults();
 						if(!tracks.isEmpty()){
 							
 							//Construct the user position report
@@ -390,7 +390,7 @@ public class TrackmateServlet extends HttpServlet {
 			DocumentQuery q = persistence.newDocumentQuery(TRACK_MODULE_NAME, DISCRIMINATOR_DOCUMENT_NAME);
 			q.getFilter().addEquals(Bean.DOCUMENT_ID, discriminatorId);
 
-			List<PersistentBean> beans = persistence.retrieve(q);
+			List<PersistentBean> beans = q.projectedResults();
 			if (!beans.isEmpty()) {
 				Binder.set(track, TRACK_DISCRIMINATOR_PROPERTY_NAME, beans.get(0));
 			}
@@ -504,7 +504,7 @@ public class TrackmateServlet extends HttpServlet {
 		parameters.put(CUSTOMER_REQUEST_PARAMETER, user.getCustomer().getName());
 		parameters.put(USERNAME_REQUEST_PARAMETER, user.getName());
 		parameters.put(PASSWORD_REQUEST_PARAMETER, hashedPassword);
-		List<Bean> beans = persistence.retrieve(bizQL);
+		List<Bean> beans = bizQL.projectedResults();
 
 		if (beans.size() != 1) {
 			throw new SecurityException("trackmate", user.getName());

@@ -236,7 +236,7 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 		DocumentQuery qStaff = pers.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 		qStaff.getFilter().addEquals(Staff.demoDataPropertyName, Boolean.TRUE);
 		
-		List<Staff> allStaff = pers.retrieve(qStaff);
+		List<Staff> allStaff = qStaff.beanResults();
 		for(Staff s: allStaff){
 			try{
 				Contact c = s.getContact();
@@ -257,7 +257,7 @@ public class LoadDemonstrationDataJob extends WildcatJob {
 		DocumentQuery qOffice = pers.newDocumentQuery(Office.MODULE_NAME, Office.DOCUMENT_NAME);
 		qOffice.getFilter().addEquals(Office.demoDataPropertyName, Boolean.TRUE);
 		
-		List<Office> allOffices = pers.retrieve(qOffice);
+		List<Office> allOffices = qOffice.beanResults();
 		for(Office o: allOffices){
 			try{
 				pers.delete(o);

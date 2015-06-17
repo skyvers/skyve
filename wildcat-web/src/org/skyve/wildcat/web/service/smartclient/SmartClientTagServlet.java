@@ -77,7 +77,6 @@ public class SmartClientTagServlet extends HttpServlet {
 						TagUtil.tag(tagId, query(tagId, 
 													dataSourceName,
 													criteria,
-													persistence,
 													user,
 													customer));
 					}
@@ -85,7 +84,6 @@ public class SmartClientTagServlet extends HttpServlet {
 						TagUtil.untag(tagId, query(tagId, 
 													dataSourceName,
 													criteria,
-													persistence,
 													user,
 													customer));
 					}
@@ -190,7 +188,6 @@ public class SmartClientTagServlet extends HttpServlet {
 	private static Iterable<Bean> query(String tagId,
 											String dataSourceName,
 											String criteriaJSON,
-											AbstractPersistence persistence,
 											User user,
 											Customer customer)
 	throws Exception {
@@ -234,6 +231,6 @@ public class SmartClientTagServlet extends HttpServlet {
 			}
 		}
 
-		return persistence.iterate(documentQuery);
+		return documentQuery.projectedIterable();
 	}
 }

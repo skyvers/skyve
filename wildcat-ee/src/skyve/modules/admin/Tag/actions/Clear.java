@@ -29,8 +29,7 @@ public class Clear implements ServerSideAction<Tag> {
 		deleteSQL.append(" and bizCustomer = '").append(bean.getBizCustomer()).append("'");
 		
 		Persistence persistence = CORE.getPersistence();
-		SQL sql = persistence.newSQL(deleteSQL.toString());
-		persistence.executeInsecureSQLDML(sql);
+		persistence.newSQL(deleteSQL.toString()).execute();
 		
 		bean.setNumberTagged(new Integer(0));
 		

@@ -24,7 +24,7 @@ public class MyStatusBizlet extends Bizlet<MyStatus> {
 		DocumentQuery q = pers.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 		q.getFilter().addEquals(Binder.createCompoundBinding(Staff.contactPropertyName,Bean.DOCUMENT_ID), pers.getUser().getContactId());
 		
-		List<Staff> staffMembers= pers.retrieve(q);
+		List<Staff> staffMembers= q.beanResults();
 		if(!staffMembers.isEmpty()){
 			bean.setMyStaff(staffMembers.get(0));
 		}

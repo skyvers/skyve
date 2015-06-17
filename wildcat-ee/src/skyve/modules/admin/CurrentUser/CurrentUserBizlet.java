@@ -29,7 +29,7 @@ public class CurrentUserBizlet extends Bizlet<CurrentUser> {
 		DocumentQuery q = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
 		q.getFilter().addEquals(Binder.createCompoundBinding(User.contactPropertyName, Bean.DOCUMENT_ID), pers.getUser().getContactId());
 		
-		List<User> users = pers.retrieve(q);
+		List<User> users = q.beanResults();
 		if(!users.isEmpty()){
 			bean.setCurrentUser(users.get(0));
 			for(Group g: users.get(0).getGroups()){
@@ -47,7 +47,7 @@ public class CurrentUserBizlet extends Bizlet<CurrentUser> {
 		if (User.groupsPropertyName.equals(fieldName)) {
 			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 			query.addOrdering(Group.namePropertyName, SortDirection.ascending);
-			List<Group> groups = persistence.retrieve(query);
+			List<Group> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
 			for (Group group : groups) {
 				result.add(new DomainValue(group.getBizId(), group.getBizKey()));

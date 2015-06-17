@@ -50,9 +50,9 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 		q.getFilter().addLike(User.userNamePropertyName, newUName + "%");
 		q.addAggregateProjection(AggregateFunction.Max, User.userNamePropertyName, "MaxOfUserName");
 
-		List<Bean> results = persistence.retrieve(q);
+		List<String> results = q.scalarResults(String.class);
 		if (results.size() > 0) {
-			String maxUName = (String) Binder.get(results.get(0), "MaxOfUserName");
+			String maxUName = results.get(0);
 
 			if (maxUName != null) {
 				// go backwards and find trailing numeric

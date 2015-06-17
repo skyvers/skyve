@@ -18,7 +18,7 @@ public class DeleteCompletedJobs implements ServerSideAction<Jobs> {
 	public ServerSideActionResult execute(Jobs bean, WebContext webContext) 
 	throws Exception {
 		Persistence persistence = CORE.getPersistence();
-		persistence.executeDML(persistence.newBizQL("delete from {admin.Job} as job"));
+		persistence.newBizQL("delete from {admin.Job} as job").execute();
 		
 		return new ServerSideActionResult(bean);
 	}

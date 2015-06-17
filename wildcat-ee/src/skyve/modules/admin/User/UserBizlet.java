@@ -50,7 +50,7 @@ public class UserBizlet extends Bizlet<User> {
 		if (myDataGroupId != null) {
 			DocumentQuery query = persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 			query.getFilter().addEquals(Bean.DOCUMENT_ID, myDataGroupId);
-			List<DataGroup> dataGroups = persistence.retrieve(query);
+			List<DataGroup> dataGroups = query.beanResults();
 			for (DataGroup dataGroup : dataGroups) {
 				bean.setDataGroup(dataGroup);
 			}
@@ -89,7 +89,7 @@ public class UserBizlet extends Bizlet<User> {
 		if (User.groupsPropertyName.equals(fieldName)) {
 			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 			query.addOrdering(Group.namePropertyName, SortDirection.ascending);
-			List<Group> groups = persistence.retrieve(query);
+			List<Group> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
 			for (Group group : groups) {
 				result.add(new DomainValue(group.getBizId(), group.getBizKey()));
@@ -99,7 +99,7 @@ public class UserBizlet extends Bizlet<User> {
 		} else if (User.dataGroupPropertyName.equals(fieldName)) {
 			DocumentQuery query = persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 			query.addOrdering(DataGroup.namePropertyName, SortDirection.ascending);
-			List<DataGroup> groups = persistence.retrieve(query);
+			List<DataGroup> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
 			for (DataGroup group : groups) {
 				result.add(new DomainValue(group.getBizId(), group.getBizKey()));
@@ -171,7 +171,7 @@ public class UserBizlet extends Bizlet<User> {
 			q.getFilter().addEquals(User.userNamePropertyName, user.getUserName());
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, user.getBizId());
 
-			List<User> otherUsers = pers.retrieve(q);
+			List<User> otherUsers = q.beanResults();
 			if (!otherUsers.isEmpty()) {
 				e.getMessages().add(new Message(User.userNamePropertyName, "This username is already being used - try again."));
 			} else {

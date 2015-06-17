@@ -395,7 +395,7 @@ public class ReportServlet extends HttpServlet {
 					}
 				}
 				JRDataSource dataSource = new WildcatDataSource(user, 
-																persistence.iterate(documentQuery).iterator());
+																documentQuery.projectedIterable().iterator());
 	
 				ReportDesignParameters designParams = new ReportDesignParameters();
 				designParams.setReportFormat(ReportFormat.valueOf((String) values.get("reportFormat")));

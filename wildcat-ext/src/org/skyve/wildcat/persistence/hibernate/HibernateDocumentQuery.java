@@ -2,7 +2,9 @@ package org.skyve.wildcat.persistence.hibernate;
 
 import java.util.List;
 
+import org.hibernate.Query;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
@@ -10,12 +12,12 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 
 public class HibernateDocumentQuery extends AbstractDocumentQuery {
-	private AbstractHibernatePersistence persistence;
+	private HibernateQueryDelegate delegate;
 	
 	public HibernateDocumentQuery(Bean queryByExampleBean, AbstractHibernatePersistence persistence)
 	throws Exception {
 		super(queryByExampleBean);
-		this.persistence = persistence;
+		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	public HibernateDocumentQuery(Document document,
@@ -23,12 +25,12 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 									String filterClause,
 									AbstractHibernatePersistence persistence) {
 		super(document, fromClause, filterClause);
-		this.persistence = persistence;
+		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	public HibernateDocumentQuery(Document document, AbstractHibernatePersistence persistence) {
 		super(document);
-		this.persistence = persistence;
+		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	public HibernateDocumentQuery(String moduleName, 
@@ -36,67 +38,114 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 									AbstractHibernatePersistence persistence)
 	throws MetaDataException {
 		super(moduleName, documentName);
-		this.persistence = persistence;
+		this.delegate = new HibernateQueryDelegate(persistence);
 	}
 
 	@Override
 	public DocumentQuery setFirstResult(int first) {
-		// TODO Auto-generated method stub
-		return null;
+		delegate.setFirstResult(first);
+		return this;
 	}
 
 	@Override
 	public DocumentQuery setMaxResults(int max) {
-		// TODO Auto-generated method stub
-		return null;
+		delegate.setMaxResults(max);
+		return this;
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T extends Bean> List<T> beanResults()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.list(query, true, true, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T extends Bean> AutoClosingIterable<T> beanIterable()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.iterate(query, true, true, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults() {
-		// TODO Auto-generated method stub
-		return null;
+	public <T extends Bean> List<T> projectedResults()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.list(query, false, false, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
-		// TODO Auto-generated method stub
-		return null;
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.iterate(query, false, false, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> List<T> scalarResults(Class<T> type)
+	throws DomainException {
+		try {
+		Query query = delegate.createHibernateQuery(this);
+		return delegate.list(query, true, true, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
+	throws DomainException {
+		try {
+		Query query = delegate.createHibernateQuery(this);
+		return delegate.iterate(query, true, true, false);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public List<Object[]> tupleResults() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Object[]> tupleResults()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.list(query, true, false, true);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable() {
-		// TODO Auto-generated method stub
-		return null;
+	public AutoClosingIterable<Object[]> tupleIterable()
+	throws DomainException {
+		try {
+			Query query = delegate.createHibernateQuery(this);
+			return delegate.iterate(query, true, false, true);
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
 	}
-
 }
