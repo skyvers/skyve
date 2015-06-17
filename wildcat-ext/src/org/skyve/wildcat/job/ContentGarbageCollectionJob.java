@@ -71,7 +71,7 @@ public class ContentGarbageCollectionJob implements Job {
 							}
 							
 							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
-							if (p.retrieveInsecureSQL(query).isEmpty()) {
+							if (query.scalarResults(Integer.class).isEmpty()) {
 								orphanedContentIds.add(result.getContentId());
 							}
 						}

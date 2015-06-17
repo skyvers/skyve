@@ -1,6 +1,5 @@
 package org.skyve.wildcat.persistence;
 
-import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -12,12 +11,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingBeanIterable;
-import org.skyve.persistence.BizQL;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.persistence.Query;
-import org.skyve.persistence.SQL;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 
 public abstract class AbstractPersistence implements Persistence {
@@ -103,31 +97,6 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void disposeAllPersistenceInstances() throws MetaDataException;
 	public abstract String generateDDL() throws DomainException, MetaDataException;
 
-	@Override
-	public final <T extends Bean> List<T> retrieve(Query query) 
-	throws DomainException {
-		return retrieve(query, null, null);
-	}
-
-	@Override
-	public final <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query) 
-	throws DomainException {
-		return iterate(query, null, null);
-	}
-
-	/**
-	 * Use a scrollable result set to iterate over a query, thus not instantiating thousands of objects up front.
-	 * 
-	 * @param <T> extends Bean. The type of bean the iterable will yield.
-	 * @param query The query to run.
-	 * @param firstResult For paged querying.
-	 * @param maxResults For paged querying.
-	 * @return An Iterable<T>.
-	 * @throws DomainException
-	 */
-	@Override
-	public abstract <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
-	throws DomainException;
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
 
@@ -139,38 +108,39 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean) 
 	throws DomainException, MetaDataException;
 
+/*	
 	@Override
 	public SQL newSQL(String query) {
-		return new SQLImpl(query);
+		return new AbstractSQL(query);
 	}
-	
+
 	@Override
 	public BizQL newBizQL(String query) {
-		return new BizQLImpl(query);
+		return new AbstractBizQL(query);
 	}
-	
+
 	@Override
 	public DocumentQuery newDocumentQuery(Document document) {
-		return new DocumentQueryImpl(document);
+		return new AbstractDocumentQuery(document);
 	}
 
 	@Override
 	public DocumentQuery newDocumentQuery(String moduleName, String documentName)
 	throws MetaDataException {
-		return new DocumentQueryImpl(moduleName, documentName);
+		return new AbstractDocumentQuery(moduleName, documentName);
 	}
 	
 	@Override
 	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause) {
-		return new DocumentQueryImpl(document, fromClause, filterClause);
+		return new AbstractDocumentQuery(document, fromClause, filterClause);
 	}
 
 	@Override
 	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
 	throws Exception {
-		return new DocumentQueryImpl(queryByExampleBean);
+		return new AbstractDocumentQuery(queryByExampleBean);
 	}
-
+*/
 	@Override
 	public final <T extends PersistentBean> T save(T bean)
 	throws DomainException, MetaDataException {

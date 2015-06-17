@@ -1,33 +1,36 @@
-package org.skyve.wildcat.util;
+package org.skyve.wildcat.persistence.hibernate;
 
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.hibernate.ScrollableResults;
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.persistence.AutoClosingBeanIterable;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.domain.MapBean;
 
-public class HibernateAutoClosingBeanIterable<T extends Bean> implements AutoClosingBeanIterable<T> {
+public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	private String moduleName = null;
 	private String documentName = null;
 	private ScrollableResults results = null;
 	private String[] aliases = null;
 	boolean closed = false;
 
-	public HibernateAutoClosingBeanIterable(String moduleName, 
-									String documentName, 
-									ScrollableResults results, 
-									String[] aliases) {
+	public HibernateAutoClosingIterable(ScrollableResults results) {
+		this(null, null, results, null);
+	}
+	
+	public HibernateAutoClosingIterable(String moduleName, 
+											String documentName, 
+											ScrollableResults results, 
+											String[] aliases) {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.results = results;
 		this.aliases = aliases;
 	}
 
-	private class HibernateBeanIterator<Z extends Bean> implements Iterator<Z> {
+	private class HibernateIterator<Z> implements Iterator<Z> {
 		@SuppressWarnings("hiding")
 		private String moduleName = null;
 
@@ -40,10 +43,10 @@ public class HibernateAutoClosingBeanIterable<T extends Bean> implements AutoClo
 		@SuppressWarnings("hiding")
 		private String[] aliases = null;
 
-		private HibernateBeanIterator(String moduleName, 
-										String documentName, 
-										ScrollableResults results, 
-										String[] aliases) {
+		private HibernateIterator(String moduleName, 
+									String documentName, 
+									ScrollableResults results, 
+									String[] aliases) {
 			this.moduleName = moduleName;
 			this.documentName = documentName;
 			this.results = results;
@@ -71,8 +74,11 @@ public class HibernateAutoClosingBeanIterable<T extends Bean> implements AutoClo
 
 			Object[] tuple = results.get();
 
-			if ((tuple.length == 1) && (tuple[0] instanceof Bean)) {
+			if (tuple.length == 1) {
 				result = (Z) tuple[0];
+			}
+			else if (moduleName == null) {
+				result = (Z) tuple;
 			}
 			else {
 				Map<String, Object> properties = new TreeMap<>();
@@ -98,7 +104,7 @@ public class HibernateAutoClosingBeanIterable<T extends Bean> implements AutoClo
 	@Override
 	@SuppressWarnings("synthetic-access")
 	public Iterator<T> iterator() {
-		Iterator<T> i = new HibernateBeanIterator<>(moduleName, documentName, results, aliases);
+		Iterator<T> i = new HibernateIterator<>(moduleName, documentName, results, aliases);
 
 		results = null; // dereference the results
 

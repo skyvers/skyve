@@ -1,16 +1,26 @@
 package org.skyve.wildcat.persistence;
 
+import java.util.List;
+
+import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
 
-public final class BizQLImpl extends ProjectionQuery implements BizQL {
+public class AbstractBizQL extends AbstractQuery implements BizQL {
 	private String query;
 	private String resolvedQuery;
 
-	public BizQLImpl(String query) {
+	public AbstractBizQL(String query) {
 		this.query = query;
 	}
 
+	@Override
+	public AbstractBizQL putParameter(String name, Object value) {
+		super.putParameter(name, value);
+		return this;
+	}
+	
 	@Override
 	public String toQueryString() {
 		return toQueryString(true);
@@ -65,5 +75,71 @@ public final class BizQLImpl extends ProjectionQuery implements BizQL {
 		}
 
 		resolvedQuery = result.toString();
+	}
+
+	@Override
+	public <T extends Bean> List<T> beanResults(Class<T> type) {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public <T extends Bean> AutoClosingIterable<T> beanIterable(Class<T> type) {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public <T extends Bean> List<T> projectedResults() {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public <T> List<T> scalarResults(Class<T> type) {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public List<Object[]> tupleResults() {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public AutoClosingIterable<Object[]> tupleIterable() {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public int execute() {
+		// No-op
+		return 0;
+	}
+
+	@Override
+	public BizQL setFirstResult(int first) {
+		// No-op
+		return null;
+	}
+
+	@Override
+	public BizQL setMaxResults(int max) {
+		// No-op
+		return null;
 	}
 }

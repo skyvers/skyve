@@ -18,11 +18,11 @@ import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.module.ContentPermission;
 import org.skyve.wildcat.metadata.repository.module.ContentRestriction;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.SQLImpl;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class UserImpl implements User {
@@ -381,14 +381,13 @@ public class UserImpl implements User {
 					sb.append(" = c.").append(ChildBean.PARENT_NAME);
 					sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
 					sb.append(Bean.DOCUMENT_ID);
-					SQLImpl sql = new SQLImpl(sb.toString());
-					sql.putParameter(Bean.DOCUMENT_ID, beanBizId);
-					List<Object> rows = AbstractPersistence.get().retrieveInsecureSQL(sql);
+					Persistence p = AbstractPersistence.get();
+					List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId).tupleResults();
 					if (rows.isEmpty()) { // bean is still transient - user hasn't saved
 						result = true;
 					}
 					else {
-						Object[] values = (Object[]) rows.get(0);
+						Object[] values = rows.get(0);
 
 						// deny if user can't read parent document
 						result = canReadBean((String) values[0], 

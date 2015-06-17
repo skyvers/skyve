@@ -15,7 +15,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.wildcat.util.UtilImpl;
 
-public final class DocumentQueryImpl extends ProjectionQuery implements Cloneable, DocumentQuery {
+public abstract class AbstractDocumentQuery extends AbstractQuery implements Cloneable, DocumentQuery {
 	/**
 	 * Used to get metadata about the query's driving document
 	 */
@@ -32,7 +32,7 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 	private LinkedHashMap<String, SortDirection> appendedOrderings = new LinkedHashMap<>();
 	private StringBuilder groupClause = new StringBuilder(32);
 
-	public DocumentQueryImpl(String moduleName, String documentName) 
+	public AbstractDocumentQuery(String moduleName, String documentName) 
 	throws MetaDataException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
@@ -41,21 +41,21 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 		postConstruct(persistence, null);
 	}
 
-	public DocumentQueryImpl(Document document) {
+	public AbstractDocumentQuery(Document document) {
 		drivingDocument = document;
 		postConstruct(AbstractPersistence.get(), null);
 	}
 
-	public DocumentQueryImpl(Document document, String fromClause, String filterClause) {
+	public AbstractDocumentQuery(Document document, String fromClause, String filterClause) {
 		drivingDocument = document;
 		postConstruct(AbstractPersistence.get(), filterClause);
 		if (fromClause != null) {
 			this.fromClause.setLength(0);
-			this.fromClause.append(new BizQLImpl(fromClause).toQueryString(false));
+			this.fromClause.append(new AbstractBizQL(fromClause).toQueryString(false));
 		}
 	}
 
-	public DocumentQueryImpl(Bean queryByExampleBean) throws Exception {
+	public AbstractDocumentQuery(Bean queryByExampleBean) throws Exception {
 		this(queryByExampleBean.getBizModule(), queryByExampleBean.getBizDocument());
 
 		for (Attribute attribute : drivingDocument.getAttributes()) {
@@ -84,14 +84,20 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 	private void postConstruct(AbstractPersistence persistence, String filterClause) {
 		drivingModuleName = drivingDocument.getOwningModuleName();
 		drivingDocumentName = drivingDocument.getName();
-		filter = new org.skyve.wildcat.persistence.DocumentFilter(this, filterClause);
+		filter = new org.skyve.wildcat.persistence.DocumentFilterImpl(this, filterClause);
 		fromClause.append(persistence.getDocumentEntityName(drivingModuleName, drivingDocumentName));
 		fromClause.append(" as ").append(THIS_ALIAS);
 	}
 
 	@Override
+	public AbstractDocumentQuery putParameter(String name, Object value) {
+		super.putParameter(name, value);
+		return this;
+	}
+	
+	@Override
 	public DocumentFilter newDocumentFilter() {
-		return new org.skyve.wildcat.persistence.DocumentFilter(this);
+		return new org.skyve.wildcat.persistence.DocumentFilterImpl(this);
 	}
 
 	@Override
@@ -100,42 +106,47 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 	}
 
 	@Override
-	public void setDistinct(boolean distinct) {
+	public DocumentQuery setDistinct(boolean distinct) {
 		this.distinct = distinct;
+		return this;
 	}
 
 	@Override
-	public void addThisProjection() {
+	public DocumentQuery addThisProjection() {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
 		projectionClause.append(THIS_ALIAS).append(" as ").append(THIS_ALIAS);
+		return this;
 	}
 
 	@Override
-	public void addBoundProjection(String binding) {
+	public DocumentQuery addBoundProjection(String binding) {
 		addBoundProjection(binding, binding);
+		return this;
 	}
 
 	@Override
-	public void addBoundProjection(String binding, String alias) {
+	public DocumentQuery addBoundProjection(String binding, String alias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
 		projectionClause.append(THIS_ALIAS).append('.').append(binding);
 		projectionClause.append(" as ").append(alias);
+		return this;
 	}
 
 	@Override
-	public void addExpressionProjection(String expression, String alias) {
+	public DocumentQuery addExpressionProjection(String expression, String alias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
 		projectionClause.append(expression).append(" as ").append(alias);
+		return this;
 	}
 
 	@Override
-	public void addAggregateProjection(AggregateFunction function, String binding, String alias) {
+	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String alias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -150,6 +161,7 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 			projectionClause.append(THIS_ALIAS).append('.').append(binding);
 		}
 		projectionClause.append(") as ").append(alias);
+		return this;
 	}
 
 	public void clearProjections() {
@@ -167,41 +179,48 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 	}
 
 	@Override
-	public void addOrdering(String binding) {
+	public DocumentQuery addOrdering(String binding) {
 		addOrdering(binding, SortDirection.ascending);
+		return this;
 	}
 
 	@Override
-	public void addOrdering(String binding, SortDirection order) {
+	public DocumentQuery addOrdering(String binding, SortDirection order) {
 		appendedOrderings.put(binding, order);
+		return this;
 	}
 
 	@Override
-	public void insertOrdering(String binding, SortDirection order) {
+	public DocumentQuery insertOrdering(String binding, SortDirection order) {
 		insertedOrderings.put(binding, order);
+		return this;
 	}
 
 	@Override
-	public void addGrouping(String binding) {
+	public DocumentQuery addGrouping(String binding) {
 		if (groupClause.length() > 0) {
 			groupClause.append(", ");
 		}
 		groupClause.append(THIS_ALIAS).append('.').append(binding);
+		return this;
 	}
 
 	@Override
-	public void addInnerJoin(String associationBinding) {
+	public DocumentQuery addInnerJoin(String associationBinding) {
 		fromClause.append(" INNER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+		return this;
 	}
 
 	@Override
-	public void addLeftOuterJoin(String associationBinding) {
+	public DocumentQuery addLeftOuterJoin(String associationBinding) {
 		fromClause.append(" LEFT OUTER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+		return this;
 	}
 
 	@Override
-	public void addRightOuterJoin(String associationBinding) {
+	public DocumentQuery addRightOuterJoin(String associationBinding) {
 		fromClause.append(" RIGHT OUTER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+		return this;
 	}
 
 	@Override
@@ -247,13 +266,13 @@ public final class DocumentQueryImpl extends ProjectionQuery implements Cloneabl
 	}
 
 	@Override
-	public DocumentQueryImpl clone() throws CloneNotSupportedException {
-		DocumentQueryImpl result = (DocumentQueryImpl) super.clone();
+	public AbstractDocumentQuery clone() throws CloneNotSupportedException {
+		AbstractDocumentQuery result = (AbstractDocumentQuery) super.clone();
 
 		result.projectionClause = new StringBuilder(projectionClause);
 		result.fromClause = new StringBuilder(fromClause);
-		result.filter = ((org.skyve.wildcat.persistence.DocumentFilter) filter).clone();
-		((org.skyve.wildcat.persistence.DocumentFilter) result.filter).setQuery(this);
+		result.filter = ((org.skyve.wildcat.persistence.DocumentFilterImpl) filter).clone();
+		((org.skyve.wildcat.persistence.DocumentFilterImpl) result.filter).setQuery(this);
 		result.appendedOrderings = new LinkedHashMap<>(result.appendedOrderings);
 		result.insertedOrderings = new LinkedHashMap<>(result.insertedOrderings);
 		result.groupClause = new StringBuilder(groupClause);

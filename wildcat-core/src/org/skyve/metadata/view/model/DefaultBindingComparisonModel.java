@@ -125,6 +125,7 @@ public class DefaultBindingComparisonModel <T extends Bean> implements Compariso
 		result.setBusinessKeyDescription((bean instanceof PersistentBean) ? 
 											((PersistentBean) bean).getBizKey() : 
 											currentDocument.getSingularAlias());
+		result.setDocument(currentDocument);
 		if (owningReference == null) {
 			result.setReferenceName(null);
 			result.setRelationshipDescription(currentDocument.getSingularAlias());

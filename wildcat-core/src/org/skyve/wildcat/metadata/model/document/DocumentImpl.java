@@ -35,7 +35,7 @@ import org.skyve.wildcat.metadata.model.Model;
 import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.DocumentQueryImpl;
+import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.util.UtilImpl;
 
 public final class DocumentImpl extends Model implements Document {
@@ -351,23 +351,23 @@ public final class DocumentImpl extends Model implements Document {
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
 			org.skyve.metadata.model.document.Document referencedDocument = getReferencedDocument(customer, attributeName);
-			DocumentQueryImpl referenceQuery = null;
+			AbstractDocumentQuery referenceQuery = null;
 			String queryName = reference.getQueryName();
 			if (queryName != null) {
 				Module module = customer.getModule(getOwningModuleName());
-				referenceQuery = (DocumentQueryImpl) module.getQuery(queryName).constructDocumentQuery(null, null);
+				referenceQuery = (AbstractDocumentQuery) module.getQuery(queryName).constructDocumentQuery(null, null);
 				referenceQuery.clearProjections();
 				referenceQuery.clearOrderings();
 			}
 			else {
-				referenceQuery = new DocumentQueryImpl(referencedDocument);
+				referenceQuery = (AbstractDocumentQuery) AbstractPersistence.get().newDocumentQuery(referencedDocument);
 			}
 			
 			referenceQuery.addBoundProjection(Bean.DOCUMENT_ID);
 			referenceQuery.addBoundProjection(Bean.BIZ_KEY);
 			referenceQuery.addOrdering(Bean.BIZ_KEY);
 
-			List<Bean> beans = AbstractPersistence.get().retrieve(referenceQuery);
+			List<Bean> beans = referenceQuery.projectedResults();
 			result = new ArrayList<>(beans.size());
 			for (Bean bean : beans) {
 				result.add(new DomainValue(bean.getBizId(), (String) BindUtil.get(bean, Bean.BIZ_KEY)));

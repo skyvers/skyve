@@ -6,7 +6,7 @@ import org.skyve.metadata.model.document.Document;
 /**
  * 
  */
-public interface DocumentQuery extends Query {
+public interface DocumentQuery extends Query, PagedQuery {
 	/**
 	 * 
 	 */
@@ -16,32 +16,20 @@ public interface DocumentQuery extends Query {
 	 * 
 	 */
 	public static enum AggregateFunction {
-		/**
-		 * 
-		 */
 		Min,
-		
-		/**
-		 * 
-		 */
 		Max, 
-		
-		/**
-		 * 
-		 */
 		Sum, 
-		
-		/**
-		 * 
-		 */
 		Count,
-		
-		/**
-		 * 
-		 */
 		Avg
 	}
 
+	@Override
+	public DocumentQuery putParameter(String name, Object value);
+	@Override
+	public DocumentQuery setFirstResult(int first);
+	@Override
+	public DocumentQuery setMaxResults(int max);
+	
 	/**
 	 * 
 	 * @return
@@ -52,32 +40,32 @@ public interface DocumentQuery extends Query {
 	 * 
 	 * @param distinct
 	 */
-	public void setDistinct(boolean distinct);
+	public DocumentQuery setDistinct(boolean distinct);
 	
 	/**
 	 * 
 	 */
-	public void addThisProjection();
+	public DocumentQuery addThisProjection();
 	
 	/**
 	 * 
 	 * @param binding
 	 */
-	public void addBoundProjection(String binding);
+	public DocumentQuery addBoundProjection(String binding);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param alias
 	 */
-	public void addBoundProjection(String binding, String alias);
+	public DocumentQuery addBoundProjection(String binding, String alias);
 	
 	/**
 	 * 
 	 * @param expression
 	 * @param alias
 	 */
-	public void addExpressionProjection(String expression, String alias);
+	public DocumentQuery addExpressionProjection(String expression, String alias);
 	
 	/**
 	 * 
@@ -85,7 +73,7 @@ public interface DocumentQuery extends Query {
 	 * @param binding
 	 * @param alias
 	 */
-	public void addAggregateProjection(AggregateFunction function, String binding, String alias);
+	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String alias);
 	
 	/**
 	 * 
@@ -97,45 +85,45 @@ public interface DocumentQuery extends Query {
 	 * 
 	 * @param binding
 	 */
-	public void addOrdering(String binding);
+	public DocumentQuery addOrdering(String binding);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public void addOrdering(String binding, SortDirection order);
+	public DocumentQuery addOrdering(String binding, SortDirection order);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public void insertOrdering(String binding, SortDirection order);
+	public DocumentQuery insertOrdering(String binding, SortDirection order);
 	
 	/**
 	 * 
 	 * @param binding
 	 */
-	public void addGrouping(String binding);
+	public DocumentQuery addGrouping(String binding);
 	
 	/**
 	 * 
 	 * @param associationBinding
 	 */
-	public void addInnerJoin(String associationBinding);
+	public DocumentQuery addInnerJoin(String associationBinding);
 	
 	/**
 	 * 
 	 * @param associationBinding
 	 */
-	public void addLeftOuterJoin(String associationBinding);
+	public DocumentQuery addLeftOuterJoin(String associationBinding);
 	
 	/**
 	 * 
 	 * @param associationBinding
 	 */
-	public void addRightOuterJoin(String associationBinding);
+	public DocumentQuery addRightOuterJoin(String associationBinding);
 
 	/**
 	 * 

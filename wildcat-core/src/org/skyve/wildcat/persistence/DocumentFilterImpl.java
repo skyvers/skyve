@@ -2,25 +2,25 @@ package org.skyve.wildcat.persistence;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class DocumentFilter implements Cloneable, org.skyve.persistence.DocumentFilter {
+public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";
 	private static final String NOT_LIKE_OPERATOR = " not like ";
 
-	private DocumentQueryImpl owningQuery;
+	private AbstractDocumentQuery owningQuery;
 	private StringBuilder filterClause = new StringBuilder(128); // resulting filter expression
 
-	public DocumentFilter(DocumentQueryImpl owningQuery) {
+	public DocumentFilterImpl(AbstractDocumentQuery owningQuery) {
 		this(owningQuery, null);
 	}
 
-	DocumentFilter(DocumentQueryImpl owningQuery, String filterClause) {
+	DocumentFilterImpl(AbstractDocumentQuery owningQuery, String filterClause) {
 		setQuery(owningQuery);
 		if (filterClause != null) {
-			this.filterClause.append(new BizQLImpl(filterClause).toQueryString(false));
+			this.filterClause.append(new AbstractBizQL(filterClause).toQueryString(false));
 		}
 	}
 
-	void setQuery(DocumentQueryImpl owningQuery) {
+	void setQuery(AbstractDocumentQuery owningQuery) {
 		this.owningQuery = owningQuery;
 	}
 
@@ -349,8 +349,8 @@ public class DocumentFilter implements Cloneable, org.skyve.persistence.Document
 	}
 
 	@Override
-	protected DocumentFilter clone() throws CloneNotSupportedException {
-		DocumentFilter result = (DocumentFilter) super.clone();
+	protected DocumentFilterImpl clone() throws CloneNotSupportedException {
+		DocumentFilterImpl result = (DocumentFilterImpl) super.clone();
 
 		result.filterClause = new StringBuilder(filterClause);
 

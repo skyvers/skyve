@@ -36,7 +36,6 @@ import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.DocumentQueryImpl;
 
 public class QueryImpl implements Query {
 	/**
@@ -186,7 +185,7 @@ public class QueryImpl implements Query {
 		Map<String, Object> implicitParameters = new TreeMap<>();
 		String replacedFromClause = replaceImplicitExpressions(getFromClause(), implicitParameters, user, customer);
 		String replacedFilterClause = replaceImplicitExpressions(getFilterClause(), implicitParameters, user, customer);
-		DocumentQuery result = new DocumentQueryImpl(document, replacedFromClause, replacedFilterClause);
+		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause);
 		if (! implicitParameters.isEmpty()) {
 			result.getParameters().putAll(implicitParameters);
 		}

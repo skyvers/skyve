@@ -101,8 +101,9 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.AutoClosingBeanIterable;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.BizQL;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -121,20 +122,15 @@ import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.BizQLImpl;
-import org.skyve.wildcat.persistence.ProjectionQuery;
-import org.skyve.wildcat.persistence.SQLImpl;
+import org.skyve.wildcat.persistence.AbstractBizQL;
+import org.skyve.wildcat.persistence.AbstractSQL;
 import org.skyve.wildcat.util.BeanVisitor;
-import org.skyve.wildcat.util.HibernateAutoClosingBeanIterable;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.ValidationUtil;
 
 import com.vividsolutions.jts.geom.Geometry;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1813679859498468849L;
 
 	private static final String DIALECT_PACKAGE = "org.hibernate.dialect.";
@@ -1270,47 +1266,6 @@ t.printStackTrace();
 		abstract void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) throws Exception;
 	}
 	
-	@Override
-	public void executeDML(BizQL dml)
-	throws DomainException, MetaDataException {
-		Query query = session.createQuery(((BizQLImpl) dml).toQueryString());
-		Map<String, Object> parameters = dml.getParameters();
-		if (parameters != null) {
-			for (Entry<String, Object> entry : parameters.entrySet()) {
-				query.setParameter(entry.getKey(), entry.getValue());
-			}
-		}
-
-		query.executeUpdate();
-	}
-
-	@Override
-	public void executeInsecureSQLDML(SQL sql)
-	throws DomainException, MetaDataException {
-		SQLQuery query = createQueryFromSQL(sql);
-		query.executeUpdate();
-	}
-
-	@Override
-	public List<Object> retrieveInsecureSQL(SQL sql)
-	throws DomainException, MetaDataException {
-		SQLQuery query = createQueryFromSQL(sql);
-		return query.list();
-	}
-
-	private SQLQuery createQueryFromSQL(SQL sql) {
-		SQLQuery result = session.createSQLQuery(((SQLImpl) sql).toQueryString());
-
-		Map<String, Object> parameters = sql.getParameters();
-		if (parameters != null) {
-			for (Entry<String, Object> entry : parameters.entrySet()) {
-				result.setParameter(entry.getKey(), entry.getValue());
-			}
-		}
-		
-		return result;
-	}
-	
 	// Do not increase visibility of this method as we don't want it to be public.
 	private void checkReferentialIntegrityOnDelete(Document document, 
 													PersistentBean beanToDelete, 
@@ -1780,127 +1735,6 @@ t.printStackTrace();
 		removeBeanContent(loadedBean);
 	}
 	
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends Bean> List<T> retrieve(org.skyve.persistence.Query query, Integer firstResult, Integer maxResults)
-	throws DomainException {
-		try {
-			ProjectionQuery internalQuery = (ProjectionQuery) query;
-			String queryString = internalQuery.toQueryString();
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(queryString + " executed on thread " + Thread.currentThread() + ", em = " + em);
-
-			Query hibernateQuery = ((HibernateEntityManager) em).getSession().createQuery(queryString);
-			if ((firstResult != null) && (firstResult.intValue() >= 0)) {
-				hibernateQuery.setFirstResult(firstResult.intValue());
-			}
-			if ((maxResults != null) && (maxResults.intValue() >= 0)) {
-				hibernateQuery.setMaxResults(maxResults.intValue());
-			}
-
-			Map<String, Object> parameters = query.getParameters();
-			if (parameters != null) {
-				for (Entry<String, Object> entry : parameters.entrySet()) {
-					Object value = entry.getValue();
-					if (value instanceof Geometry) {
-						hibernateQuery.setParameter(entry.getKey(), value, GeometryUserType.TYPE);
-					}
-					else {
-						hibernateQuery.setParameter(entry.getKey(), value);
-					}
-				}
-			}
-
-			// Replace bogus _ property names with the dot
-			String[] aliases = hibernateQuery.getReturnAliases().clone();
-			for (int i = 0, length = aliases.length; i < length; i++) {
-				aliases[i] = aliases[i].replace('_', '.');
-			}
-
-			List<?> results = hibernateQuery.list();
-			List<T> beans = new ArrayList<>(results.size());
-
-			for (Object result : results) {
-				if (result instanceof Bean) {
-					beans.add((T) result);
-				}
-				else {
-					Map<String, Object> properties = new TreeMap<>();
-
-					if (result instanceof Object[]) {
-						Object[] resultArray = (Object[]) result;
-
-						int index = 0;
-						while (index < aliases.length) {
-							properties.put(aliases[index], resultArray[index]);
-							index++;
-						}
-					}
-					else {
-						properties.put(aliases[0], result);
-					}
-
-					beans.add((T) new MapBean(internalQuery.getDrivingModuleName(), 
-												internalQuery.getDrivingDocumentName(), 
-												properties));
-				}
-			}
-
-			return beans;
-		}
-		catch (Exception e) {
-			throw new DomainException(e);
-		}
-	}
-
-	@Override
-	public <T extends Bean> AutoClosingBeanIterable<T> iterate(org.skyve.persistence.Query query, 
-																Integer firstResult, 
-																Integer maxResults)
-	throws DomainException {
-		try {
-			ProjectionQuery internalQuery = (ProjectionQuery) query;
-			String queryString = internalQuery.toQueryString();
-			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(queryString + " executed on thread " + Thread.currentThread() + ", em = " + em);
-
-			Query hibernateQuery = session.createQuery(queryString);
-			if ((firstResult != null) && (firstResult.intValue() >= 0)) {
-				hibernateQuery.setFirstResult(firstResult.intValue());
-			}
-			if ((maxResults != null) && (maxResults.intValue() >= 0)) {
-				hibernateQuery.setMaxResults(maxResults.intValue());
-			}
-
-			Map<String, Object> parameters = query.getParameters();
-			if (parameters != null) {
-				for (Entry<String, Object> entry : parameters.entrySet()) {
-					Object value = entry.getValue();
-					if (value instanceof Geometry) {
-						hibernateQuery.setParameter(entry.getKey(), value, GeometryUserType.TYPE);
-					}
-					else {
-						hibernateQuery.setParameter(entry.getKey(), value);
-					}
-				}
-			}
-
-			// Replace bogus _ property names with the dot
-			String[] aliases = hibernateQuery.getReturnAliases().clone();
-			for (int i = 0, length = aliases.length; i < length; i++) {
-				aliases[i] = aliases[i].replace('_', '.');
-			}
-
-			ScrollableResults results = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-
-			return new HibernateAutoClosingBeanIterable<>(internalQuery.getDrivingModuleName(), 
-															internalQuery.getDrivingDocumentName(), 
-															results, 
-															aliases);
-		}
-		catch (Exception e) {
-			throw new DomainException(e);
-		}
-	}
-
 	@SuppressWarnings("deprecation")
 	public final Connection getConnection() {
 		return session.connection();
@@ -2107,5 +1941,37 @@ t.printStackTrace();
 	 */
 	public final Session getSession() {
 		return session;
+	}
+
+	@Override
+	public SQL newSQL(String query) {
+		return new HibernateSQL(query, this);
+	}
+
+	@Override
+	public BizQL newBizQL(String query) {
+		return new HibernateBizQL(query, this);
+	}
+
+	@Override
+	public DocumentQuery newDocumentQuery(Document document) {
+		return new HibernateDocumentQuery(document, this);
+	}
+
+	@Override
+	public DocumentQuery newDocumentQuery(String moduleName, String documentName)
+	throws MetaDataException {
+		return new HibernateDocumentQuery(moduleName, documentName, this);
+	}
+
+	@Override
+	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause) {
+		return new HibernateDocumentQuery(document, fromClause, filterClause, this);
+	}
+
+	@Override
+	public DocumentQuery newDocumentQuery(Bean queryByExampleBean)
+	throws Exception {
+		return new HibernateDocumentQuery(queryByExampleBean, this);
 	}
 }

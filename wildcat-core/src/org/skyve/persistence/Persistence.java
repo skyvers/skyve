@@ -1,7 +1,6 @@
 package org.skyve.persistence;
 
 import java.io.Serializable;
-import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -111,24 +110,6 @@ public interface Persistence extends Serializable {
 
 	/**
 	 * 
-	 * @param dml
-	 * @throws DomainException
-	 * @throws MetaDataException
-	 */
-	public void executeDML(BizQL dml) throws DomainException, MetaDataException;
-
-	/**
-	 * Need to take into account the customer/user you are running as.
-	 * 
-	 * @param dml
-	 * @throws DomainException
-	 * @throws MetaDataException
-	 */
-	public void executeInsecureSQLDML(SQL dml) 
-	throws DomainException, MetaDataException;
-
-	/**
-	 * 
 	 * @param bean
 	 * @throws DomainException
 	 * @throws MetaDataException
@@ -144,16 +125,6 @@ public interface Persistence extends Serializable {
 	 * @throws MetaDataException
 	 */
 	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName)
-	throws DomainException, MetaDataException;
-
-	/**
-	 * 
-	 * @param sql
-	 * @return
-	 * @throws DomainException
-	 * @throws MetaDataException
-	 */
-	public List<Object> retrieveInsecureSQL(SQL sql) 
 	throws DomainException, MetaDataException;
 
 	/**
@@ -181,64 +152,6 @@ public interface Persistence extends Serializable {
 	public <T extends Bean> T retrieve(String moduleName, String documentName, String id, boolean forUpdate) 
 	throws DomainException, MetaDataException;
 
-	/**
-	 * 
-	 * @param query
-	 * @return
-	 * @throws DomainException
-	 */
-	public <T extends Bean> List<T> retrieve(Query query)
-	throws DomainException;
-	
-	/**
-	 * 
-	 * @param query
-	 * @param firstResult
-	 * @param maxResults
-	 * @return
-	 * @throws DomainException
-	 */
-	public <T extends Bean> List<T> retrieve(Query query, Integer firstResult, Integer maxResults)
-	throws DomainException;
-
-	/**
-	 * Use a scrollable result set to iterate over a query, thus not instantiating thousands of objects up front.
-	 * 
-	 * Use like this
-	 * <code><pre>
-	 * try (AutoClosingBeanIterable&lt;MyBean&gt; beans = persistence.iterate(beansQuery)) {
-	 *     for (MyBean bean : beans) {
-	 *     }
-	 * }
-	 * </pre></code>
-	 * 
-	 * @param query
-	 * @return
-	 * @throws DomainException
-	 */
-	public <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query)
-	throws DomainException;
-	
-	/**
-	 * Use a scrollable result set to iterate over a query, thus not instantiating thousands of objects up front.
-	 * 
-	 * Use like this
-	 * <code><pre>
-	 * try (AutoClosingBeanIterable&lt;MyBean&gt; beans = persistence.iterate(beansQuery, Integer.valueOf(0), Integer.valueOf(100)) {
-	 *     for (MyBean bean : beans) {
-	 *     }
-	 * }
-	 * </pre></code>
-	 * 
-	 * @param <T> extends Bean. The type of bean the iterable will yield.
-	 * @param query The query to run.
-	 * @param firstResult For paged querying.
-	 * @param maxResults For paged querying.
-	 * @return An Iterable<T>.
-	 * @throws DomainException
-	 */
-	public <T extends Bean> AutoClosingBeanIterable<T> iterate(Query query, Integer firstResult, Integer maxResults)
-	throws DomainException;
 
 	/**
 	 * 

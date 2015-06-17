@@ -8,15 +8,15 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.persistence.SQL;
 
-public class SQLImpl extends QueryImpl implements SQL {
+public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	private String query = null;
 
-	public SQLImpl(String query) {
+	public AbstractSQL(String query) {
 		this.query = query;
 	}
 
 	@Override
-	public void putParameter(String name, Object value) {
+	public AbstractSQL putParameter(String name, Object value) {
 		if (value instanceof Decimal) {
 			super.putParameter(name, ((Decimal) value).bigDecimalValue());
 		}
@@ -32,6 +32,7 @@ public class SQLImpl extends QueryImpl implements SQL {
 		else {
 			super.putParameter(name, value);
 		}
+		return this;
 	}
 
 	@Override
