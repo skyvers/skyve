@@ -3,6 +3,7 @@ package org.skyve.wildcat.persistence.hibernate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
@@ -56,16 +57,13 @@ class HibernateQueryDelegate {
 			result.setMaxResults(maxResults);
 		}
 
-		Map<String, Object> parameters = query.getParameters();
-		if (parameters != null) {
-			for (Entry<String, Object> entry : parameters.entrySet()) {
-				Object value = entry.getValue();
-				if (value instanceof Geometry) {
-					result.setParameter(entry.getKey(), value, GeometryUserType.TYPE);
-				}
-				else {
-					result.setParameter(entry.getKey(), value);
-				}
+		for (String parameterName : query.getParameterNames()) {
+			Object value = query.getParameter(parameterName);
+			if (value instanceof Geometry) {
+				result.setParameter(parameterName, value, GeometryUserType.TYPE);
+			}
+			else {
+				result.setParameter(parameterName, value);
 			}
 		}
 
@@ -157,10 +155,13 @@ class HibernateQueryDelegate {
 	
 	int execute(AbstractQuery query) {
 		Query hibernateQuery = session.createQuery(query.toQueryString());
-		Map<String, Object> parameters = query.getParameters();
-		if (parameters != null) {
-			for (Entry<String, Object> entry : parameters.entrySet()) {
-				hibernateQuery.setParameter(entry.getKey(), entry.getValue());
+		for (String parameterName : query.getParameterNames()) {
+			Object value = query.getParameter(parameterName);
+			if (value instanceof Geometry) {
+				hibernateQuery.setParameter(parameterName, value, GeometryUserType.TYPE);
+			}
+			else {
+				hibernateQuery.setParameter(parameterName, value);
 			}
 		}
 

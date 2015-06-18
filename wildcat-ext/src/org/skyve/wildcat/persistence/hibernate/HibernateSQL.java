@@ -141,11 +141,8 @@ public class HibernateSQL extends AbstractSQL {
 		Session session = persistence.getSession();
 		SQLQuery result = session.createSQLQuery(toQueryString());
 
-		Map<String, Object> parameters = getParameters();
-		if (parameters != null) {
-			for (Entry<String, Object> entry : parameters.entrySet()) {
-				result.setParameter(entry.getKey(), entry.getValue());
-			}
+		for (String parameterName : getParameterNames()) {
+			result.setParameter(parameterName, getParameter(parameterName));
 		}
 		
 		return result;

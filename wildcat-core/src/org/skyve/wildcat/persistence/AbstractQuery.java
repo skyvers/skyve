@@ -2,6 +2,7 @@ package org.skyve.wildcat.persistence;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.skyve.domain.messages.DomainException;
@@ -16,11 +17,14 @@ public abstract class AbstractQuery implements Query {
 	protected String drivingModuleName;
 	protected String drivingDocumentName;
 
-	@Override
-	public final Map<String, Object> getParameters() {
-		return parameters;
+	public final Set<String> getParameterNames() {
+		return parameters.keySet();
 	}
 
+	public final Object getParameter(String name) {
+		return parameters.get(name);
+	}
+	
 	@Override
 	public Query putParameter(String name, Object value) {
 		parameters.put(name, value);

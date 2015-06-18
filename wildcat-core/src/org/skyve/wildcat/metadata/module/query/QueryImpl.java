@@ -187,7 +187,9 @@ public class QueryImpl implements Query {
 		String replacedFilterClause = replaceImplicitExpressions(getFilterClause(), implicitParameters, user, customer);
 		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause);
 		if (! implicitParameters.isEmpty()) {
-			result.getParameters().putAll(implicitParameters);
+			for (String implicitParameterName : implicitParameters.keySet()) {
+				result.putParameter(name, implicitParameters.get(implicitParameterName));
+			}
 		}
 		
 		if (summaryType == null) {

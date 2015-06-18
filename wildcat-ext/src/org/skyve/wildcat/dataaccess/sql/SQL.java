@@ -18,11 +18,14 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
 import org.skyve.util.Binder;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractQuery;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
@@ -59,19 +62,28 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 		
 		List<T> results = new ArrayList<>(100);
 		try {
+			User user = CORE.getUser();
+			Customer customer = user.getCustomer();
+			
+			// Collect all attributes for a document inheritance hierarchy
+			List<Attribute> attributes = new ArrayList<>(document.getAttributes());
+			Extends inherits = document.getExtends();
+			while (inherits != null) {
+				Module module = customer.getModule(document.getOwningModuleName());
+				Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
+				attributes.addAll(baseDocument.getAttributes());
+				inherits = baseDocument.getExtends();
+			}
+
 			@SuppressWarnings("resource")
 			Connection connection = dataAccess.getConnection();
-			User user = CORE.getUser();
-			
+
 			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(connection, toQueryString())) {
-				Map<String, Object> parameters = getParameters();
-				for (String name : parameters.keySet()) {
-					ps.setObject(name, parameters.get(name));
+				for (String parameterName : getParameterNames()) {
+					ps.setObject(parameterName, getParameter(parameterName));
 				}
 
 				try (ResultSet rs = ps.executeQuery()) {
-					List<? extends Attribute> attributes = document.getAttributes();
-
 					while (rs.next()) {
 						T bean = document.newInstance(user);
 	
@@ -186,8 +198,30 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) throws DomainException {
-		// TODO Auto-generated method stub
-		return null;
+		List<T> results = new ArrayList<>(100);
+		try {
+			@SuppressWarnings("resource")
+			Connection connection = dataAccess.getConnection();
+
+			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(connection, toQueryString())) {
+				for (String parameterName : getParameterNames()) {
+					ps.setObject(parameterName, getParameter(parameterName));
+				}
+
+				try (ResultSet rs = ps.executeQuery()) {
+					while (rs.next()) {
+						@SuppressWarnings("unchecked")
+						T result = (T) BindUtil.convert(type, rs.getObject(1));
+						results.add(result);
+					}
+				}
+			}
+		}
+		catch (Throwable t) {
+			throw new DomainException(t);
+		}
+
+		return results;
 	}
 
 	@Override
