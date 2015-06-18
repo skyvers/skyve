@@ -14,25 +14,19 @@ import org.skyve.wildcat.persistence.AbstractSQL;
 
 public class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
-	private String moduleName;
-	private String documentName;
 	
 	public HibernateSQL(String moduleName,
 							String documentName,
 							String query,
 							AbstractHibernatePersistence persistence) {
-		super(query);
-		this.moduleName = moduleName;
-		this.documentName = documentName;
+		super(moduleName, documentName, query);
 		this.persistence = persistence;
 	}
 
 	public HibernateSQL(Document document,
 							String query,
 							AbstractHibernatePersistence persistence) {
-		super(query);
-		this.moduleName = document.getOwningModuleName();
-		this.documentName = document.getName();
+		super(document, query);
 		this.persistence = persistence;
 	}
 
@@ -45,6 +39,9 @@ public class HibernateSQL extends AbstractSQL {
 	@Override
 	public <T extends Bean> List<T> beanResults() 
 	throws DomainException {
+		String moduleName = getModuleName();
+		String documentName = getDocumentName();
+		
 		if ((moduleName == null) || (documentName == null)) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
@@ -60,6 +57,9 @@ public class HibernateSQL extends AbstractSQL {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable()
 	throws DomainException {
+		String moduleName = getModuleName();
+		String documentName = getDocumentName();
+
 		if ((moduleName == null) || (documentName == null)) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}

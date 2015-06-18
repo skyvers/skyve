@@ -7,17 +7,36 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
 
 public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	private String query = null;
+	private String moduleName;
+	private String documentName;
 
 	public AbstractSQL(String query) {
 		this.query = query;
 	}
 
+	public AbstractSQL(String moduleName,
+							String documentName,
+							String query) {
+		this.moduleName = moduleName;
+		this.documentName = documentName;
+		this.query = query;
+	}
+
+	public AbstractSQL(Document document,
+							String query) {
+		this.moduleName = document.getOwningModuleName();
+		this.documentName = document.getName();
+		this.query = query;
+	}
+ 
 	@Override
 	public AbstractSQL putParameter(String name, Object value) {
 		if (value instanceof Decimal) {
@@ -32,6 +51,9 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		else if ((! (value instanceof java.sql.Date)) && (value instanceof Date)) {
 			super.putParameter(name, new java.sql.Date(((Date) value).getTime()));
 		}
+		else if (value instanceof Enumeration) {
+			super.putParameter(name, ((Enumeration) value).toCode());
+		}
 		else {
 			super.putParameter(name, value);
 		}
@@ -41,6 +63,14 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	@Override
 	public String toQueryString() {
 		return query;
+	}
+	
+	public String getModuleName() {
+		return moduleName;
+	}
+	
+	public String getDocumentName() {
+		return documentName;
 	}
 	
 	@Override
