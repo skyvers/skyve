@@ -1,5 +1,7 @@
 package org.skyve.wildcat.persistence;
 
+import org.skyve.persistence.DocumentQuery;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.DocumentFilter {
@@ -43,7 +45,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
 		if (not) {
 			filterClause.append(" not");
 		}
@@ -218,7 +220,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NULL");
+		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NULL");
 	}
 
 	@Override
@@ -226,7 +228,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NOT NULL");
+		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" IS NOT NULL");
 	}
 
 	@Override
@@ -239,7 +241,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
-		filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" BETWEEN ");
+		filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(" BETWEEN ");
 		filterClause.append(':').append(minParameterName).append(" and :").append(maxParameterName);
 	}
 
@@ -279,35 +281,34 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 									boolean addNullTest,
 									String functionPrefix,
 									String functionSuffix) {
-		boolean isALikeOperator = (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator));
-
 		String parameterName = "param" + owningQuery.parameterNumber++;
-		if (! isALikeOperator) {
-			owningQuery.putParameter(parameterName, operand);
-		}
+		owningQuery.putParameter(parameterName, operand);
+
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
 		
 		if (addNullTest) {
-			filterClause.append('(').append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append('(').append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
 			filterClause.append(" IS NULL OR ");
 		}
-		if (isALikeOperator) {
-			filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
-			filterClause.append(operator).append('\'').append(operand).append('\'');
+
+		if (operator == null) {
+			filterClause.append(functionPrefix);
+			filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append(", :").append(parameterName).append(functionSuffix);
 		}
 		else {
-			if (operator == null) {
-				filterClause.append(functionPrefix);
-				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
-				filterClause.append(", :").append(parameterName).append(functionSuffix);
+			// like operator's must use str() around the column
+			if (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator)) {
+				filterClause.append("str(").append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(')');
 			}
 			else {
-				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
-				filterClause.append(operator).append(':').append(parameterName);
+				filterClause.append(DocumentQuery.THIS_ALIAS).append('.').append(binding);
 			}
+			filterClause.append(operator).append(':').append(parameterName);
 		}
+
 		if (addNullTest) {
 			filterClause.append(')');
 		}

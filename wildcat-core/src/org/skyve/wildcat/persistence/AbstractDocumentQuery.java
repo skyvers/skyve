@@ -1,8 +1,10 @@
 package org.skyve.wildcat.persistence;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -15,7 +17,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 import org.skyve.wildcat.util.UtilImpl;
 
-public abstract class AbstractDocumentQuery extends AbstractQuery implements Cloneable, DocumentQuery {
+public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
 	/**
 	 * Used to get metadata about the query's driving document
 	 */
@@ -266,22 +268,31 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Clo
 	}
 
 	@Override
-	public AbstractDocumentQuery clone() throws CloneNotSupportedException {
-		AbstractDocumentQuery result = (AbstractDocumentQuery) super.clone();
-
-		result.projectionClause = new StringBuilder(projectionClause);
-		result.fromClause = new StringBuilder(fromClause);
-		result.filter = ((org.skyve.wildcat.persistence.DocumentFilterImpl) filter).clone();
-		((org.skyve.wildcat.persistence.DocumentFilterImpl) result.filter).setQuery(this);
-		result.appendedOrderings = new LinkedHashMap<>(result.appendedOrderings);
-		result.insertedOrderings = new LinkedHashMap<>(result.insertedOrderings);
-		result.groupClause = new StringBuilder(groupClause);
-
-		return result;
+	public final Document getDrivingDocument() {
+		return drivingDocument;
+	}
+	
+	@Override
+	public final <T extends Bean> T beanResult() throws DomainException {
+		List<T> results = beanResults();
+		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final Document getDrivingDocument() {
-		return drivingDocument;
+	public final <T extends Bean> T projectedResult() throws DomainException {
+		List<T> results = projectedResults();
+		return AbstractQuery.assertOneResult(results);
+	}
+
+	@Override
+	public final <T> T scalarResult(Class<T> type) throws DomainException {
+		List<T> results = scalarResults(type);
+		return AbstractQuery.assertOneResult(results);
+	}
+
+	@Override
+	public final Object[] tupleResult() throws DomainException {
+		List<Object[]> results = tupleResults();
+		return AbstractQuery.assertOneResult(results);
 	}
 }

@@ -10,7 +10,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class Reindex {

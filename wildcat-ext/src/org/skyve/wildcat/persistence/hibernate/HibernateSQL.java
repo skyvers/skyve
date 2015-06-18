@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.skyve.domain.Bean;
@@ -66,34 +65,7 @@ public class HibernateSQL extends AbstractSQL {
 		}
 		try {
 			String entityName = persistence.getDocumentEntityName(moduleName, documentName);
-			return new HibernateAutoClosingIterable<T>(createQueryFromSQL().addEntity(entityName).scroll());
-		}
-		catch (Throwable t) {
-			throw new DomainException(t);
-		}
-	}
-
-	@Override
-	public <T extends Bean> List<T> projectedResults()
-	throws DomainException {
-		try {
-			Query q = createQueryFromSQL();
-			return new HibernateQueryDelegate(persistence).list(q, false, false, false);
-		}
-		catch (Throwable t) {
-			throw new DomainException(t);
-		}
-	}
-
-	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
-	throws DomainException {
-		try {
-			SQLQuery query = createQueryFromSQL();
-			return new HibernateAutoClosingIterable<T>(getDrivingModuleName(), 
-														getDrivingDocumentName(), 
-														query.scroll(),
-														query.getReturnAliases());
+			return new HibernateAutoClosingIterable<>(createQueryFromSQL().addEntity(entityName).scroll(), false, false);
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -104,14 +76,11 @@ public class HibernateSQL extends AbstractSQL {
 	public <T> List<T> scalarResults(Class<T> type)
 	throws DomainException {
 		try {
-			if (assertSingle && (query.getReturnAliases().length != 1)) {
+			List<T> results = createQueryFromSQL().list();
+			if ((! results.isEmpty()) && (results.get(0) instanceof Object[])) {
 				throw new DomainException("There should be only 1 projected value in the query");
 			}
-			else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
-				throw new DomainException("There should be more than 1 projected value in the query");
-			}
-
-			return createQueryFromSQL().list();
+			return results;
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -122,7 +91,7 @@ public class HibernateSQL extends AbstractSQL {
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
 	throws DomainException {
 		try {
-			return new HibernateAutoClosingIterable<T>(createQueryFromSQL().scroll());
+			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -130,10 +99,15 @@ public class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public List<Object[]> tupleResults()
 	throws DomainException {
 		try {
-			return createQueryFromSQL().list();
+			List<?> results = createQueryFromSQL().list();
+			if ((! results.isEmpty()) && (! (results.get(0) instanceof Object[]))) {
+				throw new DomainException("There should be more than 1 projected value in the query");
+			}
+			return (List<Object[]>) results;
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -144,7 +118,7 @@ public class HibernateSQL extends AbstractSQL {
 	public AutoClosingIterable<Object[]> tupleIterable()
 	throws DomainException {
 		try {
-			return new HibernateAutoClosingIterable<Object[]>(createQueryFromSQL().scroll());
+			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
@@ -163,8 +137,7 @@ public class HibernateSQL extends AbstractSQL {
 		}
 	}
 	
-	private SQLQuery createQueryFromSQL()
-	throws DomainException {
+	private SQLQuery createQueryFromSQL() {
 		Session session = persistence.getSession();
 		SQLQuery result = session.createSQLQuery(toQueryString());
 

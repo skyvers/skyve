@@ -15,19 +15,26 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	private ScrollableResults results = null;
 	private String[] aliases = null;
 	boolean closed = false;
-
-	public HibernateAutoClosingIterable(ScrollableResults results) {
-		this(null, null, results, null);
+	boolean first = true;
+	boolean assertSingle;
+	boolean assertMultiple;
+	
+	public HibernateAutoClosingIterable(ScrollableResults results, boolean assertSingle, boolean assertMultiple) {
+		this(null, null, results, null, assertSingle, assertMultiple);
 	}
 	
 	public HibernateAutoClosingIterable(String moduleName, 
 											String documentName, 
 											ScrollableResults results, 
-											String[] aliases) {
+											String[] aliases,
+											boolean assertSingle,
+											boolean assertMultiple) {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.results = results;
 		this.aliases = aliases;
+		this.assertSingle = assertSingle;
+		this.assertMultiple = assertMultiple;
 	}
 
 	private class HibernateIterator<Z> implements Iterator<Z> {
@@ -73,7 +80,16 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 			Z result = null;
 
 			Object[] tuple = results.get();
-
+			if (first) {
+				first = false;
+				if (assertSingle && (tuple.length != 1)) {
+					throw new IllegalStateException("There should be only 1 projected value in the query");
+				}
+				else if (assertMultiple && (tuple.length <= 1)) {
+					throw new IllegalStateException("There should be more than 1 projected value in the query");
+				}
+			}
+			
 			if (moduleName == null) {
 				if (tuple.length == 1) {
 					result = (Z) tuple[0];

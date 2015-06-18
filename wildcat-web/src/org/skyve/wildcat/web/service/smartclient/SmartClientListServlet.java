@@ -23,10 +23,9 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -49,8 +48,8 @@ import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.AbstractDocumentQuery;
+import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.TagUtil;
 import org.skyve.wildcat.util.UtilImpl;
@@ -370,12 +369,8 @@ public class SmartClientListServlet extends HttpServlet {
 		detailQuery.setMaxResults(endRow - startRow);
 		List<Bean> beans = detailQuery.projectedResults();
 		if (summaryType == null) {
-			try {
-    			summaryQuery = ((AbstractDocumentQuery) detailQuery).clone();
-    		} 
-    		catch (CloneNotSupportedException e) {
-    			throw new DomainException("Could not clone the detailQuery to make a summaryQuery");
-    		}
+			summaryQuery = query.constructDocumentQuery(AggregateFunction.Count, tagId);
+			addFilterCriteriaToQuery(module, document, summaryQuery, user, operator, criteria, parameters, tagId);
 			AbstractDocumentQuery internalSummaryQuery = (org.skyve.wildcat.persistence.AbstractDocumentQuery) summaryQuery;
 			internalSummaryQuery.clearProjections();
 			internalSummaryQuery.clearOrderings();

@@ -85,6 +85,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	}
 
 	@Override
+	public final <T extends Bean> T beanResult() throws DomainException {
+		List<T> results = beanResults();
+		return AbstractQuery.assertOneResult(results);
+	}
+
+	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable()
 	throws DomainException {
 		// No-op
@@ -96,6 +102,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	throws DomainException {
 		// No-op
 		return null;
+	}
+
+	@Override
+	public final <T extends Bean> T projectedResult() throws DomainException {
+		List<T> results = projectedResults();
+		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
@@ -113,6 +125,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	}
 
 	@Override
+	public final <T> T scalarResult(Class<T> type) throws DomainException {
+		List<T> results = scalarResults(type);
+		return AbstractQuery.assertOneResult(results);
+	}
+
+	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
 	throws DomainException {
 		// No-op
@@ -124,6 +142,12 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	throws DomainException {
 		// No-op
 		return null;
+	}
+
+	@Override
+	public final Object[] tupleResult() throws DomainException {
+		List<Object[]> results = tupleResults();
+		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override

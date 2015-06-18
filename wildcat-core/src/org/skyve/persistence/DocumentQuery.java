@@ -6,7 +6,7 @@ import org.skyve.metadata.model.document.Document;
 /**
  * 
  */
-public interface DocumentQuery extends Query, PagedQuery {
+public interface DocumentQuery extends Query, BeanQuery, ProjectedQuery, ScalarQuery, TupleQuery, PagedQuery {
 	/**
 	 * 
 	 */

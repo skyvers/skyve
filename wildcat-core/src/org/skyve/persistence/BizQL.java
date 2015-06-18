@@ -3,7 +3,7 @@ package org.skyve.persistence;
 /**
  * 
  */
-public interface BizQL extends Query, PagedQuery, DMLQuery {
+public interface BizQL extends Query, BeanQuery, ProjectedQuery, ScalarQuery, TupleQuery, PagedQuery, DMLQuery {
 	@Override
 	public BizQL putParameter(String name, Object value);
 	@Override

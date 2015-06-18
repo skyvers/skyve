@@ -134,7 +134,7 @@ class HibernateQueryDelegate {
 				else if (assertMultiple && (query.getReturnAliases().length <= 1)) {
 					throw new DomainException("There should be more than 1 projected value in the query");
 				}
-				return new HibernateAutoClosingIterable<>(results);
+				return new HibernateAutoClosingIterable<>(results, false, false);
 			}
 
 			// Replace bogus _ property names with the dot
@@ -146,7 +146,9 @@ class HibernateQueryDelegate {
 			return new HibernateAutoClosingIterable<>(drivingModuleName, 
 														drivingDocumentName, 
 														results, 
-														aliases);
+														aliases,
+														false,
+														false);
 		}
 		catch (Exception e) {
 			throw new DomainException(e);

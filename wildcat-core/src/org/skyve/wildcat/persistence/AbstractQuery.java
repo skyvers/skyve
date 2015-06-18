@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.domain.messages.NoResultsException;
@@ -38,55 +37,8 @@ public abstract class AbstractQuery implements Query {
 
 	public abstract String toQueryString();
 
-	@Override
-	public final <T extends Bean> T beanResult()
+	public static <T> T assertOneResult(List<T> results)
 	throws DomainException {
-		List<T> results = beanResults();
-		if (results.size() == 1) {
-			return results.get(0);
-		}
-		else if (results.isEmpty()) {
-			throw new NoResultsException();
-		}
-		else {
-			throw new ManyResultsException();
-		}
-	}
-
-	@Override
-	public final <T extends Bean> T projectedResult()
-	throws DomainException {
-		List<T> results = projectedResults();
-		if (results.size() == 1) {
-			return results.get(0);
-		}
-		else if (results.isEmpty()) {
-			throw new NoResultsException();
-		}
-		else {
-			throw new ManyResultsException();
-		}
-	}
-
-	@Override
-	public final <T> T scalarResult(Class<T> type)
-	throws DomainException {
-		List<T> results = scalarResults(type);
-		if (results.size() == 1) {
-			return results.get(0);
-		}
-		else if (results.isEmpty()) {
-			throw new NoResultsException();
-		}
-		else {
-			throw new ManyResultsException();
-		}
-	}
-
-	@Override
-	public final Object[] tupleResult()
-	throws DomainException {
-		List<Object[]> results = tupleResults();
 		if (results.size() == 1) {
 			return results.get(0);
 		}
