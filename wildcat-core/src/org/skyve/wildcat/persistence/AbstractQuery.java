@@ -49,4 +49,11 @@ public abstract class AbstractQuery implements Query {
 			throw new ManyResultsException();
 		}
 	}
+	
+	public static <T> T returnOneResult(List<T> results) {
+		if (results.isEmpty()) {
+			return null;
+		}
+		return results.get(0);
+	}
 }

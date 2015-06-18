@@ -275,11 +275,23 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public final <T extends Bean> T beanResult() throws DomainException {
 		List<T> results = beanResults();
+		return AbstractQuery.returnOneResult(results);
+	}
+
+	@Override
+	public final <T extends Bean> T retrieveBean() throws DomainException {
+		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
 	public final <T extends Bean> T projectedResult() throws DomainException {
+		List<T> results = projectedResults();
+		return AbstractQuery.returnOneResult(results);
+	}
+
+	@Override
+	public final <T extends Bean> T retrieveProjected() throws DomainException {
 		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -287,11 +299,23 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public final <T> T scalarResult(Class<T> type) throws DomainException {
 		List<T> results = scalarResults(type);
+		return AbstractQuery.returnOneResult(results);
+	}
+
+	@Override
+	public final <T> T retrieveScalar(Class<T> type) throws DomainException {
+		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
 	public final Object[] tupleResult() throws DomainException {
+		List<Object[]> results = tupleResults();
+		return AbstractQuery.returnOneResult(results);
+	}
+
+	@Override
+	public final Object[] retrieveTuple() throws DomainException {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}

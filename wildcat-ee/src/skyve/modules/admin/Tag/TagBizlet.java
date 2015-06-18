@@ -150,7 +150,7 @@ public class TagBizlet extends Bizlet<Tag> {
 		q.getFilter().addEquals(Tagged.tagPropertyName, bean);
 		q.addAggregateProjection(AggregateFunction.Count, Tagged.taggedBizIdPropertyName, "CountOfTagged");
 
-		bean.setNumberTagged(Integer.valueOf(q.scalarResult(Number.class).intValue()));
+		bean.setNumberTagged(Integer.valueOf(q.retrieveScalar(Number.class).intValue()));
 	}
 
 	/**

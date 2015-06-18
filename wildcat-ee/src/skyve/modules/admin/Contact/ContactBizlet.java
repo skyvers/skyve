@@ -90,7 +90,7 @@ public class ContactBizlet extends Bizlet<Contact> {
 					DocumentQuery qDG = pers.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 					qDG.getFilter().addEquals(Bean.DATA_GROUP_ID, contactBizDataGroupId);
 
-					DataGroup dg = qDG.beanResult();
+					DataGroup dg = qDG.retrieveBean();
 					user.setDataGroup(dg);
 
 					// save User

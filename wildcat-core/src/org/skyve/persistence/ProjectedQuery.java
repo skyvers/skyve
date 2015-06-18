@@ -8,5 +8,6 @@ import org.skyve.domain.messages.DomainException;
 public interface ProjectedQuery {
 	public <T extends Bean> List<T> projectedResults() throws DomainException;
 	public <T extends Bean> T projectedResult() throws DomainException;
+	public <T extends Bean> T retrieveProjected() throws DomainException;
 	public <T extends Bean> AutoClosingIterable<T> projectedIterable() throws DomainException;
 }

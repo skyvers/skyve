@@ -168,6 +168,12 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public final <T extends Bean> T projectedResult() throws DomainException {
 		List<T> results = projectedResults();
+		return AbstractQuery.returnOneResult(results);
+	}
+
+	@Override
+	public final <T extends Bean> T retrieveProjected() throws DomainException {
+		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 

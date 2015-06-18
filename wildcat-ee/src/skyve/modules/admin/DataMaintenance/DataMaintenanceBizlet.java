@@ -23,16 +23,14 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
-
-		DataMaintenance result = bean;
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery q = persistence.newDocumentQuery(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
-		List<DataMaintenance> d = q.beanResults();
-		if (d.size() > 0) {
-			result = d.get(0);
+		DataMaintenance result = q.beanResult();
+		if (result == null) {
+			result = bean;
 		}
 
-		return super.newInstance(result);
+		return bean;
 	}
 
 	@Override

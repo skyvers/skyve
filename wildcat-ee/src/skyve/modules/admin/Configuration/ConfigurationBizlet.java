@@ -1,14 +1,12 @@
 package modules.admin.Configuration;
 
-import java.util.List;
+import modules.admin.AdminUtil;
+import modules.admin.domain.Configuration;
 
 import org.skyve.CORE;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-
-import modules.admin.AdminUtil;
-import modules.admin.domain.Configuration;
 
 public class ConfigurationBizlet extends Bizlet<Configuration> {
 	/**
@@ -18,13 +16,11 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 
 	@Override
 	public Configuration newInstance(Configuration bean) throws Exception {
-		
-		Configuration result = bean;
 		Persistence persistence = CORE.getPersistence();
 		DocumentQuery q = persistence.newDocumentQuery(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
-		List<Configuration> parameters = q.beanResults();
-		if (parameters.size() > 0) {
-			result = parameters.get(0);
+		Configuration result = q.beanResult();
+		if (result == null) {
+			result = bean;
 		}
 
 		if (result.getPasswordComplexityModel() == null) {

@@ -545,7 +545,7 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 
 			if (queryParameter) {
-				query.getParameters().put(binding, value);
+				query.putParameter(binding, value);
 			}
 			else {
 				equalsOperatorRequired = equalsOperatorRequired || 
@@ -695,7 +695,7 @@ System.out.println(criterium);
 	    			value = fromString(binding, "value", valueString, customer, converter, type);
 	
 	    			if (queryParameter) {
-						query.getParameters().put(binding, value);
+						query.putParameter(binding, value);
 						continue;
 	    			}
 	
