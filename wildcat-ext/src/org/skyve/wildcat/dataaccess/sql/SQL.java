@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -52,6 +51,12 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	SQL(String query, SQLDataAccess dataAccess) {
 		super(query);
 		this.dataAccess = dataAccess;
+	}
+
+	@Override
+	public SQL putParameter(String name, Object value) {
+		super.putParameter(name, value);
+		return this;
 	}
 
 	@Override
