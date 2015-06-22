@@ -8,6 +8,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.model.document.Document;
@@ -50,6 +51,9 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 		}
 		else if ((! (value instanceof java.sql.Date)) && (value instanceof Date)) {
 			super.putParameter(name, new java.sql.Date(((Date) value).getTime()));
+		}
+		else if (value instanceof OptimisticLock) {
+			super.putParameter(name, ((OptimisticLock) value).toString());
 		}
 		else if (value instanceof Enumeration) {
 			super.putParameter(name, ((Enumeration) value).toCode());
