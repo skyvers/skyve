@@ -30,7 +30,8 @@ isc.EditView.addClassProperties({
 // refreshTimeInSeconds: null - number of seconds until a refresh is required
 // refreshConditionName: null - server-side condition name to enable refresh or not
 // refreshActionName: null - action to run on the server when doing the refresh
-//
+// opened: null - a javascript function callback executed after newInstance() and editInstance() return from the server
+// 
 // _heading: null - the heading HTML at the top of the list
 // _vm: ValuesManager - the values manager for the forms in this view
 // _actionPanel: ToolStrip - the top toolbar
@@ -233,6 +234,9 @@ isc.EditView.addMethods({
 						if (successCallback) {
 							successCallback(data);
 						}
+						if (me.opened) {
+							me.opened(data);
+						}
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
@@ -293,6 +297,9 @@ isc.EditView.addMethods({
 
 						if (successCallback) {
 							successCallback(data);
+						}
+						if (me.opened) {
+							me.opened(data);
 						}
 					}
 					else if (dsResponse.status == -1) {
