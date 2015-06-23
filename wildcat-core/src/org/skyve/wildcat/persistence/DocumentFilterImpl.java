@@ -281,6 +281,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 									boolean addNullTest,
 									String functionPrefix,
 									String functionSuffix) {
+/* TODO - str() can only be used on non-char columns otherwise it falls over in SQLServer 2012.
 		String parameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
@@ -309,6 +310,39 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 			filterClause.append(operator).append(':').append(parameterName);
 		}
 
+		if (addNullTest) {
+			filterClause.append(')');
+		}
+*/
+		boolean isALikeOperator = (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator));
+
+		String parameterName = "param" + owningQuery.parameterNumber++;
+		if (! isALikeOperator) {
+			owningQuery.putParameter(parameterName, operand);
+		}
+		if (filterClause.length() > 0) {
+			filterClause.append(" AND ");
+		}
+		
+		if (addNullTest) {
+			filterClause.append('(').append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append(" IS NULL OR ");
+		}
+		if (isALikeOperator) {
+			filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+			filterClause.append(operator).append('\'').append(operand).append('\'');
+		}
+		else {
+			if (operator == null) {
+				filterClause.append(functionPrefix);
+				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+				filterClause.append(", :").append(parameterName).append(functionSuffix);
+			}
+			else {
+				filterClause.append(org.skyve.persistence.DocumentQuery.THIS_ALIAS).append('.').append(binding);
+				filterClause.append(operator).append(':').append(parameterName);
+			}
+		}
 		if (addNullTest) {
 			filterClause.append(')');
 		}
