@@ -60,6 +60,7 @@
 		<unzip src="libs.zip" dest="${ear-path}/lib">
 			<patternset>
 				<include name="wildcat-ee/javaee/wildcat.ear/lib/*"/>
+				<exclude name="geodb*.jar" />
 			</patternset>
 			<flattenmapper/>
 		</unzip>

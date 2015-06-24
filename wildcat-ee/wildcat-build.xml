@@ -173,7 +173,7 @@
 		<delete dir="." includes="libs.zip" failonerror="false" />
 		<zip destfile="${staging.dir}/libs.zip"
 				basedir=".."
-				includes="wildcat-ee/lib/**,wildcat-ee/javaee/wildcat.ear/lib/**,wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,wildcat-ee/tools/lib/**,LICENSE.txt,DEPENDENCIES.txt"
+				includes="wildcat-ee/javaee/wildcat.ear/lib/**,wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/**,wildcat-ee/lib/javaee-api-7.0.jar,wildcat-ee/lib/wildcat-src.jar,wildcat-ee/tools/lib/com-jaspersoft-ireport.jar,wildcat-ee/tools/lib/UmlGraph.jar,wildcat-ee/tools/lib/wildcat-tools.jar,LICENSE.txt,DEPENDENCIES.txt"
 				excludes="**/.DS_Store"
 				duplicate="fail" />
 	</target>
