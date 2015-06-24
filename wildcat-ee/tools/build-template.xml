@@ -55,6 +55,34 @@
 		</java>
 	</target>
 
+	<target name="_wgetLibs" depends="clearBeforeAssemble" description="Retrieve WILDCAT libs from skyve.org">
+		<get src="http://www.skyve.org/downloads/libs.zip" dest="libs.zip" verbose="true" usetimestamp="true" />
+		<unzip src="libs.zip" dest="${ear-path}/lib">
+			<patternset>
+				<include name="wildcat-ee/javaee/wildcat.ear/lib/*"/>
+			</patternset>
+			<flattenmapper/>
+		</unzip>
+		<unzip src="libs.zip" dest="${war-path}/WEB-INF/lib">
+			<patternset>
+				<include name="wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/*"/>
+			</patternset>
+			<flattenmapper/>
+		</unzip>
+		<unzip src="libs.zip" dest="lib">
+			<patternset>
+				<include name="wildcat-ee/lib/*"/>
+			</patternset>
+			<flattenmapper/>
+		</unzip>
+		<unzip src="libs.zip" dest="tools/lib">
+			<patternset>
+				<include name="wildcat-ee/tools/lib/*"/>
+			</patternset>
+			<flattenmapper/>
+		</unzip>
+	</target>
+	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
 		<delete dir="${ear-path}/lib" includes="**" />
 		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
