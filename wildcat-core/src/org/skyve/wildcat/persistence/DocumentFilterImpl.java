@@ -1,10 +1,21 @@
 package org.skyve.wildcat.persistence;
 
+import org.skyve.CORE;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.wildcat.bind.BindUtil;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.DocumentFilter {
+public class DocumentFilterImpl implements DocumentFilter {
 	private static final String LIKE_OPERATOR = " like ";
 	private static final String NOT_LIKE_OPERATOR = " not like ";
 
@@ -28,7 +39,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 
 	@Override
 	public void addEquals(String binding, Object operand) {
-		appendRestriction(binding, " = ", operand, false, null, null);
+		appendRestriction(binding, " = ", operand, false, false, null, null);
 	}
 
 	@Override
@@ -62,157 +73,157 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 	
 	@Override
 	public void addNotEquals(String binding, Object operand) {
-		appendRestriction(binding, " != ", operand, false, null, null);
+		appendRestriction(binding, " != ", operand, false, false, null, null);
 	}
 
 	@Override
 	public void addGreaterThan(String binding, Object operand) {
-		appendRestriction(binding, " > ", operand, false, null, null);
+		appendRestriction(binding, " > ", operand, false, false, null, null);
 	}
 
 	@Override
 	public void addGreaterThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " >= ", operand, false, null, null);
+		appendRestriction(binding, " >= ", operand, false, false, null, null);
 	}
 
 	@Override
 	public void addLessThan(String binding, Object operand) {
-		appendRestriction(binding, " < ", operand, false, null, null);
+		appendRestriction(binding, " < ", operand, false, false, null, null);
 	}
 
 	@Override
 	public void addLessThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " <= ", operand, false, null, null);
+		appendRestriction(binding, " <= ", operand, false, false, null, null);
 	}
 
 	@Override
 	public void addLike(String binding, String operand) {
-		appendRestriction(binding, LIKE_OPERATOR, operand, false, null, null);
+		appendRestriction(binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null);
 	}
 
 	@Override
 	public void addNotLike(String binding, String operand) {
-		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, false, null, null);
+		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null);
 	}
 
 	@Override
 	public void addEquals(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "equals(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "equals(", ") = true");
 	}
 
 	@Override
 	public void addDisjoint(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "disjoint(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "disjoint(", ") = true");
 	}
 	
 	@Override
 	public void addIntersects(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "intersects(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "intersects(", ") = true");
 	}
 
 	@Override
 	public void addTouches(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "touches(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "touches(", ") = true");
 	}
 
 	@Override
 	public void addCrosses(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "crosses(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "crosses(", ") = true");
 	}
 
 	@Override
 	public void addWithin(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "within(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "within(", ") = true");
 	}
 	
 	@Override
 	public void addContains(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "contains(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "contains(", ") = true");
 	}
 	
 	@Override
 	public void addOverlaps(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, false, "overlaps(", ") = true");
+		appendRestriction(binding, null, geometry, false, false, "overlaps(", ") = true");
 	}
 	
 	@Override
 	public void addNullOrEquals(String binding, Object operand) {
-		appendRestriction(binding, " = ", operand, true, null, null);
+		appendRestriction(binding, " = ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrNotEquals(String binding, Object operand) {
-		appendRestriction(binding, " != ", operand, true, null, null);
+		appendRestriction(binding, " != ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrGreaterThan(String binding, Object operand) {
-		appendRestriction(binding, " > ", operand, true, null, null);
+		appendRestriction(binding, " > ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrGreaterThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " >= ", operand, true, null, null);
+		appendRestriction(binding, " >= ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrLessThan(String binding, Object operand) {
-		appendRestriction(binding, " < ", operand, true, null, null);
+		appendRestriction(binding, " < ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrLessThanOrEqualTo(String binding, Object operand) {
-		appendRestriction(binding, " <= ", operand, true, null, null);
+		appendRestriction(binding, " <= ", operand, true, false, null, null);
 	}
 
 	@Override
 	public void addNullOrLike(String binding, String operand) {
-		appendRestriction(binding, LIKE_OPERATOR, operand, true, null, null);
+		appendRestriction(binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null);
 	}
 
 	@Override
 	public void addNullOrNotLike(String binding, String operand) {
-		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, true, null, null);
+		appendRestriction(binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null);
 	}
 
 	@Override
 	public void addNullOrEquals(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "equals(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "equals(", ") = true");
 	}
 
 	@Override
 	public void addNullOrDisjoint(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "disjoint(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "disjoint(", ") = true");
 	}
 	
 	@Override
 	public void addNullOrIntersects(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "intersects(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "intersects(", ") = true");
 	}
 
 	@Override
 	public void addNullOrTouches(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "touches(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "touches(", ") = true");
 	}
 
 	@Override
 	public void addNullOrCrosses(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "crosses(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "crosses(", ") = true");
 	}
 
 	@Override
 	public void addNullOrWithin(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "within(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "within(", ") = true");
 	}
 	
 	@Override
 	public void addNullOrContains(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "contains(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "contains(", ") = true");
 	}
 	
 	@Override
 	public void addNullOrOverlaps(String binding, Geometry geometry) {
-		appendRestriction(binding, null, geometry, true, "overlaps(", ") = true");
+		appendRestriction(binding, null, geometry, true, false, "overlaps(", ") = true");
 	}
 	
 	@Override
@@ -247,41 +258,41 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 
 	@Override
 	public void addCollectionSizeEquals(String binding, int operand) {
-		appendRestriction(binding, ".size = ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size = ", new Integer(operand), false, false, null, null);
 	}
 
 	@Override
 	public void addCollectionSizeNotEquals(String binding, int operand) {
-		appendRestriction(binding, ".size != ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size != ", new Integer(operand), false, false, null, null);
 	}
 
 	@Override
 	public void addCollectionSizeGreaterThan(String binding, int operand) {
-		appendRestriction(binding, ".size > ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size > ", new Integer(operand), false, false, null, null);
 	}
 
 	@Override
 	public void addCollectionSizeGreaterThanOrEqualTo(String binding, int operand) {
-		appendRestriction(binding, ".size >= ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size >= ", new Integer(operand), false, false, null, null);
 	}
 
 	@Override
 	public void addCollectionSizeLessThan(String binding, int operand) {
-		appendRestriction(binding, ".size < ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size < ", new Integer(operand), false, false, null, null);
 	}
 
 	@Override
 	public void addCollectionSizeLessThanOrEqualTo(String binding, int operand) {
-		appendRestriction(binding, ".size <= ", new Integer(operand), false, null, null);
+		appendRestriction(binding, ".size <= ", new Integer(operand), false, false, null, null);
 	}
 	
 	private void appendRestriction(String binding,
 									String operator,
 									Object operand,
 									boolean addNullTest,
+									boolean useStr,
 									String functionPrefix,
 									String functionSuffix) {
-/* TODO - str() can only be used on non-char columns otherwise it falls over in SQLServer 2012.
 		String parameterName = "param" + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 
@@ -300,8 +311,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 			filterClause.append(", :").append(parameterName).append(functionSuffix);
 		}
 		else {
-			// like operator's must use str() around the column
-			if (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator)) {
+			if (useStr) {
 				filterClause.append("str(").append(DocumentQuery.THIS_ALIAS).append('.').append(binding).append(')');
 			}
 			else {
@@ -313,7 +323,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (addNullTest) {
 			filterClause.append(')');
 		}
-*/
+/*
 		boolean isALikeOperator = (LIKE_OPERATOR.equals(operator) || NOT_LIKE_OPERATOR.equals(operator));
 
 		String parameterName = "param" + owningQuery.parameterNumber++;
@@ -346,6 +356,7 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		if (addNullTest) {
 			filterClause.append(')');
 		}
+*/
 	}
 
 	@Override
@@ -383,12 +394,46 @@ public class DocumentFilterImpl implements Cloneable, org.skyve.persistence.Docu
 		return (filterClause.length() > 0) ? filterClause.toString() : null;
 	}
 
-	@Override
-	protected DocumentFilterImpl clone() throws CloneNotSupportedException {
-		DocumentFilterImpl result = (DocumentFilterImpl) super.clone();
-
-		result.filterClause = new StringBuilder(filterClause);
-
-		return result;
+	private boolean useStr(String binding) {
+		try {
+			String lastBinding = binding;
+			int lastDotIndex = binding.lastIndexOf('.');
+			if (lastDotIndex > 0) {
+				lastBinding = binding.substring(lastDotIndex + 1);
+			}
+			if (BindUtil.isImplicit(lastBinding)) {
+				if (ChildBean.ORDINAL_KEY.equals(lastBinding) ||
+						PersistentBean.VERSION_NAME.equals(lastBinding)) {
+					return true;
+				}
+			}
+			else {
+				Customer customer = CORE.getUser().getCustomer();
+				Document document = owningQuery.drivingDocument;
+				Module module = customer.getModule(document.getOwningModuleName());
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				if (target != null) {
+					Attribute attribute = target.getAttribute();
+					if (attribute != null) {
+						AttributeType type = attribute.getAttributeType();
+						return AttributeType.bool.equals(type) ||
+								AttributeType.date.equals(type) ||
+								AttributeType.dateTime.equals(type) ||
+								AttributeType.decimal10.equals(type) ||
+								AttributeType.decimal2.equals(type) ||
+								AttributeType.decimal5.equals(type) ||
+								AttributeType.integer.equals(type) ||
+								AttributeType.longInteger.equals(type) ||
+								AttributeType.time.equals(type) ||
+								AttributeType.timestamp.equals(type);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			// do nothing - it'll return false below
+		}
+		
+		return false;
 	}
 }
