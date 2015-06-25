@@ -174,7 +174,9 @@ public abstract class BeanVisitor {
 				}
 
 				Document parentDocument = document.getParentDocument(customer); 
-				if (parentDocument != null) {
+				if ((parentDocument != null) && 
+						// child document, not a hierarchical document
+						(! document.getName().equals(parentDocument.getName()))) {
 					Bean parent = (bean == null) ? null : (Bean) BindUtil.get(bean, ChildBean.PARENT_NAME);
 					if ((parent != null) || visitNulls) {
 						sb.setLength(0);

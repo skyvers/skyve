@@ -630,30 +630,22 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				String documentName = item.getDocumentName();
 				String queryName = item.getQueryName();
 				String modelName = item.getModelName();
-				String parentBinding = item.getParentBinding();
 				
 				if (documentName != null) {
 					if ((queryName != null) ||
-							(modelName != null) ||
-							(parentBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [document] is present, then [model] and [query] should be absent " + 
-														"and [parentBinding] is required for menu item " + item.getName());
+							(modelName != null)) {
+						throw new MetaDataException(metaDataName + " : If [document] is present, " +
+														"then [model] and [query] should be absent for menu item " + 
+														item.getName());
 					}
 				}
 				else if (queryName != null) {
-					if ((modelName != null) ||
-							(parentBinding == null)) {
+					if (modelName != null) {
 						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
-														"and [parentBinding] is required for menu item " + item.getName());
+														"for menu item " + item.getName());
 					}
 				}
-				else if (modelName != null) {
-					if (parentBinding != null) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document], [query] and " + 
-														"[parentBinding] should be absent for menu item " + item.getName());
-					}
-				}
-				else {
+				else if (modelName == null) {
 					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
 													"is required for menu item " + item.getName());
 				}
@@ -661,7 +653,6 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				result.setDocumentName(documentName);
 				result.setModelName(modelName);
 				result.setQueryName(queryName);
-				result.setParentBinding(parentBinding);
 				
 				items.add(result);
 			}

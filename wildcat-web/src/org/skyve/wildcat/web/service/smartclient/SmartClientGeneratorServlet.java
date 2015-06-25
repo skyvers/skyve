@@ -108,6 +108,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
@@ -1061,6 +1062,19 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled)
 		throws MetaDataException {
+			visitGrid(grid, false);
+		}
+
+		@Override
+		public void visitTreeGrid(TreeGrid grid,
+									boolean parentVisible,
+									boolean parentEnabled)
+		throws MetaDataException {
+			visitGrid(grid, true);
+		}
+	
+		private void visitGrid(ListGrid grid, boolean tree)
+		throws MetaDataException {
 			Query query = module.getQuery(grid.getQueryName());
 			StringBuilder ds = new StringBuilder(256);
 			String dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
@@ -1068,6 +1082,9 @@ code.append("_view:view})");
 
 			listGridVariable = "v" + variableCounter++;
 			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
+			if (tree) {
+				code.append("isTree:true,");
+			}
 			code.append("ID:").append(IDExpression()).append(',');
 			String title = grid.getTitle();
 			if (title != null) {
@@ -1083,18 +1100,29 @@ code.append("_view:view})");
 			
 			eventsWithNoForm = true;
 		}
-
+		
 		@Override
 		public void visitedListGrid(ListGrid grid,
 										boolean parentVisible,
 										boolean parentEnabled) {
+			visitedGrid(grid);
+		}
+
+		@Override
+		public void visitedTreeGrid(TreeGrid grid,
+										boolean parentVisible,
+										boolean parentEnabled) {
+			visitedGrid(grid);
+		}
+
+		private void visitedGrid(ListGrid grid) {
 			appendFilterParameters(grid.getParameters(), code);
 			code.append("_view:view});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(listGridVariable).append(");\n");
 			listGridVariable = null;
 			eventsWithNoForm = false;
 		}
-
+		
 		@Override
 		public void visitPickList(PickList list,
 									boolean parentVisible,

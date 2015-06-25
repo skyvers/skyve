@@ -9,7 +9,6 @@ public class TreeItem extends AbstractMenuItem {
 	private String documentName;
 	private String queryName;
 	private String modelName;
-	private String parentBinding;
 
 	public String getDocumentName() {
 		return documentName;
@@ -30,11 +29,5 @@ public class TreeItem extends AbstractMenuItem {
 	}
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
-	}
-	public String getParentBinding() {
-		return parentBinding;
-	}
-	public void setParentBinding(String parentBinding) {
-		this.parentBinding = parentBinding;
 	}
 }

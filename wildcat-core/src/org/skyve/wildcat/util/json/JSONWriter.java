@@ -18,6 +18,7 @@ import java.util.Stack;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.OptimisticLock;
@@ -238,6 +239,12 @@ public class JSONWriter {
 					add(ChildBean.PARENT_NAME, childBean.getParent(), propertyNames, topLevel);
 					add(',');
 					add(ChildBean.ORDINAL_KEY, childBean.getBizOrdinal(), propertyNames, topLevel);
+				}
+				
+				if (bean instanceof HierarchicalBean<?>) {
+					HierarchicalBean<?> hierarchicalBean = (HierarchicalBean<?>) bean;
+					add(',');
+					add(HierarchicalBean.PARENT_ID, hierarchicalBean.getParentBizId(), propertyNames, topLevel);
 				}
 
 				if (bean instanceof AbstractPersistentBean) {

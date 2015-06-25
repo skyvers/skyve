@@ -117,6 +117,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridContainerCol
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.UtilImpl;
@@ -1268,6 +1269,15 @@ class ViewJSONManipulator extends ViewVisitor {
 		addCondition(grid.getInvisibleConditionName());
 	}
 
+	@Override
+	public void visitTreeGrid(TreeGrid grid,
+								boolean parentVisible,
+								boolean parentEnabled)
+	throws MetaDataException {
+		addCondition(grid.getDisabledConditionName());
+		addCondition(grid.getInvisibleConditionName());
+	}
+
 	private boolean visitingDataGrid = false;
 
 	@Override
@@ -1333,6 +1343,19 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 	@Override
 	public void visitedListGrid(ListGrid grid,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// keep this in sync with the generated edit views
+		if (ViewType.create.equals(view.getType())) {
+			createIdCounter++;
+		}
+		else {
+			editIdCounter++;
+		}
+	}
+
+	@Override
+	public void visitedTreeGrid(TreeGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// keep this in sync with the generated edit views

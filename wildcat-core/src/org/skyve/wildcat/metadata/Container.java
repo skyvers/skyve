@@ -27,6 +27,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.input.Comparison;
 import org.skyve.wildcat.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
@@ -54,6 +55,7 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = Comparison.class),
 						@XmlElementRef(type = DataGrid.class),
 						@XmlElementRef(type = ListGrid.class),
+						@XmlElementRef(type = TreeGrid.class),
 						@XmlElementRef(type = Inject.class)})
 	private List<MetaData> contained = new ArrayList<>();
 

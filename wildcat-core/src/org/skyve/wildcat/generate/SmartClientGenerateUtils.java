@@ -1350,6 +1350,11 @@ public class SmartClientGenerateUtils {
 			toAppendTo.append("{name:'bizFlagComment',title:'Flag'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		
+		if (documentName.equals(document.getParentDocumentName())) { // hierarchical
+			toAppendTo.append("{name:'parentBizId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
+			toAppendTo.append(dataSourceId).append(".bizId'},");
+		}
+		
 		List<String> hiddenBindingsList = new ArrayList<>();
 		if (forLookup instanceof LookupDescription) {
 			hiddenBindingsList.add(((LookupDescription) forLookup).getDescriptionBinding());

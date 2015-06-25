@@ -119,6 +119,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridContainerCol
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.DynamicImageServlet;
 import org.skyve.wildcat.web.UserAgent.UserAgentType;
@@ -899,6 +900,25 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedListGrid(ListGrid grid,
+									boolean parentVisible,
+									boolean parentEnabled)
+	throws MetaDataException {
+		currentGrid = null;
+		completeAddToContainer();
+	}
+
+	@Override
+	public void visitTreeGrid(TreeGrid grid,
+								boolean parentVisible,
+								boolean parentEnabled)
+	throws MetaDataException {
+		HtmlOutputLabel l = b.label(null, null, "listGrid", null);
+		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO list grid
+		currentGrid = grid;
+	}
+
+	@Override
+	public void visitedTreeGrid(TreeGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled)
 	throws MetaDataException {

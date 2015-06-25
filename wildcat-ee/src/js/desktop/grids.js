@@ -146,6 +146,8 @@ BizListGrid.addProperties({
 });
 
 // Config has 4 properties possible
+// For all 4 config possibilities, "isTree" will turn this list into a tree
+//
 // For ListView functionality
 // No parameters
 //
@@ -424,25 +426,29 @@ BizListGrid.addMethods({
 								// fieldNames[0] is bizTagged
 								// fieldNames[1] is "bizFlagComment"
 								var fieldState = me.getFieldState();
-								for (var i = 2, l = fieldNames.length; i < l; i++) {
-									var field = me._dataSource.getField(fieldNames[i]);
-									var dataGridField = me.grid.getField(fieldNames[i]);
-									var align = dataGridField ? dataGridField.align : "center";
-									if ((fieldState[i].visible === undefined) ||
-											(fieldState[i].visible == null) ||
-											(fieldState[i].visible)) {
-										selectedFields.add({name: fieldNames[i],
-																	title: field.title,
-																	line: 1,
-																	width: fieldState[i].width,
-																	align: align});
-									}
-									else {
-										unselectedFields.add({name: fieldNames[i],
-																	title: field.title,
-																	line: 1,
-																	width: 100,
-																	align: align});
+								for (var i = 0, l = fieldNames.length; i < l; i++) {
+									var fieldName = fieldNames[i];
+									if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
+										var field = me._dataSource.getField(fieldName);
+										var dataGridField = me.grid.getField(fieldName);
+										var align = dataGridField ? dataGridField.align : "center";
+										if (fieldState[i] && 
+											((fieldState[i].visible === undefined) ||
+												(fieldState[i].visible == null) ||
+												(fieldState[i].visible))) {
+											selectedFields.add({name: fieldName,
+																		title: field.title,
+																		line: 1,
+																		width: fieldState[i].width,
+																		align: align});
+										}
+										else {
+											unselectedFields.add({name: fieldName,
+																		title: field.title,
+																		line: 1,
+																		width: 100,
+																		align: align});
+										}
 									}
 								}
 								
@@ -858,7 +864,9 @@ BizListGrid.addMethods({
 		me.addMember(me._toolbar);
 		me.addMember(me._advancedFilter);
 		me.addMember(me.grid);
-		me.addMember(me._summaryGrid);
+		if (me._config.isTree) {} else {
+			me.addMember(me._summaryGrid);
+		}
 		
 		// _flagForm needs to be assigned after the BizListGrid object has been constructed
 		me._flagForm = me._flagDialog.items[0];
@@ -880,7 +888,8 @@ BizListGrid.addMethods({
 	
 	_createGrid: function(config, fields) {
 		var me = this;
-		me.grid = isc.ListGrid.create({
+
+		var gridConfig = {
 			// this is required to enable an edit view (or list view)
 			// to set data straight away instead of waiting for it to paint
 			autoDraw: true, 
@@ -989,7 +998,10 @@ BizListGrid.addMethods({
 					requestProperties = {};
 					requestProperties.params = {};
 				}
-				requestProperties.params._summary = me.summaryType;
+				
+				if (config.isTree) {} else {
+					requestProperties.params._summary = me.summaryType;
+				}
 				requestProperties.params._tagId = me.tagId;
 	
 				// if params are defined, ensure they are added to the filter criteria
@@ -1046,29 +1058,32 @@ BizListGrid.addMethods({
 						fields.setLength(fieldNames.length - 1);
 						// fieldNames[0] is "bizTagged"
 						// fieldNames[1] is "bizFlagComment"
-						for (var i = 2, l = fieldNames.length; i < l; i++) {
-							var field = me._dataSource.getField(fieldNames[i]);
-							var fieldType = 'float'; // for Count, Sum, Avg
-							var editorType = null;
-							// Ensure the format stays the same in the summary grid
-							if ((me.summaryType == 'Min') || (me.summaryType == 'Max')) {
-								fieldType = field.type;
-								if ((fieldType != 'comboBox') && 
-										(fieldType != 'enum') && 
-										(fieldType != 'select') &&
-										(fieldType != 'bizLookupDescription') && 
-										(fieldType != 'boolean')) {
-									editorType = field.editorType;
-								}
-							}
-							fields[i - 1] = {name: fieldNames[i], type: fieldType, editorType: editorType, canEdit: false};
-							if (fieldType == 'float') {
-								fields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
-									if (isc.isA.Boolean(value)) {
-										return null;
+						for (var i = 0, l = fieldNames.length; i < l; i++) {
+							var fieldName = fieldNames[i];
+							if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
+								var field = me._dataSource.getField(fieldName);
+								var fieldType = 'float'; // for Count, Sum, Avg
+								var editorType = null;
+								// Ensure the format stays the same in the summary grid
+								if ((me.summaryType == 'Min') || (me.summaryType == 'Max')) {
+									fieldType = field.type;
+									if ((fieldType != 'comboBox') && 
+											(fieldType != 'enum') && 
+											(fieldType != 'select') &&
+											(fieldType != 'bizLookupDescription') && 
+											(fieldType != 'boolean')) {
+										editorType = field.editorType;
 									}
-									return value;
-								};
+								}
+								fields[i - 1] = {name: fieldName, type: fieldType, editorType: editorType, canEdit: false};
+								if (fieldType == 'float') {
+									fields[i - 1].formatCellValue = function(value, record, rowNum, colNum, grid) {
+										if (isc.isA.Boolean(value)) {
+											return null;
+										}
+										return value;
+									};
+								}
 							}
 						}
 						me._summaryGrid.setFields(fields);
@@ -1110,9 +1125,11 @@ BizListGrid.addMethods({
 				}
 			},
 			getCellCSSText: function (record, rowNum, colNum) {
-				if (record.bizTagged) {
-		        	return "font-weight:bold;background-color:#B8D1EA;";
-		        }
+				if (record) {
+					if (record.bizTagged) {
+			        	return "font-weight:bold;background-color:#B8D1EA;";
+			        }
+				}
 		    }
 /*
 			showRollOverCanvas:true,
@@ -1137,7 +1154,22 @@ BizListGrid.addMethods({
 				]
 			}
 */
-		});
+			
+		};
+		if (config.isTree) {
+			gridConfig.folderIcon = null;
+			gridConfig.autoFetchData = true;
+			gridConfig.loadOnDemand = true;
+			// nsure that these properties when sent to the server start with an '_' and are thus ignored
+			gridConfig.dataProperties = {openProperty: '_isOpen', 
+											isFolderProperty: '_isFolder',
+											childrenProperty: '_children'};
+			gridConfig.dataFetchMode = 'paged';
+			me.grid = isc.TreeGrid.create(gridConfig);
+		}
+		else {
+			me.grid = isc.ListGrid.create(gridConfig);
+		}
 	},
 
 	setDisabled: function(disabled) {
@@ -1212,90 +1244,102 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		me.canCreate = me._dataSource.canCreate;
 		me.canUpdate = me._dataSource.canUpdate;
 		me.canDelete = me._dataSource.canDelete;
-				
+
 		var fields = [{name: "bizTagged",
-			width: 30,
-			align: 'center',
-			canHide: false,
-			canSort: false,
-			canToggle: true,
-			canGroupBy: false,
-			showHover: false,
-//			frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-			recordClick: function(viewer, // the parent list grid 
-									record, 
-									recordNum, 
-									field, 
-									fieldNum, 
-									value, 
-									rawValue) {
-				if (me.canUpdate && me.canEdit) {
-					if (me.tagId) {
-						me._eventRecord = record;
-						me._eventRowNum = recordNum;
-						me._eventColNum = fieldNum;
-						if (record.bizTagged) {
-							record.bizTagged = 'UNTAG';
+						width: 30,
+						align: 'center',
+						canHide: false,
+						canSort: false,
+						canToggle: true,
+						canGroupBy: false,
+						showHover: false,
+//						frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
+						recordClick: function(viewer, // the parent list grid 
+												record, 
+												recordNum, 
+												field, 
+												fieldNum, 
+												value, 
+												rawValue) {
+							if (record) {
+								if (me.canUpdate && me.canEdit) {
+									if (me.tagId) {
+										me._eventRecord = record;
+										me._eventRowNum = recordNum;
+										me._eventColNum = fieldNum;
+										if (record.bizTagged) {
+											record.bizTagged = 'UNTAG';
+										}
+										else {
+											record.bizTagged = 'TAG';
+										}
+										me.grid.updateData(record, '', {showPrompt: false, params: {_tagId: me.tagId}});
+									}
+									else {
+										isc.warn('Select or create a tag first from the tags menu in the list toolbar');
+									}
+								}
+							}
+							
+							return false; // do not allow list grid level record click event to fire
 						}
-						else {
-							record.bizTagged = 'TAG';
+					},
+					{name: "bizFlagComment", 
+						width: 40, 
+						align: 'center',
+						// Cant hide this field as the summary type
+						// relies on the real-estate this column uses.
+						canHide: false,
+//						frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
+						formatCellValue: function(value) {
+							if (value) {
+								return '<img src="images/flag.gif">';
+							}
+							else {
+								return '';
+							}
+						},
+						recordClick: function(viewer, // the parent list grid 
+												record, 
+												recordNum, 
+												field, 
+												fieldNum, 
+												value, 
+												rawValue) {
+							if (me.canUpdate && me.canEdit) {
+								me._eventRecord = record;
+								me._eventRowNum = recordNum;
+								me._eventColNum = fieldNum;
+								me._flagForm.editRecord(record);
+								me._flagDialog.show();
+							}
+							return false; // do not allow list grid level record click event to fire
+						},
+						hoverHTML: function(record, value, rowNum, colNum, grid) {
+							return record.bizFlagComment;
 						}
-						me.grid.updateData(record, '', {showPrompt: false, params: {_tagId: me.tagId}});
-					}
-					else {
-						isc.warn('Select or create a tag first from the tags menu in the list toolbar');
-					}
-				}
-				
-				return false; // do not allow list grid level record click event to fire
-			}
-		},
-   		{name: "bizFlagComment", 
-			width: 40, 
-			align: 'center',
-			// Cant hide this field as the summary type
-			// relies on the real-estate this column uses.
-			canHide: false,
-//			frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-			formatCellValue: function(value) {
-				if (value) {
-					return '<img src="images/flag.gif">';
-				}
-				else {
-					return '';
-				}
-			},
-			recordClick: function(viewer, // the parent list grid 
-									record, 
-									recordNum, 
-									field, 
-									fieldNum, 
-									value, 
-									rawValue) {
-				if (me.canUpdate && me.canEdit) {
-					me._eventRecord = record;
-					me._eventRowNum = recordNum;
-					me._eventColNum = fieldNum;
-					me._flagForm.editRecord(record);
-					me._flagDialog.show();
-				}
-				return false; // do not allow list grid level record click event to fire
-			},
-			hoverHTML: function(record, value, rowNum, colNum, grid) {
-				return record.bizFlagComment;
-			}
-		}];
+					}];
 
 		var fieldNames = me._dataSource.getFieldNames(true);
 		var hasDetailFields = false;
-		for (var i = 2; i < fieldNames.length; i++) { // don't include bizTag and bizFlag
-			var dsField = me._dataSource.getField(fieldNames[i]);
-			var gridField = {name: dsField.name, autoFitWidth: false, canToggle: false}; // don't allow toggling of boolean checkboxes without going into edit mode
-			if (dsField.canSave == false) {
-				gridField.canEdit = false;
+		var treeFieldNotSet = true;
+		for (var i = 0; i < fieldNames.length; i++) {
+			var fieldName = fieldNames[i];
+			if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
+				var dsField = me._dataSource.getField(fieldName);
+				if (dsField.foreignKey) {} else {
+					var gridField = {name: fieldName, autoFitWidth: false, canToggle: false}; // don't allow toggling of boolean checkboxes without going into edit mode
+					if (treeFieldNotSet) {
+						gridField.treeField = true;
+						treeFieldNotSet = false;
+					}
+					if (dsField.canSave == false) {
+						gridField.canEdit = false;
+					}
+					hasDetailFields = (hasDetailFields || dsField.detail);
+					fields.add(gridField);
+				}
 			}
-			hasDetailFields = (hasDetailFields || dsField.detail);
-			fields.add(gridField);
 		}
 
 		me._advancedFilter.setDataSource(me._dataSource);

@@ -18,6 +18,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -928,7 +929,8 @@ public final class BindUtil {
 	 * @param attributeName
 	 */
 	public static final boolean isImplicit(String attributeName) {
-		return (ChildBean.PARENT_NAME.equals(attributeName) ||
+		return (HierarchicalBean.PARENT_ID.equals(attributeName) ||
+					ChildBean.PARENT_NAME.equals(attributeName) ||
 					Bean.DOCUMENT_ID.equals(attributeName) ||
 					Bean.CUSTOMER_NAME.equals(attributeName) ||
 					Bean.DATA_GROUP_ID.equals(attributeName) ||

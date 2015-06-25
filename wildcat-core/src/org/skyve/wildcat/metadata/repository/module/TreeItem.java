@@ -13,7 +13,6 @@ public class TreeItem extends Item {
 	private String documentName;
 	private String queryName;
 	private String modelName;
-	private String parentBinding;
 	
 	public String getDocumentName() {
 		return documentName;
@@ -37,13 +36,5 @@ public class TreeItem extends Item {
 	@XmlAttribute(name = "model")
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
-	}
-
-	public String getParentBinding() {
-		return parentBinding;
-	}
-	@XmlAttribute(required = true)
-	public void setParentBinding(String parentBinding) {
-		this.parentBinding = UtilImpl.processStringValue(parentBinding);
 	}
 }

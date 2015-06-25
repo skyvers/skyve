@@ -93,6 +93,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridContainerCol
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 
 // TODO check suggestion attributes on text fields etc
 class ViewValidator extends ViewVisitor {
@@ -739,6 +740,17 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
 		validateQueryName(grid.getQueryName(), listGridIdentifier);
+	}
+
+	@Override
+	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled)
+	throws MetaDataException {
+		String treeGridIdentifier = "TreeGrid " + grid.getQueryName();
+		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
+		validateBinding(null, grid.getRootBinding(), false, false, false, true, treeGridIdentifier, AttributeType.text);
+		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
+		validateQueryName(grid.getQueryName(), treeGridIdentifier);
 	}
 
 	@Override
@@ -1509,6 +1521,12 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled)
+	throws MetaDataException {
+		// nothing to do here
+	}
+
+	@Override
+	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		// nothing to do here
 	}

@@ -967,13 +967,7 @@ isc.BizUtil.addClassMethods({
 	},
 	
 	createTreeGrid: function() {
-		return isc.TreeGrid.create({width: '100%',
-										height: '100%',
-										fields: [{name: "bizKey", title: 'Document'}],
-									    data: isc.Tree.create({modelType: "parent",
-														        idField: "bizId",
-														        parentIdField: "parent",
-														        data: []})});
+		return isc.BizListGrid.create({margin: 2, isTree: true});
 	},
 	
 	createMap: function() {

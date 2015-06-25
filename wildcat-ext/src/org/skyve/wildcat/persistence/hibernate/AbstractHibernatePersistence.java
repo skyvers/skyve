@@ -70,6 +70,7 @@ import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -1213,7 +1214,7 @@ t.printStackTrace();
 		}
 	}
 
-	private static final String PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
 	
 	private abstract class DeleteValidationBeanVisitor extends BeanVisitor {
 		@Override
@@ -1234,7 +1235,7 @@ t.printStackTrace();
 				boolean validate = (owningReference == null) || owningReference.isPersistent();
 
 				// check if binding isn't a parent binding - parent beans are not cascaded
-				validate = validate && (! binding.endsWith(PARENT_NAME_SUFFIX));
+				validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
 
 				// don't check aggregations as they are not cascaded
 				if (validate && (owningReference instanceof Association)) {
@@ -1733,14 +1734,15 @@ t.printStackTrace();
 	}
 	
 	private static final Integer NEW_VERSION = new Integer(0);
-	private static final String PARENT_ID = ChildBean.PARENT_NAME + "_id";
-
+	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
+	
 	@Override
 	public void upsertBeanTuple(PersistentBean bean)
 	throws DomainException, MetaDataException {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
+		String parentDocumentName = document.getParentDocumentName();
 		StringBuilder query = new StringBuilder(256);
 
 		if (bean.isPersisted()) { // update an existing row
@@ -1749,8 +1751,13 @@ t.printStackTrace();
 			query.append(',').append(PersistentBean.LOCK_NAME).append("=:").append(PersistentBean.LOCK_NAME);
 			query.append(',').append(Bean.DATA_GROUP_ID).append("=:").append(Bean.DATA_GROUP_ID);
 			query.append(',').append(Bean.BIZ_KEY).append("=:").append(Bean.BIZ_KEY);
-			if (document.getParentDocumentName() != null) {
-				query.append(',').append(PARENT_ID).append("=:").append(PARENT_ID);
+			if (parentDocumentName != null) {
+				if (parentDocumentName.equals(document.getName())) {
+					query.append(',').append(HierarchicalBean.PARENT_ID).append("=:").append(HierarchicalBean.PARENT_ID);
+				}
+				else {
+					query.append(',').append(CHILD_PARENT_ID).append("=:").append(CHILD_PARENT_ID);
+				}
 			}
 
 			for (Attribute attribute : document.getAttributes()) {
@@ -1784,9 +1791,15 @@ t.printStackTrace();
 			values.append(Bean.DATA_GROUP_ID).append(",:").append(Bean.BIZ_KEY).append(",:").append(Bean.USER_ID);
 
 			// Add parent if required
-			if (document.getParentDocumentName() != null) {
-				columns.append(',').append(PARENT_ID);
-				values.append(",:").append(PARENT_ID);
+			if (parentDocumentName != null) {
+				if (parentDocumentName.equals(document.getName())) {
+					columns.append(',').append(HierarchicalBean.PARENT_ID);
+					values.append(",:").append(HierarchicalBean.PARENT_ID);
+				}
+				else {
+					columns.append(',').append(CHILD_PARENT_ID);
+					values.append(",:").append(CHILD_PARENT_ID);
+				}
 			}
 			// Add fields and associations
 			for (Attribute attribute : document.getAttributes()) {
@@ -1827,8 +1840,13 @@ t.printStackTrace();
 		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey());
 
 		// Bind parent if required
-		if (document.getParentDocumentName() != null) {
-			sql.putParameter(PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId());
+		if (parentDocumentName != null) {
+			if (parentDocumentName.equals(document.getName())) {
+				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getParentBizId());
+			}
+			else {
+				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId());
+			}
 		}
 		// Bind fields and associations
 		for (Attribute attribute : document.getAttributes()) {

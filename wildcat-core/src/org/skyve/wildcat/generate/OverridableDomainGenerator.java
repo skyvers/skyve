@@ -655,20 +655,25 @@ joined tables
 			if (parentDocumentName != null) {
 				Document parentDocument = document.getParentDocument(null);
 				if (parentDocument.getPersistent() != null) {
-					// Add bizOrdinal ORM
-					if (document.isOrdered()) {
-						fw.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
+					if (parentDocumentName.equals(documentName)) { // hierarchical
+						fw.append(indent).append("\t\t<property name=\"parentBizId\" length=\"36\" />\n");
 					}
-	
-					// Add parent reference ORM
-					String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
-					fw.append(indent).append("\t\t<many-to-one name=\"parent\" entity-name=\"");
-					// reference overridden document if applicable
-					if (overriddenORMDocumentsPerCustomer.contains(parentModuleName + '.' + parentDocumentName)) {
-						fw.append(customerName);
+					else {
+						// Add bizOrdinal ORM
+						if (document.isOrdered()) {
+							fw.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
+						}
+		
+						// Add parent reference ORM
+						String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
+						fw.append(indent).append("\t\t<many-to-one name=\"parent\" entity-name=\"");
+						// reference overridden document if applicable
+						if (overriddenORMDocumentsPerCustomer.contains(parentModuleName + '.' + parentDocumentName)) {
+							fw.append(customerName);
+						}
+						fw.append(parentModuleName).append(parentDocumentName);
+						fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\" />\n");
 					}
-					fw.append(parentModuleName).append(parentDocumentName);
-					fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\" />\n");
 				}
 			}
 	
@@ -1204,12 +1209,14 @@ joined tables
 			// Propagate to parent document (if applicable)
 			Document parentDocument = document.getParentDocument(customer);
 			if (parentDocument != null) {
-				String parentModuleName = parentDocument.getOwningModuleName();
-				String parentDocumentName = parentDocument.getName();
-				String parentModuleDotDocument = parentModuleName + '.' + parentDocumentName;
-				System.out.println("\t" + parentModuleDotDocument);
-				Module parentModule = customer.getModule(parentModuleName);
-				generateOverriddenORM(fw, customer, parentModule, parentDocument, filterDefinitions);
+				if (! parentDocument.getName().equals(documentName)) { // exclude hierarchical
+					String parentModuleName = parentDocument.getOwningModuleName();
+					String parentDocumentName = parentDocument.getName();
+					String parentModuleDotDocument = parentModuleName + '.' + parentDocumentName;
+					System.out.println("\t" + parentModuleDotDocument);
+					Module parentModule = customer.getModule(parentModuleName);
+					generateOverriddenORM(fw, customer, parentModule, parentDocument, filterDefinitions);
+				}
 			}
 
 			// Propagate to exported references
@@ -1911,8 +1918,13 @@ joined tables
 		String parentDocumentName = document.getParentDocumentName();
 
 		if (parentDocumentName != null) {
-			imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
-			imports.add("org.skyve.domain.ChildBean");
+			if (parentDocumentName.equals(documentName)) { // hierarchical
+				imports.add("org.skyve.domain.HierarchicalBean");
+			}
+			else {
+				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
+				imports.add("org.skyve.domain.ChildBean");
+			}
 		}
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
@@ -2062,47 +2074,72 @@ joined tables
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
 		if (parentDocumentName != null) {
-			fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
+			if (parentDocumentName.equals(documentName)) { // hierarchical
+				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
+			}
+			else {
+				fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
+			}
 		}
 		fw.append(" {\n");
 		
 		// Add parent reference and bizOrdinal property 
 		// if this is a base class of a child document
-		if ((parentDocumentName != null) && ((! overridden) || (baseDocumentName == null))) {
-			attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
-
-			// Accessor method
-			methods.append("\n\t@Override\n");
-			methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
-			methods.append("\t\treturn parent;\n");
-			methods.append("\t}\n");
-
-			// Mutator method
-			methods.append("\n\t@Override\n");
-			methods.append("\t@XmlElement\n");
-			methods.append("\tpublic void setParent(");
-			methods.append(parentDocumentName).append(" parent) {\n");
-			methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
-			methods.append("\t\tthis.parent = ").append(" parent;\n");
-			methods.append("\t}\n");
-
-			// BizOrdinal property
-			
-			attributes.append("\tprivate Integer bizOrdinal;\n\n");
-
-			// Accessor method
-			methods.append("\n\t@Override\n");
-			methods.append("\tpublic Integer getBizOrdinal() {\n");
-			methods.append("\t\treturn bizOrdinal;\n");
-			methods.append("\t}\n");
-
-			// Mutator method
-			methods.append("\n\t@Override\n");
-			methods.append("\t@XmlElement\n");
-			methods.append("\tpublic void setBizOrdinal(Integer bizOrdinal) {\n");
-			methods.append("\t\tpreset(ChildBean.ORDINAL_KEY, bizOrdinal);\n");
-			methods.append("\t\tthis.bizOrdinal = ").append(" bizOrdinal;\n");
-			methods.append("\t}\n");
+		if ((parentDocumentName != null) && 
+				((! overridden) || (baseDocumentName == null))) {
+			if (parentDocumentName.equals(documentName)) {
+				attributes.append("\tprivate String parentBizId;\n\n");
+				
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic String getParentBizId() {\n");
+				methods.append("\t\treturn parentBizId;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setParentBizId(String parentBizId) {\n");
+				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, parentBizId);\n");
+				methods.append("\t\tthis.parentBizId = parentBizId;\n");
+				methods.append("\t}\n");
+			}
+			else {
+				attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
+	
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
+				methods.append("\t\treturn parent;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setParent(");
+				methods.append(parentDocumentName).append(" parent) {\n");
+				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
+				methods.append("\t\tthis.parent = ").append(" parent;\n");
+				methods.append("\t}\n");
+	
+				// BizOrdinal property
+				
+				attributes.append("\tprivate Integer bizOrdinal;\n\n");
+	
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic Integer getBizOrdinal() {\n");
+				methods.append("\t\treturn bizOrdinal;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setBizOrdinal(Integer bizOrdinal) {\n");
+				methods.append("\t\tpreset(ChildBean.ORDINAL_KEY, bizOrdinal);\n");
+				methods.append("\t\tthis.bizOrdinal = ").append(" bizOrdinal;\n");
+				methods.append("\t}\n");
+			}
 		}
 
 		fw.append("\t/**\n");

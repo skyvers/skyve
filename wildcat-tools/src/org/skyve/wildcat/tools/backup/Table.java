@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -42,8 +43,14 @@ class Table {
 		fields.put(PersistentBean.FLAG_COMMENT_NAME, AttributeType.text);
 		fields.put(Bean.DATA_GROUP_ID, AttributeType.text);
 		fields.put(Bean.USER_ID, AttributeType.text);
-		if (document.getParentDocumentName() != null) {
-			fields.put(ChildBean.PARENT_NAME + "_id", AttributeType.association);
+		String parentDocumentName = document.getParentDocumentName();
+		if (parentDocumentName != null) {
+			if (parentDocumentName.equals(document.getName())) { // hierarchical
+				fields.put(HierarchicalBean.PARENT_ID, AttributeType.text);
+			}
+			else {
+				fields.put(ChildBean.PARENT_NAME + "_id", AttributeType.association);
+			}
 		}
 		if (document.isOrdered()) {
 			fields.put(ChildBean.ORDINAL_KEY, AttributeType.integer);

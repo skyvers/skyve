@@ -173,8 +173,7 @@ ListView.addClassProperties({
 		ListView.contents.showMember(ListView._tree);
 
 		var ds = eval(ID);
-		ListView._tree.setDataSource(ds);
-		ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
+		ListView._setHeading(ListView._tree.setDataSource(ds), ds.icon, ds.modoc);
 	},
 
 	// set the data source for the list view map

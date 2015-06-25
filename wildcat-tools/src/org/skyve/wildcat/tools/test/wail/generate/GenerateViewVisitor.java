@@ -64,6 +64,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridContainerCol
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.tools.test.wail.language.TestCase;
 import org.skyve.wildcat.tools.test.wail.language.TestSuite;
 import org.skyve.wildcat.tools.test.wail.language.step.Call;
@@ -294,6 +295,20 @@ class GenerateViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedListGrid(ListGrid grid, boolean parentVisible,
+			boolean parentEnabled) throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitTreeGrid(TreeGrid grid, boolean parentVisible,
+			boolean parentEnabled) throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible,
 			boolean parentEnabled) throws MetaDataException {
 		// TODO Auto-generated method stub
 		

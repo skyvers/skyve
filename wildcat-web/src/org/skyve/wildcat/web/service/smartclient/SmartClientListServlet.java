@@ -22,6 +22,7 @@ import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
@@ -157,7 +158,7 @@ public class SmartClientListServlet extends HttpServlet {
 							continue;
 						}
 						String value = request.getParameter(name);
-						if (name.charAt(0) != '_') {
+						if ((! name.isEmpty()) && name.charAt(0) != '_') {
 							// no '.' allowed in smart client field names
 							name = name.replace('_', '.');
 							
@@ -189,7 +190,6 @@ public class SmartClientListServlet extends HttpServlet {
 							operator = SmartClientFilterOperator.valueOf(textMatchStyle);
 						}
 	
-						
 						String[] sortBys = request.getParameterValues("_sortBy");
 						SortParameter[] sortParameters = null;
 						if (sortBys != null) {
@@ -593,7 +593,8 @@ public class SmartClientListServlet extends HttpServlet {
 											tagId);
 	}
     
-	private static final String PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
+	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
 	private static void addAdvancedFilterCriteriaToQuery(Module module,
 															Document document,
@@ -686,9 +687,12 @@ System.out.println(criterium);
 	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 	    					}
 	    				}
-		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(PARENT_NAME_SUFFIX)) {
+		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
 		    				type = String.class;
 		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+		    			}
+		    			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
+		    				type = String.class;
 		    			}
 	    			}
 	    			
@@ -918,7 +922,10 @@ System.out.println(criterium);
     		}
     	}
     	else if (filterOperator == null) {
-			if (value != null) {
+    		if (HierarchicalBean.PARENT_ID.equals(binding) && (value == null)) {
+    			filter.addNull(binding);
+    		}
+    		else if (value != null) {
 				filter.addEquals(binding, value);
 			}
     	}
@@ -927,174 +934,180 @@ System.out.println(criterium);
     		if (value instanceof org.skyve.domain.types.Enumeration) {
     			revisedValue = ((org.skyve.domain.types.Enumeration) value).toCode();
     		}
-    		switch (filterOperator) {
-    		case substring:
-    		case iContains:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addLike(binding, sb.append('%').append(revisedValue).append('%').toString());
-    			}
-    			break;
-    		case iNotContains:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).append('%').toString());
-    			}
-    			break;
-    		case startsWith:
-    		case iStartsWith:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addLike(binding, sb.append(revisedValue).append('%').toString());
-    			}
-    			break;
-    		case iNotStartsWith:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addNullOrNotLike(binding, sb.append(revisedValue).append('%').toString());
-    			}
-    			break;
-    		case iEndsWith:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addLike(binding, sb.append('%').append(revisedValue).toString());
-    			}
-    			break;
-    		case iNotEndsWith:
-    			if (revisedValue != null) {
-    				StringBuilder sb = new StringBuilder(32);
-    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).toString());
-    			}
-    			break;
-    		case equals:
-    		case exact:
-    			if (revisedValue != null) {
-    				filter.addEquals(binding, value);
-    			}
-    			break;
-    		case iEquals:
-    			if (value != null) {
-    				filter.addLike(binding, revisedValue.toString());
-    			}
-    			break;
-    		case notEqual:
-    			if (value != null) {
-    				filter.addNotEquals(binding, value);
-    			}
-    			break;
-    		case iNotEqual:
-    			if (value != null) {
-    				filter.addNotLike(binding, revisedValue.toString());
-    			}
-    			break;
-    		case greaterThan:
-    			if (value != null) {
-    				filter.addGreaterThan(binding, value);
-    			}
-    			break;
-    		case greaterOrEqual:
-    			if (value != null) {
-    				filter.addGreaterThanOrEqualTo(binding, value);
-    			}
-    			break;
-    		case lessThan:
-    			if (value != null) {
-    				filter.addLessThan(binding, value);
-    			}
-    			break;
-    		case lessOrEqual:
-    			if (value != null) {
-    				filter.addLessThanOrEqualTo(binding, value);
-    			}
-    			break;
-    		case iBetweenInclusive:
-    		case betweenInclusive:
-    			if ((start != null) && (end != null)) {
-    				filter.addBetween(binding, start, end);
-    			}
-    			else if (start != null) {
-    				filter.addGreaterThanOrEqualTo(binding, start);
-    			}
-    			else if (end != null) {
-    				filter.addLessThanOrEqualTo(binding, end);
-    			}
-    			break;
-    		case isNull:
+
+    		if (HierarchicalBean.PARENT_ID.equals(binding) && (revisedValue == null)) {
     			filter.addNull(binding);
-    			break;
-    		case notNull:
-    			filter.addNotNull(binding);
-    			break;
-    		case equalsField:
+    		}
+    		else {
+	    		switch (filterOperator) {
+	    		case substring:
+	    		case iContains:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addLike(binding, sb.append('%').append(revisedValue).append('%').toString());
+	    			}
+	    			break;
+	    		case iNotContains:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).append('%').toString());
+	    			}
+	    			break;
+	    		case startsWith:
+	    		case iStartsWith:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addLike(binding, sb.append(revisedValue).append('%').toString());
+	    			}
+	    			break;
+	    		case iNotStartsWith:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addNullOrNotLike(binding, sb.append(revisedValue).append('%').toString());
+	    			}
+	    			break;
+	    		case iEndsWith:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addLike(binding, sb.append('%').append(revisedValue).toString());
+	    			}
+	    			break;
+	    		case iNotEndsWith:
+	    			if (revisedValue != null) {
+	    				StringBuilder sb = new StringBuilder(32);
+	    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).toString());
+	    			}
+	    			break;
+	    		case equals:
+	    		case exact:
+	    			if (revisedValue != null) {
+	    				filter.addEquals(binding, value);
+	    			}
+	    			break;
+	    		case iEquals:
+	    			if (value != null) {
+	    				filter.addLike(binding, revisedValue.toString());
+	    			}
+	    			break;
+	    		case notEqual:
+	    			if (value != null) {
+	    				filter.addNotEquals(binding, value);
+	    			}
+	    			break;
+	    		case iNotEqual:
+	    			if (value != null) {
+	    				filter.addNotLike(binding, revisedValue.toString());
+	    			}
+	    			break;
+	    		case greaterThan:
+	    			if (value != null) {
+	    				filter.addGreaterThan(binding, value);
+	    			}
+	    			break;
+	    		case greaterOrEqual:
+	    			if (value != null) {
+	    				filter.addGreaterThanOrEqualTo(binding, value);
+	    			}
+	    			break;
+	    		case lessThan:
+	    			if (value != null) {
+	    				filter.addLessThan(binding, value);
+	    			}
+	    			break;
+	    		case lessOrEqual:
+	    			if (value != null) {
+	    				filter.addLessThanOrEqualTo(binding, value);
+	    			}
+	    			break;
+	    		case iBetweenInclusive:
+	    		case betweenInclusive:
+	    			if ((start != null) && (end != null)) {
+	    				filter.addBetween(binding, start, end);
+	    			}
+	    			else if (start != null) {
+	    				filter.addGreaterThanOrEqualTo(binding, start);
+	    			}
+	    			else if (end != null) {
+	    				filter.addLessThanOrEqualTo(binding, end);
+	    			}
+	    			break;
+	    		case isNull:
+	    			filter.addNull(binding);
+	    			break;
+	    		case notNull:
+	    			filter.addNotNull(binding);
+	    			break;
+	    		case equalsField:
 // TODO
-    			break;
-    		case notEqualField:
+	    			break;
+	    		case notEqualField:
 // TODO
-    			break;
-			case greaterOrEqualField:
+	    			break;
+				case greaterOrEqualField:
 // TODO
-				break;
-			case greaterThanField:
+					break;
+				case greaterThanField:
 // TODO
-				break;
-			case lessOrEqualField:
+					break;
+				case lessOrEqualField:
 // TODO
-				break;
-			case lessThanField:
+					break;
+				case lessThanField:
 // TODO
-				break;
-    		case regexp: // Regular expression match
-    		case iregexp: // Regular expression match (case insensitive)
-    			break;
-    		case inSet: // value is in a set of values. Specify criterion.value as an Array
-    			break;
-    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
-    			break;
-    		case gWithin:
-				if (value instanceof Geometry) {
-					filter.addWithin(binding, (Geometry) value);
-				}
-				break;
-    		case gContains:
-				if (value instanceof Geometry) {
-					filter.addContains(binding, (Geometry) value);
-				}
-				break;
-    		case gCrosses:
-				if (value instanceof Geometry) {
-					filter.addCrosses(binding, (Geometry) value);
-				}
-				break;
-    		case gDisjoint:
-				if (value instanceof Geometry) {
-					filter.addDisjoint(binding, (Geometry) value);
-				}
-				break;
-    		case gEquals:
-				if (value instanceof Geometry) {
-					filter.addEquals(binding, (Geometry) value);
-				}
-				break;
-    		case gIntersects:
-				if (value instanceof Geometry) {
-					filter.addIntersects(binding, (Geometry) value);
-				}
-				break;
-    		case gOverlaps:
-				if (value instanceof Geometry) {
-					filter.addOverlaps(binding, (Geometry) value);
-				}
-				break;
-    		case gTouches:
-				if (value instanceof Geometry) {
-					filter.addTouches(binding, (Geometry) value);
-				}
-				break;
-    		case and:
-			case not:
-			case or:
-				break;
-			default:
+					break;
+	    		case regexp: // Regular expression match
+	    		case iregexp: // Regular expression match (case insensitive)
+	    			break;
+	    		case inSet: // value is in a set of values. Specify criterion.value as an Array
+	    			break;
+	    		case notInSet: // value is not in a set of values. Specify criterion.value as an Array
+	    			break;
+	    		case gWithin:
+					if (value instanceof Geometry) {
+						filter.addWithin(binding, (Geometry) value);
+					}
+					break;
+	    		case gContains:
+					if (value instanceof Geometry) {
+						filter.addContains(binding, (Geometry) value);
+					}
+					break;
+	    		case gCrosses:
+					if (value instanceof Geometry) {
+						filter.addCrosses(binding, (Geometry) value);
+					}
+					break;
+	    		case gDisjoint:
+					if (value instanceof Geometry) {
+						filter.addDisjoint(binding, (Geometry) value);
+					}
+					break;
+	    		case gEquals:
+					if (value instanceof Geometry) {
+						filter.addEquals(binding, (Geometry) value);
+					}
+					break;
+	    		case gIntersects:
+					if (value instanceof Geometry) {
+						filter.addIntersects(binding, (Geometry) value);
+					}
+					break;
+	    		case gOverlaps:
+					if (value instanceof Geometry) {
+						filter.addOverlaps(binding, (Geometry) value);
+					}
+					break;
+	    		case gTouches:
+					if (value instanceof Geometry) {
+						filter.addTouches(binding, (Geometry) value);
+					}
+					break;
+	    		case and:
+				case not:
+				case or:
+					break;
+				default:
+	    		}
     		}
     	}
     }

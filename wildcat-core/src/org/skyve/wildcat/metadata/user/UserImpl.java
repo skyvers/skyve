@@ -354,8 +354,7 @@ public class UserImpl implements User {
 				Module module = customer.getModule(beanBizModule);
 				Document document = module.getDocument(customer, beanBizDocument);
 				Document parentDocument = document.getParentDocument(customer);
-				if (parentDocument == null) // document has no parent
-				{
+				if (parentDocument == null) { // document has no parent
 					result = false;
 					if (UtilImpl.SECURITY_TRACE) {
 						StringBuilder trace = new StringBuilder(64);
@@ -366,43 +365,44 @@ public class UserImpl implements User {
 						UtilImpl.LOGGER.info(trace.toString());
 					}
 				}
-				else // found a parent document
-				{
-					StringBuilder sb = new StringBuilder(256);
-					sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
-					sb.append(Bean.CUSTOMER_NAME).append(", p.");
-					sb.append(Bean.DATA_GROUP_ID).append(", p.");
-					sb.append(Bean.USER_ID);
-					sb.append(" from ");
-					sb.append(parentDocument.getPersistent().getPersistentIdentifier());
-					sb.append(" as p inner join ");
-					sb.append(document.getPersistent().getPersistentIdentifier());
-					sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
-					sb.append(" = c.").append(ChildBean.PARENT_NAME);
-					sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
-					sb.append(Bean.DOCUMENT_ID);
-					Persistence p = AbstractPersistence.get();
-					List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId).tupleResults();
-					if (rows.isEmpty()) { // bean is still transient - user hasn't saved
-						result = true;
-					}
-					else {
-						Object[] values = rows.get(0);
-
-						// deny if user can't read parent document
-						result = canReadBean((String) values[0], 
-												parentDocument.getOwningModuleName(), 
-												parentDocument.getName(),
-												(String) values[1], 
-												(String) values[2], 
-												(String) values[3]);
-						if ((! result) && (UtilImpl.SECURITY_TRACE)) {
-							StringBuilder trace = new StringBuilder(64);
-							trace.append("Security - ");
-							trace.append(beanBizModule).append('.');
-							trace.append(beanBizDocument).append('.');
-							trace.append(beanBizId).append(" denied - no read on parent");
-							UtilImpl.LOGGER.info(trace.toString());
+				else { // found a parent document
+					if (! beanBizDocument.equals(parentDocument.getName())) { // exclude hierarchical documents
+						StringBuilder sb = new StringBuilder(256);
+						sb.append("select p.").append(Bean.DOCUMENT_ID).append(", p.");
+						sb.append(Bean.CUSTOMER_NAME).append(", p.");
+						sb.append(Bean.DATA_GROUP_ID).append(", p.");
+						sb.append(Bean.USER_ID);
+						sb.append(" from ");
+						sb.append(parentDocument.getPersistent().getPersistentIdentifier());
+						sb.append(" as p inner join ");
+						sb.append(document.getPersistent().getPersistentIdentifier());
+						sb.append(" as c on p.").append(Bean.DOCUMENT_ID);
+						sb.append(" = c.").append(ChildBean.PARENT_NAME);
+						sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
+						sb.append(Bean.DOCUMENT_ID);
+						Persistence p = AbstractPersistence.get();
+						List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId).tupleResults();
+						if (rows.isEmpty()) { // bean is still transient - user hasn't saved
+							result = true;
+						}
+						else {
+							Object[] values = rows.get(0);
+	
+							// deny if user can't read parent document
+							result = canReadBean((String) values[0], 
+													parentDocument.getOwningModuleName(), 
+													parentDocument.getName(),
+													(String) values[1], 
+													(String) values[2], 
+													(String) values[3]);
+							if ((! result) && (UtilImpl.SECURITY_TRACE)) {
+								StringBuilder trace = new StringBuilder(64);
+								trace.append("Security - ");
+								trace.append(beanBizModule).append('.');
+								trace.append(beanBizDocument).append('.');
+								trace.append(beanBizId).append(" denied - no read on parent");
+								UtilImpl.LOGGER.info(trace.toString());
+							}
 						}
 					}
 				}

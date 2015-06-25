@@ -9,6 +9,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
@@ -230,16 +231,25 @@ public final class StandardGenerator {
 
 					// Parent ID column
 					if (currentDocument.getParentDocumentName() != null) {
-						if (columnBindings.contains(ChildBean.PARENT_NAME)) {
-							sheet.setValue(ChildBean.PARENT_NAME, 
-											BindUtil.get(bean, new StringBuilder(32).append(ChildBean.PARENT_NAME).append('.').append(Bean.DOCUMENT_ID).toString()));
+						if (currentDocument.getParentDocumentName().equals(currentDocument.getName())) {
+							if (columnBindings.contains(HierarchicalBean.PARENT_ID)) {
+								sheet.setValue(HierarchicalBean.PARENT_ID, 
+												BindUtil.get(bean, HierarchicalBean.PARENT_ID));
+							}
+
 						}
-						
-						Document parentDocument = currentDocument.getParentDocument(customer);
-						Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
-						if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered()) &&
-								columnBindings.contains(ChildBean.ORDINAL_KEY)) {
-							sheet.setValue(ChildBean.ORDINAL_KEY, BindUtil.get(bean, ChildBean.ORDINAL_KEY));
+						else {
+							if (columnBindings.contains(ChildBean.PARENT_NAME)) {
+								sheet.setValue(ChildBean.PARENT_NAME, 
+												BindUtil.get(bean, new StringBuilder(32).append(ChildBean.PARENT_NAME).append('.').append(Bean.DOCUMENT_ID).toString()));
+							}
+							
+							Document parentDocument = currentDocument.getParentDocument(customer);
+							Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
+							if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered()) &&
+									columnBindings.contains(ChildBean.ORDINAL_KEY)) {
+								sheet.setValue(ChildBean.ORDINAL_KEY, BindUtil.get(bean, ChildBean.ORDINAL_KEY));
+							}
 						}
 					}
 				}
@@ -313,18 +323,24 @@ public final class StandardGenerator {
 		}
 
 		// add the parent if this is a child document
-		if (currentDocument.getParentDocumentName() != null) {
-			Document parentDocument = currentDocument.getParentDocument(customer);
-			column = new BizPortColumn(parentDocument.getSingularAlias() + " ID (Parent)",
-											"The 'Parent' link of the relationship.  Populate this with " + parentDocument.getSingularAlias() + " IDs.", 
-											AttributeType.text);
-			column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
-			sheet.addColumn(ChildBean.PARENT_NAME, column);
-
-			Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
-			if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
-				column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
-				sheet.addColumn(ChildBean.ORDINAL_KEY, column);
+		String parentDocumentName = currentDocument.getParentDocumentName();
+		if (parentDocumentName != null) {
+			if (parentDocumentName.equals(document.getName())) {
+				column = new BizPortColumn("Parent ID", "This points to the parent in a hiearachy within this shee", AttributeType.text);
+			}
+			else {
+				Document parentDocument = currentDocument.getParentDocument(customer);
+				column = new BizPortColumn(parentDocument.getSingularAlias() + " ID (Parent)",
+												"The 'Parent' link of the relationship.  Populate this with " + parentDocument.getSingularAlias() + " IDs.", 
+												AttributeType.text);
+				column.setReferencedSheet(new SheetKey(parentDocument.getOwningModuleName(), parentDocument.getName()));
+				sheet.addColumn(ChildBean.PARENT_NAME, column);
+	
+				Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
+				if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
+					column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
+					sheet.addColumn(ChildBean.ORDINAL_KEY, column);
+				}
 			}
 		}
 

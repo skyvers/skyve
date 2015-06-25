@@ -73,6 +73,7 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridContainerCol
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 
 public abstract class ViewVisitor extends ActionVisitor {
 	protected CustomerImpl customer;
@@ -214,6 +215,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 										boolean parentEnabled)
 	throws MetaDataException;
 	public abstract void visitedListGrid(ListGrid grid,
+											boolean parentVisible,
+											boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitTreeGrid(TreeGrid grid,
+										boolean parentVisible,
+										boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitedTreeGrid(TreeGrid grid,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException;
@@ -607,6 +616,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitProgressBar(bar, parentVisible, parentEnabled);
 		}
 		// tabular
+		else if (widget instanceof TreeGrid) {
+			TreeGrid grid = (TreeGrid) widget;
+			visitTreeGrid(grid, parentVisible, parentEnabled);
+			visitFilterable(grid, parentVisible, parentEnabled);
+			visitEditableActions(grid, parentVisible, parentEnabled);
+			visitRemovableActions(grid, parentVisible, parentEnabled);
+			visitedTreeGrid(grid, parentVisible, parentEnabled);
+		}
 		else if (widget instanceof ListGrid) {
 			ListGrid grid = (ListGrid) widget;
 			visitListGrid(grid, parentVisible, parentEnabled);
