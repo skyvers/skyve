@@ -1919,6 +1919,7 @@ joined tables
 
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
+				imports.add("java.util.List");
 				imports.add("org.skyve.domain.HierarchicalBean");
 				imports.add("org.skyve.CORE");
 				imports.add("org.skyve.domain.Bean");
@@ -2114,7 +2115,7 @@ joined tables
 				// Traversal method
 				methods.append("\n\t@Override\n");
 				methods.append("\tpublic ").append(documentName).append(" getParent() throws DomainException, MetaDataException {\n");
-				methods.append("\t\tGroup result = null;\n\n");
+				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
 				methods.append("\t\tif (bizParentId != null) {\n");
 				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
 				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
