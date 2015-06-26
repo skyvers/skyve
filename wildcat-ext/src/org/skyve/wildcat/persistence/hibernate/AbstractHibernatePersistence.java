@@ -1842,7 +1842,7 @@ t.printStackTrace();
 		// Bind parent if required
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(document.getName())) {
-				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getParentBizId());
+				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getBizParentId());
 			}
 			else {
 				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId());

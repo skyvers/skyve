@@ -745,7 +745,7 @@ isc.EditView.addMethods({
 								// NB Using refresh() instead of setDataSource() as setDataSource()
 								// resets all fields and data sources on everything, essentially
 								// recreating the listgrid guts.
-								var existingRootValue = grid.grid.getDataSource().getField('parentBizId').rootValue;
+								var existingRootValue = grid.grid.getDataSource().getField('bizParentId').rootValue;
 								var newRootValue = '_' + grid._view._vm.getValue(grid._rootBinding);
 								if (existingRootValue != newRootValue) {
 									grid.setDataSource(grid.dataSource);

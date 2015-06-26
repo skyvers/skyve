@@ -244,7 +244,7 @@ public class JSONWriter {
 				if (bean instanceof HierarchicalBean<?>) {
 					HierarchicalBean<?> hierarchicalBean = (HierarchicalBean<?>) bean;
 					add(',');
-					add(HierarchicalBean.PARENT_ID, hierarchicalBean.getParentBizId(), propertyNames, topLevel);
+					add(HierarchicalBean.PARENT_ID, hierarchicalBean.getBizParentId(), propertyNames, topLevel);
 				}
 
 				if (bean instanceof AbstractPersistentBean) {

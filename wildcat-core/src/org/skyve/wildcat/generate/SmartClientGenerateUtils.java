@@ -1351,7 +1351,7 @@ public class SmartClientGenerateUtils {
 		}
 		
 		if (documentName.equals(document.getParentDocumentName())) { // hierarchical
-			toAppendTo.append("{name:'parentBizId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
+			toAppendTo.append("{name:'bizParentId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
 			toAppendTo.append(dataSourceId).append(".bizId'},");
 		}
 		

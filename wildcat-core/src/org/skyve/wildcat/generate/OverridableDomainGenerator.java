@@ -656,7 +656,7 @@ joined tables
 				Document parentDocument = document.getParentDocument(null);
 				if (parentDocument.getPersistent() != null) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
-						fw.append(indent).append("\t\t<property name=\"parentBizId\" length=\"36\" />\n");
+						fw.append(indent).append("\t\t<property name=\"bizParentId\" length=\"36\" index=\"bizParentIdIndex\" />\n");
 					}
 					else {
 						// Add bizOrdinal ORM
@@ -1920,6 +1920,13 @@ joined tables
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				imports.add("org.skyve.domain.HierarchicalBean");
+				imports.add("org.skyve.CORE");
+				imports.add("org.skyve.domain.Bean");
+				imports.add("org.skyve.domain.HierarchicalBean");
+				imports.add("org.skyve.persistence.DocumentQuery");
+				imports.add("org.skyve.persistence.Persistence");
+				imports.add("org.skyve.domain.messages.DomainException");
+				imports.add("org.skyve.metadata.MetaDataException");
 			}
 			else {
 				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
@@ -2088,20 +2095,43 @@ joined tables
 		if ((parentDocumentName != null) && 
 				((! overridden) || (baseDocumentName == null))) {
 			if (parentDocumentName.equals(documentName)) {
-				attributes.append("\tprivate String parentBizId;\n\n");
+				attributes.append("\tprivate String bizParentId;\n\n");
 				
 				// Accessor method
 				methods.append("\n\t@Override\n");
-				methods.append("\tpublic String getParentBizId() {\n");
-				methods.append("\t\treturn parentBizId;\n");
+				methods.append("\tpublic String getBizParentId() {\n");
+				methods.append("\t\treturn bizParentId;\n");
 				methods.append("\t}\n");
 	
 				// Mutator method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
-				methods.append("\tpublic void setParentBizId(String parentBizId) {\n");
-				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, parentBizId);\n");
-				methods.append("\t\tthis.parentBizId = parentBizId;\n");
+				methods.append("\tpublic void setBizParentId(String bizParentId) {\n");
+				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, bizParentId);\n");
+				methods.append("\t\tthis.bizParentId = bizParentId;\n");
+				methods.append("\t}\n");
+
+				// Traversal method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic ").append(documentName).append(" getParent() throws DomainException, MetaDataException {\n");
+				methods.append("\t\tGroup result = null;\n\n");
+				methods.append("\t\tif (bizParentId != null) {\n");
+				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
+				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\t\tq.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);\n");
+				methods.append("\t\t\tresult = q.retrieveBean();\n");
+				methods.append("\t\t}\n\n");
+				methods.append("\t\treturn result;\n");
+				methods.append("\t}\n");
+				
+				// Traversal method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlTransient\n");
+				methods.append("\tpublic List<").append(documentName).append("> getChildren() throws DomainException, MetaDataException {\n");
+				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
+				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
+				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n");
 			}
 			else {
