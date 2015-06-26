@@ -1158,9 +1158,8 @@ BizListGrid.addMethods({
 		};
 		if (config.isTree) {
 			gridConfig.folderIcon = null;
-			gridConfig.autoFetchData = true;
 			gridConfig.loadOnDemand = true;
-			// nsure that these properties when sent to the server start with an '_' and are thus ignored
+			// ensure that these properties when sent to the server start with an '_' and are thus ignored
 			gridConfig.dataProperties = {openProperty: '_isOpen', 
 											isFolderProperty: '_isFolder',
 											childrenProperty: '_children'};
@@ -1358,8 +1357,14 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		// Set if the grid can expand based on whether there are detail fields defined
 		me.grid.setCanExpandRecords(hasDetailFields);
 		me.addMember(me.grid, me.getMembers().length - 1);
-		
-		me.grid.filterData();
+
+		if (me._rootBinding) {
+			me.grid.getDataSource().getField('parentBizId').rootValue = '_' + me._view._vm.getValue(me._rootBinding);
+		}
+		else {
+			me.grid.getDataSource().getField('parentBizId').rootValue = null;
+		}
+		me.grid.filterData();		
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
 		return me._dataSource.getTitle();

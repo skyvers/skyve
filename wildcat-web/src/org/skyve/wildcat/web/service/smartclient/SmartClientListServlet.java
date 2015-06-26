@@ -922,8 +922,16 @@ System.out.println(criterium);
     		}
     	}
     	else if (filterOperator == null) {
-    		if (HierarchicalBean.PARENT_ID.equals(binding) && (value == null)) {
-    			filter.addNull(binding);
+    		if (HierarchicalBean.PARENT_ID.equals(binding)) {
+    			if (value == null) { // get all root nodes in the data
+    				filter.addNull(binding);
+    			}
+    			else if (((String) value).startsWith("_")) { // get a particular root node
+    				filter.addEquals(Bean.DOCUMENT_ID, ((String) value).substring(1));
+   			}
+    			else { // traversing the tree
+    				filter.addEquals(binding, value);
+    			}
     		}
     		else if (value != null) {
 				filter.addEquals(binding, value);
@@ -935,8 +943,16 @@ System.out.println(criterium);
     			revisedValue = ((org.skyve.domain.types.Enumeration) value).toCode();
     		}
 
-    		if (HierarchicalBean.PARENT_ID.equals(binding) && (revisedValue == null)) {
-    			filter.addNull(binding);
+    		if (HierarchicalBean.PARENT_ID.equals(binding)) {
+    			if (revisedValue == null) { // get all root nodes in the data
+    				filter.addNull(binding);
+    			}
+    			else if (((String) revisedValue).startsWith("_")) { // get a particular root node
+    				filter.addEquals(Bean.DOCUMENT_ID, ((String) revisedValue).substring(1));
+    			}
+    			else { // traversing the tree
+    				filter.addEquals(binding, revisedValue);
+    			}
     		}
     		else {
 	    		switch (filterOperator) {

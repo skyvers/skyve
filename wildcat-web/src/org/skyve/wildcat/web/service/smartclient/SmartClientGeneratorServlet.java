@@ -1062,7 +1062,7 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled)
 		throws MetaDataException {
-			visitGrid(grid, false);
+			visitGrid(grid, false, null);
 		}
 
 		@Override
@@ -1070,10 +1070,10 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled)
 		throws MetaDataException {
-			visitGrid(grid, true);
+			visitGrid(grid, true, grid.getRootBinding());
 		}
 	
-		private void visitGrid(ListGrid grid, boolean tree)
+		private void visitGrid(ListGrid grid, boolean tree, String rootBinding)
 		throws MetaDataException {
 			Query query = module.getQuery(grid.getQueryName());
 			StringBuilder ds = new StringBuilder(256);
@@ -1083,6 +1083,9 @@ code.append("_view:view})");
 			listGridVariable = "v" + variableCounter++;
 			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
 			if (tree) {
+				if (rootBinding != null) {
+					code.append("_rootBinding:'").append(rootBinding).append("',");
+				}
 				code.append("isTree:true,");
 			}
 			code.append("ID:").append(IDExpression()).append(',');
