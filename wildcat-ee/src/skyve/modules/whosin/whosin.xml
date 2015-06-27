@@ -52,23 +52,23 @@
 		</role>
 	</roles>
 	<menu>
-		<grid name="Offices" document="Office">
+		<list name="Offices" document="Office">
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
-		</grid>
-		<grid name="Offices" query="qOfficeForPhone">
+		</list>
+		<list name="Offices" query="qOfficeForPhone">
 			<uxui name="phone"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
-		</grid>
-		<grid name="All Staff" query="qStaff">
+		</list>
+		<list name="All Staff" query="qStaff">
 			<uxui name="desktop" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
-		</grid>
+		</list>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
 			<role name="Manager" />

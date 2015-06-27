@@ -26,7 +26,7 @@ import org.skyve.util.Util;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.metadata.module.menu.CalendarItem;
 import org.skyve.wildcat.metadata.module.menu.EditItem;
-import org.skyve.wildcat.metadata.module.menu.GridItem;
+import org.skyve.wildcat.metadata.module.menu.ListItem;
 import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
@@ -214,8 +214,8 @@ public class Desktop extends Harness {
 			if (item instanceof MenuGroup) {
 				listDataSourcesForMenuItems(user, customer, moduleName, module, ((MenuGroup) item).getItems(), dataSources, visitedQueryNames);
 			} 
-			else if (item instanceof GridItem) {
-				GridItem grid = (GridItem) item;
+			else if ((item instanceof ListItem) || (item instanceof TreeItem)) {
+				ListItem grid = (ListItem) item;
 				
 				Query query = null;
 				String target = grid.getQueryName();
@@ -269,8 +269,22 @@ public class Desktop extends Harness {
 					String icon16 = null;
 					Module itemModule = null;
 					String itemDocumentName = null;
-					if (item instanceof GridItem) {
-						GridItem gridItem = (GridItem) item;
+	                if (item instanceof TreeItem) {
+	                    TreeItem treeItem = (TreeItem) item;
+	                    itemDocumentName = treeItem.getDocumentName();
+						Query query = deriveQuery(customer,
+					                                module,
+					                                item,
+					                                treeItem.getQueryName(),
+					                                itemDocumentName);
+						itemDocumentName = query.getDocumentName();
+						result.append(query.getName());
+						itemModule = query.getDocumentModule(customer);
+						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+	                    ref = "tree";
+	                }
+	                else if (item instanceof ListItem) {
+						ListItem gridItem = (ListItem) item;
 						itemDocumentName = gridItem.getDocumentName();
 						Query query = deriveQuery(customer,
 					                                module,
@@ -296,20 +310,6 @@ public class Desktop extends Harness {
 						itemModule = query.getDocumentModule(customer);
 						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
 	                    ref = "cal";
-	                }
-	                else if (item instanceof TreeItem) {
-	                    TreeItem treeItem = (TreeItem) item;
-	                    itemDocumentName = treeItem.getDocumentName();
-						Query query = deriveQuery(customer,
-					                                module,
-					                                item,
-					                                treeItem.getQueryName(),
-					                                itemDocumentName);
-						itemDocumentName = query.getDocumentName();
-						result.append(query.getName());
-						itemModule = query.getDocumentModule(customer);
-						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
-	                    ref = "tree";
 	                }
 	                else if (item instanceof MapItem) {
 	                    MapItem mapItem = (MapItem) item;

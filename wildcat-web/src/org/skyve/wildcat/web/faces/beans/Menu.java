@@ -25,7 +25,7 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.metadata.module.menu.CalendarItem;
 import org.skyve.wildcat.metadata.module.menu.EditItem;
-import org.skyve.wildcat.metadata.module.menu.GridItem;
+import org.skyve.wildcat.metadata.module.menu.ListItem;
 import org.skyve.wildcat.metadata.module.menu.LinkItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
@@ -152,8 +152,8 @@ public class Menu extends Harness {
 	
 	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) throws MetaDataException {
 		StringBuilder url = new StringBuilder(64);
-		if (item instanceof GridItem) {
-			GridItem gridItem = (GridItem) item;
+		if (item instanceof ListItem) {
+			ListItem gridItem = (ListItem) item;
 			url.append(Util.getWildcatContextUrl());
 			url.append("/?a=").append(WebAction.g.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveQuery(customer,

@@ -16,7 +16,7 @@ public class Group extends Action {
 	private List<Action> actions = new ArrayList<>();
 
 	@XmlElementRefs({@XmlElementRef(type = EditItem.class),
-						@XmlElementRef(type = GridItem.class),
+						@XmlElementRef(type = ListItem.class),
 						@XmlElementRef(type = MapItem.class),
 						@XmlElementRef(type = CalendarItem.class),
 						@XmlElementRef(type = TreeItem.class),

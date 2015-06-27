@@ -29,6 +29,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
+import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.Query;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -45,6 +46,7 @@ import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.Inverse.InverseRelationship;
+import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.customer.CustomerMetaData;
 import org.skyve.wildcat.metadata.repository.document.DocumentMetaData;
 import org.skyve.wildcat.metadata.repository.module.ModuleMetaData;
@@ -971,8 +973,40 @@ public class LocalDesignRepository extends AbstractRepository {
 				}
 			}
 		}
+		
+		// check menu items
+		checkMenu(module.getMenu().getItems(), customer, module);
 	}
 
+	private static void checkMenu(List<MenuItem> items, Customer customer, Module module)
+	throws MetaDataException {
+		for (MenuItem item : items) {
+			if (item instanceof MenuGroup) {
+				checkMenu(((MenuGroup) item).getItems(), customer, module);
+			}
+			else if (item instanceof TreeItem) {
+				TreeItem treeItem = (TreeItem) item;
+				String documentName = treeItem.getDocumentName();
+				if (documentName == null) {
+					String queryName = treeItem.getQueryName();
+					if (queryName != null) {
+						Query query = module.getQuery(queryName);
+						documentName = query.getDocumentName();
+					}
+				}
+				if (documentName != null) {
+					Document document = module.getDocument(customer, documentName);
+					if (! documentName.equals(document.getParentDocumentName())) {
+						throw new MetaDataException("Tree Menu [" + item.getName() + 
+														"] in module " + module.getName() + 
+														" is for document " + document.getName() + 
+														" which is not hierarchical.");
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void validateDocument(Customer customer, Document document) throws MetaDataException {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();

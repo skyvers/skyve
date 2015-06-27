@@ -1,6 +1,6 @@
 package org.skyve.wildcat.metadata.module.menu;
 
-public class GridItem extends AbstractMenuItem {
+public class ListItem extends AbstractMenuItem {
 	/**
 	 * For Serialization
 	 */

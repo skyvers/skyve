@@ -539,9 +539,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				items.add(result);
 			}
-			else if (action instanceof GridItem) {
-				GridItem item = (GridItem) action;
-				org.skyve.wildcat.metadata.module.menu.GridItem result = new org.skyve.wildcat.metadata.module.menu.GridItem();
+			else if (action instanceof ListItem) {
+				ListItem item = (ListItem) action;
+				org.skyve.wildcat.metadata.module.menu.ListItem result = new org.skyve.wildcat.metadata.module.menu.ListItem();
 				populateItem(metaDataName, validRoleNames, result, item);
 
 				String documentName = item.getDocumentName();

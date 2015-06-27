@@ -335,56 +335,56 @@
 			<uxui name="tablet"/>
 			<role name="BasicUser" />
 		</edit>
-		<grid document="Contact" name="Contacts">
+		<list document="Contact" name="Contacts">
 			<uxui name="desktop"/>
 			<uxui name="tablet"/>		
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
-		</grid>
+		</list>
 		<group name="Security Admin">
-			<grid document="Group" name="Groups">			
+			<list document="Group" name="Groups">			
 				<role name="SecurityAdministrator" />
-			</grid>
-			<grid document="DataMaintenance" name="Data Maintenance">
+			</list>
+			<list document="DataMaintenance" name="Data Maintenance">
 				<role name="SecurityAdministrator" />
-			</grid>
-			<grid document="User" name="Users">
+			</list>
+			<list document="User" name="Users">
 				<role name="SecurityAdministrator" />
-			</grid>
-			<grid document="DataGroup" name="Data Groups">
+			</list>
+			<list document="DataGroup" name="Data Groups">
 				<role name="DataAdministrator" />
 				<role name="SecurityAdministrator" />
-			</grid>
+			</list>
 			<edit document="Configuration" name="Password Complexity">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<grid name="PasswordList" query="qUserPasswords">
+			<list name="PasswordList" query="qUserPasswords">
 				<role name="SecurityAdministrator" />
-			</grid>
+			</list>
 		</group>
-		<grid name="Snapshots" document="Snapshot">
+		<list name="Snapshots" document="Snapshot">
 			<uxui name="desktop"/>
 			<uxui name="tablet"/>		
 			<role name="BasicUser" />
-		</grid>
-		<grid name="Tags" document="Tag">
+		</list>
+		<list name="Tags" document="Tag">
 			<uxui name="desktop"/>
 			<uxui name="tablet"/>		
 			<role name="BasicUser" />
-		</grid>
-		<grid name="Audits" document="Audit">
+		</list>
+		<list name="Audits" document="Audit">
 			<role name="BasicUser" />
-		</grid>
+		</list>
 		<edit document="Display" name="Web Stats">
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</edit>
-		<grid name="Document Numbers" document="DocumentNumber">
+		<list name="Document Numbers" document="DocumentNumber">
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
-		</grid>		
+		</list>		
 		<edit document="Jobs" name="Jobs">
 			<role name="JobMaintainer" />
 		</edit>

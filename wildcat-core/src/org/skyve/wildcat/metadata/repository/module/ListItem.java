@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
-@XmlType(name = "grid", namespace = XMLUtil.MODULE_NAMESPACE)
-@XmlRootElement(name = "grid", namespace = XMLUtil.MODULE_NAMESPACE)
-public class GridItem extends Item {
+@XmlType(name = "list", namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlRootElement(name = "list", namespace = XMLUtil.MODULE_NAMESPACE)
+public class ListItem extends Item {
 	private String documentName;
 	private String queryName;
 	private String modelName;
