@@ -234,9 +234,6 @@ isc.EditView.addMethods({
 						if (successCallback) {
 							successCallback(data);
 						}
-						if (me.opened) {
-							me.opened(data);
-						}
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
@@ -244,6 +241,10 @@ isc.EditView.addMethods({
 
 					me.show();
 					me.refreshListGrids(true);
+
+					if (me.opened) {
+						me.opened(data);
+					}
 				},
 				{httpMethod: 'POST', params: params, willHandleError: true});
 		}
@@ -298,9 +299,6 @@ isc.EditView.addMethods({
 						if (successCallback) {
 							successCallback(data);
 						}
-						if (me.opened) {
-							me.opened(data);
-						}
 					}
 					else if (dsResponse.status == -1) {
 						isc.warn(data, null, {title: 'Problems'});
@@ -313,6 +311,10 @@ isc.EditView.addMethods({
 
 					me.show();
 					me.refreshListGrids(true);
+
+					if (me.opened) {
+						me.opened(data);
+					}
 				}, 
 				{httpMethod: 'POST', params: params, willHandleError: true});
 		}

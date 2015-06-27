@@ -1084,7 +1084,7 @@ code.append("_view:view})");
 			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
 			if (tree) {
 				if (rootBinding != null) {
-					code.append("_rootBinding:'").append(rootBinding).append("',");
+					code.append("_rootBinding:'").append(rootBinding.replace('.', '_')).append("',");
 				}
 				code.append("isTree:true,");
 			}

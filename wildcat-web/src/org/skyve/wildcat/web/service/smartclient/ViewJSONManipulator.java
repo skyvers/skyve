@@ -1276,6 +1276,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws MetaDataException {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
+		addBinding(grid.getRootBinding(), false);
 	}
 
 	private boolean visitingDataGrid = false;

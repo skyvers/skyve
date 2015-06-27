@@ -1367,7 +1367,7 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 				bizParentIdField.rootValue = null;
 			}
 		}
-		me.grid.filterData();		
+		me.grid.filterData();
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
 		return me._dataSource.getTitle();

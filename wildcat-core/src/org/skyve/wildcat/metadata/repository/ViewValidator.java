@@ -748,7 +748,7 @@ class ViewValidator extends ViewVisitor {
 		String treeGridIdentifier = "TreeGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
-		validateBinding(null, grid.getRootBinding(), false, false, false, true, treeGridIdentifier, AttributeType.text);
+		validateBinding(null, grid.getRootBinding(), false, false, false, true, treeGridIdentifier, null);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
 		validateQueryName(grid.getQueryName(), treeGridIdentifier);
 	}
