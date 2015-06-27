@@ -1362,7 +1362,10 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 			me.grid.getDataSource().getField('bizParentId').rootValue = '_' + me._view._vm.getValue(me._rootBinding);
 		}
 		else {
-			me.grid.getDataSource().getField('bizParentId').rootValue = null;
+			var bizParentIdField = me.grid.getDataSource().getField('bizParentId');
+			if (bizParentIdField) {
+				bizParentIdField.rootValue = null;
+			}
 		}
 		me.grid.filterData();		
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
