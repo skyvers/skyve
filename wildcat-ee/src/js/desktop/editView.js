@@ -240,7 +240,7 @@ isc.EditView.addMethods({
 					}
 
 					me.show();
-					me.refreshListGrids(true);
+					me.refreshListGrids(true, true);
 
 					if (me.opened) {
 						me.opened(data);
@@ -310,7 +310,7 @@ isc.EditView.addMethods({
 					}
 
 					me.show();
-					me.refreshListGrids(true);
+					me.refreshListGrids(true, true);
 
 					if (me.opened) {
 						me.opened(data);
@@ -424,7 +424,7 @@ isc.EditView.addMethods({
 								// data parameter is an object on save
 								me._saved = true;
 								me.scatter(data);
-								me.refreshListGrids(true);
+								me.refreshListGrids(true, false);
 							}
 							else {
 								if (lookupDescription) {
@@ -458,7 +458,7 @@ isc.EditView.addMethods({
 						}
 						else { // no action
 							me.scatter(data);
-							me.refreshListGrids(true);
+							me.refreshListGrids(true, false);
 						}
 						
 						if (successCallback) {
@@ -545,7 +545,7 @@ isc.EditView.addMethods({
 						// data parameter is an object on save
 						me._saved = true;
 						me.scatter(data);
-						me.refreshListGrids(true);
+						me.refreshListGrids(true, false);
 						
 						if (successCallback) {
 							successCallback(data);
@@ -723,7 +723,8 @@ isc.EditView.addMethods({
 	},
 
 	// if the listgrid is visible, it refreshes the grid
-	refreshListGrids: function(forceRefresh) { // if true force refresh of all grids
+	refreshListGrids: function(forceRefresh, // if true, force refresh of all grids
+								forcePostRefresh) { // if true, force even postRefresh = false grids - called on new and edit actions
 		if (forceRefresh) {
 			this._refreshedGrids = {};
 		}
@@ -742,7 +743,7 @@ isc.EditView.addMethods({
 						}
 						else if (grid._rootBinding) { // tree grid with root binding
 							if (grid.hasDataSource()) {
-								if (grid.postRefresh) { // refresh only if the grids wants to be
+								if (forcePostRefresh || grid.postRefresh) { // refresh only if the grids wants to be
 									// if we have a new root value then set the data source,
 									// otherwise just refresh the tree data - node state (open or closed) stays the same
 									// NB Using refresh() instead of setDataSource() as setDataSource()
@@ -767,11 +768,13 @@ isc.EditView.addMethods({
 							// Using refresh() instead of setDataSource() as setDataSource()
 							// resets all fields and data sources on everything, essentially
 							// recreating the listgrid guts.
-							if (grid.hasDataSource()) {
-								grid.refresh();
-							}
-							else {
-								grid.setDataSource(grid.dataSource);
+							if (forcePostRefresh || grid.postRefresh) { // refresh only if the grids wants to be
+								if (grid.hasDataSource()) {
+									grid.refresh();
+								}
+								else {
+									grid.setDataSource(grid.dataSource);
+								}
 							}
 							this._refreshedGrids[gridID] = true;
 						}
@@ -1381,7 +1384,7 @@ BizTabPane.addMethods({
 	
 	tabSelected: function(tabNum, tabPane, ID, tab) {
 		if (this._view.isVisible()) {
-			this._view.delayCall('refreshListGrids', [false], 0);
+			this._view.delayCall('refreshListGrids', [false, false], 0);
 		}
 	},
 	

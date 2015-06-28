@@ -8,9 +8,11 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.collection.PersistentCollection;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -63,6 +65,14 @@ public abstract class AbstractBean implements Bean {
 	
 	@Override
 	public final boolean isChanged() {
+		Customer customer = null;
+		try {
+			customer = CORE.getUser().getCustomer();
+		} 
+		catch (MetaDataException e) {
+			// do nothing - we can continue
+		}
+
 		// if this bean is unchanged, check the collections to see if they're dirty
 		if (originalValues.isEmpty()) {
 			Class<?> type = getClass();
@@ -71,21 +81,33 @@ public abstract class AbstractBean implements Bean {
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
 						String propertyName = descriptor.getName();
-						Object collection = BindUtil.get(this, propertyName);
-						if (collection instanceof PersistentCollection) { // persistent
-							if (((PersistentCollection) collection).isDirty()) {
-								if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : persistent collection " + propertyName + " is dirty ");
-								return true;
+						boolean trackChanges = true;
+						if (customer != null) {
+							try {
+								trackChanges = customer.getModule(getBizModule()).getDocument(customer, getBizDocument()).getAttribute(propertyName).isTrackChanges();
+							}
+							catch (Exception e) {
+								// if we get here, leave trackChanges on
 							}
 						}
-						else { // transient
-							if (HierarchicalBean.class.isAssignableFrom(type) && 
-									propertyName.equals("children")) {
-								continue;
+
+						if (trackChanges) {
+							Object collection = BindUtil.get(this, propertyName);
+							if (collection instanceof PersistentCollection) { // persistent
+								if (((PersistentCollection) collection).isDirty()) {
+									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : persistent collection " + propertyName + " is dirty ");
+									return true;
+								}
 							}
-							else if (! ((Collection<?>) collection).isEmpty()) {
-								if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
-								return true;
+							else { // transient
+								if (HierarchicalBean.class.isAssignableFrom(type) && 
+										propertyName.equals("children")) {
+									continue;
+								}
+								else if (! ((Collection<?>) collection).isEmpty()) {
+									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
+									return true;
+								}
 							}
 						}
 					}

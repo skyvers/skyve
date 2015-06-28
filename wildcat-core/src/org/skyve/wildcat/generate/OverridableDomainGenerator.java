@@ -1587,7 +1587,9 @@ joined tables
 			methods.append("\n\t@XmlElement");
 			methods.append("\n\tpublic void set").append(methodName).append('(');
 			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
-			methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
+			if (reference.isTrackChanges()) {
+				methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
+			}
 			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			methods.append("\t}\n");
 		}
@@ -1909,7 +1911,9 @@ joined tables
 				methods.append("\n\t@XmlElement");
 				methods.append("\n\tpublic void set").append(methodName).append('(');
 				methods.append(propertySimpleClassName).append(' ').append(name).append(") {\n");
-				methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
+				if (attribute.isTrackChanges()) {
+					methods.append("\t\tpreset(").append(name).append("PropertyName, ").append(name).append(");\n");
+				}
 				methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 				methods.append("\t}\n");
 			}

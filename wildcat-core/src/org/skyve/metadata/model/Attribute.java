@@ -113,6 +113,12 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
+	public boolean isTrackChanges();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public InputWidget getDefaultInputWidget();
 	
 	/**

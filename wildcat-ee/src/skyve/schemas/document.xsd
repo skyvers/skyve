@@ -212,6 +212,7 @@
           <xs:element name="defaultWidget" type="ns2:widgetReference" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="deprecated" type="xs:boolean"/>
+        <xs:attribute name="trackChanges" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
