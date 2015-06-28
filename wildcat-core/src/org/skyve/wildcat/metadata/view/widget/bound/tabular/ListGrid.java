@@ -42,6 +42,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableEditConditionName",
 							"disableRemoveConditionName",
 							"queryName", 
+							"postRefresh",
 							"continueConversation",
 							"editedActions",
 							"removedActions",							
@@ -76,6 +77,7 @@ public class ListGrid implements MetaData,
 
 	private String queryName;
 	private boolean continueConversation;
+	private Boolean postRefresh;
 	
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> removedActions = new ArrayList<>();
@@ -98,6 +100,15 @@ public class ListGrid implements MetaData,
 	@XmlAttribute(name = "continueConversation", required = true)
 	public void setContinueConversation(boolean continueConversation) {
 		this.continueConversation = continueConversation;
+	}
+
+	public Boolean getPostRefresh() {
+		return postRefresh;
+	}
+
+	@XmlAttribute(name = "postRefresh")
+	public void setPostRefresh(Boolean refresh) {
+		this.postRefresh = refresh;
 	}
 
 	@Override

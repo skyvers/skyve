@@ -1356,7 +1356,12 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		me._createGrid(me._config, fields);
 		// Set if the grid can expand based on whether there are detail fields defined
 		me.grid.setCanExpandRecords(hasDetailFields);
-		me.addMember(me.grid, me.getMembers().length - 1);
+		if (me._config.isTree) {
+			me.addMember(me.grid); // add to the end - no summary row
+		}
+		else {
+			me.addMember(me.grid, me.getMembers().length - 1); // add before the summary row
+		}
 
 		if (me._rootBinding) {
 			me.grid.getDataSource().getField('bizParentId').rootValue = '_' + me._view._vm.getValue(me._rootBinding);

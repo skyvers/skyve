@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.hibernate.collection.PersistentCollection;
 import org.skyve.domain.Bean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -64,7 +65,8 @@ public abstract class AbstractBean implements Bean {
 	public final boolean isChanged() {
 		// if this bean is unchanged, check the collections to see if they're dirty
 		if (originalValues.isEmpty()) {
-			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(getClass())) {
+			Class<?> type = getClass();
+			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(type)) {
 				Class<?> propertyType = descriptor.getPropertyType();
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
@@ -77,7 +79,11 @@ public abstract class AbstractBean implements Bean {
 							}
 						}
 						else { // transient
-							if (! ((Collection<?>) collection).isEmpty()) {
+							if (HierarchicalBean.class.isAssignableFrom(type) && 
+									propertyName.equals("children")) {
+								continue;
+							}
+							else if (! ((Collection<?>) collection).isEmpty()) {
 								if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
 								return true;
 							}

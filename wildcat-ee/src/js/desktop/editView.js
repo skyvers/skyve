@@ -742,18 +742,20 @@ isc.EditView.addMethods({
 						}
 						else if (grid._rootBinding) { // tree grid with root binding
 							if (grid.hasDataSource()) {
-								// if we have a new root value then set the data source,
-								// otherwise just refresh the tree data - node state (open or closed) stays the same
-								// NB Using refresh() instead of setDataSource() as setDataSource()
-								// resets all fields and data sources on everything, essentially
-								// recreating the listgrid guts.
-								var existingRootValue = grid.grid.getDataSource().getField('bizParentId').rootValue;
-								var newRootValue = '_' + grid._view._vm.getValue(grid._rootBinding);
-								if (existingRootValue != newRootValue) {
-									grid.setDataSource(grid.dataSource);
-								}
-								else {
-									grid.refresh();
+								if (grid.postRefresh) { // refresh only if the grids wants to be
+									// if we have a new root value then set the data source,
+									// otherwise just refresh the tree data - node state (open or closed) stays the same
+									// NB Using refresh() instead of setDataSource() as setDataSource()
+									// resets all fields and data sources on everything, essentially
+									// recreating the listgrid guts.
+									var existingRootValue = grid.grid.getDataSource().getField('bizParentId').rootValue;
+									var newRootValue = '_' + grid._view._vm.getValue(grid._rootBinding);
+									if (existingRootValue != newRootValue) {
+										grid.setDataSource(grid.dataSource);
+									}
+									else {
+										grid.refresh();
+									}
 								}
 							}
 							else {
