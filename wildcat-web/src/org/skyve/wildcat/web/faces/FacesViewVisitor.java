@@ -67,6 +67,7 @@ import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -912,7 +913,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		HtmlOutputLabel l = b.label(null, null, "listGrid", null);
+		HtmlOutputLabel l = b.label(null, null, "treeGrid", null);
 		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO list grid
 		currentGrid = grid;
 	}
@@ -1943,6 +1944,22 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
+	}
+
+	@Override
+	public void visitOnSelectedEventHandler(Selectable selectable,
+												boolean parentVisible,
+												boolean parentEnabled)
+	throws MetaDataException {
+		// TODO - need to account for data/list/tree grids in here
+	}
+
+	@Override
+	public void visitedOnSelectedEventHandler(Selectable editable,
+												boolean parentVisible,
+												boolean parentEnabled)
+	throws MetaDataException {
+		// TODO - need to account for data/list/tree grids in here
 	}
 
 	@Override

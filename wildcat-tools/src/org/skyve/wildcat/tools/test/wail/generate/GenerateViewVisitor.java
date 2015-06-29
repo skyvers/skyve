@@ -24,6 +24,7 @@ import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -706,6 +707,21 @@ class GenerateViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
+			boolean parentVisible, boolean parentEnabled)
+			throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible,
+			boolean parentEnabled) throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitedOnSelectedEventHandler(Selectable selectable,
 			boolean parentVisible, boolean parentEnabled)
 			throws MetaDataException {
 		// TODO Auto-generated method stub

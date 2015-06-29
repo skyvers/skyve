@@ -30,6 +30,7 @@ import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -445,6 +446,14 @@ public abstract class ViewVisitor extends ActionVisitor {
 														boolean parentVisible,
 														boolean parentEnabled)
 	throws MetaDataException;
+	public abstract void visitOnSelectedEventHandler(Selectable selectable,
+														boolean parentVisible,
+														boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitedOnSelectedEventHandler(Selectable selectable,
+														boolean parentVisible,
+														boolean parentEnabled)
+	throws MetaDataException;
 	public abstract void visitOnPickedEventHandler(Lookup lookup,
 													boolean parentVisible,
 													boolean parentEnabled)
@@ -622,6 +631,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitFilterable(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
 			visitRemovableActions(grid, parentVisible, parentEnabled);
+			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedTreeGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof ListGrid) {
@@ -630,6 +640,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitFilterable(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
 			visitRemovableActions(grid, parentVisible, parentEnabled);
+			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof DataGrid) {
@@ -979,6 +990,18 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitOnRemovedEventHandler(removable, parentVisible, parentEnabled);
 			visitActions(actions, parentVisible, parentEnabled);
 			visitedOnRemovedEventHandler(removable, parentVisible, parentEnabled);
+		}
+	}
+
+	private void visitSelectableActions(Selectable selectable,
+											boolean parentVisible,
+											boolean parentEnabled) 
+	throws MetaDataException {
+		List<EventAction> actions = selectable.getSelectedActions();
+		if ((actions != null) && (! actions.isEmpty())) {
+			visitOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
+			visitActions(actions, parentVisible, parentEnabled);
+			visitedOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
 		}
 	}
 

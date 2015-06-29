@@ -147,7 +147,8 @@ public class JSONWriter {
 		}
 
 		try {
-			info = Introspector.getBeanInfo(object.getClass());
+			Class<?> type = object.getClass();
+			info = Introspector.getBeanInfo(type);
 			PropertyDescriptor[] props = info.getPropertyDescriptors();
 			for (int i = 0; i < props.length; ++i) {
 				PropertyDescriptor prop = props[i];
@@ -155,10 +156,11 @@ public class JSONWriter {
 				Method accessor = prop.getReadMethod();
 				Method mutator = prop.getWriteMethod();
 				if ((accessor != null) && // has read access
-						((mutator != null) ||
-							// had write access
-							"errorMessage".equals(name) ||
+						// not the hierarchical bean's children property
+						(! (HierarchicalBean.class.isAssignableFrom(type) && "children".equals(name))) &&
+						((mutator != null) || // has write access
 							// errorMessage property in ErrorMessage
+							"errorMessage".equals(name) ||
 							// or is a collection, iterator or iterable
 							Collection.class.isAssignableFrom(prop.getPropertyType()) ||
 							Iterator.class.equals(prop.getPropertyType()) || 

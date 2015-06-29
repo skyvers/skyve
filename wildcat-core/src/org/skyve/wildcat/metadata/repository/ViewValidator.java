@@ -43,6 +43,7 @@ import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -738,6 +739,7 @@ class ViewValidator extends ViewVisitor {
 		String listGridIdentifier = "ListGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), listGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
+		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, null);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
 		validateQueryName(grid.getQueryName(), listGridIdentifier);
 	}
@@ -748,7 +750,8 @@ class ViewValidator extends ViewVisitor {
 		String treeGridIdentifier = "TreeGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
-		validateBinding(null, grid.getRootBinding(), false, false, false, true, treeGridIdentifier, null);
+		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, null);
+		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier, null);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
 		validateQueryName(grid.getQueryName(), treeGridIdentifier);
 	}
@@ -1805,6 +1808,29 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
+												boolean parentVisible,
+												boolean parentEnabled)
+	throws MetaDataException {
+		// nothing to do here
+	}
+
+	@Override
+	public void visitOnSelectedEventHandler(Selectable selectable,
+												boolean parentVisible,
+												boolean parentEnabled)
+	throws MetaDataException {
+		String widgetIdentifier = "Unknown widget";
+		if (selectable instanceof Bound) {
+			widgetIdentifier = "[onSelected] event handler for widget with binding " + ((Bound) selectable).getBinding();
+		}
+		else if (selectable instanceof ListGrid) {
+			widgetIdentifier = "[onSelected] event handler for list grid with query " + ((ListGrid) selectable).getQueryName();
+		}
+		validateEventHandlerSequence(selectable.getSelectedActions(), widgetIdentifier);
+	}
+
+	@Override
+	public void visitedOnSelectedEventHandler(Selectable editable,
 												boolean parentVisible,
 												boolean parentEnabled)
 	throws MetaDataException {

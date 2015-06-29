@@ -4,22 +4,23 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
-			propOrder = {"rootBinding"})
+			propOrder = {"rootIdBinding"})
 public class TreeGrid extends ListGrid {
 	private static final long serialVersionUID = -94277478938378729L;
 
-	private String rootBinding;
+	private String rootIdBinding;
 	
-	public String getRootBinding() {
-		return rootBinding;
+	public String getRootIdBinding() {
+		return rootIdBinding;
 	}
 
-	@XmlAttribute(name = "rootBinding")
-	public void setRootBinding(String rootBinding) {
-		this.rootBinding = rootBinding;
+	@XmlAttribute(name = "rootIdBinding")
+	public void setRootIdBinding(String rootIdBinding) {
+		this.rootIdBinding = UtilImpl.processStringValue(rootIdBinding);
 	}
 }

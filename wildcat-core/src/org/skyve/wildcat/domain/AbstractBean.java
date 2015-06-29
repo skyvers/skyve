@@ -81,6 +81,12 @@ public abstract class AbstractBean implements Bean {
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
 						String propertyName = descriptor.getName();
+
+						if (HierarchicalBean.class.isAssignableFrom(type) && 
+								propertyName.equals("children")) {
+							continue;
+						}
+						
 						boolean trackChanges = true;
 						if (customer != null) {
 							try {
@@ -100,11 +106,7 @@ public abstract class AbstractBean implements Bean {
 								}
 							}
 							else { // transient
-								if (HierarchicalBean.class.isAssignableFrom(type) && 
-										propertyName.equals("children")) {
-									continue;
-								}
-								else if (! ((Collection<?>) collection).isEmpty()) {
+								if (! ((Collection<?>) collection).isEmpty()) {
 									if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.isChanged(): Bean " + toString() + " is DIRTY : transient collection " + propertyName + " is not empty ");
 									return true;
 								}

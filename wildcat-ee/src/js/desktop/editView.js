@@ -741,7 +741,7 @@ isc.EditView.addMethods({
 							grid.rerender();
 							this._refreshedGrids[gridID] = true;
 						}
-						else if (grid._rootBinding) { // tree grid with root binding
+						else if (grid.rootIdBinding) { // tree grid with root binding
 							if (grid.hasDataSource()) {
 								if (forcePostRefresh || grid.postRefresh) { // refresh only if the grids wants to be
 									// if we have a new root value then set the data source,
@@ -750,7 +750,7 @@ isc.EditView.addMethods({
 									// resets all fields and data sources on everything, essentially
 									// recreating the listgrid guts.
 									var existingRootValue = grid.grid.getDataSource().getField('bizParentId').rootValue;
-									var newRootValue = '_' + grid._view._vm.getValue(grid._rootBinding);
+									var newRootValue = '_' + grid._view._vm.getValue(grid.rootIdBinding);
 									if (existingRootValue != newRootValue) {
 										grid.setDataSource(grid.dataSource);
 									}

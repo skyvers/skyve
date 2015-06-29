@@ -66,6 +66,7 @@ import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -1070,7 +1071,7 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled)
 		throws MetaDataException {
-			visitGrid(grid, true, grid.getRootBinding());
+			visitGrid(grid, true, grid.getRootIdBinding());
 		}
 	
 		private void visitGrid(ListGrid grid, boolean tree, String rootBinding)
@@ -1084,7 +1085,7 @@ code.append("_view:view})");
 			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
 			if (tree) {
 				if (rootBinding != null) {
-					code.append("_rootBinding:'").append(rootBinding.replace('.', '_')).append("',");
+					code.append("rootIdBinding:'").append(rootBinding.replace('.', '_')).append("',");
 				}
 				code.append("isTree:true,");
 			}
@@ -1098,6 +1099,10 @@ code.append("_view:view})");
 			code.append("name:'").append(listGridVariable).append("',");
 			code.append("contConv:").append(grid.getContinueConversation()).append(",");
 			code.append("postRefresh:").append(! Boolean.FALSE.equals(grid.getPostRefresh())).append(",");
+			String selectedIdBinding = grid.getSelectedIdBinding();
+			if (selectedIdBinding != null) {
+				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
+			}
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			disableCRUD(grid, code);
@@ -2181,6 +2186,31 @@ pickListFields:[{name:'value'}],
 		throws MetaDataException {
 			code.append("},");
 			inOnRemovedEventHandler = false;
+		}
+
+		@Override
+		public void visitOnSelectedEventHandler(Selectable selectable,
+													boolean parentVisible,
+													boolean parentEnabled)
+		throws MetaDataException {
+			if (dataGridFieldsIncomplete) {
+				code.setLength(code.length() - 1);
+				code.append("],");
+				dataGridFieldsIncomplete = false;
+			}
+			code.append("bizSelected:function(bizId){var view=this._view;");
+			String selectedIdBinding = selectable.getSelectedIdBinding();
+			if (selectedIdBinding != null) {
+				code.append("view._vm.setValue(this.selectedIdBinding,bizId);");
+			}
+		}
+
+		@Override
+		public void visitedOnSelectedEventHandler(Selectable selectable,
+													boolean parentVisible,
+													boolean parentEnabled)
+		throws MetaDataException {
+			code.append("},");
 		}
 
 		@Override
