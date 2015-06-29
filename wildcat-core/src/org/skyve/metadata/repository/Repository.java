@@ -107,7 +107,7 @@ public interface Repository {
 	throws MetaDataException;
 
 	
-	public <T extends Bean> ComparisonModel<T> getComparisonModel(Customer customer, Document document, String modelName)
+	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName)
 	throws MetaDataException;
 	
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName)

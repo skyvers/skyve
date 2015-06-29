@@ -13,7 +13,7 @@ import org.skyve.metadata.view.model.ComparisonComposite.Mutation;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.util.BeanVisitor;
 
-public class DefaultBindingComparisonModel <T extends Bean> implements ComparisonModel<T> {
+public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
 	/**
 	 * For Serialization
 	 */
@@ -21,21 +21,21 @@ public class DefaultBindingComparisonModel <T extends Bean> implements Compariso
 
 	private Customer customer;
 	private Document document;
-	private Bean oldBean;
+	private C toCompareTo;
 	private String[] excludedBindingPrefixes;
 	
 	public DefaultBindingComparisonModel(Customer customer,
 											Document document,
-											T oldBean,
+											C toCompareTo,
 											String[] excludedBindingPrefixes) {
 		this.customer = customer;
 		this.document = document;
-		this.oldBean = oldBean;
+		this.toCompareTo = toCompareTo;
 		this.excludedBindingPrefixes = excludedBindingPrefixes;
 	}
 	
 	@Override
-	public ComparisonComposite getComparisonComposite(T newBean)
+	public ComparisonComposite getComparisonComposite(C boundBean)
 	throws Exception {
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
@@ -60,7 +60,7 @@ public class DefaultBindingComparisonModel <T extends Bean> implements Compariso
 
 				return true;
 			}
-		}.visit(document, newBean, customer);
+		}.visit(document, boundBean, customer);
 
 		// Visit oldBean and add/modify the resulting model.
 		new BeanVisitor() {
@@ -88,7 +88,7 @@ public class DefaultBindingComparisonModel <T extends Bean> implements Compariso
 
 				return true;
 			}
-		}.visit(document, oldBean, customer);
+		}.visit(document, toCompareTo, customer);
 
 		ComparisonComposite result = null;
 		

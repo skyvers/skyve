@@ -1694,9 +1694,10 @@ class ViewJSONManipulator extends ViewVisitor {
 
 			try {
 				AbstractRepository repository = AbstractRepository.get();
-				ComparisonModel<Bean> model = repository.getComparisonModel(customer, 
-																				document,
-																				comparison.getModelName());
+				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, 
+																					document,
+																					comparison.getModelName());
+				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
 				if (! forApply) {
 					comparisons.put(referenceName, 

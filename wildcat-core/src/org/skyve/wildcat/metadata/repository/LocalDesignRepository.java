@@ -726,7 +726,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public  <T extends Bean> ComparisonModel<T> getComparisonModel(Customer customer, Document document, String modelName)
+	public  <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName)
 	throws MetaDataException {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
