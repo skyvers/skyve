@@ -58,7 +58,14 @@ public class Tagged extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return "Tagged";
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"Tagged",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

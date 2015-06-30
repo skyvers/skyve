@@ -8,11 +8,7 @@
 	<pluralAlias>Setup</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/configuration16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/configuration32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return "Admin Setup";
-		]]>
-	</bizKey>
+	<bizKey expression="Admin Setup"/>
 	<attributes>
 		<enum name="passwordComplexityModel" required="true">
 			<displayName>Password Strength</displayName>

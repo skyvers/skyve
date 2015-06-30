@@ -210,9 +210,8 @@
 			toolTip="Perform the selected document action for all applicable tagged records." 
 			confirm="Ok to perform the action for this document type?" 
 			relativeIconFileName="shared/icons/Job.gif"/>
-		<action className="UpdateModule" displayName="Update Module" inActionPanel="false"/>
-		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false"/>
-		
+		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
+		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>		
 	</actions>
 </view>
 

@@ -6,15 +6,7 @@
 	<persistent name="ADM_DocumentNumber" />
 	<singularAlias>Document Number</singularAlias>
 	<pluralAlias>Document Numbers</pluralAlias>
-	<bizKey>
-		<![CDATA[
-			StringBuilder sb = new StringBuilder();
-			sb.append(getModuleName()).append('.');
-			sb.append(getDocumentName()).append('.');
-			sb.append(getSequenceName()).append('.');
-			return sb.toString();
-		]]>
-	</bizKey>
+	<bizKey expression="{moduleName}.{documentName}.{sequenceName}"/>
 	<attributes>
 		<text name="moduleName" required="true">
 			<displayName>Module Name</displayName>

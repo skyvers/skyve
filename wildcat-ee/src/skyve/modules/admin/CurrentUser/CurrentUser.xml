@@ -7,11 +7,7 @@
 	<pluralAlias>Current Users</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return "Current User";
-		]]>
-	</bizKey>
+	<bizKey expression="Current User"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" persistent="false">
 			<displayName>Current User</displayName>

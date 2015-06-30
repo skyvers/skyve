@@ -54,7 +54,14 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberOfHits();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{userName} - {year}/{month} = {numberOfHits}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

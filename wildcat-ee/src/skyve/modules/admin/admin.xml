@@ -16,6 +16,7 @@
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="MyContact" />
 		<document ref="CurrentUser"/>
+		<document ref="Communication"/>
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="Display" />
@@ -239,7 +240,14 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>			
-				<document name="Contact" permission="CRUDD" />
+				<document name="Communication" permission="CRUDD">
+					<action name="CreateFiles"/>
+					<action name="GetResults"/>
+					<action name="SendNow"/>			
+					<action name="UpdateModule"/>
+					<action name="UpdateDocument"/>		
+				</document>
+				<document name="Contact" permission="CRUDD"/> 
 			</privileges>
 		</role>
 		<role name="SecurityAdministrator">
@@ -247,6 +255,13 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
+				</document>
+				<document name="Communication" permission="CRUDD">
+					<action name="CreateFiles"/>
+					<action name="GetResults"/>
+					<action name="SendNow"/>			
+					<action name="UpdateModule"/>
+					<action name="UpdateDocument"/>					
 				</document>
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
@@ -324,7 +339,6 @@
 		<edit document="ChangePassword" name="Password" >
 			<role name="BasicUser" />
 			<role name="ViewUser" />
-			
 		</edit>
 		<edit document="MyContact" name="My Details">
 			<role name="BasicUser" />
@@ -341,6 +355,10 @@
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="DataAdministrator" />
+			<role name="SecurityAdministrator" />
+		</list>
+		<list document="Communication" name="Communications">
+			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
 		<group name="Security Admin">

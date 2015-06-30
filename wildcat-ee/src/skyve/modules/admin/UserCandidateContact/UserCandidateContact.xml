@@ -18,11 +18,7 @@
 	<singularAlias>User Candidate Contact</singularAlias>
 	<pluralAlias>User Candidate Contacts</pluralAlias>
 	<parentDocument>User</parentDocument>
-	<bizKey>
-		<![CDATA[
-			return (contact == null) ? "Unknown" : contact.getBizKey()
-		]]>
-	</bizKey>
+	<bizKey expression="{contact.bizKey}"/>
 	<attributes>
 		<association name="contact" type="aggregation" persistent="false">
 			<displayName>Contact</displayName>

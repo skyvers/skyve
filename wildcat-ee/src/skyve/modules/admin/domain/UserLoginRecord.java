@@ -52,7 +52,14 @@ public class UserLoginRecord extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return getUserName() + " @ " + getLoginDateTime();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{userName} @ {loginDateTime}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

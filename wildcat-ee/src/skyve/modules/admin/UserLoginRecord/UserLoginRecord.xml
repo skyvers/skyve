@@ -6,11 +6,7 @@
 	<persistent name="ADM_UserLoginRecord" />
 	<singularAlias>User Login Record</singularAlias>
 	<pluralAlias>User Login Records</pluralAlias>
-	<bizKey>
-		<![CDATA[
-			return getUserName() + " @ " + getLoginDateTime();
-		]]>
-	</bizKey>
+	<bizKey expression="{userName} @ {loginDateTime}"/>
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>

@@ -123,7 +123,14 @@ public class Configuration extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return "Admin Setup";
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"Admin Setup",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

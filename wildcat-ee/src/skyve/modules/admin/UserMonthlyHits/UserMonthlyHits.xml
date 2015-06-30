@@ -6,11 +6,7 @@
 	<persistent name="ADM_UserMonthlyHits" />
 	<singularAlias>User Monthly Hits</singularAlias>
 	<pluralAlias>User Monthly Hits</pluralAlias>
-	<bizKey>
-		<![CDATA[
-			return getUserName() + " - " + getYear() + '/' + getMonth() + " = " + getNumberOfHits();
-		]]>
-	</bizKey>
+	<bizKey expression="{userName} - {year}/{month} = {numberOfHits}"/>
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>

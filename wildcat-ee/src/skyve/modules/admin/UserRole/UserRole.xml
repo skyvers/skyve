@@ -7,11 +7,7 @@
 	<singularAlias>User Role</singularAlias>
 	<pluralAlias>User Roles</pluralAlias>
 	<parentDocument>User</parentDocument>
-	<bizKey>
-		<![CDATA[
-			return (getRoleName()==null?"User Role":getRoleName());
-		]]>
-	</bizKey>
+	<bizKey expression="{roleName}"/>
 	<attributes>
 		<text name="roleName" required="true">
 			<displayName>Role Name</displayName>

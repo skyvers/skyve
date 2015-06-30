@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view type="edit" title="Communication" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<tabPane>
+		<tab title="Manage">
+			<vbox pixelMemberPadding="10">
+				<form border="true" borderTitle="Configuration" pixelHeight="1">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<default binding="description" />
+						</item>
+					</row>
+					<row>
+						<item >
+							<combo binding="moduleName">
+								<onChangedHandlers>
+									<server action="UpdateModule" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item >
+							<combo binding="documentName">
+								<onChangedHandlers>
+									<server action="UpdateDocument" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+				</form>
+				<form border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<default binding="tag" />
+						</item>
+						<item>
+							<button actionName="GetResults" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item colspan="3">
+							<textArea binding="results" pixelHeight="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button actionName="CreateFiles" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button actionName="SendNow" pixelWidth="200" />
+						</item>
+					</row>
+				</form>								
+			</vbox>
+		</tab>
+		<tab title="Email">
+			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelMemberPadding="10"
+				pixelPadding="10">
+				<form pixelWidth="1100">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<blurb>	
+								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document.</i></font>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item colspan="4">
+							<textField binding="emailTo" pixelWidth="800" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<blurb>	
+								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document.</i></font>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item colspan="4">
+							<textField binding="emailSubject" pixelWidth="800" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<blurb>	
+								<![CDATA[<font color="green"><i>Email body can use bindings relative to the selected module document.
+								For images, either include a link to the image, or paste the encoded image into the Source view.</i></font>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item showLabel="true" colspan="4">
+							<html binding="emailBody" pixelHeight="400" pixelWidth="800" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1">
+				<form pixelWidth="1100">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item>
+							<default binding="attachment" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+		</tab>
+	</tabPane>
+	<actions>
+		<defaults />
+		<action clientValidation="true" className="GetResults" displayName="Check Results" inActionPanel="false"
+			relativeIconFileName="shared/icons/Search.gif" />
+		<action clientValidation="true" className="CreateFiles" displayName="Start Job" inActionPanel="false"
+			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?"/>
+		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
+			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?"/>
+		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
+		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>			
+	</actions>
+	<newParameters />
+</view>
+

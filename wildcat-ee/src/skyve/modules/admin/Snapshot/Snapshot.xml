@@ -8,9 +8,7 @@
 	<pluralAlias>Snapshots</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/snapshot16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/snapshot32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		return (name == null ? "New Snapshot" : name);
-	</bizKey>
+	<bizKey expression="{name} for {queryName} in module {moduleName}"/>
 	<attributes>
 		<text name="moduleName" required="true">
 			<displayName>Module</displayName>

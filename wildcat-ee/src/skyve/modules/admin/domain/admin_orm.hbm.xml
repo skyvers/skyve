@@ -41,6 +41,31 @@
 		<filter name="adminAuditUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.domain.Communication" table="ADM_Communication" entity-name="adminCommunication">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="description" length="250" />
+		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" />
+		<property name="moduleName" length="500" />
+		<property name="documentName" length="500" />
+		<property name="toBinding" length="500" />
+		<property name="emailTo" length="250" />
+		<property name="emailSubject" length="250" />
+		<property name="emailBody" type="text" />
+		<property name="attachment" length="36" />
+		<property name="filePath" length="2000" />
+		<filter name="adminCommunicationNoneFilter" condition="1=0"/>
+		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminCommunicationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminCommunicationUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.admin.domain.Configuration" table="ADM_Configuration" entity-name="adminConfiguration">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -369,6 +394,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminAuditUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationNoneFilter" />
+	<filter-def name="adminCommunicationCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminCommunicationUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminConfigurationNoneFilter" />

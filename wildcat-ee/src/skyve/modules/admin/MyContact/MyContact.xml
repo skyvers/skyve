@@ -7,11 +7,7 @@
 	<pluralAlias>Contacts</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/contact16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/contact32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-		  	return "My Contact Details";
-		]]>
-	</bizKey>
+	<bizKey expression="My Contact Details"/>
 	<attributes>
 		<association type="aggregation" name="myContact">
 			<displayName>My Contact</displayName>

@@ -256,7 +256,14 @@ public class Tag extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (name == null ? "Tag" : name);
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{name}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Communication" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_Communication" />
+	<singularAlias>Communication</singularAlias>
+	<pluralAlias>Communications</pluralAlias>
+	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>	
+	<bizKey expression="{description}"/>
+	<attributes>
+		<text name="description" required="true">
+			<displayName>Description</displayName>
+			<length>250</length>
+		</text>
+		<association name="tag" type="aggregation" required="true">
+			<displayName>Tag</displayName>
+			<domain>variant</domain>
+			<documentName>Tag</documentName>
+		</association>
+		<text name="moduleName">
+			<displayName>Module</displayName>
+			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="documentName">
+			<displayName>Document</displayName>
+			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="toBinding">
+			<displayName>Send to</displayName>
+			<shortDescription>Provide a binding which contains the email address to send to</shortDescription>
+			<length>500</length>
+		</text>
+		<text name="emailTo" required="true">
+			<displayName>Email To</displayName>
+			<shortDescription>The email address to send to.  Bindings are allowed relative to the above module document.</shortDescription>
+			<length>250</length>
+		</text>
+		<text name="emailSubject" required="true">
+			<displayName>Email Subject</displayName>
+			<shortDescription>The subject of the email.  Bindings are allowed relative to the above module document.</shortDescription>
+			<length>250</length>
+		</text>
+		<markup name="emailBody" required="true">
+			<displayName>Email Body</displayName>
+			<shortDescription><![CDATA[
+			The body of the email.  
+			<p/>
+			Bindings are allowed relative to the above module document.
+			<p/>
+			To include images in the HTML, switch to the Source view, and embed the 64bit encoding from a site like 
+			http://www.freeformatter.com/base64-encoder.html
+			]]>
+			</shortDescription>
+		</markup>
+		<memo name="results" persistent="false">
+			<displayName>Results</displayName>
+		</memo>
+		<content name="attachment">
+			<displayName>Attachment</displayName>
+		</content>
+		<text name="filePath">
+			<displayName>Result Folder</displayName>
+			<length>2000</length>
+		</text>
+	</attributes>
+</document>

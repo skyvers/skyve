@@ -66,11 +66,14 @@ public class DocumentNumber extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-StringBuilder sb = new StringBuilder();
-			sb.append(getModuleName()).append('.');
-			sb.append(getDocumentName()).append('.');
-			sb.append(getSequenceName()).append('.');
-			return sb.toString();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{moduleName}.{documentName}.{sequenceName}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

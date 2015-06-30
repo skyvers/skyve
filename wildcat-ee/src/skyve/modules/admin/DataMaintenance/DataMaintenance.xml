@@ -8,11 +8,7 @@
 	<pluralAlias>Data Maintenance</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/maintenance16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/maintenance32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return "Data Maintenance";
-		]]>
-	</bizKey>
+	<bizKey expression="Data Maintenance"/>
 	<attributes>
 		<text name="modDocName">
 			<displayName>Module.Document</displayName>

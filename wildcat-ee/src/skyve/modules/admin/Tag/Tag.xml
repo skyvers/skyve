@@ -8,9 +8,7 @@
 	<pluralAlias>Tags</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/tag16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/tag32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		return (name == null ? "Tag" : name);
-	</bizKey>
+	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" >
 			<displayName>Name</displayName>

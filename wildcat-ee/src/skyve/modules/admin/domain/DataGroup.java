@@ -48,7 +48,14 @@ public class DataGroup extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getName()==null?"Datagroup":getName());
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{name}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override
