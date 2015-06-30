@@ -301,11 +301,20 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				borderBox.setBorder(Boolean.TRUE);
 				borderBox.setBorderTitle(form.getBorderTitle());
 				borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
-				borderBox.setPercentageHeight(form.getPercentageHeight());
 				borderBox.setPercentageWidth(form.getPercentageWidth());
-				borderBox.setPixelHeight(form.getPixelHeight());
 				borderBox.setPixelWidth(form.getPixelWidth());
 				borderBox.setPixelPadding(Integer.valueOf(5));
+
+				// If no height is specified, use a height of 1 pixel 
+				// which makes the bordered vbox expand to fit its contents
+				Integer percentageHeight = form.getPercentageHeight();
+				Integer pixelHeight = form.getPixelHeight();
+				if ((percentageHeight == null) && (pixelHeight == null)) {
+					pixelHeight = Integer.valueOf(1);
+				}
+				borderBox.setPercentageHeight(percentageHeight);
+				borderBox.setPixelHeight(pixelHeight);
+
 				visitVBox(borderBox, parentVisible, parentEnabled);
 			}
 			
