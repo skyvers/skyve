@@ -69,4 +69,33 @@
 			<arg value="admin" /> <!-- moduleName -->
 		</java>
 	</target>
+	
+	<target name="javadoc" description="Create javadoc website">
+		<java fork="true" classname="org.skyve.wildcat.tools.javadoc.doctor.DoctorUtil">
+			<classpath refid="classpath"/>
+			<arg value="src/skyve/" /> <!-- source path -->
+			<arg value="bizhub" /> <!-- customer -->
+			<!-- list of modules to document -->
+			<arg value="admin" />
+			<arg value="whosin" />
+			<arg value="whosinIntegrate" />
+		</java>
+		<antcall target="umlJavadoc" />
+	</target>
+	
+	<!-- Copied from build-template.xml -->
+	<target name="umlJavadoc">
+        <javadoc sourcepath="src\skyve" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
+			<classpath refid="classpath"/>
+            <doclet name="org.skyve.wildcat.tools.javadoc.WildcatDoclet" path="tools/lib/UMLGraph.jar:tools/lib/wildcat-tools.jar">
+                    <param name="-hide" value="org.skyve.*|java.*|org.skyve.wildcat.*"/>
+
+            		<param name="-nodefontsize" value="9"/>
+                    <param name="-nodefontpackagesize" value="7"/>
+                    <param name="-link" value="http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/"/>
+                    <param name="-link" value="http://docs.oracle.com/javase/8/docs/api/"/>
+            </doclet>
+        </javadoc>
+		<delete dir="src/skyve" includes="**/package.html" />
+	</target>
 </project>
