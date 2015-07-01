@@ -1027,14 +1027,15 @@ isc.EditView.addMethods({
 				widget.enable();
 			}
 		}
-		else if (parent && parent.enableTab && parent.disableTab) {
-			var tabIndex = parent.getTabNumber(widget);
+		else if (parent && parent.enableTab && parent.disableTab && widget.pane) {
+			var tab = parent.tabForPane(widget.pane);
+			var tabIndex = parent.getTabNumber(tab);
 			if (tabIndex >= 0) { // is shown
 				if (disabled) {
-					parent.disableTab(widget);
+					parent.disableTab(tab);
 				}
 				else {
-					parent.enableTab(widget);
+					parent.enableTab(tab);
 				}
 			}
 		}

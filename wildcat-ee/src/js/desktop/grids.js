@@ -829,6 +829,7 @@ BizListGrid.addMethods({
 			membersMargin: 2,
 			layoutMargin: 2,
 			width: '100%',
+			overflow: 'hidden', // ensure that if the toolbar doesn't fit, it doesn't break the layout
 			members: toolStripMembers
 		});
 		
@@ -979,7 +980,7 @@ BizListGrid.addMethods({
 			},
 			selectionUpdated: function(record, recordList) {
 				if (me.bizSelected) {
-					me.bizSelected(record.bizId);
+					me.bizSelected(record ? record.bizId : null);
 				}
 			},
 			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
