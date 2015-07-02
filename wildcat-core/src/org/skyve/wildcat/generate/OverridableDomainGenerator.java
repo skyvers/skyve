@@ -1684,6 +1684,7 @@ joined tables
 
 		if ((! overridden) || (baseDocumentName == null)) { // not an extension
 			imports.add("javax.xml.bind.annotation.XmlTransient");
+			imports.add("org.skyve.CORE");
 			
 			statics.append("\t/** @hidden */\n");
 			statics.append("\tpublic static final String MODULE_NAME = \"").append(module.getName()).append("\";\n");
@@ -1702,6 +1703,10 @@ joined tables
 			methods.append("\t\treturn ").append(documentName).append(".DOCUMENT_NAME;\n");
 			methods.append("\t}\n");
 	
+			methods.append("\n\tpublic static ").append(documentName).append(" newInstance() throws Exception {\n");
+			methods.append("\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
+			methods.append("\t}\n");
+
 			String bizKeyMethodCode = ((DocumentImpl) document).getBizKeyMethodCode();
 			if (bizKeyMethodCode != null) {
 				methods.append("\n\t@Override");
