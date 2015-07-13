@@ -25,7 +25,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -1085,7 +1085,7 @@ code.append("_view:view})");
 	
 		private void visitGrid(ListGrid grid, boolean tree, String rootBinding)
 		throws MetaDataException {
-			Query query = module.getQuery(grid.getQueryName());
+			DocumentQueryDefinition query = module.getDocumentQuery(grid.getQueryName());
 			StringBuilder ds = new StringBuilder(256);
 			String dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
 			code.insert(0, ds);
@@ -1464,7 +1464,7 @@ code.append("_view:view})");
 			code.append(",_view:view,");
 			appendFilterParameters(lookup.getParameters(), code);
 
-			Query query = def.getLookup().getQuery();
+			DocumentQueryDefinition query = def.getLookup().getQuery();
 
 			StringBuilder ds = new StringBuilder(256);
 			String optionDataSource = def.getLookup().getOptionDataSource();

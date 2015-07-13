@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.wildcat.jasperreports.WildcatDataSource;
@@ -39,7 +39,7 @@ public class WildcatQueryExecuter implements JRQueryExecuter {
 	public JRDataSource createDatasource() 
 	throws JRException {
 		try {
-			Query query = getQuery(moduleDotQuery);
+			DocumentQueryDefinition query = getQuery(moduleDotQuery);
 			DocumentQuery documentQuery = query.constructDocumentQuery(null, null);
 			Persistence persistence = CORE.getPersistence();
 			return new WildcatDataSource(persistence.getUser(),
@@ -50,7 +50,7 @@ public class WildcatQueryExecuter implements JRQueryExecuter {
         }
 	}
 	
-	public static Query getQuery(String moduleDotQuery)
+	public static DocumentQueryDefinition getQuery(String moduleDotQuery)
 	throws MetaDataException {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 		UserImpl user = new UserImpl();
@@ -62,7 +62,7 @@ public class WildcatQueryExecuter implements JRQueryExecuter {
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
 		Module module = customer.getModule(moduleDotQuery.substring(0, dotIndex));
 		String queryName = moduleDotQuery.substring(dotIndex + 1);
-		Query query = module.getQuery(queryName);
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		if (query == null) {
     		query = module.getDocumentDefaultQuery(customer, queryName);
 		}

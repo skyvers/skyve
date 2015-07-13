@@ -11,26 +11,30 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
+import org.skyve.wildcat.metadata.repository.module.BizQLMetaData;
 import org.skyve.wildcat.metadata.repository.module.Column;
+import org.skyve.wildcat.metadata.repository.module.DocumentQueryMetaData;
 import org.skyve.wildcat.metadata.repository.module.ModuleMetaData;
-import org.skyve.wildcat.metadata.repository.module.QueryMetaData;
+import org.skyve.wildcat.metadata.repository.module.SQLMetaData;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
-
 
 public class QueryGenerator {
 	private QueryGenerator() {
 		// do nothing
 	}
 
-	public static List<Query> generate(Customer customer, Module module) 
+	public static List<QueryDefinition> generate(Customer customer, Module module) 
 	throws MetaDataException {
 		Set<String> documentNames = module.getDocumentRefs().keySet();
-		List<Query> result = new ArrayList<>(documentNames.size());
+		List<QueryDefinition> result = new ArrayList<>(documentNames.size());
 
 		for (String documentName : documentNames) {
 			Document document = module.getDocument(customer, documentName);
@@ -48,24 +52,47 @@ public class QueryGenerator {
 	throws MetaDataException {
 		ModuleMetaData newModule = new ModuleMetaData();
 
-		List<Query> queries = generate(customer, module);
-		for (Query query : queries) {
-			QueryMetaData metaDataQuery = new QueryMetaData();
-			metaDataQuery.setName(query.getName());
-			metaDataQuery.setDisplayName(query.getDisplayName());
-			metaDataQuery.setDescription(query.getDescription());
-			metaDataQuery.setDocumentName(query.getDocumentName());
-			metaDataQuery.setDocumentation(query.getDocumentation());
-
-			for (QueryColumn queryColumn : query.getColumns()) {
-				Column metaDataColumn = new Column();
-				metaDataColumn.setBinding(queryColumn.getBinding());
-				metaDataColumn.setDisplayName(queryColumn.getDisplayName());
-				metaDataColumn.setName(queryColumn.getName());
-				metaDataColumn.setSortOrder(queryColumn.getSortOrder());
-				metaDataQuery.getColumns().add(metaDataColumn);
+		List<QueryDefinition> queries = generate(customer, module);
+		for (QueryDefinition query : queries) {
+			if (query instanceof DocumentQueryDefinition) {
+				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
+				DocumentQueryMetaData documentQueryMetaData = new DocumentQueryMetaData();
+				documentQueryMetaData.setName(documentQuery.getName());
+				documentQueryMetaData.setDisplayName(documentQuery.getDisplayName());
+				documentQueryMetaData.setDescription(documentQuery.getDescription());
+				documentQueryMetaData.setDocumentName(documentQuery.getDocumentName());
+				documentQueryMetaData.setDocumentation(documentQuery.getDocumentation());
+	
+				for (QueryColumn queryColumn : documentQuery.getColumns()) {
+					Column metaDataColumn = new Column();
+					metaDataColumn.setBinding(queryColumn.getBinding());
+					metaDataColumn.setDisplayName(queryColumn.getDisplayName());
+					metaDataColumn.setName(queryColumn.getName());
+					metaDataColumn.setSortOrder(queryColumn.getSortOrder());
+					documentQueryMetaData.getColumns().add(metaDataColumn);
+				}
+				newModule.getQueries().add(documentQueryMetaData);
 			}
-			newModule.getQueries().add(metaDataQuery);
+			else if (query instanceof SQLDefinition) {
+				SQLDefinition sql = (SQLDefinition) query;
+				SQLMetaData sqlMetaData = new SQLMetaData();
+				sqlMetaData.setName(sql.getName());
+				sqlMetaData.setDisplayName(sql.getDisplayName());
+				sqlMetaData.setDescription(sql.getDescription());
+				sqlMetaData.setDocumentation(sql.getDocumentation());
+				sqlMetaData.setQuery(sql.getQuery());
+				newModule.getQueries().add(sqlMetaData);
+			}
+			else if (query instanceof BizQLDefinition) {
+				BizQLDefinition bizQL = (BizQLDefinition) query;
+				BizQLMetaData bizQLMetaData = new BizQLMetaData();
+				bizQLMetaData.setName(bizQL.getName());
+				bizQLMetaData.setDisplayName(bizQL.getDisplayName());
+				bizQLMetaData.setDescription(bizQL.getDescription());
+				bizQLMetaData.setDocumentation(bizQL.getDocumentation());
+				bizQLMetaData.setQuery(bizQL.getQuery());
+				newModule.getQueries().add(bizQLMetaData);
+			}
 		}
 		return XMLUtil.marshalModule(newModule, false);
 	}

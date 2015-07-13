@@ -8,7 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.wildcat.web.AbstractWebContext;
@@ -86,12 +86,12 @@ public class ActionUtil {
 		ec.redirect(outcome.toString());
     }
     
-    static Query getQuery(final String bizModule, final String queryName)
+    static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName)
 	throws MetaDataException {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bizModule);
-		Query query = module.getQuery(queryName);
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
 		}

@@ -7,6 +7,8 @@ import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -22,8 +24,11 @@ import org.skyve.wildcat.metadata.module.Job;
 import org.skyve.wildcat.metadata.module.ModuleImpl;
 import org.skyve.wildcat.metadata.module.menu.AbstractMenuItem;
 import org.skyve.wildcat.metadata.module.menu.MenuGroup;
+import org.skyve.wildcat.metadata.module.query.BizQLDefinitionImpl;
+import org.skyve.wildcat.metadata.module.query.DocumentQueryDefinitionImpl;
 import org.skyve.wildcat.metadata.module.query.QueryColumn;
-import org.skyve.wildcat.metadata.module.query.QueryImpl;
+import org.skyve.wildcat.metadata.module.query.QueryDefinitionImpl;
+import org.skyve.wildcat.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.wildcat.metadata.repository.NamedMetaData;
 import org.skyve.wildcat.metadata.repository.PersistentMetaData;
 import org.skyve.wildcat.metadata.user.RoleImpl;
@@ -40,9 +45,9 @@ import org.skyve.wildcat.util.XMLUtil;
 							"homeDocument",
 							"jobs",
 							"documents",
-							"queries",
 							"roles",
-							"menu"})
+							"menu",
+							"queries"})
 public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<org.skyve.metadata.module.Module> {
 	private String title;
 	private ViewType homeRef;
@@ -94,7 +99,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "queries")
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "query", required = true)
+	@XmlElementRefs({@XmlElementRef(type = DocumentQueryMetaData.class),
+						@XmlElementRef(type = BizQLMetaData.class),
+						@XmlElementRef(type = SQLMetaData.class)})
 	public List<QueryMetaData> getQueries() {
 		return queries;
 	}
@@ -216,114 +223,126 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		if (repositoryQueries != null) {
 			Set<String> queryNames = new TreeSet<>();
 			for (QueryMetaData queryMetaData : repositoryQueries) {
-				QueryImpl query = new QueryImpl();
-				value = queryMetaData.getName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a query is required");
+				if (queryMetaData instanceof SQLMetaData) {
+					SQLMetaData sqlMetaData = (SQLMetaData) queryMetaData;
+					SQLDefinitionImpl sqlImpl = new SQLDefinitionImpl();
+					populateQueryProperties(queryMetaData, 
+												sqlImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
+					sqlImpl.setQuery(sqlMetaData.getQuery());
 				}
-				if (! queryNames.add(value)) {
-					throw new MetaDataException(metaDataName + " : Duplicate query named " + value);
+				else if (queryMetaData instanceof BizQLMetaData) {
+					BizQLMetaData bizQLMetaData = (BizQLMetaData) queryMetaData;
+					BizQLDefinitionImpl bizQLImpl = new BizQLDefinitionImpl();
+					populateQueryProperties(queryMetaData,
+												bizQLImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
+					bizQLImpl.setQuery(bizQLMetaData.getQuery());
 				}
-				if (documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The query named " + value + " is a module document name.");
-				}
-				query.setName(value);
+				else if (queryMetaData instanceof DocumentQueryMetaData) {
+					DocumentQueryMetaData documentQueryMetaData = (DocumentQueryMetaData) queryMetaData;
+					DocumentQueryDefinitionImpl documentQueryImpl = new DocumentQueryDefinitionImpl();
+					populateQueryProperties(queryMetaData,
+												documentQueryImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
 
-				value = queryMetaData.getDisplayName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [displayName] for query " + query.getName() + " is required");
-				}
-				query.setDisplayName(value);
-
-				value = queryMetaData.getDescription();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + " is required");
-				}
-				query.setDescription(value);
-
-				value = queryMetaData.getDocumentName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [documentName] for query " + query.getName() + " is required");
-				}
-				if (! documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
-													query.getName() + " is not a module document");
-				}
-				query.setDocumentName(value);
-				query.setFromClause(queryMetaData.getFrom());
-				query.setFilterClause(queryMetaData.getFilter());
-				query.setOwningModule(result);
-
-				List<Column> repositoryQueryColumns = queryMetaData.getColumns();
-				if (repositoryQueryColumns != null) {
-					for (Column column : repositoryQueryColumns) {
-						QueryColumn queryColumn = new QueryColumn();
-						queryColumn.setName(column.getName());
-						String binding = column.getBinding();
-						String expression = column.getExpression();
-						if ((binding == null) && (expression == null)) {
-							throw new MetaDataException(metaDataName + " : The [binding] and [expression] for a query column is missing in query " + query.getName());
-						}
-						if ((binding != null) && (expression != null)) {
-							throw new MetaDataException(metaDataName + " : Both the [binding] and [expression] for a query column are entered in query " + query.getName());
-						}
-						if ((expression != null) && (column.getName() == null)) {
-							throw new MetaDataException(metaDataName + " : An [expression] query column requires the [name] to be entered in query " + query.getName());
-						}
-						queryColumn.setBinding(binding);
-						queryColumn.setExpression(expression);
-						queryColumn.setDisplayName(column.getDisplayName());
-						FilterOperator filterOperator = column.getFilterOperator();
-						String filterExpression = column.getFilterExpression();
-						if ((filterOperator != null) && 
-								(! filterOperator.equals(FilterOperator.isNull)) &&
-								(! filterOperator.equals(FilterOperator.notNull)) && 
-								(filterExpression == null)) {
-							throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
-															" in column " + column.getBinding() + 
-															" in query " + query.getName() + " requires an [expression].");
-						}
-						if (((filterOperator == null) || 
-								filterOperator.equals(FilterOperator.isNull) || 
-								filterOperator.equals(FilterOperator.notNull)) &&
-								(filterExpression != null)) {
-							throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
-															" in column " + column.getBinding() + 
-															" in query " + query.getName() +
-															" does not require an [expression].");
-						}
-						queryColumn.setFilterOperator(filterOperator);
-						queryColumn.setFilterExpression(filterExpression);
-						queryColumn.setSortOrder(column.getSortOrder());
-						Boolean projected = column.getProjected();
-						if (projected != null) {
-							queryColumn.setSelected(projected.booleanValue());
-						}
-						Boolean hidden = column.getHidden();
-						if (hidden != null) {
-							queryColumn.setHidden(hidden.booleanValue());
-						}
-						Boolean sortable = column.getSortable();
-						if (sortable != null) {
-							queryColumn.setSortable(sortable.booleanValue());
-						}
-						Boolean filterable = column.getFilterable();
-						if (filterable != null) {
-							queryColumn.setFilterable(filterable.booleanValue());
-						}
-						Boolean editable = column.getEditable();
-						if (editable != null) {
-							queryColumn.setEditable(editable.booleanValue());
-						}
-
-						query.getColumns().add(queryColumn);
+					value = documentQueryMetaData.getDocumentName();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The [documentName] for query " + 
+														documentQueryImpl.getName() + " is required");
 					}
-				}
+					if (! documentNames.contains(value)) {
+						throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
+														documentQueryImpl.getName() + " is not a module document");
+					}
+					documentQueryImpl.setDocumentName(value);
+					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
+					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
 
-				query.setDocumentation(queryMetaData.getDocumentation());
-				
-				// TODO querylet processing query.setQuerylet();
-				result.putQuery(query);
+					List<Column> repositoryQueryColumns = documentQueryMetaData.getColumns();
+					if (repositoryQueryColumns != null) {
+						for (Column column : repositoryQueryColumns) {
+							QueryColumn queryColumn = new QueryColumn();
+							queryColumn.setName(column.getName());
+							String binding = column.getBinding();
+							String expression = column.getExpression();
+							if ((binding == null) && (expression == null)) {
+								throw new MetaDataException(metaDataName + 
+																" : The [binding] and [expression] for a query column is missing in query " + 
+																documentQueryImpl.getName());
+							}
+							if ((binding != null) && (expression != null)) {
+								throw new MetaDataException(metaDataName + 
+																" : Both the [binding] and [expression] for a query column are entered in query " + 
+																documentQueryImpl.getName());
+							}
+							if ((expression != null) && (column.getName() == null)) {
+								throw new MetaDataException(metaDataName + 
+																" : An [expression] query column requires the [name] to be entered in query " + 
+																documentQueryImpl.getName());
+							}
+							queryColumn.setBinding(binding);
+							queryColumn.setExpression(expression);
+							queryColumn.setDisplayName(column.getDisplayName());
+							FilterOperator filterOperator = column.getFilterOperator();
+							String filterExpression = column.getFilterExpression();
+							if ((filterOperator != null) && 
+									(! filterOperator.equals(FilterOperator.isNull)) &&
+									(! filterOperator.equals(FilterOperator.notNull)) && 
+									(filterExpression == null)) {
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
+																" in column " + column.getBinding() + 
+																" in query " + documentQueryImpl.getName() + 
+																" requires an [expression].");
+							}
+							if (((filterOperator == null) || 
+									filterOperator.equals(FilterOperator.isNull) || 
+									filterOperator.equals(FilterOperator.notNull)) &&
+									(filterExpression != null)) {
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
+																" in column " + column.getBinding() + 
+																" in query " + documentQueryImpl.getName() +
+																" does not require an [expression].");
+							}
+							queryColumn.setFilterOperator(filterOperator);
+							queryColumn.setFilterExpression(filterExpression);
+							queryColumn.setSortOrder(column.getSortOrder());
+							Boolean projected = column.getProjected();
+							if (projected != null) {
+								queryColumn.setSelected(projected.booleanValue());
+							}
+							Boolean hidden = column.getHidden();
+							if (hidden != null) {
+								queryColumn.setHidden(hidden.booleanValue());
+							}
+							Boolean sortable = column.getSortable();
+							if (sortable != null) {
+								queryColumn.setSortable(sortable.booleanValue());
+							}
+							Boolean filterable = column.getFilterable();
+							if (filterable != null) {
+								queryColumn.setFilterable(filterable.booleanValue());
+							}
+							Boolean editable = column.getEditable();
+							if (editable != null) {
+								queryColumn.setEditable(editable.booleanValue());
+							}
+	
+							documentQueryImpl.getColumns().add(queryColumn);
+						}
+					}
+
+					// TODO querylet processing query.setQuerylet();
+				}
 			}
 		}
 
@@ -700,6 +719,42 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
 	}
 	
+	private static void populateQueryProperties(QueryMetaData queryMetaData, 
+													QueryDefinitionImpl query, 
+													String metaDataName,
+													ModuleImpl owningModule,
+													Set<String> queryNames,
+													Set<String> documentNames)
+	throws MetaDataException {
+		String value = queryMetaData.getName();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [name] for a query is required");
+		}
+		if (! queryNames.add(value)) {
+			throw new MetaDataException(metaDataName + " : Duplicate query named " + value);
+		}
+		if (documentNames.contains(value)) {
+			throw new MetaDataException(metaDataName + " : The query named " + value + " is a module document name.");
+		}
+		query.setName(value);
+
+		value = queryMetaData.getDisplayName();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [displayName] for query " + query.getName() + " is required");
+		}
+		query.setDisplayName(value);
+
+		value = queryMetaData.getDescription();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + " is required");
+		}
+		query.setDescription(value);
+		query.setDocumentation(queryMetaData.getDocumentation());
+
+		query.setOwningModule(owningModule);
+		owningModule.putQuery(query);
+	}
+
 	private static void populateUxuis(String metaDataName, 
 										String itemName, 
 										List<ApplicableTo> uxuis, 

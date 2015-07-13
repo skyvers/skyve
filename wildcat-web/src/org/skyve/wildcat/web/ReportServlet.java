@@ -47,15 +47,15 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.report.ReportFormat;
-import org.skyve.wildcat.jasperreports.WildcatDataSource;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ReportStyle;
+import org.skyve.wildcat.jasperreports.WildcatDataSource;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
@@ -360,7 +360,7 @@ public class ReportServlet extends HttpServlet {
 				int _Index = module_Query.indexOf('_');
 				Module module = customer.getModule(module_Query.substring(0, _Index));
 				String queryName = module_Query.substring(_Index + 1);
-				Query query = module.getQuery(queryName);
+				DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 				if (query == null) {
 					query = module.getDocumentDefaultQuery(customer, queryName);
 				}

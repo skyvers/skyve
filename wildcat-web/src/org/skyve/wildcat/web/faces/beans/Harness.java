@@ -7,7 +7,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.domain.messages.SecurityException;
@@ -129,15 +129,15 @@ public abstract class Harness implements Serializable {
 		}
 	}
 	
-	public static Query deriveQuery(Customer customer,
-                                        Module module,
-                                        MenuItem item,
-                                        String queryName,
-                                        String documentName)
+	public static DocumentQueryDefinition deriveDocumentQuery(Customer customer,
+																Module module,
+																MenuItem item,
+																String queryName,
+																String documentName)
 	throws MetaDataException {
-        Query query = null;
+        DocumentQueryDefinition query = null;
 		if (queryName != null) {
-            query = module.getQuery(queryName);
+            query = module.getDocumentQuery(queryName);
             if ((query == null) || (query.getName() == null)) {
                 MetaDataException me = new MetaDataException("The target query " + queryName + " for menu action " +
                                                                 item.getName() + " is invalid in module " + module.getName());

@@ -62,7 +62,7 @@ import org.primefaces.mobile.component.field.Field;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.field.TextFormat;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
@@ -899,7 +899,7 @@ public class ComponentBuilder {
     									boolean required,
     									String disabled,
     									String displayBinding,
-    									Query query,
+    									QueryDefinition query,
     									Integer pixelWidth,
     									boolean applyDefaultWidth,
     									boolean dontDisplay) {

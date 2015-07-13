@@ -35,7 +35,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
@@ -130,14 +130,14 @@ public class SmartClientListServlet extends HttpServlet {
 	
 			    	Customer customer = user.getCustomer();
 			        Module module = null;
-					Query query = null;
+					DocumentQueryDefinition query = null;
 	
 			        if (dataSource != null) {
 			        	// use first 2 tokens of '_' split - could be a pick list which means extra '_' in it
 			        	String[] tokens = dataSource.split("_");
 						module = customer.getModule(tokens[0]);
 						String documentOrQueryName = tokens[1];
-						query = module.getQuery(documentOrQueryName);
+						query = module.getDocumentQuery(documentOrQueryName);
 						if (query == null) {
 							query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 						}
@@ -306,7 +306,7 @@ public class SmartClientListServlet extends HttpServlet {
 	
     private static void fetch(Module module,
     							Document queryDocument,
-		    					Query query, 
+		    					DocumentQueryDefinition query, 
 								int startRow,
 								int endRow,
 								SmartClientFilterOperator operator,
@@ -1170,7 +1170,7 @@ System.out.println(criterium);
 	}
 */
     private static void update(Module module, 
-								Query query,
+								DocumentQueryDefinition query,
 								String tagId,
 								boolean rowIsTagged,
 								SortedMap<String, Object> parameters, 
@@ -1223,7 +1223,7 @@ System.out.println(criterium);
 
 	private static void tag(Customer customer,
 								Module module,
-								Query query, 
+								DocumentQueryDefinition query, 
 								String tagId,
 								Map<String, Object> parameters, 
 								PrintWriter pw)
@@ -1242,7 +1242,7 @@ System.out.println(criterium);
 
 	private static void untag(Customer customer,
 								Module module,
-								Query query, 
+								DocumentQueryDefinition query, 
 								String tagId,
 								Map<String, Object> parameters, 
 								PrintWriter pw)
@@ -1263,7 +1263,7 @@ System.out.println(criterium);
 												Module module,
 												Document document,
 												String bizId,
-												Query query, 
+												DocumentQueryDefinition query, 
 												String tagId,
 												boolean rowIstagged)
 	throws Exception {
@@ -1316,7 +1316,7 @@ System.out.println(criterium);
 													Map<String, Object> parameters,
 													Module module,
 													String documentName,
-													Query query,
+													DocumentQueryDefinition query,
 													boolean tagging)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
@@ -1374,7 +1374,7 @@ System.out.println(criterium);
 	}
 
 	private static void remove(Module module,
-	    						Query query,
+	    						DocumentQueryDefinition query,
 								Map<String, Object> parameters, 
 								AbstractPersistence persistence,
 								PrintWriter pw)

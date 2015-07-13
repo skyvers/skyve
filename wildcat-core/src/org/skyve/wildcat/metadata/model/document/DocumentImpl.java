@@ -25,6 +25,7 @@ import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -34,8 +35,8 @@ import org.skyve.wildcat.metadata.flow.Flow;
 import org.skyve.wildcat.metadata.model.Model;
 import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.AbstractDocumentQuery;
+import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
 public final class DocumentImpl extends Model implements Document {
@@ -355,7 +356,8 @@ public final class DocumentImpl extends Model implements Document {
 			String queryName = reference.getQueryName();
 			if (queryName != null) {
 				Module module = customer.getModule(getOwningModuleName());
-				referenceQuery = (AbstractDocumentQuery) module.getQuery(queryName).constructDocumentQuery(null, null);
+				DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+				referenceQuery = (AbstractDocumentQuery) query.constructDocumentQuery(null, null);
 				referenceQuery.clearProjections();
 				referenceQuery.clearOrderings();
 			}

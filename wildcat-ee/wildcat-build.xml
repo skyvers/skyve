@@ -149,7 +149,7 @@
 		<classpath refid="classpath" />
 	</taskdef>
 	<target name="buildXmlSchemas">
-		<schemagen destdir="src/skyve/schemas" includeantruntime="true">
+		<schemagen destdir="src/skyve/schemas" includeantruntime="true" verbose="false" >
 			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/router" />
 			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/customer" />
 			<src path="../wildcat-core/src/org/skyve/wildcat/metadata/repository/module" />

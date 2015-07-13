@@ -5,7 +5,11 @@
 
   <xs:import namespace="http://www.skyve.org/xml/view" schemaLocation="view.xsd"/>
 
+  <xs:element name="bizQL" type="tns:bizQL"/>
+
   <xs:element name="calendar" type="tns:calendar"/>
+
+  <xs:element name="documentQuery" type="tns:documentQuery"/>
 
   <xs:element name="edit" type="tns:edit"/>
 
@@ -20,6 +24,8 @@
   <xs:element name="map" type="tns:map"/>
 
   <xs:element name="module" type="tns:module"/>
+
+  <xs:element name="sql" type="tns:sql"/>
 
   <xs:element name="tree" type="tns:tree"/>
 
@@ -41,6 +47,28 @@
   <xs:complexType name="actionPrivilege">
     <xs:sequence/>
     <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="bizQL">
+    <xs:complexContent>
+      <xs:extension base="tns:query">
+        <xs:sequence>
+          <xs:element name="query" type="xs:string" form="qualified"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="query" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="displayName" type="xs:string" form="qualified"/>
+          <xs:element name="description" type="xs:string" form="qualified"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="calendar">
@@ -110,6 +138,25 @@
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="permission" type="tns:documentPermission" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="documentQuery">
+    <xs:complexContent>
+      <xs:extension base="tns:query">
+        <xs:sequence>
+          <xs:element name="from" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="filter" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="columns" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="column" type="tns:column" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="documentName" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="edit">
@@ -227,13 +274,6 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
-          <xs:element name="queries" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="query" type="tns:query" form="qualified" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
           <xs:element name="roles" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -242,6 +282,17 @@
             </xs:complexType>
           </xs:element>
           <xs:element name="menu" type="tns:menu" form="qualified" minOccurs="0"/>
+          <xs:element name="queries" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:documentQuery"/>
+                  <xs:element ref="tns:bizQL"/>
+                  <xs:element ref="tns:sql"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="title" type="xs:string" use="required"/>
       </xs:extension>
@@ -255,28 +306,6 @@
         <xs:attribute name="displayName" type="xs:string" use="required"/>
         <xs:attribute name="className" type="xs:string" use="required"/>
         <xs:attribute name="shortDescription" type="xs:string"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="query">
-    <xs:complexContent>
-      <xs:extension base="ns1:namedMetaData">
-        <xs:sequence>
-          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="displayName" type="xs:string" form="qualified"/>
-          <xs:element name="description" type="xs:string" form="qualified"/>
-          <xs:element name="from" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="filter" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="columns" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="column" type="tns:column" form="qualified" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:sequence>
-        <xs:attribute name="documentName" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -299,40 +328,50 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="sql">
+    <xs:complexContent>
+      <xs:extension base="tns:query">
+        <xs:sequence>
+          <xs:element name="query" type="xs:string" form="qualified"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:simpleType name="documentPermission">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="_R_DD"/>
-      <xs:enumeration value="CR__C"/>
-      <xs:enumeration value="_RU_D"/>
-      <xs:enumeration value="_RU_U"/>
-      <xs:enumeration value="_R__C"/>
-      <xs:enumeration value="CRUDG"/>
+      <xs:enumeration value="_R_DG"/>
       <xs:enumeration value="_____"/>
+      <xs:enumeration value="_R_DC"/>
+      <xs:enumeration value="CR_DD"/>
       <xs:enumeration value="CRU_G"/>
-      <xs:enumeration value="_R__U"/>
+      <xs:enumeration value="_RUDG"/>
+      <xs:enumeration value="CRU_D"/>
+      <xs:enumeration value="_RU_D"/>
+      <xs:enumeration value="CRU_U"/>
       <xs:enumeration value="CRUDD"/>
       <xs:enumeration value="_R__D"/>
-      <xs:enumeration value="_R__G"/>
-      <xs:enumeration value="CR_DD"/>
-      <xs:enumeration value="CR_DU"/>
-      <xs:enumeration value="_RU_G"/>
-      <xs:enumeration value="CR__U"/>
-      <xs:enumeration value="CR_DG"/>
-      <xs:enumeration value="_RUDC"/>
-      <xs:enumeration value="CRUDC"/>
-      <xs:enumeration value="CRU_D"/>
-      <xs:enumeration value="_R_DC"/>
+      <xs:enumeration value="CRU_C"/>
       <xs:enumeration value="_RUDU"/>
-      <xs:enumeration value="_R_DG"/>
+      <xs:enumeration value="CR__U"/>
+      <xs:enumeration value="CR__C"/>
+      <xs:enumeration value="_RUDD"/>
+      <xs:enumeration value="_R__C"/>
+      <xs:enumeration value="_RU_G"/>
+      <xs:enumeration value="CRUDG"/>
+      <xs:enumeration value="CR__G"/>
+      <xs:enumeration value="_R_DD"/>
+      <xs:enumeration value="_R__G"/>
+      <xs:enumeration value="_RU_U"/>
+      <xs:enumeration value="_RUDC"/>
+      <xs:enumeration value="_R_DU"/>
+      <xs:enumeration value="_R__U"/>
+      <xs:enumeration value="_RU_C"/>
+      <xs:enumeration value="CRUDC"/>
+      <xs:enumeration value="CR_DG"/>
+      <xs:enumeration value="CR_DU"/>
       <xs:enumeration value="CR__D"/>
       <xs:enumeration value="CRUDU"/>
-      <xs:enumeration value="CRU_C"/>
-      <xs:enumeration value="CRU_U"/>
-      <xs:enumeration value="CR__G"/>
-      <xs:enumeration value="_RUDG"/>
-      <xs:enumeration value="_R_DU"/>
-      <xs:enumeration value="_RUDD"/>
-      <xs:enumeration value="_RU_C"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

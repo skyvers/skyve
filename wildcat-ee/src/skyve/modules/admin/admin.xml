@@ -35,130 +35,6 @@
 		<document ref="Tag" defaultQueryName="qTags"/>
 		<document ref="Tagged" />
 	</documents>
-	<queries>
-		<query name="qUserPasswords" documentName="User">
-			<displayName>User Passwords</displayName>
-			<description>Initial Passwords for Users</description>
-			<columns>
-				<column binding="contact.name" sortOrder ="ascending" />
-				<column binding="userName" />
-				<column binding="clearTextPassword">
-					<filterOperator>notNull</filterOperator>
-				</column>
-				<column binding="createdDateTime" />
-				<column binding="passwordExpired" >
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>true</filterExpression>
-				</column>
-			</columns>
-		</query>
-		<query name="qContacts" documentName="Contact">
-			<displayName>Contacts</displayName>
-			<description>All Contact Details</description>
-			<columns>
-				<column binding="name" sortOrder ="ascending" />
-				<column binding="contactType" sortOrder ="ascending" />
-				<column binding="email1" sortOrder ="ascending" />
-				<column binding="mobile" sortOrder ="ascending" />
-			</columns>
-		</query>
-		<query name="qMyContact" documentName="Contact">
-			<displayName>My Contact Details</displayName>
-			<description>My Contact Details</description>
-			<columns>
-				<column binding="name" sortOrder="ascending" />
-				<column binding="bizId">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>{CONTACTID}</filterExpression>
-				</column>
-			</columns>
-		</query>
-		<query name="qUsers" documentName="User">
-			<displayName>Users</displayName>
-			<description>All Users</description>
-			<columns>
-				<column binding="contact.name" sortOrder ="ascending" />
-				<column binding="contact.email1" sortOrder ="ascending" />
-				<column binding="contact.mobile" sortOrder ="ascending" />
-				<column binding="userName" sortOrder ="ascending" />
-			</columns>
-		</query>
-		<query name="qCompletedJobs" documentName="Job">
-			<displayName>All Completed Jobs</displayName>
-			<description>All completed jobs whether successful or not</description>
-			<columns>
-				<column binding="startTime" sortOrder="descending"/>
-				<column binding="displayName" />
-				<column binding="endTime" />
-				<column binding="status" />
-				<column binding="percentComplete" />
-			</columns>
-		</query>
-		<query name="qAllSchedules" documentName="JobSchedule">
-			<displayName>Job Schedule</displayName>
-			<description>The list of all job schedule entries</description>
-			<columns>
-				<column binding="bizKey" sortOrder ="ascending" />
-				<column binding="startTime" sortOrder ="ascending" />
-				<column binding="endTime" />
-			</columns>
-		</query>
-		<query name="qExistingHits" documentName="UserMonthlyHits">
-			<displayName>Existing Hits</displayName>
-			<description>The existing hits record for a user, month and year</description>
-			<columns>
-				<column binding="userName" />
-				<column binding="numberOfHits" />
-				<column binding="userName">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>?</filterExpression>
-				</column>
-				<column binding="year">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>?</filterExpression>
-				</column>
-				<column binding="month">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>?</filterExpression>
-				</column>
-			</columns>
-		</query>
-		<query name="qSnapshots" documentName="Snapshot">
-			<displayName>Snapshot</displayName>
-			<description>The list of all Snapshots.</description>
-			<columns>
-				<column binding="moduleName" sortOrder ="ascending" />
-				<column binding="queryName" sortOrder ="ascending" />
-				<column binding="name" sortOrder ="ascending" />
-			</columns>
-		</query>
-		<query name="qTags" documentName="Tag">
-			<displayName>Tag</displayName>
-			<description>The list of all Tags.</description>
-			<columns>
-				<column binding="name" sortOrder ="ascending" />
-				<column binding="visible" />
-			</columns>
-		</query>
-		<query name="qAudits" documentName="Audit">
-			<displayName>Audit</displayName>
-			<description>The list of all Audits.</description>
-			<columns>
-				<column binding="timestamp" sortOrder="descending" />
-				<column binding="userName" />
-				<column binding="operation" />
-				<column binding="auditModuleName" />
-				<column binding="auditDocumentName" />
-				<column binding="auditBizKey" />
-				<column binding="auditBizVersion" />
-			</columns>
-		</query>
-	</queries>
 	<roles>
 		<role name="BasicUser">
 			<description>
@@ -407,4 +283,128 @@
 			<role name="JobMaintainer" />
 		</edit>
 	</menu>
+	<queries>
+		<documentQuery name="qUserPasswords" documentName="User">
+			<displayName>User Passwords</displayName>
+			<description>Initial Passwords for Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder ="ascending" />
+				<column binding="userName" />
+				<column binding="clearTextPassword">
+					<filterOperator>notNull</filterOperator>
+				</column>
+				<column binding="createdDateTime" />
+				<column binding="passwordExpired" >
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>true</filterExpression>
+				</column>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qContacts" documentName="Contact">
+			<displayName>Contacts</displayName>
+			<description>All Contact Details</description>
+			<columns>
+				<column binding="name" sortOrder ="ascending" />
+				<column binding="contactType" sortOrder ="ascending" />
+				<column binding="email1" sortOrder ="ascending" />
+				<column binding="mobile" sortOrder ="ascending" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMyContact" documentName="Contact">
+			<displayName>My Contact Details</displayName>
+			<description>My Contact Details</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="bizId">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{CONTACTID}</filterExpression>
+				</column>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qUsers" documentName="User">
+			<displayName>Users</displayName>
+			<description>All Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder ="ascending" />
+				<column binding="contact.email1" sortOrder ="ascending" />
+				<column binding="contact.mobile" sortOrder ="ascending" />
+				<column binding="userName" sortOrder ="ascending" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qCompletedJobs" documentName="Job">
+			<displayName>All Completed Jobs</displayName>
+			<description>All completed jobs whether successful or not</description>
+			<columns>
+				<column binding="startTime" sortOrder="descending"/>
+				<column binding="displayName" />
+				<column binding="endTime" />
+				<column binding="status" />
+				<column binding="percentComplete" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qAllSchedules" documentName="JobSchedule">
+			<displayName>Job Schedule</displayName>
+			<description>The list of all job schedule entries</description>
+			<columns>
+				<column binding="bizKey" sortOrder ="ascending" />
+				<column binding="startTime" sortOrder ="ascending" />
+				<column binding="endTime" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qExistingHits" documentName="UserMonthlyHits">
+			<displayName>Existing Hits</displayName>
+			<description>The existing hits record for a user, month and year</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="numberOfHits" />
+				<column binding="userName">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+				<column binding="year">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+				<column binding="month">
+					<projected>false</projected>
+					<filterOperator>equal</filterOperator>
+					<filterExpression>?</filterExpression>
+				</column>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qSnapshots" documentName="Snapshot">
+			<displayName>Snapshot</displayName>
+			<description>The list of all Snapshots.</description>
+			<columns>
+				<column binding="moduleName" sortOrder ="ascending" />
+				<column binding="queryName" sortOrder ="ascending" />
+				<column binding="name" sortOrder ="ascending" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qTags" documentName="Tag">
+			<displayName>Tag</displayName>
+			<description>The list of all Tags.</description>
+			<columns>
+				<column binding="name" sortOrder ="ascending" />
+				<column binding="visible" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qAudits" documentName="Audit">
+			<displayName>Audit</displayName>
+			<description>The list of all Audits.</description>
+			<columns>
+				<column binding="timestamp" sortOrder="descending" />
+				<column binding="userName" />
+				<column binding="operation" />
+				<column binding="auditModuleName" />
+				<column binding="auditDocumentName" />
+				<column binding="auditBizKey" />
+				<column binding="auditBizVersion" />
+			</columns>
+		</documentQuery>
+	</queries>
 </module>

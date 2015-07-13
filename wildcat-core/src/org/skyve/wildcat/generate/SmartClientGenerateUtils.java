@@ -35,7 +35,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -85,7 +85,7 @@ public class SmartClientGenerateUtils {
         private List<String> pickListFields = new ArrayList<>();
         // Filter fields for option data source
         private List<String> filterFields = new ArrayList<>();
-        private Query query;
+        private DocumentQueryDefinition query;
         private boolean canCreate;
         private boolean canUpdate;
         
@@ -109,7 +109,7 @@ public class SmartClientGenerateUtils {
             	queryName = query.getName();
             }
             else {
-            	query = module.getQuery(queryName);
+            	query = module.getDocumentQuery(queryName);
             }
             
             StringBuilder sb = new StringBuilder(128);
@@ -180,11 +180,11 @@ public class SmartClientGenerateUtils {
             return filterFields;
         }
 
-        public Query getQuery() {
+        public DocumentQueryDefinition getQuery() {
             return query;
         }
 
-        public void setQuery(Query query) {
+        public void setQuery(DocumentQueryDefinition query) {
             this.query = query;
         }
 
@@ -1291,7 +1291,7 @@ public class SmartClientGenerateUtils {
 	@SuppressWarnings("null")
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
-														Query query,
+														DocumentQueryDefinition query,
 														String dataSourceIDOverride,
 														Lookup forLookup,
 														boolean config,

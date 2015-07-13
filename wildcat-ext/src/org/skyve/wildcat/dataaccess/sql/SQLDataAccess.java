@@ -7,8 +7,10 @@ import javax.sql.DataSource;
 
 import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
+import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class SQLDataAccess implements AutoCloseable {
@@ -62,11 +64,29 @@ public class SQLDataAccess implements AutoCloseable {
 		return new SQL(moduleName, documentName, query, this);
 	}
 	
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
+	throws MetaDataException {
+		Module module = CORE.getUser().getCustomer().getModule(moduleName);
+		return new SQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
+	}
+	
 	public SQL newSQL(Document document, String query) {
 		return new SQL(document, query, this);
 	}
 
+	public SQL newNamedSQL(Document document, String queryName) 
+	throws MetaDataException {
+		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
+		return new SQL(document, module.getSQL(queryName).getQuery(), this);
+	}
+
 	public SQL newSQL(String query) {
 		return new SQL(query, this);
+	}
+
+	public SQL newNamedSQL(String moduleName, String queryName)
+	throws MetaDataException {
+		Module module = CORE.getUser().getCustomer().getModule(moduleName);
+		return new SQL(module.getSQL(queryName).getQuery(), this);
 	}
 }

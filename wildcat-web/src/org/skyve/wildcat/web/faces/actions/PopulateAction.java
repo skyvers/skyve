@@ -1,7 +1,7 @@
 package org.skyve.wildcat.web.faces.actions;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.util.Util;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
@@ -20,7 +20,8 @@ public class PopulateAction extends FacesAction<Void> {
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PopulateAction");
 
-		Query query = ActionUtil.getQuery(facesView.getBizModuleParameter(), facesView.getQueryNameParameter());
+		DocumentQueryDefinition query = ActionUtil.getDocumentQuery(facesView.getBizModuleParameter(),
+																		facesView.getQueryNameParameter());
 		facesView.setBizDocumentParameter(query.getDocumentName());
 		facesView.setTitle(query.getDisplayName());
 		

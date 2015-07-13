@@ -3,7 +3,6 @@ package org.skyve.metadata.module.query;
 import java.util.List;
 
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
@@ -13,13 +12,13 @@ import org.skyve.web.WebContext;
 /**
  * 
  */
-public interface Query extends NamedMetaData {
+public interface DocumentQueryDefinition extends QueryDefinition {
 	/**
 	 * 
 	 * @return
 	 */
-	public Module getOwningModule();
-
+	public String getDocumentName();
+	
 	/**
 	 * 
 	 * @param customer
@@ -28,24 +27,6 @@ public interface Query extends NamedMetaData {
 	 */
 	public Module getDocumentModule(Customer customer)
 	throws MetaDataException;
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getDisplayName();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getDescription();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public String getDocumentName();
 	
 	/**
 	 * 
@@ -73,18 +54,11 @@ public interface Query extends NamedMetaData {
 	
 	/**
 	 * 
-	 * @return
-	 */
-	public String getDocumentation();
-	
-	/**
-	 * 
 	 * @param summaryType
 	 * @param tagId
 	 * @return
 	 * @throws MetaDataException
 	 */
-	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
-													String tagId)
+	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType, String tagId)
 	throws MetaDataException;
 }

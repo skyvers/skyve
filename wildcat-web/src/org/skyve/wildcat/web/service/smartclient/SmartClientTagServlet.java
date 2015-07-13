@@ -19,7 +19,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
@@ -195,7 +195,7 @@ public class SmartClientTagServlet extends HttpServlet {
 		int _Index = dataSourceName.indexOf('_');
 		Module module = customer.getModule(dataSourceName.substring(0, _Index));
 		String documentOrQueryName = dataSourceName.substring(_Index + 1);
-		Query query = module.getQuery(documentOrQueryName);
+		DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
 		}

@@ -7,6 +7,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
@@ -180,13 +181,19 @@ public interface Persistence extends Serializable {
 	 */
 	public SQL newSQL(String query);	
 	
+	public SQL newNamedSQL(String moduleName, String queryName) throws MetaDataException;	
+
+	public SQL newNamedSQL(Module module, String queryName) throws MetaDataException;
+
 	/**
 	 * 
 	 * @param query
 	 * @return
 	 */
-	public SQL newSQL(String moduleName, String documentName, String query);	
+	public SQL newSQL(String moduleName, String documentName, String query);
 
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
+	throws MetaDataException;
 	
 	/**
 	 * 
@@ -195,6 +202,8 @@ public interface Persistence extends Serializable {
 	 */
 	public SQL newSQL(Document document, String query);	
 
+	public SQL newNamedSQL(Document document, String queryName) throws MetaDataException;	
+
 	/**
 	 * 
 	 * @param query
@@ -202,6 +211,15 @@ public interface Persistence extends Serializable {
 	 */
 	public BizQL newBizQL(String query);	
 	
+	public BizQL newNamedBizQL(String moduleName, String queryName) throws MetaDataException;	
+
+	public BizQL newNamedBizQL(Module module, String queryName) throws MetaDataException;
+
+	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName)
+	throws MetaDataException;
+
+	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) throws MetaDataException;
+
 	/**
 	 * 
 	 * @param document

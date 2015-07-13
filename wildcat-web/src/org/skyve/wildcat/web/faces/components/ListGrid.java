@@ -27,7 +27,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
@@ -61,7 +62,7 @@ public class ListGrid extends HtmlPanelGroup {
 					User user = CORE.getUser();
 					Customer customer = user.getCustomer();
 					Module module = customer.getModule(moduleName);
-					Query query = module.getQuery(queryName);
+					DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 					if (query == null) {
 						query = module.getDocumentDefaultQuery(customer, queryName);
 					}
@@ -132,7 +133,7 @@ public class ListGrid extends HtmlPanelGroup {
 		</h:form>
 	*/
 	UIComponent build(Customer customer,
-						Query query,
+						DocumentQueryDefinition query,
 						Application a,
 						ExpressionFactory ef,
 						ELContext elc,
@@ -204,7 +205,7 @@ public class ListGrid extends HtmlPanelGroup {
 	
 	private static void addHeader(UIComponent componentToAddTo,
 									Application a,
-									Query query,
+									QueryDefinition query,
 									String moduleName,
 									String documentName,
 									boolean canCreate,
@@ -245,7 +246,7 @@ public class ListGrid extends HtmlPanelGroup {
 	private static void addBoundColumns(Customer customer,
 											String moduleName,
 											String documentName,
-											Query query,
+											DocumentQueryDefinition query,
 											List<UIComponent> componentChildrenToAddTo,
 											Application a,
 											ExpressionFactory ef,

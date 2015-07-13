@@ -14,7 +14,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.wildcat.bind.BindUtil;
 
@@ -40,7 +40,7 @@ public class WildcatQueryFieldsProvider implements FieldsProvider {
 	throws JRException, UnsupportedOperationException {
     	try {
     		String moduleDotQuery = dataset.getQuery().getText();
-    		Query query = WildcatQueryExecuter.getQuery(moduleDotQuery);
+    		DocumentQueryDefinition query = WildcatQueryExecuter.getQuery(moduleDotQuery);
     		
     		Customer customer = CORE.getUser().getCustomer();
     		Module owningModule = query.getOwningModule();

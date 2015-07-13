@@ -12,7 +12,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Reference;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Bound;
@@ -265,7 +265,7 @@ class ViewValidator extends ViewVisitor {
 	
 	private void validateQueryName(String queryName, String widgetIdentifier)
 	throws MetaDataException {
-		if ((queryName != null) && (module.getQuery(queryName) == null)) {
+		if ((queryName != null) && (module.getDocumentQuery(queryName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
 		}
 	}
@@ -879,9 +879,9 @@ class ViewValidator extends ViewVisitor {
 		validateQueryName(lookup.getQuery(), lookupIdentifier);
 		
 		// determine the query that will be used
-		Query query = null;
+		DocumentQueryDefinition query = null;
 		if (lookup.getQuery() != null) {
-    		query = module.getQuery(lookup.getQuery());
+    		query = module.getDocumentQuery(lookup.getQuery());
     	}
 		else {
 			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
@@ -901,7 +901,7 @@ class ViewValidator extends ViewVisitor {
     		Reference reference = (Reference) target.getAttribute();
     		String queryName = reference.getQueryName();
     		if (queryName != null) {
-        		query = module.getQuery(queryName);
+        		query = module.getDocumentQuery(queryName);
     		}
     		else {
     			query = module.getDocumentDefaultQuery(customer, reference.getDocumentName());
@@ -914,14 +914,15 @@ class ViewValidator extends ViewVisitor {
 												null : 
 												new LinkedHashSet<>(dropDownColumns);
 		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
-    	for (QueryColumn column : query.getColumns()) {
+		
+		for (QueryColumn column : query.getColumns()) {
     		String alias = column.getName();
     		if (alias == null) {
     			alias = column.getBinding();
     		}
             if ((testColumns != null) && testColumns.contains(alias)) {
         		if (! column.isProjected()) {
-        			throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query.");
+					throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query.");
         		}
         		testColumns.remove(alias);
             }
@@ -932,7 +933,7 @@ class ViewValidator extends ViewVisitor {
             	foundLookupDescription = true;
             }
     	}
-    	
+		
     	if (! foundLookupDescription) {
 			throw new MetaDataException(lookupIdentifier + " in " + viewIdentifier + " has a description binding of " + descriptionBinding + " which is not defined in the query.");
     	}
@@ -1284,7 +1285,7 @@ class ViewValidator extends ViewVisitor {
 			public void processQueryListViewReference(QueryListViewReference reference)
 			throws MetaDataException {
 				try {
-					if (module.getQuery(reference.getQueryName()) == null) {
+					if (module.getDocumentQuery(reference.getQueryName()) == null) {
 						throw new IllegalStateException("No such query");
 					}
 				}

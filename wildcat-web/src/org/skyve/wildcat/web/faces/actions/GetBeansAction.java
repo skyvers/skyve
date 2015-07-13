@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
@@ -25,7 +25,7 @@ public class GetBeansAction extends FacesAction<List<Bean>> {
 	public List<Bean> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetBeansAction - bizModule=" + bizModule + " : queryName=" + queryName);
 
-		Query query = ActionUtil.getQuery(bizModule, queryName);
+		DocumentQueryDefinition query = ActionUtil.getDocumentQuery(bizModule, queryName);
 		DocumentQuery documentQuery = query.constructDocumentQuery(null, null).setFirstResult(0).setMaxResults(250);
 		
 		if (parameters != null) {

@@ -20,7 +20,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
@@ -69,7 +70,7 @@ public class ViewGenerator {
 		Module module = customer.getModule(document.getOwningModuleName());
 
 		if (type == ViewType.list) {
-			Query defaultQuery = module.getDocumentDefaultQuery(customer, document.getName());
+			QueryDefinition defaultQuery = module.getDocumentDefaultQuery(customer, document.getName());
 			result = generateListView(customer, document, defaultQuery, null);
 		}
 		else if (type == ViewType.edit) {
@@ -102,7 +103,7 @@ public class ViewGenerator {
 		pickList.setPickAssociationBinding(binding);
 
 		if (beans.size() > 0) {
-			Query query = module.getQuery(reference.getQueryName());
+			DocumentQueryDefinition query = module.getDocumentQuery(reference.getQueryName());
 			for (QueryColumn queryColumn : query.getColumns()) {
 				if (! queryColumn.isProjected()) {
 					continue;
@@ -147,7 +148,7 @@ public class ViewGenerator {
 	}
 
 	@SuppressWarnings("unused")
-	public static ViewImpl generateListView(Customer customer, Document document, Query query, String description) {
+	public static ViewImpl generateListView(Customer customer, Document document, QueryDefinition query, String description) {
 		ViewImpl result = new ViewImpl();
 		result.setType(ViewType.list);
 		StringBuilder title = new StringBuilder(64);

@@ -15,7 +15,8 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Job;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
@@ -143,8 +144,10 @@ public class DoctorUtil {
 			table.getHtmlContent().add("The module " + module.getTitle() + " has the following queries defined:");
 			table.setHeaderValues("Query", "Driving Document", "Description");
 
-			for (Query q : module.getMetadataQueries()) {
-				table.setRowValues(q.getDisplayName(), q.getDocumentName(), q.getDescription());
+			for (QueryDefinition q : module.getMetadataQueries()) {
+				table.setRowValues(q.getDisplayName(), 
+									(q instanceof DocumentQueryDefinition) ? ((DocumentQueryDefinition) q).getDocumentName() : null, 
+									q.getDescription());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -195,7 +198,7 @@ public class DoctorUtil {
 
 		if (!module.getMetadataQueries().isEmpty()) {
 			// For each query, create documentation
-			for (Query q : module.getMetadataQueries()) {
+			for (QueryDefinition q : module.getMetadataQueries()) {
 				renderQuery(customer, module, q, out);
 			}
 		}
@@ -359,7 +362,7 @@ public class DoctorUtil {
 	 * @param out
 	 * @throws Exception
 	 */
-	public static void renderQuery(Customer customer, Module module, Query q, PrintStream out) throws Exception {
+	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
 		section.setSectionTitle("Query " + q.getDisplayName());
@@ -368,24 +371,27 @@ public class DoctorUtil {
 		out.println(section.toHTML());
 
 		// Field List
-		DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), q.getName() + "queryFieldList"));
-		table.setTitle("Columns");
-		table.setHeaderValues("Field", "Description", "Expression", "Filter", "Order");
-		for (QueryColumn c : q.getColumns()) {
-
-			// See if we can find the document binding
-			String binding = null;
-			Document d = module.getDocument(customer, q.getDocumentName());
-			Attribute a = getAttributeFromFieldName(d, c.getBinding());
-			if (a != null) {
-				binding = a.getDisplayName();
-			} else {
-				binding = c.getBinding();
+		if (q instanceof DocumentQueryDefinition) {
+			DocumentQueryDefinition dq = (DocumentQueryDefinition) q;
+			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), q.getName() + "queryFieldList"));
+			table.setTitle("Columns");
+			table.setHeaderValues("Field", "Description", "Expression", "Filter", "Order");
+			for (QueryColumn c : dq.getColumns()) {
+	
+				// See if we can find the document binding
+				String binding = null;
+				Document d = module.getDocument(customer, dq.getDocumentName());
+				Attribute a = getAttributeFromFieldName(d, c.getBinding());
+				if (a != null) {
+					binding = a.getDisplayName();
+				} else {
+					binding = c.getBinding();
+				}
+	
+				table.setRowValues(binding, c.getDisplayName(), c.getExpression(), c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
 			}
-
-			table.setRowValues(binding, c.getDisplayName(), c.getExpression(), c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
+			out.println(table.toHTML(true));
 		}
-		out.println(table.toHTML(true));
 	}
 
 	/**

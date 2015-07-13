@@ -16,13 +16,16 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.wildcat.metadata.AbstractMetaDataMap;
 import org.skyve.wildcat.metadata.model.document.field.Field;
-import org.skyve.wildcat.metadata.module.query.QueryImpl;
+import org.skyve.wildcat.metadata.module.query.DocumentQueryDefinitionImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.user.RoleImpl;
 
@@ -46,7 +49,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	/**
 	 * The list of queries for this module in the order they are added.
 	 */
-	private List<Query> queries = new ArrayList<>();
+	private List<QueryDefinition> queries = new ArrayList<>();
 
 	/**
 	 * The list of roles for this module in the order they are added.
@@ -85,15 +88,15 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public Query getDocumentDefaultQuery(Customer customer, String documentName) 
+	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) 
 	throws MetaDataException {
-		Query result = null;
+		DocumentQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
 		if (documentRef != null) {
 			String queryName = documentRef.getDefaultQueryName();
 			if (queryName != null) {
-				result = getQuery(queryName);
+				result = getDocumentQuery(queryName);
 				if (result == null) {
 					throw new MetaDataException("The default query of " + queryName + 
 													" does not exist for document " + documentName);
@@ -105,7 +108,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				if ((persistent == null) || (persistent.getName() == null)) {
 					throw new MetaDataException("Cannot create a query for transient Document " + document.getOwningModuleName() + "." + document.getName());
 				}
-				QueryImpl query = new QueryImpl();
+				DocumentQueryDefinitionImpl query = new DocumentQueryDefinitionImpl();
 
 				String queryTitle = "All " + document.getPluralAlias();
 				query.setDisplayName(queryTitle);
@@ -216,18 +219,30 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 	
 	@Override
-	public Query getQuery(String queryName) {
-		// NB Cannot throw as QueryCommand tests it
-		return (Query) getMetaData(queryName);
+	public DocumentQueryDefinition getDocumentQuery(String queryName) {
+		// NB Cannot throw if null as QueryCommand tests it
+		return (DocumentQueryDefinition) getMetaData(queryName);
 	}
 
-	public void putQuery(Query query) {
+	@Override
+	public SQLDefinition getSQL(String queryName) {
+		// NB Cannot throw if null as QueryCommand tests it
+		return (SQLDefinition) getMetaData(queryName);
+	}
+
+	@Override
+	public BizQLDefinition getBizQL(String queryName) {
+		// NB Cannot throw if null as QueryCommand tests it
+		return (BizQLDefinition) getMetaData(queryName);
+	}
+
+	public void putQuery(QueryDefinition query) {
 		putMetaData(query.getName(), query);
 		queries.add(query);
 	}
 
 	@Override
-	public List<Query> getMetadataQueries() {
+	public List<QueryDefinition> getMetadataQueries() {
 		return Collections.unmodifiableList(queries);
 	}
 

@@ -19,7 +19,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
@@ -81,7 +82,7 @@ public class Desktop extends Harness {
 						result.append("details.showMember(ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
 						Module homeModule = customer.getModule(bizModule);
-						Query query = homeModule.getDocumentDefaultQuery(customer, bizDocument);
+						QueryDefinition query = homeModule.getDocumentDefaultQuery(customer, bizDocument);
 						result.append("ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 					} 
 					else {
@@ -186,7 +187,7 @@ public class Desktop extends Harness {
 			if (ViewType.list.equals(module.getHomeRef())) {
 				String homeDocumentName = module.getHomeDocumentName();
 				if (homeDocumentName != null) {
-					Query query = module.getDocumentDefaultQuery(customer, homeDocumentName);
+					DocumentQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
 					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 			}
@@ -217,10 +218,10 @@ public class Desktop extends Harness {
 			else if ((item instanceof ListItem) || (item instanceof TreeItem)) {
 				ListItem grid = (ListItem) item;
 				
-				Query query = null;
+				DocumentQueryDefinition query = null;
 				String target = grid.getQueryName();
 				if (target != null) {
-					query = module.getQuery(target);
+					query = module.getDocumentQuery(target);
 				}
 				else {
 					target = grid.getDocumentName();
@@ -272,11 +273,11 @@ public class Desktop extends Harness {
 	                if (item instanceof TreeItem) {
 	                    TreeItem treeItem = (TreeItem) item;
 	                    itemDocumentName = treeItem.getDocumentName();
-						Query query = deriveQuery(customer,
-					                                module,
-					                                item,
-					                                treeItem.getQueryName(),
-					                                itemDocumentName);
+						DocumentQueryDefinition query = deriveDocumentQuery(customer,
+												                                module,
+												                                item,
+												                                treeItem.getQueryName(),
+												                                itemDocumentName);
 						itemDocumentName = query.getDocumentName();
 						result.append(query.getName());
 						itemModule = query.getDocumentModule(customer);
@@ -286,11 +287,11 @@ public class Desktop extends Harness {
 	                else if (item instanceof ListItem) {
 						ListItem gridItem = (ListItem) item;
 						itemDocumentName = gridItem.getDocumentName();
-						Query query = deriveQuery(customer,
-					                                module,
-					                                item,
-					                                gridItem.getQueryName(),
-					                                itemDocumentName);
+						DocumentQueryDefinition query = deriveDocumentQuery(customer,
+												                                module,
+												                                item,
+												                                gridItem.getQueryName(),
+												                                itemDocumentName);
 						itemDocumentName = query.getDocumentName();
 						result.append(query.getName());
 						itemModule = query.getDocumentModule(customer);
@@ -300,11 +301,11 @@ public class Desktop extends Harness {
 					else if (item instanceof CalendarItem) {
 	                    CalendarItem calendarItem = (CalendarItem) item;
 	                    itemDocumentName = calendarItem.getDocumentName();
-						Query query = deriveQuery(customer,
-					                                module,
-					                                item,
-					                                calendarItem.getQueryName(),
-					                                itemDocumentName);
+						DocumentQueryDefinition query = deriveDocumentQuery(customer,
+												                                module,
+												                                item,
+												                                calendarItem.getQueryName(),
+												                                itemDocumentName);
 						itemDocumentName = query.getDocumentName();
 						result.append(query.getName());
 						itemModule = query.getDocumentModule(customer);
@@ -314,11 +315,11 @@ public class Desktop extends Harness {
 	                else if (item instanceof MapItem) {
 	                    MapItem mapItem = (MapItem) item;
 	                    itemDocumentName = mapItem.getDocumentName();
-						Query query = deriveQuery(customer,
-					                                module,
-					                                item,
-					                                mapItem.getQueryName(),
-					                                itemDocumentName);
+						DocumentQueryDefinition query = deriveDocumentQuery(customer,
+												                                module,
+												                                item,
+												                                mapItem.getQueryName(),
+												                                itemDocumentName);
 						result.append(query.getName());
 	                    result.append('_').append(mapItem.getGeometryBinding());
 						itemModule = query.getDocumentModule(customer);

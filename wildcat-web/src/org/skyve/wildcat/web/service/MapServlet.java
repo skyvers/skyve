@@ -16,7 +16,7 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.map.DefaultCollectionMapModel;
@@ -126,7 +126,7 @@ public class MapServlet extends HttpServlet {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
-		Query query = module.getQuery(queryName);
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
 		}

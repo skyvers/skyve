@@ -98,6 +98,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.BizQL;
@@ -1959,6 +1960,18 @@ t.printStackTrace();
 	}
 
 	@Override
+	public SQL newNamedSQL(String moduleName, String queryName)
+	throws MetaDataException {
+		Module module = user.getCustomer().getModule(moduleName);
+		return new HibernateSQL(module.getSQL(queryName).getQuery(), this);
+	}
+
+	@Override
+	public SQL newNamedSQL(Module module, String queryName) {
+		return new HibernateSQL(module.getSQL(queryName).getQuery(), this);
+	}
+
+	@Override
 	public SQL newSQL(String moduleName, String documentName, String query) {
 		return new HibernateSQL(moduleName, documentName, query, this);
 	}
@@ -1969,8 +1982,49 @@ t.printStackTrace();
 	}
 
 	@Override
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
+	throws MetaDataException {
+		Module module = user.getCustomer().getModule(moduleName);
+		return new HibernateSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
+	}
+
+	@Override
+	public SQL newNamedSQL(Document document, String queryName) 
+	throws MetaDataException {
+		Module module = user.getCustomer().getModule(document.getOwningModuleName());
+		return new HibernateSQL(document, module.getSQL(queryName).getQuery(), this);
+	}
+
+	@Override
 	public BizQL newBizQL(String query) {
 		return new HibernateBizQL(query, this);
+	}
+
+	@Override
+	public BizQL newNamedBizQL(String moduleName, String queryName) 
+	throws MetaDataException {
+		Module module = user.getCustomer().getModule(moduleName);
+		return new HibernateBizQL(module.getBizQL(queryName).getQuery(), this);
+	}
+
+	@Override
+	public BizQL newNamedBizQL(Module module, String queryName) {
+		return new HibernateBizQL(module.getBizQL(queryName).getQuery(), this);
+	}
+
+	@Override
+	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName)
+	throws MetaDataException {
+		Module module = user.getCustomer().getModule(moduleName);
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		return query.constructDocumentQuery(null, null);
+	}
+
+	@Override
+	public DocumentQuery newNamedDocumentQuery(Module module, String queryName)
+	throws MetaDataException {
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		return query.constructDocumentQuery(null, null);
 	}
 
 	@Override

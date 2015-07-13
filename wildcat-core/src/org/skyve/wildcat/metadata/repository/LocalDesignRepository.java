@@ -31,7 +31,8 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -559,7 +560,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						for (String referenceName : result.getReferenceNames()) {
 							String queryName = result.getReferenceByName(referenceName).getQueryName();
 							Module documentModule = getModule(customer, documentModuleName);
-							if ((queryName != null) && (documentModule.getQuery(queryName) == null)) {
+							if ((queryName != null) && (documentModule.getDocumentQuery(queryName) == null)) {
 								StringBuilder mde = new StringBuilder(documentName);
 								mde.append(" : The reference ");
 								mde.append(referenceName);
@@ -925,50 +926,53 @@ public class LocalDesignRepository extends AbstractRepository {
 		}
 		
 		// check query columns
-		for (Query query : module.getMetadataQueries()) {
-			Module queryDocumentModule = query.getDocumentModule(customer);
-			Document queryDocument = queryDocumentModule.getDocument(customer, query.getDocumentName());
-			for (QueryColumn column :query.getColumns()) {
-				String binding = column.getBinding();
-				if (binding != null) {
-					TargetMetaData target = null;
-					try {
-						target = BindUtil.getMetaDataForBinding(customer, 
-																	queryDocumentModule,
-																	queryDocument,
-																	binding);
-					}
-					catch (MetaDataException e) {
-						throw new MetaDataException("Query " + query.getName() + 
-														" in module " + query.getOwningModule().getName() +
-														" with column binding " + binding +
-														" is not a valid binding.", e);
-					}
-
-					Document targetDocument = target.getDocument();
-					Attribute targetAttribute = target.getAttribute();
-					Persistent targetPersistent = targetDocument.getPersistent();
-					if ((targetPersistent == null) || (targetPersistent.getName() == null) || // transient document
-							((targetAttribute != null) && 
-								(! BindUtil.isImplicit(targetAttribute.getName())) &&
-								(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
-						if (column.isSortable() || column.isFilterable() || column.isEditable()) {
-							throw new MetaDataException("Query " + query.getName() + 
-														" in module " + query.getOwningModule().getName() +
-														" with column binding " + binding +
-														" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+		for (QueryDefinition query : module.getMetadataQueries()) {
+			if (query instanceof DocumentQueryDefinition) {
+				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
+				Module queryDocumentModule = documentQuery.getDocumentModule(customer);
+				Document queryDocument = queryDocumentModule.getDocument(customer, documentQuery.getDocumentName());
+				for (QueryColumn column : documentQuery.getColumns()) {
+					String binding = column.getBinding();
+					if (binding != null) {
+						TargetMetaData target = null;
+						try {
+							target = BindUtil.getMetaDataForBinding(customer, 
+																		queryDocumentModule,
+																		queryDocument,
+																		binding);
 						}
-					}
-					
-					// Customer overridden documents that are used in metadata queries cause an error unless 
-					// <association>.bizId is used as the binding.
-					if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&
-							(column.getFilterOperator() != null)) {
-						throw new MetaDataException("Query " + query.getName() + 
-														" in module " + query.getOwningModule().getName() +
-														" with column binding " + binding +
-														" references an association which has a column filter defined.  Use [" + 
-														binding + ".bizId] as the binding for the column.");
+						catch (MetaDataException e) {
+							throw new MetaDataException("Query " + query.getName() + 
+															" in module " + query.getOwningModule().getName() +
+															" with column binding " + binding +
+															" is not a valid binding.", e);
+						}
+	
+						Document targetDocument = target.getDocument();
+						Attribute targetAttribute = target.getAttribute();
+						Persistent targetPersistent = targetDocument.getPersistent();
+						if ((targetPersistent == null) || (targetPersistent.getName() == null) || // transient document
+								((targetAttribute != null) && 
+									(! BindUtil.isImplicit(targetAttribute.getName())) &&
+									(! targetAttribute.isPersistent()))) { // transient non-implicit attribute
+							if (column.isSortable() || column.isFilterable() || column.isEditable()) {
+								throw new MetaDataException("Query " + query.getName() + 
+															" in module " + query.getOwningModule().getName() +
+															" with column binding " + binding +
+															" references a transient (or mapped) attribute and should not be sortable, filterable or editable.");
+							}
+						}
+						
+						// Customer overridden documents that are used in metadata queries cause an error unless 
+						// <association>.bizId is used as the binding.
+						if ((targetAttribute != null) && AttributeType.association.equals(targetAttribute.getAttributeType()) &&
+								(column.getFilterOperator() != null)) {
+							throw new MetaDataException("Query " + query.getName() + 
+															" in module " + query.getOwningModule().getName() +
+															" with column binding " + binding +
+															" references an association which has a column filter defined.  Use [" + 
+															binding + ".bizId] as the binding for the column.");
+						}
 					}
 				}
 			}
@@ -990,7 +994,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				if (documentName == null) {
 					String queryName = treeItem.getQueryName();
 					if (queryName != null) {
-						Query query = module.getQuery(queryName);
+						DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 						documentName = query.getDocumentName();
 					}
 				}

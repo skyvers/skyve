@@ -16,14 +16,14 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.metadata.module.query.Query;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.Querylet;
 import org.skyve.metadata.user.User;
@@ -37,10 +37,7 @@ import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
-public class QueryImpl implements Query {
-	/**
-	 * For Serialization
-	 */
+public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements DocumentQueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
 
 	private static final String USER_EXPRESSION = "{USER}";
@@ -52,14 +49,6 @@ public class QueryImpl implements Query {
 	private static final String DATE_EXPRESSION = "{DATE}";
 	private static final String DATETIME_EXPRESSION = "{DATETIME}";
 
-	private Module owningModule;
-
-	private String displayName;
-
-	private String name;
-
-	private String description;
-
 	private String documentName;
 
 	private String fromClause;
@@ -68,57 +57,19 @@ public class QueryImpl implements Query {
 
 	private List<QueryColumn> columns = new ArrayList<>();
 
-	private String documentation;
-	
 	private Querylet<? extends WebContext> querylet;
 
 	@Override
-	public Module getOwningModule() {
-		return owningModule;
-	}
-	
-	@Override
 	public Module getDocumentModule(Customer customer)
 	throws MetaDataException {
-		Module result = owningModule;
-		DocumentRef ref = owningModule.getDocumentRefs().get(getDocumentName());
+		Module result = getOwningModule();
+		DocumentRef ref = result.getDocumentRefs().get(getDocumentName());
 		String referencedModuleName = ref.getReferencedModuleName();
 		if (referencedModuleName != null) {
 			result = customer.getModule(referencedModuleName);
 		}
 		
 		return result;
-	}
-
-	public void setOwningModule(Module owningModule) {
-		this.owningModule = owningModule;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
-	}
-
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	@Override
@@ -164,15 +115,6 @@ public class QueryImpl implements Query {
 	}
 
 	@Override
-	public String getDocumentation() {
-		return documentation;
-	}
-
-	public void setDocumentation(String documentation) {
-		this.documentation = documentation;
-	}
-
-	@Override
 	@SuppressWarnings("incomplete-switch")
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
 													String tagId)
@@ -180,6 +122,7 @@ public class QueryImpl implements Query {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
+		Module owningModule = getOwningModule();
 		Document document = owningModule.getDocument(customer, getDocumentName());
 
 		Map<String, Object> implicitParameters = new TreeMap<>();
@@ -188,7 +131,7 @@ public class QueryImpl implements Query {
 		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause);
 		if (! implicitParameters.isEmpty()) {
 			for (String implicitParameterName : implicitParameters.keySet()) {
-				result.putParameter(name, implicitParameters.get(implicitParameterName));
+				result.putParameter(getName(), implicitParameters.get(implicitParameterName));
 			}
 		}
 		
