@@ -27,14 +27,14 @@
 <body>
 <form>
 <table align="center" height="100%" >
-	<tr><td height="30%">&nbsp</td></tr>
+	<tr><td height="30%">&nbsp;</td></tr>
 
 	<tr bgColor="367ABA">
 		<td align="center" height="5%"><strong style="color:FFFFFF"><font face="Tahoma">Request Unsuccessful</font></strong></td>
 	</tr>
 	<tr bgColor="BECE24">
 		<td style="color:333333" align="center" height="10%">
-			<font size="2" face="Tahoma">An error occured while processing your request.
+			<font size="2" face="Tahoma">An error occurred while processing your request.
 				<br/>
 				<br/>
 					Return <a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"
@@ -45,7 +45,7 @@
 			</font> 
 		</td>
 	</tr>
-	<tr><td >&nbsp</td></tr>
+	<tr><td >&nbsp;</td></tr>
 
 </table>
 
