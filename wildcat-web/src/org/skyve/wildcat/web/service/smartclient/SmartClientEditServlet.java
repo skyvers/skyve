@@ -588,24 +588,30 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		}
     		}
     	}
+		try {
+			StringBuilder message = new StringBuilder(256);
+	    	message.append("{response:{status:0,startRow:0,endRow:0,totalRows:1,data:[");
+			ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
+																		processModule, 
+																		processDocument, 
+																		processDocument.getView(UX_UI, customer, processBean.isCreated() ? ViewType.edit : ViewType.create),
+																		processBean,
+																		editIdCounter,
+																		createIdCounter,
+																		false);
+			manipulator.visit();
 
-    	StringBuilder message = new StringBuilder(256);
-    	message.append("{response:{status:0,startRow:0,endRow:0,totalRows:1,data:[");
-		ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
-																	processModule, 
-																	processDocument, 
-																	processDocument.getView(UX_UI, customer, processBean.isCreated() ? ViewType.edit : ViewType.create),
-																	processBean,
-																	editIdCounter,
-																	createIdCounter,
-																	false);
-		manipulator.visit();
-		webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
-		WebUtil.putConversationInCache(webContext);
-		message.append(manipulator.toJSON(webContext));
-		message.append("]}}");
-
-		pw.append(message);
+			webContext.setCurrentBean((formBinding == null) ? processBean : ((contextBean == null) ? processBean : contextBean));
+			message.append(manipulator.toJSON(webContext));
+			message.append("]}}");
+			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
+			pw.append(message);
+		}
+		finally {
+			// lastly put the conversation in the cache, after the response is sent
+			// and all lazy loading of domain objects has been realised
+			WebUtil.putConversationInCache(webContext);
+		}
     }
     
     private static void applyNewParameters(Customer customer, 
@@ -817,12 +823,19 @@ public class SmartClientEditServlet extends HttpServlet {
 																	createIdCounter,
 																	false);
 		manipulator.visit();
-		result.append("{response:{status:0,data:");
-		WebUtil.putConversationInCache(webContext);
-		result.append(manipulator.toJSON(webContext));
-		result.append("}}");
-		
-		pw.append(result);
+		try {
+			result.append("{response:{status:0,data:");
+			result.append(manipulator.toJSON(webContext));
+			result.append("}}");
+
+			// append in one atomic operation so that if an error is thrown, the response isn't half-sent
+			pw.append(result);
+		}
+		finally {
+			// lastly put the conversation in the cache, after the response is sent
+			// and all lazy loading of domain objects has been realised
+			WebUtil.putConversationInCache(webContext);
+		}
 	}
 	
 	private static void remove(AbstractWebContext webContext,
