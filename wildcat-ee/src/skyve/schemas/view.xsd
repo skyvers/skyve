@@ -788,6 +788,7 @@
         <xs:sequence/>
         <xs:attribute name="border" type="xs:boolean"/>
         <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="percentageHeight" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
@@ -795,6 +796,7 @@
         <xs:attribute name="pixelMemberPadding" type="xs:int"/>
         <xs:attribute name="pixelPadding" type="xs:int"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="widgetId" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -806,6 +808,7 @@
         <xs:sequence/>
         <xs:attribute name="border" type="xs:boolean"/>
         <xs:attribute name="borderTitle" type="xs:string"/>
+        <xs:attribute name="horizontalAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="percentageHeight" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
@@ -813,6 +816,7 @@
         <xs:attribute name="pixelMemberPadding" type="xs:int"/>
         <xs:attribute name="pixelPadding" type="xs:int"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="widgetId" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -1386,34 +1390,42 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="verticalAlignment">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="middle"/>
+      <xs:enumeration value="bottom"/>
+      <xs:enumeration value="top"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Download"/>
       <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="OK"/>
       <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="BizExport"/>
       <xs:enumeration value="Report"/>
       <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="ZoomOut"/>
       <xs:enumeration value="New"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Download"/>
       <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="Save"/>
       <xs:enumeration value="Remove"/>
       <xs:enumeration value="Delete"/>
-      <xs:enumeration value="Save"/>
+      <xs:enumeration value="OK"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
-      <xs:enumeration value="blankFrame"/>
-      <xs:enumeration value="self"/>
-      <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="self"/>
+      <xs:enumeration value="blankFrame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

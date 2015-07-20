@@ -49,6 +49,7 @@ import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.VerticalAlignment;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.ViewVisitor;
 import org.skyve.wildcat.metadata.view.container.Box;
@@ -239,12 +240,45 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitVBox(VBox vbox, 
 								boolean parentVisible,
-								boolean parentEnabled) {
+								boolean parentEnabled)
+		throws MetaDataException {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizVBox.create({");
 			size(vbox, code);
 			box(vbox);
 			bordered(vbox, code);
+			VerticalAlignment v = vbox.getVerticalAlignment();
+			if (v != null) {
+				switch (v) {
+				case top:
+					code.append("align:'top',");
+					break;
+				case middle:
+					code.append("align:'center',");
+					break;
+				case bottom:
+					code.append("align:'bottom',");
+					break;
+				default:
+					throw new MetaDataException("VBox VerticalAlignment of " + v + " is not supported");
+				}
+			}
+			HorizontalAlignment h = vbox.getHorizontalAlignment();
+			if (h != null) {
+				switch (h) {
+				case left:
+					code.append("defaultLayoutAlign:'left',");
+					break;
+				case centre:
+					code.append("defaultLayoutAlign:'center',");
+					break;
+				case right:
+					code.append("defaultLayoutAlign:'right',");
+					break;
+				default:
+					throw new MetaDataException("VBox HoriaontalAlignment of " + h + " is not supported");
+				}
+			}
 			invisible(vbox.getInvisibleConditionName(), code);
 			removeTrailingComma(code);
 			code.append("});\n");
@@ -256,10 +290,43 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitHBox(HBox hbox, 
 								boolean parentVisible,
-								boolean parentEnabled) {
+								boolean parentEnabled)
+		throws MetaDataException {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizHBox.create({");
 			size(hbox, code);
+			HorizontalAlignment h = hbox.getHorizontalAlignment();
+			if (h != null) {
+				switch (h) {
+				case left:
+					code.append("align:'left',");
+					break;
+				case centre:
+					code.append("align:'center',");
+					break;
+				case right:
+					code.append("align:'right',");
+					break;
+				default:
+					throw new MetaDataException("HBox HoriaontalAlignment of " + h + " is not supported");
+				}
+			}
+			VerticalAlignment v = hbox.getVerticalAlignment();
+			if (v != null) {
+				switch (v) {
+				case top:
+					code.append("defaultLayoutAlign:'top',");
+					break;
+				case middle:
+					code.append("defaultLayoutAlign:'center',");
+					break;
+				case bottom:
+					code.append("defaultLayoutAlign:'bottom',");
+					break;
+				default:
+					throw new MetaDataException("HBox HoriaontalAlignment of " + h + " is not supported");
+				}
+			}
 			box(hbox);
 			bordered(hbox, code);
 			invisible(hbox.getInvisibleConditionName(), code);

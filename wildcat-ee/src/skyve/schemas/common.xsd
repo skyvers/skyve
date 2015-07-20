@@ -80,19 +80,19 @@
 
   <xs:simpleType name="reportFormat">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="rtf"/>
-      <xs:enumeration value="xlsx"/>
-      <xs:enumeration value="txt"/>
+      <xs:enumeration value="xls"/>
+      <xs:enumeration value="html"/>
+      <xs:enumeration value="xml"/>
       <xs:enumeration value="odt"/>
+      <xs:enumeration value="docx"/>
+      <xs:enumeration value="ods"/>
+      <xs:enumeration value="xhtml"/>
+      <xs:enumeration value="xlsx"/>
+      <xs:enumeration value="pptx"/>
+      <xs:enumeration value="txt"/>
       <xs:enumeration value="csv"/>
       <xs:enumeration value="pdf"/>
-      <xs:enumeration value="ods"/>
-      <xs:enumeration value="html"/>
-      <xs:enumeration value="xhtml"/>
-      <xs:enumeration value="xls"/>
-      <xs:enumeration value="xml"/>
-      <xs:enumeration value="docx"/>
-      <xs:enumeration value="pptx"/>
+      <xs:enumeration value="rtf"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

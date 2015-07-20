@@ -7,8 +7,10 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.wildcat.metadata.Container;
 import org.skyve.wildcat.metadata.view.Bordered;
+import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Identifiable;
 import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.VerticalAlignment;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -32,6 +34,9 @@ public class VBox extends Container implements Identifiable, Box, RelativeSize, 
 	
 	private Integer pixelPadding;
 	private Integer pixelMemberPadding;
+	
+	private HorizontalAlignment horizontalAlignment;
+	private VerticalAlignment verticalAlignment;
 	
 	private String invisibleConditionName;
 
@@ -131,6 +136,24 @@ public class VBox extends Container implements Identifiable, Box, RelativeSize, 
 	@XmlAttribute(name = "pixelMemberPadding", required = false)
 	public void setPixelMemberPadding(Integer pixelMemberPadding) {
 		this.pixelMemberPadding = pixelMemberPadding;
+	}
+
+	public HorizontalAlignment getHorizontalAlignment() {
+		return horizontalAlignment;
+	}
+
+	@XmlAttribute(required = false)
+	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
+		this.horizontalAlignment = horizontalAlignment;
+	}
+
+	public VerticalAlignment getVerticalAlignment() {
+		return verticalAlignment;
+	}
+
+	@XmlAttribute(required = false)
+	public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
+		this.verticalAlignment = verticalAlignment;
 	}
 
 	@Override
