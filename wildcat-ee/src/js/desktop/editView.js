@@ -1468,6 +1468,8 @@ BizListMembership.addMethods({
 			dragDataAction: "move",
 			recordDrop: function (dropRecords, targetRecord, index, sourceWidget) {
 				this.Super('recordDrop', arguments);
+				me._view._vm.setValue('_changed', true); // make the view dirty
+				me._view._vm.setValue('_apply', true); // post view changes before zooming
 				me.changed();
 			},
 			alternateRecordStyles: true,
@@ -1491,6 +1493,8 @@ BizListMembership.addMethods({
 				if (sourceWidget == this) { // a reorder drop
 					this.reorderData();
 				}
+				me._view._vm.setValue('_changed', true); // make the view dirty
+				me._view._vm.setValue('_apply', true); // post view changes before zooming
 				me.changed();
 			},
 			reorderData: function() {
@@ -1527,6 +1531,8 @@ BizListMembership.addMethods({
 						height: 32, 
 						click: function() {
 							me._memberList.transferSelectedData(me._candidateList);
+							me._view._vm.setValue('_changed', true); // make the view dirty
+							me._view._vm.setValue('_apply', true); // post view changes before zooming
 							me.changed();
 						},
 						canHover: true,
@@ -1542,6 +1548,8 @@ BizListMembership.addMethods({
 						height: 32, 
 						click: function() {
 							me._candidateList.transferSelectedData(me._memberList);
+							me._view._vm.setValue('_changed', true); // make the view dirty
+							me._view._vm.setValue('_apply', true); // post view changes before zooming
 							me.changed();
 						},
 						canHover: true,
