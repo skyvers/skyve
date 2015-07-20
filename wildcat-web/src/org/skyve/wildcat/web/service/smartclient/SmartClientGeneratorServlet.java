@@ -897,8 +897,11 @@ code.append("_view:view})");
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append("=BizLabel.create({");
 
-		        size(label, code);
-		        
+				size(label, code);
+				if (label.getPixelWidth() == null) { // default to whole width
+					code.append("width:'100%',");
+				}
+
 				if (alignment != null) {
 					code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
 				}
