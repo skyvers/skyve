@@ -21,12 +21,12 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
-import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -121,7 +121,13 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	Customer customer = user.getCustomer();
 			    	
 			    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
+			    	if (formBinding != null) {
+			    		formBinding = formBinding.replace('_', '.');
+			    	}
 			    	String gridBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
+			    	if (gridBinding != null) {
+			    		gridBinding = gridBinding.replace('_', '.');
+			    	}
 			    	String editIdCounter = request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER);
 			    	String createIdCounter = request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER);
 	

@@ -807,6 +807,9 @@ public final class BindUtil {
 		if (map.containsKey(binding)) {
 			result = map.get(binding);
 		}
+		else if (map.containsKey(binding.replace('.', '_'))) {
+			result = map.get(binding.replace('.', '_'));
+		}
 		else {
 			Object currentMap = map;
 			StringTokenizer tokenizer = new StringTokenizer(binding, ".");

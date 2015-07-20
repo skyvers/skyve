@@ -346,13 +346,13 @@ class ViewJSONManipulator extends ViewVisitor {
 					addBindingsAndFormatValues(bindings, element, elementValues, webId);
 					values.add(elementValues);
 				}
-				json.put(bindingPrefix, values);
+				json.put(bindingPrefix.replace('.', '_'), values);
 			}
 			else {
 				Bean currentBean = (Bean) value;
 				Map<String, Object> beanValues = new TreeMap<>();
 				addBindingsAndFormatValues(bindings, currentBean, beanValues, webId);
-				json.put(bindingPrefix, beanValues);
+				json.put(bindingPrefix.replace('.', '_'), beanValues);
 			}
 		}
 	}
