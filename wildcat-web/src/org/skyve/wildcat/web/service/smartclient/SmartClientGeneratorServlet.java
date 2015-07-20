@@ -787,7 +787,22 @@ code.append("_view:view})");
 
 		@Override
 		public void visitSpacer(Spacer spacer) throws MetaDataException {
-			code.append("type:'spacer',");
+			if (formVariable == null) { // not a form
+				String variable = "v" + variableCounter++;
+				code.append("var ").append(variable).append("=LayoutSpacer.create(");
+		        if ((spacer.getPixelWidth() != null) || spacer.getPixelHeight() != null) {
+		        	code.append('{');
+		        	size(spacer, code);
+		        	code.setLength(code.length() - 1); // remove trailing comma
+		        	code.append('}');
+		        }
+				code.append(");\n");
+				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+			}
+			else {
+				code.append("type:'spacer',");
+				size(spacer, code);
+			}
 		}
 
 		@Override

@@ -756,8 +756,9 @@ public class ComponentBuilder {
 		return result;
 	}
     
-    public Spacer spacer() {
+    public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
         Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
+        addSize(result, null, pixelWidth, null, pixelHeight, null, null);
         setId(result);
         return result;
     }

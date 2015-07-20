@@ -20,6 +20,7 @@ import org.skyve.wildcat.metadata.view.widget.DynamicImage;
 import org.skyve.wildcat.metadata.view.widget.GeoLocator;
 import org.skyve.wildcat.metadata.view.widget.Link;
 import org.skyve.wildcat.metadata.view.widget.MapDisplay;
+import org.skyve.wildcat.metadata.view.widget.Spacer;
 import org.skyve.wildcat.metadata.view.widget.StaticImage;
 import org.skyve.wildcat.metadata.view.widget.bound.Label;
 import org.skyve.wildcat.metadata.view.widget.bound.input.CheckMembership;
@@ -50,6 +51,7 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = Label.class),
 						@XmlElementRef(type = Blurb.class),
 						@XmlElementRef(type = Link.class),
+						@XmlElementRef(type = Spacer.class),
 						@XmlElementRef(type = ListMembership.class),
 						@XmlElementRef(type = CheckMembership.class),
 						@XmlElementRef(type = Comparison.class),

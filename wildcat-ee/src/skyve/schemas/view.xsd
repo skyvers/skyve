@@ -599,6 +599,7 @@
         <xs:element ref="tns:label"/>
         <xs:element ref="tns:blurb"/>
         <xs:element ref="tns:link"/>
+        <xs:element ref="tns:spacer"/>
         <xs:element ref="tns:listMembership"/>
         <xs:element ref="tns:checkMembership"/>
         <xs:element ref="tns:comparison"/>
@@ -979,6 +980,8 @@
 
   <xs:complexType name="spacer">
     <xs:sequence/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="pixelWidth" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="link">
@@ -1374,19 +1377,19 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="pick"/>
-      <xs:enumeration value="create"/>
       <xs:enumeration value="edit"/>
-      <xs:enumeration value="params"/>
+      <xs:enumeration value="create"/>
+      <xs:enumeration value="pick"/>
       <xs:enumeration value="list"/>
+      <xs:enumeration value="params"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="left"/>
-      <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+      <xs:enumeration value="centre"/>
+      <xs:enumeration value="left"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -1400,32 +1403,32 @@
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="Download"/>
       <xs:enumeration value="New"/>
       <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Download"/>
       <xs:enumeration value="Edit"/>
-      <xs:enumeration value="Upload"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="Save"/>
       <xs:enumeration value="Remove"/>
-      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="Save"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="DEFAULTS"/>
       <xs:enumeration value="OK"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Upload"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="modalWindow"/>
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
-      <xs:enumeration value="namedFame"/>
       <xs:enumeration value="self"/>
       <xs:enumeration value="blankFrame"/>
+      <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

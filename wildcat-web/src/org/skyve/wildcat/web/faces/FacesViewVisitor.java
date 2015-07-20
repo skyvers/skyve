@@ -745,7 +745,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitSpacer(Spacer spacer) throws MetaDataException {
-		addComponent(null, false, null, b.label(null, null, " ", null), null, null);
+		addComponent(null, false, null, b.spacer(spacer.getPixelWidth(), spacer.getPixelHeight()), spacer.getPixelWidth(), null);
 	}
 
 	@Override
