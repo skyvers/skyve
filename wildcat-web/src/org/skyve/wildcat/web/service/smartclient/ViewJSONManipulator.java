@@ -470,73 +470,79 @@ class ViewJSONManipulator extends ViewVisitor {
 				
 				// Get the existing beans in the list
 				List<Bean> beanList = (List<Bean>) BindUtil.get(appliedTo, childBindingPrefix);
-
-				// process the existing beans applying the changes and ordering from the requestList
-				int newIndex = 0;
-				for (Object requestListItem : requestList) {
-					String thisBizId = null;
-					Map<String, Object> thisMap = null;
-					if (requestListItem instanceof String) { // reference
-						thisBizId = (String) requestListItem;
-					}
-					else {
-						thisMap = (Map<String, Object>) requestListItem;
-						thisBizId = (String) thisMap.get(Bean.DOCUMENT_ID);
-					}
-					Bean thisBean = null;
-					if (thisBizId != null) {
-						thisBean = BindUtil.getElementInCollection(beanList, thisBizId);
-					}
-
-					if (thisBean == null) { // DNE in beanList
-						if (thisMap == null) { // reference
-							thisBean = findReferencedBean(relatedDocument, thisBizId, persistence);
+				// beanList could be null if we have a datagrid that is bound to a compound binding...
+				// eg <dataGrid binding="foo.bars" />
+				// Now, if foo is made null by another control - maybe a combo empty value is chosen then
+				// 1) foo is null
+				// 2) foo.bars yields null and we don't need to apply any processing
+				if (beanList != null) {
+					// process the existing beans applying the changes and ordering from the requestList
+					int newIndex = 0;
+					for (Object requestListItem : requestList) {
+						String thisBizId = null;
+						Map<String, Object> thisMap = null;
+						if (requestListItem instanceof String) { // reference
+							thisBizId = (String) requestListItem;
 						}
 						else {
-							// create a new one with new Instance
-							thisBean = relatedDocument.newInstance(user);
-							applyJSON(childBindings,
-										relatedDocument,
-										thisMap,
-										thisBean,
-										persistence);
+							thisMap = (Map<String, Object>) requestListItem;
+							thisBizId = (String) thisMap.get(Bean.DOCUMENT_ID);
 						}
-
-						// Determine if we should link the bean in as the parent
-						String parentDocumentName = relatedDocument.getParentDocumentName();
-						if ((parentDocumentName != null) && // is a child document
-								parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
-							((ChildBean<Bean>) thisBean).setParent(appliedTo);
+						Bean thisBean = null;
+						if (thisBizId != null) {
+							thisBean = BindUtil.getElementInCollection(beanList, thisBizId);
 						}
-						beanList.add(newIndex, thisBean);
-					}
-					else { // found
-						// Only move the bean in the collection if required
-						// NB We do this conditionally so we don't upset hibernate collection dirtiness
-						if (beanList.indexOf(thisBean) != newIndex) {
-							beanList.remove(thisBean);
+	
+						if (thisBean == null) { // DNE in beanList
+							if (thisMap == null) { // reference
+								thisBean = findReferencedBean(relatedDocument, thisBizId, persistence);
+							}
+							else {
+								// create a new one with new Instance
+								thisBean = relatedDocument.newInstance(user);
+								applyJSON(childBindings,
+											relatedDocument,
+											thisMap,
+											thisBean,
+											persistence);
+							}
+	
+							// Determine if we should link the bean in as the parent
+							String parentDocumentName = relatedDocument.getParentDocumentName();
+							if ((parentDocumentName != null) && // is a child document
+									parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
+								((ChildBean<Bean>) thisBean).setParent(appliedTo);
+							}
 							beanList.add(newIndex, thisBean);
 						}
-
-						// apply the properties from the JSON to the bean element, if its not a reference
-						if (thisMap != null) {
-							applyJSON(childBindings,
-										relatedDocument,
-										thisMap,
-										thisBean,
-										persistence);
+						else { // found
+							// Only move the bean in the collection if required
+							// NB We do this conditionally so we don't upset hibernate collection dirtiness
+							if (beanList.indexOf(thisBean) != newIndex) {
+								beanList.remove(thisBean);
+								beanList.add(newIndex, thisBean);
+							}
+	
+							// apply the properties from the JSON to the bean element, if its not a reference
+							if (thisMap != null) {
+								applyJSON(childBindings,
+											relatedDocument,
+											thisMap,
+											thisBean,
+											persistence);
+							}
 						}
+						newIndex++;
 					}
-					newIndex++;
-				}
-
-				// delete any left over beans in the list as these were not present in the requestList
-				while (beanList.size() > newIndex) {
-					beanList.remove(newIndex);
-				}
-				
-				if (relation instanceof Collection) { // NB it could be an inverse
-					BindUtil.sortCollectionByMetaData(appliedTo, (Collection) relation);
+	
+					// delete any left over beans in the list as these were not present in the requestList
+					while (beanList.size() > newIndex) {
+						beanList.remove(newIndex);
+					}
+					
+					if (relation instanceof Collection) { // NB it could be an inverse
+						BindUtil.sortCollectionByMetaData(appliedTo, (Collection) relation);
+					}
 				}
 			}
 			else { // relation is an association
