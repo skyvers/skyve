@@ -541,7 +541,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					}
 					
 					if (relation instanceof Collection) { // NB it could be an inverse
-						BindUtil.sortCollectionByMetaData(appliedTo, (Collection) relation);
+						BindUtil.sortCollectionByMetaData(appliedTo, customer, module, appliedToDoc, childBindingPrefix);
 					}
 				}
 			}
