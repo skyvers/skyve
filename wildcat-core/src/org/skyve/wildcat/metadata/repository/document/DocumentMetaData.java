@@ -42,6 +42,7 @@ import org.skyve.wildcat.metadata.model.document.field.Enumeration.EnumeratedVal
 import org.skyve.wildcat.metadata.model.document.field.Field;
 import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
 import org.skyve.wildcat.metadata.model.document.field.Geometry;
+import org.skyve.wildcat.metadata.model.document.field.Id;
 import org.skyve.wildcat.metadata.model.document.field.Integer;
 import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.metadata.model.document.field.LongInteger;
@@ -196,7 +197,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						@XmlElementRef(type = org.skyve.wildcat.metadata.model.document.Association.class),
 						@XmlElementRef(type = org.skyve.wildcat.metadata.model.document.Collection.class),
 						@XmlElementRef(type = Inverse.class),
-						@XmlElementRef(type = Geometry.class)})
+						@XmlElementRef(type = Geometry.class),
+						@XmlElementRef(type = Id.class)})
 	public List<Attribute> getAttributes() {
 		return attributes;
 	}

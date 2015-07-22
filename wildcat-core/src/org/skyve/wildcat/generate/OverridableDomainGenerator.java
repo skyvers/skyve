@@ -1096,6 +1096,9 @@ joined tables
 				else if (type == AttributeType.geometry) {
 					fw.append("\" type=\"").append(GEOMETRY);
 				}
+				else if (type == AttributeType.id) {
+					fw.append("\" length=\"36");
+				}
 				else if (type == AttributeType.content) {
 					fw.append("\" length=\"36");
 				}

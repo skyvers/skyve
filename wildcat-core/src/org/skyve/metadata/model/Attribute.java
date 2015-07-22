@@ -46,7 +46,8 @@ public interface Attribute extends NamedMetaData {
 		association(Bean.class), 
 		collection(List.class),
 		inverse(List.class),
-		geometry(Geometry.class);
+		geometry(Geometry.class),
+		id(String.class);
 
 		private Class<?> implementingType;
 

@@ -39,6 +39,8 @@
 
   <xs:element name="geometry" type="tns:geometry"/>
 
+  <xs:element name="id" type="tns:id"/>
+
   <xs:element name="integer" type="tns:integer"/>
 
   <xs:element name="integerValidator" type="tns:integerValidator"/>
@@ -117,6 +119,7 @@
                   <xs:element ref="tns:collection"/>
                   <xs:element ref="tns:inverse"/>
                   <xs:element ref="tns:geometry"/>
+                  <xs:element ref="tns:id"/>
                 </xs:choice>
               </xs:sequence>
             </xs:complexType>
@@ -523,6 +526,14 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="id">
+    <xs:complexContent>
+      <xs:extension base="tns:field">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="DocumentUniqueConstraint">
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
@@ -557,33 +568,33 @@
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
       <xs:enumeration value="capital"/>
-      <xs:enumeration value="lower"/>
       <xs:enumeration value="upper"/>
+      <xs:enumeration value="lower"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="isbnCheckDigit"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
       <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="email"/>
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="url"/>
-      <xs:enumeration value="isinCheckDigit"/>
       <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="isinCheckDigit"/>
       <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="isbnCheckDigit"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ibanCheckDigit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="dynamic"/>
       <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
-      <xs:enumeration value="dynamic"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -596,24 +607,24 @@
 
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="child"/>
       <xs:enumeration value="aggregation"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="child"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="global"/>
       <xs:enumeration value="user"/>
       <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="global"/>
       <xs:enumeration value="customer"/>
     </xs:restriction>
   </xs:simpleType>
