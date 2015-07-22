@@ -35,6 +35,14 @@ public class AttachmentContent extends Content {
 		}
 		this.attributeName = attributeName;
 		this.fileName = fileName;
+		if (fileName == null) {
+			if (mimeType != null) {
+				this.fileName = "content." + mimeType.getStandardFileSuffix();
+			}
+			else {
+				this.fileName = "content";
+			}
+		}
 		this.mimeType = mimeType;
 		if ((fileName != null) && (mimeType == null)) {
 			this.mimeType = MimeType.fromFileName(fileName);

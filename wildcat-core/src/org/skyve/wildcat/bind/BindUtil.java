@@ -678,7 +678,7 @@ public final class BindUtil {
 	/**
 	 * Sort a collection by its order metadata.
 	 * 
-	 * @param owningBean The bean that owns the collection.
+	 * @param bean The bean that ultimately has the collection.
 	 * @param customer The customer of the owningBean.
 	 * @param module The module of the owningBean.
 	 * @param document The document of the owningBean.
@@ -687,12 +687,19 @@ public final class BindUtil {
 	 * @throws IllegalAccessException
 	 * @throws NoSuchMethodException
 	 */
-	public static void sortCollectionByMetaData(Bean owningBean,
+	public static void sortCollectionByMetaData(Bean bean,
 													Customer customer,
 													Module module,
 													Document document,
 													String collectionBinding) 
 	throws MetaDataException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		// Cater for compound bindings here
+		Bean owningBean = bean;
+		int dotIndex = collectionBinding.indexOf('.'); // compound binding
+		if (dotIndex > 0) {
+			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, dotIndex));
+		}
+		
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
 		Collection targetCollection = (Collection) target.getAttribute();
 		sortCollectionByMetaData(owningBean, targetCollection);

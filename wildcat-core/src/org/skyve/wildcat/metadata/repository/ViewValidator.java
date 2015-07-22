@@ -11,7 +11,10 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.view.View.ViewType;
@@ -101,9 +104,9 @@ class ViewValidator extends ViewVisitor {
 	private String viewIdentifier;
 	private String uxui;
 	
-	// These 2 variables are used when validating the contents of a table
-	private String tabularIdentifier;
-	private String tabularBinding;
+	// These 2 variables are used when validating the contents of a data grid
+	private String dataGridIdentifier;
+	private String dataGridBinding;
 	
 	ViewValidator(ViewImpl view, CustomerImpl customer, DocumentImpl document, String uxui)
 	throws MetaDataException {
@@ -256,7 +259,19 @@ class ViewValidator extends ViewVisitor {
 											String description)
 	throws MetaDataException {
 		if (message != null) {
-			if (! BindUtil.messageBindingsAreValid(customer, module, document, message)) {
+			Module testModule = module;
+			Document testDocument = document;
+			if (dataGridBinding != null) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, dataGridBinding);
+				Attribute targetAttribute = target.getAttribute();
+				// Collection and Inverse are appropriate here...
+				if (targetAttribute instanceof Relation) {
+					Relation relation = (Relation) targetAttribute;
+					testDocument = module.getDocument(customer, relation.getDocumentName());
+					testModule = customer.getModule(testDocument.getOwningModuleName());
+				}
+			}
+			if (! BindUtil.messageBindingsAreValid(customer, testModule, testDocument, message)) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 												" has " + description + " containing malformed binding expressions.");
 			}
@@ -297,21 +312,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = checkBox.getBinding();
-		String checkBoxIdentifier = null;
-		if (tabularBinding == null) {
-			checkBoxIdentifier = "CheckBox " + binding;
-			validateBinding(null, 
-								binding, 
-								true, 
-								false, 
-								false, 
-								true,
-								checkBoxIdentifier,
-								AttributeType.bool);
+		String checkBoxIdentifier = "CheckBox " + binding;
+		if (dataGridBinding != null) {
+			checkBoxIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			checkBoxIdentifier = "CheckBox in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding, 
+							binding, 
+							true, 
+							false, 
+							false, 
+							true,
+							checkBoxIdentifier,
+							AttributeType.bool);
 		validateConditionName(checkBox.getDisabledConditionName(), checkBoxIdentifier);
 		validateConditionName(checkBox.getInvisibleConditionName(), checkBoxIdentifier);
 	}
@@ -354,21 +366,18 @@ class ViewValidator extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 		String binding = colour.getBinding();
-		String colourIdentifier = null;
-		if (tabularBinding == null) {
-			colourIdentifier = "Colour " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								colourIdentifier,
-								AttributeType.colour);
+		String colourIdentifier = "Colour " + binding;
+		if (dataGridBinding != null) {
+			colourIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			colourIdentifier = "Colour in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							colourIdentifier,
+							AttributeType.colour);
 		validateConditionName(colour.getDisabledConditionName(), colourIdentifier);
 		validateConditionName(colour.getInvisibleConditionName(), colourIdentifier);
 	}
@@ -385,21 +394,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = combo.getBinding();
-		String comboIdentifier = null;
-		if (tabularBinding == null) {
-			comboIdentifier = "Combo " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								true,
-								false,
-								comboIdentifier,
-								null);
+		String comboIdentifier = "Combo " + binding;
+		if (dataGridBinding != null) {
+			comboIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			comboIdentifier = "Combo in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							true,
+							false,
+							comboIdentifier,
+							null);
 		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
 		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
 	}
@@ -414,21 +420,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = image.getBinding();
-		String imageIdentifier = null;
-		if (tabularBinding == null) {
-			imageIdentifier = "ContentImage " + binding;
-			validateBinding(null, 
-								binding,
-								true,
-								false,
-								false,
-								true,
-								imageIdentifier,
-								AttributeType.content);
+		String imageIdentifier = "ContentImage " + binding;
+		if (dataGridBinding != null) {
+			imageIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			imageIdentifier = "Image in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding, 
+							binding,
+							true,
+							false,
+							false,
+							true,
+							imageIdentifier,
+							AttributeType.content);
 		validateConditionName(image.getDisabledConditionName(), imageIdentifier);
 		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
 	}
@@ -437,21 +440,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = link.getBinding();
-		String linkIdentifier = null;
-		if (tabularBinding == null) {
-			linkIdentifier = "ContentLink " + link.getBinding();
-			validateBinding(null,
-								binding,
-								false,
-								false,
-								false,
-								true,
-								linkIdentifier,
-								AttributeType.content);
+		String linkIdentifier = "ContentLink " + link.getBinding();
+		if (dataGridBinding != null) {
+			linkIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			linkIdentifier = "ContextLink in " + tabularBinding;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							false,
+							false,
+							false,
+							true,
+							linkIdentifier,
+							AttributeType.content);
 		validateConditionName(link.getDisabledConditionName(), linkIdentifier);
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
 		validateParameterBindings(link.getParameters(), linkIdentifier);
@@ -462,7 +462,7 @@ class ViewValidator extends ViewVisitor {
 	throws MetaDataException {
 		String title = grid.getTitle();
 		String id = grid.getWidgetId();
-		tabularBinding = grid.getBinding();
+		dataGridBinding = grid.getBinding();
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("Grid");
 		if (id != null) {
@@ -471,22 +471,22 @@ class ViewValidator extends ViewVisitor {
 		if (title != null) {
 			sb.append((sb.length() > 4) ? " and " : " with ").append("title ").append(title);
 		}
-		sb.append((sb.length() > 4) ? " and " : " with ").append("binding ").append(tabularBinding);
-		tabularIdentifier = sb.toString();
+		sb.append((sb.length() > 4) ? " and " : " with ").append("binding ").append(dataGridBinding);
+		dataGridIdentifier = sb.toString();
 		validateBinding(null,
-							tabularBinding,
+							dataGridBinding,
 							true,
 							false,
 							false,
 							false,
-							tabularIdentifier,
+							dataGridIdentifier,
 							null);
-		validateConditionName(grid.getDisabledConditionName(), tabularIdentifier);
-		validateConditionName(grid.getInvisibleConditionName(), tabularIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), tabularIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), tabularIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), tabularIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), tabularIdentifier);
+		validateConditionName(grid.getDisabledConditionName(), dataGridIdentifier);
+		validateConditionName(grid.getInvisibleConditionName(), dataGridIdentifier);
+		validateConditionName(grid.getDisableAddConditionName(), dataGridIdentifier);
+		validateConditionName(grid.getDisableEditConditionName(), dataGridIdentifier);
+		validateConditionName(grid.getDisableRemoveConditionName(), dataGridIdentifier);
+		validateConditionName(grid.getDisableZoomConditionName(), dataGridIdentifier);
 	}
 
 	@Override
@@ -494,8 +494,8 @@ class ViewValidator extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {
-		String columnIdentifier = "Column " + column.getTitle() + " of " + tabularIdentifier;
-		validateBinding(tabularBinding,
+		String columnIdentifier = "Column " + column.getTitle() + " of " + dataGridIdentifier;
+		validateBinding(dataGridBinding,
 							column.getBinding(),
 							false,
 							false,
@@ -680,21 +680,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = html.getBinding();
-		String htmlIdentifier = null;
-		if (tabularBinding == null) {
-			htmlIdentifier = "HTML " + html.getBinding();
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								htmlIdentifier,
-								AttributeType.markup);
+		String htmlIdentifier = "HTML " + html.getBinding();
+		if (dataGridBinding != null) {
+			htmlIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			htmlIdentifier = "HTML in" + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							htmlIdentifier,
+							AttributeType.markup);
 		validateConditionName(html.getDisabledConditionName(), htmlIdentifier);
 		validateConditionName(html.getInvisibleConditionName(), htmlIdentifier);
 	}
@@ -705,6 +702,9 @@ class ViewValidator extends ViewVisitor {
 							boolean parentEnabled)
 	throws MetaDataException {
 		String blurbIdentifier = "A Blurb";
+		if (dataGridBinding != null) {
+			blurbIdentifier += " in" + dataGridIdentifier;
+		}
 		validateMessageBindings(blurb.getMarkup(), blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 	}
@@ -713,7 +713,11 @@ class ViewValidator extends ViewVisitor {
 	public void visitLabel(Label label, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String labelIdentifier = "A Label";
-		validateBinding(null,
+		if (dataGridBinding != null) {
+			labelIdentifier += " in " + dataGridIdentifier;
+		}
+
+		validateBinding(dataGridBinding,
 							label.getBinding(),
 							false,
 							false,
@@ -721,7 +725,7 @@ class ViewValidator extends ViewVisitor {
 							true,
 							labelIdentifier,
 							null);
-		validateBinding(null,
+		validateBinding(dataGridBinding,
 							label.getFor(),
 							false,
 							false,
@@ -779,7 +783,7 @@ class ViewValidator extends ViewVisitor {
 	throws MetaDataException {
 		// do nothing
 	}
-
+	
 	@Override
 	public void visitComparison(Comparison comparison,
 									boolean parentVisible,
@@ -802,21 +806,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = lookup.getBinding();
-		String lookupIdentifier = null;
-		if (tabularBinding == null) {
-			lookupIdentifier = "Lookup " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								true,
-								false,
-								false,
-								lookupIdentifier,
-								AttributeType.association);
+		String lookupIdentifier = "Lookup " + binding;
+		if (dataGridBinding != null) {
+			lookupIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			lookupIdentifier = "Lookup in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							true,
+							false,
+							false,
+							lookupIdentifier,
+							AttributeType.association);
 		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
@@ -838,37 +839,26 @@ class ViewValidator extends ViewVisitor {
 	throws MetaDataException {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
-		String lookupIdentifier = null;
-		if (tabularBinding == null) {
-			lookupIdentifier = "LookupDescription " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								true,
-								false,
-								false,
-								lookupIdentifier,
-								AttributeType.association);
-			validateBinding(binding,
-								descriptionBinding,
-								true,
-								false,
-								false,
-								true,
-								lookupIdentifier,
-								null);
-		}
-		else {
-			lookupIdentifier = "LookupDescription in " + tabularIdentifier;
-			validateBinding(tabularBinding,
-								descriptionBinding,
-								true,
-								false,
-								false,
-								true,
-								lookupIdentifier,
-								null);
-		}
+		String lookupIdentifier = "LookupDescription " + binding;
+		// lookupDescription cannot have a compound binding when used on a form as the value
+		// cannot be set by the pick.
+		// In a grid is OK though as picking is not available
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							(dataGridBinding == null),
+							false,
+							false,
+							lookupIdentifier,
+							AttributeType.association);
+		validateBinding(dataGridBinding,
+							BindUtil.createCompoundBinding(binding, descriptionBinding),
+							true,
+							false,
+							false,
+							true,
+							lookupIdentifier,
+							null);
 		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
@@ -886,15 +876,12 @@ class ViewValidator extends ViewVisitor {
 		else {
 			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
 			String fullBinding = binding;
-			if (tabularBinding != null) {
+			if (dataGridBinding != null) {
 				if (binding == null) {
-					fullBinding = tabularBinding;
+					fullBinding = dataGridBinding;
 				}
 				else {
-					StringBuilder sb = new StringBuilder(128);
-					sb.append(tabularBinding).append('.');
-					sb.append(binding);
-					fullBinding = sb.toString();
+					fullBinding = BindUtil.createCompoundBinding(dataGridBinding, binding);
 				}
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
@@ -964,21 +951,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = password.getBinding();
-		String passwordIdentifier = null;
-		if (tabularBinding == null) {
-			passwordIdentifier = "Password " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								passwordIdentifier,
-								AttributeType.text);
+		String passwordIdentifier = "Password " + binding;
+		if (dataGridBinding != null) {
+			passwordIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			passwordIdentifier = "Password in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							passwordIdentifier,
+							AttributeType.text);
 		validateConditionName(password.getDisabledConditionName(), passwordIdentifier);
 		validateConditionName(password.getInvisibleConditionName(), passwordIdentifier);
 	}
@@ -1022,21 +1006,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = radio.getBinding();
-		String radioIdentifier = null;
-		if (tabularBinding == null) {
-			radioIdentifier = "Radio " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								true,
-								false,
-								radioIdentifier,
-								null);
+		String radioIdentifier = "Radio " + binding;
+		if (dataGridBinding != null) {
+			radioIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			radioIdentifier = "Radio in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							true,
+							false,
+							radioIdentifier,
+							null);
 		validateConditionName(radio.getDisabledConditionName(), radioIdentifier);
 		validateConditionName(radio.getInvisibleConditionName(), radioIdentifier);
 	}
@@ -1053,21 +1034,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = richText.getBinding();
-		String richTextIdentifier = null;
-		if (tabularBinding == null) {
-			richTextIdentifier = "RichText " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								richTextIdentifier,
-								AttributeType.markup);
+		String richTextIdentifier = "RichText " + binding;
+		if (dataGridBinding != null) {
+			richTextIdentifier += " in " + dataGridIdentifier;
 		}
-		else {
-			richTextIdentifier = "RichText in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							richTextIdentifier,
+							AttributeType.markup);
 		validateConditionName(richText.getDisabledConditionName(), richTextIdentifier);
 		validateConditionName(richText.getInvisibleConditionName(), richTextIdentifier);
 	}
@@ -1084,21 +1062,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = slider.getBinding();
-		String sliderIdentifier = null;
-		if (tabularBinding == null) {
-			sliderIdentifier = "Slider " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								sliderIdentifier,
-								null);
+		String sliderIdentifier = "Slider " + binding;
+		if (dataGridBinding != null) {
+			sliderIdentifier += " in " + dataGridBinding;
 		}
-		else {
-			sliderIdentifier = "Slider in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							sliderIdentifier,
+							null);
 		validateConditionName(slider.getDisabledConditionName(), sliderIdentifier);
 		validateConditionName(slider.getInvisibleConditionName(), sliderIdentifier);
 	}
@@ -1120,21 +1095,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = spinner.getBinding();
-		String spinnerIdentifier = null;
-		if (tabularBinding == null) {
-			spinnerIdentifier = "Spinner " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								spinnerIdentifier,
-								null);
+		String spinnerIdentifier = "Spinner " + binding;
+		if (dataGridBinding != null) {
+			spinnerIdentifier += " in " + dataGridBinding;
 		}
-		else {
-			spinnerIdentifier = "Spinner in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							spinnerIdentifier,
+							null);
 		validateConditionName(spinner.getDisabledConditionName(), spinnerIdentifier);
 		validateConditionName(spinner.getInvisibleConditionName(), spinnerIdentifier);
 	}
@@ -1216,12 +1188,12 @@ class ViewValidator extends ViewVisitor {
 																String referenceDescription)
 			throws MetaDataException {
 				String bindingToTest = referenceBinding;
-				if (tabularBinding != null) {
+				if (dataGridBinding != null) {
 					if (referenceBinding == null) {
-						bindingToTest = tabularBinding;
+						bindingToTest = dataGridBinding;
 					}
 					else {
-						bindingToTest = new StringBuilder(64).append(tabularBinding).append('.').append(referenceBinding).toString();
+						bindingToTest = BindUtil.createCompoundBinding(dataGridBinding, referenceBinding);
 					}
 				}
 
@@ -1337,7 +1309,10 @@ class ViewValidator extends ViewVisitor {
 			public void processContentReference(ContentReference reference)
 			throws MetaDataException {
 				String widgetidentifier = linkIdentifier + " with a content reference";
-				validateBinding(null,
+				if (dataGridBinding != null) {
+					widgetidentifier += " in " + dataGridIdentifier;
+				}
+				validateBinding(dataGridBinding,
 									reference.getBinding(),
 									true,
 									false,
@@ -1352,14 +1327,14 @@ class ViewValidator extends ViewVisitor {
 			public void processActionReference(ActionReference reference)
 			throws MetaDataException {
 				String widgetIdentifier = linkIdentifier + " with an action reference";
-				if (tabularBinding != null) { // in a table or grid
-					widgetIdentifier += " in table/grid " + tabularBinding;
+				if (dataGridBinding != null) { // in a table or grid
+					widgetIdentifier += " in " + dataGridBinding;
 					String actionName = reference.getActionName();
 					try {
 						TargetMetaData target = validateReferenceBinding(null, "an action reference");
 						Reference targetReference = (Reference) target.getAttribute();
 						if (targetReference == null) {
-							throw new MetaDataException("Target Reference " + tabularBinding + " DNE");
+							throw new MetaDataException("Target Reference " + dataGridBinding + " DNE");
 						}
 						ModuleImpl targetModule = (ModuleImpl) customer.getModule(target.getDocument().getOwningModuleName());
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
@@ -1408,21 +1383,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = text.getBinding();
-		String textIdentifier = null;
-		if (tabularBinding == null) {
-			textIdentifier = "TextArea " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								textIdentifier,
-								null);
+		String textIdentifier = "TextArea " + binding;
+		if (dataGridBinding != null) {
+			textIdentifier += " in " + dataGridBinding;
 		}
-		else {
-			textIdentifier = "TextArea in " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							textIdentifier,
+							null);
 		validateConditionName(text.getDisabledConditionName(), textIdentifier);
 		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
 	}
@@ -1439,21 +1411,18 @@ class ViewValidator extends ViewVisitor {
 	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		String binding = text.getBinding();
-		String textIdentifier = null;
-		if (tabularBinding == null) {
-			textIdentifier = "Text " + binding;
-			validateBinding(null,
-								binding,
-								true,
-								false,
-								false,
-								true,
-								textIdentifier,
-								null);
+		String textIdentifier = "Text " + binding;
+		if (dataGridBinding != null) {
+			textIdentifier += " in " + dataGridBinding;
 		}
-		else {
-			textIdentifier = "Text in  " + tabularIdentifier;
-		}
+		validateBinding(dataGridBinding,
+							binding,
+							true,
+							false,
+							false,
+							true,
+							textIdentifier,
+							null);
 		validateConditionName(text.getDisabledConditionName(), textIdentifier);
 		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
 	}
@@ -1495,8 +1464,8 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
-		tabularBinding = null;
-		tabularIdentifier = null;
+		dataGridBinding = null;
+		dataGridIdentifier = null;
 	}
 
 	@Override
