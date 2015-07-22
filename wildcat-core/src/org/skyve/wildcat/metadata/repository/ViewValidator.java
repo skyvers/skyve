@@ -481,6 +481,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							dataGridIdentifier,
 							null);
+		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, dataGridIdentifier, null);
 		validateConditionName(grid.getDisabledConditionName(), dataGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), dataGridIdentifier);
 		validateConditionName(grid.getDisableAddConditionName(), dataGridIdentifier);

@@ -1245,6 +1245,18 @@
               </xs:sequence>
             </xs:complexType>
           </xs:element>
+          <xs:element name="onSelectedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="inline" type="xs:boolean"/>
@@ -1255,6 +1267,7 @@
         <xs:attribute name="disableZoom" type="xs:string"/>
         <xs:attribute name="disableEdit" type="xs:string"/>
         <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="selectedIdBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1378,57 +1391,57 @@
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="edit"/>
+      <xs:enumeration value="params"/>
+      <xs:enumeration value="list"/>
       <xs:enumeration value="create"/>
       <xs:enumeration value="pick"/>
-      <xs:enumeration value="list"/>
-      <xs:enumeration value="params"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
       <xs:enumeration value="right"/>
-      <xs:enumeration value="centre"/>
       <xs:enumeration value="left"/>
+      <xs:enumeration value="centre"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="verticalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="middle"/>
       <xs:enumeration value="bottom"/>
       <xs:enumeration value="top"/>
+      <xs:enumeration value="middle"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Download"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Edit"/>
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="Save"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="OK"/>
       <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="Remove"/>
       <xs:enumeration value="Upload"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="Download"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Save"/>
+      <xs:enumeration value="DEFAULTS"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="self"/>
-      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="self"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

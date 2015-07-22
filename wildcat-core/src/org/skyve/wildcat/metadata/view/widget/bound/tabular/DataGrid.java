@@ -17,6 +17,7 @@ import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
+import org.skyve.wildcat.metadata.view.event.Selectable;
 import org.skyve.wildcat.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.wildcat.metadata.view.event.SetDisabledEventAction;
 import org.skyve.wildcat.metadata.view.event.SetInvisibleEventAction;
@@ -34,17 +35,20 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableZoomConditionName",
 							"disableEditConditionName",
 							"disableRemoveConditionName",
+							"selectedIdBinding",
 							"columns",
 							"addedActions",
 							"editedActions",
-							"removedActions"})
+							"removedActions",
+							"selectedActions"})
 public class DataGrid extends TabularWidget implements Identifiable,
 														Disableable,
 														Editable,
 														DisableableCRUDGrid, 
 														Addable,
 														org.skyve.wildcat.metadata.view.event.Editable,
-														Removable {
+														Removable,
+														Selectable {
 	/**
 	 * For Serialization
 	 */
@@ -58,7 +62,8 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	private String disableZoomConditionName;
 	private String disableEditConditionName;
 	private String disableRemoveConditionName;
-
+	private String selectedIdBinding;
+	
 	private Boolean inline;
 	
 	private Boolean editable;
@@ -70,6 +75,7 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	private List<EventAction> addedActions = new ArrayList<>();
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> removedActions = new ArrayList<>();
+	private List<EventAction> selectedActions = new ArrayList<>();
 
 	@Override
 	public String getWidgetId() {
@@ -173,6 +179,17 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 	
 	@Override
+	public String getSelectedIdBinding() {
+		return selectedIdBinding;
+	}
+
+	@Override
+	@XmlAttribute(name = "selectedIdBinding")
+	public void setSelectedIdBinding(String selectedIdBinding) {
+		this.selectedIdBinding = UtilImpl.processStringValue(selectedIdBinding);
+	}
+
+	@Override
 	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onAddedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
@@ -200,5 +217,15 @@ public class DataGrid extends TabularWidget implements Identifiable,
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
 	public List<EventAction> getRemovedActions() {
 		return removedActions;
+	}
+	
+	@Override
+	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onSelectedHandlers")
+	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
+						@XmlElementRef(type = ServerSideActionEventAction.class),
+						@XmlElementRef(type = SetDisabledEventAction.class),
+						@XmlElementRef(type = SetInvisibleEventAction.class)})
+	public List<EventAction> getSelectedActions() {
+		return selectedActions;
 	}
 }

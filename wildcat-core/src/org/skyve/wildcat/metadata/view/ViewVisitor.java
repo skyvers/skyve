@@ -725,6 +725,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitAddableActions(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
 			visitRemovableActions(grid, parentVisible, parentEnabled);
+			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedDataGrid(grid, parentVisible, parentEnabled);
 		}
 		else if (widget instanceof PickList) {

@@ -1343,6 +1343,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			}
 		}
 
+		addBinding(grid.getSelectedIdBinding(), true, true);
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
 		addCondition(grid.getDisableAddConditionName());

@@ -1676,7 +1676,12 @@ BizDataGrid.addMethods({
 				}
 				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
 			},
-			
+			selectionUpdated: function(record, recordList) {
+				if (me.bizSelected) {
+					me.bizSelected(record ? record.bizId : null);
+				}
+			},
+
 			canEditCell: function(rowNum, colNum) {
 				return (! me._disabled) && this.Super("canEditCell", arguments);
 			},

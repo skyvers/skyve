@@ -1028,6 +1028,10 @@ code.append("_view:view})");
 				code.append("title:'");
 				code.append(SmartClientGenerateUtils.processString(grid.getTitle())).append("',");
 			}
+			String selectedIdBinding = grid.getSelectedIdBinding();
+			if (selectedIdBinding != null) {
+				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
+			}
 			size(grid, code);
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
