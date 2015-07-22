@@ -121,9 +121,9 @@ public class UtilImpl {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
 			}
 			else {
-				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/customer.xsd");
+				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				absoluteBasePath = url.getPath();
-				absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 20); // remove schemas/customer.xsd
+				absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 				absoluteBasePath = absoluteBasePath.replace('\\', '/');
 			}
 		}
