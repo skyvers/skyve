@@ -498,10 +498,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				if (documentName != null) {
 					if ((queryName != null) ||
-							(modelName != null) ||
 							(startBinding == null) || 
 							(endBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [document] is present, then [model] and [query] should be absent " + 
+						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
 														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
 					}
 				}
@@ -515,7 +514,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				}
 				else if (modelName != null) {
 					if ((startBinding != null) || (endBinding != null)) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document], [query], " + 
+						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " + 
 														"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
 					}
 				}
@@ -568,10 +567,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				String modelName = item.getModelName();
 
 				if (documentName != null) {
-					if ((queryName != null) ||
-							(modelName != null)) {
+					if (queryName != null) {
 						throw new MetaDataException(metaDataName + 
-														" : If [document] is present, then [model] and [query] should be absent " + 
+														" : If [document] is present, then [query] should be absent " + 
 														"for menu item " + item.getName());
 					}
 				}
@@ -581,7 +579,11 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 														"for menu item " + item.getName());
 					}
 				}
-				else if (modelName == null) {
+				else if (modelName != null) {
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
+				}
+				else {
 					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
 													"is required for menu item " + item.getName());
 				}
@@ -605,9 +607,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				
 				if (documentName != null) {
 					if ((queryName != null) ||
-							(modelName != null) ||
 							(geometryBinding == null)) {
-						throw new MetaDataException(metaDataName + " : If [document] is present, then [model] and [query] should be absent " + 
+						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
 														"and [geometryBinding] is required for menu item " + item.getName());
 					}
 				}
@@ -619,10 +620,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 					}
 				}
 				else if (modelName != null) {
-					if (geometryBinding != null) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document], [query] " + 
-														"[geometryBinding] should be absent for menu item " + item.getName());
-					}
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
 				}
 				else {
 					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
@@ -651,10 +650,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				String modelName = item.getModelName();
 				
 				if (documentName != null) {
-					if ((queryName != null) ||
-							(modelName != null)) {
+					if (queryName != null) {
 						throw new MetaDataException(metaDataName + " : If [document] is present, " +
-														"then [model] and [query] should be absent for menu item " + 
+														"then [query] should be absent for menu item " + 
 														item.getName());
 					}
 				}
@@ -664,7 +662,11 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 														"for menu item " + item.getName());
 					}
 				}
-				else if (modelName == null) {
+				else if (modelName != null) {
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
+				}
+				else {
 					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
 													"is required for menu item " + item.getName());
 				}

@@ -32,8 +32,8 @@ import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
@@ -47,6 +47,10 @@ import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.Inverse.InverseRelationship;
+import org.skyve.wildcat.metadata.module.menu.AbstractDocumentMenuItem;
+import org.skyve.wildcat.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
+import org.skyve.wildcat.metadata.module.menu.EditItem;
+import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.customer.CustomerMetaData;
 import org.skyve.wildcat.metadata.repository.document.DocumentMetaData;
@@ -982,29 +986,101 @@ public class LocalDesignRepository extends AbstractRepository {
 		checkMenu(module.getMenu().getItems(), customer, module);
 	}
 
-	private static void checkMenu(List<MenuItem> items, Customer customer, Module module)
+	private void checkMenu(List<MenuItem> items, Customer customer, Module module)
 	throws MetaDataException {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				checkMenu(((MenuGroup) item).getItems(), customer, module);
 			}
-			else if (item instanceof TreeItem) {
-				TreeItem treeItem = (TreeItem) item;
-				String documentName = treeItem.getDocumentName();
-				if (documentName == null) {
-					String queryName = treeItem.getQueryName();
-					if (queryName != null) {
-						DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-						documentName = query.getDocumentName();
+			else {
+				if (item instanceof AbstractDocumentMenuItem) {
+					String documentName = ((AbstractDocumentMenuItem) item).getDocumentName();
+					Document document = null;
+					if (documentName != null) {
+						try {
+							document = module.getDocument(customer, documentName);
+						}
+						catch (Exception e) {
+							throw new MetaDataException("Menu [" + item.getName() + 
+															"] in module " + module.getName() +
+															" is for document " + documentName +
+															" which does not exist.", e);
+						}
+						// NB EditItem can be to a transient document
+						if ((! (item instanceof EditItem)) && (document.getPersistent() == null)) {
+							throw new MetaDataException("Menu [" + item.getName() + 
+															"] in module " + module.getName() +
+															" is for document " + documentName +
+															" which is not persistent.");
+						}
 					}
-				}
-				if (documentName != null) {
-					Document document = module.getDocument(customer, documentName);
-					if (! documentName.equals(document.getParentDocumentName())) {
-						throw new MetaDataException("Tree Menu [" + item.getName() + 
-														"] in module " + module.getName() + 
-														" is for document " + document.getName() + 
-														" which is not hierarchical.");
+
+					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
+						AbstractDocumentOrQueryOrModelMenuItem dataItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+						String queryName = dataItem.getQueryName();
+						DocumentQueryDefinition query = null;
+						if (queryName != null) {
+							query = module.getDocumentQuery(queryName);
+							if (query == null) {
+								throw new MetaDataException("Menu [" + item.getName() + 
+																"] in module " + module.getName() +
+																" is for query " + queryName +
+																" which does not exist.");
+							}
+							documentName = query.getDocumentName();
+							document = module.getDocument(customer, documentName);
+						}
+						
+						// TODO check list/tree/calendar model names
+						String modelName = ((AbstractDocumentOrQueryOrModelMenuItem) item).getModelName();
+						if (modelName != null) {
+							if (item instanceof MapItem) {
+								try {
+									getMapModel(customer, document, modelName);
+								}
+								catch (Exception e) {
+									throw new MetaDataException("Menu [" + item.getName() + 
+																	"] in module " + module.getName() +
+																	" is for model " + modelName +
+																	" which does not exist.");
+								}
+							}
+						}
+						
+						if (item instanceof TreeItem) {
+							// Not a model, then its a query or document so check the document is hierarchical
+							if ((modelName == null) && (documentName != null) && (document != null)) {
+								if (! documentName.equals(document.getParentDocumentName())) {
+									throw new MetaDataException("Tree Menu [" + item.getName() + 
+																	"] in module " + module.getName() + 
+																	" is for document " + document.getName() + 
+																	" which is not hierarchical.");
+								}
+							}
+						}
+						else if (item instanceof MapItem) {
+							if (document != null) {
+								String binding = ((MapItem) item).getGeometryBinding();
+								try {
+									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+									Attribute attribute = target.getAttribute();
+									if ((attribute == null) || 
+											(! AttributeType.geometry.equals(attribute.getAttributeType()))) {
+										throw new MetaDataException("Map Menu [" + item.getName() + 
+																		"] in module " + module.getName() + 
+																		" has a geometryBinding of " + binding + 
+																		" which is not a geometry.");
+									}
+								}
+								catch (Exception e) {
+									throw new MetaDataException("Map Menu [" + item.getName() + 
+																	"] in module " + module.getName() + 
+																	" has a geometryBinding of " + binding + 
+																	" which does not exist.");
+								}
+								
+							}
+						}
 					}
 				}
 			}
