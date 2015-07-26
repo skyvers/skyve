@@ -89,7 +89,6 @@ public final class DocumentImpl extends Model implements Document {
 	public <T extends Bean> T newInstance(User user) throws Exception {
 		Customer customer = user.getCustomer();
 		Class<T> beanClass = getBeanClass(customer);
-
 		T result = beanClass.newInstance();
 		
 		// Run bizlet newInstance()
@@ -120,41 +119,59 @@ public final class DocumentImpl extends Model implements Document {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends Bean> Class<T> getBeanClass(Customer customer) throws ClassNotFoundException {
+	public <T extends Bean> Class<T> getBeanClass(Customer customer)
+	throws ClassNotFoundException {
 		Class<T> result = null;
 		
 		AbstractRepository repository = AbstractRepository.get();
 
-		String dotDocumentName = '.' + getName();
-		String packagePath = ((CustomerImpl) customer).getVTable().get(getOwningModuleName() + dotDocumentName);
+		String documentName = getName();
+		String packagePath = ((CustomerImpl) customer).getVTable().get(getOwningModuleName() + '.' + documentName);
 		packagePath = packagePath.replace('/', '.');
 		int lastDotIndex = packagePath.lastIndexOf('.');
-		String className = packagePath.substring(0, lastDotIndex + 1) + repository.DOMAIN_NAME + dotDocumentName;
-		if (packagePath.startsWith(repository.CUSTOMERS_NAME)) {
-			// Look for an extension first and if not found look for a base class
-			try {
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className + "Ext");
-			}
-			catch (ClassNotFoundException e) { // no extension class
-				// Look for the base class in the customer area
-				try {
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className);
-				}
-				catch (ClassNotFoundException e1) { // no extension or base class in customer area
-					// Look for the base class in the modules area
-					className = new StringBuilder(128).append(repository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(repository.DOMAIN_NAME).append(dotDocumentName).toString();
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className);
-				}
-			}
-		}
-		else {
-			// Look for base class and if abstract, look for an extension
-			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className);
-			if (Modifier.isAbstract(result.getModifiers())) {
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className + "Ext");
-			}
-		}
+		packagePath = packagePath.substring(0, lastDotIndex + 1);
 
+		StringBuilder className = new StringBuilder(128);
+		
+		// Look for a hand-crafted extension first
+		try {
+			className.append(packagePath).append(documentName).append('.').append(documentName).append("Extension");
+			result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+		}
+		catch (ClassNotFoundException e) {
+			if (packagePath.startsWith(repository.CUSTOMERS_NAME)) {
+				// Look for an extension first and if not found look for a base class
+				try {
+					className.setLength(0);
+					className.append(packagePath).append(repository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
+					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+				}
+				catch (ClassNotFoundException e1) { // no extension class
+					// Look for the base class in the customer area
+					try {
+						className.setLength(className.length() - 3); // remove "Ext"
+						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					}
+					catch (ClassNotFoundException e2) { // no extension or base class in customer area
+						// Look for the base class in the modules area
+						className.setLength(0);
+						className.append(repository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
+						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					}
+				}
+			}
+			else {
+				// Look for base class and if abstract, look for an extension
+				className.setLength(0);
+				className.append(packagePath).append(repository.DOMAIN_NAME).append('.').append(documentName);
+				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+				if (Modifier.isAbstract(result.getModifiers())) {
+					className.append("Ext");
+					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+				}
+			}
+		}
+	
 		return result;
 	}
 

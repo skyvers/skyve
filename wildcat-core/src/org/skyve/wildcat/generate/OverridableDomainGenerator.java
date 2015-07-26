@@ -587,9 +587,16 @@ joined tables
 			else {
 				fw.append(indent).append("\t<class name=\"");
 			}
-			fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
-			if (forExt) {
-				fw.append("Ext");
+			String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/' + documentName + "Extension.java";
+			if (new File(extensionPath).exists()) {
+				System.out.println("    Generate ORM using " + extensionPath);
+				fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName).append("Extension");
+			}
+			else {
+				fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
+				if (forExt) {
+					fw.append("Ext");
+				}
 			}
 			fw.append("\" ");
 	
