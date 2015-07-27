@@ -310,7 +310,8 @@ isc.EditView.addMethods({
 					}
 
 					me.show();
-					me.refreshListGrids(true, true);
+					// only postRefresh if we don't have an action - no 'ZoomOut' or nothing
+					me.refreshListGrids(true, (! action));
 
 					if (me.opened) {
 						me.opened(data);
