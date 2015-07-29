@@ -293,7 +293,9 @@ isc.EditView.addMethods({
 						me.scatter(data[0]);
 
 						if (openedFromDataGrid) {
-							me._b += 'ElementById(' + data[0].bizId + ')';
+							if (me._b.endsWith(')')) {} else {
+								me._b += 'ElementById(' + data[0].bizId + ')';
+							}
 						}
 
 						if (successCallback) {
@@ -304,9 +306,15 @@ isc.EditView.addMethods({
 						isc.warn(data, null, {title: 'Problems'});
 					}
 
-					// ensure that zoom out of a child view of a "new" document refreshes the parent view
-					if (bizId) {} else {
+					// ensure that zoom out of a child view refreshes the parent view
+					if (action == 'ZoomOut') {
 						me._vm.setValue('_apply', true);
+					}
+					else {
+						// ensure that zooming in to a new document makes this (the parent) document dirty
+						if (bizId) {} else {
+							me._vm.setValue('_apply', true);
+						}
 					}
 
 					me.show();
@@ -608,7 +616,13 @@ isc.EditView.addMethods({
 						var candidates = [];
 						for (var key in valueMap) {
 							var value = valueMap[key];
-							if (! data.containsProperty('bizId', key)) {
+							var element = data.find('bizId', key);
+							// if we have an element as a member, use the valueMap value as the bizKey,
+							// otherwise, the bizKey was sent up from the server so just use that.
+							if (element) {
+								element.bizKey = value;
+							}
+							else { // not assigned, so add it as a candidate
 								candidates.push({bizId: key, bizKey: value});
 							}
 						}
@@ -1255,6 +1269,7 @@ BizButton.addMethods({
 							}
 						}
 					}
+					opener._vm.setValue('_apply', true);
 				}
 				WindowStack.popoff(false); // don't rerender
 			}
