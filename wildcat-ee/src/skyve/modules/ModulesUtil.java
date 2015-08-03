@@ -865,7 +865,7 @@ public class ModulesUtil {
 					Module module = customer.getModule(b.getBizModule());
 					Document document = module.getDocument(customer, b.getBizDocument());
 
-					for (Attribute attribute : document.getAttributes()) {
+					for (Attribute attribute : document.getAllAttributes()) {
 						if (attribute.getDisplayName().equals(a)) {
 							found = true;
 							if (binding.toString().length() > 0) {

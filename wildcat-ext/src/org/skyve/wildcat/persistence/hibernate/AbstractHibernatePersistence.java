@@ -1554,7 +1554,7 @@ t.printStackTrace();
 		Module module = customer.getModule(beanToReindex.getBizModule());
 		Document document = module.getDocument(customer, beanToReindex.getBizDocument());
 		boolean hasContent = false;
-		for (Attribute attribute : document.getAttributes()) {
+		for (Attribute attribute : document.getAllAttributes()) {
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
 				AttributeType type = attribute.getAttributeType();
@@ -1746,6 +1746,25 @@ t.printStackTrace();
 		String parentDocumentName = document.getParentDocumentName();
 		StringBuilder query = new StringBuilder(256);
 
+		// Get all attributes that are required for the table backing this document
+		// including any joined or mapped inheritence
+		List<Attribute> attributes = new ArrayList<>(document.getAttributes());
+		Extends inherits = document.getExtends();
+		while (inherits != null) {
+			Module baseModule = customer.getModule(document.getOwningModuleName());
+			Document baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
+			Persistent persistent = baseDocument.getPersistent();
+			if (persistent != null) {
+				ExtensionStrategy strategy = persistent.getStrategy();
+				if (strategy.equals(ExtensionStrategy.joined) || strategy.equals(ExtensionStrategy.mapped)) {
+					attributes.addAll(baseDocument.getAttributes());
+				}
+			}
+			inherits = baseDocument.getExtends();
+		}
+
+		// now get on with the upsert
+		
 		if (bean.isPersisted()) { // update an existing row
 			query.append("update ").append(document.getPersistent().getPersistentIdentifier()).append(" set ");
 			query.append(PersistentBean.VERSION_NAME).append('=').append(PersistentBean.VERSION_NAME).append("+1");
@@ -1761,7 +1780,7 @@ t.printStackTrace();
 				}
 			}
 
-			for (Attribute attribute : document.getAttributes()) {
+			for (Attribute attribute : attributes) {
 				if (! attribute.isPersistent()) {
 					continue;
 				}
@@ -1803,7 +1822,7 @@ t.printStackTrace();
 				}
 			}
 			// Add fields and associations
-			for (Attribute attribute : document.getAttributes()) {
+			for (Attribute attribute : attributes) {
 				if (! attribute.isPersistent()) {
 					continue;
 				}
@@ -1850,7 +1869,7 @@ t.printStackTrace();
 			}
 		}
 		// Bind fields and associations
-		for (Attribute attribute : document.getAttributes()) {
+		for (Attribute attribute : attributes) {
 			if (! attribute.isPersistent()) {
 				continue;
 			}

@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.skyve.CORE;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.metadata.AbstractMetaDataMap;
 
 public abstract class Model extends AbstractMetaDataMap implements org.skyve.metadata.model.Model {
@@ -52,6 +57,23 @@ public abstract class Model extends AbstractMetaDataMap implements org.skyve.met
 	@Override
 	public List<? extends Attribute> getAttributes() {
 		return Collections.unmodifiableList(attributes);
+	}
+	
+	@Override
+	public List<? extends Attribute> getAllAttributes() throws MetaDataException {
+		List<Attribute> result = new ArrayList<>(attributes);
+		Extends currentInherits = inherits;
+		if (currentInherits != null) {
+			Customer customer = CORE.getUser().getCustomer();
+			while (currentInherits != null) {
+				Module module = customer.getModule(getOwningModuleName());
+				Document baseDocument = module.getDocument(customer, currentInherits.getDocumentName());
+				result.addAll(baseDocument.getAttributes());
+				currentInherits = baseDocument.getExtends();
+			}
+		}
+		
+		return Collections.unmodifiableList(result);
 	}
 
 	@Override

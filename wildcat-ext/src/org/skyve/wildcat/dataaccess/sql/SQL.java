@@ -17,9 +17,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
@@ -68,17 +66,6 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 		List<T> results = new ArrayList<>(100);
 		try {
 			User user = CORE.getUser();
-			Customer customer = user.getCustomer();
-			
-			// Collect all attributes for a document inheritance hierarchy
-			List<Attribute> attributes = new ArrayList<>(document.getAttributes());
-			Extends inherits = document.getExtends();
-			while (inherits != null) {
-				Module module = customer.getModule(document.getOwningModuleName());
-				Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
-				attributes.addAll(baseDocument.getAttributes());
-				inherits = baseDocument.getExtends();
-			}
 
 			@SuppressWarnings("resource")
 			Connection connection = dataAccess.getConnection();
@@ -92,7 +79,7 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 					while (rs.next()) {
 						T bean = document.newInstance(user);
 	
-						for (Attribute attribute : attributes) {
+						for (Attribute attribute : document.getAllAttributes()) {
 							String name = attribute.getName();
 							AttributeType type = attribute.getAttributeType();
 							if (AttributeType.bool.equals(type)) {

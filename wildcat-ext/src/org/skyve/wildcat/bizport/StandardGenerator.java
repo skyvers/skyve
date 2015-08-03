@@ -288,7 +288,7 @@ public final class StandardGenerator {
 		
 		Bizlet<?> bizlet = null;
 
-		for (Attribute attribute : currentDocument.getAttributes()) {
+		for (Attribute attribute : currentDocument.getAllAttributes()) {
 			AttributeType type = attribute.getAttributeType();
 			String name = attribute.getName();
 

@@ -13,8 +13,8 @@ import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -176,7 +176,7 @@ public class StandardLoader {
 	throws Exception {
 		T result = getBeanForRow(persistence, user, document, sheet);
 
-		for (Attribute attribute : document.getAttributes()) {
+		for (Attribute attribute : document.getAllAttributes()) {
 			if (! (attribute instanceof Reference)) {
 				String binding = attribute.getName();
 				// Ignore bizId, owner id and element id, bizKey columns

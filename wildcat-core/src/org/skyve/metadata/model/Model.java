@@ -2,6 +2,7 @@ package org.skyve.metadata.model;
 
 import java.util.List;
 
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 
 /**
@@ -26,6 +27,12 @@ public interface Model extends NamedMetaData {
 	 * @return
 	 */
 	public List<? extends Attribute> getAttributes();
+
+	/**
+	 * 
+	 * @return
+	 */
+	public List<? extends Attribute> getAllAttributes() throws MetaDataException;
 
 	/**
 	 * 

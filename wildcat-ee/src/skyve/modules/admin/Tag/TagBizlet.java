@@ -51,7 +51,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			if (bean.getModuleName() != null && bean.getDocumentName() != null) {
 				Module module = customer.getModule(bean.getModuleName());
 				Document document = module.getDocument(customer, bean.getDocumentName());
-				for (Attribute attribute : document.getAttributes()) {
+				for (Attribute attribute : document.getAllAttributes()) {
 					result.add(new DomainValue(attribute.getName(), attribute.getDisplayName()));
 				}
 			}
