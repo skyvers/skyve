@@ -6,10 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.Principal;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
@@ -629,15 +627,15 @@ public class SmartClientEditServlet extends HttpServlet {
 	    									SortedMap<String, Object> parameters)
     throws Exception {
 		View view = processDocument.getView(UX_UI, customer, processBean.isCreated() ? ViewType.edit : ViewType.create);
-		Set<String> newParameterNames = new TreeSet<>();
+		TreeMap<String, String> newParameterNamesToBindings = new TreeMap<>();
 		for (Parameter parameter : view.getParameters()) {
-			newParameterNames.add(parameter.getName());
+			newParameterNamesToBindings.put(parameter.getName(), parameter.getBinding());
 		}
 		
-		if (! newParameterNames.isEmpty()) { // we have new parameters to apply
+		if (! newParameterNamesToBindings.isEmpty()) { // we have new parameters to apply
 			// apply any supplied (and allowed) parameters to the new instance
 			for (String parameterBinding : parameters.keySet()) {
-				if (newParameterNames.contains(parameterBinding)) {
+				if (newParameterNamesToBindings.containsKey(parameterBinding)) {
 	    			Object parameterValue = parameters.get(parameterBinding);
 	    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																			processModule, 
@@ -663,7 +661,14 @@ public class SmartClientEditServlet extends HttpServlet {
 	    					parameterValue = parameterBean;
 	    				}
 	    			}
-	    			BindUtil.set(processBean, parameterBinding, parameterValue);
+	    			// For the new parameters on the target edit view, if it has a binding defined,
+	    			// use it, otherwise rely on the name.
+	    			// This allows us to bind on something other than the parameter name given.
+	    			String targetBinding = newParameterNamesToBindings.get(parameterBinding);
+	    			if (targetBinding == null) {
+	    				targetBinding = parameterBinding;
+	    			}
+	    			BindUtil.set(processBean, targetBinding, parameterValue);
 				}
 			}
 		}
