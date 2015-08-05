@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.skyve.CORE;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
@@ -118,6 +119,10 @@ public class Configuration extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizDocument() {
 		return Configuration.DOCUMENT_NAME;
+	}
+
+	public static Configuration newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override

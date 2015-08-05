@@ -9,6 +9,7 @@
 	<documents>
 		<document ref="Office" />
 		<document ref="Staff" defaultQueryName="qStaff"/>
+		<document ref="Position"/>
 
 		<document ref="Contact" moduleRef="admin" />
 		<document ref="User" moduleRef="admin" />
@@ -19,6 +20,7 @@
 			<privileges>
 				<document name="Office" permission="CRUDC" />
 				<document name="Staff" permission="CRUDC" />
+				<document name="Position" permission="CRUDC" />
 			</privileges>
 		</role>
 		<role name="StaffMember">
@@ -26,6 +28,7 @@
 			<privileges>
 				<document name="Office" permission="_R__C" />
 				<document name="Staff" permission="_RU_C" />
+				<document name="Position" permission="_R__C" />
 			</privileges>
 		</role>
 	</roles>
@@ -47,6 +50,10 @@
 			<role name="Manager" />
 			<role name="StaffMember" />
 		</list>
+		<tree name="Organisation Structure" query="qPositions" >
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</tree>
 		<map name="Staff Locations" document="Staff" geometryBinding="location" >
 			<uxui name="desktop" />
 			<role name="Manager" />
@@ -74,5 +81,14 @@
 				<column binding="bizKey" sortOrder="ascending"/>
 			</columns>
 		</documentQuery>
+		<documentQuery name="qPositions" documentName="Position">
+			<displayName>Organisation Structure</displayName>
+			<description>Organisation Structure</description>
+			<columns>
+				<column binding="bizKey" sortOrder="ascending"/>
+				<column binding="reportsTo" sortOrder="ascending" editable="false" filterable="false" sortable="false"/>
+			</columns>
+		</documentQuery>
+		
 	</queries>
 </module>

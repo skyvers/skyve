@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.User;
+import org.skyve.CORE;
 import org.skyve.domain.ChildBean;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 
@@ -46,6 +47,10 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 	@XmlTransient
 	public String getBizDocument() {
 		return UserRole.DOCUMENT_NAME;
+	}
+
+	public static UserRole newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override

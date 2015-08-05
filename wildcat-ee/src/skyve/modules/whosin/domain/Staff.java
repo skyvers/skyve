@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.domain.Contact;
+import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
@@ -25,6 +26,7 @@ import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
  * 
  * @depend - - - Status
  * @navhas n baseOffice 0..1 Office
+ * @navhas n reportsTo 0..1 Position
  * @navhas n contact 0..1 Contact
  * @stereotype "persistent"
  */
@@ -60,6 +62,8 @@ public class Staff extends AbstractPersistentBean {
 	public static final String dueBackPropertyName = "dueBack";
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
+	/** @hidden */
+	public static final String reportsToPropertyName = "reportsTo";
 
 	/**
 	 * Status
@@ -152,6 +156,7 @@ public class Staff extends AbstractPersistentBean {
 	 * If this is set, the data was created by the demo data job and can safely be deleted.
 	 **/
 	private Boolean demoData;
+	private Position reportsTo = null;
 
 	@Override
 	@XmlTransient
@@ -165,10 +170,21 @@ public class Staff extends AbstractPersistentBean {
 		return Staff.DOCUMENT_NAME;
 	}
 
+	public static Staff newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	}
+
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return getContact().getName();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{contact.name}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override
@@ -342,5 +358,22 @@ return getContact().getName();
 	public void setDemoData(Boolean demoData) {
 		preset(demoDataPropertyName, demoData);
 		this.demoData = demoData;
+	}
+
+	/**
+	 * {@link #reportsTo} accessor.
+	 **/
+	public Position getReportsTo() {
+		return reportsTo;
+	}
+
+	/**
+	 * {@link #reportsTo} mutator.
+	 * 
+	 * @param reportsTo	The new value to set.
+	 **/
+	@XmlElement
+	public void setReportsTo(Position reportsTo) {
+		this.reportsTo = reportsTo;
 	}
 }

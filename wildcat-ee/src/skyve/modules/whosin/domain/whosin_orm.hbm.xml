@@ -36,6 +36,24 @@
 		<filter name="whosinOfficeUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.whosin.domain.Position" table="WHO_Position" entity-name="whosinPosition">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="bizParentId" length="36" index="bizParentIdIndex" />
+		<property name="positionTitle" length="200" />
+		<many-to-one name="staff" entity-name="whosinStaff" column="staff_id" cascade="persist,save-update,refresh,merge" />
+		<filter name="whosinPositionNoneFilter" condition="1=0"/>
+		<filter name="whosinPositionCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="whosinPositionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="whosinPositionUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.whosin.domain.Staff" table="WHO_Staff" entity-name="whosinStaff">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -72,6 +90,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="whosinOfficeUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinPositionNoneFilter" />
+	<filter-def name="whosinPositionCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinPositionDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinPositionUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="whosinStaffNoneFilter" />

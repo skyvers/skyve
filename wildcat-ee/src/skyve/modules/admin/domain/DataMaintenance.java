@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.skyve.CORE;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 
 /**
@@ -40,6 +41,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizDocument() {
 		return DataMaintenance.DOCUMENT_NAME;
+	}
+
+	public static DataMaintenance newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override
