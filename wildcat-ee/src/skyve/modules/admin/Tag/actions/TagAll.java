@@ -9,10 +9,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
@@ -32,17 +28,12 @@ public class TagAll implements ServerSideAction<Tag> {
 		
 		Persistence pers = CORE.getPersistence();
 		
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-		Module modTag = customer.getModule(Tag.MODULE_NAME);
-		Document docTagged = modTag.getDocument(customer, Tagged.DOCUMENT_NAME);
-		
 		DocumentQuery q = pers.newDocumentQuery(bean.getModuleName(), bean.getDocumentName());
 		
 		List<Bean> beans = q.projectedResults();
 		for(Bean b: beans){
 			//add bean to tagged
-			Tagged tagged = docTagged.newInstance(user);
+			Tagged tagged = Tagged.newInstance();
 			tagged.setTag(bean);
 			tagged.setTaggedModule(bean.getModuleName());
 			tagged.setTaggedDocument(bean.getDocumentName());

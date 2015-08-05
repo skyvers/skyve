@@ -4,12 +4,6 @@ import modules.admin.domain.Configuration;
 import modules.admin.domain.Configuration.PasswordComplexityModel;
 import modules.admin.domain.DataMaintenance;
 
-import org.skyve.CORE;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
-
 public class AdminUtil {
 
 	public static int MINIMUM_PASSWORD_LENGTH = 6;
@@ -57,20 +51,11 @@ public class AdminUtil {
 	}
 
 	public static Configuration getConfiguration() throws Exception {
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Configuration.MODULE_NAME);
-		Document document = module.getDocument(customer, Configuration.DOCUMENT_NAME);
-		return document.newInstance(user);
+		return Configuration.newInstance();
 	}
 
 	public static DataMaintenance getDataMaintenance() throws Exception {
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(DataMaintenance.MODULE_NAME);
-		Document document = module.getDocument(customer, DataMaintenance.DOCUMENT_NAME);
 
-		DataMaintenance parm = document.newInstance(user);
-		return parm;
+		return DataMaintenance.newInstance();
 	}	
 }

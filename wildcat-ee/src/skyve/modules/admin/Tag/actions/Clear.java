@@ -1,13 +1,12 @@
 package modules.admin.Tag.actions;
 
+import modules.admin.domain.Tag;
+
 import org.skyve.CORE;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
-import org.skyve.persistence.SQL;
 import org.skyve.web.WebContext;
-
-import modules.admin.domain.Tag;
 
 public class Clear implements ServerSideAction<Tag> {
 	/**

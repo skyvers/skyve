@@ -6,11 +6,7 @@ import modules.whosin.domain.Staff;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
@@ -35,32 +31,23 @@ public class StaffBizlet extends Bizlet<Staff> {
 		}
 
 		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			System.out.println("FIRING SAVE OR OK");
-			System.out.println("FIRING SAVE OR OK");
-			System.out.println("FIRING SAVE OR OK");
-			System.out.println("FIRING SAVE OR OK");
 			Position pos = getPositionOf(bean);
 			if (pos != null) {
 				
 				//assign reports to of the associated position
 				pos.setReportsTo(bean.getReportsTo());
-				System.out.println("Assigning reports to ");
+
 			} else if(bean.originalValues().containsKey(Staff.reportsToPropertyName)){
 				
 				// create a new position and set the reports to
 				Persistence pers = CORE.getPersistence();
-				User user = pers.getUser();
-				Customer customer = user.getCustomer();
-				Module module = customer.getModule(Position.MODULE_NAME);
-				Document document = module.getDocument(customer, Position.DOCUMENT_NAME);
 
-				Position newPosition = document.newInstance(user);
+				Position newPosition = Position.newInstance();
 				newPosition.setStaff(bean);
 				newPosition.setPositionTitle(bean.getRoleTitle());
 				newPosition.setReportsTo(bean.getReportsTo());
 				
 				newPosition = pers.save(newPosition);
-				System.out.println("Creating reports to ");
 			}
 		}
 

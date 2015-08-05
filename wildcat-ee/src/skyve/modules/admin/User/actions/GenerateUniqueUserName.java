@@ -5,15 +5,13 @@ import java.util.List;
 import modules.admin.domain.User;
 
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 
 public class GenerateUniqueUserName implements ServerSideAction<User> {
