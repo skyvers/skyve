@@ -13,7 +13,7 @@
 		<module name="whosin"/>
 		<module name="whosinIntegrate" />
 	</modules>
-	<homeModule>whosinIntegrate</homeModule>
+	<homeModule>whosin</homeModule>
 	<interceptors>
 		<interceptor className="modules.RDBMSAuditInterceptor" />
 	</interceptors>

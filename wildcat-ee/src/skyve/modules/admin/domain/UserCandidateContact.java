@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.User;
+import org.skyve.CORE;
 import org.skyve.domain.ChildBean;
 import org.skyve.wildcat.domain.AbstractTransientBean;
 
@@ -57,6 +58,10 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	@XmlTransient
 	public String getBizDocument() {
 		return UserCandidateContact.DOCUMENT_NAME;
+	}
+
+	public static UserCandidateContact newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override

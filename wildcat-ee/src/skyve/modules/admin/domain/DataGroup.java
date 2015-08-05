@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.skyve.CORE;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 
 /**
@@ -43,6 +44,10 @@ public class DataGroup extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizDocument() {
 		return DataGroup.DOCUMENT_NAME;
+	}
+
+	public static DataGroup newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override

@@ -8,9 +8,7 @@
 	<pluralAlias>Jobs</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		return (getDisplayName()==null?"Job":getDisplayName());
-	</bizKey>
+	<bizKey expression="{displayName}"/>
 	<attributes>
 		<timestamp name="startTime">
 			<displayName>Start Time</displayName>

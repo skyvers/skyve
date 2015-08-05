@@ -6,7 +6,7 @@
 	<persistent name="ADM_Tagged" />
 	<singularAlias>Tagged</singularAlias>
 	<pluralAlias>Tagged</pluralAlias>
-	<bizKey expression="Tagged"/>
+	<bizKey expression="Tagged Item"/>
 	<attributes>
 		<text name="taggedModule">
 			<displayName>Tagged Module</displayName>

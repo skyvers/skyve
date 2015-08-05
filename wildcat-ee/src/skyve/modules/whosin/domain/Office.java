@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.skyve.CORE;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
 
@@ -70,6 +71,10 @@ public class Office extends AbstractPersistentBean {
 	@XmlTransient
 	public String getBizDocument() {
 		return Office.DOCUMENT_NAME;
+	}
+
+	public static Office newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override

@@ -651,7 +651,7 @@ public class ModulesUtil {
 				}
 
 				// create a new document number record
-				dN = document.newInstance(user);
+				dN = DocumentNumber.newInstance();
 				dN.setModuleName(moduleName);
 				dN.setDocumentName(documentName);
 				dN.setSequenceName(fieldName);
@@ -705,12 +705,15 @@ public class ModulesUtil {
 	 * @throws Exception
 	 *             general Exception
 	 */
-	public static String incrementAlpha(String prefix, String lastNumber, int numberLength) throws Exception {
+	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) throws Exception {
 
 	     String newNumber = "";
 	     String nonNumeric = lastNumber;
 	     Integer value = new Integer(1);
-	     if(prefix==null){
+	     String prefix;
+	     if(suppliedPrefix!=null){
+	    	 prefix = suppliedPrefix;
+	     } else {
 	    	 prefix="";
 	     }
 	     
@@ -728,15 +731,15 @@ public class ModulesUtil {
 	         } else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$")  && !"0".equals(lastNumber)) {
 	             int len = prefix.length();
 	             value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
-	             nonNumeric = (prefix == null ? "" : prefix);
+	             nonNumeric = prefix;
 	             
 	         //cater for numeric only
 	         } else if (lastNumber.matches("^\\d+$")) {
-	             nonNumeric = (prefix == null ? "" : prefix);
+	             nonNumeric = prefix;
 	             value = new Integer(Integer.parseInt(lastNumber) + 1);
 	         }
 	     } else {
-	         nonNumeric = (prefix == null ? "" : prefix);
+	         nonNumeric = prefix;
 	     }
 
 	     // now put prefix and value together
@@ -750,20 +753,6 @@ public class ModulesUtil {
 	     return newNumber;
 	}
 	
-
-
-	/** short-hand generic way to create a bean instance */
-	public static Bean newBeanInstance(String moduleName, String documentName) throws Exception {
-		User user = CORE.getPersistence().getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(moduleName);
-		Document document = module.getDocument(customer, documentName);
-
-		Bean bean = document.newInstance(user);
-
-		return bean;
-	}
-
 
 	/** returns a fomatted string representing the condition */
 	public static String getConditionName(String conditionCode) {

@@ -8,11 +8,7 @@
 	<pluralAlias>Groups</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/group16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return (getName()==null?"Group":getName());
-		]]>
-	</bizKey>
+	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" required="true">
 			<displayName>Group Name</displayName>

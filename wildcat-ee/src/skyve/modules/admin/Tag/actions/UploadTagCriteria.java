@@ -127,7 +127,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 				
 				if(FilterAction.tagRecordsThatMatch.equals(tag.getFilterAction())){
 					//add bean to tagged
-					Tagged tagged = docTagged.newInstance(user);
+					Tagged tagged = Tagged.newInstance();
 					tagged.setTag(tag);
 					tagged.setTaggedModule(tag.getModuleName());
 					tagged.setTaggedDocument(tag.getDocumentName());

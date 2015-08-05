@@ -47,10 +47,8 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the source audit record
-		@SuppressWarnings("unchecked")
 		Map<String, Object> source = (Map<String, Object>) JSONUtil.unmarshall(u, sourceVersion.getAudit());
 		for (String binding : source.keySet()) {
-			@SuppressWarnings("unchecked")
 			Map<String, Object> sourceValues = (Map<String, Object>) source.get(binding);
 
 			if (binding.isEmpty()) {
@@ -72,11 +70,9 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		
 		// Visit the comparison audit record, if there is one
 		if (comparisonVersion != null) {
-			@SuppressWarnings("unchecked")
 			Map<String, Object> compare = (Map<String, Object>) JSONUtil.unmarshall(u, comparisonVersion.getAudit());
 			for (String binding : compare.keySet()) {
 				ComparisonComposite node = bindingToNodes.get(binding);
-				@SuppressWarnings("unchecked")
 				Map<String, Object> compareValues = (Map<String, Object>) compare.get(binding);
 
 				if (binding.isEmpty()) {

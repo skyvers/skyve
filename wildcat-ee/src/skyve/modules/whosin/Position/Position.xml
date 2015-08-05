@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="Position" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Staff position.
+		]]>
+	</documentation>
+	<persistent name="WHO_Position" />
+	<singularAlias>Position</singularAlias>
+	<pluralAlias>Organisational Structure</pluralAlias>
+	<icon16x16RelativeFilePath>icons/document/office16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/office32.png</icon32x32RelativeFilePath>
+	<parentDocument>Position</parentDocument>
+	<bizKey expression="{positionTitle} ({staff.contact.name})"/>
+	<attributes>
+		<text name="positionTitle">
+			<displayName>Position Title</displayName>
+			<length>200</length>
+		</text>
+		<association type="aggregation" name="staff">
+			<displayName>Staff Person</displayName>
+			<documentName>Staff</documentName>
+		</association>
+		<association type="aggregation" name="reportsTo" persistent="false" trackChanges="false">
+			<displayName>Reports To</displayName>
+			<documentName>Position</documentName>
+		</association>
+		<boolean name="demoData">
+			<displayName>Demonstration Data</displayName>
+			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+		</boolean>		
+	</attributes>
+</document>

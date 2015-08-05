@@ -57,9 +57,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		Module m = c.getModule(Audit.MODULE_NAME);
-		Document d = m.getDocument(c, Audit.DOCUMENT_NAME);
-		Audit a = d.newInstance(u);
+		Audit a = Audit.newInstance();
 		
 		Module am = c.getModule(bean.getBizModule());
 		Document ad = am.getDocument(c, bean.getBizDocument());

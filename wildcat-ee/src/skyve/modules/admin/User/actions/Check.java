@@ -38,7 +38,6 @@ public class Check implements ServerSideAction<User> {
 		org.skyve.metadata.user.User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(UserCandidateContact.MODULE_NAME);
-		Document document = module.getDocument(customer, UserCandidateContact.DOCUMENT_NAME);
 		Document contactDocument = module.getDocument(customer, Contact.DOCUMENT_NAME);
 
 		// contact to match score
@@ -88,7 +87,7 @@ public class Check implements ServerSideAction<User> {
 		
 		// Add to the resulting collection
 		for (Contact contact : distinctContacts.keySet()) {
-			UserCandidateContact c = document.newInstance(user);
+			UserCandidateContact c = UserCandidateContact.newInstance();
 			c.setContact(contact);
 			c.setMatchScore(distinctContacts.get(contact));
 			c.setParent(adminUser);
@@ -96,7 +95,7 @@ public class Check implements ServerSideAction<User> {
 		}
 		
 		if (candidateContacts.isEmpty()) {
-			Contact contact = contactDocument.newInstance(user);
+			Contact contact = Contact.newInstance();
 			contact.setName(adminUser.getSearchContactName());
 			contact.setEmail1(adminUser.getSearchEmail());
 			contact.setContactType(ContactType.person);

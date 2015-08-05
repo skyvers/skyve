@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.Group;
+import org.skyve.CORE;
 import org.skyve.domain.ChildBean;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 
@@ -48,10 +49,21 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 		return GroupRole.DOCUMENT_NAME;
 	}
 
+	public static GroupRole newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	}
+
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getRoleName()==null?"Group Role":getRoleName());
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{roleName}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

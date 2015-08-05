@@ -7,11 +7,7 @@
 	<singularAlias>Group Role</singularAlias>
 	<pluralAlias>Group Roles</pluralAlias>
 	<parentDocument>Group</parentDocument>
-	<bizKey>
-		<![CDATA[
-			return (getRoleName()==null?"Group Role":getRoleName());
-		]]>
-	</bizKey>
+	<bizKey expression="{roleName}"/>
 	<attributes>
 		<text name="roleName" required="true">
 			<displayName>Role Name</displayName>

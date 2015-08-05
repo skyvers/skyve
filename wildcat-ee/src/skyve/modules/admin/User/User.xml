@@ -8,13 +8,7 @@
 	<pluralAlias>Users</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return (getContact() == null) ?
-					getUserName() : 
-					getUserName() + " - " + getContact().getBizKey();
-		]]>
-	</bizKey>
+	<bizKey expression="{userName} - {contact.bizKey}"/>
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>

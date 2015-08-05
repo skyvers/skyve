@@ -23,6 +23,13 @@
 		</row>
 		<row>
 			<item>
+				<lookupDescription binding="reportsTo" descriptionBinding="bizKey">
+					<filterParameter operator="notEqual" name="staff" binding="bizId"/>
+				</lookupDescription>
+			</item>
+		</row>
+		<row>
+			<item>
 				<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
 			</item>
 		</row>
@@ -66,5 +73,4 @@
 	<actions>
 		<defaults />
 	</actions>
-	<newParameters />	
 </view>

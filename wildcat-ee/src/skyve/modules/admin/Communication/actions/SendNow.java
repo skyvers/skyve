@@ -54,7 +54,7 @@ public class SendNow implements ServerSideAction<Communication> {
 	 * 
 	 * @throws Exception
 	 */
-	public static void preProcess(Communication mailout, System system) throws Exception {
+	public static void preProcess(Communication mailout) throws Exception {
 		if (mailout.getTag() == null) {
 			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for the mailout."));
 		}

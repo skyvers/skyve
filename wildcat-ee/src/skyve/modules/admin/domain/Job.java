@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.skyve.CORE;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
@@ -61,10 +62,21 @@ public class Job extends AbstractPersistentBean {
 		return Job.DOCUMENT_NAME;
 	}
 
+	public static Job newInstance() throws Exception {
+		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	}
+
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getDisplayName()==null?"Job":getDisplayName());
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{displayName}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override
