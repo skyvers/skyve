@@ -59,7 +59,14 @@ public class Group extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getName()==null?"Group":getName());
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{name}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

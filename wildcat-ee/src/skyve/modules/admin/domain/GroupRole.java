@@ -56,7 +56,14 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getRoleName()==null?"Group Role":getRoleName());
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{roleName}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

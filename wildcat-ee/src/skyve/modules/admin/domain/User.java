@@ -263,9 +263,14 @@ public class User extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return (getContact() == null) ?
-					getUserName() : 
-					getUserName() + " - " + getContact().getBizKey();
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{userName} - {contact.bizKey}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

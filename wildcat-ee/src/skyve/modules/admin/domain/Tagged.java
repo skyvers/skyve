@@ -65,7 +65,7 @@ public class Tagged extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"Tagged",
+														"Tagged Item",
 														this);
 		}
 		catch (Exception e) {
