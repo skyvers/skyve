@@ -48,6 +48,7 @@
 		<property name="bizParentId" length="36" index="bizParentIdIndex" />
 		<property name="positionTitle" length="200" />
 		<many-to-one name="staff" entity-name="whosinStaff" column="staff_id" cascade="persist,save-update,refresh,merge" />
+		<property name="demoData" />
 		<filter name="whosinPositionNoneFilter" condition="1=0"/>
 		<filter name="whosinPositionCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="whosinPositionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -41,10 +41,16 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 	public static final String staffPropertyName = "staff";
 	/** @hidden */
 	public static final String reportsToPropertyName = "reportsTo";
+	/** @hidden */
+	public static final String demoDataPropertyName = "demoData";
 
 	private String positionTitle;
 	private Staff staff = null;
 	private Position reportsTo = null;
+	/**
+	 * If this is set, the data was created by the demo data job and can safely be deleted.
+	 **/
+	private Boolean demoData;
 	private String bizParentId;
 
 
@@ -134,6 +140,24 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 	@XmlElement
 	public void setReportsTo(Position reportsTo) {
 		this.reportsTo = reportsTo;
+	}
+
+	/**
+	 * {@link #demoData} accessor.
+	 **/
+	public Boolean getDemoData() {
+		return demoData;
+	}
+
+	/**
+	 * {@link #demoData} mutator.
+	 * 
+	 * @param demoData	The new value to set.
+	 **/
+	@XmlElement
+	public void setDemoData(Boolean demoData) {
+		preset(demoDataPropertyName, demoData);
+		this.demoData = demoData;
 	}
 
 	@Override

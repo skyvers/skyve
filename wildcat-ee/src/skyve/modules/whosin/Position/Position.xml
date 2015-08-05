@@ -26,5 +26,9 @@
 			<displayName>Reports To</displayName>
 			<documentName>Position</documentName>
 		</association>
+		<boolean name="demoData">
+			<displayName>Demonstration Data</displayName>
+			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+		</boolean>		
 	</attributes>
 </document>
