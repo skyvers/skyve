@@ -374,6 +374,7 @@ public class Staff extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setReportsTo(Position reportsTo) {
+		preset(reportsToPropertyName, reportsTo);
 		this.reportsTo = reportsTo;
 	}
 }
