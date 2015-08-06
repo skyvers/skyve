@@ -49,7 +49,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentQuery;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ColumnAlignment;
@@ -366,36 +368,40 @@ public class ReportServlet extends HttpServlet {
 				}
 				Document document = module.getDocument(customer, query.getDocumentName());
 				String tagId = (String) values.get("tagId");
-				DocumentQuery documentQuery = query.constructDocumentQuery(null, tagId);
-				
+				DocumentQueryListModel model = new DocumentQueryListModel();
+				model.setQuery(query);
+				model.setSelectedTagId(tagId);
+
 				// add filter criteria
 				@SuppressWarnings("unchecked")
 				Map<String, Object> criteria = (Map<String, Object>) values.get("criteria");
 				if (criteria != null) {
 					String operator = (String) criteria.get("operator");
+					Filter filter = model.getFilter();
 					if (operator != null) { // advanced criteria
 						@SuppressWarnings("unchecked")
 						List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
 						SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
 																					document,
 																					user,
-																					documentQuery,
 																					CompoundFilterOperator.valueOf(operator),
 																					advancedCriteria,
-																					tagId);
+																					tagId,
+																					model,
+																					filter);
 					}
 					else { // simple criteria
 						SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
 																				document,
-																				user,
-																				documentQuery,
+																				customer,
 																				SmartClientFilterOperator.substring,
 																				criteria,
-																				tagId);
+																				tagId,
+																				filter);
 					}
 				}
 				JRDataSource dataSource = new WildcatDataSource(user, 
-																documentQuery.projectedIterable().iterator());
+																model.iterate().iterator());
 	
 				ReportDesignParameters designParams = new ReportDesignParameters();
 				designParams.setReportFormat(ReportFormat.valueOf((String) values.get("reportFormat")));
@@ -434,9 +440,6 @@ public class ReportServlet extends HttpServlet {
 				JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
 	
 				Map<String, Object> params = new TreeMap<>();
-//				params.put("RESOURCE_DIR", 
-//								repository.REPOSITORY_DIRECTORY + repository.CUSTOMERS_NAMESPACE + 
-//								customer.getName() + '/' + repository.RESOURCES_NAMESPACE);
 				StringBuilder sb = new StringBuilder(256);
 				sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
 				sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);

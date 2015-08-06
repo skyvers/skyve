@@ -21,7 +21,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentQuery;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
@@ -202,35 +204,40 @@ public class SmartClientTagServlet extends HttpServlet {
 		if (query == null) {
 			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
 		}
+		DocumentQueryListModel model = new DocumentQueryListModel();
+		model.setQuery(query);
 		Document document = module.getDocument(customer, query.getDocumentName());
-		DocumentQuery documentQuery = query.constructDocumentQuery(null, tagId);
 
 		// add filter criteria
 		@SuppressWarnings("unchecked")
 		Map<String, Object> criteria = (Map<String, Object>) JSONUtil.unmarshall(user, criteriaJSON);
 		if (criteria != null) {
 			String operator = (String) criteria.get("operator");
+
+			Filter filter = model.getFilter();
 			if (operator != null) { // advanced criteria
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
 				SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
 																			document,
 																			user,
-																			documentQuery,
 																			CompoundFilterOperator.valueOf(operator),
-																			advancedCriteria, tagId);
+																			advancedCriteria,
+																			tagId,
+																			model,
+																			filter);
 			}
 			else { // simple criteria
 				SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
 																		document,
-																		user,
-																		documentQuery,
+																		customer,
 																		SmartClientFilterOperator.substring,
 																		criteria,
-																		tagId);
+																		tagId,
+																		filter);
 			}
 		}
 
-		return documentQuery.projectedIterable();
+		return model.iterate();
 	}
 }

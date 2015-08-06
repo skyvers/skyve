@@ -4,4 +4,3 @@ public enum CompoundFilterOperator
 {
 	and, or, not
 }
-

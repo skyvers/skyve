@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model;
+package org.skyve.metadata.view.model.comparison;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
-import org.skyve.metadata.view.model.ComparisonComposite.Mutation;
+import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.util.BeanVisitor;
 

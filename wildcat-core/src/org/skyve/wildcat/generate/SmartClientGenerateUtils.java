@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
@@ -38,6 +39,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
@@ -1278,6 +1280,42 @@ public class SmartClientGenerateUtils {
     }
 
     /**
+     * Appends a data source definition from a document list model.
+     * @param user
+     * @param customer
+     * @param model
+     * @param toAppendTo	definition is appended to this
+     * @return	The ID for the query definition generated.
+     * @throws MetaDataException
+     */
+	public static String appendDataSourceDefinition(User user,
+														Customer customer,
+														Module owningModule,
+														String documentName,
+														String modelName,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) 
+	throws MetaDataException {
+		Document document = owningModule.getDocument(customer, documentName);
+		Module documentModule = customer.getModule(document.getOwningModuleName());
+		ListModel<Bean> model = CORE.getRepository().getListModel(customer, document, modelName);
+		return appendDataSourceDefinition(user, 
+											customer,
+											owningModule.getName(),
+											documentModule,
+											document,
+											null,
+											modelName,
+											"Model",
+											model.getColumns(),
+											null, 
+											null, 
+											true, 
+											toAppendTo, 
+											visitedQueryNames);
+	}
+	
+	/**
      * Appends a data source definition from a module query.
      * @param customer
      * @param query
@@ -1288,7 +1326,6 @@ public class SmartClientGenerateUtils {
      * @return	The ID for the query definition generated.
      * @throws MetaDataException
      */
-	@SuppressWarnings("null")
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
 														DocumentQueryDefinition query,
@@ -1298,20 +1335,56 @@ public class SmartClientGenerateUtils {
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) 
 	throws MetaDataException {
-		// dataSourceId -> defn
-		Map<String, String> childDataSources = new TreeMap<>();
-		
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
 		Document document = documentModule.getDocument(customer, documentName);
-
+		return appendDataSourceDefinition(user, 
+											customer, 
+											owningModule.getName(), 
+											documentModule, 
+											document, 
+											query.getName(), 
+											null, 
+											query.getDescription(),
+											query.getColumns(),
+											dataSourceIDOverride, 
+											forLookup, 
+											config, 
+											toAppendTo, 
+											visitedQueryNames);
+	}
+	
+	@SuppressWarnings("null")
+	private static String appendDataSourceDefinition(User user,
+														Customer customer,
+														String owningModuleName,
+														Module documentModule,
+														Document document,
+														String queryName,
+														String modelName,
+														String description,
+														List<QueryColumn> columns,
+														String dataSourceIDOverride,
+														Lookup forLookup,
+														boolean config,
+														StringBuilder toAppendTo,
+														Set<String> visitedQueryNames) 
+	throws MetaDataException {
+		// dataSourceId -> defn
+		Map<String, String> childDataSources = new TreeMap<>();
+		
+		String documentName = document.getName();
 		String dataSourceId = null;
 		if (dataSourceIDOverride != null) {
 			dataSourceId = dataSourceIDOverride;
 		}
-		else {
-			dataSourceId = new StringBuilder(32).append(owningModule.getName()).append('_').append(query.getName()).toString();
+		else if (queryName != null) {
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(queryName).toString();
+		}
+		else if (modelName != null) {
+			// NB 4 tokens, not 3
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(documentName).append("__").append(modelName).toString();
 		}
 		if (visitedQueryNames == null) {
 			toAppendTo.append("if(window.").append(dataSourceId);
@@ -1342,7 +1415,7 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(document));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(document));
 		toAppendTo.append(",title:'");
-		toAppendTo.append(processString(query.getDescription()));
+		toAppendTo.append(processString(description));
 		toAppendTo.append("',fields:[");
 
 		if (! config) {
@@ -1368,7 +1441,7 @@ public class SmartClientGenerateUtils {
 			}
 		}
 		
-		for (QueryColumn column : query.getColumns()) {
+		for (QueryColumn column : columns) {
 			if (! column.isProjected()) {
 				continue;
 			}
