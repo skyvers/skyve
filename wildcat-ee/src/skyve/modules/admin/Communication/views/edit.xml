@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view type="edit" title="Communication" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns="http://www.skyve.org/xml/view" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view type="edit" title="Communication" 
+			xmlns="http://www.skyve.org/xml/view"
+			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Manage">
 			<vbox pixelMemberPadding="10">
@@ -8,13 +10,14 @@
 					<column percentageWidth="20" />
 					<column />
 					<column />
+					<column />
 					<row>
-						<item>
+						<item colspan="2">
 							<default binding="description" />
 						</item>
 					</row>
 					<row>
-						<item >
+						<item colspan="2">
 							<combo binding="moduleName">
 								<onChangedHandlers>
 									<server action="UpdateModule" />
@@ -23,12 +26,25 @@
 						</item>
 					</row>
 					<row>
-						<item >
+						<item  colspan="2">
 							<combo binding="documentName">
 								<onChangedHandlers>
 									<server action="UpdateDocument" />
 								</onChangedHandlers>
 							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<default binding="tag" />
+						</item>
+						<item align="right">
+							<button actionName="GetCount" pixelWidth="200"/>
+						</item>
+					</row>
+					<row>
+						<item  colspan="2">
+							<textField binding="filePath" />
 						</item>
 					</row>
 				</form>
@@ -37,19 +53,17 @@
 					<column />
 					<column />
 					<column />
-					<column />
-					<column />
 					<row>
-						<item>
-							<default binding="tag" />
-						</item>
-						<item>
-							<button actionName="GetResults" pixelWidth="200" />
+						<item colspan="2">
+							<textArea binding="results" pixelHeight="200" />
 						</item>
 					</row>
 					<row>
-						<item colspan="3">
-							<textArea binding="results" pixelHeight="200" />
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button actionName="GetResults" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
@@ -71,7 +85,7 @@
 				</form>								
 			</vbox>
 		</tab>
-		<tab title="Email">
+		<tab title="Contents">
 			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelMemberPadding="10"
 				pixelPadding="10">
 				<form pixelWidth="1100">
@@ -92,7 +106,7 @@
 					</row>
 					<row>
 						<item colspan="4">
-							<textField binding="emailTo" pixelWidth="800" />
+							<textField binding="sendTo" pixelWidth="800" />
 						</item>
 					</row>
 					<row>
@@ -107,7 +121,7 @@
 					</row>
 					<row>
 						<item colspan="4">
-							<textField binding="emailSubject" pixelWidth="800" />
+							<textField binding="subject" pixelWidth="800" />
 						</item>
 					</row>
 					<row>
@@ -123,7 +137,7 @@
 					</row>
 					<row>
 						<item showLabel="true" colspan="4">
-							<html binding="emailBody" pixelHeight="400" pixelWidth="800" />
+							<html binding="body" pixelHeight="400" pixelWidth="800" />
 						</item>
 					</row>
 				</form>
@@ -148,7 +162,9 @@
 		<defaults />
 		<action clientValidation="true" className="GetResults" displayName="Check Results" inActionPanel="false"
 			relativeIconFileName="shared/icons/Search.gif" />
-		<action clientValidation="true" className="CreateFiles" displayName="Start Job" inActionPanel="false"
+		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false"
+			relativeIconFileName="shared/icons/Search.gif" />
+		<action clientValidation="true" className="CreateFiles" displayName="Generate Files" inActionPanel="false"
 			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?"/>
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?"/>

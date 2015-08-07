@@ -12,20 +12,20 @@
 			<displayName>Description</displayName>
 			<length>250</length>
 		</text>
-		<association name="tag" type="aggregation" required="true">
+		<association name="tag" type="aggregation">
 			<displayName>Tag</displayName>
 			<domain>variant</domain>
 			<documentName>Tag</documentName>
 		</association>
 		<text name="moduleName">
 			<displayName>Module</displayName>
-			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<shortDescription>Bindings used in the communication address, subject and body will be based on the selected module document.</shortDescription>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="documentName">
 			<displayName>Document</displayName>
-			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<shortDescription>Bindings used in the communication address, subject and body will be based on the selected module document.</shortDescription>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
@@ -34,20 +34,20 @@
 			<shortDescription>Provide a binding which contains the email address to send to</shortDescription>
 			<length>500</length>
 		</text>
-		<text name="emailTo" required="true">
-			<displayName>Email To</displayName>
-			<shortDescription>The email address to send to.  Bindings are allowed relative to the above module document.</shortDescription>
+		<text name="sendTo">
+			<displayName>To</displayName>
+			<shortDescription>The address to send to. Bindings are allowed relative to the above module document.</shortDescription>
 			<length>250</length>
 		</text>
-		<text name="emailSubject" required="true">
-			<displayName>Email Subject</displayName>
-			<shortDescription>The subject of the email.  Bindings are allowed relative to the above module document.</shortDescription>
+		<text name="subject">
+			<displayName>Subject</displayName>
+			<shortDescription>The subject of the communication. Bindings are allowed relative to the above module document.</shortDescription>
 			<length>250</length>
 		</text>
-		<markup name="emailBody" required="true">
-			<displayName>Email Body</displayName>
+		<markup name="body">
+			<displayName>Body</displayName>
 			<shortDescription><![CDATA[
-			The body of the email.  
+			The body of the communication.  
 			<p/>
 			Bindings are allowed relative to the above module document.
 			<p/>
@@ -62,9 +62,23 @@
 		<content name="attachment">
 			<displayName>Attachment</displayName>
 		</content>
+		<enum name="actionType">
+			<displayName>Action</displayName>
+			<values>
+				<value code="save" description="Save for bulk send"/>
+				<value code="send" description="Send Immediately"/>
+				<value code="test" description="Test bindings and output"/>
+			</values>
+		</enum>
 		<text name="filePath">
 			<displayName>Result Folder</displayName>
+			<shortDescription>The path (local to the server) where bulk files will be created.</shortDescription>
 			<length>2000</length>
 		</text>
 	</attributes>
+	<conditions>
+		<condition name="saveAction">
+			<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
+		</condition>
+	</conditions>
 </document>

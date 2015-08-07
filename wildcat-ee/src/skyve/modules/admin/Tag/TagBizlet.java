@@ -9,6 +9,7 @@ import modules.admin.domain.Tag.FilterOperator;
 import modules.admin.domain.Tagged;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -16,6 +17,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
@@ -244,4 +246,45 @@ public class TagBizlet extends Bizlet<Tag> {
 			sql.execute();
 		}
 	}
+	
+	/**
+	 * Retrieve the items tagged which match the specified module and document
+	 * 
+	 * @param mailout
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<Bean> getTaggedItemsForDocument(Tag tag, String moduleName, String documentName) throws Exception{
+		Persistence pers = CORE.getPersistence();
+		User user = pers.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(moduleName);
+		Document document = module.getDocument(customer, documentName);
+
+		List<Bean> beans = new ArrayList<>();
+		for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
+			if(bean!=null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())){
+				//need to check that this is only done for documents of the selected type
+				beans.add(bean);
+			}
+		}
+		
+		return beans;
+	}
+
+	public static Long getTaggedCountForDocument(Tag tag, String moduleName, String documentName) throws Exception {
+		Long result = new Long(0);
+
+		Persistence pers = CORE.getPersistence();
+		DocumentQuery q = pers.newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
+		q.getFilter().addEquals(Tagged.tagPropertyName, tag);
+		q.getFilter().addEquals(Tagged.taggedModulePropertyName, moduleName);
+		q.getFilter().addEquals(Tagged.taggedDocumentPropertyName, documentName);
+		q.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+
+		result = q.scalarResult(Long.class);
+		
+		return result;
+	}
+	
 }

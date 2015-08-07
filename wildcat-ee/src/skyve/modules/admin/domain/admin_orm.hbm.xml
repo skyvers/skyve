@@ -55,10 +55,15 @@
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
-		<property name="emailTo" length="250" />
-		<property name="emailSubject" length="250" />
-		<property name="emailBody" type="text" />
+		<property name="sendTo" length="250" />
+		<property name="subject" length="250" />
+		<property name="body" type="text" />
 		<property name="attachment" length="36" />
+		<property name="actionType" length="4">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Communication$ActionType</param>
+			</type>
+		</property>
 		<property name="filePath" length="2000" />
 		<filter name="adminCommunicationNoneFilter" condition="1=0"/>
 		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>

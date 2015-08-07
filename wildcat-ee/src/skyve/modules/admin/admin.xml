@@ -8,6 +8,7 @@
 	<homeDocument>ChangePassword</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
+		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
 	</jobs>	
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -16,7 +17,7 @@
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="MyContact" />
 		<document ref="CurrentUser"/>
-		<document ref="Communication"/>
+		<document ref="Communication" defaultQueryName="qCommunications"/>
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="Display" />
@@ -118,6 +119,7 @@
 				</document>			
 				<document name="Communication" permission="CRUDD">
 					<action name="CreateFiles"/>
+					<action name="GetCount"/>
 					<action name="GetResults"/>
 					<action name="SendNow"/>			
 					<action name="UpdateModule"/>
@@ -134,6 +136,7 @@
 				</document>
 				<document name="Communication" permission="CRUDD">
 					<action name="CreateFiles"/>
+					<action name="GetCount"/>
 					<action name="GetResults"/>
 					<action name="SendNow"/>			
 					<action name="UpdateModule"/>
@@ -404,6 +407,16 @@
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
 				<column binding="auditBizVersion" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qCommunications" documentName="Communication">
+			<displayName>Communications</displayName>
+			<description>Communications</description>
+			<columns>
+				<column binding="description" sortOrder="ascending"/>
+				<column binding="documentName"/>
+				<column binding="subject"/>
+				<column binding="tag.name"/>
 			</columns>
 		</documentQuery>
 	</queries>

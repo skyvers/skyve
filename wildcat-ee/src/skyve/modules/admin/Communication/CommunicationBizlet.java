@@ -3,16 +3,20 @@ package modules.admin.Communication;
 import java.util.ArrayList;
 import java.util.List;
 
+import modules.admin.Communication.actions.GetResults;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Job;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
@@ -23,11 +27,11 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	 */
 	private static final long serialVersionUID = -7404508611264793559L;
 
-	public static void checkForUnsavedData(Communication mailout) throws Exception {
-		if (!mailout.originalValues().isEmpty()) {
+	public static void checkForUnsavedData(Communication communication) throws Exception {
+		if (!communication.originalValues().isEmpty()) {
 			// find if any field except results
 			boolean fieldOtherThanResults = false;
-			for (String s : mailout.originalValues().keySet()) {
+			for (String s : communication.originalValues().keySet()) {
 				if (!Communication.resultsPropertyName.equals(s)) {
 					fieldOtherThanResults = true;
 					break;
@@ -85,8 +89,28 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			}
 		}
 		
-
 		return result;
 	}
+	
+	public static Communication kickOffJob(Communication communication) throws Exception{
 
+		GetResults.getResults(communication);
+		
+		Persistence persistence = CORE.getPersistence();
+		User user = persistence.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(Communication.MODULE_NAME);
+		Job job = module.getJob("jProcessCommunicationsForTag");
+
+		EXT.runOneShotJob(job, communication, user);
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(communication.getResults());
+		sb.append("\nThe job has been commenced - check Admin->Jobs for the log.");
+		communication.setResults(sb.toString());
+		
+		communication.originalValues().remove(Communication.resultsPropertyName);
+		
+		return communication;
+	}
 }

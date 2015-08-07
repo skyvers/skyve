@@ -1,6 +1,9 @@
 package modules.admin.Communication.actions;
 
+import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
+import modules.admin.domain.Communication.ActionType;
 
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -18,25 +21,54 @@ public class GetResults implements ServerSideAction<Communication> {
 	 * Kick off the annual returns job.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication mailout, WebContext webContext)
-	throws Exception {
+	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
 
+		communication.setActionType(ActionType.testBindingsAndOutput);
+	
+		String results = getResults(communication);
 		
-		if (mailout.getTag() == null) {
-			throw new ValidationException(new Message(Communication.tagPropertyName, 
-														"A tag must be selected for results."));
+		communication.setResults(results);
+		
+		Communication result = CommunicationBizlet.kickOffJob(communication);
+		
+		return new ServerSideActionResult(result);
+	}
+	
+	public static String getResults(Communication communication) throws Exception{
+		
+		if (communication.getTag() == null) {
+			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
+		}
+
+		CommunicationBizlet.checkForUnsavedData(communication);
+
+		Long count = TagBizlet.getTaggedCountForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
+
+		StringBuilder results = new StringBuilder();
+		results.append(count).append(" communications for ");
+		results.append(communication.getDocumentName());
+		results.append(" will be ");
+		
+		switch (communication.getActionType()){
+		case saveForBulkSend:
+			results.append(" created into the directory ");
+			results.append(communication.getFilePath());
+			results.append(".");
+			break;
+			
+		case sendImmediately:
+			results.append(" sent immediately.");
+			break;
+			
+		case testBindingsAndOutput:
+			results.append(" tested.");
+			break;
+			
+		default:
+			break;
 		}
 		
-//		CommunicationBizlet.checkForUnsavedData(mailout);		
+		return results.toString();
 		
-		StringBuilder results =	new StringBuilder();
-		results.append("\nEmails will be created into the directory ");
-		
-		
-		mailout.setResults(results.toString());
-		
-		mailout.originalValues().remove(Communication.resultsPropertyName);
-		
-		return new ServerSideActionResult(mailout);
-	}	
+	}
 }

@@ -1,6 +1,5 @@
 package modules.admin.Tag;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -58,13 +57,7 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 				act = rep.getAction(customer, document, documentActionName);
 			}
 
-			List<Bean> beans = new ArrayList<>();
-			for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
-				if(bean!=null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())){
-					//need to check that this is only done for documents of the selected type
-					beans.add(bean);
-				}
-			}
+			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getModuleName(), tag.getDocumentName());
 			
 			int size=  beans.size();
 			int processed = 0;
