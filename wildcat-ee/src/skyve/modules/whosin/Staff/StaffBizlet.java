@@ -33,12 +33,12 @@ public class StaffBizlet extends Bizlet<Staff> {
 		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			Position pos = getPositionOf(bean);
 			if (pos != null) {
-				
-				//assign reports to of the associated position
+
+				// assign reports to of the associated position
 				pos.setReportsTo(bean.getReportsTo());
 
-			} else if(bean.originalValues().containsKey(Staff.reportsToPropertyName)){
-				
+			} else if (bean.originalValues().containsKey(Staff.reportsToPropertyName)) {
+
 				// create a new position and set the reports to
 				Persistence pers = CORE.getPersistence();
 
@@ -46,7 +46,7 @@ public class StaffBizlet extends Bizlet<Staff> {
 				newPosition.setStaff(bean);
 				newPosition.setPositionTitle(bean.getRoleTitle());
 				newPosition.setReportsTo(bean.getReportsTo());
-				
+
 				newPosition = pers.save(newPosition);
 			}
 		}
@@ -56,11 +56,16 @@ public class StaffBizlet extends Bizlet<Staff> {
 
 	public static Position getPositionOf(Staff bean) throws Exception {
 
-		Persistence pers = CORE.getPersistence();
-		DocumentQuery q = pers.newDocumentQuery(Position.MODULE_NAME, Position.DOCUMENT_NAME);
-		q.getFilter().addEquals(Position.staffPropertyName, bean);
+		if (bean.isPersisted()) {
+			Persistence pers = CORE.getPersistence();
+			DocumentQuery q = pers.newDocumentQuery(Position.MODULE_NAME, Position.DOCUMENT_NAME);
+			q.getFilter().addEquals(Position.staffPropertyName, bean);
 
-		Position position = q.beanResult();
-		return position;
+			Position position = q.beanResult();
+			return position;
+		}
+
+		return null;
+
 	}
 }
