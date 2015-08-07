@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model;
+package org.skyve.metadata.view.model.comparison;
 
 import java.util.ArrayList;
 import java.util.List;

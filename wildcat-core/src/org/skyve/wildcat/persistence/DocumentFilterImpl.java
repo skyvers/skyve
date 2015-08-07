@@ -360,7 +360,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	}
 
 	@Override
-	public void addConjunction(org.skyve.persistence.DocumentFilter filter) {
+	public void addAnd(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
 			filterClause.append(" AND ");
 		}
@@ -368,7 +368,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	}
 
 	@Override
-	public void addDisjunction(org.skyve.persistence.DocumentFilter filter) {
+	public void addOr(DocumentFilter filter) {
 		if (filterClause.length() > 0) {
 			filterClause.insert(0, '(');
 			filterClause.append(") OR ");

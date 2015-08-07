@@ -38,7 +38,8 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.metadata.view.model.ComparisonModel;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
@@ -741,6 +742,15 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	public  <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName)
+	throws MetaDataException {
+		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
+		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
+		fullyQualifiedActionName.append(".models.").append(modelName);
+		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+	}
+
+	@Override
+	public  <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName)
 	throws MetaDataException {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());

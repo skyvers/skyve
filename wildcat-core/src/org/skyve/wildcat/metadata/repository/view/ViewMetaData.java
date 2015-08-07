@@ -242,8 +242,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 				if (parameter.getName() == null) {
 					throw new MetaDataException(metaDataName + " : The " + getType() + " view newParameter [name] is required in " + getType() + " view " + metaDataName);
 				}
-				if ((parameter.getBinding() != null) || (parameter.getValue() != null)) {
-					throw new MetaDataException(metaDataName + " : The " + getType() + " view " + parameter.getName() + " newParameter [binding] or [value] are not required in view " + getType() + " view " + metaDataName);
+				if (parameter.getValue() != null) {
+					throw new MetaDataException(metaDataName + " : The " + getType() + " view " + parameter.getName() + " newParameter [value] is not required in " + getType() + " view " + metaDataName);
 				}
 			}
 			result.getParameters().addAll(parameters);

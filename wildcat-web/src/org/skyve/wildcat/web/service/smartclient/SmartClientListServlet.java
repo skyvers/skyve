@@ -27,6 +27,7 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -38,7 +39,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentFilter;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
@@ -49,7 +53,6 @@ import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
 import org.skyve.wildcat.metadata.model.document.field.Enumeration;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.TagUtil;
@@ -130,25 +133,46 @@ public class SmartClientListServlet extends HttpServlet {
 	
 			    	Customer customer = user.getCustomer();
 			        Module module = null;
+			        Document drivingDocument = null;
+			        ListModel<Bean> model = null;
 					DocumentQueryDefinition query = null;
-	
+					
 			        if (dataSource != null) {
-			        	// use first 2 tokens of '_' split - could be a pick list which means extra '_' in it
+			        	// '_' split could be 2, 3 or 4 tokens
+			        	// 2 - module_query, module_document (default query)
+			        	// >3 - module_query_attribute (picklist), module_document_attribute (default query picklist)
+			        	// '__' - module_document__model
 			        	String[] tokens = dataSource.split("_");
 						module = customer.getModule(tokens[0]);
-						String documentOrQueryName = tokens[1];
-						query = module.getDocumentQuery(documentOrQueryName);
-						if (query == null) {
-							query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+						
+						// model type of request
+						if (dataSource.contains("__")) {
+							drivingDocument = module.getDocument(customer, tokens[1]);
+							model = CORE.getRepository().getListModel(customer, drivingDocument, tokens[3]);
+							if (model == null) {
+								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
+							}
 						}
-						if (query == null) {
-							throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
+						// query type of request
+						else {
+							String documentOrQueryName = tokens[1];
+							query = module.getDocumentQuery(documentOrQueryName);
+							// not a query, must be a document
+							if (query == null) {
+								query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+							}
+							if (query == null) {
+								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
+							}
+					        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+					        queryModel.setQuery(query);
+					        model = queryModel;
+					        drivingDocument = module.getDocument(customer, query.getDocumentName());
 						}
-					}
+			        }
 			        else {
 			        	throw new ServletException("No datasource name in the request.");
 			        }
-			        Document queryDocument = module.getDocument(customer, query.getDocumentName());
 			        
 			        SortedMap<String, Object> parameters = new TreeMap<>();
 					java.util.Enumeration<String> names = request.getParameterNames();
@@ -177,7 +201,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 					switch (operation) {
 					case fetch:
-						if (! user.canReadDocument(queryDocument)) {
+						if (! user.canReadDocument(drivingDocument)) {
 							throw new SecurityException("read this data", user.getName());
 						}
 						String _startRow = request.getParameter("_startRow");
@@ -217,8 +241,7 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 	
 						fetch(module,
-								queryDocument,
-								query, 
+								drivingDocument,
 								startRow, 
 								endRow, 
 								operator, 
@@ -230,10 +253,11 @@ public class SmartClientListServlet extends HttpServlet {
 								request.getParameter("_tagId"),
 								parameters, 
 								persistence, 
-								pw);
+								pw,
+								model);
 						break;
 					case add:
-						if (! user.canCreateDocument(queryDocument)) {
+						if (! user.canCreateDocument(drivingDocument)) {
 							throw new SecurityException("create this data", user.getName());
 						}
 						break;
@@ -247,7 +271,7 @@ public class SmartClientListServlet extends HttpServlet {
 							untag(customer, module, query, tagId, parameters, pw);
 						}
 						else {
-							if (! user.canUpdateDocument(queryDocument)) {
+							if (! user.canUpdateDocument(drivingDocument)) {
 								throw new SecurityException("update this data", user.getName());
 							}
 		
@@ -266,7 +290,7 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						break;
 					case remove:
-						if (! user.canDeleteDocument(queryDocument)) {
+						if (! user.canDeleteDocument(drivingDocument)) {
 							throw new SecurityException("delete this data", user.getName());
 						}
 	
@@ -306,7 +330,6 @@ public class SmartClientListServlet extends HttpServlet {
 	
     private static void fetch(Module module,
     							Document queryDocument,
-		    					DocumentQueryDefinition query, 
 								int startRow,
 								int endRow,
 								SmartClientFilterOperator operator,
@@ -317,80 +340,35 @@ public class SmartClientListServlet extends HttpServlet {
 								String tagId,
 								SortedMap<String, Object> parameters,
 								AbstractPersistence persistence,
-								PrintWriter pw)
+								PrintWriter pw,
+								ListModel<Bean> model)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
-		
+
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Set<String> propertyNames = new TreeSet<>();
-		propertyNames.add(Bean.DOCUMENT_ID);
-		propertyNames.add(PersistentBean.LOCK_NAME);
-		propertyNames.add(PersistentBean.TAGGED_NAME);
-		propertyNames.add(PersistentBean.FLAG_COMMENT_NAME);
-		propertyNames.add(Bean.BIZ_KEY);
-		for (QueryColumn column : query.getColumns()) {
-			if (column.isProjected()) {
-				String binding = column.getBinding();
-				// if this binding is to an association, 
-				// add the bizId as the column value and bizKey as the column displayValue
-				TargetMetaData target = Binder.getMetaDataForBinding(customer,
-																		module,
-																		queryDocument,
-																		binding);
-				
-				if (target.getAttribute() instanceof Association) {
-					StringBuilder sb = new StringBuilder(64);
-					sb.append(binding).append('.').append(Bean.BIZ_KEY);
-					propertyNames.add(sb.toString());
-				}
-				propertyNames.add((binding != null) ? binding : column.getName());
-			}
-		}
-		
-		DocumentQuery summaryQuery = null;
-		DocumentQuery detailQuery = query.constructDocumentQuery(null, tagId);
 
-		Document document = detailQuery.getDrivingDocument();
+		model.setStartRow(startRow);
+		model.setEndRow(endRow);
+		model.setSortParameters(sortParameters);
+		model.setSummary(summaryType);
+		model.setSelectedTagId(tagId);
+		Filter filter = model.getFilter();
 		
 		// Add filter criteria to query
-		addFilterCriteriaToQuery(module, document, detailQuery, user, operator, criteria, parameters, tagId);
+		addFilterCriteriaToQuery(module, queryDocument, user, operator, criteria, parameters, tagId, model, filter);
 
-		// Apply sort - if defined
-		if (sortParameters != null) {
-			for (SortParameter sortParameter : sortParameters) {
-				String binding = sortParameter.getBinding();
-				SortDirection direction = sortParameter.getDirection();
-				detailQuery.insertOrdering(binding, direction);
-			}
-		}
-
-		detailQuery.setFirstResult(startRow);
-		detailQuery.setMaxResults(endRow - startRow);
-		List<Bean> beans = detailQuery.projectedResults();
-		if (summaryType == null) {
-			summaryQuery = query.constructDocumentQuery(AggregateFunction.Count, tagId);
-			addFilterCriteriaToQuery(module, document, summaryQuery, user, operator, criteria, parameters, tagId);
-			AbstractDocumentQuery internalSummaryQuery = (org.skyve.wildcat.persistence.AbstractDocumentQuery) summaryQuery;
-			internalSummaryQuery.clearProjections();
-			internalSummaryQuery.clearOrderings();
-		}
-		else {
-			summaryQuery = query.constructDocumentQuery(summaryType, tagId);
-			addFilterCriteriaToQuery(module, document, summaryQuery, user, operator, criteria, parameters, tagId);
-		}
-
-		// This needs to be the ID to satisfy the client data source definitions
-		summaryQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, Bean.DOCUMENT_ID);
-		summaryQuery.addAggregateProjection(AggregateFunction.Min, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
-		
-		Bean summaryBean = summaryQuery.projectedResults().get(0);
+		Page page = model.fetch();
+		List<Bean> beans = page.getRows();
+		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
 			BindUtil.set(summaryBean, PersistentBean.FLAG_COMMENT_NAME, summaryType);
 			beans.add(summaryBean);
 		}
-		
-		long totalRows = ((Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID)).longValue();
+		long totalRows = page.getTotalRows();
+System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + page.getRows().size());
+		Set<String> projections = model.getProjections();
+
 		message.append("{response:{");
 		message.append("status:0,");
 		message.append("startRow:").append(startRow);
@@ -399,26 +377,26 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(",totalRows:");
 		message.append(totalRows);
 		message.append(",data:");
-		message.append(JSONUtil.marshall(customer, beans, propertyNames));
+		message.append(JSONUtil.marshall(customer, beans, projections));
 		message.append("}}");
 		pw.append(message);
 	}
     
 	private static void addFilterCriteriaToQuery(Module module,
 													Document document,
-													DocumentQuery query,
 		    										User user,
 		    										SmartClientFilterOperator filterOperator,
 		    										String[] criteria,
 		    										SortedMap<String, Object> parameters,
-		    										String tagId) 
+		    										String tagId,
+													ListModel<?> model, 
+													Filter filter) 
     throws Exception {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
-    	CompoundFilterOperator compoundFilterOpererator = CompoundFilterOperator.and;
+    	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
     	String operatorParameter = (String) mutableParameters.get("operator");
     	if (operatorParameter != null) { // advanced criteria
-    		compoundFilterOpererator = CompoundFilterOperator.valueOf(operatorParameter);
-
+    		compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
     		// Produce advanced criteria parameter
     		List<Map<String, Object>> advancedCriteria = null;
     		if (criteria == null) {
@@ -436,10 +414,11 @@ public class SmartClientListServlet extends HttpServlet {
     		addAdvancedFilterCriteriaToQuery(module,
     											document,
     											user,
-    											query,
-    											compoundFilterOpererator,
+    											compoundFilterOperator,
     											advancedCriteria,
-    											tagId);
+    											tagId,
+												model,
+												filter);
     		
     		mutableParameters.remove("operator");
     		mutableParameters.remove("criteria");
@@ -448,11 +427,11 @@ public class SmartClientListServlet extends HttpServlet {
     	// simple criteria or extra criteria from grid filter parameters
     	addSimpleFilterCriteriaToQuery(module,
 										document,
-										user,
-										query,
+										user.getCustomer(),
 										filterOperator,
 										mutableParameters,
-										tagId);
+										tagId,
+										filter);
     }
 
     /**
@@ -460,7 +439,7 @@ public class SmartClientListServlet extends HttpServlet {
      * 
      * @param module
      * @param document
-     * @param user
+     * @param customer
      * @param query	Add the filter critiera to this query.
      * @param filterOperator	The default operator to use for all filter critiera.
      * @param criteria	A Map of name value pairs
@@ -468,13 +447,12 @@ public class SmartClientListServlet extends HttpServlet {
      */
     public static void addSimpleFilterCriteriaToQuery(Module module,
 														Document document,
-														User user,
-														DocumentQuery query,
+														Customer customer,
 			    										SmartClientFilterOperator filterOperator,
 			    										Map<String, Object> criteria,
-			    										String tagId) 
+			    										String tagId,
+		    											Filter filter) 
     throws Exception {
-		DocumentFilter topLevelFilter = query.getFilter();
 		for (String binding : criteria.keySet()) {
 			Object value = criteria.get(binding);
 			if ("".equals(value)) {
@@ -488,7 +466,6 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			// Determine the type and converter of the filtered attribute
-			Customer customer = user.getCustomer();
 			Converter<?> converter = null;
     		Class<?> type = String.class;
     		
@@ -544,22 +521,18 @@ public class SmartClientListServlet extends HttpServlet {
 									type);
 			}
 
-			if (queryParameter) {
-				query.putParameter(binding, value);
-			}
-			else {
+			if (! queryParameter) {
 				equalsOperatorRequired = equalsOperatorRequired || 
 											(value instanceof Date) ||
 											(value instanceof Number) ||
 											(value instanceof Boolean);
-				addCriteriumToFilter(topLevelFilter, 
-										binding, 
+				addCriteriumToFilter(binding, 
 										equalsOperatorRequired ? SmartClientFilterOperator.equals : filterOperator, 
 										value, 
 										null, 
 										null,
-										user,
-										tagId);
+										tagId,
+										filter);
 			}
 		}
 	}
@@ -578,32 +551,33 @@ public class SmartClientListServlet extends HttpServlet {
 	public static void addAdvancedFilterCriteriaToQuery(Module module,
 															Document document,
 															User user,
-															DocumentQuery query,
 															CompoundFilterOperator compoundFilterOperator,
 															List<Map<String, Object>> criteria,
-															String tagId)
+															String tagId,
+															ListModel<?> model,
+															Filter filter)
 	throws Exception {
-		addAdvancedFilterCriteriaToQuery(module,
-											document,
-											user,
-											query,
-											query.getFilter(),
-											compoundFilterOperator,
-											criteria,
-											tagId);
+		addAdvancedFilterCriteriaToQueryInternal(module,
+													document,
+													user,
+													compoundFilterOperator,
+													criteria,
+													tagId,
+													model,
+													filter);
 	}
     
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	private static void addAdvancedFilterCriteriaToQuery(Module module,
-															Document document,
-															User user,
-															DocumentQuery query,
-															DocumentFilter currentFilter,
-				    										CompoundFilterOperator compoundFilterOperator,
-				    										List<Map<String, Object>> criteria,
-				    										String tagId)
+	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
+																	Document document,
+																	User user,
+						    										CompoundFilterOperator compoundFilterOperator,
+						    										List<Map<String, Object>> criteria,
+						    										String tagId,
+																	ListModel<?> model,
+																	Filter filter)
     throws Exception {
 		if (criteria != null) {
 			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
@@ -616,24 +590,24 @@ System.out.println(criterium);
 				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterium.get("operator"));
 
 				if (binding == null) { // advanced criteria
-					DocumentFilter subFilter = query.newDocumentFilter();
+					Filter subFilter = model.newFilter();
 					CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 					@SuppressWarnings("unchecked")
 					List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterium.get("criteria");
 					addAdvancedFilterCriteriaToQuery(module,
 														document,
 														user,
-														query,
-														subFilter,
 														subCompoundFilterOperator,
 														subCritiera,
-														tagId);
+														tagId,
+														model,
+														subFilter);
 					if (! subFilter.isEmpty()) {
 						if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
-							currentFilter.addDisjunction(subFilter);
+							filter.addOr(subFilter);
 						}
 						else { // not is taken into account below
-							currentFilter.addConjunction(subFilter);
+							filter.addAnd(subFilter);
 						}
 					}
 				}
@@ -699,7 +673,6 @@ System.out.println(criterium);
 	    			value = fromString(binding, "value", valueString, customer, converter, type);
 	
 	    			if (queryParameter) {
-						query.putParameter(binding, value);
 						continue;
 	    			}
 	
@@ -723,20 +696,20 @@ System.out.println(criterium);
 	
 		    		start = fromString(binding, "start", startString, customer, converter, type);
 	    			end = fromString(binding, "end", endString, customer, converter, type);
-	    			
+
 		    		switch (compoundFilterOperator) {
 		    		case and:
-		    			addCriteriumToFilter(currentFilter, binding, filterOperator, value, start, end, user, tagId);
+		    			addCriteriumToFilter(binding, filterOperator, value, start, end, tagId, filter);
 		    			break;
 		    		case or:
 		    			if (firstCriteriaIteration) {
-		    				addCriteriumToFilter(currentFilter, binding, filterOperator, value, start, end, user, tagId);
+		    				addCriteriumToFilter(binding, filterOperator, value, start, end, tagId, filter);
 		    			}
 		    			else {
-			    			DocumentFilter orFilter = query.newDocumentFilter();
-			    			addCriteriumToFilter(orFilter, binding, filterOperator, value, start, end, user, tagId);
+		    				Filter orFilter = model.newFilter();
+			    			addCriteriumToFilter(binding, filterOperator, value, start, end, tagId, orFilter);
 			    			if (! orFilter.isEmpty()) {
-			    				currentFilter.addDisjunction(orFilter);
+			    				filter.addOr(orFilter);
 			    			}
 		    			}
 		    			break;
@@ -744,87 +717,87 @@ System.out.println(criterium);
 		    			switch (filterOperator) {
 		    			case substring:
 		    			case iContains:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotContains, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotContains:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iContains, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter);
 		    				break;
 		    			case startsWith:
 		    			case iStartsWith:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotStartsWith:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iStartsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case iEndsWith:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotEndsWith:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iEndsWith, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter);
 		    				break;
 		    			case exact:
 		    			case equals:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter);
 		    				break;
 		    			case iEquals:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iNotEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iNotEqual, value, start, end, tagId, filter);
 		    				break;
 		    			case notEqual:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.equals, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.equals, value, start, end, tagId, filter);
 		    				break;
 		    			case iNotEqual:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.iEquals, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.iEquals, value, start, end, tagId, filter);
 		    				break;
 		    			case greaterThan:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessOrEqual, value, start, end, tagId, filter);
 		    				break;
 		    			case greaterOrEqual:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessThan, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessThan, value, start, end, tagId, filter);
 		    				break;
 		    			case lessThan:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, tagId, filter);
 		    				break;
 		    			case lessOrEqual:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThan, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter);
 		    				break;
 		    			case betweenInclusive:
 		    			case iBetweenInclusive:
 		    				if (start != null) {
-				    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqual, start, null, null, user, tagId);
+				    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
 		    				}
 		    				if (end != null) {
-				    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThan, end, null, null, user, tagId);
+				    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterThan, end, null, null, tagId, filter);
 		    				}
 		    				break;
 		    			case isNull:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notNull, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter);
 		    				break;
 		    			case notNull:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.isNull, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter);
 		    				break;
 		    			case equalsField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter);
 		    				break;
 		    			case notEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.equalsField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter);
 		    				break;
 		    			case greaterThanField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter);
 		    				break;
 		    			case greaterOrEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.lessThanField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.lessThanField, value, start, end, tagId, filter);
 		    				break;
 		    			case lessThanField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, tagId, filter);
 		    				break;
 		    			case lessOrEqualField:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.greaterThanField, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.greaterThanField, value, start, end, tagId, filter);
 		    				break;
 						case inSet:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.notInSet, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.notInSet, value, start, end, tagId, filter);
 		    				break;
 						case notInSet:
-			    			addCriteriumToFilter(currentFilter, binding, SmartClientFilterOperator.inSet, value, start, end, user, tagId);
+			    			addCriteriumToFilter(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter);
 		    				break;
 						case regexp:
 						case iregexp:
@@ -897,61 +870,56 @@ System.out.println(criterium);
 		return result;
     }
     
-    private static void addCriteriumToFilter(DocumentFilter filter, 
-    											String binding,
+    private static void addCriteriumToFilter(String binding,
     											SmartClientFilterOperator filterOperator, 
     											Object value,
     											Object start,
     											Object end,
-    											User user,
-    											String tagId) {
+    											String tagId,
+    											Filter filter) {
     	if (PersistentBean.TAGGED_NAME.equals(binding)) {
-			StringBuilder sb = new StringBuilder(64);
-			sb.append("exists (select 1 from adminTagged as tagged where tagged.tag.bizId = '");
-			sb.append(tagId);
-			sb.append("' and tagged.bizUserId = '");
-			sb.append(user.getId());
-			sb.append("' and tagged.taggedBizId = bean.bizId)");
-
 			if ("true".equals(value)) {
-    			filter.addExpression(sb.toString());
-    		}
+				filter.addTagged(tagId, true);
+			}
     		else if ("false".equals(value)) {
-    			sb.insert(0, "not ");
-    			filter.addExpression(sb.toString());
+    			filter.addTagged(tagId, false);
     		}
     	}
     	else if (filterOperator == null) {
     		if (HierarchicalBean.PARENT_ID.equals(binding)) {
+    			String parentId = (String) value;
     			if (value == null) { // get all root nodes in the data
     				filter.addNull(binding);
     			}
-    			else if (((String) value).startsWith("_")) { // get a particular root node
-    				filter.addEquals(Bean.DOCUMENT_ID, ((String) value).substring(1));
-   			}
+    			else if (parentId.startsWith("_")) { // get a particular root node
+    				filter.addEquals(Bean.DOCUMENT_ID, parentId.substring(1));
+    			}
     			else { // traversing the tree
-    				filter.addEquals(binding, value);
+    				filter.addEquals(binding, parentId);
     			}
     		}
     		else if (value != null) {
-				filter.addEquals(binding, value);
-			}
+    			addEquals(filter, binding, value);
+    		}
     	}
     	else {
+    		// Use the code string for enums and others for the string operators (contains etc), 
+    		// otherwise hibernate will moan
     		Object revisedValue = value;
     		if (value instanceof org.skyve.domain.types.Enumeration) {
     			revisedValue = ((org.skyve.domain.types.Enumeration) value).toCode();
     		}
 
     		if (HierarchicalBean.PARENT_ID.equals(binding)) {
-    			if (revisedValue == null) { // get all root nodes in the data
+    			String parentId = (String) revisedValue;
+    			if (parentId == null) { // get all root nodes in the data
     				filter.addNull(binding);
     			}
-    			else if (((String) revisedValue).startsWith("_")) { // get a particular root node
-    				filter.addEquals(Bean.DOCUMENT_ID, ((String) revisedValue).substring(1));
+    			else if (parentId.startsWith("_")) { // get a particular root node
+    				filter.addEquals(Bean.DOCUMENT_ID, parentId.substring(1));
     			}
     			else { // traversing the tree
-    				filter.addEquals(binding, revisedValue);
+    				filter.addEquals(binding, parentId);
     			}
     		}
     		else {
@@ -959,92 +927,86 @@ System.out.println(criterium);
 	    		case substring:
 	    		case iContains:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addLike(binding, sb.append('%').append(revisedValue).append('%').toString());
+	    				filter.addContains(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case iNotContains:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).append('%').toString());
+	    				filter.addNotContains(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case startsWith:
 	    		case iStartsWith:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addLike(binding, sb.append(revisedValue).append('%').toString());
+	    				filter.addStartsWith(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case iNotStartsWith:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addNullOrNotLike(binding, sb.append(revisedValue).append('%').toString());
+	    				filter.addNotStartsWith(binding,  revisedValue.toString());
 	    			}
 	    			break;
 	    		case iEndsWith:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addLike(binding, sb.append('%').append(revisedValue).toString());
+	    				filter.addEndsWith(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case iNotEndsWith:
 	    			if (revisedValue != null) {
-	    				StringBuilder sb = new StringBuilder(32);
-	    				filter.addNullOrNotLike(binding, sb.append('%').append(revisedValue).toString());
+	    				filter.addNotEndsWith(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case equals:
 	    		case exact:
-	    			if (revisedValue != null) {
-	    				filter.addEquals(binding, value);
+	    			if (value != null) {
+	    				addEquals(filter, binding, value);
 	    			}
 	    			break;
 	    		case iEquals:
-	    			if (value != null) {
-	    				filter.addLike(binding, revisedValue.toString());
+	    			if (revisedValue != null) {
+	    				filter.addEqualsIgnoreCase(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case notEqual:
 	    			if (value != null) {
-	    				filter.addNotEquals(binding, value);
+	    				addNotEquals(filter, binding, value);
 	    			}
 	    			break;
 	    		case iNotEqual:
-	    			if (value != null) {
-	    				filter.addNotLike(binding, revisedValue.toString());
+	    			if (revisedValue != null) {
+	    				filter.addNotEqualsIgnoreCase(binding, revisedValue.toString());
 	    			}
 	    			break;
 	    		case greaterThan:
 	    			if (value != null) {
-	    				filter.addGreaterThan(binding, value);
+	    				addGreaterThan(filter, binding, value);
 	    			}
 	    			break;
 	    		case greaterOrEqual:
 	    			if (value != null) {
-	    				filter.addGreaterThanOrEqualTo(binding, value);
+	    				addGreaterThanOrEqualTo(filter, binding, value);
 	    			}
 	    			break;
 	    		case lessThan:
 	    			if (value != null) {
-	    				filter.addLessThan(binding, value);
+	    				addLessThan(filter, binding, value);
 	    			}
 	    			break;
 	    		case lessOrEqual:
 	    			if (value != null) {
-	    				filter.addLessThanOrEqualTo(binding, value);
+	    				addLessThanOrEqualTo(filter, binding, value);
 	    			}
 	    			break;
 	    		case iBetweenInclusive:
 	    		case betweenInclusive:
 	    			if ((start != null) && (end != null)) {
-	    				filter.addBetween(binding, start, end);
+	    				addBetween(filter, binding, start, end);
 	    			}
 	    			else if (start != null) {
-	    				filter.addGreaterThanOrEqualTo(binding, start);
+	    				addGreaterThanOrEqualTo(filter, binding, start);
 	    			}
 	    			else if (end != null) {
-	    				filter.addLessThanOrEqualTo(binding, end);
+	    				addLessThanOrEqualTo(filter, binding, end);
 	    			}
 	    			break;
 	    		case isNull:
@@ -1100,7 +1062,7 @@ System.out.println(criterium);
 					break;
 	    		case gEquals:
 					if (value instanceof Geometry) {
-						filter.addEquals(binding, (Geometry) value);
+						filter.addEquals(binding, (Geometry) value); 
 					}
 					break;
 	    		case gIntersects:
@@ -1125,6 +1087,171 @@ System.out.println(criterium);
 				default:
 	    		}
     		}
+    	}
+    }
+    
+    private static void addEquals(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addEquals(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addEquals(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addEquals(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addEquals(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addEquals(binding, (Decimal) value);
+    	}
+    	else if (value instanceof Boolean) {
+    		filter.addEquals(binding, (Boolean) value);
+    	}
+    	else if (value instanceof Enum) {
+    		filter.addEquals(binding, (Enum<?>) value);
+    	}
+    	else if (value instanceof Geometry) {
+    		filter.addEquals(binding, (Geometry) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addNotEquals(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addNotEquals(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addNotEquals(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addNotEquals(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addNotEquals(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addNotEquals(binding, (Decimal) value);
+    	}
+    	else if (value instanceof Boolean) {
+    		filter.addNotEquals(binding, (Boolean) value);
+    	}
+    	else if (value instanceof Enum) {
+    		filter.addNotEquals(binding, (Enum<?>) value);
+    	}
+    	else if (value instanceof Geometry) {
+    		filter.addNotEquals(binding, (Geometry) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addGreaterThan(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addGreaterThan(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addGreaterThan(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addGreaterThan(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addGreaterThan(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addGreaterThan(binding, (Decimal) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addGreaterThanOrEqualTo(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addGreaterThanOrEqualTo(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addGreaterThanOrEqualTo(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addGreaterThanOrEqualTo(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addGreaterThanOrEqualTo(binding, (Decimal) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addLessThan(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addLessThan(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addLessThan(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addLessThan(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addLessThan(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addLessThan(binding, (Decimal) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
+    	if (value instanceof String) {
+    		filter.addLessThanOrEqualTo(binding, (String) value);
+    	}
+    	else if (value instanceof Date) {
+    		filter.addLessThanOrEqualTo(binding, (Date) value);
+    	}
+    	else if (value instanceof Integer) {
+    		filter.addLessThanOrEqualTo(binding, (Integer) value);
+    	}
+    	else if (value instanceof Long) {
+    		filter.addLessThanOrEqualTo(binding, (Long) value);
+    	}
+    	else if (value instanceof Decimal) {
+    		filter.addLessThanOrEqualTo(binding, (Decimal) value);
+    	}
+    	else {
+    		throw new IllegalArgumentException(value + " is not catered for in filtering");
+    	}
+    }
+    
+    private static void addBetween(Filter filter, String binding, Object start, Object end) {
+    	if (start instanceof String) {
+    		filter.addBetween(binding, (String) start, (String) end);
+    	}
+    	else if (start instanceof Date) {
+    		filter.addBetween(binding, (Date) start, (Date) end);
+    	}
+    	else if (start instanceof Integer) {
+    		filter.addBetween(binding, (Integer) start, (Integer) end);
+    	}
+    	else if (start instanceof Long) {
+    		filter.addBetween(binding, (Long) start, (Long) end);
+    	}
+    	else if (start instanceof Decimal) {
+    		filter.addBetween(binding, (Decimal) start, (Decimal) end);
+    	}
+    	else {
+    		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");
     	}
     }
 /*

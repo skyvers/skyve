@@ -16,7 +16,8 @@ import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.metadata.view.model.ComparisonModel;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.wildcat.metadata.repository.router.Router;
 
@@ -106,13 +107,15 @@ public interface Repository {
 	public View getView(String uxui, Customer customer, Document document, ViewType viewType)
 	throws MetaDataException;
 
-	
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName)
 	throws MetaDataException;
 	
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName)
 	throws MetaDataException;
 
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName)
+	throws MetaDataException;
+	
 	/**
 	 * 
 	 * @param customer

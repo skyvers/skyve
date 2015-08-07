@@ -10,10 +10,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.wildcat.bind.BindUtil;
 
-public final class MapBean extends LazyDynaMap implements Bean {
-	/**
-	 * For Serialization
-	 */
+public class MapBean extends LazyDynaMap implements Bean {
 	private static final long serialVersionUID = 1L;
 
 	public MapBean(String bizModule, String bizDocument, Map<String, Object> properties) {

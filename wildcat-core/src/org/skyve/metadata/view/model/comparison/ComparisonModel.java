@@ -1,4 +1,4 @@
-package org.skyve.metadata.view.model;
+package org.skyve.metadata.view.model.comparison;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;

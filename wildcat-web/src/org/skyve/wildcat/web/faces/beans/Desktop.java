@@ -27,8 +27,8 @@ import org.skyve.util.Util;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.metadata.module.menu.CalendarItem;
 import org.skyve.wildcat.metadata.module.menu.EditItem;
-import org.skyve.wildcat.metadata.module.menu.ListItem;
 import org.skyve.wildcat.metadata.module.menu.LinkItem;
+import org.skyve.wildcat.metadata.module.menu.ListItem;
 import org.skyve.wildcat.metadata.module.menu.MapItem;
 import org.skyve.wildcat.metadata.module.menu.TreeItem;
 import org.skyve.wildcat.metadata.repository.router.Router;
@@ -219,16 +219,29 @@ public class Desktop extends Harness {
 				ListItem grid = (ListItem) item;
 				
 				DocumentQueryDefinition query = null;
-				String target = grid.getQueryName();
-				if (target != null) {
-					query = module.getDocumentQuery(target);
+				String queryName = grid.getQueryName();
+				String modelName = grid.getModelName();
+				String documentName = grid.getDocumentName();
+				
+				if (queryName != null) { // its a query
+					query = module.getDocumentQuery(queryName);
+					SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 				}
 				else {
-					target = grid.getDocumentName();
-					query = module.getDocumentDefaultQuery(customer, target);
+					if (modelName != null) { // its a model
+						SmartClientGenerateUtils.appendDataSourceDefinition(user, 
+																				customer, 
+																				module, 
+																				documentName,
+																				modelName,
+																				dataSources, 
+																				visitedQueryNames);
+					}
+					else {
+						query = module.getDocumentDefaultQuery(customer, documentName);
+						SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
+					}
 				}
-
-				SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, true, dataSources, visitedQueryNames);
 			}
 		}
 	}
@@ -273,28 +286,44 @@ public class Desktop extends Harness {
 	                if (item instanceof TreeItem) {
 	                    TreeItem treeItem = (TreeItem) item;
 	                    itemDocumentName = treeItem.getDocumentName();
-						DocumentQueryDefinition query = deriveDocumentQuery(customer,
-												                                module,
-												                                item,
-												                                treeItem.getQueryName(),
-												                                itemDocumentName);
-						itemDocumentName = query.getDocumentName();
-						result.append(query.getName());
-						itemModule = query.getDocumentModule(customer);
+						String itemQueryName = treeItem.getQueryName();
+						String modelName = treeItem.getModelName();
+						if (modelName != null) {
+							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							result.append(itemDocumentName).append("__").append(modelName);
+						}
+						else {
+		                    DocumentQueryDefinition query = deriveDocumentQuery(customer,
+													                                module,
+													                                item,
+													                                itemQueryName,
+													                                itemDocumentName);
+							itemDocumentName = query.getDocumentName();
+							result.append(query.getName());
+							itemModule = query.getDocumentModule(customer);
+						}
 						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
 	                    ref = "tree";
 	                }
 	                else if (item instanceof ListItem) {
 						ListItem gridItem = (ListItem) item;
 						itemDocumentName = gridItem.getDocumentName();
-						DocumentQueryDefinition query = deriveDocumentQuery(customer,
-												                                module,
-												                                item,
-												                                gridItem.getQueryName(),
-												                                itemDocumentName);
-						itemDocumentName = query.getDocumentName();
-						result.append(query.getName());
-						itemModule = query.getDocumentModule(customer);
+						String itemQueryName = gridItem.getQueryName();
+						String modelName = gridItem.getModelName();
+						if (modelName != null) {
+							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							result.append(itemDocumentName).append("__").append(modelName);
+						}
+						else {
+							DocumentQueryDefinition query = deriveDocumentQuery(customer,
+													                                module,
+													                                item,
+													                                itemQueryName,
+													                                itemDocumentName);
+							itemDocumentName = query.getDocumentName();
+							result.append(query.getName());
+							itemModule = query.getDocumentModule(customer);
+						}
 						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
 						ref = "grid";
 					}
@@ -315,14 +344,23 @@ public class Desktop extends Harness {
 	                else if (item instanceof MapItem) {
 	                    MapItem mapItem = (MapItem) item;
 	                    itemDocumentName = mapItem.getDocumentName();
-						DocumentQueryDefinition query = deriveDocumentQuery(customer,
-												                                module,
-												                                item,
-												                                mapItem.getQueryName(),
-												                                itemDocumentName);
-						result.append(query.getName());
-	                    result.append('_').append(mapItem.getGeometryBinding());
-						itemModule = query.getDocumentModule(customer);
+						String itemQueryName = mapItem.getQueryName();
+						String modelName = mapItem.getModelName();
+						if (modelName != null) {
+							itemModule = customer.getModule(module.getDocument(customer, itemDocumentName).getOwningModuleName());
+							result.append(itemDocumentName).append("__").append(modelName);
+		                    result.append('_').append(mapItem.getGeometryBinding());
+						}
+						else {
+							DocumentQueryDefinition query = deriveDocumentQuery(customer,
+													                                module,
+													                                item,
+													                                itemQueryName,
+													                                itemDocumentName);
+							result.append(query.getName());
+		                    result.append('_').append(mapItem.getGeometryBinding());
+							itemModule = query.getDocumentModule(customer);
+						}
 						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
 	                    ref = "map";
 	                }

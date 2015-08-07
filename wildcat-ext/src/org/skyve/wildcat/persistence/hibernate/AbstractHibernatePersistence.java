@@ -1914,6 +1914,10 @@ t.printStackTrace();
 
 		// execute it
 		sql.execute();
+		
+		// Set the bizVersion appropriately, if the upsert was successful
+		Integer bizVersion = bean.getBizVersion();
+		bean.setBizVersion((bizVersion == null) ? NEW_VERSION : Integer.valueOf(bizVersion.intValue() + 1));
 	}
 
 	@Override

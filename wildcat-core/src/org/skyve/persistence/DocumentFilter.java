@@ -310,13 +310,13 @@ public interface DocumentFilter {
 	 * 
 	 * @param filter
 	 */
-	public void addConjunction(DocumentFilter filter);
+	public void addAnd(DocumentFilter filter);
 	
 	/**
 	 * 
 	 * @param filter
 	 */
-	public void addDisjunction(DocumentFilter filter);
+	public void addOr(DocumentFilter filter);
 	
 	/**
 	 * 

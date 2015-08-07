@@ -1,0 +1,153 @@
+package org.skyve.metadata.view.model.list;
+
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.persistence.AbstractDocumentQuery;
+import org.skyve.wildcat.web.SortParameter;
+
+public class DocumentQueryListModel extends ListModel<Bean> {
+	private static final long serialVersionUID = 8905939302545321358L;
+
+	private Customer customer;
+	private Module module;
+	private DocumentQueryDefinition query;
+
+	public void setQuery(DocumentQueryDefinition query) 
+	throws MetaDataException {
+		customer = CORE.getUser().getCustomer();
+		this.query = query;
+		columns = query.getColumns();
+		module = query.getDocumentModule(customer);
+		
+		projections.add(Bean.DOCUMENT_ID);
+		projections.add(PersistentBean.LOCK_NAME);
+		projections.add(PersistentBean.TAGGED_NAME);
+		projections.add(PersistentBean.FLAG_COMMENT_NAME);
+		projections.add(Bean.BIZ_KEY);
+
+		Document queryDocument = module.getDocument(customer, query.getDocumentName());
+		for (QueryColumn column : query.getColumns()) {
+			if (column.isProjected()) {
+				String binding = column.getBinding();
+				// if this binding is to an association, 
+				// add the bizId as the column value and bizKey as the column displayValue
+				TargetMetaData target = Binder.getMetaDataForBinding(customer,
+																		module,
+																		queryDocument,
+																		binding);
+				
+				if (target.getAttribute() instanceof Association) {
+					StringBuilder sb = new StringBuilder(64);
+					sb.append(binding).append('.').append(Bean.BIZ_KEY);
+					projections.add(sb.toString());
+				}
+				projections.add((binding != null) ? binding : column.getName());
+			}
+		}
+	}
+	
+	private List<QueryColumn> columns;
+	
+	@Override
+	public List<QueryColumn> getColumns() {
+		return columns;
+	}
+
+	private Set<String> projections = new TreeSet<>();
+	
+	@Override
+	public Set<String> getProjections() {
+		return projections;
+	}
+
+	private DocumentQuery detailQuery;
+	private DocumentQuery summaryQuery;
+	private DocumentQueryFilter filter;
+	
+	@Override
+	public Filter getFilter() throws Exception {
+		if (filter == null) {
+			establishQueries();
+			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter());
+		}
+		return filter;
+	}
+
+	@Override
+	public Filter newFilter() throws Exception {
+		establishQueries();
+		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
+	}
+
+	@Override
+	public Page fetch() throws Exception {
+		establishQueries();
+		
+		if (getSummary() == null) {
+			AbstractDocumentQuery internalSummaryQuery = (org.skyve.wildcat.persistence.AbstractDocumentQuery) summaryQuery;
+			internalSummaryQuery.clearProjections();
+			internalSummaryQuery.clearOrderings();
+		}
+
+		// This needs to be the ID to satisfy the client data source definitions
+		summaryQuery.addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, Bean.DOCUMENT_ID);
+		summaryQuery.addAggregateProjection(AggregateFunction.Min, PersistentBean.FLAG_COMMENT_NAME, PersistentBean.FLAG_COMMENT_NAME);
+		
+		int startRow = getStartRow();
+		int endRow = getEndRow();
+		detailQuery.setFirstResult(startRow);
+		detailQuery.setMaxResults(endRow - startRow);
+		
+		SortParameter[] sorts = getSortParameters();
+		if (sorts != null) {
+			for (SortParameter sort : sorts) {
+				String binding = sort.getBinding();
+				SortDirection direction = sort.getDirection();
+				detailQuery.insertOrdering(binding, direction);
+			}
+		}
+		
+		Page result = new Page();
+		Bean summaryBean = summaryQuery.projectedResult();
+		result.setTotalRows(((Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID)).longValue());
+		result.setRows(detailQuery.projectedResults());
+		result.setSummary(summaryBean);
+		
+		return result;
+	}
+
+	@Override
+	public AutoClosingIterable<Bean> iterate() throws Exception {
+		establishQueries();
+		return detailQuery.projectedIterable();
+	}
+	
+	private void establishQueries() throws MetaDataException {
+		if (detailQuery == null) {
+			detailQuery = query.constructDocumentQuery(null, getSelectedTagId());
+		}
+		if (summaryQuery == null) {
+			AggregateFunction summary = getSummary();
+			summaryQuery = query.constructDocumentQuery((summary == null) ? AggregateFunction.Count : summary, getSelectedTagId());
+		}
+	}
+}
