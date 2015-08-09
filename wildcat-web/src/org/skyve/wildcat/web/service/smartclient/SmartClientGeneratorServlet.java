@@ -1174,11 +1174,36 @@ code.append("_view:view})");
 	
 		private void visitGrid(ListGrid grid, boolean tree, String rootBinding)
 		throws MetaDataException {
-			DocumentQueryDefinition query = module.getDocumentQuery(grid.getQueryName());
-			StringBuilder ds = new StringBuilder(256);
-			String dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
-			code.insert(0, ds);
-
+			String queryName = grid.getQueryName();
+			String modelName = grid.getModelName();
+			String dataSourceId = null;
+			if (queryName != null) { // its a query
+				DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+				StringBuilder ds = new StringBuilder(256);
+				dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+				code.insert(0, ds);
+			}
+			else {
+				if (modelName != null) { // its a model
+					StringBuilder ds = new StringBuilder(256);
+					dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, 
+																						customer, 
+																						module, 
+																						document,
+																						modelName,
+																						false,
+																						ds, 
+																						null);
+					code.insert(0, ds);
+				}
+				else {
+					DocumentQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
+					StringBuilder ds = new StringBuilder(256);
+					dataSourceId = SmartClientGenerateUtils.appendDataSourceDefinition(user, customer, query, null, null, false, ds, null);
+					code.insert(0, ds);
+				}
+			}
+			
 			listGridVariable = "v" + variableCounter++;
 			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
 			if (tree) {

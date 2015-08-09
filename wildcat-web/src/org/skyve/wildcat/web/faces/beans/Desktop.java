@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -229,11 +230,13 @@ public class Desktop extends Harness {
 				}
 				else {
 					if (modelName != null) { // its a model
+						Document document = module.getDocument(customer, documentName);
 						SmartClientGenerateUtils.appendDataSourceDefinition(user, 
 																				customer, 
 																				module, 
-																				documentName,
+																				document,
 																				modelName,
+																				true,
 																				dataSources, 
 																				visitedQueryNames);
 					}

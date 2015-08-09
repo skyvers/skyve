@@ -1117,10 +1117,14 @@ BizListGrid.addMethods({
 			fieldStateChanged: function() {
 				// ensure the widths of all fields are set
 				var fieldState = me.getFieldState();
-	
 				// make the first column = the width of the first and second columns together
 				// ie the bizTagged and BizFlagComment columns
 				fieldState[1].width = fieldState[0].width + fieldState[1].width;
+				// if there is an expansion column, then take that into account 
+				// NB we are assuming LTR until we get an international customer...
+				if (this.canExpandRecords) {
+					fieldState[1].width += 30;
+				}
 				fieldState.remove(0);
 	
 				me._summaryGrid.setFieldState(fieldState);

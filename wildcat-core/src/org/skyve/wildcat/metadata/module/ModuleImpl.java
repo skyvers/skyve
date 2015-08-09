@@ -26,6 +26,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.wildcat.metadata.AbstractMetaDataMap;
 import org.skyve.wildcat.metadata.model.document.field.Field;
 import org.skyve.wildcat.metadata.module.query.DocumentQueryDefinitionImpl;
+import org.skyve.wildcat.metadata.module.query.QueryColumnImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.user.RoleImpl;
 
@@ -151,7 +152,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 			if (attribute.isPersistent() && (! attribute.isDeprecated())) {
 				// Note - collections not included in generated queries
 				if (attribute instanceof Field) {
-					org.skyve.wildcat.metadata.module.query.QueryColumn column = new org.skyve.wildcat.metadata.module.query.QueryColumn();
+					QueryColumnImpl column = new org.skyve.wildcat.metadata.module.query.QueryColumnImpl();
 					column.setEditable(false);
 					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());

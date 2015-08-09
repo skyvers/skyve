@@ -444,10 +444,10 @@ ReportDialog.addClassProperties({
 	// The entire interface
 	_layout: null,
 
-	// The extra criteria defined on the query
+	// The extra criteria defined on the query or model
 	_criteria: null,
 	
-	// The data source representing the server-side query
+	// The data source representing the server-side query or model
 	_dataSourceID: null,
 	
 	_createReportPanel: function(buttonDefn, // the button to include in the panel
@@ -500,7 +500,7 @@ ReportDialog.addClassProperties({
 								if (ReportDialog._valuesManager.validate()) {
 									var values = ReportDialog._valuesManager.getValues();
 									values.columns = ReportDialog._selectedColumnList.getData();
-									values.query = ReportDialog._dataSourceID;
+									values.ds = ReportDialog._dataSourceID;
 									if (ReportDialog._criteria) {
 										values.criteria = ReportDialog._criteria;
 									}
@@ -560,8 +560,8 @@ ReportDialog.addClassProperties({
 		}
 	},
 	
-	popupExport: function(dataSourceID, // the ID of the data source - and thus the server-side query
-					criteria, // the criteria to apply to the server-side query
+	popupExport: function(dataSourceID, // the ID of the data source - and thus the server-side query or model
+					criteria, // the criteria to apply to the server-side query or model
 					unselectedFields, // data for the unselected fields in field selection list grids
 					selectedFields) { // data for the selected fields in field selection list grids
 		ReportDialog._createExport();

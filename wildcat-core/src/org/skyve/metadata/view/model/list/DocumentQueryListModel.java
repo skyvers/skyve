@@ -27,14 +27,18 @@ import org.skyve.wildcat.web.SortParameter;
 public class DocumentQueryListModel extends ListModel<Bean> {
 	private static final long serialVersionUID = 8905939302545321358L;
 
+	private String description;
+	
 	private Customer customer;
 	private Module module;
+	private Document drivingDocument;
 	private DocumentQueryDefinition query;
 
 	public void setQuery(DocumentQueryDefinition query) 
 	throws MetaDataException {
 		customer = CORE.getUser().getCustomer();
 		this.query = query;
+		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
 		
@@ -44,7 +48,7 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		projections.add(PersistentBean.FLAG_COMMENT_NAME);
 		projections.add(Bean.BIZ_KEY);
 
-		Document queryDocument = module.getDocument(customer, query.getDocumentName());
+		drivingDocument = module.getDocument(customer, query.getDocumentName());
 		for (QueryColumn column : query.getColumns()) {
 			if (column.isProjected()) {
 				String binding = column.getBinding();
@@ -52,7 +56,7 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 				// add the bizId as the column value and bizKey as the column displayValue
 				TargetMetaData target = Binder.getMetaDataForBinding(customer,
 																		module,
-																		queryDocument,
+																		drivingDocument,
 																		binding);
 				
 				if (target.getAttribute() instanceof Association) {
@@ -65,6 +69,16 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		}
 	}
 	
+	@Override
+	public String getDescription() {
+		return description;
+	}
+
+	@Override
+	public Document getDrivingDocument() {
+		return drivingDocument;
+	}
+
 	private List<QueryColumn> columns;
 	
 	@Override

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
@@ -67,6 +68,10 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		this.selectedTagId = selectedTagId;
 	}
 
+	public abstract String getDescription();
+	
+	public abstract Document getDrivingDocument();
+	
 	public abstract List<QueryColumn> getColumns();
 	
 	public abstract Set<String> getProjections();
