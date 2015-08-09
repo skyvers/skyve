@@ -2,6 +2,8 @@ package org.skyve.wildcat.metadata.repository;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
@@ -87,8 +89,46 @@ public abstract class AbstractRepository implements Repository {
 
 		persistence = AbstractPersistence.get();
 		persistence.setUser(user);
+		
+		classes.clear();
 	}
 
+	// class maps
+	private Map<String, Class<?>> classes = new TreeMap<>();
+	
+	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) 
+	throws MetaDataException {
+		Class<?> result = null;
+		
+		String javaCodeLocation = null;
+		if (customer == null) {
+			javaCodeLocation = fullyQualifiedJavaCodeName;
+		}
+		else {
+			javaCodeLocation = ((CustomerImpl) customer).getVTable().get(fullyQualifiedJavaCodeName);
+		}
+		if (javaCodeLocation != null) {
+			result = classes.get(javaCodeLocation);
+			if (result == null) {
+				synchronized (this) {
+					// check again in case this thread was stalled by another in the same spot
+					result = classes.get(javaCodeLocation);
+					if (result == null) {
+						String className = javaCodeLocation.replace('/', '.');
+						try {
+							result = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+						}
+						catch (Exception e) {
+							throw new MetaDataException("A problem was encountered loading class " + className, e);
+						}
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
 	/**
 	 * If customer is null, we must be looking for a repository code that does not 
 	 * rely on the customer's vtable - not overloaded by a customer.
@@ -100,47 +140,28 @@ public abstract class AbstractRepository implements Repository {
 	 * @return
 	 * @throws MetaDataException
 	 */
-	@Override
+	@SuppressWarnings("unchecked")
 	public final <T extends MetaData> T getJavaCode(Customer customer, 
-														String fullyQualifiedJavaCodeName, 
+														String fullyQualifiedJavaCodeName,
 														boolean assertExistence)
 	throws MetaDataException {
 		T result = null;
-
-		String javaCodeLocation = null;
-		if (customer == null) {
-			javaCodeLocation = fullyQualifiedJavaCodeName;
-		}
-		else {
-			javaCodeLocation = ((CustomerImpl) customer).getVTable().get(fullyQualifiedJavaCodeName);
-		}
-		if (javaCodeLocation == null) {
+		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);
+		
+		if (type == null) {
 			if (assertExistence) {
 				throw new MetaDataException(fullyQualifiedJavaCodeName + " does not exist in the customer's vtable");
 			}
 		}
 		else {
-			result = get(javaCodeLocation);
-			if (result == null) {
-				synchronized (this) {
-					// check again in case this thread was stalled by another in the same spot
-					result = get(javaCodeLocation);
-					if (result == null) {
-						String className = javaCodeLocation.replace('/', '.');
-						try {
-							@SuppressWarnings("unchecked")
-							Class<T> type = (Class<T>) Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-							result = type.newInstance();
-							put(javaCodeLocation, result);
-						}
-						catch (Exception e) {
-							throw new MetaDataException("A problem was encountered loading class " + className, e);
-						}
-					}
-				}
+			try {
+				result = (T) type.newInstance();
+			}
+			catch (Exception e) {
+				throw new MetaDataException("A problem was encountered loading class " + type, e);
 			}
 		}
-
+		
 		return result;
 	}
 

@@ -1373,7 +1373,8 @@
     <xs:attribute name="disableZoom" type="xs:string"/>
     <xs:attribute name="disableEdit" type="xs:string"/>
     <xs:attribute name="disableRemove" type="xs:string"/>
-    <xs:attribute name="query" type="xs:string" use="required"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="selectedIdBinding" type="xs:string"/>
     <xs:attribute name="postRefresh" type="xs:boolean"/>
     <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>

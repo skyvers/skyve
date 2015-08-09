@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.list;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +18,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.domain.MapBean;
@@ -27,23 +30,20 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 
 	private Customer customer;
 	private Module module;
-	private Document document;
+	private Document drivingDocument;
 	private List<Bean> rows;
 	
 	/**
-	 * The model is destructive to the collection of rows so ensure you send in a copy.
 	 * 
-	 * @param rows
 	 * @param module
 	 * @param document
 	 * @throws Exception
 	 */
-	public void setRows(List<Bean> rows, Module module, Document document)
+	public void setDrivingDocument(Module module, Document drivingDocument)
 	throws Exception {
 		customer = CORE.getUser().getCustomer();
 		this.module = module;
-		this.document = document;
-		this.rows = rows;
+		this.drivingDocument = drivingDocument;
 		
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
@@ -58,7 +58,7 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 				// add the bizId as the column value and bizKey as the column displayValue
 				TargetMetaData target = Binder.getMetaDataForBinding(customer,
 																		module,
-																		document,
+																		drivingDocument,
 																		binding);
 				
 				if (target.getAttribute() instanceof Association) {
@@ -71,6 +71,20 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 		}
 	}
 	
+	/**
+	 * The model is destructive to the collection of rows so ensure you send in a copy.
+	 * 
+	 * @param rows
+	 */
+	public void setRows(List<Bean> rows) {
+		this.rows = rows;
+	}
+	
+	@Override
+	public Document getDrivingDocument() {
+		return drivingDocument;
+	}
+
 	private Set<String> projections = new TreeSet<>();
 	
 	@Override
@@ -81,9 +95,9 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 	private InMemoryFilter filter;
 	
 	@Override
-	public Filter getFilter() throws Exception {
+	public final Filter getFilter() throws Exception {
 		if (filter == null) {
-			filter = new InMemoryFilter();
+			filter = (InMemoryFilter) newFilter();
 		}
 		return filter;
 	}
@@ -93,12 +107,7 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 		return new InMemoryFilter();
 	}
 
-	@Override
-	public Page fetch() throws Exception {
-		if (getSummary() == null) {
-			// TODO need to do summary processing here
-		}
-
+	private void filterAndSort() {
 		if (filter != null) {
 			filter.filter(rows);
 		}
@@ -114,6 +123,95 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 			}
 			Binder.sortCollectionByOrdering(rows, order);
 		}
+	}
+	
+	private Bean summarize() throws Exception {
+		Map<String, Object> summaryData = new TreeMap<>();
+
+		AggregateFunction summary = getSummary();
+		// This needs to be the ID to satisfy the client data source definitions
+		summaryData.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
+		summaryData.put(PersistentBean.FLAG_COMMENT_NAME, "");
+
+		if (AggregateFunction.Count.equals(summary)) {
+			for (Bean row : rows) {
+				for (QueryColumn column : getColumns()) {
+					String binding = column.getBinding();
+					Object value = Binder.get(row, binding);
+					if (value != null) {
+						Long count = (Long) summaryData.get(binding);
+						count = (count == null) ? Long.valueOf(1) : Long.valueOf(count.longValue() + 1);
+						summaryData.put(binding, count);
+					}
+				}
+			}
+		}
+		else if (AggregateFunction.Min.equals(summary)) {
+			minOrMax(summaryData, false);
+		}
+		else if (AggregateFunction.Max.equals(summary)) {
+			minOrMax(summaryData, true);
+		}
+		else if (AggregateFunction.Sum.equals(summary)) {
+			sum(summaryData);
+		}
+		else if (AggregateFunction.Avg.equals(summary)) {
+			sum(summaryData);
+
+			// Now compute the average
+			for (QueryColumn column : getColumns()) {
+				String binding = column.getBinding();
+				Number sum = (Number) summaryData.get(binding);
+				if (sum != null) {
+					summaryData.put(binding, Double.valueOf(sum.doubleValue() / rows.size()));
+				}
+			}
+		}
+		
+		return new MapBean(module.getName(), drivingDocument.getName(), summaryData);
+	}
+	
+	private void minOrMax(Map<String, Object> summaryData, boolean max) throws Exception {
+		for (Bean row : rows) {
+			for (QueryColumn column : getColumns()) {
+				String binding = column.getBinding();
+				@SuppressWarnings("unchecked")
+				Comparable<Object> value = (Comparable<Object>) Binder.get(row, binding);
+				if (value != null) {
+					@SuppressWarnings("unchecked")
+					Comparable<Object> minOrMax = (Comparable<Object>) summaryData.get(binding);
+					if (minOrMax == null) {
+						summaryData.put(binding, value);
+					}
+					else if (max && (value.compareTo(minOrMax) > 0)) {
+						summaryData.put(binding, value);
+					}
+					else if ((! max) && (value.compareTo(minOrMax) < 0)) {
+						summaryData.put(binding, value);
+					}
+				}
+			}
+		}
+	}
+	
+	private void sum(Map<String, Object> summaryData) throws Exception {
+		for (Bean row : rows) {
+			for (QueryColumn column : getColumns()) {
+				String binding = column.getBinding();
+				Object value = Binder.get(row, binding);
+				if (value instanceof Number) {
+					double number = ((Number) value).doubleValue();
+					Number sum = (Number) summaryData.get(binding);
+					sum = (sum == null) ? Double.valueOf(number) : Double.valueOf(sum.doubleValue() + number);
+					summaryData.put(binding, sum);
+				}
+			}
+		}
+	}
+	
+	@Override
+	public Page fetch() throws Exception {
+		filterAndSort();
 		
 		int startRow = getStartRow();
 		int endRow = getEndRow();
@@ -121,22 +219,38 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 		Page result = new Page();
 		int totalRows = rows.size();
 		result.setTotalRows(totalRows);
-		// NB get destructive on the list
-		rows.retainAll(rows.subList(startRow, Math.min(endRow + 1, totalRows)));
-		result.setRows(rows);
+		result.setSummary(summarize());
 
-		Map<String, Object> summaryData = new TreeMap<>();
-		// This needs to be the ID to satisfy the client data source definitions
-		summaryData.put(Bean.DOCUMENT_ID, Long.valueOf(rows.size()));
-		summaryData.put(PersistentBean.FLAG_COMMENT_NAME, "");
-		result.setSummary(new MapBean(module.getName(), document.getName(), summaryData));
+		// If something requests a start row > what we have in the set
+		// (maybe a criteria has constrained the set such that a page we were at doesn't exist any more)
+		// then just send back an empty result set.
+		if (startRow < totalRows) {
+			// NB This next bit gets destructive on the list
+			rows.retainAll(rows.subList(startRow, Math.min(endRow + 1, totalRows)));
+			result.setRows(rows);
+		}
+		else {
+			result.setRows(new ArrayList<Bean>(0));
+		}
 		
 		return result;
 	}
 
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
-		// TODO 
-		return null;
+		filterAndSort();
+		
+		return new AutoClosingIterable<Bean>() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public Iterator<Bean> iterator() {
+				return rows.iterator();
+			}
+
+			@Override
+			public void close() throws Exception {
+				// nothing to close here
+			}
+		};
 	}
 }

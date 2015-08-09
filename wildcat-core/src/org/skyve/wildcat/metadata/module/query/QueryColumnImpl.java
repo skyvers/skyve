@@ -2,11 +2,9 @@ package org.skyve.wildcat.metadata.module.query;
 
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.module.query.QueryColumn;
 
-public class QueryColumn implements org.skyve.metadata.module.query.QueryColumn {
-	/**
-	 * For Serialization
-	 */
+public class QueryColumnImpl implements QueryColumn {
 	private static final long serialVersionUID = 5165779649604451833L;
 
 	private String name;

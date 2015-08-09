@@ -152,6 +152,7 @@ public class SmartClientListServlet extends HttpServlet {
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
+							drivingDocument = model.getDrivingDocument();
 						}
 						// query type of request
 						else {
@@ -371,7 +372,10 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 
 		message.append("{response:{");
 		message.append("status:0,");
-		message.append("startRow:").append(startRow);
+		// If SmartClient requests a start row > what we have in the set
+		// (maybe a criteria has constrained the set such that a page we were at doesn't exist any more)
+		// then just send back a start row of 0.
+		message.append("startRow:").append((startRow > totalRows) ? 0 : startRow);
 		message.append(",endRow:");
 		message.append(Math.min(totalRows, endRow));
 		message.append(",totalRows:");

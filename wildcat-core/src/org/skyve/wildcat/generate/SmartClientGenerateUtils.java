@@ -1291,26 +1291,29 @@ public class SmartClientGenerateUtils {
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
 														Module owningModule,
-														String documentName,
+														Document owningDocument,
 														String modelName,
+														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) 
 	throws MetaDataException {
-		Document document = owningModule.getDocument(customer, documentName);
-		Module documentModule = customer.getModule(document.getOwningModuleName());
-		ListModel<Bean> model = CORE.getRepository().getListModel(customer, document, modelName);
+		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName);
+		Document drivingDocument = model.getDrivingDocument();
+		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
+
 		return appendDataSourceDefinition(user, 
 											customer,
 											owningModule.getName(),
-											documentModule,
-											document,
+											owningDocument,
+											drivingDocumentModule,
+											drivingDocument,
 											null,
 											modelName,
-											"Model",
+											model.getDescription(),
 											model.getColumns(),
 											null, 
 											null, 
-											true, 
+											config, 
 											toAppendTo, 
 											visitedQueryNames);
 	}
@@ -1338,12 +1341,13 @@ public class SmartClientGenerateUtils {
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
-		Document document = documentModule.getDocument(customer, documentName);
+		Document drivingDocument = documentModule.getDocument(customer, documentName);
 		return appendDataSourceDefinition(user, 
 											customer, 
 											owningModule.getName(), 
+											drivingDocument,
 											documentModule, 
-											document, 
+											drivingDocument, 
 											query.getName(), 
 											null, 
 											query.getDescription(),
@@ -1359,8 +1363,9 @@ public class SmartClientGenerateUtils {
 	private static String appendDataSourceDefinition(User user,
 														Customer customer,
 														String owningModuleName,
-														Module documentModule,
-														Document document,
+														Document owningDocument,
+														Module drivingDocumentModule,
+														Document drivingDocument,
 														String queryName,
 														String modelName,
 														String description,
@@ -1374,7 +1379,7 @@ public class SmartClientGenerateUtils {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 		
-		String documentName = document.getName();
+		String drivingDocumentName = drivingDocument.getName();
 		String dataSourceId = null;
 		if (dataSourceIDOverride != null) {
 			dataSourceId = dataSourceIDOverride;
@@ -1384,7 +1389,7 @@ public class SmartClientGenerateUtils {
 		}
 		else if (modelName != null) {
 			// NB 4 tokens, not 3
-			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(documentName).append("__").append(modelName).toString();
+			dataSourceId = new StringBuilder(32).append(owningModuleName).append('_').append(owningDocument.getName()).append("__").append(modelName).toString();
 		}
 		if (visitedQueryNames == null) {
 			toAppendTo.append("if(window.").append(dataSourceId);
@@ -1402,18 +1407,18 @@ public class SmartClientGenerateUtils {
 		}
 		toAppendTo.append("ID:'").append(dataSourceId);
 		toAppendTo.append("',modoc:'");
-		toAppendTo.append(documentModule.getName());
+		toAppendTo.append(drivingDocumentModule.getName());
 		toAppendTo.append('.');
-		toAppendTo.append(documentName);
-		toAppendTo.append("',icon:'").append(document.getIcon32x32RelativeFileName());
+		toAppendTo.append(drivingDocumentName);
+		toAppendTo.append("',icon:'").append(drivingDocument.getIcon32x32RelativeFileName());
 		if (! config) {
 			// ensure all filtering is server-side
 			// this enables the summary row to always stay in sync
 			toAppendTo.append("',criteriaPolicy:'dropOnChange");
 		}
-		toAppendTo.append("',canCreate:").append(user.canCreateDocument(document));
-		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(document));
-		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(document));
+		toAppendTo.append("',canCreate:").append(user.canCreateDocument(drivingDocument));
+		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
+		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");
 		toAppendTo.append(processString(description));
 		toAppendTo.append("',fields:[");
@@ -1423,7 +1428,7 @@ public class SmartClientGenerateUtils {
 			toAppendTo.append("{name:'bizFlagComment',title:'Flag'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		
-		if (documentName.equals(document.getParentDocumentName())) { // hierarchical
+		if (drivingDocumentName.equals(drivingDocument.getParentDocumentName())) { // hierarchical
 			toAppendTo.append("{name:'bizParentId',title:'Parent ID',type:'text',hidden:true,foreignKey:'");
 			toAppendTo.append(dataSourceId).append(".bizId'},");
 		}
@@ -1446,7 +1451,7 @@ public class SmartClientGenerateUtils {
 				continue;
 			}
 
-			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, documentModule, document, column);
+			SmartClientQueryColumnDefinition def = getQueryColumn(user, customer, drivingDocumentModule, drivingDocument, column);
 			toAppendTo.append('{').append(def.toJavascript()).append("},");
 			SmartClientLookupDefinition lookup = def.getLookup();
 			if (lookup != null) {

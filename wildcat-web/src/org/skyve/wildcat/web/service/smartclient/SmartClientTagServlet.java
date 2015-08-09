@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -24,6 +25,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
@@ -76,18 +78,22 @@ public class SmartClientTagServlet extends HttpServlet {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
-						TagUtil.tag(tagId, query(tagId, 
-													dataSourceName,
-													criteria,
-													user,
-													customer));
+						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
+																			dataSourceName,
+																			criteria,
+																			user,
+																			customer)) {
+							TagUtil.tag(tagId, iterable);
+						}
 					}
 					else if ("U".equals(action)) {
-						TagUtil.untag(tagId, query(tagId, 
-													dataSourceName,
-													criteria,
-													user,
-													customer));
+						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
+																			dataSourceName,
+																			criteria,
+																			user,
+																			customer)) {
+							TagUtil.untag(tagId, iterable);
+						}
 					}
 					else if ("C".equals(action)) {
 						TagUtil.clear(tagId);
@@ -187,27 +193,40 @@ public class SmartClientTagServlet extends HttpServlet {
         sb.append("]");
 	}
 
-	private static Iterable<Bean> query(String tagId,
-											String dataSourceName,
-											String criteriaJSON,
-											User user,
-											Customer customer)
+	private static AutoClosingIterable<Bean> iterate(String tagId,
+														String dataSourceName,
+														String criteriaJSON,
+														User user,
+														Customer customer)
 	throws Exception {
 		// Determine
 		int _Index = dataSourceName.indexOf('_');
 		Module module = customer.getModule(dataSourceName.substring(0, _Index));
-		String documentOrQueryName = dataSourceName.substring(_Index + 1);
-		DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryName);
-		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, documentOrQueryName);
+		String documentOrQueryOrModelName = dataSourceName.substring(_Index + 1);
+		Document drivingDocument = null;
+		ListModel<Bean> model = null;
+		int __Index = documentOrQueryOrModelName.indexOf("__");
+		if (__Index >= 0) {
+			String documentName = documentOrQueryOrModelName.substring(0, __Index);
+			Document document = module.getDocument(customer, documentName);
+			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
+			model = CORE.getRepository().getListModel(customer, document, modelName);
+			drivingDocument = model.getDrivingDocument();
 		}
-		if (query == null) {
-			throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
+		else {
+			DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryOrModelName);
+			if (query == null) {
+				query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+			}
+			if (query == null) {
+				throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+			}
+			drivingDocument = module.getDocument(customer, query.getDocumentName());
+			DocumentQueryListModel queryModel = new DocumentQueryListModel();
+			queryModel.setQuery(query);
+			model = queryModel;
 		}
-		DocumentQueryListModel model = new DocumentQueryListModel();
-		model.setQuery(query);
-		Document document = module.getDocument(customer, query.getDocumentName());
-
+		
 		// add filter criteria
 		@SuppressWarnings("unchecked")
 		Map<String, Object> criteria = (Map<String, Object>) JSONUtil.unmarshall(user, criteriaJSON);
@@ -219,7 +238,7 @@ public class SmartClientTagServlet extends HttpServlet {
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
 				SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
-																			document,
+																			drivingDocument,
 																			user,
 																			CompoundFilterOperator.valueOf(operator),
 																			advancedCriteria,
@@ -229,7 +248,7 @@ public class SmartClientTagServlet extends HttpServlet {
 			}
 			else { // simple criteria
 				SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
-																		document,
+																		drivingDocument,
 																		customer,
 																		SmartClientFilterOperator.substring,
 																		criteria,

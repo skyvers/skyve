@@ -3,7 +3,6 @@ package org.skyve.metadata.repository;
 import java.io.File;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -30,22 +29,6 @@ public interface Repository {
 	 * @param customer if <code>null</code>, the entire repository goes.
 	 */
 	public void evictCachedMetaData(Customer customer) throws MetaDataException;
-	
-	/**
-	 * If customer is null, we must be looking for a repository code that does not 
-	 * rely on the customer's vtable - not overloaded by a customer.
-	 * 
-	 * @param <T> The type of the metadata.
-	 * @param customer The customer to load the code for, or null
-	 * @param fullyQualifiedJavaCodeName
-	 * @param assertExistence
-	 * @return
-	 * @throws MetaDataException
-	 */
-	public <T extends MetaData> T getJavaCode(Customer customer, 
-												String fullyQualifiedJavaCodeName, 
-												boolean assertExistence)
-	throws MetaDataException;
 	
 	/**
 	 * 

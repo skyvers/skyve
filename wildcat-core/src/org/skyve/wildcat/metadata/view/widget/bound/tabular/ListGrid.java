@@ -43,6 +43,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableEditConditionName",
 							"disableRemoveConditionName",
 							"queryName",
+							"modelName",
 							"selectedIdBinding",
 							"postRefresh",
 							"continueConversation",
@@ -59,9 +60,6 @@ public class ListGrid implements MetaData,
 									Editable,
 									Removable,
 									Selectable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 4739299969425100550L;
 
 	private String title;
@@ -80,6 +78,7 @@ public class ListGrid implements MetaData,
 	private String disableRemoveConditionName;
 
 	private String queryName;
+	private String modelName;
 	private String selectedIdBinding;
 	private boolean continueConversation;
 	private Boolean postRefresh;
@@ -94,9 +93,18 @@ public class ListGrid implements MetaData,
 		return queryName;
 	}
 
-	@XmlAttribute(name = "query", required = true)
+	@XmlAttribute(name = "query")
 	public void setQueryName(String queryName) {
-		this.queryName = queryName;
+		this.queryName = UtilImpl.processStringValue(queryName);
+	}
+
+	public String getModelName() {
+		return modelName;
+	}
+
+	@XmlAttribute(name = "model")
+	public void setModelName(String modelName) {
+		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
 	public boolean getContinueConversation() {

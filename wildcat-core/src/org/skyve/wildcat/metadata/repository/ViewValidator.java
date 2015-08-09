@@ -278,10 +278,77 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
+	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier)
+	throws MetaDataException {
+		if (queryName != null) {
+			if (modelName != null) {
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a query and a model name.");
+			}
+			validateQueryName(queryName, widgetIdentifier);
+		}
+		else if (modelName != null) {
+			validateListModelName(modelName, widgetIdentifier);
+		}
+		else {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " requires a query name or a model name.");
+		}
+	}
+
 	private void validateQueryName(String queryName, String widgetIdentifier)
 	throws MetaDataException {
 		if ((queryName != null) && (module.getDocumentQuery(queryName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
+		}
+	}
+	
+	private void validateListModelName(String modelName, String widgetIdentifier)
+	throws MetaDataException {
+		if (modelName != null) {
+			try {
+				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
+				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
+				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
+				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				}
+			}
+			catch (Exception e) { // NB could be class cast problems
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid list model of " + modelName, e);
+			}
+		}
+	}
+
+	private void validateMapModelName(String modelName, String widgetIdentifier)
+	throws MetaDataException {
+		if (modelName != null) {
+			try {
+				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
+				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
+				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
+				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				}
+			}
+			catch (Exception e) { // NB could be class cast problems
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid map model of " + modelName, e);
+			}
+		}
+	}
+
+	private void validateComparisonModelName(String modelName, String widgetIdentifier)
+	throws MetaDataException {
+		if (modelName != null) {
+			try {
+				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
+				fullyQualifiedJavaCodeName.append(document.getOwningModuleName()).append('.').append(document.getName());
+				fullyQualifiedJavaCodeName.append(".models.").append(modelName);
+				if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName.toString()) == null) {
+					throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+				}
+			}
+			catch (Exception e) { // NB could be class cast problems
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid comparison model of " + modelName, e);
+			}
 		}
 	}
 	
@@ -666,6 +733,7 @@ class ViewValidator extends ViewVisitor {
 	throws MetaDataException {
 		String geometryIdentifier = "Map with model " + map.getModelName();
 		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
+		validateMapModelName(map.getModelName(), geometryIdentifier);
 	}
 
 	@Override
@@ -746,7 +814,7 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
-		validateQueryName(grid.getQueryName(), listGridIdentifier);
+		validateQueryOrModel(grid.getQueryName(), grid.getModelName(), listGridIdentifier);
 	}
 
 	@Override
@@ -758,7 +826,7 @@ class ViewValidator extends ViewVisitor {
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier, null);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
-		validateQueryName(grid.getQueryName(), treeGridIdentifier);
+		validateQueryOrModel(grid.getQueryName(), grid.getModelName(), treeGridIdentifier);
 	}
 
 	@Override
@@ -801,6 +869,7 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.association);
 		validateConditionName(comparison.getDisabledConditionName(), comparisonIdentifier);
 		validateConditionName(comparison.getInvisibleConditionName(), comparisonIdentifier);
+		validateComparisonModelName(comparison.getModelName(), comparisonIdentifier);
 	}
 
 	@Override

@@ -52,6 +52,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ColumnAlignment;
@@ -358,18 +359,35 @@ public class ReportServlet extends HttpServlet {
 	
 				@SuppressWarnings("unchecked")
 				Map<String, Object> values = (Map<String, Object>) JSONUtil.unmarshall(user, valuesParam);
-				String module_Query = (String) values.get("query");
-				int _Index = module_Query.indexOf('_');
-				Module module = customer.getModule(module_Query.substring(0, _Index));
-				String queryName = module_Query.substring(_Index + 1);
-				DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-				if (query == null) {
-					query = module.getDocumentDefaultQuery(customer, queryName);
+				String module_QueryOrModel = (String) values.get("ds");
+				int _Index = module_QueryOrModel.indexOf('_');
+				Module module = customer.getModule(module_QueryOrModel.substring(0, _Index));
+				String documentOrQueryOrModelName = module_QueryOrModel.substring(_Index + 1);
+				Document drivingDocument = null;
+				ListModel<Bean> model = null;
+				int __Index = documentOrQueryOrModelName.indexOf("__");
+				if (__Index >= 0) {
+					String documentName = documentOrQueryOrModelName.substring(0, __Index);
+					Document document = module.getDocument(customer, documentName);
+					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
+					model = repository.getListModel(customer, document, modelName);
+					drivingDocument = model.getDrivingDocument();
 				}
-				Document document = module.getDocument(customer, query.getDocumentName());
+				else {
+					DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryOrModelName);
+					if (query == null) {
+						query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+					}
+					if (query == null) {
+						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+					}
+					drivingDocument = module.getDocument(customer, query.getDocumentName());
+					DocumentQueryListModel queryModel = new DocumentQueryListModel();
+					queryModel.setQuery(query);
+					model = queryModel;
+				}
+
 				String tagId = (String) values.get("tagId");
-				DocumentQueryListModel model = new DocumentQueryListModel();
-				model.setQuery(query);
 				model.setSelectedTagId(tagId);
 
 				// add filter criteria
@@ -382,7 +400,7 @@ public class ReportServlet extends HttpServlet {
 						@SuppressWarnings("unchecked")
 						List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
 						SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module,
-																					document,
+																					drivingDocument,
 																					user,
 																					CompoundFilterOperator.valueOf(operator),
 																					advancedCriteria,
@@ -392,7 +410,7 @@ public class ReportServlet extends HttpServlet {
 					}
 					else { // simple criteria
 						SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
-																				document,
+																				drivingDocument,
 																				customer,
 																				SmartClientFilterOperator.substring,
 																				criteria,
@@ -400,56 +418,60 @@ public class ReportServlet extends HttpServlet {
 																				filter);
 					}
 				}
-				JRDataSource dataSource = new WildcatDataSource(user, 
-																model.iterate().iterator());
-	
-				ReportDesignParameters designParams = new ReportDesignParameters();
-				designParams.setReportFormat(ReportFormat.valueOf((String) values.get("reportFormat")));
-				designParams.setReportStyle(ReportStyle.valueOf((String) values.get("style")));
-	
-				designParams.setPageWidth(((Number) values.get("width")).intValue());
-				designParams.setPageHeight(((Number) values.get("height")).intValue());
-				designParams.setPaginated(Boolean.TRUE.equals(values.get("isPaginated")));
-				designParams.setPretty(Boolean.TRUE.equals(values.get("isPretty")));
-	
-				designParams.setTopMargin(((Number) values.get("top")).intValue());
-				designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
-				designParams.setBottomMargin(((Number) values.get("left")).intValue());
-				designParams.setRightMargin(((Number) values.get("right")).intValue());
-	
-				@SuppressWarnings("unchecked")
-				List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
-				for (Map<String, Object> column : columns) {
-					ReportColumn reportColumn = new ReportColumn();
-					reportColumn.setLine(((Number) column.get("line")).intValue());
-					reportColumn.setName((String) column.get("name"));
-					reportColumn.setTitle((String) column.get("title"));
-					reportColumn.setType("text");
-					reportColumn.setWidth(((Number) column.get("width")).intValue());
-					String align = (String) column.get("align");
-					if (align != null) {
-						reportColumn.setAlignment(ColumnAlignment.valueOf(align));
+
+				JasperPrint jasperPrint = null;
+				
+				try (AutoClosingIterable<Bean> iterable = model.iterate()) {
+					JRDataSource dataSource = new WildcatDataSource(user, iterable.iterator());
+		
+					ReportDesignParameters designParams = new ReportDesignParameters();
+					designParams.setReportFormat(ReportFormat.valueOf((String) values.get("reportFormat")));
+					designParams.setReportStyle(ReportStyle.valueOf((String) values.get("style")));
+		
+					designParams.setPageWidth(((Number) values.get("width")).intValue());
+					designParams.setPageHeight(((Number) values.get("height")).intValue());
+					designParams.setPaginated(Boolean.TRUE.equals(values.get("isPaginated")));
+					designParams.setPretty(Boolean.TRUE.equals(values.get("isPretty")));
+		
+					designParams.setTopMargin(((Number) values.get("top")).intValue());
+					designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
+					designParams.setBottomMargin(((Number) values.get("left")).intValue());
+					designParams.setRightMargin(((Number) values.get("right")).intValue());
+		
+					@SuppressWarnings("unchecked")
+					List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
+					for (Map<String, Object> column : columns) {
+						ReportColumn reportColumn = new ReportColumn();
+						reportColumn.setLine(((Number) column.get("line")).intValue());
+						reportColumn.setName((String) column.get("name"));
+						reportColumn.setTitle((String) column.get("title"));
+						reportColumn.setType("text");
+						reportColumn.setWidth(((Number) column.get("width")).intValue());
+						String align = (String) column.get("align");
+						if (align != null) {
+							reportColumn.setAlignment(ColumnAlignment.valueOf(align));
+						}
+						else {
+							reportColumn.setAlignment(ColumnAlignment.left);
+						}
+						designParams.getColumns().add(reportColumn);
 					}
-					else {
-						reportColumn.setAlignment(ColumnAlignment.left);
-					}
-					designParams.getColumns().add(reportColumn);
+					
+					JasperDesign jasperDesign = createJasperDesign(designParams);
+					JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
+		
+					Map<String, Object> params = new TreeMap<>();
+					StringBuilder sb = new StringBuilder(256);
+					sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
+					sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
+					params.put("RESOURCE_DIR", sb.toString());
+					params.put("TITLE", model.getDescription());
+					
+					jasperPrint = JasperFillManager.fillReport(jasperReport,
+																params, 
+																dataSource);
 				}
-				
-				JasperDesign jasperDesign = createJasperDesign(designParams);
-				JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);
-	
-				Map<String, Object> params = new TreeMap<>();
-				StringBuilder sb = new StringBuilder(256);
-				sb.append(UtilImpl.getAbsoluteBasePath()).append(repository.CUSTOMERS_NAMESPACE);
-				sb.append(customer.getName()).append('/').append(repository.RESOURCES_NAMESPACE);
-				params.put("RESOURCE_DIR", sb.toString());
-				params.put("TITLE", query.getDisplayName());
-				
-				JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,
-																		params, 
-																		dataSource);
-	
+			
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ReportFormat format = ReportFormat.valueOf((String) values.get("reportFormat"));
 				ReportUtil.runReport(jasperPrint, format, baos);

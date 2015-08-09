@@ -26,7 +26,7 @@ import org.skyve.wildcat.metadata.module.menu.AbstractMenuItem;
 import org.skyve.wildcat.metadata.module.menu.MenuGroup;
 import org.skyve.wildcat.metadata.module.query.BizQLDefinitionImpl;
 import org.skyve.wildcat.metadata.module.query.DocumentQueryDefinitionImpl;
-import org.skyve.wildcat.metadata.module.query.QueryColumn;
+import org.skyve.wildcat.metadata.module.query.QueryColumnImpl;
 import org.skyve.wildcat.metadata.module.query.QueryDefinitionImpl;
 import org.skyve.wildcat.metadata.module.query.SQLDefinitionImpl;
 import org.skyve.wildcat.metadata.repository.NamedMetaData;
@@ -271,7 +271,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 					List<Column> repositoryQueryColumns = documentQueryMetaData.getColumns();
 					if (repositoryQueryColumns != null) {
 						for (Column column : repositoryQueryColumns) {
-							QueryColumn queryColumn = new QueryColumn();
+							QueryColumnImpl queryColumn = new QueryColumnImpl();
 							queryColumn.setName(column.getName());
 							String binding = column.getBinding();
 							String expression = column.getExpression();
