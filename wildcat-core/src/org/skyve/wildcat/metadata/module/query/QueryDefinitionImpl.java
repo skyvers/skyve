@@ -8,8 +8,6 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 
 	private Module owningModule;
 
-	private String displayName;
-
 	private String name;
 
 	private String description;
@@ -32,15 +30,6 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	@Override
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
 	}
 
 	@Override

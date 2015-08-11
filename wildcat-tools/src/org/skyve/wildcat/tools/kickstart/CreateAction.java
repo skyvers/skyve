@@ -67,7 +67,9 @@ class CreateAction extends AbstractAction {
 				// Don't close this connection
 				connection = persistence.getConnection();
 				try (Statement statement = connection.createStatement()) {
-					GeoDB.InitGeoDB(connection);
+					if ("org.skyve.wildcat.persistence.hibernate.dialect.H2SpatialDialect".equals(UtilImpl.DIALECT)) {
+						GeoDB.InitGeoDB(connection);
+					}
 System.out.println(createSql());
 					statement.executeUpdate(createSql());
 				}

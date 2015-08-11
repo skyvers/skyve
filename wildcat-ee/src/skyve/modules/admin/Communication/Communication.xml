@@ -19,34 +19,34 @@
 		</association>
 		<text name="moduleName">
 			<displayName>Module</displayName>
-			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<description>Bindings used in the email address, subject and body will be based on the selected module document.</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="documentName">
 			<displayName>Document</displayName>
-			<shortDescription>Bindings used in the email address, subject and body will be based on the selected module document.</shortDescription>
+			<description>Bindings used in the email address, subject and body will be based on the selected module document.</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="toBinding">
 			<displayName>Send to</displayName>
-			<shortDescription>Provide a binding which contains the email address to send to</shortDescription>
+			<description>Provide a binding which contains the email address to send to</description>
 			<length>500</length>
 		</text>
 		<text name="emailTo" required="true">
 			<displayName>Email To</displayName>
-			<shortDescription>The email address to send to.  Bindings are allowed relative to the above module document.</shortDescription>
+			<description>The email address to send to.  Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
 		<text name="emailSubject" required="true">
 			<displayName>Email Subject</displayName>
-			<shortDescription>The subject of the email.  Bindings are allowed relative to the above module document.</shortDescription>
+			<description>The subject of the email.  Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
 		<markup name="emailBody" required="true">
 			<displayName>Email Body</displayName>
-			<shortDescription><![CDATA[
+			<description><![CDATA[
 			The body of the email.  
 			<p/>
 			Bindings are allowed relative to the above module document.
@@ -54,7 +54,7 @@
 			To include images in the HTML, switch to the Source view, and embed the 64bit encoding from a site like 
 			http://www.freeformatter.com/base64-encoder.html
 			]]>
-			</shortDescription>
+			</description>
 		</markup>
 		<memo name="results" persistent="false">
 			<displayName>Results</displayName>

@@ -22,7 +22,7 @@ public interface Job extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getShortDescription();
+	public String getDescription();
 	
 	/**
 	 * Derived property

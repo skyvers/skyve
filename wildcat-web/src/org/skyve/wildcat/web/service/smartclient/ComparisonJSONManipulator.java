@@ -21,6 +21,7 @@ import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.metadata.view.widget.bound.input.InputWidget;
 
@@ -128,7 +129,7 @@ public final class ComparisonJSONManipulator {
 		for (ComparisonComposite child : node.getChildren()) {
 			String childReferenceType = "A";
 			Reference childReference = nodeDocument.getReferenceByName(child.getReferenceName());
-			if (childReference instanceof org.skyve.wildcat.metadata.model.document.Collection) {
+			if (childReference instanceof CollectionImpl) {
 				childReferenceType = "C";
 			}
 			processNode(child, childReferenceType, node, json);

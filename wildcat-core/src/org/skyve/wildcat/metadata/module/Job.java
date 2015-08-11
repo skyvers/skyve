@@ -9,7 +9,7 @@ import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.MODULE_NAMESPACE,
-			propOrder = {"displayName", "className", "shortDescription"})
+			propOrder = {"displayName", "className", "description"})
 public class Job extends NamedMetaData implements org.skyve.metadata.module.Job {
 	/**
 	 * For Serialization
@@ -31,7 +31,7 @@ public class Job extends NamedMetaData implements org.skyve.metadata.module.Job 
 	 */
 	private String className;
 
-	private String shortDescription;
+	private String description;
 	
 	@Override
 	public String getDisplayName() {
@@ -54,13 +54,13 @@ public class Job extends NamedMetaData implements org.skyve.metadata.module.Job 
 	}
 	
 	@Override
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlAttribute
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = UtilImpl.processStringValue(shortDescription);
+	public void setDescription(String description) {
+		this.description = UtilImpl.processStringValue(description);
 	}
 
 	@Override

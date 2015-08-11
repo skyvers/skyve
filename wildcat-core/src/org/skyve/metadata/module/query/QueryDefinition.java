@@ -17,12 +17,6 @@ public interface QueryDefinition extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getDisplayName();
-	
-	/**
-	 * 
-	 * @return
-	 */
 	public String getDescription();
 	
 	/**

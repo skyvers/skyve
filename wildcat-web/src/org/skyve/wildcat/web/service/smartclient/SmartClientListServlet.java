@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -43,7 +42,6 @@ import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -266,10 +264,10 @@ public class SmartClientListServlet extends HttpServlet {
 						String tagId = request.getParameter("_tagId");
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 						if ("TAG".equals(bizTagged)) {
-							tag(customer, module, query, tagId, parameters, pw);
+							tag(customer, module, model, tagId, parameters, pw);
 						}
 						else if ("UNTAG".equals(bizTagged)) {
-							untag(customer, module, query, tagId, parameters, pw);
+							untag(customer, module, model, tagId, parameters, pw);
 						}
 						else {
 							if (! user.canUpdateDocument(drivingDocument)) {
@@ -282,8 +280,7 @@ public class SmartClientListServlet extends HttpServlet {
 								rowIsTagged = oldValuesJSON.contains(PersistentBean.TAGGED_NAME + "\":true");
 							}
 							update(module, 
-									query, 
-									tagId,
+									model, 
 									rowIsTagged,
 									parameters, 
 									persistence, 
@@ -295,11 +292,7 @@ public class SmartClientListServlet extends HttpServlet {
 							throw new SecurityException("delete this data", user.getName());
 						}
 	
-						remove(module, 
-								query, 
-								parameters, 
-								persistence, 
-								pw);
+						remove(model, parameters, pw);
 						break;
 					default:
 					}
@@ -1301,139 +1294,98 @@ System.out.println(criterium);
 	}
 */
     private static void update(Module module, 
-								DocumentQueryDefinition query,
-								String tagId,
+								ListModel<Bean> model,
 								boolean rowIsTagged,
-								SortedMap<String, Object> parameters, 
+								SortedMap<String, Object> properties, 
 								AbstractPersistence persistence,
 								PrintWriter pw)
 	throws Exception {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Document document = module.getDocument(customer, query.getDocumentName());
-
+		Document document = model.getDrivingDocument();
+		
 		// remove read-only property parameters as they have no setters
-		parameters.remove(Bean.MODULE_KEY);
-		parameters.remove(Bean.DOCUMENT_KEY);
-		parameters.remove(Bean.BIZ_KEY);
+		properties.remove(Bean.MODULE_KEY);
+		properties.remove(Bean.DOCUMENT_KEY);
+		properties.remove(Bean.BIZ_KEY);
 
 		// remove parameters that are not really properties
-		parameters.remove("operator");
-		parameters.remove("criteria");
+		properties.remove("operator");
+		properties.remove("criteria");
 		
 		// remove parameters that are not editable
-		for (QueryColumn column : query.getColumns()) {
+		for (QueryColumn column : model.getColumns()) {
 			String columnBinding = column.getBinding();
 			if (! column.isEditable()) {
-				parameters.remove(columnBinding);
+				properties.remove(columnBinding);
 			}
 			
 			// replace association bizIds with the real object
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, columnBinding);
 			Attribute targetAttribute = target.getAttribute();
 			if (targetAttribute instanceof Association) {
-				parameters.put(columnBinding,
+				properties.put(columnBinding,
 								persistence.retrieve(module.getName(),
 														((Association) targetAttribute).getDocumentName(),
-														(String) parameters.get(columnBinding),
+														(String) properties.get(columnBinding),
 														false));
 			}
 		}
 		
-		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		PersistentBean bean = persistence.retrieve(document, bizId, true);
-
-		BindUtil.populateProperties(user, bean, parameters, true);
-// go through the query to get the properties
-		bean = persistence.save(document, bean);
+		String bizId = (String) properties.remove(Bean.DOCUMENT_ID);
+		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
 		
-		pw.append(returnUpdatedMessage(customer, module, document, bizId, query, tagId, rowIsTagged));
+		pw.append(returnUpdatedMessage(customer, model, bean, rowIsTagged));
 	}
 
 	private static void tag(Customer customer,
 								Module module,
-								DocumentQueryDefinition query, 
+								ListModel<Bean> model, 
 								String tagId,
 								Map<String, Object> parameters, 
 								PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		TagUtil.tag(tagId, module.getName(), query.getDocumentName(), bizId);
+		TagUtil.tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
 		pw.append(returnTagUpdateMessage(customer,
 											parameters, 
 											module, 
-											query.getDocumentName(),
-											query,
+											model,
 											true));
 	}
 
 	private static void untag(Customer customer,
 								Module module,
-								DocumentQueryDefinition query, 
+								ListModel<Bean> model,
 								String tagId,
 								Map<String, Object> parameters, 
 								PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		TagUtil.untag(tagId, module.getName(), query.getDocumentName(), bizId);
+		TagUtil.untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
 		
 		// return the updated row
 		pw.append(returnTagUpdateMessage(customer, 
 											parameters,
 											module,
-											query.getDocumentName(),
-											query,
+											model,
 											false));
 	}
 
 	private static String returnUpdatedMessage(Customer customer,
-												Module module,
-												Document document,
-												String bizId,
-												DocumentQueryDefinition query, 
-												String tagId,
+												ListModel<Bean> model, 
+												Bean bean,
 												boolean rowIstagged)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{response:{status:0,data:");
-		
-		Set<String> propertyNames = new TreeSet<>();
-		propertyNames.add(Bean.DOCUMENT_ID);
-		propertyNames.add(PersistentBean.LOCK_NAME);
-		propertyNames.add(PersistentBean.TAGGED_NAME);
-		propertyNames.add(PersistentBean.FLAG_COMMENT_NAME);
-		for (QueryColumn column : query.getColumns()) {
-			String binding = column.getBinding();
-			if (binding == null) {
-				propertyNames.add(column.getName());
-			}
-			else {
-				propertyNames.add(binding);
-				TargetMetaData target = Binder.getMetaDataForBinding(customer,
-																		module,
-																		document,
-																		binding);
-				if (target.getAttribute() instanceof Association) {
-					StringBuilder sb = new StringBuilder(64);
-					sb.append(binding).append('.').append(Bean.BIZ_KEY);
-					propertyNames.add(sb.toString());
-				}
-			}
-			propertyNames.add((binding != null) ? binding : column.getName());
-		}
-		
-		DocumentQuery detailQuery = query.constructDocumentQuery(null, tagId);
-		detailQuery.getFilter().addEquals(Bean.DOCUMENT_ID, bizId);
-		
-		List<Bean> beans = detailQuery.projectedResults();
-		
+
 		// reinstate whether the record is tagged or not.
-		
-		String json = JSONUtil.marshall(customer, beans, propertyNames);
+		String json = JSONUtil.marshall(customer, bean, model.getProjections());
 		if (rowIstagged) {
 			json = json.replace(PersistentBean.TAGGED_NAME + "\":null", PersistentBean.TAGGED_NAME + "\":true");
 		}
@@ -1446,76 +1398,36 @@ System.out.println(criterium);
 	private static String returnTagUpdateMessage(Customer customer,
 													Map<String, Object> parameters,
 													Module module,
-													String documentName,
-													DocumentQueryDefinition query,
+													ListModel<Bean> model,
 													boolean tagging)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{response:{status:0,data:[");
 
+		Set<String> projections = model.getProjections();
 		Map<String, Object> properties = new TreeMap<>();
-
-		Set<String> propertyNames = new TreeSet<>();
-		propertyNames.add(Bean.DOCUMENT_ID);
-		properties.put(Bean.DOCUMENT_ID, parameters.get(Bean.DOCUMENT_ID));
-		propertyNames.add(PersistentBean.LOCK_NAME);
-		properties.put(PersistentBean.LOCK_NAME, parameters.get(PersistentBean.LOCK_NAME));
-		propertyNames.add(PersistentBean.TAGGED_NAME);
-		properties.put(PersistentBean.TAGGED_NAME, Boolean.valueOf(tagging));
-		propertyNames.add(PersistentBean.FLAG_COMMENT_NAME);
-		properties.put(PersistentBean.FLAG_COMMENT_NAME, parameters.get(PersistentBean.FLAG_COMMENT_NAME));
-
-		Document document = module.getDocument(customer, documentName);
-		
-		for (QueryColumn column : query.getColumns()) {
-			String binding = column.getBinding();
-			if (binding == null) {
-				binding = column.getName();
+		for (String projection : projections) {
+			if (PersistentBean.TAGGED_NAME.equals(projection)) {
+				properties.put(projection, Boolean.valueOf(tagging));
 			}
-			else {
-				TargetMetaData target = Binder.getMetaDataForBinding(customer,
-																		module,
-																		document,
-																		binding);
-				Attribute attribute = target.getAttribute(); 
-				if (attribute instanceof Association) {
-					StringBuilder sb = new StringBuilder(64);
-					sb.append(binding).append('.').append(Bean.BIZ_KEY);
-					String bizKeyBinding = sb.toString();
-					propertyNames.add(bizKeyBinding);
-					Document associationDocument = module.getDocument(customer, ((Association) attribute).getDocumentName());
-					PersistentBean relatedBean = CORE.getPersistence().retrieve(associationDocument,
-																					(String) parameters.get(binding),
-																					false);
-					properties.put(bizKeyBinding, relatedBean.getBizKey());
-				}
-			}
-			propertyNames.add(binding);
-			properties.put(binding, parameters.get(binding));
+			properties.put(projection, parameters.get(projection));
 		}
 
 		message.append(JSONUtil.marshall(customer,
 											new MapBean(module.getName(),
-															documentName,
+															model.getDrivingDocument().getName(),
 															properties),
-											propertyNames));
+											projections));
 		message.append("]}}");
 		
 		return message.toString();
 	}
 
-	private static void remove(Module module,
-	    						DocumentQueryDefinition query,
+	private static void remove(ListModel<Bean> model,
 								Map<String, Object> parameters, 
-								AbstractPersistence persistence,
 								PrintWriter pw)
 	throws Exception {
-		User user = persistence.getUser();
-		Customer customer = user.getCustomer();
-		Document document = module.getDocument(customer, query.getDocumentName());
-		PersistentBean bean = persistence.retrieve(document, (String) parameters.get(Bean.DOCUMENT_ID), true);
-
-		persistence.delete(document, bean);
+		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
 		pw.append("{response:{status:0}}");
 	}
 }

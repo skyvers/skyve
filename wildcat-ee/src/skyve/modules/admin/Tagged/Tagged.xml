@@ -23,12 +23,12 @@
 		</text>
 		<association name="tag" type="aggregation" required="true">
 			<displayName>Tag</displayName>
-			<shortDescription>The tag</shortDescription>
+			<description>The tag</description>
 			<documentName>Tag</documentName>
 		</association>
 	</attributes>
 	<uniqueConstraints>
-		<constraint name="uniqueTag" scope="user" shortDescription="Ensure that a document is tagged only once per tag">
+		<constraint name="uniqueTag" scope="user" description="Ensure that a document is tagged only once per tag">
 			<message>This document is already tagged.</message>
 			<fieldReferences>
 				<ref>tag</ref>

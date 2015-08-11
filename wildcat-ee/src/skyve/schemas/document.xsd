@@ -92,7 +92,7 @@
           <xs:element name="pluralAlias" type="xs:string" form="qualified"/>
           <xs:element name="icon16x16RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="icon32x32RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="shortDescription" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="parentDocument" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="bizKey" type="tns:bizKey" form="qualified" minOccurs="0"/>
           <xs:element name="attributes" form="qualified" minOccurs="0">
@@ -211,7 +211,7 @@
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="displayName" type="xs:string" form="qualified"/>
-          <xs:element name="shortDescription" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="defaultWidget" type="ns2:widgetReference" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="deprecated" type="xs:boolean"/>
@@ -503,7 +503,7 @@
       </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="shortDescription" type="xs:string"/>
+    <xs:attribute name="description" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="inverse">
@@ -548,7 +548,7 @@
           </xs:element>
         </xs:sequence>
         <xs:attribute name="scope" type="tns:documentScope" use="required"/>
-        <xs:attribute name="shortDescription" type="xs:string"/>
+        <xs:attribute name="description" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -559,49 +559,49 @@
 
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="mapped"/>
       <xs:enumeration value="single"/>
+      <xs:enumeration value="mapped"/>
       <xs:enumeration value="joined"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="capital"/>
       <xs:enumeration value="upper"/>
       <xs:enumeration value="lower"/>
+      <xs:enumeration value="capital"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="isinCheckDigit"/>
-      <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="email"/>
-      <xs:enumeration value="url"/>
-      <xs:enumeration value="luhnCheckDigit"/>
       <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="creditCard"/>
       <xs:enumeration value="isbnCheckDigit"/>
       <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="ean13CheckDigit"/>
       <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="url"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="dynamic"/>
-      <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
+      <xs:enumeration value="variant"/>
+      <xs:enumeration value="dynamic"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="indexType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="textual"/>
       <xs:enumeration value="database"/>
+      <xs:enumeration value="textual"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -614,18 +614,18 @@
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
-      <xs:enumeration value="composition"/>
       <xs:enumeration value="child"/>
+      <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
       <xs:enumeration value="user"/>
-      <xs:enumeration value="dataGroup"/>
-      <xs:enumeration value="global"/>
       <xs:enumeration value="customer"/>
+      <xs:enumeration value="global"/>
+      <xs:enumeration value="dataGroup"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

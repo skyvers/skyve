@@ -867,7 +867,7 @@ public class SmartClientGenerateUtils {
 			super(user, customer, module, document, widget, null);
 			Attribute attribute = target.getAttribute();
 			if (attribute != null) {
-				helpText = attribute.getShortDescription();
+				helpText = attribute.getDescription();
 				if (AttributeType.time.equals(attribute.getAttributeType())) {
 					textAlign = HorizontalAlignment.right;
 				}

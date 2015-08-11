@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeSet;
 
 import org.skyve.CORE;
@@ -18,6 +19,7 @@ import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
@@ -117,7 +119,7 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		establishQueries();
 		
 		if (getSummary() == null) {
-			AbstractDocumentQuery internalSummaryQuery = (org.skyve.wildcat.persistence.AbstractDocumentQuery) summaryQuery;
+			AbstractDocumentQuery internalSummaryQuery = (AbstractDocumentQuery) summaryQuery;
 			internalSummaryQuery.clearProjections();
 			internalSummaryQuery.clearOrderings();
 		}
@@ -153,6 +155,44 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 	public AutoClosingIterable<Bean> iterate() throws Exception {
 		establishQueries();
 		return detailQuery.projectedIterable();
+	}
+	
+	@Override
+	public Bean update(String bizId, SortedMap<String, Object> values) 
+	throws Exception {
+		return update(bizId, 
+						values, 
+						drivingDocument, 
+						query,
+						getSelectedTagId());
+	}
+
+	public static Bean update(String bizId, 
+								SortedMap<String, Object> properties, 
+								Document drivingDocument,
+								DocumentQueryDefinition query,
+								String selectedTagId)
+	throws Exception {
+		Persistence p = CORE.getPersistence();
+		PersistentBean bean = p.retrieve(drivingDocument, bizId, true);
+		BindUtil.populateProperties(p.getUser(), bean, properties, true);
+		bean = p.save(drivingDocument, bean);
+		
+		DocumentQuery q = query.constructDocumentQuery(null, selectedTagId);
+		q.getFilter().addEquals(Bean.DOCUMENT_ID, bizId);
+		return q.projectedResult();
+	}
+	
+	@Override
+	public void remove(String bizId) throws Exception {
+		remove(bizId, drivingDocument);
+	}
+
+	public static void remove(String bizId, Document drivingDocument)
+	throws Exception {
+		Persistence p = CORE.getPersistence();
+		PersistentBean bean = p.retrieve(drivingDocument, bizId, true);
+		p.delete(drivingDocument, bean);
 	}
 	
 	private void establishQueries() throws MetaDataException {

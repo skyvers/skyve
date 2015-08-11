@@ -78,7 +78,7 @@ public interface Attribute extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getShortDescription();
+	public String getDescription();
 	
 	/**
 	 * 

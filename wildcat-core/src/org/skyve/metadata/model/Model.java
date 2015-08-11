@@ -50,7 +50,7 @@ public interface Model extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getShortDescription();
+	public String getDescription();
 	
 	/**
 	 * 

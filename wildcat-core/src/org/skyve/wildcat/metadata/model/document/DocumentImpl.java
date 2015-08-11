@@ -32,14 +32,14 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.flow.Flow;
-import org.skyve.wildcat.metadata.model.Model;
+import org.skyve.wildcat.metadata.model.ModelImpl;
 import org.skyve.wildcat.metadata.model.document.field.Text;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractDocumentQuery;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
-public final class DocumentImpl extends Model implements Document {
+public final class DocumentImpl extends ModelImpl implements Document {
 	/**
 	 * For Serialization
 	 */
@@ -436,7 +436,7 @@ public final class DocumentImpl extends Model implements Document {
 			bizKeyField.setName("bizKey");
 			bizKeyField.setPersistent(false);
 			bizKeyField.setRequired(false);
-			bizKeyField.setShortDescription(null);
+			bizKeyField.setDescription(null);
 			bizKeyField.setDomainType(null);
 			bizKeyField.setLength(1024);
 		}

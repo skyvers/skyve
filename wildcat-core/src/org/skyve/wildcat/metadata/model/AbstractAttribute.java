@@ -25,7 +25,7 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
 			propOrder = {"documentation",
 							"displayName", 
-							"shortDescription", 
+							"description", 
 							"defaultWidgetReference",
 							"deprecatedBool",
 							"trackChangesBool"})
@@ -37,7 +37,7 @@ public abstract class AbstractAttribute extends org.skyve.wildcat.metadata.repos
 
 	private String displayName;
 	private AttributeType attributeType;
-	private String shortDescription;
+	private String description;
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
 	private boolean deprecated;
@@ -55,13 +55,13 @@ public abstract class AbstractAttribute extends org.skyve.wildcat.metadata.repos
 	}
 
 	@Override
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = UtilImpl.processStringValue(shortDescription);
+	public void setDescription(String description) {
+		this.description = UtilImpl.processStringValue(description);
 	}
 
 	@Override

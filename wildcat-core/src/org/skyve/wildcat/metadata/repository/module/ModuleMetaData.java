@@ -740,12 +740,6 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 		query.setName(value);
 
-		value = queryMetaData.getDisplayName();
-		if (value == null) {
-			throw new MetaDataException(metaDataName + " : The [displayName] for query " + query.getName() + " is required");
-		}
-		query.setDisplayName(value);
-
 		value = queryMetaData.getDescription();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + " is required");

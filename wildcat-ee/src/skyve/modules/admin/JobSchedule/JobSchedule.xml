@@ -452,15 +452,15 @@
 		</boolean>
 		<dateTime name="startTime">
 			<displayName>Start Time</displayName>
-			<shortDescription>When to start triggering the job.  May be left blank</shortDescription>
+			<description>When to start triggering the job.  May be left blank</description>
 		</dateTime>
 		<dateTime name="endTime">
 			<displayName>End Time</displayName>
-			<shortDescription>When to finish triggering the job.  May be left blank</shortDescription>
+			<description>When to finish triggering the job.  May be left blank</description>
 		</dateTime>
 		<association name="runAs" type="aggregation" required="true">
 			<displayName>Run As</displayName>
-			<shortDescription>The user to run the job</shortDescription>
+			<description>The user to run the job</description>
 			<documentName>User</documentName>
 			<queryName>qUsers</queryName>
 		</association>

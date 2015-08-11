@@ -9,6 +9,7 @@ import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.ThreadSafeFactory;
 
@@ -44,7 +45,7 @@ public class CORE {
 	 * @return The new ordering specification.
 	 */
 	public static Ordering newOrdering(String by, SortDirection sort) {
-		return new org.skyve.wildcat.metadata.model.document.Collection.Ordering(by, sort);
+		return new CollectionImpl.OrderingImpl(by, sort);
 	}
 	
 	/**

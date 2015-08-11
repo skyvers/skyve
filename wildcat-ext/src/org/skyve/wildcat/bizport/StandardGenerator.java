@@ -295,7 +295,7 @@ public final class StandardGenerator {
 			// Leave collections and biz keys out of it
 			if (! ((attribute instanceof Collection) || Bean.BIZ_KEY.equals(name))) {
 				if (AttributeType.association.equals(type)) {
-					column = new BizPortColumn(attribute.getDisplayName() + " ID", attribute.getShortDescription(), type);
+					column = new BizPortColumn(attribute.getDisplayName() + " ID", attribute.getDescription(), type);
 					Association association = (Association) attribute;
 					Module owningModule = customer.getModule(currentDocument.getOwningModuleName());
 					Document associationDocument = owningModule.getDocument(customer, association.getDocumentName());
@@ -303,7 +303,7 @@ public final class StandardGenerator {
 															associationDocument.getName()));
 				}
 				else {
-					column = new BizPortColumn(attribute.getDisplayName(), attribute.getShortDescription(), type);
+					column = new BizPortColumn(attribute.getDisplayName(), attribute.getDescription(), type);
 				}
 
 				if (DomainType.constant.equals(attribute.getDomainType())) {

@@ -9,10 +9,9 @@ import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
 			name = "query",
-			propOrder = {"documentation", "displayName", "description"})
+			propOrder = {"documentation", "description"})
 public abstract class QueryMetaData extends NamedMetaData {
 	private String documentation;
-	private String displayName;
 	private String description;
 
 	public String getDocumentation() {
@@ -22,15 +21,6 @@ public abstract class QueryMetaData extends NamedMetaData {
 	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
-	public void setDisplayName(String displayName) {
-		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
 	public String getDescription() {

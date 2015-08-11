@@ -52,7 +52,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 				Module module = customer.getModule(bean.getModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
-					result.add(new DomainValue(document.getName(), document.getShortDescription()));
+					result.add(new DomainValue(document.getName(), document.getDescription()));
 				}
 			}
 		}

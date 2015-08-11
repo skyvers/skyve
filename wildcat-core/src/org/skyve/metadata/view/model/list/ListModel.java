@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
@@ -80,4 +81,8 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	public abstract Filter newFilter() throws Exception;
 	public abstract Page fetch() throws Exception;
 	public abstract AutoClosingIterable<Bean> iterate() throws Exception;
+	
+	public abstract Bean update(String bizId, SortedMap<String, Object> properties)
+	throws Exception;
+	public abstract void remove(String bizId) throws Exception;
 }
