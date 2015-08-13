@@ -50,6 +50,7 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 					case saveForBulkSend:
 
 						sb.append("\n Saving");
+						CommunicationBizlet.generate(communication, pb);
 						break;
 					case testBindingsAndOutput:
 
@@ -58,6 +59,7 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 					case sendImmediately:
 
 						sb.append("\n Sending");
+						CommunicationBizlet.send(communication, pb);
 						break;
 					default:
 						break;

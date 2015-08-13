@@ -39,6 +39,12 @@
 			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
+		<text name="sendFrom">
+			<displayName>From</displayName>
+			<description>The address to send from.</description>
+			<length>250</length>
+			<validator type="email" />
+		</text>
 		<text name="subject">
 			<displayName>Subject</displayName>
 			<description>The subject of the communication. Bindings are allowed relative to the above module document.</description>
@@ -62,12 +68,24 @@
 		<content name="attachment">
 			<displayName>Attachment</displayName>
 		</content>
-		<enum name="actionType">
+		<text name="attachmentFileName">
+			<displayName>Attachment File Name</displayName>
+			<description>The file name for the attachment as it will appear to receivers.</description>
+			<length>250</length>
+		</text>
+		<enum name="actionType" trackChanges="false" persistent="false">
 			<displayName>Action</displayName>
 			<values>
 				<value code="save" description="Save for bulk send"/>
 				<value code="send" description="Send Immediately"/>
 				<value code="test" description="Test bindings and output"/>
+			</values>
+		</enum>
+		<enum name="formatType">
+			<displayName>Format</displayName>
+			<values>
+				<value code="email"/>
+				<value code="sms"/>
 			</values>
 		</enum>
 		<text name="filePath">
@@ -79,6 +97,9 @@
 	<conditions>
 		<condition name="saveAction">
 			<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
+		</condition>
+		<condition name="emailType">
+			<![CDATA[FormatType.email.equals(this.getFormatType())]]>
 		</condition>
 	</conditions>
 </document>

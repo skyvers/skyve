@@ -5,10 +5,12 @@ import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
 
+import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
 public class GetResults implements ServerSideAction<Communication> {
@@ -25,23 +27,28 @@ public class GetResults implements ServerSideAction<Communication> {
 
 		communication.setActionType(ActionType.testBindingsAndOutput);
 	
-		String results = getResults(communication);
+		Persistence pers = CORE.getPersistence();
 		
-		communication.setResults(results);
+		Communication result = pers.save(communication);
 		
-		Communication result = CommunicationBizlet.kickOffJob(communication);
+		String results = getResults(result);
+		
+		result.setResults(results);
+		
+		result = CommunicationBizlet.kickOffJob(result);
 		
 		return new ServerSideActionResult(result);
 	}
 	
-	public static String getResults(Communication communication) throws Exception{
+	public static String getResults(Communication bean) throws Exception{
 		
-		if (communication.getTag() == null) {
+		if (bean.getTag() == null) {
 			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
 		}
 
-		CommunicationBizlet.checkForUnsavedData(communication);
-
+		Persistence pers = CORE.getPersistence();
+		Communication communication = pers.save(bean);
+		
 		Long count = TagBizlet.getTaggedCountForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 
 		StringBuilder results = new StringBuilder();

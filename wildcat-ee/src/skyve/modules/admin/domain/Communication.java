@@ -16,6 +16,7 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
  * Communication
  * 
  * @depend - - - ActionType
+ * @depend - - - FormatType
  * @navhas n tag 0..1 Tag
  * @stereotype "persistent"
  */
@@ -46,6 +47,8 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String sendToPropertyName = "sendTo";
 	/** @hidden */
+	public static final String sendFromPropertyName = "sendFrom";
+	/** @hidden */
 	public static final String subjectPropertyName = "subject";
 	/** @hidden */
 	public static final String bodyPropertyName = "body";
@@ -54,7 +57,11 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String attachmentPropertyName = "attachment";
 	/** @hidden */
+	public static final String attachmentFileNamePropertyName = "attachmentFileName";
+	/** @hidden */
 	public static final String actionTypePropertyName = "actionType";
+	/** @hidden */
+	public static final String formatTypePropertyName = "formatType";
 	/** @hidden */
 	public static final String filePathPropertyName = "filePath";
 
@@ -127,6 +134,74 @@ public class Communication extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Format
+	 **/
+	@XmlEnum
+	public static enum FormatType implements Enumeration {
+		email("email", "email"),
+		sms("sms", "sms");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private FormatType(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static FormatType fromCode(String code) {
+			FormatType result = null;
+
+			for (FormatType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static FormatType fromDescription(String description) {
+			FormatType result = null;
+
+			for (FormatType value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				FormatType[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (FormatType value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
 	private String description;
 	private Tag tag = null;
 	/**
@@ -146,6 +221,10 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private String sendTo;
 	/**
+	 * The address to send from.
+	 **/
+	private String sendFrom;
+	/**
 	 * The subject of the communication. Bindings are allowed relative to the above module document.
 	 **/
 	private String subject;
@@ -160,7 +239,12 @@ public class Communication extends AbstractPersistentBean {
 	private String body;
 	private String results;
 	private String attachment;
+	/**
+	 * The file name for the attachment as it will appear to receivers.
+	 **/
+	private String attachmentFileName;
 	private ActionType actionType;
+	private FormatType formatType;
 	/**
 	 * The path (local to the server) where bulk files will be created.
 	 **/
@@ -310,6 +394,24 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #sendFrom} accessor.
+	 **/
+	public String getSendFrom() {
+		return sendFrom;
+	}
+
+	/**
+	 * {@link #sendFrom} mutator.
+	 * 
+	 * @param sendFrom	The new value to set.
+	 **/
+	@XmlElement
+	public void setSendFrom(String sendFrom) {
+		preset(sendFromPropertyName, sendFrom);
+		this.sendFrom = sendFrom;
+	}
+
+	/**
 	 * {@link #subject} accessor.
 	 **/
 	public String getSubject() {
@@ -382,6 +484,24 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #attachmentFileName} accessor.
+	 **/
+	public String getAttachmentFileName() {
+		return attachmentFileName;
+	}
+
+	/**
+	 * {@link #attachmentFileName} mutator.
+	 * 
+	 * @param attachmentFileName	The new value to set.
+	 **/
+	@XmlElement
+	public void setAttachmentFileName(String attachmentFileName) {
+		preset(attachmentFileNamePropertyName, attachmentFileName);
+		this.attachmentFileName = attachmentFileName;
+	}
+
+	/**
 	 * {@link #actionType} accessor.
 	 **/
 	public ActionType getActionType() {
@@ -395,8 +515,25 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setActionType(ActionType actionType) {
-		preset(actionTypePropertyName, actionType);
 		this.actionType = actionType;
+	}
+
+	/**
+	 * {@link #formatType} accessor.
+	 **/
+	public FormatType getFormatType() {
+		return formatType;
+	}
+
+	/**
+	 * {@link #formatType} mutator.
+	 * 
+	 * @param formatType	The new value to set.
+	 **/
+	@XmlElement
+	public void setFormatType(FormatType formatType) {
+		preset(formatTypePropertyName, formatType);
+		this.formatType = formatType;
 	}
 
 	/**
@@ -415,6 +552,15 @@ public class Communication extends AbstractPersistentBean {
 	public void setFilePath(String filePath) {
 		preset(filePathPropertyName, filePath);
 		this.filePath = filePath;
+	}
+
+	@XmlTransient
+	public boolean isEmailType() {
+		return (FormatType.email.equals(this.getFormatType()));
+	}
+
+	public boolean isNotEmailType() {
+		return (! isEmailType());
 	}
 
 	@XmlTransient

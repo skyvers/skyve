@@ -56,12 +56,14 @@
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
 		<property name="sendTo" length="250" />
+		<property name="sendFrom" length="250" />
 		<property name="subject" length="250" />
 		<property name="body" type="text" />
 		<property name="attachment" length="36" />
-		<property name="actionType" length="4">
+		<property name="attachmentFileName" length="250" />
+		<property name="formatType" length="5">
 			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.Communication$ActionType</param>
+				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
 			</type>
 		</property>
 		<property name="filePath" length="2000" />

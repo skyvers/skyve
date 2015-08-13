@@ -96,9 +96,24 @@
 					<column />
 					<row>
 						<item>
-							<spacer />
+							<combo binding="formatType" >
+								<onChangedHandlers><rerender/></onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="sendFrom" invisible="notEmailType" />
 						</item>
 						<item>
+							<button actionName="SendNow" pixelWidth="200" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item colspan="3">
 							<blurb>	
 								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document.</i></font>]]>
 							</blurb>
@@ -113,7 +128,7 @@
 						<item>
 							<spacer />
 						</item>
-						<item>
+						<item colspan="3">
 							<blurb>	
 								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document.</i></font>]]>
 							</blurb>
@@ -121,14 +136,14 @@
 					</row>
 					<row>
 						<item colspan="4">
-							<textField binding="subject" pixelWidth="800" />
+							<textField binding="subject" pixelWidth="800" invisible="notEmailType" />
 						</item>
 					</row>
 					<row>
 						<item>
 							<spacer />
 						</item>
-						<item>
+						<item colspan="3">
 							<blurb>	
 								<![CDATA[<font color="green"><i>Email body can use bindings relative to the selected module document.
 								For images, either include a link to the image, or paste the encoded image into the Source view.</i></font>]]>
@@ -153,6 +168,9 @@
 						<item>
 							<default binding="attachment" />
 						</item>
+						<item>
+							<default binding="attachmentFileName" />
+						</item>
 					</row>
 				</form>
 			</vbox>
@@ -168,6 +186,8 @@
 			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?"/>
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?"/>
+		<action clientValidation="true" className="TestSend" displayName="Test Send" inActionPanel="false"
+			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?"/>
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>			
 	</actions>
