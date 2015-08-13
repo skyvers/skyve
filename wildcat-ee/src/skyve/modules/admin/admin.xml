@@ -400,7 +400,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qCommunications" documentName="Communication">
-			<displayName>Communications</displayName>
 			<description>Communications</description>
 			<columns>
 				<column binding="description" sortOrder="ascending"/>
