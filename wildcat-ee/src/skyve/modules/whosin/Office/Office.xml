@@ -45,12 +45,11 @@
 		</text>
 		<geometry name="boundary">
 			<displayName>Boundary</displayName>
-			<shortDescription>The boundary around the office.</shortDescription>
+			<description>The boundary around the office.</description>
 		</geometry>
 		<boolean name="demoData">
 			<displayName>Demonstration Data</displayName>
-			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+			<description>If this is set, the data was created by the demo data job and can safely be deleted.</description>
 		</boolean>
-		
 	</attributes>
 </document>

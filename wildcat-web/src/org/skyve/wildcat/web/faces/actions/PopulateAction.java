@@ -23,7 +23,7 @@ public class PopulateAction extends FacesAction<Void> {
 		DocumentQueryDefinition query = ActionUtil.getDocumentQuery(facesView.getBizModuleParameter(),
 																		facesView.getQueryNameParameter());
 		facesView.setBizDocumentParameter(query.getDocumentName());
-		facesView.setTitle(query.getDisplayName());
+		facesView.setTitle(query.getDescription());
 		
 		return null;
 	}

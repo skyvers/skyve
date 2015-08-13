@@ -33,6 +33,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.Inverse.InverseRelationship;
@@ -797,7 +798,7 @@ joined tables
 				
 				StringBuilder orderBy = null;
 				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
-				if ((! ((org.skyve.wildcat.metadata.model.document.Collection) collection).isComplexOrdering()) && 
+				if ((! ((CollectionImpl) collection).isComplexOrdering()) && 
 						(! collection.getOrdering().isEmpty())) {
 					orderBy = new StringBuilder(64);
 					for (Ordering ordering : collection.getOrdering()) {
@@ -1397,7 +1398,7 @@ joined tables
 	throws MetaDataException {
 		String doc = enumeration.getDocumentation();
 		if (doc == null) {
-			doc = enumeration.getShortDescription();
+			doc = enumeration.getDescription();
 		}
 		if (doc == null) {
 			doc = enumeration.getDisplayName();
@@ -2012,7 +2013,7 @@ joined tables
 		// Generate/Include UML doc
 		String description = document.getDocumentation();
 		if (description == null) {
-			description = document.getShortDescription();
+			description = document.getDescription();
 		}
 		if (description == null) {
 			description = document.getName();
@@ -2211,7 +2212,7 @@ joined tables
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {
 		String description = attribute.getDocumentation();
 		if (description == null) {
-			description = attribute.getShortDescription();
+			description = attribute.getDescription();
 		}
 		if (description != null) {
 			toAppendTo.append("\t/**\n");

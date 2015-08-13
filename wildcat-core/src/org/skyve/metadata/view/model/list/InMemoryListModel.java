@@ -22,7 +22,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.domain.MapBean;
-import org.skyve.wildcat.metadata.model.document.Collection.Ordering;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl.OrderingImpl;
 import org.skyve.wildcat.web.SortParameter;
 
 public abstract class InMemoryListModel extends ListModel<Bean> {
@@ -114,12 +114,12 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 		
 		SortParameter[] sorts = getSortParameters();
 		if (sorts != null) {
-			Ordering[] order = new Ordering[sorts.length];
+			OrderingImpl[] order = new OrderingImpl[sorts.length];
 			int i = 0;
 			for (SortParameter sort : sorts) {
 				String binding = sort.getBinding();
 				SortDirection direction = sort.getDirection();
-				order[i++] = new Ordering(binding, direction);
+				order[i++] = new OrderingImpl(binding, direction);
 			}
 			Binder.sortCollectionByOrdering(rows, order);
 		}
@@ -211,6 +211,10 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 	
 	@Override
 	public Page fetch() throws Exception {
+		if (rows == null) {
+			rows = new ArrayList<>(0);
+		}
+		
 		filterAndSort();
 		
 		int startRow = getStartRow();
@@ -238,6 +242,10 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
+		if (rows == null) {
+			rows = new ArrayList<>(0);
+		}
+
 		filterAndSort();
 		
 		return new AutoClosingIterable<Bean>() {

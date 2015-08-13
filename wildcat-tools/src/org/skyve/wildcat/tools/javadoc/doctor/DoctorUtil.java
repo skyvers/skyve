@@ -132,7 +132,7 @@ public class DoctorUtil {
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
 				// document.getName()
-				table.setRowValues(document.getName(), document.getShortDescription());
+				table.setRowValues(document.getName(), document.getDescription());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -145,7 +145,7 @@ public class DoctorUtil {
 			table.setHeaderValues("Query", "Driving Document", "Description");
 
 			for (QueryDefinition q : module.getMetadataQueries()) {
-				table.setRowValues(q.getDisplayName(), 
+				table.setRowValues(q.getName(),
 									(q instanceof DocumentQueryDefinition) ? ((DocumentQueryDefinition) q).getDocumentName() : null, 
 									q.getDescription());
 			}
@@ -234,7 +234,7 @@ public class DoctorUtil {
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));
 		title.setSectionType(SectionType.SubChapter);
 		title.setSectionTitle(document.getPluralAlias());
-		title.getHtmlContent().add(document.getShortDescription());
+		title.getHtmlContent().add(document.getDescription());
 		title.getHtmlContent().add("<p/>");
 		if (document.getParentDocumentName() != null) {
 			title.getHtmlContent().add(document.getName() + " is a child of " + document.getParentDocumentName());
@@ -270,7 +270,7 @@ public class DoctorUtil {
 					}
 					String description = attribute.getDocumentation();
 					if (description == null) {
-						description = attribute.getShortDescription();
+						description = attribute.getDescription();
 					}
 					table.setRowValues(attribute.getDisplayName(),
 										attribute.getAttributeType().toString(),
@@ -291,7 +291,7 @@ public class DoctorUtil {
 			table.setHeaderValues("Reference", "Type", "Document", "Required", "Description");
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
-				table.setRowValues(reference.getDisplayName(), reference.getAttributeType().toString(), reference.getDocumentName(), String.valueOf(reference.isRequired()), reference.getShortDescription());
+				table.setRowValues(reference.getDisplayName(), reference.getAttributeType().toString(), reference.getDocumentName(), String.valueOf(reference.isRequired()), reference.getDescription());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -328,7 +328,7 @@ public class DoctorUtil {
 						s.append(r);
 					}
 				}
-				table.setRowValues(u.getName(), u.getShortDescription(), s.toString());
+				table.setRowValues(u.getName(), u.getDescription(), s.toString());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -365,7 +365,7 @@ public class DoctorUtil {
 	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
-		section.setSectionTitle("Query " + q.getDisplayName());
+		section.setSectionTitle("Query " + q.getDescription());
 		section.setSectionType(SectionType.SubChapter);
 		section.getHtmlContent().add(q.getDocumentation());
 		out.println(section.toHTML());

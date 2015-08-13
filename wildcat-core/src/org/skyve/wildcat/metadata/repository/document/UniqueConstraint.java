@@ -15,20 +15,20 @@ import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
 			name = "DocumentUniqueConstraint", 
-			propOrder = {"scope", "shortDescription", "message", "fieldReferences"})
+			propOrder = {"scope", "description", "message", "fieldReferences"})
 public class UniqueConstraint extends NamedMetaData {
-	private String shortDescription;
+	private String description;
 	private DocumentScope scope;
 	private String message;
 	private List<FieldReference> fieldReferences = new ArrayList<>();
 	
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlAttribute
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = UtilImpl.processStringValue(shortDescription);
+	public void setDescription(String description) {
+		this.description = UtilImpl.processStringValue(description);
 	}
 
 	public DocumentScope getScope() {

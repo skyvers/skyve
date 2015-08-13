@@ -58,7 +58,6 @@ public class QueryGenerator {
 				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
 				DocumentQueryMetaData documentQueryMetaData = new DocumentQueryMetaData();
 				documentQueryMetaData.setName(documentQuery.getName());
-				documentQueryMetaData.setDisplayName(documentQuery.getDisplayName());
 				documentQueryMetaData.setDescription(documentQuery.getDescription());
 				documentQueryMetaData.setDocumentName(documentQuery.getDocumentName());
 				documentQueryMetaData.setDocumentation(documentQuery.getDocumentation());
@@ -77,7 +76,6 @@ public class QueryGenerator {
 				SQLDefinition sql = (SQLDefinition) query;
 				SQLMetaData sqlMetaData = new SQLMetaData();
 				sqlMetaData.setName(sql.getName());
-				sqlMetaData.setDisplayName(sql.getDisplayName());
 				sqlMetaData.setDescription(sql.getDescription());
 				sqlMetaData.setDocumentation(sql.getDocumentation());
 				sqlMetaData.setQuery(sql.getQuery());
@@ -87,7 +85,6 @@ public class QueryGenerator {
 				BizQLDefinition bizQL = (BizQLDefinition) query;
 				BizQLMetaData bizQLMetaData = new BizQLMetaData();
 				bizQLMetaData.setName(bizQL.getName());
-				bizQLMetaData.setDisplayName(bizQL.getDisplayName());
 				bizQLMetaData.setDescription(bizQL.getDescription());
 				bizQLMetaData.setDocumentation(bizQL.getDocumentation());
 				bizQLMetaData.setQuery(bizQL.getQuery());

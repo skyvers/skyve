@@ -45,7 +45,7 @@
 		</text>
 		<geometry name="boundary">
 			<displayName>Boundary</displayName>
-			<shortDescription>The boundary around the office.</shortDescription>
+			<description>The boundary around the office.</description>
 		</geometry>
 	</attributes>
 	<conditions>

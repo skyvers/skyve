@@ -61,7 +61,6 @@
 	</menu>
 	<queries>
 		<documentQuery name="qStaff" documentName="Staff">
-			<displayName>All Staff</displayName>
 			<description>All Staff</description>
 			<columns>
 				<column binding="contact.name" sortOrder="ascending"/>
@@ -74,7 +73,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qOfficeForPhone" documentName="Office">
-			<displayName>Offices</displayName>
 			<description>All Offices</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending"/>

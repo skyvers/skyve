@@ -19,19 +19,19 @@
 		</boolean>
 		<text name="moduleName" >
 			<displayName>Module</displayName>
-			<shortDescription>The module to tag.</shortDescription>
+			<description>The module to tag.</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
 		<text name="documentName" >
 			<displayName>Document</displayName>
-			<shortDescription>The document to tag.</shortDescription>
+			<description>The document to tag.</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
 		<text name="attributeName" >
 			<displayName>Attribute</displayName>
-			<shortDescription>The name of the attribute to tag.</shortDescription>
+			<description>The name of the attribute to tag.</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
@@ -70,19 +70,19 @@
 		</integer>
 		<association type="aggregation" name="actionTag" persistent="false">
 			<displayName>Tag</displayName>
-			<shortDescription>The tag to use for the action to be performed on this tag.</shortDescription>
+			<description>The tag to use for the action to be performed on this tag.</description>
 			<domain>dynamic</domain>
 			<documentName>Tag</documentName>
 		</association>
 		<text name="documentCondition" persistent="false">
 			<displayName>Condition</displayName>
-			<shortDescription>The condition which must be satisfied for the tagged document, for the action to be executed.</shortDescription>
+			<description>The condition which must be satisfied for the tagged document, for the action to be executed.</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
 		<text name="documentAction" persistent="false">
 			<displayName>Action</displayName>
-			<shortDescription>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</shortDescription>
+			<description>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>

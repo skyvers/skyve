@@ -17,7 +17,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
-import org.skyve.wildcat.metadata.model.document.Association;
+import org.skyve.wildcat.metadata.model.document.AssociationImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.util.UtilImpl;
@@ -87,8 +87,8 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
             		}
         			value = Binder.convert(type, code);
             	}
-            	else if (targetAttribute instanceof Association) {
-            		Association targetAssociation = (Association) targetAttribute;
+            	else if (targetAttribute instanceof AssociationImpl) {
+            		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
             		value = CORE.getPersistence().retrieve(targetDocument.getOwningModuleName(), 
                 											targetAssociation.getDocumentName(),
                 											code,

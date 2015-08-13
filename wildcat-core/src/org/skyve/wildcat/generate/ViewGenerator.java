@@ -154,7 +154,7 @@ public class ViewGenerator {
 		StringBuilder title = new StringBuilder(64);
 		String finalDescription = description;
 		if (finalDescription == null) {
-			finalDescription = document.getShortDescription();
+			finalDescription = document.getDescription();
 		}
 		if (finalDescription == null) {
 			finalDescription = document.getPluralAlias();

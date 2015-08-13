@@ -1050,7 +1050,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		else {
 			if (parentVisible && visible(image)) {
 				if ((! forApply) || 
-						(forApply && parentEnabled)) {
+						(forApply && parentEnabled && (! Boolean.FALSE.equals(image.getEditable())))) {
 					addBinding(image.getBinding(), true);
 				}
 			}
@@ -1221,7 +1221,7 @@ class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(link)) {
 			if ((! forApply) || 
-					(forApply && parentEnabled)) {
+					(forApply && parentEnabled && (! Boolean.FALSE.equals(link.getEditable())))) {
 				addBinding(link.getBinding(), true);
 			}
 		}
@@ -1771,6 +1771,9 @@ class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(lookup)) {
 			if ((! forApply) || 
+					// Although LookupDescription implements Editable,
+					// editable here means there is no split button displayed;
+					// the combo still auto-completes and so the data still needs to be applied.
 					(forApply && parentEnabled && enabled(lookup))) {
 				// LookupDescription binding can be null when the lookup is in a 
 				// data grid and the lookup selects the entire row
@@ -1956,7 +1959,7 @@ class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
-					(forApply && parentEnabled && enabled(text))) {
+					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
 				addBinding(text.getBinding(), true);
 			}
 		}
@@ -1983,7 +1986,7 @@ class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(text)) {
 			if ((! forApply) || 
-					(forApply && parentEnabled && enabled(text))) {
+					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
 				addBinding(text.getBinding(), true);
 			}
 		}

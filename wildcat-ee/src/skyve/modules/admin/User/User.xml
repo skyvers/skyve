@@ -12,75 +12,75 @@
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>
-			<shortDescription>Login name of the user.</shortDescription>
+			<description>Login name of the user.</description>
 			<length>50</length>
 		</text>
 		<text name="password" >
 			<displayName>Password</displayName>
-			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<description>Check Password Complexity settings for minimum required strength.</description>
 			<!--  The password is checked and populated in the Bizlet -->
 			<length>30</length>
 		</text>
 		<dateTime name="createdDateTime">
 			<displayName>Created</displayName>
-			<shortDescription>The time and date when this user account was created.</shortDescription>
+			<description>The time and date when this user account was created.</description>
 		</dateTime>
 		<text name="homeModule" >
 			<displayName>Home Module</displayName>
-			<shortDescription>The module displayed when the user first logs in.</shortDescription>
+			<description>The module displayed when the user first logs in.</description>
 			<domain>variant</domain>
 			<length>30</length>
 		</text>
 		<text name="newPassword" persistent="false">
 			<displayName>New Password</displayName>
-			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
 		</text>
 		<text name="confirmPassword" persistent="false">
 			<displayName>Confirm Password</displayName>
-			<shortDescription>Check Password Complexity settings for minimum required strength.</shortDescription>
+			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
 		</text>
 		<boolean  name="generated">
 			<displayName>Generated</displayName>
-			<shortDescription>Whether the User was generated or manually entered.</shortDescription>
+			<description>Whether the User was generated or manually entered.</description>
 		</boolean >
 		<text name="legacyId" >
 			<displayName>Legacy Id</displayName>
-			<shortDescription>Legacy ID value when imported from legacy System using the conversion tool.</shortDescription>
+			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
 			<length>100</length>
 		</text>
 		<text name="clearTextPassword" >
 			<displayName>Generated Password</displayName>
-			<shortDescription>
+			<description>
 				The newly assigned password - this password must be changed at your next login.
-			</shortDescription>
+			</description>
 			<length>50</length>
 		</text>
 		<boolean  name="passwordExpired">
 			<displayName>Must change password</displayName>
-			<shortDescription>Whether the password must be changed</shortDescription>
+			<description>Whether the password must be changed</description>
 		</boolean >
 		<dateTime name="passwordLastChanged">
 			<displayName>Last changed</displayName>
-			<shortDescription>Date and Time the users password was last changed</shortDescription>
+			<description>Date and Time the users password was last changed</description>
 		</dateTime>
 
 		<association name="contact" type="aggregation" required="true">
 			<displayName>Contact</displayName>
-			<shortDescription>The contact details for the user.</shortDescription>
+			<description>The contact details for the user.</description>
 			<documentName>Contact</documentName>
 			<queryName>qContacts</queryName>
 		</association>
 		<association name="dataGroup" type="aggregation">
 			<displayName>Data Group</displayName>
-			<shortDescription>The group that constrains what information this user can see.</shortDescription>
+			<description>The group that constrains what information this user can see.</description>
 			<domain>variant</domain>
 			<documentName>DataGroup</documentName>
 		</association>
 		<collection name="groups" type="aggregation">
 			<displayName>Groups</displayName>
-			<shortDescription>The collection of groups that this user belongs to.</shortDescription>
+			<description>The collection of groups that this user belongs to.</description>
 			<domain>variant</domain>
 			<documentName>Group</documentName>
 			<minCardinality>0</minCardinality>
@@ -96,13 +96,13 @@
 		</collection>
 		<collection name="roles" type="child">
 			<displayName>Roles</displayName>
-			<shortDescription><![CDATA[
+			<description><![CDATA[
 			Typically users are assigned membership of groups, which define sets of roles, 
 			corresponding to business roles within an organisation.
 			<br/>
 			However user may also have specific roles assigned in addition to the roles
 			which are implied from the groups to which they belong.
-			]]></shortDescription>
+			]]></description>
 			<documentName>UserRole</documentName>
 			<minCardinality>0</minCardinality>
 			<ordering>
@@ -119,14 +119,14 @@
 		<!-- New user wizard state properties -->
 		<enum name="wizardState" persistent="false">
 			<displayName>Wizard State</displayName>
-			<shortDescription>
+			<description>
 			The create user wizard is staged into the following states which roughly follow in order.
 			Either an existing contact is confirmed as that of the new user,
 			OR
 			A new contact is created for the new user.
 			Once the identity of the new user is established, the wizard moves on
 			to confirm the new user name and password and membership of groups.
-			</shortDescription>
+			</description>
 			<values>
 				<value code="confirmContact"/>
 				<value code="createContact"/>
@@ -136,17 +136,17 @@
 		</enum>
 		<text name="searchContactName" persistent="false">
 			<displayName>Full name</displayName>
-			<shortDescription>This is used to determine if you are on the system already</shortDescription>
+			<description>This is used to determine if you are on the system already</description>
 			<length>1024</length>
 		</text>
 		<text name="searchEmail" persistent="false">
 			<displayName>Email</displayName>
-			<shortDescription>The email address to use to search existing contacts.</shortDescription>
+			<description>The email address to use to search existing contacts.</description>
 			<length>512</length>
 		</text>
 		<collection name="candidateContacts" type="child" persistent="false">
 			<displayName>Candidate Contacts</displayName>
-			<shortDescription>The contacts who possibly match the search criteria.</shortDescription>
+			<description>The contacts who possibly match the search criteria.</description>
 			<documentName>UserCandidateContact</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>

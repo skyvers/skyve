@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/cglib-3.1.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/geodb_hatbox-1.0.b7.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/lib/sqljdbc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

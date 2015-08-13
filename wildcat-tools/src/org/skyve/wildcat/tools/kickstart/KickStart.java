@@ -16,7 +16,7 @@ public class KickStart extends JFrame {
 	}
 	
 	private void init() {
-		Dimension size = new Dimension(640, 480);
+		Dimension size = new Dimension(800, 480);
 		setPreferredSize(size);
 
 		add(new KickStartPanel());

@@ -213,7 +213,7 @@ public class ListGrid extends HtmlPanelGroup {
 		UIOutput heading = null;
 		if (! mobile) {
 			heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-	        heading.setValue(query.getDisplayName());
+	        heading.setValue(query.getDescription());
 		}
 		
         if (canCreate) {

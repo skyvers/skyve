@@ -21,7 +21,7 @@
 		</text>
 		<enum name="contactType">
 			<displayName>Contact Type</displayName>
-			<shortDescription>Whether this contact is a person or an organisation.</shortDescription>
+			<description>Whether this contact is a person or an organisation.</description>
 			<values>
 				<value code="Person"/>
 				<value code="Organisation"/>

@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -21,15 +22,26 @@ class KickStartPanel extends JPanel {
 	private JPasswordField password = new JPasswordField();
 	private JTextField email = new JTextField("admin@demo.com");
 	private JTextField mobile = new JTextField();
-	private JTextField dbDialect = new JTextField("org.skyve.wildcat.persistence.hibernate.dialect.H2SpatialDialect");
-	private JTextField dbDriver = new JTextField("org.h2.jdbcx.JdbcDataSource");
-	private JTextField dbUrl = new JTextField("jdbc:h2:file:~/demo;IGNORECASE=TRUE");
+	private JComboBox<String> dbDialect = new JComboBox<>(new String[] {"org.skyve.wildcat.persistence.hibernate.dialect.H2SpatialDialect",
+																			"org.skyve.wildcat.persistence.hibernate.dialect.SQLServer2005SpatialDialect",
+																			"org.skyve.wildcat.persistence.hibernate.dialect.SQLServer2008SpatialDialect",
+																			"org.skyve.wildcat.persistence.hibernate.dialect.MySQL5InnoDBSpatialDialect"});
+	private JComboBox<String> dbDriver = new JComboBox<>(new String[] {"org.h2.jdbcx.JdbcDataSource",
+																		"com.microsoft.sqlserver.jdbc.SQLServerDriver",
+																		"com.mysql.jdbc.Driver"});
+	private JComboBox<String> dbUrl = new JComboBox<>(new String[] {"jdbc:h2:file:~/<db-name>;IGNORECASE=TRUE",
+																		"jdbc:sqlserver://localhost;databaseName=<db-name>;sendStringParametersAsUnicode=false;",
+																		"jdbc:mysql://localhost:3306/<db-name>?useCursorFetch=true&defaultFetchSize=100"});
 	private JTextField dbUserName = new JTextField("sa");
 	private JTextField dbPassword = new JTextField("sa");
 	
 	public KickStartPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+		dbDialect.setEditable(true);
+		dbDriver.setEditable(true);
+		dbUrl.setEditable(true);
+		
 		JPanel userPanel = new JPanel(new SpringLayout());
 		userPanel.setBorder(BorderFactory.createTitledBorder("Customer/User"));
 		userPanel.add(new JLabel("Customer Name:*"));
@@ -89,15 +101,15 @@ class KickStartPanel extends JPanel {
 	}
 
 	String getDBDialect() {
-		return Util.processStringValue(dbDialect.getText());
+		return Util.processStringValue((String) dbDialect.getSelectedItem());
 	}
 	
 	String getDBDriver() {
-		return Util.processStringValue(dbDriver.getText());
+		return Util.processStringValue((String) dbDriver.getSelectedItem());
 	}
 	
 	String getDBUrl() {
-		return Util.processStringValue(dbUrl.getText());
+		return Util.processStringValue((String) dbUrl.getSelectedItem());
 	}
 	
 	String getDBUserName() {

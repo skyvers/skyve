@@ -26,12 +26,12 @@
 		</date>
 		<text name="roleTitle">
 			<displayName>Role Title</displayName>
-			<shortDescription>The person's organisational title or role</shortDescription>
+			<description>The person's organisational title or role</description>
 			<length>200</length>
 		</text>
 		<association type="aggregation" name="baseOffice">
 			<displayName>Base Office</displayName>
-			<shortDescription>The office this person usually operates from.</shortDescription>
+			<description>The office this person usually operates from.</description>
 			<documentName>Office</documentName>
 		</association>
 		<geometry name="location">
@@ -48,11 +48,11 @@
 		</enum>
 		<dateTime name="dueBack">
 			<displayName>Due Back</displayName>
-			<shortDescription>If not in the office, when the staff member is due back.</shortDescription>
+			<description>If not in the office, when the staff member is due back.</description>
 		</dateTime>
 		<boolean name="demoData">
 			<displayName>Demonstration Data</displayName>
-			<shortDescription>If this is set, the data was created by the demo data job and can safely be deleted.</shortDescription>
+			<description>If this is set, the data was created by the demo data job and can safely be deleted.</description>
 		</boolean>
 		<association type="aggregation" name="reportsTo" persistent="false">
 			<displayName>Reports To</displayName>

@@ -67,7 +67,7 @@ public interface UniqueConstraint extends NamedMetaData {
 	 * 
 	 * @return
 	 */
-	public String getShortDescription();
+	public String getDescription();
 	
 	/**
 	 * 

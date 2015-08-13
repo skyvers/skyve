@@ -25,7 +25,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.metadata.model.document.Association;
+import org.skyve.wildcat.metadata.model.document.AssociationImpl;
 import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
@@ -110,8 +110,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20150809";
-	public static final String WILDCAT_VERSION = "20150809";
+	public static final String JAVASCRIPT_FILE_VERSION = "20150811";
+	public static final String WILDCAT_VERSION = "20150811";
 	public static final String SMART_CLIENT_DIR = "isomorphic10a";
 	
 	private static String absoluteBasePath;
@@ -290,8 +290,8 @@ public class UtilImpl {
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
 				if (reference.isPersistent()) {
-					if (reference instanceof Association) {
-						Association association = (Association) reference;
+					if (reference instanceof AssociationImpl) {
+						AssociationImpl association = (AssociationImpl) reference;
 						if (association.getType() == AssociationType.composition) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
@@ -328,8 +328,8 @@ public class UtilImpl {
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
 				if (reference.isPersistent()) {
-					if (reference instanceof Association) {
-						Association association = (Association) reference;
+					if (reference instanceof AssociationImpl) {
+						AssociationImpl association = (AssociationImpl) reference;
 						if (association.getType() == AssociationType.composition) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
@@ -395,7 +395,7 @@ public class UtilImpl {
 			switch (type) {
 			case association:
 				if (currentDepth < maxDepth) {
-					Association association = (Association) attribute;
+					AssociationImpl association = (AssociationImpl) attribute;
 					Module associationModule = module;
 					String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
 					if (associationModuleRef != null) {

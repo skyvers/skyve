@@ -26,8 +26,11 @@ import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.model.document.AssociationImpl;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
+import org.skyve.wildcat.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.wildcat.metadata.model.document.field.Boolean;
 import org.skyve.wildcat.metadata.model.document.field.Colour;
 import org.skyve.wildcat.metadata.model.document.field.Content;
@@ -72,7 +75,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"pluralAlias",
 							"icon16x16RelativeFilePath",
 							"icon32x32RelativeFilePath",
-							"shortDescription",
+							"description",
 							"parentDocument", 
 							"bizKey", 
 							"attributes", 
@@ -88,7 +91,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String pluralAlias;
 	private String icon16x16RelativeFilePath;
 	private String icon32x32RelativeFilePath;
-	private String shortDescription;
+	private String description;
 	private String parentDocument;
 	private BizKey bizKey;
 	private List<Attribute> attributes = new ArrayList<>();
@@ -150,13 +153,13 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = UtilImpl.processStringValue(shortDescription);
+	public void setDescription(String description) {
+		this.description = UtilImpl.processStringValue(description);
 	}
 
 	public String getParentDocument() {
@@ -194,8 +197,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						@XmlElementRef(type = Markup.class),
 						@XmlElementRef(type = Colour.class),
 						@XmlElementRef(type = Content.class),
-						@XmlElementRef(type = org.skyve.wildcat.metadata.model.document.Association.class),
-						@XmlElementRef(type = org.skyve.wildcat.metadata.model.document.Collection.class),
+						@XmlElementRef(type = AssociationImpl.class),
+						@XmlElementRef(type = CollectionImpl.class),
 						@XmlElementRef(type = Inverse.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = Id.class)})
@@ -266,7 +269,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		result.setIcon16x16RelativeFileName(icon16);
 		result.setIcon32x32RelativeFileName(icon32);
 		
-		result.setShortDescription(getShortDescription());
+		result.setDescription(getDescription());
 		
 		result.setParentDocumentName(getParentDocument());
 
@@ -600,7 +603,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 								for (Ordering ordering : orderings) {
 									String by = ordering.getBy();
 									if (by.indexOf('.') >= 0) {
-										((org.skyve.wildcat.metadata.model.document.Collection) collection).setComplexOrdering(true);
+										((CollectionImpl) collection).setComplexOrdering(true);
 										break;
 									}
 								}
@@ -645,7 +648,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			Set<String> constraintNames = new TreeSet<>();
 
 			for (UniqueConstraint constraintMetaData : uniqueConstraints) {
-				org.skyve.wildcat.metadata.model.document.UniqueConstraint constraint = new org.skyve.wildcat.metadata.model.document.UniqueConstraint();
+				UniqueConstraintImpl constraint = new UniqueConstraintImpl();
 				value = constraintMetaData.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The unique constraint [name] is required");
@@ -655,7 +658,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				}
 				constraint.setName(value);
 				constraint.setScope(constraintMetaData.getScope());
-				constraint.setShortDescription(constraintMetaData.getShortDescription());
+				constraint.setDescription(constraintMetaData.getDescription());
 				value = constraintMetaData.getMessage();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The unique constraint [message] is required for constraint " +

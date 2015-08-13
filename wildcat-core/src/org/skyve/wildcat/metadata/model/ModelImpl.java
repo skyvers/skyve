@@ -9,15 +9,13 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Model;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.metadata.AbstractMetaDataMap;
 
-public abstract class Model extends AbstractMetaDataMap implements org.skyve.metadata.model.Model {
-	/**
-	 * For Serialization
-	 */
+public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private static final long serialVersionUID = -9075615768687125545L;
 
 	private String owningModuleName;
@@ -33,7 +31,7 @@ public abstract class Model extends AbstractMetaDataMap implements org.skyve.met
 	private String icon16x16RelativeFileName;
 	private String icon32x32RelativeFileName;
 	private String name;
-	private String shortDescription;
+	private String description;
 
 	@Override
 	public String getOwningModuleName() {
@@ -122,12 +120,12 @@ public abstract class Model extends AbstractMetaDataMap implements org.skyve.met
 	}
 
 	@Override
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override

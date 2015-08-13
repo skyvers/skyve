@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
@@ -18,8 +19,8 @@ import org.skyve.wildcat.util.XMLUtil;
  */
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
 			name = "CollectionUniqueConstraint", 
-			propOrder = {"name", "shortDescription", "message", "fieldNames"})
-public class UniqueConstraint implements org.skyve.metadata.model.document.UniqueConstraint {
+			propOrder = {"name", "description", "message", "fieldNames"})
+public class UniqueConstraintImpl implements UniqueConstraint {
 	/**
 	 * For Serialization
 	 */
@@ -27,7 +28,7 @@ public class UniqueConstraint implements org.skyve.metadata.model.document.Uniqu
 
 	private String name;
 	private DocumentScope scope;
-	private String shortDescription;
+	private String description;
 	private String message;
 	private List<String> fieldNames = new ArrayList<>();
 	
@@ -58,13 +59,13 @@ public class UniqueConstraint implements org.skyve.metadata.model.document.Uniqu
 	}
 
 	@Override
-	public String getShortDescription() {
-		return shortDescription;
+	public String getDescription() {
+		return description;
 	}
 
 	@XmlAttribute
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = UtilImpl.processStringValue(shortDescription);
+	public void setDescription(String description) {
+		this.description = UtilImpl.processStringValue(description);
 	}
 
 	/**

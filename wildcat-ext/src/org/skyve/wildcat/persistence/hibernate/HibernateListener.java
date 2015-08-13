@@ -24,7 +24,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.metadata.model.document.Collection;
+import org.skyve.wildcat.metadata.model.document.CollectionImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
 public class HibernateListener implements PostUpdateEventListener,
@@ -126,7 +126,7 @@ public class HibernateListener implements PostUpdateEventListener,
 			Document document = module.getDocument(customer, eventBean.getBizDocument());
 			for (String referenceName : document.getReferenceNames()) {
 				if (BindUtil.get(eventBean, referenceName) == list) {
-					Collection collection = (Collection) document.getReferenceByName(referenceName);
+					CollectionImpl collection = (CollectionImpl) document.getReferenceByName(referenceName);
 					if (collection.isComplexOrdering()) {
 						BindUtil.sortCollectionByMetaData(eventBean, collection);
 						list.clearDirty();

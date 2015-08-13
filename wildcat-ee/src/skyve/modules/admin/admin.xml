@@ -288,7 +288,6 @@
 	</menu>
 	<queries>
 		<documentQuery name="qUserPasswords" documentName="User">
-			<displayName>User Passwords</displayName>
 			<description>Initial Passwords for Users</description>
 			<columns>
 				<column binding="contact.name" sortOrder ="ascending" />
@@ -305,7 +304,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qContacts" documentName="Contact">
-			<displayName>Contacts</displayName>
 			<description>All Contact Details</description>
 			<columns>
 				<column binding="name" sortOrder ="ascending" />
@@ -315,7 +313,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qMyContact" documentName="Contact">
-			<displayName>My Contact Details</displayName>
 			<description>My Contact Details</description>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
@@ -327,7 +324,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qUsers" documentName="User">
-			<displayName>Users</displayName>
 			<description>All Users</description>
 			<columns>
 				<column binding="contact.name" sortOrder ="ascending" />
@@ -337,7 +333,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qCompletedJobs" documentName="Job">
-			<displayName>All Completed Jobs</displayName>
 			<description>All completed jobs whether successful or not</description>
 			<columns>
 				<column binding="startTime" sortOrder="descending"/>
@@ -348,7 +343,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qAllSchedules" documentName="JobSchedule">
-			<displayName>Job Schedule</displayName>
 			<description>The list of all job schedule entries</description>
 			<columns>
 				<column binding="bizKey" sortOrder ="ascending" />
@@ -357,7 +351,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qExistingHits" documentName="UserMonthlyHits">
-			<displayName>Existing Hits</displayName>
 			<description>The existing hits record for a user, month and year</description>
 			<columns>
 				<column binding="userName" />
@@ -380,7 +373,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qSnapshots" documentName="Snapshot">
-			<displayName>Snapshot</displayName>
 			<description>The list of all Snapshots.</description>
 			<columns>
 				<column binding="moduleName" sortOrder ="ascending" />
@@ -389,7 +381,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qTags" documentName="Tag">
-			<displayName>Tag</displayName>
 			<description>The list of all Tags.</description>
 			<columns>
 				<column binding="name" sortOrder ="ascending" />
@@ -397,7 +388,6 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qAudits" documentName="Audit">
-			<displayName>Audit</displayName>
 			<description>The list of all Audits.</description>
 			<columns>
 				<column binding="timestamp" sortOrder="descending" />

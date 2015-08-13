@@ -12,7 +12,7 @@
 	<attributes>
 		<enum name="passwordComplexityModel" required="true">
 			<displayName>Password Strength</displayName>
-			<shortDescription>The security level/complexity model for user passwords</shortDescription>
+			<description>The security level/complexity model for user passwords</description>
 			<values>
 				<value code="MINIMUM"/>
 				<value code="MEDIUM"/>
