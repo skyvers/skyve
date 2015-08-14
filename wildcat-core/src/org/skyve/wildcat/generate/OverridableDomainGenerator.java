@@ -965,11 +965,16 @@ joined tables
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName);
 					fw.append("\" column=\"").append(association.getName());
+					// NB Don't use merge as cascade type.
+					// Cascade type 'merge' makes many-many relationships within the association
+					// target object update (without the collection being dirty)
+					// and thus causes optimistic lock exceptions when the bizLock 
+					// is up-revved from the update statement.
 					if (type == AssociationType.composition) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,merge,delete\" />\n");
+						fw.append("_id\" cascade=\"persist,save-update,refresh,delete\" />\n");
 					}
 					else if (type == AssociationType.aggregation) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,merge\" />\n");
+						fw.append("_id\" cascade=\"persist,save-update,refresh\" />\n");
 					}
 					else {
 						throw new IllegalStateException("Association type " + type + " not supported.");

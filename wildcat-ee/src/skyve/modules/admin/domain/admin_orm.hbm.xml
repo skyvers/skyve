@@ -51,7 +51,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="description" length="250" />
-		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" />
+		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh" />
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
@@ -241,7 +241,7 @@
 		<property name="cronExpression" length="128" />
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
-		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh,merge" />
+		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminJobScheduleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -299,7 +299,7 @@
 		<property name="taggedModule" length="30" />
 		<property name="taggedDocument" length="30" />
 		<property name="taggedBizId" length="36" index="adminTaggedtaggedBizId" />
-		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh,merge" />
+		<many-to-one name="tag" entity-name="adminTag" column="tag_id" cascade="persist,save-update,refresh" />
 		<filter name="adminTaggedNoneFilter" condition="1=0"/>
 		<filter name="adminTaggedCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminTaggedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -324,8 +324,8 @@
 		<property name="clearTextPassword" length="50" />
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" />
-		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh" />
+		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh" />
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" />
 			<many-to-many entity-name="adminGroup" column="element_id" />
