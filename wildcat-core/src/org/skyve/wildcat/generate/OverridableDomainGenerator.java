@@ -965,20 +965,27 @@ joined tables
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName);
 					fw.append("\" column=\"").append(association.getName());
-					// NB Don't use merge as cascade type.
-					// Cascade type 'merge' makes many-many relationships within the association
-					// target object update (without the collection being dirty)
-					// and thus causes optimistic lock exceptions when the bizLock 
-					// is up-revved from the update statement.
 					if (type == AssociationType.composition) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,delete\" />\n");
+						fw.append("_id\" cascade=\"persist,save-update,refresh,delete");
 					}
 					else if (type == AssociationType.aggregation) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh\" />\n");
+						fw.append("_id\" cascade=\"persist,save-update,refresh");
 					}
 					else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
 					}
+					// Cascade type 'merge' makes many-many relationships within the association
+					// target object update (without the collection being dirty)
+					// and thus causes optimistic lock exceptions when the bizLock 
+					// is up-revved from the update statement.
+					// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
+					// all groups are up-revved, even though the collection is not dirty,
+					// causing optimistic lock when Staff are saved.
+					// So if lots of Staff use the same user, we're screwed.
+					if (ALLOW_CASCADE_MERGE) {
+						fw.append(",merge");
+					}
+					fw.append("\" />\n");
 				}
 			}
 			else if (attribute instanceof Enumeration) {

@@ -23,7 +23,16 @@ public abstract class DomainGenerator {
 	protected static final String TIMESTAMP = "Timestamp";
 	protected static final String GEOMETRY = "Geometry";
 	
-	protected static String SRC_PATH; 
+	protected static String SRC_PATH;
+	// Cascade type 'merge' makes many-many relationships within the association
+	// target object update (without the collection being dirty)
+	// and thus causes optimistic lock exceptions when the bizLock 
+	// is up-revved from the update statement.
+	// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
+	// all groups are up-revved, even though the collection is not dirty,
+	// causing optimistic lock when Staff are saved.
+	// So if lots of Staff use the same user, we're screwed.
+	protected static boolean ALLOW_CASCADE_MERGE = true; // for now
 
 	public static final void validate(String customerName) throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
@@ -59,26 +68,38 @@ public abstract class DomainGenerator {
 
 	public abstract void generate() throws Exception;
 
+	/**
+	 * Usage :- src/skyve, src/skyve true, src/skyve false Debug! 
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length >= 1) {
-			SRC_PATH = args[0];
-		}
-		else {
+		if (args.length == 0) {
 			System.err.println("You must have at least the src path as an argument - usually \"src/skyve/\"");
 			System.exit(1);
 		}
 
-		if (args.length != 2) { // allow for debug mode if there are 2 arguments
-			UtilImpl.COMMAND_TRACE = false;
-			UtilImpl.CONTENT_TRACE = false;
-			UtilImpl.HTTP_TRACE = false;
-			UtilImpl.QUERY_TRACE = false;
-			UtilImpl.SECURITY_TRACE = false;
-			UtilImpl.BIZLET_TRACE = false;
-			UtilImpl.SQL_TRACE = false;
-			UtilImpl.XML_TRACE = false;
+		UtilImpl.COMMAND_TRACE = false;
+		UtilImpl.CONTENT_TRACE = false;
+		UtilImpl.HTTP_TRACE = false;
+		UtilImpl.QUERY_TRACE = false;
+		UtilImpl.SECURITY_TRACE = false;
+		UtilImpl.BIZLET_TRACE = false;
+		UtilImpl.SQL_TRACE = false;
+		UtilImpl.XML_TRACE = false;
+
+		SRC_PATH = args[0];
+		if (args.length >= 2) {
+			if ("true".equalsIgnoreCase(args[1]) || "false".equalsIgnoreCase(args[1])) {
+				ALLOW_CASCADE_MERGE = Boolean.parseBoolean(args[1]);
+			}
+			else {
+				System.err.println("The second argument ALLOW_CASCADE_MERGE should be true or false");
+				System.exit(1);
+			}
 		}
-		else {
+
+		if (args.length == 3) { // allow for debug mode if there are only 3 arguments
 			UtilImpl.COMMAND_TRACE = true;
 			UtilImpl.CONTENT_TRACE = true;
 			UtilImpl.HTTP_TRACE = true;
@@ -88,7 +109,11 @@ public abstract class DomainGenerator {
 			UtilImpl.SQL_TRACE = true;
 			UtilImpl.XML_TRACE = true;
 		}
-		
+
+		System.out.println("SRC_PATH=" + SRC_PATH);
+		System.out.println("ALLOW_CASCADE_MERGE=" + ALLOW_CASCADE_MERGE);
+		System.out.println("DEBUG=" + (args.length == 3));
+
 		DomainGenerator foo = UtilImpl.USING_JPA ? new JPADomainGenerator() : new OverridableDomainGenerator();
 		AbstractRepository repository = new LocalDesignRepository();
 		AbstractRepository.set(repository);
