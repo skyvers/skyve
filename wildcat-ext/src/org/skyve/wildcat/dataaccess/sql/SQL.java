@@ -1,32 +1,18 @@
 package org.skyve.wildcat.dataaccess.sql;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.Decimal10;
-import org.skyve.domain.types.Decimal2;
-import org.skyve.domain.types.Decimal5;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
-import org.skyve.util.Binder;
-import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractQuery;
 import org.skyve.wildcat.persistence.AbstractSQL;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 public class SQL extends AbstractSQL implements ProjectedQuery {
 	private SQLDataAccess dataAccess;
@@ -64,93 +50,10 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 		}
 		
 		List<T> results = new ArrayList<>(100);
-		try {
-			User user = CORE.getUser();
-
-			@SuppressWarnings("resource")
-			Connection connection = dataAccess.getConnection();
-
-			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(connection, toQueryString())) {
-				for (String parameterName : getParameterNames()) {
-					ps.setObject(parameterName, getParameter(parameterName));
-				}
-
-				try (ResultSet rs = ps.executeQuery()) {
-					while (rs.next()) {
-						T bean = document.newInstance(user);
-	
-						for (Attribute attribute : document.getAllAttributes()) {
-							String name = attribute.getName();
-							AttributeType type = attribute.getAttributeType();
-							if (AttributeType.bool.equals(type)) {
-								boolean value = rs.getBoolean(name);
-								Binder.set(bean, name, rs.wasNull() ? null : Boolean.valueOf(value));
-							}
-							else if (AttributeType.colour.equals(type) ||
-										AttributeType.content.equals(type) ||
-										AttributeType.enumeration.equals(type) ||
-										AttributeType.markup.equals(type) ||
-										AttributeType.memo.equals(type) ||
-										AttributeType.text.equals(type)) {
-								Binder.convertAndSet(bean, name, rs.getString(name));
-							}
-							else if (AttributeType.date.equals(type)) {
-								Date value = rs.getDate(name);
-								if (value != null) {
-									Binder.convertAndSet(bean, name, value);
-								}
-							}
-							else if (AttributeType.dateTime.equals(type)) {
-								Time value = rs.getTime(name);
-								if (value != null) {
-									Binder.convertAndSet(bean, name, value);
-								}
-							}
-							else if (AttributeType.decimal10.equals(type)) {
-								double value = rs.getDouble(name);
-								Binder.set(bean, name, rs.wasNull() ? null : new Decimal10(value));
-							}
-							else if (AttributeType.decimal2.equals(type)) {
-								double value = rs.getDouble(name);
-								Binder.set(bean, name, rs.wasNull() ? null : new Decimal2(value));
-							}
-							else if (AttributeType.decimal5.equals(type)) {
-								double value = rs.getDouble(name);
-								Binder.set(bean, name, rs.wasNull() ? null : new Decimal5(value));
-							}
-							else if (AttributeType.geometry.equals(type)) {
-								Geometry geometry = (Geometry) dataAccess.getGeometryUserType().nullSafeGet(rs, new String[] {name}, null);
-								Binder.set(bean, name, geometry);
-							}
-							else if (AttributeType.integer.equals(type)) {
-								int value = rs.getInt(name);
-								Binder.set(bean, name, rs.wasNull() ? null : Integer.valueOf(value));
-							}
-							else if (AttributeType.longInteger.equals(type)) {
-								long value = rs.getLong(name);
-								Binder.set(bean, name, rs.wasNull() ? null : Long.valueOf(value));
-							}
-							else if (AttributeType.time.equals(type)) {
-								Time value = rs.getTime(name);
-								if (value != null) {
-									Binder.convertAndSet(bean, name, value);
-								}
-							}
-							else if (AttributeType.timestamp.equals(type)) {
-								Date value = rs.getDate(name);
-								if (value != null) {
-									Binder.convertAndSet(bean, name, value);
-								}
-							}
-						}
-	
-						results.add(bean);
-					}
-				}
+		try (SQLIterable<T> iterable = new SQLIterable<>(document, dataAccess, this, null)) {
+			for (T result : iterable) {
+				results.add(result);
 			}
-		}
-		catch (Throwable t) {
-			throw new DomainException(t);
 		}
 
 		return results;
@@ -159,8 +62,11 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable()
 	throws DomainException {
-		// TODO Auto-generated method stub
-		return null;
+		if (document == null) {
+			throw new DomainException("The document must be set to create beans from SQL");
+		}
+		
+		return new SQLIterable<>(document, dataAccess, this, null);
 	}
 
 	@Override
@@ -191,26 +97,10 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) throws DomainException {
 		List<T> results = new ArrayList<>(100);
-		try {
-			@SuppressWarnings("resource")
-			Connection connection = dataAccess.getConnection();
-
-			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(connection, toQueryString())) {
-				for (String parameterName : getParameterNames()) {
-					ps.setObject(parameterName, getParameter(parameterName));
-				}
-
-				try (ResultSet rs = ps.executeQuery()) {
-					while (rs.next()) {
-						@SuppressWarnings("unchecked")
-						T result = (T) BindUtil.convert(type, rs.getObject(1));
-						results.add(result);
-					}
-				}
+		try (SQLIterable<T> iterable = new SQLIterable<>(null, dataAccess, this, type)) {
+			for (T result : iterable) {
+				results.add(result);
 			}
-		}
-		catch (Throwable t) {
-			throw new DomainException(t);
 		}
 
 		return results;
@@ -219,20 +109,25 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
 	throws DomainException {
-		// TODO Auto-generated method stub
-		return null;
+		return new SQLIterable<>(null, dataAccess, this, type);
 	}
 
 	@Override
 	public List<Object[]> tupleResults() throws DomainException {
-		// TODO Auto-generated method stub
-		return null;
+		List<Object[]> results = new ArrayList<>(100);
+		try (SQLIterable<Object[]> iterable = new SQLIterable<>(null, dataAccess, this, null)) {
+			for (Object[] result : iterable) {
+				results.add(result);
+			}
+		}
+
+		return results;
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable() throws DomainException {
-		// TODO Auto-generated method stub
-		return null;
+	public AutoClosingIterable<Object[]> tupleIterable() 
+	throws DomainException {
+		return new SQLIterable<>(null, dataAccess, this, null);
 	}
 
 	@Override
