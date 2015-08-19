@@ -1968,10 +1968,17 @@ joined tables
 		}
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
-			imports.add("modules." + baseDocument.getOwningModuleName() + ".domain." + baseDocumentName);
+
+			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + module.getName() + '/' + documentName + '/' + documentName + "Extension.java";
+			if (new File(extensionPath).exists()) {
+				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName + "Extension");
+			}
+			else {
+				imports.add("modules." + baseDocument.getOwningModuleName() + ".domain." + baseDocumentName);
+			}
 		}
 
-		// Add extra imports required if this is a base class
+		// Add extra imports required if this is not a base class
 		if (baseDocumentName == null) {
 			if (persistent != null) {
 				imports.add("org.skyve.wildcat.domain.AbstractPersistentBean");
@@ -2108,7 +2115,14 @@ joined tables
 			if (overridden) {
 				fw.append("Ext");
 			}
-			fw.append(" extends ").append(baseDocumentName);
+			
+			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + module.getName() + '/' + documentName + '/' + documentName + "Extension.java";
+			if (new File(extensionPath).exists()) {
+				fw.append(" extends ").append(baseDocumentName).append("Extension");
+			}
+			else {
+				fw.append(" extends ").append(baseDocumentName);
+			}
 		}
 		else {
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
