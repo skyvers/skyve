@@ -1855,6 +1855,9 @@ joined tables
 								AttributeType.text.equals(type)) {
 						attributes.append(" = \"").append(defaultValue).append('"');
 					}
+					else if (AttributeType.enumeration.equals(type)) {
+						attributes.append(" = ").append(propertySimpleClassName).append('.').append(defaultValue);
+					}
 					else {
 						attributes.append(" = new ").append(propertySimpleClassName);
 						attributes.append("(\"").append(defaultValue).append("\")");
