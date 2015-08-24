@@ -235,6 +235,10 @@ public class JSONReader {
 						BindUtil.set(result, propertyName, lock);
 					}
 					else if (PersistentBean.VERSION_NAME.equals(propertyName)) {
+						// Convert the number to an Integer
+						if (value != null) {
+							value = Integer.valueOf(((Number) value).intValue());
+						}
 						BindUtil.set(result, propertyName, value);
 					}
 					else {
@@ -261,7 +265,7 @@ public class JSONReader {
 							}
 						}
 						if (BindUtil.isWriteable(result, propertyName)) {
-							BindUtil.set(result, propertyName, value);
+							BindUtil.convertAndSet(result, propertyName, value);
 						}
 					}
 
