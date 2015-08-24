@@ -9,6 +9,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -91,34 +92,54 @@ public abstract class BeanVisitor {
 		StringBuilder sb = new StringBuilder(64);
 		try {
 			if (accept(binding, document, owningDocument, owningReference, bean, visitingInheritedDocument)) {
-				for (String referenceName : document.getReferenceNames()) {
-					Document referencedDocument = document.getReferencedDocument(customer, referenceName);
-					Reference childReference = document.getReferenceByName(referenceName);
-					if (childReference instanceof Collection) {
-						@SuppressWarnings("unchecked")
-						List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, referenceName);
-						if (children != null) {
-							int i = 0;
-							for (Bean child : children) {
-								if (child != null) {
+				// NB visit references in the order they are defined in the document.
+				for (Attribute attribute : document.getAttributes()) {
+					if (attribute instanceof Reference) {
+						String referenceName = attribute.getName();
+						Document referencedDocument = document.getReferencedDocument(customer, referenceName);
+						Reference childReference = document.getReferenceByName(referenceName);
+						if (childReference instanceof Collection) {
+							@SuppressWarnings("unchecked")
+							List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, referenceName);
+							if (children != null) {
+								int i = 0;
+								for (Bean child : children) {
+									if (child != null) {
+										sb.setLength(0);
+										if (binding.length() != 0) {
+											sb.append(binding).append('.');
+										}
+										sb.append(referenceName).append('[').append(i).append(']');
+										visit(sb.toString(), 
+												referencedDocument, 
+												document, 
+												childReference, 
+												child, 
+												customer,
+												visitedBeans, 
+												visitNulls,
+												false);
+									}
+									i++;
+								}
+								if ((i == 0) && visitNulls) { // no elements in the collection
 									sb.setLength(0);
 									if (binding.length() != 0) {
 										sb.append(binding).append('.');
 									}
-									sb.append(referenceName).append('[').append(i).append(']');
+									sb.append(referenceName);
 									visit(sb.toString(), 
-											referencedDocument, 
+											referencedDocument,
 											document, 
 											childReference, 
-											child, 
-											customer,
+											null, 
+											customer, 
 											visitedBeans, 
 											visitNulls,
 											false);
 								}
-								i++;
 							}
-							if ((i == 0) && visitNulls) { // no elements in the collection
+							else {
 								sb.setLength(0);
 								if (binding.length() != 0) {
 									sb.append(binding).append('.');
@@ -136,39 +157,23 @@ public abstract class BeanVisitor {
 							}
 						}
 						else {
-							sb.setLength(0);
-							if (binding.length() != 0) {
-								sb.append(binding).append('.');
+							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, referenceName);
+							if ((child != null) || visitNulls) {
+								sb.setLength(0);
+								if (binding.length() != 0) {
+									sb.append(binding).append('.');
+								}
+								sb.append(referenceName);
+								visit(sb.toString(), 
+										referencedDocument,
+										document, 
+										childReference, 
+										child, 
+										customer, 
+										visitedBeans, 
+										visitNulls,
+										false);
 							}
-							sb.append(referenceName);
-							visit(sb.toString(), 
-									referencedDocument,
-									document, 
-									childReference, 
-									null, 
-									customer, 
-									visitedBeans, 
-									visitNulls,
-									false);
-						}
-					}
-					else {
-						Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, referenceName);
-						if ((child != null) || visitNulls) {
-							sb.setLength(0);
-							if (binding.length() != 0) {
-								sb.append(binding).append('.');
-							}
-							sb.append(referenceName);
-							visit(sb.toString(), 
-									referencedDocument,
-									document, 
-									childReference, 
-									child, 
-									customer, 
-									visitedBeans, 
-									visitNulls,
-									false);
 						}
 					}
 				}

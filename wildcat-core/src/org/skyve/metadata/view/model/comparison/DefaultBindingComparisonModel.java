@@ -50,12 +50,17 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 										Bean bean,
 										boolean visitingInheritedDocument)
 			throws Exception {
+				// No need to visit inherited documents as the properties are processed with document.getAllAttributes()
+				if (visitingInheritedDocument) {
+					return true;
+				}
+
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
 				}
 				
-//System.out.println("OB = " + binding + " -> " + bizId);
+//System.out.println("OB = " + binding + " -> " + bean);
 				bindingToNodes.put(binding, createNode(binding, owningReference, currentDocument, bean, true));
 
 				return true;
@@ -73,6 +78,11 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 										Bean bean,
 										boolean visitingInheritedDocument)
 			throws Exception {
+				// No need to visit inherited documents as the properties are processed with document.getAllAttributes()
+				if (visitingInheritedDocument) {
+					return true;
+				}
+
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
@@ -164,7 +174,8 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 								boolean newEntry,
 								String binding)
 	throws Exception {
-		for (Attribute attribute : beanDocument.getAttributes()) {
+		// Get any inherited attributes here too.
+		for (Attribute attribute : beanDocument.getAllAttributes()) {
 			String fqAttributeBinding = null;
 			if (binding.isEmpty()) {
 				fqAttributeBinding = attribute.getName();

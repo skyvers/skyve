@@ -111,7 +111,7 @@ public class UtilImpl {
 	
 	// For versioning javascript for web site
 	public static final String JAVASCRIPT_FILE_VERSION = "20150814";
-	public static final String WILDCAT_VERSION = "20150819";
+	public static final String WILDCAT_VERSION = "20150824";
 	public static final String SMART_CLIENT_DIR = "isomorphic10a";
 	
 	private static String absoluteBasePath;
