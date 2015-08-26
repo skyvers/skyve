@@ -44,11 +44,11 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" />
 		<property name="staffCode" length="50" />
 		<property name="dateOfBirth" type="DateOnly" />
 		<property name="roleTitle" length="200" />
-		<many-to-one name="baseOffice" entity-name="whosinIntegrateOffice" column="baseOffice_id" cascade="persist,save-update,refresh" />
+		<many-to-one name="baseOffice" entity-name="whosinIntegrateOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" />
 		<property name="location" type="Geometry" />
 		<property name="status" length="9">
 			<type name="Enum">

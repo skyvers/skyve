@@ -1,6 +1,6 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Communication.CommunicationUtil;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
 
@@ -22,7 +22,7 @@ public class SendNow implements ServerSideAction<Communication> {
 
 		communication.setActionType(ActionType.sendImmediately);
 		
-		Communication result = CommunicationBizlet.kickOffJob(communication);
+		Communication result = CommunicationUtil.kickOffJob(communication);
 		
 		return new ServerSideActionResult(result);
 	}

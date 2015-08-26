@@ -64,6 +64,8 @@ public class Communication extends AbstractPersistentBean {
 	public static final String formatTypePropertyName = "formatType";
 	/** @hidden */
 	public static final String filePathPropertyName = "filePath";
+	/** @hidden */
+	public static final String systemPropertyName = "system";
 
 	/**
 	 * Action
@@ -249,6 +251,10 @@ public class Communication extends AbstractPersistentBean {
 	 * The path (local to the server) where bulk files will be created.
 	 **/
 	private String filePath;
+	/**
+	 * System communications can not be deleted unless the system flag is cleared first.
+	 **/
+	private Boolean system;
 
 	@Override
 	@XmlTransient
@@ -554,6 +560,24 @@ public class Communication extends AbstractPersistentBean {
 		this.filePath = filePath;
 	}
 
+	/**
+	 * {@link #system} accessor.
+	 **/
+	public Boolean getSystem() {
+		return system;
+	}
+
+	/**
+	 * {@link #system} mutator.
+	 * 
+	 * @param system	The new value to set.
+	 **/
+	@XmlElement
+	public void setSystem(Boolean system) {
+		preset(systemPropertyName, system);
+		this.system = system;
+	}
+
 	@XmlTransient
 	public boolean isEmailType() {
 		return (FormatType.email.equals(this.getFormatType()));
@@ -561,6 +585,15 @@ public class Communication extends AbstractPersistentBean {
 
 	public boolean isNotEmailType() {
 		return (! isEmailType());
+	}
+
+	@XmlTransient
+	public boolean isLocked() {
+		return (isPersisted() && Boolean.TRUE.equals(getSystem()));
+	}
+
+	public boolean isNotLocked() {
+		return (! isLocked());
 	}
 
 	@XmlTransient

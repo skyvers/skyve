@@ -3,7 +3,7 @@ package modules.admin.Communication.actions;
 import java.util.List;
 
 import modules.ModulesUtil;
-import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
@@ -42,7 +42,7 @@ public class TestSend implements ServerSideAction<Communication> {
 			throw new ValidationException(new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
 		}
 		
-		CommunicationBizlet.sendOverrideTo(communication, myAddress, beans.get(0));
+		CommunicationUtil.sendOverrideTo(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, myAddress, beans.get(0));
 		
 		return new ServerSideActionResult(communication);
 	}

@@ -49,24 +49,26 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 					switch (communication.getActionType()) {
 					case saveForBulkSend:
 
-						sb.append("\n Saving");
-						CommunicationBizlet.generate(communication, pb);
+						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						sb.append("\n Saved OK");
 						break;
 					case testBindingsAndOutput:
 
-						sb.append("\n Testing");
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						sb.append("\n Tested OK");
 						break;
 					case sendImmediately:
 
-						sb.append("\n Sending");
-						CommunicationBizlet.send(communication, pb);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						sb.append("\n Sent OK");
 						break;
 					default:
 						break;
 					}
 				} catch (Exception e) {
 					sb.append(" - Unsuccessful");
-					sb.append("\n").append(e.getMessage());
+					sb.append("\n");
+					sb.append(e);
 				}
 				setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
 
@@ -78,6 +80,5 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 		} else {
 			throw new Exception("Communication job failed to commence because not valid action type was selected.");
 		}
-
 	}
 }

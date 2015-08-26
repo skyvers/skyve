@@ -93,6 +93,10 @@
 			<description>The path (local to the server) where bulk files will be created.</description>
 			<length>2000</length>
 		</text>
+		<boolean name="system">
+			<displayName>System</displayName>
+			<description>System communications can not be deleted unless the system flag is cleared first.</description>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="saveAction">
@@ -100,6 +104,9 @@
 		</condition>
 		<condition name="emailType">
 			<![CDATA[FormatType.email.equals(this.getFormatType())]]>
+		</condition>
+		<condition name="locked">
+			<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
 		</condition>
 	</conditions>
 </document>

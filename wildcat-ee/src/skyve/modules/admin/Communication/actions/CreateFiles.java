@@ -1,6 +1,6 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Communication.CommunicationUtil;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
 
@@ -28,7 +28,7 @@ public class CreateFiles implements ServerSideAction<Communication> {
 			throw new ValidationException(new Message(Communication.filePathPropertyName, "Value is required for this action"));
 		}
 		
-		Communication result = CommunicationBizlet.kickOffJob(communication);
+		Communication result = CommunicationUtil.kickOffJob(communication);
 		
 		return new ServerSideActionResult(result);
 	}

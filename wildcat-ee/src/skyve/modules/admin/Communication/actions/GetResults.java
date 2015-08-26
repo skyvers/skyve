@@ -1,6 +1,6 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.Communication.CommunicationBizlet;
+import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
@@ -35,7 +35,7 @@ public class GetResults implements ServerSideAction<Communication> {
 		
 		result.setResults(results);
 		
-		result = CommunicationBizlet.kickOffJob(result);
+		result = CommunicationUtil.kickOffJob(result);
 		
 		return new ServerSideActionResult(result);
 	}
@@ -74,6 +74,8 @@ public class GetResults implements ServerSideAction<Communication> {
 		default:
 			break;
 		}
+		
+		System.out.println("RESULTS " + results.toString());
 		
 		return results.toString();
 		

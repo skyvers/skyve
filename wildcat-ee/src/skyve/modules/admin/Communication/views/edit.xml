@@ -11,14 +11,18 @@
 					<column />
 					<column />
 					<column />
+					<column />
 					<row>
-						<item colspan="2">
-							<default binding="description" />
+						<item>
+							<textField binding="description" disabled="locked"/>
+						</item>
+						<item>
+							<default binding="system" />
 						</item>
 					</row>
 					<row>
 						<item colspan="2">
-							<combo binding="moduleName">
+							<combo binding="moduleName" disabled="locked">
 								<onChangedHandlers>
 									<server action="UpdateModule" />
 								</onChangedHandlers>
@@ -27,7 +31,7 @@
 					</row>
 					<row>
 						<item  colspan="2">
-							<combo binding="documentName">
+							<combo binding="documentName" disabled="locked">
 								<onChangedHandlers>
 									<server action="UpdateDocument" />
 								</onChangedHandlers>
@@ -55,7 +59,7 @@
 					<column />
 					<row>
 						<item colspan="2">
-							<textArea binding="results" pixelHeight="200" />
+							<textArea binding="results" pixelHeight="200" disabled="true"/>
 						</item>
 					</row>
 					<row>
