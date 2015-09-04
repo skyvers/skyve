@@ -43,18 +43,19 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(targetBean.getBizModule());
 			Document document = module.getDocument(customer, targetBean.getBizDocument());
-			Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-			if (bizlet != null) {
-				ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
-				WebContext webContext = facesView.getWebContext();
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
-				if (! vetoed) {
+
+			ImplicitActionName ian = ok ? ImplicitActionName.OK : ImplicitActionName.Save;
+			WebContext webContext = facesView.getWebContext();
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
+			if (! vetoed) {
+				Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ian + ", " + targetBean + ", null, " + ", " + webContext);
 					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + targetBean);
-					internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 				}
+				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 			}
 	
 			if (targetBean.isNotPersisted() && (! user.canCreateDocument(document))) {

@@ -855,15 +855,17 @@ t.printStackTrace();
 				String persistentName = (persistent == null) ? null : persistent.getName();
 				try {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-					if ((! visitingInheritedDocument) && 
-							(persistentName != null) && 
-							(bizlet != null)) { // persistent and concrete for this bean graph with a bizlet
+
+					// persistent and concrete for this bean graph
+					if ((! visitingInheritedDocument) && (persistentName != null)) {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
-							bizlet.preSave(bean);
-							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Exiting " + bizlet.getClass().getName() + ".preSave");
+							if (bizlet != null) {
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Entering " + bizlet.getClass().getName() + ".preSave: " + bean);
+								bizlet.preSave(bean);
+								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preSave", "Exiting " + bizlet.getClass().getName() + ".preSave");
+							}
 							internalCustomer.interceptAfterPreSave(bean);
 						}
 					}
@@ -959,19 +961,20 @@ t.printStackTrace();
 			throws Exception {
 				Persistent persistent = document.getPersistent();
 				String persistentName = (persistent == null) ? null : persistent.getName();
-				if ((! visitingInheritedDocument) && 
-						(persistentName != null)) { // persistent and concrete for this bean graph
+				
+				// persistent and concrete for this bean graph
+				if ((! visitingInheritedDocument) && (persistentName != null)) {
 					try {
-						Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-						if (bizlet != null) {
-							CustomerImpl internalCustomer = (CustomerImpl) customer;
-							boolean vetoed = internalCustomer.interceptBeforePostSave(bean);
-							if (! vetoed) {
+						CustomerImpl internalCustomer = (CustomerImpl) customer;
+						boolean vetoed = internalCustomer.interceptBeforePostSave(bean);
+						if (! vetoed) {
+							Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+							if (bizlet != null) {
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Entering " + bizlet.getClass().getName() + ".postSave: " + bean);
 								bizlet.postSave(bean);
 								if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postSave", "Exiting " + bizlet.getClass().getName() + ".postSave");
-								internalCustomer.interceptAfterPostSave(bean);
 							}
+							internalCustomer.interceptAfterPostSave(bean);
 						}
 					}
 					catch (ValidationException e) {
@@ -1529,20 +1532,21 @@ t.printStackTrace();
 	public void postLoad(AbstractPersistentBean loadedBean)
 	throws Exception {
 		Customer customer = user.getCustomer();
-		Document document = customer.getModule(loadedBean.getBizModule()).getDocument(customer, loadedBean.getBizDocument());
-		Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-		if (bizlet != null) {
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
-			if (! vetoed) {
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
+		if (! vetoed) {
+			Document document = customer.getModule(loadedBean.getBizModule()).getDocument(customer, loadedBean.getBizDocument());
+			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Entering " + bizlet.getClass().getName() + ".postLoad: " + loadedBean);
 				bizlet.postLoad(loadedBean);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "postLoad", "Exiting " + bizlet.getClass().getName() + ".postLoad");
-				internalCustomer.interceptAfterPostLoad(loadedBean);
 			}
-			// clear the object's dirtiness
-			loadedBean.originalValues().clear();
+			internalCustomer.interceptAfterPostLoad(loadedBean);
 		}
+
+		// clear the object's dirtiness
+		loadedBean.originalValues().clear();
 	}
 
 	@Override
@@ -1696,16 +1700,16 @@ t.printStackTrace();
 		}.visit(document, beanToDelete, customer);
 		
 		try {
-			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-			if (bizlet != null) {
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreDelete(beanToDelete);
-				if (! vetoed) {
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreDelete(beanToDelete);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Entering " + bizlet.getClass().getName() + ".preDelete: " + beanToDelete);
 					bizlet.preDelete(beanToDelete);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preDelete", "Exiting " + bizlet.getClass().getName() + ".preDelete");
-					internalCustomer.interceptAfterPreDelete(beanToDelete);
 				}
+				internalCustomer.interceptAfterPreDelete(beanToDelete);
 			}
 
 			Set<String> documentsVisited = new TreeSet<>();

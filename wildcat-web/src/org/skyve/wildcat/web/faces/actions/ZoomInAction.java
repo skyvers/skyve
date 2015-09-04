@@ -48,17 +48,18 @@ public class ZoomInAction extends FacesAction<Void> {
 			Customer customer = CORE.getUser().getCustomer();
 			Module collectionModule = customer.getModule(currentBean.getBizModule());
 			Document collectionDocument = collectionModule.getDocument(customer, currentBean.getBizDocument());
-			Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
-			if (bizlet != null) {
-				WebContext webContext = facesView.getWebContext();
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
-				if (! vetoed) {
+
+			WebContext webContext = facesView.getWebContext();
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
+				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + currentBean + ", " + facesView.getBean() + ", " + webContext);
 					currentBean = bizlet.preExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
-					internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 				}
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 			}
 	
 			ActionUtil.redirect(facesView, currentBean);

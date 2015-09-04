@@ -447,23 +447,26 @@ public class CustomerImpl implements Customer {
 																					String documentName, 
 																					Attribute attribute)
 	throws Exception {
+		List<DomainValue> result = null;
+		
 		String attributeName = attribute.getName();
-		String key = documentName + '.' + attributeName;
-		List<DomainValue> result = domainValueCache.get(key);
-		if (attribute instanceof Enumeration) {
-			Class<org.skyve.domain.types.Enumeration> domainEnum = AbstractRepository.get().getEnum((Enumeration) attribute);
-			result = (List<DomainValue>) domainEnum.getMethod("toDomainValues").invoke(null);
-			domainValueCache.put(key, result);
-		}
-		else if ((bizlet != null) && (result == null)) {
-			boolean vetoed = interceptBeforeGetConstantDomainValues(attributeName);
-			if (! vetoed) {
+		boolean vetoed = interceptBeforeGetConstantDomainValues(attributeName);
+		if (! vetoed) {
+			String key = documentName + '.' + attributeName;
+			result = domainValueCache.get(key);
+			if (attribute instanceof Enumeration) {
+				Class<org.skyve.domain.types.Enumeration> domainEnum = AbstractRepository.get().getEnum((Enumeration) attribute);
+				result = (List<DomainValue>) domainEnum.getMethod("toDomainValues").invoke(null);
+				domainValueCache.put(key, result);
+			}
+			else if ((bizlet != null) && (result == null)) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
 				result = bizlet.getConstantDomainValues(attributeName);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
-				interceptAfterGetConstantDomainValues(attributeName, result);
+				domainValueCache.put(key, result);
 			}
-			domainValueCache.put(key, result);
+
+			interceptAfterGetConstantDomainValues(attributeName, result);
 		}
 
 		return result;
@@ -643,7 +646,7 @@ public class CustomerImpl implements Customer {
 		}
 		return false;
 	}
-	
+
 	public void interceptAfterPreExecute(ImplicitActionName actionName,
 											Bean result,
 											Bean parentBean,

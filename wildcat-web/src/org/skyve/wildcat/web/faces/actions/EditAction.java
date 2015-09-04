@@ -73,16 +73,16 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 				webContext.setConversation(AbstractPersistence.get());
 				webContext.setCurrentBean(bean);
 
-				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-				if (bizlet != null) {
-					CustomerImpl internalCustomer = (CustomerImpl) customer;
-					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, bean, null, webContext);
-					if (! vetoed) {
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, bean, null, webContext);
+				if (! vetoed) {
+					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+					if (bizlet != null) {
 						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + bean + ", null, " + ", " + webContext);
 		    			bean = (T) bizlet.preExecute(ImplicitActionName.New, bean, null, webContext);
 						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
-						internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
 					}
+					internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, bean, null, webContext);
 				}
 			}
 		}
@@ -107,16 +107,16 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			webContext.setConversation(persistence);
 			webContext.setCurrentBean(bean);
 
-			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-			if (bizlet != null) {
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, bean, null, webContext);
-				if (! vetoed) {
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, bean, null, webContext);
+			if (! vetoed) {
+				Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + bean + ", null, " + ", " + webContext);
 	    			bean = (T) bizlet.preExecute(ImplicitActionName.Edit, bean, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + bean);
-					internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
 				}
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, bean, null, webContext);
     		}
 		}
 		facesView.setWebContext(webContext);

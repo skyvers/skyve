@@ -101,18 +101,18 @@ public class AddAction extends FacesAction<Void> {
 			}
 		}
 
-		// Call the bizlet
-		Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
-		if (bizlet != null) {
-			WebContext webContext = facesView.getWebContext();
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
-			if (! vetoed) {
+		// Call the bizlet and interceptors
+		WebContext webContext = facesView.getWebContext();
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
+		if (! vetoed) {
+			Bizlet<Bean> bizlet = ((DocumentImpl) collectionDocument).getBizlet(customer);
+			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + newBean + ", " + facesView.getBean() + ", " + webContext);
 				newBean = bizlet.preExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + newBean);
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 			}
+			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 		}
 
 		// Add the new element to the collection

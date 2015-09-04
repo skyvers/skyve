@@ -452,13 +452,15 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							processBean,
 	    							parameters);
 	    		
-	    		if ((fireExecuteCallbacks) && (processBizlet != null)) {
+	    		if (fireExecuteCallbacks) {
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, processBean, null, webContext);
 					if (! vetoed) {
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + processBean + ", null, " + webContext);
-		    			processBean = processBizlet.preExecute(ImplicitActionName.New, processBean, null, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.New + ", " + processBean + ", null, " + webContext);
+			    			processBean = processBizlet.preExecute(ImplicitActionName.New, processBean, null, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, processBean, null, webContext);
 					}
 	    		}
@@ -485,13 +487,15 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			throw new SecurityException("this data", user.getName());
 		    		}
 	    		}
-	    		if ((fireExecuteCallbacks) && (processBizlet != null)) {
+	    		if (fireExecuteCallbacks) {
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					if (! vetoed) {
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", null, " + webContext);
-		    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, null, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", null, " + webContext);
+			    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, null, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					}
 	    		}
@@ -554,13 +558,15 @@ public class SmartClientEditServlet extends HttpServlet {
     			}
 
 	    		// call preExecute()
-	    		if ((fireExecuteCallbacks) && (processBizlet != null)) {
+	    		if (fireExecuteCallbacks) {
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					if (! vetoed) {
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + processBean + ", " + parentBean + ", " + webContext);
-		    			processBean = processBizlet.preExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Add + ", " + processBean + ", " + parentBean + ", " + webContext);
+			    			processBean = processBizlet.preExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					}
 	    		}
@@ -580,13 +586,15 @@ public class SmartClientEditServlet extends HttpServlet {
     			else {
     				processBean = (Bean) referenceValue;
     			}
-	    		if ((fireExecuteCallbacks) && (processBizlet != null)) {
+	    		if (fireExecuteCallbacks) {
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					if (! vetoed) {
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", " + parentBean + ", " + webContext);
-		    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
-		    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Edit + ", " + processBean + ", " + parentBean + ", " + webContext);
+			    			processBean = processBizlet.preExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
+						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					}
 	    		}
@@ -738,16 +746,17 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 		else { // an implicit action
 			Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
-			if (processBizlet != null) {
-				UtilImpl.LOGGER.info("PRE-EXECUTE on " + implicitAction);
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(implicitAction, processedBean, null, webContext);
-				if (! vetoed) {
+			UtilImpl.LOGGER.info("PRE-EXECUTE on " + implicitAction);
+
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(implicitAction, processedBean, null, webContext);
+			if (! vetoed) {
+				if (processBizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Entering " + processBizlet.getClass().getName() + ".preExecute: " + implicitAction + ", " + processedBean + ", null, " + webContext);
 					processedBean = processBizlet.preExecute(implicitAction, processedBean, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processedBean);
-					internalCustomer.interceptAfterPreExecute(implicitAction, processedBean, null, webContext);
 				}
+				internalCustomer.interceptAfterPreExecute(implicitAction, processedBean, null, webContext);
 			}
 
 			// We are zooming out, so run the required validation and security checks
@@ -887,25 +896,25 @@ public class SmartClientEditServlet extends HttpServlet {
 		}
 		
 		// Run preExecute after the copy is taken, in case we rollback
-		if (bizlet != null) {
-			UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Delete);
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, 
-																			persistentBeanToDelete, 
-																			null,
-																			webContext);
-			if (! vetoed) {
+		UtilImpl.LOGGER.info("PRE-EXECUTE on " + ImplicitActionName.Delete);
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, 
+																		persistentBeanToDelete, 
+																		null,
+																		webContext);
+		if (! vetoed) {
+			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + webContext);
 				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
 															persistentBeanToDelete, 
 															null,
 															webContext);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
-															persistentBeanToDelete, 
-															null,
-															webContext);
 			}
+			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
+														persistentBeanToDelete, 
+														null,
+														webContext);
 		}
 		
 		persistence.delete(processDocument, persistentBeanToDelete);

@@ -70,17 +70,17 @@ public class DeleteAction extends FacesAction<Void> {
 		}
 
 		// Run preExecute after the copy is taken, in case we rollback
-		Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-		if (bizlet != null) {
-			WebContext webContext = facesView.getWebContext();
-			CustomerImpl internalCustomer = (CustomerImpl) customer;
-			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
-			if (! vetoed) {
+		WebContext webContext = facesView.getWebContext();
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
+		if (! vetoed) {
+			Bizlet<PersistentBean> bizlet = ((DocumentImpl) document).getBizlet(customer);
+			if (bizlet != null) {
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.Delete + ", " + persistentBeanToDelete + ", null, " + ", " + webContext);
 				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
 				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + persistentBeanToDelete);
-				internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
 			}
+			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, persistentBeanToDelete, null, webContext);
 		}
 
 		persistence.delete(document, persistentBeanToDelete);

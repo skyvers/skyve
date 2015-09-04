@@ -41,16 +41,17 @@ public class ZoomOutAction extends FacesAction<Void> {
 			Module module = customer.getModule(currentBean.getBizModule());
 			Document document = module.getDocument(customer, currentBean.getBizDocument());
 			Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
-			if (bizlet != null) {
-				WebContext webContext = facesView.getWebContext();
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
-				if (! vetoed) {
+
+			WebContext webContext = facesView.getWebContext();
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
+			if (! vetoed) {
+				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Entering " + bizlet.getClass().getName() + ".preExecute: " + ImplicitActionName.ZoomOut + ", " + currentBean + ", null, " + webContext);
 					currentBean = bizlet.preExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
 					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "preExecute", "Exiting " + bizlet.getClass().getName() + ".preExecute: " + currentBean);
-					internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
 				}
+				internalCustomer.interceptAfterPreExecute(ImplicitActionName.ZoomOut, currentBean, null, webContext);
 			}
 	
 			if (currentBean.isNotPersisted() && (! user.canCreateDocument(document))) {
