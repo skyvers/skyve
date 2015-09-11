@@ -1229,6 +1229,33 @@ code.append("_view:view})");
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			disableCRUD(grid, code);
+			if (Boolean.FALSE.equals(grid.getShowAdd())) {
+				code.append("showAdd:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowZoom())) {
+				code.append("showZoom:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowEdit())) {
+				code.append("showEdit:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowRemove())) {
+				code.append("showRemove:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowFilter())) {
+				code.append("showFilter:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowSummary())) {
+				code.append("showSummary:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowExport())) {
+				code.append("showExport:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowSnap())) {
+				code.append("showSnap:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowTag())) {
+				code.append("showTag:false,");
+			}
 			
 			eventsWithNoForm = true;
 		}
@@ -2511,7 +2538,7 @@ pickListFields:[{name:'value'}],
 				builder.append("disableRemoveConditionName:'").append(disabledCRUDCondition).append("',");
 			}
 		}
-		
+
 		private static void disableLookupComponents(Lookup lookup, StringBuilder builder) {
 			String disabledCondition = lookup.getDisablePickConditionName();
 			if (disabledCondition != null) {

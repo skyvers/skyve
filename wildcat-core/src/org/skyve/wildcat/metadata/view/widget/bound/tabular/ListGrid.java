@@ -42,6 +42,15 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableZoomConditionName",
 							"disableEditConditionName",
 							"disableRemoveConditionName",
+							"showAdd",
+							"showZoom",
+							"showEdit",
+							"showRemove",
+							"showFilter",
+							"showSummary",
+							"showExport",
+							"showSnap",
+							"showTag",
 							"queryName",
 							"modelName",
 							"selectedIdBinding",
@@ -76,6 +85,16 @@ public class ListGrid implements MetaData,
 	private String disableZoomConditionName;
 	private String disableEditConditionName;
 	private String disableRemoveConditionName;
+
+	private Boolean showAdd;
+	private Boolean showZoom;
+	private Boolean showEdit;
+	private Boolean showRemove;
+	private Boolean showExport;
+	private Boolean showFilter;
+	private Boolean showSummary;
+	private Boolean showSnap;
+	private Boolean showTag;
 
 	private String queryName;
 	private String modelName;
@@ -253,6 +272,87 @@ public class ListGrid implements MetaData,
 		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
 	}
 	
+	public Boolean getShowAdd() {
+		return showAdd;
+	}
+
+	@XmlAttribute(name = "showAdd", required = false)
+	public void setShowAdd(Boolean showAdd) {
+		this.showAdd = showAdd;
+	}
+
+	public Boolean getShowZoom() {
+		return showZoom;
+	}
+
+	@XmlAttribute(name = "showZoom", required = false)
+	public void setShowZoom(Boolean showZoom) {
+		this.showZoom = showZoom;
+	}
+
+	public Boolean getShowEdit() {
+		return showEdit;
+	}
+
+	@XmlAttribute(name = "showEdit", required = false)
+	public void setShowEdit(Boolean showEdit) {
+		this.showEdit = showEdit;
+	}
+
+	public Boolean getShowRemove() {
+		return showRemove;
+	}
+
+	@XmlAttribute(name = "showRemove", required = false)
+	public void setShowRemove(Boolean showRemove) {
+		this.showRemove = showRemove;
+	}
+
+	public Boolean getShowExport() {
+		return showExport;
+	}
+
+	@XmlAttribute(name = "showExport", required = false)
+	public void setShowExport(Boolean showExport) {
+		this.showExport = showExport;
+	}
+
+	public Boolean getShowFilter() {
+		return showFilter;
+	}
+
+	@XmlAttribute(name = "showFilter", required = false)
+	public void setShowFilter(Boolean showFilter) {
+		this.showFilter = showFilter;
+	}
+
+	public Boolean getShowSummary() {
+		return showSummary;
+	}
+
+	@XmlAttribute(name = "showSummary", required = false)
+	public void setShowSummary(Boolean showSummary) {
+		this.showSummary = showSummary;
+	}
+
+	public Boolean getShowSnap() {
+		return showSnap;
+	}
+
+	@XmlAttribute(name = "showSnap", required = false)
+	public void setShowSnap(Boolean showSnap) {
+		this.showSnap = showSnap;
+	}
+
+	public Boolean getShowTag() {
+		return showTag;
+	}
+
+	@XmlAttribute(name = "showTag", required = false)
+	public void setShowTag(Boolean showTag) {
+		this.showTag = showTag;
+	}
+
 	@Override
 	public String getSelectedIdBinding() {
 		return selectedIdBinding;

@@ -87,7 +87,7 @@ isc.AdvancedFilter.addMethods({
 
 			this.filterableComponent.grid.setShowFilterEditor(false);
 			// ensure we show and hide the whole panel 
-			// otherwise mouse gestures don't work on well on the list filter editor in IE7
+			// otherwise mouse gestures don't work well on the list filter editor in IE7
 			this.show();
 		}
 		else {

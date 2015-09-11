@@ -141,6 +141,17 @@ BizListGrid.addProperties({
 	_editButton: null,
 	_pickButton: null,
 	
+	// Switches to turn off tool buttons / menu items
+	showAdd: true,
+	showZoom: true,
+	showEdit: true,
+	showRemove: true,
+	showExport: true,
+	showFilter: true,
+	showSummary: true,
+	showSnap: true,
+	showTag: true,
+
 	// Lookup control - set when this BizListGrid is used as a picklist
 	_lookup: null
 });
@@ -472,16 +483,30 @@ BizListGrid.addMethods({
 */
 
 		var contextMenuData = (config && config.isPickList) ? [pickItem] : [];
-		contextMenuData.addList([newItem,
-		                         	me._zoomItem,
-									editItem,
-									this.deleteSelectionItem,
-									{isSeparator: true},
-			        				this.clearSelectionItem,
-			        				clearFilterItem,
-			        				refreshItem,
-			        		        {isSeparator: true},
-			        				exportItem]);
+		if (me.showAdd) {
+			contextMenuData.add(newItem);
+		}
+		if (me.showZoom) {
+			contextMenuData.add(me._zoomItem);
+		}
+		if (me.showEdit) {
+			contextMenuData.add(editItem);
+		}
+		if (me.showRemove) {
+			contextMenuData.add(this.deleteSelectionItem);
+		}
+		if (contextMenuData.length > 0) {
+			contextMenuData.add({isSeparator: true});
+		}
+		contextMenuData.add(this.clearSelectionItem);
+		if (me.showFilter) {
+			contextMenuData.add(clearFilterItem);
+		}
+		contextMenuData.add(refreshItem);
+		if (me.showExport) {
+			contextMenuData.addList([{isSeparator: true}, exportItem]);
+		}
+		
 		// the context menu of the BizListGrid
 		me._contextMenu = isc.Menu.create({
 		    showShadow: true,
@@ -787,44 +812,70 @@ BizListGrid.addMethods({
 		};
 		
 		var toolStripMembers = (config && config.isPickList) ? [me._pickButton] : [];
-		toolStripMembers.addList([
-            me._newButton,
-			me._zoomButton,
-			me._editButton,
-			me.deleteSelectionButton,
-			"separator",
-			BizUtil.createImageButton(me.clearSelectionItem.icon, 
-										false,
-										"<b>Clear selected</b> records.",
-										me.clearSelectionItem.click),
-			BizUtil.createImageButton(clearFilterItem.icon,
-										false,
-										"<b>Clear filter</b> criteria.",
-										clearFilterItem.click),
-			BizUtil.createImageButton(refreshItem.icon,
-										false,
-										"<b>Refresh</b> table data.",
-										refreshItem.click),
-	        "separator",
-			BizUtil.createImageButton(exportItem.icon,
-										false,
-										"<b>Export</b> table data.",
-										exportItem.click),
-			"separator",
-			me._advancedFilter.toggleButton,
-			"separator",
-			isc.Label.create({
-				width: 60,
-			    contents: "Snapshot:"
-			}),
-			snapMenuButton,
-			"separator",
-			isc.Label.create({
-				width: 30,
-			    contents: "Tag:"
-			}),
-			tagsMenuButton
-		]);
+		if (me.showAdd) {
+			toolStripMembers.add(me._newButton);
+		}
+		if (me.showZoom) {
+			toolStripMembers.add(me._zoomButton);
+		}
+		if (me.showEdit) {
+			toolStripMembers.add(me._editButton);
+		}
+		if (me.showRemove) {
+			toolStripMembers.add(me.deleteSelectionButton);
+		}
+		if (toolStripMembers.length > 0) {
+			toolStripMembers.add("separator");
+		}
+		toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
+														false,
+														"<b>Clear selected</b> records.",
+														me.clearSelectionItem.click));
+		if (me.showFilter) {
+			toolStripMembers.add(BizUtil.createImageButton(clearFilterItem.icon,
+															false,
+															"<b>Clear filter</b> criteria.",
+															clearFilterItem.click));
+		}
+		toolStripMembers.add(BizUtil.createImageButton(refreshItem.icon,
+														false,
+														"<b>Refresh</b> table data.",
+														refreshItem.click));
+		if (me.showFilter) {
+			toolStripMembers.addList([
+      			"separator",
+    			me._advancedFilter.toggleButton
+			]);
+		}
+		if (me.showExport) {
+			toolStripMembers.addList([
+                "separator",
+                BizUtil.createImageButton(exportItem.icon,
+											false,
+											"<b>Export</b> table data.",
+											exportItem.click)
+			]);
+		}
+		if (me.showSnap) {
+			toolStripMembers.addList([
+				"separator",
+				isc.Label.create({
+					width: 60,
+				    contents: "Snapshot:"
+				}),
+				snapMenuButton
+			]);
+		}
+		if (me.showTag) {
+			toolStripMembers.addList([
+				"separator",
+				isc.Label.create({
+					width: 30,
+				    contents: "Tag:"
+				}),
+				tagsMenuButton
+			]);
+		}
 		me._toolbar = isc.ToolStrip.create({
 			membersMargin: 2,
 			layoutMargin: 2,
@@ -866,7 +917,9 @@ BizListGrid.addMethods({
 		me.addMember(me._advancedFilter);
 		me.addMember(me.grid);
 		if (me._config.isTree) {} else {
-			me.addMember(me._summaryGrid);
+			if ( me.showSummary) {
+				me.addMember(me._summaryGrid);
+			}
 		}
 		
 		// _flagForm needs to be assigned after the BizListGrid object has been constructed
@@ -901,7 +954,7 @@ BizListGrid.addMethods({
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (! me._advancedFilter.toggleButton.selected),
+			showFilterEditor: (me.showFilter && (! me._advancedFilter.toggleButton.selected)),
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,
@@ -955,7 +1008,7 @@ BizListGrid.addMethods({
 						me.pick(me._lookup);
 					}
 					else {
-						if (me.canZoom) {
+						if (me.showZoom && me.canZoom) {
 							me._zoomItem.click();
 						}
 					}
@@ -1008,7 +1061,9 @@ BizListGrid.addMethods({
 				if (config.isTree) {} else {
 					requestProperties.params._summary = me.summaryType;
 				}
-				requestProperties.params._tagId = me.tagId;
+				if (me.showTag) {
+					requestProperties.params._tagId = me.tagId;
+				}
 	
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
@@ -1062,8 +1117,8 @@ BizListGrid.addMethods({
 						// Make the count summary fields numeric (if applicable)
 						var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
 						fields.setLength(fieldNames.length - 1);
-						// fieldNames[0] is "bizTagged"
-						// fieldNames[1] is "bizFlagComment"
+						// if (me.showTag) then fieldNames[0] is "bizTagged", fieldNames[1] is "bizFlagComment"
+						// else fieldNames[0] is "bizFlagComment"
 						for (var i = 0, l = fieldNames.length; i < l; i++) {
 							var fieldName = fieldNames[i];
 							if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
@@ -1110,23 +1165,26 @@ BizListGrid.addMethods({
 			},
 	
 			canEditCell: function(rowNum, colNum) {
-				// column zero = tag, column 1 = flag
-				return (! me._disabled) && (colNum > 1) && this.Super("canEditCell", arguments);
+				// if (me.showTag) then column zero = tag, column 1 = flag else column zero = flag
+				return (! me._disabled) && (colNum > (me.showTag ? 1 : 0)) && this.Super("canEditCell", arguments);
 			},
 	
 			fieldStateChanged: function() {
 				// ensure the widths of all fields are set
 				var fieldState = me.getFieldState();
-				// make the first column = the width of the first and second columns together
-				// ie the bizTagged and BizFlagComment columns
-				fieldState[1].width = fieldState[0].width + fieldState[1].width;
+				// If we have a tag column (the first column)
+				if (me.showTag) {
+					// make the first column = the width of the first and second columns together
+					// ie the bizTagged and BizFlagComment columns
+					fieldState[1].width = fieldState[0].width + fieldState[1].width;
+				}
+				fieldState.removeAt(0); // bizTagged needs to go now
+				
 				// if there is an expansion column, then take that into account 
 				// NB we are assuming LTR until we get an international customer...
 				if (this.canExpandRecords) {
-					fieldState[1].width += 30;
+					fieldState[0].width += 30;
 				}
-				fieldState.remove(0);
-	
 				me._summaryGrid.setFieldState(fieldState);
 			},
 			scrolled: function() {
@@ -1254,80 +1312,92 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		me.canUpdate = me._dataSource.canUpdate;
 		me.canDelete = me._dataSource.canDelete;
 
-		var fields = [{name: "bizTagged",
-						width: 30,
-						align: 'center',
-						canHide: false,
-						canSort: false,
-						canToggle: true,
-						canGroupBy: false,
-						showHover: false,
-//						frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-						recordClick: function(viewer, // the parent list grid 
-												record, 
-												recordNum, 
-												field, 
-												fieldNum, 
-												value, 
-												rawValue) {
-							if (record) {
-								if (me.canUpdate && me.canEdit) {
-									if (me.tagId) {
-										me._eventRecord = record;
-										me._eventRowNum = recordNum;
-										me._eventColNum = fieldNum;
-										if (record.bizTagged) {
-											record.bizTagged = 'UNTAG';
-										}
-										else {
-											record.bizTagged = 'TAG';
-										}
-										me.grid.updateData(record, '', {showPrompt: false, params: {_tagId: me.tagId}});
+		var fields = [];
+		if (me.showTag) {
+			fields.add(
+				{name: "bizTagged",
+					width: 30,
+					align: 'center',
+					canHide: false,
+					canSort: false,
+					canToggle: true,
+					canGroupBy: false,
+					showHover: false,
+//					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
+					recordClick: function(viewer, // the parent list grid 
+											record, 
+											recordNum, 
+											field, 
+											fieldNum, 
+											value, 
+											rawValue) {
+						if (record) {
+							if (me.canUpdate && me.canEdit) {
+								if (me.tagId) {
+									me._eventRecord = record;
+									me._eventRowNum = recordNum;
+									me._eventColNum = fieldNum;
+									if (record.bizTagged) {
+										record.bizTagged = 'UNTAG';
 									}
 									else {
-										isc.warn('Select or create a tag first from the tags menu in the list toolbar');
+										record.bizTagged = 'TAG';
 									}
+									me.grid.updateData(record, '', {showPrompt: false, params: {_tagId: me.tagId}});
+								}
+								else {
+									isc.warn('Select or create a tag first from the tags menu in the list toolbar');
 								}
 							}
-							
-							return false; // do not allow list grid level record click event to fire
 						}
-					},
-					{name: "bizFlagComment", 
-						width: 40, 
-						align: 'center',
-						// Cant hide this field as the summary type
-						// relies on the real-estate this column uses.
-						canHide: false,
-//						frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-						formatCellValue: function(value) {
-							if (value) {
-								return '<img src="images/flag.gif">';
-							}
-							else {
-								return '';
-							}
-						},
-						recordClick: function(viewer, // the parent list grid 
-												record, 
-												recordNum, 
-												field, 
-												fieldNum, 
-												value, 
-												rawValue) {
-							if (me.canUpdate && me.canEdit) {
-								me._eventRecord = record;
-								me._eventRowNum = recordNum;
-								me._eventColNum = fieldNum;
-								me._flagForm.editRecord(record);
-								me._flagDialog.show();
-							}
-							return false; // do not allow list grid level record click event to fire
-						},
-						hoverHTML: function(record, value, rowNum, colNum, grid) {
-							return record.bizFlagComment;
-						}
-					}];
+						
+						return false; // do not allow list grid level record click event to fire
+					}
+				}
+			);
+		}
+		else {
+			fields.add({name: "bizTagged", hidden: true, canHide: false});
+		}
+		fields.add(
+			{name: "bizFlagComment", 
+				// extend the width of the flag column to allow the sumary grid dropdown to display nicely
+				// if we are not showing the tag column and we have the summary row showing
+				width: ((! me.showTag) && me.showSummary) ? 60 : 40, 
+				align: 'center',
+				// Cant hide this field as the summary type
+				// relies on the real-estate this column uses.
+				canHide: false,
+//				frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
+				formatCellValue: function(value) {
+					if (value) {
+						return '<img src="images/flag.gif">';
+					}
+					else {
+						return '';
+					}
+				},
+				recordClick: function(viewer, // the parent list grid 
+										record, 
+										recordNum, 
+										field, 
+										fieldNum, 
+										value, 
+										rawValue) {
+					if (me.canUpdate && me.canEdit) {
+						me._eventRecord = record;
+						me._eventRowNum = recordNum;
+						me._eventColNum = fieldNum;
+						me._flagForm.editRecord(record);
+						me._flagDialog.show();
+					}
+					return false; // do not allow list grid level record click event to fire
+				},
+				hoverHTML: function(record, value, rowNum, colNum, grid) {
+					return record.bizFlagComment;
+				}
+			}
+		);
 
 		var fieldNames = me._dataSource.getFieldNames(true);
 		var hasDetailFields = false;
@@ -1336,7 +1406,7 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 			var fieldName = fieldNames[i];
 			if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
 				var dsField = me._dataSource.getField(fieldName);
-				if (dsField.foreignKey) {} else {
+				if (dsField.foreignKey) {} else { // not the parent FK tree field
 					var gridField = {name: fieldName, autoFitWidth: false, canToggle: false}; // don't allow toggling of boolean checkboxes without going into edit mode
 					if (treeFieldNotSet) {
 						gridField.treeField = true;
@@ -1366,7 +1436,7 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 		me._createGrid(me._config, fields);
 		// Set if the grid can expand based on whether there are detail fields defined
 		me.grid.setCanExpandRecords(hasDetailFields);
-		if (me._config.isTree) {
+		if (me._config.isTree || (! me.showSummary)) {
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
