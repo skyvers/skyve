@@ -72,13 +72,11 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 	}
 	
 	/**
-	 * The model is destructive to the collection of rows so ensure you send in a copy.
+	 * The model is destructive to the collection of rows so ensure you return a copy if required.
 	 * 
 	 * @param rows
 	 */
-	public void setRows(List<Bean> rows) {
-		this.rows = rows;
-	}
+	public abstract List<Bean> getRows() throws Exception;
 	
 	@Override
 	public Document getDrivingDocument() {
@@ -211,6 +209,7 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 	
 	@Override
 	public Page fetch() throws Exception {
+		rows = getRows();
 		if (rows == null) {
 			rows = new ArrayList<>(0);
 		}
@@ -242,6 +241,7 @@ public abstract class InMemoryListModel extends ListModel<Bean> {
 
 	@Override
 	public AutoClosingIterable<Bean> iterate() throws Exception {
+		rows = getRows();
 		if (rows == null) {
 			rows = new ArrayList<>(0);
 		}

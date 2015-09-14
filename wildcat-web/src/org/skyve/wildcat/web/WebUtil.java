@@ -149,20 +149,22 @@ System.out.println(conversationKey + " : " + currentBeanId);
 		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
         if (contextKey != null) {
     		AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
-    		result = webContext.getCurrentBean();
-
-			String bizId = request.getParameter(Bean.DOCUMENT_ID); 
-	    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
-    		if (formBinding != null) { // sub-form
-        		// find the process bean
-        		Object referenceValue = BindUtil.get(result, formBinding);
-        		if (referenceValue instanceof List<?>) {
-        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
-        		}
-        		else {
-        			result = (Bean) referenceValue;
-        		}
-        	}
+    		if (webContext != null) {
+	    		result = webContext.getCurrentBean();
+	
+				String bizId = request.getParameter(Bean.DOCUMENT_ID); 
+		    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
+	    		if (formBinding != null) { // sub-form
+	        		// find the process bean
+	        		Object referenceValue = BindUtil.get(result, formBinding);
+	        		if (referenceValue instanceof List<?>) {
+	        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
+	        		}
+	        		else {
+	        			result = (Bean) referenceValue;
+	        		}
+	        	}
+    		}
         }
         
         return result;

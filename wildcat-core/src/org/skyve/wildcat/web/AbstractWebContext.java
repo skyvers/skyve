@@ -17,6 +17,7 @@ public abstract class AbstractWebContext implements Serializable, org.skyve.web.
 	 * The name of the request parameter which holds the encoded context on the web client.
 	 */
 	public static final String CONTEXT_NAME = "_c";
+	public static final String CONTINUE_CONVERSATION = "_cc";
 	public static final String DOCUMENT_NAME = "_doc";
 	public static final String MODULE_NAME = "_mod";
 	public static final String BEAN_NAME = "_bean";

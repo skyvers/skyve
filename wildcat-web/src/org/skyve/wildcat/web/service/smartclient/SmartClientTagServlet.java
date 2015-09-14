@@ -78,18 +78,26 @@ public class SmartClientTagServlet extends HttpServlet {
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
+						// Note - if there is no form in the view then there is no web context
+						Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,
+																			bean,
 																			user,
 																			customer)) {
 							TagUtil.tag(tagId, iterable);
 						}
 					}
 					else if ("U".equals(action)) {
+						// Note - if there is no form in the view then there is no web context
+						Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+
 						try (AutoClosingIterable<Bean> iterable = iterate(tagId, 
 																			dataSourceName,
 																			criteria,
+																			bean,
 																			user,
 																			customer)) {
 							TagUtil.untag(tagId, iterable);
@@ -196,6 +204,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	private static AutoClosingIterable<Bean> iterate(String tagId,
 														String dataSourceName,
 														String criteriaJSON,
+														Bean bean,
 														User user,
 														Customer customer)
 	throws Exception {
@@ -211,6 +220,7 @@ public class SmartClientTagServlet extends HttpServlet {
 			Document document = module.getDocument(customer, documentName);
 			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
 			model = CORE.getRepository().getListModel(customer, document, modelName);
+			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
 		}
 		else {

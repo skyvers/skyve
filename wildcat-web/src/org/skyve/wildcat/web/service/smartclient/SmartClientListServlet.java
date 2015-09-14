@@ -107,13 +107,17 @@ public class SmartClientListServlet extends HttpServlet {
 	        
 	        try {
 				try {
+			        Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+
 					// use the view's conversation if it was sent down from the client
 					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 					AbstractWebContext webContext = WebUtil.getCachedConversation(webId, request, response);
 					if (webContext != null) {
-			        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
-			            persistence = webContext.getConversation();
-			            persistence.setForThread();
+						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
+				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
+				            persistence = webContext.getConversation();
+				            persistence.setForThread();
+						}
 			        }
 			        // if no conversation to use, start a new one
 			        if (persistence == null) {
@@ -150,6 +154,7 @@ public class SmartClientListServlet extends HttpServlet {
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}
+							model.setBean(bean);
 							drivingDocument = model.getDrivingDocument();
 						}
 						// query type of request

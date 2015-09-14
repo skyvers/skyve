@@ -347,8 +347,15 @@ BizListGrid.addMethods({
 					// Ensure that embedded list grids use their parent view's conversation to edit data
 					// in the same way as when zooming in
 					if (me._view) { // this is an embedded list grid
+						if (me.grid.saveRequestProperties) {} else {
+							me.grid.saveRequestProperties = {};
+						}
+						if (me.grid.saveRequestProperties.params) {} else {
+							me.grid.saveRequestProperties.params = {};
+						}
+
+						var instance = me._view.gather(false); // don't validate
 						if (config && config.contConv) {
-							var instance = me._view.gather(false); // don't validate
 							if (instance._changed || me._view._vm.valuesHaveChanged()) {
 								isc.say('There are unsaved changes in the ' + me._view._singular + 
 												'.  Save your changes to the ' + me._view._singular + ' first.',
@@ -357,19 +364,11 @@ BizListGrid.addMethods({
 								);
 							}
 							else {
-								if (me.grid.saveRequestProperties) {} else {
-									me.grid.saveRequestProperties = {};
-								}
-								if (me.grid.saveRequestProperties.params) {} else {
-									me.grid.saveRequestProperties.params = {};
-								}
-								me.grid.saveRequestProperties.params._c = instance._c;
-								me.grid.startEditing(me._eventRowNum, me._eventColNum);
+								me.grid.saveRequestProperties.params._cc = '';
 							}
 						}
-						else {
-							me.grid.startEditing(me._eventRowNum, me._eventColNum);
-						}
+						me.grid.saveRequestProperties.params._c = instance._c;
+						me.grid.startEditing(me._eventRowNum, me._eventColNum);
 					}
 					else {
 						if (me.grid.saveRequestProperties && me.grid.saveRequestProperties.params) {
@@ -1064,7 +1063,13 @@ BizListGrid.addMethods({
 				if (me.showTag) {
 					requestProperties.params._tagId = me.tagId;
 				}
-	
+				if (me._view) { // required for ListModel.setBean() on server side
+					requestProperties.params._c = me._view.gather(false)._c;
+				}
+				if (config && config.contConv) { // indicates that the conversation is to be continued
+					requestProperties.params._cc = '';
+				}
+				
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
 				// NB result could be an advanced criteria after this call whereas critiera could be a simple criteria still
