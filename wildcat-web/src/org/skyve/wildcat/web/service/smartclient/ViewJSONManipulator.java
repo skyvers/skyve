@@ -1274,6 +1274,11 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws MetaDataException {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
+		addCondition(grid.getDisableAddConditionName());
+		addCondition(grid.getDisableEditConditionName());
+		addCondition(grid.getDisableZoomConditionName());
+		addCondition(grid.getDisableRemoveConditionName());
+		addCondition(grid.getPostRefreshConditionName());
 		addBinding(grid.getSelectedIdBinding(), true);
 	}
 
@@ -1284,6 +1289,11 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws MetaDataException {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
+		addCondition(grid.getDisableAddConditionName());
+		addCondition(grid.getDisableEditConditionName());
+		addCondition(grid.getDisableZoomConditionName());
+		addCondition(grid.getDisableRemoveConditionName());
+		addCondition(grid.getPostRefreshConditionName());
 		addBinding(grid.getSelectedIdBinding(), true);
 		addBinding(grid.getRootIdBinding(), false);
 	}

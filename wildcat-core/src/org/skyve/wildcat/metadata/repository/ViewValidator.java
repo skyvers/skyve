@@ -812,6 +812,11 @@ class ViewValidator extends ViewVisitor {
 		String listGridIdentifier = "ListGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), listGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
+		validateConditionName(grid.getDisableAddConditionName(), listGridIdentifier);
+		validateConditionName(grid.getDisableEditConditionName(), listGridIdentifier);
+		validateConditionName(grid.getDisableZoomConditionName(), listGridIdentifier);
+		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
+		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
 		validateParameterBindings(grid.getParameters(), listGridIdentifier);
 		validateQueryOrModel(grid.getQueryName(), grid.getModelName(), listGridIdentifier);
@@ -823,6 +828,11 @@ class ViewValidator extends ViewVisitor {
 		String treeGridIdentifier = "TreeGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getDisableAddConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getDisableEditConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getDisableZoomConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getDisableRemoveConditionName(), treeGridIdentifier);
+		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier, null);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);

@@ -568,33 +568,33 @@
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
       <xs:enumeration value="capital"/>
-      <xs:enumeration value="lower"/>
       <xs:enumeration value="upper"/>
+      <xs:enumeration value="lower"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="email"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
-      <xs:enumeration value="luhnCheckDigit"/>
-      <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="ipAddress"/>
       <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="ean13CheckDigit"/>
       <xs:enumeration value="url"/>
       <xs:enumeration value="isbnCheckDigit"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="ipAddress"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
       <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="variant"/>
       <xs:enumeration value="dynamic"/>
       <xs:enumeration value="constant"/>
+      <xs:enumeration value="variant"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -607,25 +607,25 @@
 
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="composition"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="composition"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="child"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="dataGroup"/>
-      <xs:enumeration value="customer"/>
       <xs:enumeration value="user"/>
+      <xs:enumeration value="dataGroup"/>
       <xs:enumeration value="global"/>
+      <xs:enumeration value="customer"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

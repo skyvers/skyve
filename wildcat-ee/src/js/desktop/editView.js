@@ -219,16 +219,18 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
+					var values = {};
 					if (dsResponse.status >= 0) { // success test
 						// ensure that save operation is set to add (it would be edit)
 						me._vm.setSaveOperationType("add");
 
 						// scatter the first (and only) row returned from the server
 						// data parameter is an array on fetch
-						me.scatter(data[0]);
+						values = data[0];
+						me.scatter(values);
 
 						if (openedFromDataGrid) {
-							me._b += 'ElementById(' + data[0].bizId + ')';
+							me._b += 'ElementById(' + value.bizId + ')';
 						}
 						
 						if (successCallback) {
@@ -240,7 +242,7 @@ isc.EditView.addMethods({
 					}
 
 					me.show();
-					me.refreshListGrids(true, true);
+					me.refreshListGrids(true, true, values);
 
 					if (me.opened) {
 						me.opened(data);
@@ -287,14 +289,16 @@ isc.EditView.addMethods({
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
+					var values = {}
 					if (dsResponse.status >= 0) { // success test
 						// scatter the first (and only) row returned from the server
 						// data parameter is an array on fetch
-						me.scatter(data[0]);
+						values = data[0];
+						me.scatter(values);
 
 						if (openedFromDataGrid) {
 							if (me._b.endsWith(')')) {} else {
-								me._b += 'ElementById(' + data[0].bizId + ')';
+								me._b += 'ElementById(' + values.bizId + ')';
 							}
 						}
 
@@ -319,8 +323,7 @@ isc.EditView.addMethods({
 
 					me.show();
 					// only postRefresh if we don't have an action - no 'ZoomOut' or nothing
-					me.refreshListGrids(true, (! action));
-
+					me.refreshListGrids(true, (! action), values);
 					if (me.opened) {
 						me.opened(data);
 					}
@@ -433,7 +436,7 @@ isc.EditView.addMethods({
 								// data parameter is an object on save
 								me._saved = true;
 								me.scatter(data);
-								me.refreshListGrids(true, false);
+								me.refreshListGrids(true, false, data);
 							}
 							else {
 								if (lookupDescription) {
@@ -467,7 +470,7 @@ isc.EditView.addMethods({
 						}
 						else { // no action
 							me.scatter(data);
-							me.refreshListGrids(true, false);
+							me.refreshListGrids(true, false, data);
 						}
 						
 						if (successCallback) {
@@ -554,8 +557,8 @@ isc.EditView.addMethods({
 						// data parameter is an object on save
 						me._saved = true;
 						me.scatter(data);
-						me.refreshListGrids(true, false);
-						
+						me.refreshListGrids(true, false, data);
+
 						if (successCallback) {
 							successCallback(data);
 						}
@@ -751,7 +754,8 @@ isc.EditView.addMethods({
 
 	// if the listgrid is visible, it refreshes the grid
 	refreshListGrids: function(forceRefresh, // if true, force refresh of all grids
-								forcePostRefresh) { // if true, force even postRefresh = false grids - called on new and edit actions
+								forcePostRefresh, // if true, force even postRefresh = false grids - called on new and edit actions
+								values) { // the values to evaluate conditions against 
 		if (forceRefresh) {
 			this._refreshedGrids = {};
 		}
@@ -770,7 +774,10 @@ isc.EditView.addMethods({
 						}
 						else if (grid.rootIdBinding) { // tree grid with root binding
 							if (grid.hasDataSource()) {
-								if (forcePostRefresh || grid.postRefresh) { // refresh only if the grids wants to be
+								if (forcePostRefresh || 
+										// refresh only if the grids wants to be
+										(grid.postRefreshConditionName === undefined) ||
+										this._evaluateConditionName(grid.postRefreshConditionName, values)) {
 									// if we have a new root value then set the data source,
 									// otherwise just refresh the tree data - node state (open or closed) stays the same
 									// NB Using refresh() instead of setDataSource() as setDataSource()
@@ -795,7 +802,10 @@ isc.EditView.addMethods({
 							// Using refresh() instead of setDataSource() as setDataSource()
 							// resets all fields and data sources on everything, essentially
 							// recreating the listgrid guts.
-							if (forcePostRefresh || grid.postRefresh) { // refresh only if the grids wants to be
+							if (forcePostRefresh || 
+									// refresh only if the grids wants to be
+									(grid.postRefreshConditionName === undefined) ||
+									this._evaluateConditionName(grid.postRefreshConditionName, values)) {
 								if (grid.hasDataSource()) {
 									grid.refresh();
 								}

@@ -1221,7 +1221,10 @@ code.append("_view:view})");
 			code.append("dataSource:'").append(dataSourceId).append("',");
 			code.append("name:'").append(listGridVariable).append("',");
 			code.append("contConv:").append(grid.getContinueConversation()).append(",");
-			code.append("postRefresh:").append(! Boolean.FALSE.equals(grid.getPostRefresh())).append(",");
+			String postRefreshConditionName = grid.getPostRefreshConditionName();
+			if (postRefreshConditionName != null) {
+				code.append("postRefreshConditionName:'").append(postRefreshConditionName).append("',");
+			}
 			String selectedIdBinding = grid.getSelectedIdBinding();
 			if (selectedIdBinding != null) {
 				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");

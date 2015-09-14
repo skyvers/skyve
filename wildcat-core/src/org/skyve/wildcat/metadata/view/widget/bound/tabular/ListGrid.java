@@ -54,7 +54,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"queryName",
 							"modelName",
 							"selectedIdBinding",
-							"postRefresh",
+							"postRefreshConditionName",
 							"continueConversation",
 							"editedActions",
 							"removedActions",
@@ -100,7 +100,7 @@ public class ListGrid implements MetaData,
 	private String modelName;
 	private String selectedIdBinding;
 	private boolean continueConversation;
-	private Boolean postRefresh;
+	private String postRefreshConditionName;
 	
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> removedActions = new ArrayList<>();
@@ -135,13 +135,13 @@ public class ListGrid implements MetaData,
 		this.continueConversation = continueConversation;
 	}
 
-	public Boolean getPostRefresh() {
-		return postRefresh;
+	public String getPostRefreshConditionName() {
+		return postRefreshConditionName;
 	}
 
 	@XmlAttribute(name = "postRefresh")
-	public void setPostRefresh(Boolean refresh) {
-		this.postRefresh = refresh;
+	public void setPostRefreshConditionName(String refresh) {
+		this.postRefreshConditionName = refresh;
 	}
 
 	@Override
