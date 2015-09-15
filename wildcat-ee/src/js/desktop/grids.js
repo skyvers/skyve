@@ -466,6 +466,7 @@ BizListGrid.addMethods({
 								var allCriteria = getAllCriteria();
 
 								ReportDialog.popupExport(me._dataSource.ID,
+															me._view ? me._view.gather(false)._c : null,
 															allCriteria,
 															unselectedFields, 
 															selectedFields);
@@ -793,6 +794,10 @@ BizListGrid.addMethods({
 				params.d = me._dataSource.ID;
 				var criteria = getAllCriteria();
 				params.c = criteria;
+				
+				if (me._view) {
+					params._c = me._view.gather(false)._c;
+				}
 			}
 			RPCManager.sendRequest({
 				showPrompt: true,

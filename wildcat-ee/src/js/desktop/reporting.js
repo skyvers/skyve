@@ -438,7 +438,7 @@ ReportDialog.addClassProperties({
 		autoDraw: true,
 		canSubmit: true,
 		method: 'POST',
-		items: [{name: 'values', type: 'hidden'}]
+		items: [{name: 'values', type: 'hidden'}, {name: '_c', type: 'hidden'}]
 	}),
 
 	// The entire interface
@@ -509,6 +509,9 @@ ReportDialog.addClassProperties({
 									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
 									var fileNameNoSuffix = ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
 									ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
+									if (ReportDialog._c) {
+										ReportDialog._submitForm.setValue('_c', ReportDialog._c);
+									}
 									ReportDialog._submitForm.setAction('export/' + fileNameNoSuffix + '.' + format);
 									ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
 																		'_blank' :
@@ -561,12 +564,14 @@ ReportDialog.addClassProperties({
 	},
 	
 	popupExport: function(dataSourceID, // the ID of the data source - and thus the server-side query or model
-					criteria, // the criteria to apply to the server-side query or model
-					unselectedFields, // data for the unselected fields in field selection list grids
-					selectedFields) { // data for the selected fields in field selection list grids
+							_c, // the web context identifier
+							criteria, // the criteria to apply to the server-side query or model
+							unselectedFields, // data for the unselected fields in field selection list grids
+							selectedFields) { // data for the selected fields in field selection list grids
 		ReportDialog._createExport();
 		
 		ReportDialog._dataSourceID = dataSourceID;
+		ReportDialog._c = _c;
 		ReportDialog._criteria = criteria;
 		ReportDialog._columnList.setData(unselectedFields);
 		ReportDialog._selectedColumnList.setData(selectedFields);
