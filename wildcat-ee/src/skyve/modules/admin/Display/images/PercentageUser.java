@@ -1,13 +1,22 @@
 package modules.admin.Display.images;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.List;
 
 import modules.admin.domain.Display;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.PieSectionLabelGenerator;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
+import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.jdbc.JDBCPieDataset;
 import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
@@ -20,8 +29,7 @@ public class PercentageUser implements DynamicImage<Display> {
 	private static final long serialVersionUID = -4758170827473887904L;
 
 	@Override
-	public BufferedImage getImage(Display display, int width, int height, User user)
-	throws Exception {
+	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
 			StringBuilder sb = new StringBuilder("SELECT userName");
@@ -35,19 +43,53 @@ public class PercentageUser implements DynamicImage<Display> {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());
 			JFreeChart chart = ChartFactory.createPieChart3D("User", data, true, false, false);
-			chart.setBackgroundImageAlpha(0F);
-			chart.getPlot().setBackgroundAlpha(0F);
+			chart.setBackgroundImageAlpha(0.2F);
+			chart.getPlot().setBackgroundAlpha(0.2F);
+
+			PiePlot plot = (PiePlot) chart.getPlot();
+			plot.setBackgroundAlpha(0.2F);
+			plot.setNoDataMessage("No data available");
+			// plot.setLabelGenerator(null); //null means no labels
+			// StandardPieSectionLabelGenerator labelGenerator = new
+			// StandardPieSectionLabelGenerator();
+			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator("{1}", new DecimalFormat("#,##0"), new DecimalFormat("0.00"));
+			plot.setLabelGenerator(generator); // null means no labels
+
+			plot.setStartAngle(135);
+			plot.setOutlineVisible(false);
+
+			Color baseColour = new Color(70, 130, 180);
+			Color nextColour = baseColour;
+			int redDiff = (baseColour.getRed()/2)/plot.getDataset().getItemCount();
+			int greenDiff = (baseColour.getGreen()/2)/plot.getDataset().getItemCount();
+			int blueDiff = (baseColour.getBlue()/2)/plot.getDataset().getItemCount();
+			
+			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getItemCount(); seriesIndex++) {
+				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), nextColour);
+				nextColour = new Color(nextColour.getRed()-redDiff,nextColour.getGreen()-greenDiff, nextColour.getBlue()-blueDiff);
+			}
+			
+			//Review section titles
+	        List<String> keys = plot.getDataset().getKeys();
+	        Iterator<String> iterator = keys.iterator();
+	        while (iterator.hasNext()) {
+	            String key = iterator.next();
+	            System.out.println(key);  // do whatever you need the key for here
+	        }			
+
+			plot.setLabelFont(new Font("Arial Unicode MS", 0, 9));
+			plot.setSectionOutlinesVisible(true);
+			plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
+			plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
+
 			return chart.createBufferedImage(width, height);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		finally {
+		} finally {
 			if (connection != null) {
 				try {
 					connection.close();
-				}
-				catch (SQLException e) {
+				} catch (SQLException e) {
 					e.printStackTrace();
 				}
 				connection = null;
