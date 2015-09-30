@@ -399,38 +399,13 @@ public class ViewGenerator {
 				Attribute attribute = target.getAttribute();
 				DataGridBoundColumn column = new DataGridBoundColumn();
 
-				// Field has a domain 
-				if (attribute instanceof Field) {
-					Field field = (Field) attribute;
-
-					column.setBinding(propertyName);
-					
-					DomainType domainType = field.getDomainType();
-					if (DomainType.dynamic.equals(domainType)) {
-						// Cannot determine the variant domain values client side so
-						// widget needs to be a disabled text field - need to zoom to edit
-						TextField textField = generateTextField(propertyName);
-						textField.setDisabledConditionName("true");
-						WidgetReference ref = new WidgetReference();
-						ref.setWidget(textField);
-						column.setInputWidget(ref);
-					}
-				}
-				else if (attribute instanceof Association) {
-					column.setBinding(propertyName);
-					
-					if (DomainType.dynamic.equals(attribute.getDomainType())) {
-						// Cannot determine the variant domain values client side so
-						// widget needs to be a disabled text field - need to zoom to edit
-						TextField textField = generateTextField(propertyName);
-						textField.setDisabledConditionName("true");
-						WidgetReference ref = new WidgetReference();
-						ref.setWidget(textField);
-						column.setInputWidget(ref);
-					}
+				DomainType domainType = attribute.getDomainType();
+				if (DomainType.dynamic.equals(domainType)) {
+					column.setBinding(Binder.createCompoundBinding(propertyName, Bean.BIZ_KEY));
+					column.setEditable(Boolean.FALSE);
 				}
 				else {
-					throw new IllegalStateException("Attribute is neither a field nor an association...");
+					column.setBinding(propertyName);
 				}
 
 				result.getColumns().add(column);

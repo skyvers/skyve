@@ -923,16 +923,21 @@ class ViewValidator extends ViewVisitor {
 		// lookupDescription cannot have a compound binding when used on a form as the value
 		// cannot be set by the pick.
 		// In a grid is OK though as picking is not available
+		// 
+		// Also a lookupDescription in a data grid bound to an aggregated collection 
+		// doesn't have to have a binding
 		validateBinding(dataGridBinding,
 							binding,
-							true,
+							(dataGridBinding == null),
 							(dataGridBinding == null),
 							false,
 							false,
 							lookupIdentifier,
 							AttributeType.association);
 		validateBinding(dataGridBinding,
-							BindUtil.createCompoundBinding(binding, descriptionBinding),
+							// binding can be null if dataGridBinding is set and this 
+							// is a lookup to the elements in the collection
+							(binding == null) ? descriptionBinding : BindUtil.createCompoundBinding(binding, descriptionBinding),
 							true,
 							false,
 							false,
