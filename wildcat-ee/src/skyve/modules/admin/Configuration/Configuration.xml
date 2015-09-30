@@ -11,12 +11,12 @@
 	<bizKey expression="Admin Setup"/>
 	<attributes>
 		<enum name="passwordComplexityModel" required="true">
-			<displayName>Password Strength</displayName>
+			<displayName>Password Complexity</displayName>
 			<description>The security level/complexity model for user passwords</description>
 			<values>
-				<value code="MINIMUM"/>
-				<value code="MEDIUM"/>
-				<value code="MAXIMUM"/>
+				<value code="MINIMUM" description="Minimum - min 6 chars"/>
+				<value code="MEDIUM" description="Medium - min 6 chars, upper, lower and numeric"/>
+				<value code="MAXIMUM" description="Maximum - min 8 chars, upper, lower, numeric and punctuation"/>
 			</values>
 		</enum>
 	</attributes>

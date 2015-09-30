@@ -12,7 +12,6 @@
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>
-			<description>Login name of the user.</description>
 			<length>50</length>
 		</text>
 		<text name="password" >

@@ -15,11 +15,10 @@
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
-		<document ref="MyContact" />
 		<document ref="CurrentUser"/>
 		<document ref="Communication" defaultQueryName="qCommunications"/>
 		<document ref="DataGroup" />
-		<document ref="DataMaintenance" />
+		<document ref="DataMaintenance"/>
 		<document ref="Display" />
 		<document ref="DocumentNumber" />
 		<document ref="Group" />
@@ -49,10 +48,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="MyContact" permission="_____" >
+				<document name="CurrentUser" permission="CR__U" >
 					<action name="UpdateMyDetails"/>
 				</document>
-				<document name="CurrentUser" permission="CR__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="Tag" permission="CRUDU" >	
@@ -82,10 +80,9 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="MyContact" permission="_____" >
+				<document name="CurrentUser" permission="CR__U" >
 					<action name="UpdateMyDetails"/>
 				</document>
-				<document name="CurrentUser" permission="CR__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="Tag" permission="CRUDU" >	
@@ -195,7 +192,9 @@
 				<document name="Group" permission="_R__C" />
 				<document name="GroupRole" permission="_R__C" />
 
-				<document name="CurrentUser" permission="CR__U" />
+				<document name="CurrentUser" permission="CR__U" >
+					<action name="UpdateMyDetails"/>
+				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="Tag" permission="CRUDU" >	
@@ -219,11 +218,7 @@
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 		</edit>
-		<edit document="MyContact" name="My Details">
-			<role name="BasicUser" />
-			<role name="ViewUser" />
-		</edit>
-		<edit document="CurrentUser" name="Current User Details">
+		<edit document="CurrentUser" name="My Details">
 			<uxui name="desktop"/>
 			<uxui name="tablet"/>
 			<role name="BasicUser" />
@@ -244,9 +239,9 @@
 			<list document="Group" name="Groups">			
 				<role name="SecurityAdministrator" />
 			</list>
-			<list document="DataMaintenance" name="Data Maintenance">
+			<edit document="DataMaintenance" name="Data Maintenance">
 				<role name="SecurityAdministrator" />
-			</list>
+			</edit>
 			<list document="User" name="Users">
 				<role name="SecurityAdministrator" />
 			</list>
@@ -257,7 +252,7 @@
 			<edit document="Configuration" name="Password Complexity">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list name="PasswordList" query="qUserPasswords">
+			<list name="Generated Credentials" query="qUserPasswords">
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
@@ -288,7 +283,7 @@
 	</menu>
 	<queries>
 		<documentQuery name="qUserPasswords" documentName="User">
-			<description>Initial Passwords for Users</description>
+			<description>Generated Credentials</description>
 			<columns>
 				<column binding="contact.name" sortOrder ="ascending" />
 				<column binding="userName" />
@@ -310,17 +305,6 @@
 				<column binding="contactType" sortOrder ="ascending" />
 				<column binding="email1" sortOrder ="ascending" />
 				<column binding="mobile" sortOrder ="ascending" />
-			</columns>
-		</documentQuery>
-		<documentQuery name="qMyContact" documentName="Contact">
-			<description>My Contact Details</description>
-			<columns>
-				<column binding="name" sortOrder="ascending" />
-				<column binding="bizId">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>{CONTACTID}</filterExpression>
-				</column>
 			</columns>
 		</documentQuery>
 		<documentQuery name="qUsers" documentName="User">

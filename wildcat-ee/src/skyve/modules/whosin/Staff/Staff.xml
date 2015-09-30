@@ -9,8 +9,8 @@
 	<persistent name="WHO_Staff" />
 	<singularAlias>Staff</singularAlias>
 	<pluralAlias>Staff Members</pluralAlias>
-	<icon16x16RelativeFilePath>icons/document/staff16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/staff32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{contact.name}"/>
 	<attributes>
 		<association name="contact" type="aggregation">

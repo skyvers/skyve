@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Setup"
+<view title="Password Complexity"
 		type="edit"
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"

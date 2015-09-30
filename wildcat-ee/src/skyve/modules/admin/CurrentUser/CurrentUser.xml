@@ -3,11 +3,11 @@
 				xmlns="http://www.skyve.org/xml/document"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<singularAlias>Current User</singularAlias>
-	<pluralAlias>Current Users</pluralAlias>
+	<singularAlias>My Details</singularAlias>
+	<pluralAlias>My Details</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey expression="Current User"/>
+	<bizKey expression="My Details"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" persistent="false">
 			<displayName>Current User</displayName>
@@ -15,11 +15,18 @@
 		</association>
 		<collection name="groups" type="aggregation" persistent="false">
 			<displayName>Groups</displayName>
-			<domain>variant</domain>
 			<documentName>Group</documentName>
 			<minCardinality>0</minCardinality>
 			<ordering>
 				<order by="name" sort="ascending" />
+			</ordering>
+		</collection>		
+		<collection name="roles" type="aggregation" persistent="false">
+			<displayName>Roles</displayName>
+			<documentName>UserRole</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="rolename" sort="ascending" />
 			</ordering>
 		</collection>		
 	</attributes>

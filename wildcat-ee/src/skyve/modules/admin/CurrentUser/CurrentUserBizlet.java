@@ -1,15 +1,12 @@
 package modules.admin.CurrentUser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import modules.admin.domain.CurrentUser;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
+import modules.admin.domain.UserRole;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -30,28 +27,11 @@ public class CurrentUserBizlet extends Bizlet<CurrentUser> {
 			for(Group g: user.getGroups()){
 				bean.getGroups().add(g);
 			}
+			for(UserRole r: user.getRoles()){
+				bean.getRoles().add(r);
+			}
 		}
 			
 		return bean;
 	}
-
-	@Override
-	public List<DomainValue> getVariantDomainValues(String fieldName) throws Exception {
-		Persistence persistence = CORE.getPersistence();
-		
-		if (User.groupsPropertyName.equals(fieldName)) {
-			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-			query.addOrdering(Group.namePropertyName, SortDirection.ascending);
-			List<Group> groups = query.beanResults();
-			List<DomainValue> result = new ArrayList<>(groups.size());
-			for (Group group : groups) {
-				result.add(new DomainValue(group.getBizId(), group.getBizKey()));
-			}
-
-			return result;
-		} 
-		
-		return super.getVariantDomainValues(fieldName);
-	}
-
 }

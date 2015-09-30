@@ -13,6 +13,7 @@ import org.skyve.wildcat.domain.AbstractTransientBean;
  * CurrentUser
  * 
  * @navhas n currentUser 0..1 User
+ * @navhas n roles 0..n UserRole
  * @navhas n groups 0..n Group
  * @stereotype "transient"
  */
@@ -34,9 +35,12 @@ public class CurrentUser extends AbstractTransientBean {
 	public static final String currentUserPropertyName = "currentUser";
 	/** @hidden */
 	public static final String groupsPropertyName = "groups";
+	/** @hidden */
+	public static final String rolesPropertyName = "roles";
 
 	private User currentUser = null;
 	private List<Group> groups = new ArrayList<>();
+	private List<UserRole> roles = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -103,5 +107,32 @@ public class CurrentUser extends AbstractTransientBean {
 	 **/
 	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
 		 setElementById(groups, element);
+	}
+
+	/**
+	 * {@link #roles} accessor.
+	 **/
+	@XmlElement
+	public List<UserRole> getRoles() {
+		return roles;
+	}
+
+	/**
+	 * {@link #roles} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 **/
+	public UserRole getRolesElementById(String bizId) {
+		return getElementById(roles, bizId);
+	}
+
+	/**
+	 * {@link #roles} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param roles	The new value to set.
+	 **/
+	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
+		 setElementById(roles, element);
 	}
 }

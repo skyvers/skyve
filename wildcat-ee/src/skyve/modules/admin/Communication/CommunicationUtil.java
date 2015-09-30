@@ -102,12 +102,12 @@ public class CommunicationUtil {
 			}
 		}
 
-		try (FileOutputStream fos = new FileOutputStream(communication.getFilePath())) {
+		String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
+		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailBody = communication.getBody();
+		emailBody = Binder.formatMessage(customer, emailBody, beans);
 
-			String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
-			String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
-			String emailBody = communication.getBody();
-			emailBody = Binder.formatMessage(customer, emailBody, beans);
+		try (FileOutputStream fos = new FileOutputStream(communication.getFilePath())) {
 
 			// Generate file name - Communication_Description_To
 			StringBuilder fileName = new StringBuilder();
@@ -167,10 +167,11 @@ public class CommunicationUtil {
 			sendFrom = UtilImpl.SMTP_SENDER;
 		}
 
+		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailBody = communication.getBody();
+		emailBody = Binder.formatMessage(customer, emailBody, beans);
+
 		try {
-			String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
-			String emailBody = communication.getBody();
-			emailBody = Binder.formatMessage(customer, emailBody, beans);
 
 			if (RunMode.ACTION.equals(runMode)) {
 				EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody, MimeType.html, null, null, null);

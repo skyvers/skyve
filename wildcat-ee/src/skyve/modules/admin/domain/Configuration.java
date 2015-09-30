@@ -40,9 +40,9 @@ public class Configuration extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	public static enum PasswordComplexityModel implements Enumeration {
-		mINIMUM("MINIMUM", "MINIMUM"),
-		mEDIUM("MEDIUM", "MEDIUM"),
-		mAXIMUM("MAXIMUM", "MAXIMUM");
+		minimumMin6Chars("MINIMUM", "Minimum - min 6 chars"),
+		mediumMin6CharsUpperLowerAndNumeric("MEDIUM", "Medium - min 6 chars, upper, lower and numeric"),
+		maximumMin8CharsUpperLowerNumericAndPunctuation("MAXIMUM", "Maximum - min 8 chars, upper, lower, numeric and punctuation");
 
 		private String code;
 		private String description;

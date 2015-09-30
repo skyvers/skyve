@@ -86,6 +86,5 @@
 				<column binding="reportsTo" sortOrder="ascending" editable="false" filterable="false" sortable="false"/>
 			</columns>
 		</documentQuery>
-		
 	</queries>
 </module>

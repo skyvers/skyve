@@ -157,9 +157,6 @@ public class User extends AbstractPersistentBean {
 		}
 	}
 
-	/**
-	 * Login name of the user.
-	 **/
 	private String userName;
 	/**
 	 * Check Password Complexity settings for minimum required strength.

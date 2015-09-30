@@ -58,17 +58,17 @@ public class GetResults implements ServerSideAction<Communication> {
 		
 		switch (communication.getActionType()){
 		case saveForBulkSend:
-			results.append(" created into the directory ");
+			results.append("created into the directory ");
 			results.append(communication.getFilePath());
 			results.append(".");
 			break;
 			
 		case sendImmediately:
-			results.append(" sent immediately.");
+			results.append("sent immediately.");
 			break;
 			
 		case testBindingsAndOutput:
-			results.append(" tested.");
+			results.append("tested.");
 			break;
 			
 		default:

@@ -1,6 +1,5 @@
 package modules.admin.Configuration;
 
-import modules.admin.AdminUtil;
 import modules.admin.domain.Configuration;
 
 import org.skyve.CORE;
@@ -13,7 +12,7 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -1282437688681930236L;
-
+	
 	@Override
 	public Configuration newInstance(Configuration bean) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -24,9 +23,11 @@ public class ConfigurationBizlet extends Bizlet<Configuration> {
 		}
 
 		if (result.getPasswordComplexityModel() == null) {
-			result.setPasswordComplexityModel(AdminUtil.defaultPasswordComplexityModel);
+			result.setPasswordComplexityModel(ComplexityModel.DEFAULT_COMPLEXITY_MODEL);
 		}
 
 		return result;
 	}
+	
+	
 }
