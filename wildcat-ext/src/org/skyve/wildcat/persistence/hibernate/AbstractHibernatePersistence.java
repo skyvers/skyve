@@ -1562,7 +1562,8 @@ t.printStackTrace();
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
 				AttributeType type = attribute.getAttributeType();
-				if (IndexType.textual.equals(field.getIndex())) {
+				IndexType index = field.getIndex();
+				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
 					String fieldName = field.getName();
 					String value = BindUtil.getDisplay(customer, beanToReindex, fieldName);
 					if (AttributeType.markup.equals(type)) {
@@ -1616,7 +1617,8 @@ t.printStackTrace();
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
 				AttributeType type = field.getAttributeType();
-				if (IndexType.textual.equals(field.getIndex())) {
+				IndexType index = field.getIndex();
+				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
 					if (oldState != null) { // an update
 						if (! propertyTypes[i].isEqual(state[i], oldState[i], EntityMode.POJO)) {
 							String value = (state[i] == null) ? null : state[i].toString();

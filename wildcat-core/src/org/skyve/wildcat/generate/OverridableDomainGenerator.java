@@ -999,7 +999,8 @@ joined tables
 					fw.append("\" length=\"").append(fieldLength.toString());
 				}
 
-				if (IndexType.database.equals(enumeration.getIndex())) {
+				IndexType index = enumeration.getIndex();
+				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
 					fw.append(moduleName).append(documentName).append(enumerationName);
 				}
@@ -1144,7 +1145,8 @@ joined tables
 				else if ((type == AttributeType.memo) || (type == AttributeType.markup)) {
 					fw.append("\" type=\"text");
 				}
-				if (IndexType.database.equals(field.getIndex())) {
+				IndexType index = field.getIndex();
+				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
 					fw.append(moduleName).append(documentName).append(fieldName);
 				}
