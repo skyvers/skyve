@@ -141,7 +141,10 @@
 														<tr>
 															<% if (! mobile) { %>
 															<td>
+																&nbsp;
+																<!-- 
 																<img src="images/loginSecurityLock.gif" alt="secure" title="This is a Secure Area" />
+																 -->
 															</td>
 															<% } %>
 															<td>
