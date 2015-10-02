@@ -13,6 +13,10 @@
 			<displayName>Current User</displayName>
 			<documentName>User</documentName>
 		</association>
+		<text name="groupMembershipList">
+			<displayName>Group Membership</displayName>
+			<length>500</length>
+		</text>
 		<dateTime name="lastLogin">
 			<displayName>Last Login</displayName>
 		</dateTime>
@@ -30,6 +34,14 @@
 			<minCardinality>0</minCardinality>
 			<ordering>
 				<order by="rolename" sort="ascending" />
+			</ordering>
+		</collection>		
+		<collection name="jobs" type="aggregation" >
+			<displayName>Jobs</displayName>
+			<documentName>Job</documentName>
+			<minCardinality>0</minCardinality>
+			<ordering>
+				<order by="startTime" sort="descending" />
 			</ordering>
 		</collection>		
 	</attributes>

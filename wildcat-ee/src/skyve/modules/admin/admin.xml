@@ -269,7 +269,7 @@
 		<list name="Audits" document="Audit">
 			<role name="BasicUser" />
 		</list>
-		<edit document="Display" name="Web Stats">
+		<edit document="Display" name="User Stats">
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</edit>

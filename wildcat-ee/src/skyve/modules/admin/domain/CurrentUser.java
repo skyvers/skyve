@@ -16,6 +16,7 @@ import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
 /**
  * CurrentUser
  * 
+ * @navhas n jobs 0..n Job
  * @navhas n currentUser 0..1 User
  * @navhas n roles 0..n UserRole
  * @navhas n groups 0..n Group
@@ -38,16 +39,22 @@ public class CurrentUser extends AbstractTransientBean {
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
 	/** @hidden */
+	public static final String groupMembershipListPropertyName = "groupMembershipList";
+	/** @hidden */
 	public static final String lastLoginPropertyName = "lastLogin";
 	/** @hidden */
 	public static final String groupsPropertyName = "groups";
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
+	/** @hidden */
+	public static final String jobsPropertyName = "jobs";
 
 	private User currentUser = null;
+	private String groupMembershipList;
 	private DateTime lastLogin;
 	private List<Group> groups = new ArrayList<>();
 	private List<UserRole> roles = new ArrayList<>();
+	private List<Job> jobs = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -87,6 +94,24 @@ public class CurrentUser extends AbstractTransientBean {
 	public void setCurrentUser(User currentUser) {
 		preset(currentUserPropertyName, currentUser);
 		this.currentUser = currentUser;
+	}
+
+	/**
+	 * {@link #groupMembershipList} accessor.
+	 **/
+	public String getGroupMembershipList() {
+		return groupMembershipList;
+	}
+
+	/**
+	 * {@link #groupMembershipList} mutator.
+	 * 
+	 * @param groupMembershipList	The new value to set.
+	 **/
+	@XmlElement
+	public void setGroupMembershipList(String groupMembershipList) {
+		preset(groupMembershipListPropertyName, groupMembershipList);
+		this.groupMembershipList = groupMembershipList;
 	}
 
 	/**
@@ -161,5 +186,32 @@ public class CurrentUser extends AbstractTransientBean {
 	 **/
 	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
 		 setElementById(roles, element);
+	}
+
+	/**
+	 * {@link #jobs} accessor.
+	 **/
+	@XmlElement
+	public List<Job> getJobs() {
+		return jobs;
+	}
+
+	/**
+	 * {@link #jobs} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 **/
+	public Job getJobsElementById(String bizId) {
+		return getElementById(jobs, bizId);
+	}
+
+	/**
+	 * {@link #jobs} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param jobs	The new value to set.
+	 **/
+	public void setJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
+		 setElementById(jobs, element);
 	}
 }

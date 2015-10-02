@@ -18,6 +18,7 @@ import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.AreaRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.title.TextTitle;
@@ -34,16 +35,15 @@ public class Activity implements DynamicImage<Display> {
 	private static final long serialVersionUID = 920018115413956116L;
 
 	@Override
-	public BufferedImage getImage(Display display, int width, int height, User user)
-	throws Exception {
-		return getActivityLineImage(null, width, height);
+	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
+		return getActivityAreaImage(null, width, height, user);
 	}
-	
-	public static BufferedImage getActivity3DBarImage(modules.admin.domain.User adminUser, int width, int height) throws Exception {
+
+	public static BufferedImage getActivity3DBarImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
-			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser));
+			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser, user));
 			JFreeChart chart = ChartFactory.createBarChart3D("", "", "Activity", data, PlotOrientation.VERTICAL, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
@@ -58,14 +58,14 @@ public class Activity implements DynamicImage<Display> {
 			plot.setNoDataMessage("No data available");
 			plot.setOutlineVisible(false);
 
-			//generate generic series colours 
+			// generate generic series colours
 			Color baseColour = new Color(70, 130, 180);
 			Color nextColour = baseColour;
 			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getColumnCount();
 			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getColumnCount();
 			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getColumnCount();
 
-			//set series renderers
+			// set series renderers
 			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator("{2}", new DecimalFormat("#,##0"));
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
@@ -82,7 +82,7 @@ public class Activity implements DynamicImage<Display> {
 			Font axisFont = new Font("Arial", Font.PLAIN, 12);
 			plot.getDomainAxis().setLabelFont(axisFont);
 			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
-			
+
 			chart.getLegend().setVisible(false);
 
 			return chart.createBufferedImage(width, height);
@@ -101,12 +101,12 @@ public class Activity implements DynamicImage<Display> {
 
 		return null;
 	}
-	
-	public static BufferedImage getActivityLineImage(modules.admin.domain.User adminUser, int width, int height) throws Exception {
+
+	public static BufferedImage getActivityLineImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
-			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser));
+			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser, user));
 			JFreeChart chart = ChartFactory.createLineChart("", "", "Activity", data, PlotOrientation.VERTICAL, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
@@ -138,7 +138,7 @@ public class Activity implements DynamicImage<Display> {
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
-			//renderer.setBaseItemLabelFont(new Font("Arial", 0, 10));
+			// renderer.setBaseItemLabelFont(new Font("Arial", 0, 10));
 
 			TextTitle title = chart.getTitle();
 			title.setFont(new Font("Arial Unicode MS", Font.BOLD, 12));
@@ -146,7 +146,7 @@ public class Activity implements DynamicImage<Display> {
 			Font axisFont = new Font("Arial", Font.PLAIN, 12);
 			plot.getDomainAxis().setLabelFont(axisFont);
 			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
-			
+
 			chart.getLegend().setVisible(false);
 
 			return chart.createBufferedImage(width, height);
@@ -166,33 +166,101 @@ public class Activity implements DynamicImage<Display> {
 		return null;
 	}
 
-	public static String getActivityHistorySQL(modules.admin.domain.User adminUser){
-		//note SQL concat function is implementation specific
+	public static BufferedImage getActivityAreaImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
+		Connection connection = null;
+		try {
+			connection = EXT.getPooledJDBCConnection();
+			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser, user));
+			JFreeChart chart = ChartFactory.createAreaChart("", "", "Activity", data, PlotOrientation.VERTICAL, true, false, false);
+
+			chart.setBackgroundImageAlpha(0.8F);
+			chart.getPlot().setBackgroundAlpha(0.2F);
+			chart.setBackgroundPaint(null);
+			chart.getPlot().setBackgroundPaint(null);
+
+			CategoryPlot plot = (CategoryPlot) chart.getPlot();
+			plot.setRangeGridlinesVisible(false);
+
+			// BarRenderer renderer = (BarRenderer) plot.getRenderer();
+			AreaRenderer renderer = (AreaRenderer) chart.getCategoryPlot().getRenderer();
+
+			plot.setNoDataMessage("No data available");
+			plot.setOutlineVisible(false);
+
+			Color baseColour = new Color(70, 130, 180);
+			Color nextColour = baseColour;
+			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getColumnCount();
+			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getColumnCount();
+			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+
+			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator("{2}", new DecimalFormat("#,##0"));
+			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
+				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				renderer.setSeriesItemLabelsVisible(seriesIndex, false);
+				renderer.setSeriesPaint(seriesIndex, nextColour);
+				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
+			}
+
+			renderer.setItemLabelAnchorOffset(0);
+			// renderer.setBaseItemLabelFont(new Font("Arial", 0, 10));
+
+			TextTitle title = chart.getTitle();
+			title.setFont(new Font("Arial Unicode MS", Font.BOLD, 12));
+
+			Font axisFont = new Font("Arial", Font.PLAIN, 12);
+			plot.getDomainAxis().setLabelFont(axisFont);
+			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
+
+			chart.getLegend().setVisible(false);
+
+			return chart.createBufferedImage(width, height);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (connection != null) {
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				connection = null;
+			}
+		}
+
+		return null;
+	}
+
+	public static String getActivityHistorySQL(modules.admin.domain.User adminUser, User user) throws Exception {
+		// note SQL concat function is implementation specific
 		StringBuilder sqlB = new StringBuilder(512);
-		
+
 		sqlB.append("select concat(monthName,concat('-',year-2000)) as yearMonth, hits from (");
 		sqlB.append(" select year, case ");
-		
-		//construct month names from int
+
+		// construct month names from int
 		DateFormatSymbols dfs = new DateFormatSymbols();
-	    String[] months = dfs.getMonths();
-		for(int m=0; m<11; m++){
-			sqlB.append(" when month = ").append(m+1).append(" then '").append(months[m].substring(0, 3)).append("'");
+		String[] months = dfs.getMonths();
+		for (int m = 0; m < 11; m++) {
+			sqlB.append(" when month = ").append(m + 1).append(" then '").append(months[m].substring(0, 3)).append("'");
 		}
 		sqlB.append(" else 'Dec' end as monthName, month");
 		sqlB.append(", hits from (");
-		
+
 		sqlB.append(" select year, month, sum(numberOfHits) as hits");
 		sqlB.append(" from (");
 		sqlB.append("	select year, month, numberOfHits");
 		sqlB.append("	from adm_userMonthlyHits");
-		
-		//filter for user if supplied
-		if(adminUser!=null ){
-			sqlB.append(" where userName = '").append(adminUser.getUserName()).append("'");
+
+		sqlB.append(" where bizCustomer = '");
+		sqlB.append(user.getCustomer().getName());
+		sqlB.append("\'");
+
+		// filter for user if supplied
+		if (adminUser != null) {
+			sqlB.append(" and userName = '").append(adminUser.getUserName()).append("'");
 		}
 
-		// union in all possible year/month combinations 
+		// union in all possible year/month combinations
 		// for the last 12 months
 		Calendar c = Calendar.getInstance();
 		Date now = new Date();
@@ -209,7 +277,7 @@ public class Activity implements DynamicImage<Display> {
 		// filter for last 12 months
 		int lastYear = c.get(Calendar.YEAR) * 100 + (c.get(Calendar.MONTH) + 1);
 		sqlB.append(" where (year*100+month) > ").append(lastYear);
-		
+
 		// grouping and order
 		sqlB.append(" group by year, month");
 		sqlB.append(" )");
@@ -218,7 +286,6 @@ public class Activity implements DynamicImage<Display> {
 
 		return sqlB.toString();
 	}
-
 
 	@Override
 	public ImageFormat getFormat() {

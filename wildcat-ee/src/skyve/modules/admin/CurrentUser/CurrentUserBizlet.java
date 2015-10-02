@@ -1,7 +1,10 @@
 package modules.admin.CurrentUser;
 
+import java.util.List;
+
 import modules.admin.domain.CurrentUser;
 import modules.admin.domain.Group;
+import modules.admin.domain.Job;
 import modules.admin.domain.User;
 import modules.admin.domain.UserLoginRecord;
 import modules.admin.domain.UserRole;
@@ -26,11 +29,29 @@ public class CurrentUserBizlet extends Bizlet<CurrentUser> {
 		User user = qUsers.beanResult();
 		if (user != null) {
 			bean.setCurrentUser(user);
+			
+			StringBuilder sb = new StringBuilder(64);
 			for(Group g: user.getGroups()){
 				bean.getGroups().add(g);
+				if(sb.length()>0){
+					sb.append(',');
+				}
+				sb.append(g.getName());
 			}
+			bean.setGroupMembershipList(sb.toString());
+			
 			for(UserRole r: user.getRoles()){
 				bean.getRoles().add(r);
+			}
+			
+			//find jobs
+			//TODO - work out why I only get one job
+			DocumentQuery qJobs = pers.newDocumentQuery(Job.MODULE_NAME, Job.DOCUMENT_NAME);
+			qJobs.getFilter().addEquals(Bean.USER_ID, bean.getCurrentUser().getBizId());
+			
+			List<Job> jobs = qJobs.beanResults();
+			for(Job job:jobs){
+				bean.getJobs().add(job);
 			}
 
 			//get last login time

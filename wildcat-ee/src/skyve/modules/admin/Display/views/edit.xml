@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Web Statistics"
-		type="edit"
-		xmlns="http://www.skyve.org/xml/view"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<tabPane>
-		<tab title="Activity">
-			<dynamicImage name="Activity" imageInitialPixelHeight="400" />
-		</tab>
-		<tab title="Activity by User">
-			<dynamicImage name="ActivityBreakdown" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
-		</tab>
-	</tabPane>
+<view title="User Statistics" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox>
+		<hbox>
+			<vbox border="true" borderTitle="Activity By User" percentageWidth="50">
+				<dynamicImage name="ActivityBreakdown" imageInitialPixelHeight="400"  />
+			</vbox>
+			<vbox border="true" borderTitle="Activity Context" >
+				<dynamicImage name="ActivityContext" imageInitialPixelHeight="400" />
+			</vbox>
+		</hbox>
+		<vbox border="true" borderTitle="Activity">
+			<dynamicImage name="Activity" />
+		</vbox>
+	</vbox>
 </view>

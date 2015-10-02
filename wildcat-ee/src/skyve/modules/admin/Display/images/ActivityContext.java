@@ -19,7 +19,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class ActivityBreakdown implements DynamicImage<Display> {
+public class ActivityContext implements DynamicImage<Display> {
 	/**
 	 * For Serialization
 	 */
@@ -27,30 +27,38 @@ public class ActivityBreakdown implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return getActivityBreakdown3DPieImage(width, height, user);
+		return getActivityContextPieImage(null, width, height, user);
 	}
 
-	public static BufferedImage getActivityBreakdown3DPieImage(int width, int height, User user) throws Exception {
+	public static BufferedImage getActivityContextPieImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
-			StringBuilder sb = new StringBuilder("SELECT userName");
-			sb.append(", sum(numberofhits) ");
-			sb.append(" FROM adm_usermonthlyhits");
+			StringBuilder sb = new StringBuilder("SELECT ");
+			sb.append(" auditDocumentName, count(*) as countOfActivity");
+			sb.append(" FROM adm_audit");
 			sb.append(" where bizCustomer = '");
 			sb.append(user.getCustomer().getName());
 			sb.append("\'");
-			sb.append(" group by userName");
+			// filter for user if supplied
+			if (adminUser != null) {
+				sb.append(" and userName = '").append(adminUser.getUserName()).append("'");
+			}
+
+			sb.append(" group by auditDocumentName");
 
 			connection = EXT.getPooledJDBCConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());
 			JFreeChart chart = ChartFactory.createPieChart("", data, true, false, false);
-			chart.setBackgroundImageAlpha(0.0F);
-			chart.getPlot().setBackgroundAlpha(0.0F);
+			chart.setBackgroundImageAlpha(0.2F);
+			chart.getPlot().setBackgroundAlpha(0.2F);
 			chart.setBackgroundPaint(null);
 
 			PiePlot plot = (PiePlot) chart.getPlot();
 			plot.setBackgroundAlpha(0.0F);
 			plot.setNoDataMessage("No data available");
+			// PieSectionLabelGenerator generator = new
+			// StandardPieSectionLabelGenerator("{1}", new
+			// DecimalFormat("#,##0"), new DecimalFormat("0.00"));
 			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator("{0}");
 			plot.setLabelGenerator(generator); // null means no labels
 
