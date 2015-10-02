@@ -21,7 +21,7 @@ public class CurrentUserActivity implements DynamicImage<CurrentUser> {
 	public BufferedImage getImage(CurrentUser bean, int width, int height, User user) throws Exception {
 		
 		if (bean != null && bean.getCurrentUser() != null) {
-			return Activity.getActivityImage(bean.getCurrentUser(), width, height);
+			return Activity.getActivityLineImage(bean.getCurrentUser(), width, height);
 		}
 		return null;
 	}

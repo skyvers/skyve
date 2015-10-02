@@ -9,7 +9,7 @@
 			<dynamicImage name="Activity" imageInitialPixelHeight="400" />
 		</tab>
 		<tab title="Activity by User">
-			<dynamicImage name="ActivityByUser" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
+			<dynamicImage name="ActivityBreakdown" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
 		</tab>
 	</tabPane>
 </view>

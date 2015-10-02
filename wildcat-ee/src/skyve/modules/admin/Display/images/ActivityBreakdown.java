@@ -7,8 +7,6 @@ import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.Iterator;
-import java.util.List;
 
 import modules.admin.domain.Display;
 
@@ -22,7 +20,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class ActivityByUser implements DynamicImage<Display> {
+public class ActivityBreakdown implements DynamicImage<Display> {
 	/**
 	 * For Serialization
 	 */
@@ -30,6 +28,10 @@ public class ActivityByUser implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
+		return getActivityBreakdown3DPieImage(width, height, user);
+	}
+
+	public static BufferedImage getActivityBreakdown3DPieImage(int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
 			StringBuilder sb = new StringBuilder("SELECT userName");
@@ -50,9 +52,6 @@ public class ActivityByUser implements DynamicImage<Display> {
 			PiePlot plot = (PiePlot) chart.getPlot();
 			plot.setBackgroundAlpha(0.2F);
 			plot.setNoDataMessage("No data available");
-			// plot.setLabelGenerator(null); //null means no labels
-			// StandardPieSectionLabelGenerator labelGenerator = new
-			// StandardPieSectionLabelGenerator();
 			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator("{1}", new DecimalFormat("#,##0"), new DecimalFormat("0.00"));
 			plot.setLabelGenerator(generator); // null means no labels
 
@@ -70,15 +69,7 @@ public class ActivityByUser implements DynamicImage<Display> {
 				nextColour = new Color(nextColour.getRed()-redDiff,nextColour.getGreen()-greenDiff, nextColour.getBlue()-blueDiff);
 			}
 			
-			//Review section titles
-	        List<String> keys = plot.getDataset().getKeys();
-	        Iterator<String> iterator = keys.iterator();
-	        while (iterator.hasNext()) {
-	            String key = iterator.next();
-	            System.out.println(key);  // do whatever you need the key for here
-	        }			
-
-			plot.setLabelFont(new Font("Arial Unicode MS", 0, 9));
+			plot.setLabelFont(new Font("Arial", 0, 9));
 			plot.setSectionOutlinesVisible(true);
 			plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
 			plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
