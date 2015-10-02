@@ -4,10 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
+import org.skyve.domain.types.DateTime;
 import org.skyve.wildcat.domain.AbstractTransientBean;
+import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
 
 /**
  * CurrentUser
@@ -34,11 +38,14 @@ public class CurrentUser extends AbstractTransientBean {
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
 	/** @hidden */
+	public static final String lastLoginPropertyName = "lastLogin";
+	/** @hidden */
 	public static final String groupsPropertyName = "groups";
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
 
 	private User currentUser = null;
+	private DateTime lastLogin;
 	private List<Group> groups = new ArrayList<>();
 	private List<UserRole> roles = new ArrayList<>();
 
@@ -80,6 +87,26 @@ public class CurrentUser extends AbstractTransientBean {
 	public void setCurrentUser(User currentUser) {
 		preset(currentUserPropertyName, currentUser);
 		this.currentUser = currentUser;
+	}
+
+	/**
+	 * {@link #lastLogin} accessor.
+	 **/
+	public DateTime getLastLogin() {
+		return lastLogin;
+	}
+
+	/**
+	 * {@link #lastLogin} mutator.
+	 * 
+	 * @param lastLogin	The new value to set.
+	 **/
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	@XmlElement
+	public void setLastLogin(DateTime lastLogin) {
+		preset(lastLoginPropertyName, lastLogin);
+		this.lastLogin = lastLogin;
 	}
 
 	/**

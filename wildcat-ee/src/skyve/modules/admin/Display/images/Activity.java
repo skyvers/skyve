@@ -44,7 +44,7 @@ public class Activity implements DynamicImage<Display> {
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser));
-			JFreeChart chart = ChartFactory.createBarChart3D("", "", "Access", data, PlotOrientation.VERTICAL, true, false, false);
+			JFreeChart chart = ChartFactory.createBarChart3D("", "", "Activity", data, PlotOrientation.VERTICAL, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
@@ -107,7 +107,7 @@ public class Activity implements DynamicImage<Display> {
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, getActivityHistorySQL(adminUser));
-			JFreeChart chart = ChartFactory.createLineChart("", "", "Access", data, PlotOrientation.VERTICAL, true, false, false);
+			JFreeChart chart = ChartFactory.createLineChart("", "", "Activity", data, PlotOrientation.VERTICAL, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);

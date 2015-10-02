@@ -9,11 +9,14 @@
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey expression="My Details"/>
 	<attributes>
-		<association type="aggregation" name="currentUser" persistent="false">
+		<association type="aggregation" name="currentUser" >
 			<displayName>Current User</displayName>
 			<documentName>User</documentName>
 		</association>
-		<collection name="groups" type="aggregation" persistent="false">
+		<dateTime name="lastLogin">
+			<displayName>Last Login</displayName>
+		</dateTime>
+		<collection name="groups" type="aggregation" >
 			<displayName>Groups</displayName>
 			<documentName>Group</documentName>
 			<minCardinality>0</minCardinality>
@@ -21,7 +24,7 @@
 				<order by="name" sort="ascending" />
 			</ordering>
 		</collection>		
-		<collection name="roles" type="aggregation" persistent="false">
+		<collection name="roles" type="aggregation" >
 			<displayName>Roles</displayName>
 			<documentName>UserRole</documentName>
 			<minCardinality>0</minCardinality>

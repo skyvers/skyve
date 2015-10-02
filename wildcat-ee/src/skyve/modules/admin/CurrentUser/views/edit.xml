@@ -28,6 +28,11 @@
 				</row>
 				<row>
 					<item>
+						<textField binding="lastLogin"  disabled="true" editable="false"/>
+					</item>
+				</row>
+				<row>
+					<item>
 						<spacer />
 					</item>
 					<item>
