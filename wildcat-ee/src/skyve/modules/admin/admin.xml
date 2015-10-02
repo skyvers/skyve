@@ -5,7 +5,7 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>edit</homeRef>
-	<homeDocument>ChangePassword</homeDocument>
+	<homeDocument>CurrentUser</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />

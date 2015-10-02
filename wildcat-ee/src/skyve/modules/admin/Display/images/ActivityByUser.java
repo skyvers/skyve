@@ -22,7 +22,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class PercentageUser implements DynamicImage<Display> {
+public class ActivityByUser implements DynamicImage<Display> {
 	/**
 	 * For Serialization
 	 */
@@ -42,9 +42,10 @@ public class PercentageUser implements DynamicImage<Display> {
 
 			connection = EXT.getPooledJDBCConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());
-			JFreeChart chart = ChartFactory.createPieChart3D("User", data, true, false, false);
+			JFreeChart chart = ChartFactory.createPieChart3D("", data, true, false, false);
 			chart.setBackgroundImageAlpha(0.2F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
+			chart.setBackgroundPaint(null);
 
 			PiePlot plot = (PiePlot) chart.getPlot();
 			plot.setBackgroundAlpha(0.2F);

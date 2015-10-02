@@ -5,11 +5,11 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Monthly Hits">
-			<dynamicImage name="UserMonthlyHits" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
+		<tab title="Activity">
+			<dynamicImage name="Activity" imageInitialPixelHeight="400" />
 		</tab>
-		<tab title="Percentage Hits By user">
-			<dynamicImage name="PercentageUser" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
+		<tab title="Activity by User">
+			<dynamicImage name="ActivityByUser" imageInitialPixelWidth="600" imageInitialPixelHeight="400" />
 		</tab>
 	</tabPane>
 </view>

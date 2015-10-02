@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="{currentUser.contact.name}" type="edit" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<hbox>
-		<vbox percentageWidth="50" pixelMemberPadding="20">
+	<hbox border="true" borderTitle="Details" percentageHeight="1" pixelPadding="10">
+		<vbox percentageWidth="50" pixelPadding="10">
 			<form>
 				<column percentageWidth="20" />
 				<column />
@@ -26,33 +26,15 @@
 						<textField binding="currentUser.contact.mobile" />
 					</item>
 				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="UpdateMyDetails" pixelWidth="100" />
+					</item>
+				</row>
 			</form>
-			<hbox >
-				<form percentageWidth="20">
-					<column />
-					<row>
-						<item>
-							<spacer />
-						</item>
-					</row>
-				</form>
-				<dataGrid binding="currentUser.groups" editable="false">
-					<boundColumn binding="name" title="Groups"/>
-				</dataGrid>
-			</hbox>
-			<hbox >
-				<form percentageWidth="20">
-					<column />
-					<row>
-						<item>
-							<spacer />
-						</item>
-					</row>
-				</form>
-				<dataGrid binding="currentUser.roles" editable="false" >
-					<boundColumn binding="roleName" title="Roles"/>
-				</dataGrid>
-			</hbox>
 		</vbox>
 		<form percentageWidth="50">
 			<column percentageWidth="20" />
@@ -67,7 +49,21 @@
 			</row>
 		</form>
 	</hbox>
+	<vbox border="true" borderTitle="Activity">
+		<dynamicImage name="CurrentUserActivity" />
+	</vbox>
+	<vbox>
+		<form>
+			<column />
+			<row>
+				<item>
+					<spacer />
+				</item>
+			</row>
+		</form>
+	</vbox>
 	<actions>
-		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif" />
+		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
+			inActionPanel="false" />
 	</actions>
 </view>
