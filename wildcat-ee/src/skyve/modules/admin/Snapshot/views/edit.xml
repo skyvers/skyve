@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view type="edit" title="Snapshot" icon32x32RelativeFileName="icons/document/snapshot32.png" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" pixelPadding="10" pixelHeight="1">
+		<form>
+			<column percentageWidth="10" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<default binding="moduleName" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="queryName" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="name" />
+				</item>
+			</row>
+			<row>
+				<item colspan="2">
+					<textArea binding="snapshot" pixelHeight="400" pixelWidth="800"/>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+	<newParameters />
+</view>
+

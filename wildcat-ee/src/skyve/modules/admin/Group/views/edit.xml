@@ -6,7 +6,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane >
 		<tab title="Group" >
-			<vbox pixelPadding="10">
+			<vbox pixelPadding="10" percentageWidth="50">
 			<form>
 				<column percentageWidth="20" />
 				<column />

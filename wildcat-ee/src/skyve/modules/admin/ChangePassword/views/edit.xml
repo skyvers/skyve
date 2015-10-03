@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Change Your Password" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" borderTitle="Password" percentageWidth="50" pixelPadding="10" pixelHeight="1">
+	<vbox border="true" percentageWidth="50" pixelPadding="10" pixelHeight="1">
 		<form>
 			<column percentageWidth="20" />
 			<column />

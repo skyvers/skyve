@@ -28,7 +28,7 @@ public class Activity implements DynamicImage<Display> {
 		// note SQL concat function is implementation specific
 		StringBuilder sqlB = new StringBuilder(512);
 
-		sqlB.append("select concat(monthName,concat('-',year-2000)) as yearMonth, hits from (");
+		sqlB.append("select monthName , hits from (");
 		sqlB.append(" select year, case ");
 
 		// construct month names from int
