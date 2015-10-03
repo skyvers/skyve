@@ -293,7 +293,7 @@ public class ThemeCharts {
 			plot.setStartAngle(135);
 			plot.setOutlineVisible(false);
 
-			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, 0);
+			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, plot.getDataset().getItemCount());
 
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getItemCount(); seriesIndex++) {
 				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), colouriser.getCurrent());

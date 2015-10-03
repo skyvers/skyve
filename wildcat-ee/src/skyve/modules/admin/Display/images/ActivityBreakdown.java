@@ -6,6 +6,7 @@ import modules.admin.ThemeCharts;
 import modules.admin.ThemeCharts.ChartAspect;
 import modules.admin.domain.Display;
 
+import org.jfree.chart.plot.PlotOrientation;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
@@ -18,7 +19,7 @@ public class ActivityBreakdown implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return ThemeCharts.getPieChartImage(getActivityBreakdownSQL(user), new Integer(0), width, height, ChartAspect.FLAT);
+		return ThemeCharts.getBarChartImage(getActivityBreakdownSQL(user), "","",null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT);
 	}
 
 	public static String getActivityBreakdownSQL(User user) throws MetaDataException {

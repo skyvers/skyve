@@ -4,7 +4,7 @@
 	<vbox>
 		<hbox>
 			<vbox border="true" borderTitle="Activity By User" percentageWidth="50">
-				<dynamicImage name="ActivityBreakdown" imageInitialPixelHeight="400"  />
+				<dynamicImage name="ActivityBreakdown" />
 			</vbox>
 			<vbox border="true" borderTitle="Activity Context" >
 				<dynamicImage name="ActivityContext" imageInitialPixelHeight="400" />
