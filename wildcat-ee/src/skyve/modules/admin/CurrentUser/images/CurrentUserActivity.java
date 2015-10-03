@@ -2,9 +2,11 @@ package modules.admin.CurrentUser.images;
 
 import java.awt.image.BufferedImage;
 
+import modules.admin.ThemeCharts;
 import modules.admin.Display.images.Activity;
 import modules.admin.domain.CurrentUser;
 
+import org.jfree.chart.plot.PlotOrientation;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
@@ -19,9 +21,9 @@ public class CurrentUserActivity implements DynamicImage<CurrentUser> {
 	 */
 	@Override
 	public BufferedImage getImage(CurrentUser bean, int width, int height, User user) throws Exception {
-		
+
 		if (bean != null && bean.getCurrentUser() != null) {
-			return Activity.getActivityAreaImage(bean.getCurrentUser(), width, height, user);
+			return ThemeCharts.getAreaChartImage(Activity.getActivityHistorySQL(bean.getCurrentUser(), user), "", "Activity", 2, PlotOrientation.VERTICAL, width, height);
 		}
 		return null;
 	}

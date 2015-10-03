@@ -16,6 +16,7 @@ import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.data.jdbc.JDBCPieDataset;
 import org.skyve.EXT;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
@@ -33,21 +34,8 @@ public class ActivityContext implements DynamicImage<Display> {
 	public static BufferedImage getActivityContextPieImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
 		Connection connection = null;
 		try {
-			StringBuilder sb = new StringBuilder("SELECT ");
-			sb.append(" auditDocumentName, count(*) as countOfActivity");
-			sb.append(" FROM adm_audit");
-			sb.append(" where bizCustomer = '");
-			sb.append(user.getCustomer().getName());
-			sb.append("\'");
-			// filter for user if supplied
-			if (adminUser != null) {
-				sb.append(" and userName = '").append(adminUser.getUserName()).append("'");
-			}
-
-			sb.append(" group by auditDocumentName");
-
 			connection = EXT.getPooledJDBCConnection();
-			JDBCPieDataset data = new JDBCPieDataset(connection, sb.toString());
+			JDBCPieDataset data = new JDBCPieDataset(connection, getActivityContextSQL(user, adminUser));
 			JFreeChart chart = ChartFactory.createPieChart("", data, true, false, false);
 			chart.setBackgroundImageAlpha(0.2F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
@@ -108,5 +96,22 @@ public class ActivityContext implements DynamicImage<Display> {
 	@Override
 	public Float getCompressionQuality() {
 		return null;
+	}
+
+	public static String getActivityContextSQL(User user, modules.admin.domain.User adminUser) throws MetaDataException {
+		StringBuilder sb = new StringBuilder("SELECT ");
+		sb.append(" auditDocumentName, count(*) as countOfActivity");
+		sb.append(" FROM adm_audit");
+		sb.append(" where bizCustomer = '");
+		sb.append(user.getCustomer().getName());
+		sb.append("\'");
+		// filter for user if supplied
+		if (adminUser != null) {
+			sb.append(" and userName = '").append(adminUser.getUserName()).append("'");
+		}
+
+		sb.append(" group by auditDocumentName");
+
+		return sb.toString();
 	}
 }
