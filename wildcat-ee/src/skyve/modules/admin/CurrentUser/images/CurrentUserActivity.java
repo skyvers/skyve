@@ -23,7 +23,7 @@ public class CurrentUserActivity implements DynamicImage<CurrentUser> {
 	public BufferedImage getImage(CurrentUser bean, int width, int height, User user) throws Exception {
 
 		if (bean != null && bean.getCurrentUser() != null) {
-			return ThemeCharts.getAreaChartImage(Activity.getActivityHistorySQL(bean.getCurrentUser(), user), "", "Activity", 2, PlotOrientation.VERTICAL, width, height);
+			return ThemeCharts.getAreaChartImage(Activity.getActivityHistorySQL(bean.getCurrentUser(), user), "", "Activity", null, PlotOrientation.VERTICAL, width, height);
 		}
 		return null;
 	}

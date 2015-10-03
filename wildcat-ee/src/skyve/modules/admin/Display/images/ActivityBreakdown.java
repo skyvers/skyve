@@ -18,7 +18,7 @@ public class ActivityBreakdown implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return ThemeCharts.getPieChartImage(getActivityBreakdownSQL(user), 0, width, height, ChartAspect.FLAT);
+		return ThemeCharts.getPieChartImage(getActivityBreakdownSQL(user), new Integer(0), width, height, ChartAspect.FLAT);
 	}
 
 	public static String getActivityBreakdownSQL(User user) throws MetaDataException {

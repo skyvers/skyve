@@ -21,7 +21,7 @@ public class Activity implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return ThemeCharts.getAreaChartImage(getActivityHistorySQL(null, user), "", "Activity", 2, PlotOrientation.VERTICAL, width, height);
+		return ThemeCharts.getAreaChartImage(getActivityHistorySQL(null, user), "", "Activity", null, PlotOrientation.VERTICAL, width, height);
 	}
 
 	public static String getActivityHistorySQL(modules.admin.domain.User adminUser, User user) throws Exception {

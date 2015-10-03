@@ -71,7 +71,7 @@
 			</vbox>
 		</hbox>
 	</vbox>
-	<vbox border="true" borderTitle="Jobs">
+	<vbox border="true" borderTitle="Jobs" pixelPadding="10">
 		<dataGrid binding="jobs" editable="false">
 			<boundColumn binding="displayName" />
 			<boundColumn binding="status" />

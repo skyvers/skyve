@@ -20,6 +20,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.AreaRenderer;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.jdbc.JDBCCategoryDataset;
 import org.jfree.data.jdbc.JDBCPieDataset;
@@ -61,13 +62,18 @@ public class ThemeCharts {
 
 	}
 
-	public static BufferedImage get3DBarChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
+	public static BufferedImage getBarChartImage(String sql, String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, ChartAspect aspect) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, sql);
-			JFreeChart chart = ChartFactory.createBarChart3D(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
+			JFreeChart chart;
+			if (ChartAspect.THREE_D.equals(aspect)) {
+				chart = ChartFactory.createBarChart3D(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
+			} else {
+				chart = ChartFactory.createBarChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
+			}
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
 			chart.setBackgroundPaint(null);
@@ -75,7 +81,13 @@ public class ThemeCharts {
 			CategoryPlot plot = (CategoryPlot) chart.getPlot();
 			plot.setRangeGridlinesVisible(false);
 
-			BarRenderer renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
+			BarRenderer renderer;
+			if (ChartAspect.THREE_D.equals(aspect)) {
+				renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
+			} else {
+				renderer = (BarRenderer) plot.getRenderer();
+				renderer.setBarPainter(new StandardBarPainter());
+			}
 
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
@@ -84,9 +96,14 @@ public class ThemeCharts {
 			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, plot.getDataset().getColumnCount());
 
 			// set series renderers
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			CategoryItemLabelGenerator generator = null;
+			if (labelColumn != null) {
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
-				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				if (labelColumn != null) {
+					renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				}
 				renderer.setSeriesItemLabelsVisible(seriesIndex, true);
 				renderer.setSeriesPaint(seriesIndex, colouriser.getCurrent());
 				colouriser.nextColour();
@@ -120,7 +137,7 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getLineChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
+	public static BufferedImage getLineChartImage(String sql, String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
@@ -141,17 +158,19 @@ public class ThemeCharts {
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
 
-			Color nextColour = themeColour;
-			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getColumnCount();
-			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getColumnCount();
-			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, plot.getDataset().getColumnCount());
 
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			CategoryItemLabelGenerator generator = null;
+			if (labelColumn != null) {
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
-				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				if (labelColumn != null) {
+					renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				}
 				renderer.setSeriesItemLabelsVisible(seriesIndex, false);
-				renderer.setSeriesPaint(seriesIndex, nextColour);
-				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
+				renderer.setSeriesPaint(seriesIndex, colouriser.getCurrent());
+				colouriser.nextColour();
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
@@ -182,7 +201,7 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getAreaChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
+	public static BufferedImage getAreaChartImage(String sql, String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
@@ -203,17 +222,19 @@ public class ThemeCharts {
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
 
-			Color nextColour = themeColour;
-			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getColumnCount();
-			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getColumnCount();
-			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, plot.getDataset().getColumnCount());
 
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			CategoryItemLabelGenerator generator = null;
+			if (labelColumn != null) {
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
-				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				if (labelColumn != null) {
+					renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
+				}
 				renderer.setSeriesItemLabelsVisible(seriesIndex, false);
-				renderer.setSeriesPaint(seriesIndex, nextColour);
-				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
+				renderer.setSeriesPaint(seriesIndex, colouriser.getCurrent());
+				colouriser.nextColour();
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
@@ -244,7 +265,7 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getPieChartImage(String sql, int labelColumn, int width, int height, ChartAspect aspect) throws Exception {
+	public static BufferedImage getPieChartImage(String sql, Integer labelColumn, int width, int height, ChartAspect aspect) throws Exception {
 		Connection connection = null;
 		try {
 
@@ -264,20 +285,19 @@ public class ThemeCharts {
 			plot.setBackgroundAlpha(0.0F);
 			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 
-			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator(labelReference(labelColumn));
-			plot.setLabelGenerator(generator); // null means no labels
+			if (labelColumn != null) {
+				PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator(labelReference(labelColumn));
+				plot.setLabelGenerator(generator); // null means no labels
+			}
 
 			plot.setStartAngle(135);
 			plot.setOutlineVisible(false);
 
-			Color nextColour = themeColour;
-			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getItemCount();
-			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getItemCount();
-			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getItemCount();
+			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, 0);
 
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getItemCount(); seriesIndex++) {
-				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), nextColour);
-				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
+				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), colouriser.getCurrent());
+				colouriser.nextColour();
 			}
 
 			plot.setSectionOutlinesVisible(true);
@@ -303,7 +323,7 @@ public class ThemeCharts {
 		return null;
 	}
 
-	private static String labelReference(int columnIndex) {
-		return "{" + columnIndex + "}";
+	private static String labelReference(Integer columnIndex) {
+		return "{" + columnIndex.toString() + "}";
 	}
 }
