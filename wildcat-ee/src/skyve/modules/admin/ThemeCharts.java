@@ -27,16 +27,46 @@ import org.skyve.EXT;
 
 public class ThemeCharts {
 
+	private static final DecimalFormat themeNumericFormat = new DecimalFormat("#,##0");
+	private static final String EMPTY_STRING = "";
+	private static final Color themeColour = new Color(70, 130, 180);
+	private static final String themeFont = "Arial";
+	private static final String NO_DATA_AVAILABLE = "No data available";
+
 	public enum ChartAspect {
 		FLAT, THREE_D
 	}
 
-	public static BufferedImage get3DBarChartImage(String sql, String domainTitle, String rangeTitle, int itemLabelColumnIndex, PlotOrientation orientation, int width, int height) throws Exception {
+	private static class SectionColouriser {
+		private int redDiff;
+		private int greenDiff;
+		private int blueDiff;
+
+		private Color current;
+
+		public Color getCurrent() {
+			return current;
+		}
+
+		public SectionColouriser(Color baseColour, int columnCount) {
+			this.current = baseColour;
+			this.redDiff = (baseColour.getRed() / 2) / columnCount;
+			this.greenDiff = (baseColour.getGreen() / 2) / columnCount;
+			this.blueDiff = (baseColour.getBlue() / 2) / columnCount;
+		}
+
+		public void nextColour() {
+			this.current = new Color(current.getRed() - redDiff, current.getGreen() - greenDiff, current.getBlue() - blueDiff);
+		}
+
+	}
+
+	public static BufferedImage get3DBarChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, sql);
-			JFreeChart chart = ChartFactory.createBarChart3D("", domainTitle, rangeTitle, data, orientation, true, false, false);
+			JFreeChart chart = ChartFactory.createBarChart3D(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
@@ -47,34 +77,29 @@ public class ThemeCharts {
 
 			BarRenderer renderer = (BarRenderer) chart.getCategoryPlot().getRenderer();
 
-			plot.setNoDataMessage("No data available");
+			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
 
 			// generate generic series colours
-			Color baseColour = new Color(70, 130, 180);
-			Color nextColour = baseColour;
-			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getColumnCount();
-			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getColumnCount();
-			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+			SectionColouriser colouriser = new ThemeCharts.SectionColouriser(themeColour, plot.getDataset().getColumnCount());
 
 			// set series renderers
-			String colIndex = "{" + itemLabelColumnIndex + "}";
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(colIndex, new DecimalFormat("#,##0"));
+			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
 				renderer.setSeriesItemLabelsVisible(seriesIndex, true);
-				renderer.setSeriesPaint(seriesIndex, nextColour);
-				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
+				renderer.setSeriesPaint(seriesIndex, colouriser.getCurrent());
+				colouriser.nextColour();
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font("Arial Unicode MS", Font.BOLD, 12));
+			title.setFont(new Font(themeFont, Font.BOLD, 12));
 
-			Font axisFont = new Font("Arial", Font.PLAIN, 12);
+			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
 			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
+			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
 			chart.getLegend().setVisible(false);
 
@@ -95,12 +120,12 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getLineChartImage(String sql, String domainTitle, String rangeTitle, int itemLabelColumnIndex, PlotOrientation orientation, int width, int height) throws Exception {
+	public static BufferedImage getLineChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, sql);
-			JFreeChart chart = ChartFactory.createLineChart("", domainTitle, rangeTitle, data, orientation, true, false, false);
+			JFreeChart chart = ChartFactory.createLineChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
@@ -113,17 +138,15 @@ public class ThemeCharts {
 			// BarRenderer renderer = (BarRenderer) plot.getRenderer();
 			LineAndShapeRenderer renderer = (LineAndShapeRenderer) chart.getCategoryPlot().getRenderer();
 
-			plot.setNoDataMessage("No data available");
+			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
 
-			Color baseColour = new Color(70, 130, 180);
-			Color nextColour = baseColour;
-			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getColumnCount();
-			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getColumnCount();
-			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+			Color nextColour = themeColour;
+			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getColumnCount();
+			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getColumnCount();
+			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getColumnCount();
 
-			String colIndex = "{" + itemLabelColumnIndex + "}";
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(colIndex, new DecimalFormat("#,##0"));
+			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
 				renderer.setSeriesItemLabelsVisible(seriesIndex, false);
@@ -132,14 +155,13 @@ public class ThemeCharts {
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
-			// renderer.setBaseItemLabelFont(new Font("Arial", 0, 10));
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font("Arial Unicode MS", Font.BOLD, 12));
+			title.setFont(new Font(themeFont, Font.BOLD, 12));
 
-			Font axisFont = new Font("Arial", Font.PLAIN, 12);
+			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
 			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
+			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
 			chart.getLegend().setVisible(false);
 
@@ -160,12 +182,12 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getAreaChartImage(String sql, String domainTitle, String rangeTitle, int itemLabelColumnIndex, PlotOrientation orientation, int width, int height) throws Exception {
+	public static BufferedImage getAreaChartImage(String sql, String domainTitle, String rangeTitle, int labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, sql);
-			JFreeChart chart = ChartFactory.createAreaChart("", domainTitle, rangeTitle, data, orientation, true, false, false);
+			JFreeChart chart = ChartFactory.createAreaChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
 			chart.setBackgroundImageAlpha(0.8F);
 			chart.getPlot().setBackgroundAlpha(0.2F);
@@ -178,17 +200,15 @@ public class ThemeCharts {
 			// BarRenderer renderer = (BarRenderer) plot.getRenderer();
 			AreaRenderer renderer = (AreaRenderer) chart.getCategoryPlot().getRenderer();
 
-			plot.setNoDataMessage("No data available");
+			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 			plot.setOutlineVisible(false);
 
-			Color baseColour = new Color(70, 130, 180);
-			Color nextColour = baseColour;
-			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getColumnCount();
-			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getColumnCount();
-			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getColumnCount();
+			Color nextColour = themeColour;
+			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getColumnCount();
+			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getColumnCount();
+			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getColumnCount();
 
-			String colIndex = "{" + itemLabelColumnIndex + "}";
-			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(colIndex, new DecimalFormat("#,##0"));
+			CategoryItemLabelGenerator generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				renderer.setSeriesItemLabelGenerator(seriesIndex, generator);
 				renderer.setSeriesItemLabelsVisible(seriesIndex, false);
@@ -197,14 +217,13 @@ public class ThemeCharts {
 			}
 
 			renderer.setItemLabelAnchorOffset(0);
-			// renderer.setBaseItemLabelFont(new Font("Arial", 0, 10));
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font("Arial Unicode MS", Font.BOLD, 12));
+			title.setFont(new Font(themeFont, Font.BOLD, 12));
 
-			Font axisFont = new Font("Arial", Font.PLAIN, 12);
+			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
 			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font("Arial", Font.PLAIN, 14));
+			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
 			chart.getLegend().setVisible(false);
 
@@ -225,7 +244,7 @@ public class ThemeCharts {
 		return null;
 	}
 
-	public static BufferedImage getPieChartImage(String sql, int itemLabelColumnIndex, int width, int height, ChartAspect aspect) throws Exception {
+	public static BufferedImage getPieChartImage(String sql, int labelColumn, int width, int height, ChartAspect aspect) throws Exception {
 		Connection connection = null;
 		try {
 
@@ -233,9 +252,9 @@ public class ThemeCharts {
 			JDBCPieDataset data = new JDBCPieDataset(connection, sql);
 			JFreeChart chart;
 			if (ChartAspect.THREE_D.equals(aspect)) {
-				chart = ChartFactory.createPieChart3D("", data, true, false, false);
+				chart = ChartFactory.createPieChart3D(EMPTY_STRING, data, true, false, false);
 			} else {
-				chart = ChartFactory.createPieChart("", data, true, false, false);
+				chart = ChartFactory.createPieChart(EMPTY_STRING, data, true, false, false);
 			}
 			chart.setBackgroundImageAlpha(0.0F);
 			chart.getPlot().setBackgroundAlpha(0.0F);
@@ -243,27 +262,24 @@ public class ThemeCharts {
 
 			PiePlot plot = (PiePlot) chart.getPlot();
 			plot.setBackgroundAlpha(0.0F);
-			plot.setNoDataMessage("No data available");
+			plot.setNoDataMessage(NO_DATA_AVAILABLE);
 
-			String colIndex = "{" + itemLabelColumnIndex + "}";
-			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator(colIndex);
+			PieSectionLabelGenerator generator = new StandardPieSectionLabelGenerator(labelReference(labelColumn));
 			plot.setLabelGenerator(generator); // null means no labels
 
 			plot.setStartAngle(135);
 			plot.setOutlineVisible(false);
 
-			Color baseColour = new Color(70, 130, 180);
-			Color nextColour = baseColour;
-			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getItemCount();
-			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getItemCount();
-			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getItemCount();
+			Color nextColour = themeColour;
+			int redDiff = (themeColour.getRed() / 2) / plot.getDataset().getItemCount();
+			int greenDiff = (themeColour.getGreen() / 2) / plot.getDataset().getItemCount();
+			int blueDiff = (themeColour.getBlue() / 2) / plot.getDataset().getItemCount();
 
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getItemCount(); seriesIndex++) {
 				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), nextColour);
 				nextColour = new Color(nextColour.getRed() - redDiff, nextColour.getGreen() - greenDiff, nextColour.getBlue() - blueDiff);
 			}
 
-			plot.setLabelFont(new Font("Arial", 0, 9));
 			plot.setSectionOutlinesVisible(true);
 			plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
 			plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
@@ -285,5 +301,9 @@ public class ThemeCharts {
 		}
 
 		return null;
+	}
+
+	private static String labelReference(int columnIndex) {
+		return "{" + columnIndex + "}";
 	}
 }

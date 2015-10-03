@@ -125,6 +125,7 @@ public class TagBizlet extends Bizlet<Tag> {
 				bean.setFilterColumn(new Integer(1));
 			}
 			update(bean);
+			bean.originalValues().clear();
 		}
 
 		return bean;

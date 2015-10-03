@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Data Maintenance"
-		type="edit"
-		xmlns="http://www.skyve.org/xml/view"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <form>
-        <column percentageWidth="20"/>
-        <column/>
-        <column/>
-        <row>
-        	<item>
-        		<combo binding="modDocName"/>
-       		</item>
-       		<item>
-       			<button actionName="DataMaintenanceExportAction" />
-       		</item>
-      	</row>
-    </form>
-    <actions>
-        <defaults />
+<view title="Data Maintenance" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" pixelPadding="10" pixelHeight="1">
+		<form>
+			<column percentageWidth="20" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<combo binding="modDocName" />
+				</item>
+				<item>
+					<button actionName="DataMaintenanceExportAction" pixelWidth="200"/>
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer/>
+				</item>
+				<item>
+					<spacer/>
+				</item>
+				<item>
+					<button actionName="DataMaintenanceImportAction" pixelWidth="200"/>
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
-		<import className="DataMaintenanceImportAction" displayName="Import Data" />
-    </actions>
+		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false"/>
+	</actions>
 </view>

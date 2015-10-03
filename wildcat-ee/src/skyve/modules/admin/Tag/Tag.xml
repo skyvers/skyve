@@ -35,19 +35,19 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
-		<boolean name="fileHasHeaders" persistent="false">
+		<boolean name="fileHasHeaders" persistent="false" trackChanges="false">
 			<displayName>Upload File has Column Headers</displayName>
 		</boolean>
-		<integer name="numberLoaded" persistent="false">
+		<integer name="numberLoaded" persistent="false" trackChanges="false">
 			<displayName>Number of loaded values</displayName>
 		</integer>
-		<integer name="numberMatched" persistent="false">
+		<integer name="numberMatched" persistent="false" trackChanges="false">
 			<displayName>Number of matched</displayName>
 		</integer>
-		<integer name="numberTagged" persistent="false">
+		<integer name="numberTagged" persistent="false" trackChanges="false">
 			<displayName>Number of tagged values</displayName>
 		</integer>
-		<enum name="filterOperator" persistent="false">
+		<enum name="filterOperator" persistent="false" trackChanges="false">
 			<displayName>Filter Operator</displayName>
 			<values>
 				<value code="equals" description="Equals"/>
@@ -55,38 +55,38 @@
 				<value code="contains" description="Contains"/>
 			</values>
 		</enum>
-		<enum name="filterAction" persistent="false">
+		<enum name="filterAction" persistent="false" trackChanges="false">
 			<displayName>Filter Action</displayName>
 			<values>
 				<value code="tag" description="Tag records that match" />
 				<value code="unTag" description="UnTag records that match"/>
 			</values>
 		</enum>
-		<boolean name="unTagSuccessful" persistent="false">
+		<boolean name="unTagSuccessful" persistent="false" trackChanges="false">
 			<displayName>Untag successful documents</displayName>
 		</boolean>
-		<integer name="filterColumn" persistent="false">
+		<integer name="filterColumn" persistent="false" trackChanges="false">
 			<displayName>Column</displayName>
 		</integer>
-		<association type="aggregation" name="actionTag" persistent="false">
+		<association type="aggregation" name="actionTag" persistent="false" trackChanges="false">
 			<displayName>Tag</displayName>
 			<description>The tag to use for the action to be performed on this tag.</description>
 			<domain>dynamic</domain>
 			<documentName>Tag</documentName>
 		</association>
-		<text name="documentCondition" persistent="false">
+		<text name="documentCondition" persistent="false" trackChanges="false">
 			<displayName>Condition</displayName>
 			<description>The condition which must be satisfied for the tagged document, for the action to be executed.</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
-		<text name="documentAction" persistent="false">
+		<text name="documentAction" persistent="false" trackChanges="false">
 			<displayName>Action</displayName>
 			<description>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
-		<memo name="documentActionResults" persistent="false">
+		<memo name="documentActionResults" persistent="false" trackChanges="false">
 			<displayName>Results</displayName>
 		</memo>
 	</attributes>

@@ -4,14 +4,16 @@
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<tabPane>
-		<tab title="Group">
+	<tabPane >
+		<tab title="Group" >
+			<vbox pixelPadding="10">
 			<form>
 				<column percentageWidth="20" />
 				<column />
 				<row><item><textField binding="name" /></item></row>
 				<row><item><textArea binding="description" wrap="true" /></item></row>
 			</form>
+			</vbox>
 		</tab>
 		<tab title="Roles">
 			<dataGrid pixelWidth="400" pixelHeight="300" binding="roles">

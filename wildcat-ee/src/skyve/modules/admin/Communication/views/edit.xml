@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Manage">
-			<vbox pixelMemberPadding="10">
+			<vbox pixelMemberPadding="10" pixelPadding="10">
 				<form border="true" borderTitle="Configuration" pixelHeight="1">
 					<column percentageWidth="20" />
 					<column />
@@ -52,7 +52,7 @@
 						</item>
 					</row>
 				</form>
-				<form border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1">
+				<form border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1" >
 					<column percentageWidth="20" />
 					<column />
 					<column />
@@ -90,8 +90,7 @@
 			</vbox>
 		</tab>
 		<tab title="Contents">
-			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelMemberPadding="10"
-				pixelPadding="10">
+			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelPadding="10">
 				<form pixelWidth="1100">
 					<column percentageWidth="20" />
 					<column />
@@ -161,7 +160,7 @@
 					</row>
 				</form>
 			</vbox>
-			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1">
+			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1" pixelPadding="10">
 				<form pixelWidth="1100">
 					<column percentageWidth="20" />
 					<column />

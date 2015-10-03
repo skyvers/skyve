@@ -1,57 +1,58 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Tag"
-		type="edit"
-		xmlns="http://www.skyve.org/xml/view"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="Tag" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Details">
-			<form>
-				<column percentageWidth="20" />
-				<column />
-				<column />
-				<row>
-					<item>
-						<default binding="name" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<default binding="visible" />
-					</item>
-				</row>
-			</form>
+			<vbox border="true" pixelHeight="1" pixelPadding="10">
+				<form>
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<row>
+						<item>
+							<default binding="name" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<default binding="visible" />
+						</item>
+					</row>
+				</form>
+			</vbox>
 		</tab>
 		<tab title="Combinations">
-			<form>
-				<column percentageWidth="20" />
-				<column />
-				<column />
-				<column />
-				<column />
-				<row>
-					<item colspan="3">
-						<combo binding="actionTag" />
-					</item>
-				</row>
-				<row>
-					<item>
-						<spacer />
-					</item>
-					<item>
-						<button actionName="ExceptTag" pixelWidth="150" />
-					</item>
-					<item>
-						<button actionName="IntersectTag" pixelWidth="150" />
-					</item>
-					<item>
-						<button actionName="UnionTag" pixelWidth="150" />
-					</item>
-				</row>
-			</form>
+			<vbox border="true" pixelHeight="1" pixelPadding="10">
+				<form>
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
+					<column />
+					<row>
+						<item colspan="3">
+							<combo binding="actionTag" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item>
+							<button actionName="ExceptTag" pixelWidth="150" />
+						</item>
+						<item>
+							<button actionName="IntersectTag" pixelWidth="150" />
+						</item>
+						<item>
+							<button actionName="UnionTag" pixelWidth="150" />
+						</item>
+					</row>
+				</form>
+			</vbox>
 		</tab>
 		<tab title="Processing">
-			<vbox>
+			<vbox border="true" pixelHeight="1" pixelPadding="10">
 				<form>
 					<column percentageWidth="20" />
 					<column />
@@ -80,7 +81,7 @@
 					</row>
 					<row>
 						<item>
-							<spacer/>
+							<spacer />
 						</item>
 						<item>
 							<button actionName="Clear" pixelWidth="150" />
@@ -88,7 +89,7 @@
 						<item>
 							<button actionName="TagAll" pixelWidth="150" />
 						</item>
-						
+
 					</row>
 				</form>
 				<form border="true" borderTitle="Load">
@@ -147,7 +148,7 @@
 					<row>
 						<item>
 							<textField binding="numberTagged" disabled="true" />
-						</item>					
+						</item>
 					</row>
 				</form>
 				<form border="true" borderTitle="Process">
@@ -171,8 +172,8 @@
 					</row>
 					<row>
 						<item>
-							<checkBox binding="unTagSuccessful" triState="false"/>
-						</item>					
+							<checkBox binding="unTagSuccessful" triState="false" />
+						</item>
 					</row>
 					<row>
 						<item colspan="5">
@@ -187,31 +188,21 @@
 		<defaults />
 		<upload className="UploadTagCriteria" displayName="Upload Tag Criteria" inActionPanel="false"
 			toolTip="Upload criteria for tagging records" disabled="notAttributeSet" />
-		<action className="Clear" displayName="Clear Tag" inActionPanel="false" 
-			toolTip="Clear tagged records."
-			confirm="Ok to clear all records from the tag?" 
-			relativeIconFileName="shared/icons/Clear.gif"/>
-		<action className="TagAll" displayName="Tag All" inActionPanel="false" 
-			toolTip="Tag all instances of this document."
-			confirm="Ok to tag all?" 
-			relativeIconFileName="shared/icons/Finished.gif"/>
-		<action className="ExceptTag" displayName="Except" inActionPanel="false" 
-			toolTip="Exclude records in the action Tag."
-			confirm="Ok to except the action Tag records?"
-			relativeIconFileName="icons/Except.gif" />
+		<action className="Clear" displayName="Clear Tag" inActionPanel="false" toolTip="Clear tagged records."
+			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" />
+		<action className="TagAll" displayName="Tag All" inActionPanel="false" toolTip="Tag all instances of this document."
+			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" />
+		<action className="ExceptTag" displayName="Except" inActionPanel="false" toolTip="Exclude records in the action Tag."
+			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" />
 		<action className="IntersectTag" displayName="Intersect" inActionPanel="false"
-			toolTip="Exclude records which aren't in both tags." 
-			confirm="Ok to intersect the Tags?" 
-			relativeIconFileName="icons/Intersect.gif"/>
+			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" />
 		<action className="UnionTag" displayName="Union" inActionPanel="false" toolTip="Add records from the action Tag."
-			confirm="Ok to union the Tags?" 
-			relativeIconFileName="icons/Union.gif"/>
+			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" />
 		<action className="BulkDocumentAction" displayName="Bulk Document Action" inActionPanel="false"
-			toolTip="Perform the selected document action for all applicable tagged records." 
-			confirm="Ok to perform the action for this document type?" 
-			relativeIconFileName="shared/icons/Job.gif"/>
-		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
-		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>		
+			toolTip="Perform the selected document action for all applicable tagged records." confirm="Ok to perform the action for this document type?"
+			relativeIconFileName="shared/icons/Job.gif" />
+		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
+		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 	</actions>
 </view>
 
