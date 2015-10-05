@@ -10,19 +10,21 @@
 				<item>
 					<combo binding="modDocName" />
 				</item>
+			</row>
+			<row>
 				<item>
-					<button actionName="DataMaintenanceExportAction" pixelWidth="200"/>
+					<spacer />
+				</item>
+				<item>
+					<button actionName="DataMaintenanceExportAction" pixelWidth="200" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<spacer/>
+					<spacer />
 				</item>
 				<item>
-					<spacer/>
-				</item>
-				<item>
-					<button actionName="DataMaintenanceImportAction" pixelWidth="200"/>
+					<button actionName="DataMaintenanceImportAction" pixelWidth="200" />
 				</item>
 			</row>
 		</form>
@@ -30,6 +32,6 @@
 	<actions>
 		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
-		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false"/>
+		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
 	</actions>
 </view>
