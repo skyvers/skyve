@@ -2,8 +2,8 @@ package modules.admin.Display.images;
 
 import java.awt.image.BufferedImage;
 
-import modules.admin.ThemeCharts;
-import modules.admin.ThemeCharts.ChartAspect;
+import modules.admin.ThemeCharter;
+import modules.admin.ThemeCharter.ChartAspect;
 import modules.admin.domain.Display;
 
 import org.jfree.chart.plot.PlotOrientation;
@@ -19,7 +19,9 @@ public class ActivityBreakdown implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return ThemeCharts.getBarChartImage(getActivityBreakdownSQL(user), "","",null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT);
+		ThemeCharter charter = new ThemeCharter();
+		charter.setSql(getActivityBreakdownSQL(user));
+		return charter.getBarChartImage("", "", null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT);
 	}
 
 	public static String getActivityBreakdownSQL(User user) throws MetaDataException {

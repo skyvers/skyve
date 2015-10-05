@@ -2,7 +2,7 @@ package modules.admin.CurrentUser.images;
 
 import java.awt.image.BufferedImage;
 
-import modules.admin.ThemeCharts;
+import modules.admin.ThemeCharter;
 import modules.admin.Display.images.Activity;
 import modules.admin.domain.CurrentUser;
 
@@ -23,7 +23,9 @@ public class CurrentUserActivity implements DynamicImage<CurrentUser> {
 	public BufferedImage getImage(CurrentUser bean, int width, int height, User user) throws Exception {
 
 		if (bean != null && bean.getCurrentUser() != null) {
-			return ThemeCharts.getAreaChartImage(Activity.getActivityHistorySQL(bean.getCurrentUser(), user), "", "Activity", null, PlotOrientation.VERTICAL, width, height);
+			ThemeCharter charter = new ThemeCharter();
+			charter.setSql(Activity.getActivityHistorySQL(bean.getCurrentUser(), user));
+			return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height);
 		}
 		return null;
 	}

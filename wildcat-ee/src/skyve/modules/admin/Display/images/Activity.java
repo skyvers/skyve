@@ -5,7 +5,7 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.Date;
 
-import modules.admin.ThemeCharts;
+import modules.admin.ThemeCharter;
 import modules.admin.domain.Display;
 
 import org.jfree.chart.plot.PlotOrientation;
@@ -21,7 +21,9 @@ public class Activity implements DynamicImage<Display> {
 
 	@Override
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
-		return ThemeCharts.getAreaChartImage(getActivityHistorySQL(null, user), "", "Activity", null, PlotOrientation.VERTICAL, width, height);
+		ThemeCharter charter = new ThemeCharter();
+		charter.setSql(getActivityHistorySQL(null, user));
+		return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height);
 	}
 
 	public static String getActivityHistorySQL(modules.admin.domain.User adminUser, User user) throws Exception {

@@ -6,12 +6,21 @@
 			<vbox border="true" borderTitle="Activity By User" percentageWidth="50">
 				<dynamicImage name="ActivityBreakdown" />
 			</vbox>
-			<vbox border="true" borderTitle="Activity Context" >
-				<dynamicImage name="ActivityContext" imageInitialPixelHeight="400" />
+			<vbox border="true" borderTitle="Activity Context">
+				<dynamicImage name="ActivityContext" />
 			</vbox>
 		</hbox>
 		<vbox border="true" borderTitle="Activity">
 			<dynamicImage name="Activity" />
+		</vbox>
+		<vbox border="true" borderTitle="Jobs" pixelPadding="10">
+			<dataGrid binding="jobs" editable="false">
+				<boundColumn binding="displayName" />
+				<boundColumn binding="status" />
+				<boundColumn binding="percentComplete" />
+				<boundColumn binding="startTime" />
+				<boundColumn binding="endTime" />
+			</dataGrid>
 		</vbox>
 	</vbox>
 </view>
