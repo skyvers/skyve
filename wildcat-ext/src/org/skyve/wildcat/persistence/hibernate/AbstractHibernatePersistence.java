@@ -1854,24 +1854,24 @@ t.printStackTrace();
 
 		// bind the built in parameters
 		SQL sql = newSQL(query.toString());
-		sql.putParameter(Bean.DOCUMENT_ID, bean.getBizId());
+		sql.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), AttributeType.text);
 		bean.setBizLock(new OptimisticLock(user.getName(), new Date()));
-		sql.putParameter(PersistentBean.LOCK_NAME, bean.getBizLock().toString());
+		sql.putParameter(PersistentBean.LOCK_NAME, bean.getBizLock().toString(), AttributeType.text);
 		if (! bean.isPersisted()) {
-			sql.putParameter(PersistentBean.VERSION_NAME, NEW_VERSION);
-			sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer());
-			sql.putParameter(Bean.USER_ID, bean.getBizUserId());
+			sql.putParameter(PersistentBean.VERSION_NAME, NEW_VERSION, AttributeType.integer);
+			sql.putParameter(Bean.CUSTOMER_NAME, bean.getBizCustomer(), AttributeType.text);
+			sql.putParameter(Bean.USER_ID, bean.getBizUserId(), AttributeType.text);
 		}
-		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId());
-		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey());
+		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId(), AttributeType.text);
+		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey(), AttributeType.text);
 
 		// Bind parent if required
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(document.getName())) {
-				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getBizParentId());
+				sql.putParameter(HierarchicalBean.PARENT_ID, ((HierarchicalBean<?>) bean).getBizParentId(), AttributeType.text);
 			}
 			else {
-				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId());
+				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId(), AttributeType.text);
 			}
 		}
 		// Bind fields and associations
@@ -1888,11 +1888,11 @@ t.printStackTrace();
 				if (attribute instanceof Association) {
 					String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
 					String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
-					sql.putParameter(columnName, BindUtil.get(bean, binding));
+					sql.putParameter(columnName, BindUtil.get(bean, binding), AttributeType.text);
 				}
 				else if (attribute instanceof Enumeration) {
 					org.skyve.domain.types.Enumeration value = (org.skyve.domain.types.Enumeration) BindUtil.get(bean, attributeName);
-					sql.putParameter(attributeName, (value == null) ? null : value.toCode());
+					sql.putParameter(attributeName, (value == null) ? null : value.toCode(), AttributeType.text);
 				}
 				else if (attribute instanceof Field) {
 					List<DomainValue> domainValues = null;
@@ -1909,7 +1909,7 @@ t.printStackTrace();
 							}
 						}
 					}
-					sql.putParameter(attributeName, value);
+					sql.putParameter(attributeName, value, attribute.getAttributeType());
 				}
 			}
 			catch (Exception e) {

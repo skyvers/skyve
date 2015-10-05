@@ -12,6 +12,7 @@ import org.skyve.persistence.Query;
 
 public abstract class AbstractQuery implements Query {
 	private Map<String, Object> parameters = new TreeMap<>();
+	
 	protected int parameterNumber = 0; // keep parameter names unique if created programatically
 
 	protected String drivingModuleName;

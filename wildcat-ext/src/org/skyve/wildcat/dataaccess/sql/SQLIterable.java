@@ -1,9 +1,11 @@
 package org.skyve.wildcat.dataaccess.sql;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.sql.Types;
 import java.util.Iterator;
 
 import org.skyve.CORE;
@@ -32,8 +34,108 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 		this.scalarType = scalarType;
 		try {
 			ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), sql.toQueryString());
-			for (String parameterName : sql.getParameterNames()) {
-				ps.setObject(parameterName, sql.getParameter(parameterName));
+			for (String name : sql.getParameterNames()) {
+				Object value = sql.getParameter(name);
+				AttributeType type = sql.getParameterType(name);
+
+				if (AttributeType.bool.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.BOOLEAN);
+					}
+					else {
+						ps.setBoolean(name, ((Boolean) value).booleanValue());
+					}
+				}
+				else if (AttributeType.colour.equals(type) ||
+							AttributeType.content.equals(type) ||
+							AttributeType.enumeration.equals(type) ||
+							AttributeType.text.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.VARCHAR);
+					}
+					else {
+						ps.setString(name, (String) value);
+					}
+				}
+				else if (AttributeType.markup.equals(type) ||
+							AttributeType.memo.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.LONGVARCHAR);
+					}
+					else {
+						ps.setString(name, (String) value);
+					}
+				}
+				else if (AttributeType.date.equals(type)) {
+					if (value == null) {
+						ps.setNull(name,Types.DATE);
+					}
+					else {
+						ps.setDate(name, (Date) value);
+					}
+				}
+				else if (AttributeType.dateTime.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.TIMESTAMP);
+					}
+					else {
+						ps.setTimestamp(name, new java.sql.Timestamp(((Date) value).getTime()));
+					}
+				}
+				else if (AttributeType.decimal10.equals(type) ||
+							AttributeType.decimal2.equals(type) ||
+							AttributeType.decimal5.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.DECIMAL);
+					}
+					else {
+						ps.setBigDecimal(name, (BigDecimal) value);
+					}
+				}
+				else if (AttributeType.geometry.equals(type)) {
+					// The SpatialDialect.getGeomertyUseType() subclasses all give values of JDBC Types.ARRAY
+					if (value == null) {
+						ps.setNull(name, Types.ARRAY);
+					}
+					else {
+						ps.setObject(name, value);
+					}
+				}
+				else if (AttributeType.integer.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.INTEGER);
+					}
+					else {
+						ps.setInt(name, ((Integer) value).intValue());
+					}
+				}
+				else if (AttributeType.longInteger.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.NUMERIC);
+					}
+					else {
+						ps.setLong(name,  ((Long) value).longValue());
+					}
+				}
+				else if (AttributeType.time.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.TIME);
+					}
+					else {
+						ps.setTime(name, new java.sql.Time(((Date) value).getTime()));
+					}
+				}
+				else if (AttributeType.timestamp.equals(type)) {
+					if (value == null) {
+						ps.setNull(name, Types.TIMESTAMP);
+					}
+					else {
+						ps.setTimestamp(name, new java.sql.Timestamp(((Date) value).getTime()));
+					}
+				}
+				else {
+					ps.setObject(name, value);
+				}
 			}
 			rs = ps.executeQuery();
 		}

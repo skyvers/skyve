@@ -1,16 +1,12 @@
 package org.skyve.wildcat.persistence;
 
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.types.DateTime;
-import org.skyve.domain.types.Decimal;
-import org.skyve.domain.types.Enumeration;
-import org.skyve.domain.types.OptimisticLock;
-import org.skyve.domain.types.TimeOnly;
-import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
 
@@ -18,6 +14,8 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	private String query = null;
 	private String moduleName;
 	private String documentName;
+
+	private Map<String, AttributeType> parametersTypes = new TreeMap<>();
 
 	public AbstractSQL(String query) {
 		this.query = query;
@@ -39,31 +37,22 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	}
  
 	@Override
-	public AbstractSQL putParameter(String name, Object value) {
-		if (value instanceof Decimal) {
-			super.putParameter(name, ((Decimal) value).bigDecimalValue());
-		}
-		else if (value instanceof TimeOnly) {
-			super.putParameter(name, new java.sql.Time(((Date) value).getTime()));
-		}
-		else if ((value instanceof Timestamp) || (value instanceof DateTime)) {
-			super.putParameter(name, new java.sql.Timestamp(((Date) value).getTime()));
-		}
-		else if ((! (value instanceof java.sql.Date)) && (value instanceof Date)) {
-			super.putParameter(name, new java.sql.Date(((Date) value).getTime()));
-		}
-		else if (value instanceof OptimisticLock) {
-			super.putParameter(name, ((OptimisticLock) value).toString());
-		}
-		else if (value instanceof Enumeration) {
-			super.putParameter(name, ((Enumeration) value).toCode());
-		}
-		else {
-			super.putParameter(name, value);
-		}
+	public AbstractSQL putParameter(String name, Object value, AttributeType type) {
+		super.putParameter(name, value);
+		parametersTypes.put(name, type);
 		return this;
 	}
-
+	
+	@Override
+	public AbstractSQL putParameter(String name, Object value) {
+		super.putParameter(name, value);
+		return this;
+	}
+	
+	public final AttributeType getParameterType(String name) {
+		return parametersTypes.get(name);
+	}
+	
 	@Override
 	public String toQueryString() {
 		return query;

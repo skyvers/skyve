@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
@@ -40,6 +41,12 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 	@Override
 	public SQL putParameter(String name, Object value) {
 		super.putParameter(name, value);
+		return this;
+	}
+
+	@Override
+	public SQL putParameter(String name, Object value, AttributeType type) {
+		super.putParameter(name, value, type);
 		return this;
 	}
 
