@@ -128,9 +128,11 @@ public final class ComparisonJSONManipulator {
 		
 		for (ComparisonComposite child : node.getChildren()) {
 			String childReferenceType = "A";
-			Reference childReference = nodeDocument.getReferenceByName(child.getReferenceName());
-			if (childReference instanceof CollectionImpl) {
-				childReferenceType = "C";
+			if (nodeDocument != null) {
+				Reference childReference = nodeDocument.getReferenceByName(child.getReferenceName());
+				if (childReference instanceof CollectionImpl) {
+					childReferenceType = "C";
+				}
 			}
 			processNode(child, childReferenceType, node, json);
 		}
@@ -163,6 +165,10 @@ public final class ComparisonJSONManipulator {
 						
 						propertyWidget = attribute.getDefaultInputWidget();
 					}
+					if ((propertyWidget != null) && (propertyWidget.getBinding() == null)) {
+						propertyWidget.setBinding(propertyName);
+					}
+					
 					SmartClientFieldDefinition field = SmartClientGenerateUtils.getField(user, customer, module, nodeDocument, propertyWidget);
 					String type = field.getType();
 					item.put(TYPE_KEY, type);
