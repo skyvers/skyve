@@ -40,39 +40,54 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		Module am = c.getModule(sourceVersion.getAuditModuleName());
-		Document ad = am.getDocument(c, sourceVersion.getAuditDocumentName());
+		Module am = null;
+		Document ad = null;
+		try {
+			am = c.getModule(sourceVersion.getAuditModuleName());
+			ad = am.getDocument(c, sourceVersion.getAuditDocumentName());
+		}
+		catch (Exception e) {
+			// either the module or document is now inaccessible or no longer exists
+		}
+		
 		boolean deleted = Operation.delete.equals(sourceVersion.getOperation());
 
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the source audit record
+		@SuppressWarnings("unchecked")
 		Map<String, Object> source = (Map<String, Object>) JSONUtil.unmarshall(u, sourceVersion.getAudit());
 		for (String binding : source.keySet()) {
+			@SuppressWarnings("unchecked")
 			Map<String, Object> sourceValues = (Map<String, Object>) source.get(binding);
 
 			if (binding.isEmpty()) {
 				bindingToNodes.put(binding, createNode(c, null, ad, sourceValues, deleted));
 			}
 			else {
-				TargetMetaData target = null;
+				Reference reference = null;
+				Document referenceDocument = null;
 				try {
-					target = Binder.getMetaDataForBinding(c, am, ad, binding);
-					Reference reference = (Reference) target.getAttribute();
-					Document referenceDocument = am.getDocument(c, reference.getDocumentName());
-					bindingToNodes.put(binding, createNode(c, reference, referenceDocument, sourceValues, deleted));
+					if ((am != null) && (ad != null)) {
+						TargetMetaData target = Binder.getMetaDataForBinding(c, am, ad, binding);
+						reference = (Reference) target.getAttribute();
+						referenceDocument = (reference == null) ? null : am.getDocument(c, reference.getDocumentName());
+					}
 				}
 				catch (MetaDataException e) {
-					bindingToNodes.put(binding, createNode(c, null, null, sourceValues, deleted));
+					// couldn't resolve the binding; we'll continue on but it'll just be a node with the attribute names as audited
 				}
+				bindingToNodes.put(binding, createNode(c, reference, referenceDocument, sourceValues, deleted));
 			}
 		}
 		
 		// Visit the comparison audit record, if there is one
 		if (comparisonVersion != null) {
+			@SuppressWarnings("unchecked")
 			Map<String, Object> compare = (Map<String, Object>) JSONUtil.unmarshall(u, comparisonVersion.getAudit());
 			for (String binding : compare.keySet()) {
 				ComparisonComposite node = bindingToNodes.get(binding);
+				@SuppressWarnings("unchecked")
 				Map<String, Object> compareValues = (Map<String, Object>) compare.get(binding);
 
 				if (binding.isEmpty()) {
@@ -89,7 +104,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						try {
 							target = Binder.getMetaDataForBinding(c, am, ad, binding);
 							Reference reference = (Reference) target.getAttribute();
-							Document referenceDocument = am.getDocument(c, reference.getDocumentName());
+							Document referenceDocument = (am == null) ? null : am.getDocument(c, reference.getDocumentName());
 							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
 						}
 						catch (MetaDataException e) {
@@ -171,7 +186,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 			property.setName(name);
 
 			// Coerce the value to the attributes type if the attribute still exists
-			Attribute attribute = nodeDocument.getAttribute(name);
+			Attribute attribute = (nodeDocument == null) ? null : nodeDocument.getAttribute(name);
 			if (attribute == null) { // attribute DNE
 				property.setTitle(name);
 				property.setWidget(new TextField());
@@ -213,7 +228,8 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 			List<ComparisonProperty> properties = node.getProperties();
 			for (ComparisonProperty property : properties) {
 				Object value = values.remove(property.getName());
-				Attribute attribute = node.getDocument().getAttribute(property.getName());
+				Document document = node.getDocument();
+				Attribute attribute = (document == null) ? null : document.getAttribute(property.getName());
 				if (attribute != null) {
 					Class<?> type = null;
 					if (attribute instanceof Enumeration) {
