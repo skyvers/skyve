@@ -6,7 +6,7 @@ import org.skyve.metadata.model.document.Document;
 /**
  * 
  */
-public interface DocumentQuery extends Query, BeanQuery, ProjectedQuery, ScalarQuery, TupleQuery, PagedQuery {
+public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, TupleQuery, PagedQuery {
 	/**
 	 * 
 	 */
@@ -23,7 +23,6 @@ public interface DocumentQuery extends Query, BeanQuery, ProjectedQuery, ScalarQ
 		Avg
 	}
 
-	@Override
 	public DocumentQuery putParameter(String name, Object value);
 	@Override
 	public DocumentQuery setFirstResult(int first);

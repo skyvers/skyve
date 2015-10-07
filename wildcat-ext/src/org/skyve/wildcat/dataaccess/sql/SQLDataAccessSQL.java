@@ -8,24 +8,23 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
 import org.skyve.wildcat.persistence.AbstractQuery;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
-public class SQL extends AbstractSQL implements ProjectedQuery {
+class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	private SQLDataAccess dataAccess;
 	private Document document;
 	
-	SQL(Document document, String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(Document document, String query, SQLDataAccess dataAccess) {
 		super(document, query);
 		this.document = document;
 		this.dataAccess = dataAccess;
 	}
 
-	SQL(String moduleName, String documentName, String query, SQLDataAccess dataAccess)
+	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccess dataAccess)
 	throws MetaDataException {
 		super(moduleName, documentName, query);
 		Customer customer = CORE.getUser().getCustomer();
@@ -33,21 +32,9 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 		this.dataAccess = dataAccess;
 	}
 
-	SQL(String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(String query, SQLDataAccess dataAccess) {
 		super(query);
 		this.dataAccess = dataAccess;
-	}
-
-	@Override
-	public SQL putParameter(String name, Object value) {
-		super.putParameter(name, value);
-		return this;
-	}
-
-	@Override
-	public SQL putParameter(String name, Object value, AttributeType type) {
-		super.putParameter(name, value, type);
-		return this;
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package org.skyve.wildcat.dataaccess.sql;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Types;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.skyve.CORE;
@@ -28,7 +28,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	private NamedParameterPreparedStatement ps = null;
 	private ResultSet rs = null;
 	
-	SQLIterable(Document document, SQLDataAccess dataAccess, SQL sql, Class<T> scalarType) throws DomainException {
+	SQLIterable(Document document, SQLDataAccess dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) throws DomainException {
 		this.document = document;
 		this.dataAccess = dataAccess;
 		this.scalarType = scalarType;
@@ -49,7 +49,8 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 				else if (AttributeType.colour.equals(type) ||
 							AttributeType.content.equals(type) ||
 							AttributeType.enumeration.equals(type) ||
-							AttributeType.text.equals(type)) {
+							AttributeType.text.equals(type) ||
+							AttributeType.id.equals(type)) {
 					if (value == null) {
 						ps.setNull(name, Types.VARCHAR);
 					}
@@ -71,7 +72,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						ps.setNull(name,Types.DATE);
 					}
 					else {
-						ps.setDate(name, (Date) value);
+						ps.setDate(name, new java.sql.Date(((Date) value).getTime()));
 					}
 				}
 				else if (AttributeType.dateTime.equals(type)) {

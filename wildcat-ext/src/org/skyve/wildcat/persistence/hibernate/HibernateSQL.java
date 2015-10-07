@@ -21,26 +21,26 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
-public class HibernateSQL extends AbstractSQL {
+class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
 	
-	public HibernateSQL(String moduleName,
-							String documentName,
-							String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(String moduleName,
+					String documentName,
+					String query,
+					AbstractHibernatePersistence persistence) {
 		super(moduleName, documentName, query);
 		this.persistence = persistence;
 	}
 
-	public HibernateSQL(Document document,
-							String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(Document document,
+					String query,
+					AbstractHibernatePersistence persistence) {
 		super(document, query);
 		this.persistence = persistence;
 	}
 
-	public HibernateSQL(String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(String query,
+					AbstractHibernatePersistence persistence) {
 		super(query);
 		this.persistence = persistence;
 	}
@@ -186,7 +186,8 @@ public class HibernateSQL extends AbstractSQL {
 			else if (AttributeType.colour.equals(type) ||
 						AttributeType.content.equals(type) ||
 						AttributeType.enumeration.equals(type) ||
-						AttributeType.text.equals(type)) {
+						AttributeType.text.equals(type) ||
+						AttributeType.id.equals(type)) {
 				result.setString(name, (String) value);
 			}
 			else if (AttributeType.markup.equals(type) ||

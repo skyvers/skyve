@@ -17,7 +17,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 
 	@Override
 	public AbstractBizQL putParameter(String name, Object value) {
-		super.putParameter(name, value);
+		parameters.put(name, value);
 		return this;
 	}
 	

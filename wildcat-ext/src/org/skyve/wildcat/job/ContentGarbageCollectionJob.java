@@ -62,12 +62,12 @@ public class ContentGarbageCollectionJob implements Job {
 								sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
 	
 								query = p.newSQL(sql.toString());
-								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
-								query.putParameter(attributeName, result.getContentId());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
+								query.putParameter(attributeName, result.getContentId(), false);
 							}
 							else { // bean
 								query = p.newSQL(sql.toString());
-								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
 							}
 							
 							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());

@@ -68,8 +68,8 @@ public class WebStatsUtil {
 			SQL sql = persistence.newSQL(query.toString());
 			sql.putParameter("month", month);
 			sql.putParameter("year", year);
-			sql.putParameter("userName", user.getName());
-			sql.putParameter("customer", user.getCustomer().getName());
+			sql.putParameter("userName", user.getName(), false);
+			sql.putParameter("customer", user.getCustomer().getName(), false);
 			List<String> results = sql.scalarResults(String.class);
 			if (results.isEmpty()) {
 				query.setLength(0);
@@ -77,14 +77,14 @@ public class WebStatsUtil {
 				query.append(" (bizId, bizVersion, bizCustomer, bizLock, bizUserId, userName, year, month, numberOfHits, bizKey) values ");
 				query.append("(:bizId, 0, :bizCustomer, :bizLock, :bizUserId, :userName, :year, :month, 1, :bizKey)");
 				sql = persistence.newSQL(query.toString());
-				sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
-				sql.putParameter(Bean.CUSTOMER_NAME, user.getCustomer().getName());
-				sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(user.getName(), now).toString());
-				sql.putParameter(Bean.USER_ID, user.getId());
-				sql.putParameter("userName", user.getName());
+				sql.putParameter(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), false);
+				sql.putParameter(Bean.CUSTOMER_NAME, user.getCustomer().getName(), false);
+				sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(user.getName(), now).toString(), false);
+				sql.putParameter(Bean.USER_ID, user.getId(), false);
+				sql.putParameter("userName", user.getName(), false);
 				sql.putParameter("year", year);
 				sql.putParameter("month", month);
-				sql.putParameter("bizKey", "bizKey");
+				sql.putParameter("bizKey", "bizKey", false);
 				
 				sql.execute();
 			}
@@ -94,7 +94,7 @@ public class WebStatsUtil {
 				query.append(" set numberOfHits = numberOfHits + 1 ");
 				query.append("where bizId = :bizId");
 				sql = persistence.newSQL(query.toString());
-				sql.putParameter(Bean.DOCUMENT_ID, results.get(0));
+				sql.putParameter(Bean.DOCUMENT_ID, results.get(0), false);
 				sql.execute();
 			}
 		}

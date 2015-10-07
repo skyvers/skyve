@@ -93,7 +93,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
 	@Override
 	public AbstractDocumentQuery putParameter(String name, Object value) {
-		super.putParameter(name, value);
+		parameters.put(name, value);
 		return this;
 	}
 	

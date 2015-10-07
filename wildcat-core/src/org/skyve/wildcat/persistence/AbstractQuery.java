@@ -8,12 +8,11 @@ import java.util.TreeMap;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.domain.messages.NoResultsException;
-import org.skyve.persistence.Query;
 
-public abstract class AbstractQuery implements Query {
-	private Map<String, Object> parameters = new TreeMap<>();
+public abstract class AbstractQuery {
+	protected Map<String, Object> parameters = new TreeMap<>();
 	
-	protected int parameterNumber = 0; // keep parameter names unique if created programatically
+	protected int parameterNumber = 0; // keep parameter names unique if created programmatically
 
 	protected String drivingModuleName;
 	protected String drivingDocumentName;
@@ -26,12 +25,6 @@ public abstract class AbstractQuery implements Query {
 		return parameters.get(name);
 	}
 	
-	@Override
-	public Query putParameter(String name, Object value) {
-		parameters.put(name, value);
-		return this;
-	}
-
 	public String getDrivingModuleName() {
 		return drivingModuleName;
 	}
