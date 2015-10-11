@@ -672,17 +672,21 @@ isc.EditView.addMethods({
 								}
 							}
 						}
-						// NB keep the selection when we refresh the data
-						var selectedRecord = grid.grid.getSelectedRecord();
+
 						grid.grid.setData(data);
-						if (selectedRecord) {
-							var index = data.findIndex('bizId', selectedRecord.bizId);
-							if (index >= 0) {
-								// NB remove the event callback temporarily
-								var method = grid.grid.selectionUpdated;
-								grid.grid.selectionUpdated = null;
-								grid.grid.selectSingleRecord(index);
-								grid.grid.selectionUpdated = method;
+
+						// NB set the selection from the server when we refresh the data
+						if (grid.selectedIdBinding) {
+							var selectedBizId = values[grid.selectedIdBinding];
+							if (selectedBizId) {
+								var index = data.findIndex('bizId', selectedBizId);
+								if (index >= 0) {
+									// NB remove the event callback temporarily
+									var method = grid.grid.selectionUpdated;
+									grid.grid.selectionUpdated = null;
+									grid.grid.selectSingleRecord(index);
+									grid.grid.selectionUpdated = method;
+								}
 							}
 						}
 					}
