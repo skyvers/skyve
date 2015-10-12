@@ -695,11 +695,10 @@ public final class BindUtil {
 	throws MetaDataException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
-		int dotIndex = collectionBinding.indexOf('.'); // compound binding
-		if (dotIndex > 0) {
-			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, dotIndex));
+		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
+		if (lastDotIndex > 0) {
+			owningBean = (Bean) BindUtil.get(owningBean, collectionBinding.substring(0, lastDotIndex));
 		}
-		
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, collectionBinding);
 		Collection targetCollection = (Collection) target.getAttribute();
 		sortCollectionByMetaData(owningBean, targetCollection);
