@@ -1678,7 +1678,7 @@ BizDataGrid.addMethods({
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: me.canUpdate && me.canEdit,
-			editEvent: ((me.canUpdate && me.canEdit && config.editable) ? (config.inline ? 'doubleClick' : 'none') : 'none'),
+			editEvent: 'none',
 			neverValidate: false,
 			validateByCell: true,
 			saveByCell: false,
@@ -1735,7 +1735,9 @@ BizDataGrid.addMethods({
 					me._eventColNum = colNum;
 					this.selectSingleRecord(record);
 					if (config.inline) {
-						// do nothing as the double click event is set in the list grid configuration.
+						if (me.canUpdate && me.canEdit && (! me._disabled)) {
+							this.startEditing(rowNum, colNum, false);
+						}
 					}
 					else {
 						if (me.canZoom) {

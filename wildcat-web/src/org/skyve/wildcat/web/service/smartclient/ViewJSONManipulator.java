@@ -1299,6 +1299,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	private boolean visitingDataGrid = false;
+	private boolean visitedDataGridHasEditableColumns = false;
 
 	@Override
 	public void visitDataGrid(DataGrid grid,
@@ -1312,8 +1313,16 @@ class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(grid)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled && enabled(grid))) {
-		        visitingDataGrid = true;
-			    String gridBinding = grid.getBinding();
+				visitingDataGrid = true;
+				// The grid columns are editable if the grid is editable, and either the edit function is enabled or 
+				// the add function is enabled for an inline grid
+				// NB The zoom operation can be disabled and not affect whether the columns are editable because 
+				// the changed values are posted in the zoomed-in page, not from the grid.
+				visitedDataGridHasEditableColumns = (! Boolean.FALSE.equals(grid.getEditable())) &&
+														(evaluateConditionInOppositeSense(grid.getDisableEditConditionName()) ||
+															(Boolean.TRUE.equals(grid.getInline()) && 
+																evaluateConditionInOppositeSense(grid.getDisableAddConditionName())));
+				String gridBinding = grid.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
@@ -1351,6 +1360,14 @@ class ViewJSONManipulator extends ViewVisitor {
 					}
 				}
 			}
+			else {
+				// grid is disabled
+				visitedDataGridHasEditableColumns = false;
+			}
+		}
+		else {
+			// grid is invisible
+			visitedDataGridHasEditableColumns = false;
 		}
 
 		addBinding(grid.getSelectedIdBinding(), true, true);
@@ -1413,7 +1430,10 @@ class ViewJSONManipulator extends ViewVisitor {
 	throws MetaDataException {
 		if (parentVisible) {
 			if ((! forApply) || 
-					(forApply && parentEnabled && (! Boolean.FALSE.equals(column.getEditable())))) {
+					(forApply && 
+						parentEnabled && 
+						visitedDataGridHasEditableColumns && 
+						(! Boolean.FALSE.equals(column.getEditable())))) {
 				addBinding(column.getBinding(), true);
 			}
 		}
