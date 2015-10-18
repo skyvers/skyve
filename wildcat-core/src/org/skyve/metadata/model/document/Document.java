@@ -41,10 +41,16 @@ public interface Document extends Model {
 	throws MetaDataException;
 
 	/**
-	 * 
+	 * Get the unique constraints for this document only - no super-documents.
 	 * @return
 	 */
 	public List<UniqueConstraint> getUniqueConstraints();
+
+	/**
+	 * Get the unique constraints for this document and any super-documents.
+	 * @return
+	 */
+	public List<UniqueConstraint> getAllUniqueConstraints() throws MetaDataException;
 
 	/**
 	 * 

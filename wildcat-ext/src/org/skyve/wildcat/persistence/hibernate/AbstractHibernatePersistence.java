@@ -1069,18 +1069,8 @@ t.printStackTrace();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
 		Customer customer = user.getCustomer();
 
-		// Collect unique constraints for a document inheritance hierarchy
-		List<UniqueConstraint> constraints = new ArrayList<>(document.getUniqueConstraints());
-		Extends inherits = document.getExtends();
-		while (inherits != null) {
-			Module module = customer.getModule(owningModuleName);
-			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
-			constraints.addAll(baseDocument.getUniqueConstraints());
-			inherits = baseDocument.getExtends();
-		}
-		
 		try {
-			for (UniqueConstraint constraint : constraints) {
+			for (UniqueConstraint constraint : document.getAllUniqueConstraints()) {
 				StringBuilder queryString = new StringBuilder(48);
 				queryString.append("select bean from ").append(entityName).append(" as bean");
 				
