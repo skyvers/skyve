@@ -89,12 +89,12 @@ BizGrid.addMethods({
 
 		me.deleteSelectionButton = BizUtil.createImageButton(me.deleteSelectionItem.icon, 
 																true,
-																"<b>Delete/Remove</b> selected records.",
+																"<b>Delete/Remove</b> selected.",
 																me.deleteSelectionItem.click);
 		me.deleteSelectionButton.setDisabled(true);
 		
 		me.clearSelectionItem = {
-			title: "Clear Selection", 
+			title: "Deselect all", 
 			icon: "../images/icons/clearSelection.png",
 			click: function() {
 				me.grid.deselectAllRecords(); // event data set null by selectionChanged
@@ -833,7 +833,7 @@ BizListGrid.addMethods({
 		}
 		toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
 														false,
-														"<b>Clear selected</b> records.",
+														"<b>Deselect</b> all.",
 														me.clearSelectionItem.click));
 		if (me.showFilter) {
 			toolStripMembers.add(BizUtil.createImageButton(clearFilterItem.icon,
@@ -1729,19 +1729,21 @@ BizDataGrid.addMethods({
 				return false; // stop normal context menu
 			},
 			rowDoubleClick: function(record, rowNum, colNum) {
-				if (record && record.bizId && config.editable) { // not a group by row
-					me._eventRecord = record;
-					me._eventRowNum = rowNum;
-					me._eventColNum = colNum;
-					this.selectSingleRecord(record);
-					if (config.inline) {
-						if (me.canUpdate && me.canEdit && (! me._disabled)) {
-							this.startEditing(rowNum, colNum, false);
+				if (config.editable) { // editable grid
+					if (record.isFolder) {} else { // group by folder row - so ignore
+						me._eventRecord = record;
+						me._eventRowNum = rowNum;
+						me._eventColNum = colNum;
+						this.selectSingleRecord(record);
+						if (config.inline) {
+							if (me.canUpdate && me.canEdit && (! me._disabled)) {
+								this.startEditing(rowNum, colNum, false);
+							}
 						}
-					}
-					else {
-						if (me.canZoom) {
-							me.zoom(false);
+						else {
+							if (me.canZoom) {
+								me.zoom(false);
+							}
 						}
 					}
 				}
@@ -1832,7 +1834,7 @@ BizDataGrid.addMethods({
 					"separator",
 					BizUtil.createImageButton(me.clearSelectionItem.icon, 
 												false,
-												"<b>Clear selected</b> records.",
+												"<b>Deselect</b> all.",
 												me.clearSelectionItem.click)
 				]
 			}));
@@ -1934,7 +1936,8 @@ BizDataGrid.addMethods({
 //			}
 //		 });
 
-		this.grid.startEditingNew();
+		// bizId needs to be defined to separate it from grouping expansion rows
+		this.grid.startEditingNew({bizId: null});
 	},
 	
 	remove: function(bizId) {
