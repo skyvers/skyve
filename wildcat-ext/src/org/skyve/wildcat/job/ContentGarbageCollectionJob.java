@@ -78,7 +78,7 @@ public class ContentGarbageCollectionJob implements Job {
 					}
 					
 					for (String contentId : orphanedContentIds) {
-						UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove content with ID " + contentId);
+						if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove content with ID " + contentId);
 						cm.remove(contentId);
 					}
 				}
@@ -86,7 +86,7 @@ public class ContentGarbageCollectionJob implements Job {
 			finally {
 				p.commit(true);
 			}
-			Util.LOGGER.info("Successfully performed CMS garbage collection");
+			if (UtilImpl.CONTENT_TRACE) Util.LOGGER.info("Successfully performed CMS garbage collection");
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst performing CMS garbage collection", e);
