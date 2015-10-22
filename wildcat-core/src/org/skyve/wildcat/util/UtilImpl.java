@@ -220,7 +220,7 @@ public class UtilImpl {
 		throws DomainException, MetaDataException {
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + toString() + " with binding " + binding + " is DIRTY");
+				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
 				return false;
 			}
 			return true;
