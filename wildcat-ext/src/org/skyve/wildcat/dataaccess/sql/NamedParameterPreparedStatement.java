@@ -1,10 +1,13 @@
 package org.skyve.wildcat.dataaccess.sql;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -154,18 +157,9 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 		return indexes;
 	}
 
+
 	/**
 	 * Sets a parameter.
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param value
-	 *            parameter value
-	 * @throws SQLException
-	 *             if an error occurred
-	 * @throws IllegalArgumentException
-	 *             if the parameter does not exist
-	 * @see PreparedStatement#setObject(int, java.lang.Object)
 	 */
 	public void setObject(String name, Object value) throws SQLException {
 		int[] indexes = getIndexes(name);
@@ -175,17 +169,17 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	}
 
 	/**
+	 * Sets a null parameter.
+	 */
+	public void setNull(String name, int sqlType) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setNull(indexes[i], sqlType);
+		}
+	}
+	
+	/**
 	 * Sets a parameter.
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param value
-	 *            parameter value
-	 * @throws SQLException
-	 *             if an error occurred
-	 * @throws IllegalArgumentException
-	 *             if the parameter does not exist
-	 * @see PreparedStatement#setString(int, java.lang.String)
 	 */
 	public void setString(String name, String value) throws SQLException {
 		int[] indexes = getIndexes(name);
@@ -196,16 +190,16 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 
 	/**
 	 * Sets a parameter.
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param value
-	 *            parameter value
-	 * @throws SQLException
-	 *             if an error occurred
-	 * @throws IllegalArgumentException
-	 *             if the parameter does not exist
-	 * @see PreparedStatement#setInt(int, int)
+	 */
+	public void setBoolean(String name, boolean value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setBoolean(indexes[i], value);
+		}
+	}
+
+	/**
+	 * Sets a parameter.
 	 */
 	public void setInt(String name, int value) throws SQLException {
 		int[] indexes = getIndexes(name);
@@ -216,16 +210,6 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 
 	/**
 	 * Sets a parameter.
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param value
-	 *            parameter value
-	 * @throws SQLException
-	 *             if an error occurred
-	 * @throws IllegalArgumentException
-	 *             if the parameter does not exist
-	 * @see PreparedStatement#setInt(int, int)
 	 */
 	public void setLong(String name, long value) throws SQLException {
 		int[] indexes = getIndexes(name);
@@ -236,21 +220,41 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 
 	/**
 	 * Sets a parameter.
-	 * 
-	 * @param name
-	 *            parameter name
-	 * @param value
-	 *            parameter value
-	 * @throws SQLException
-	 *             if an error occurred
-	 * @throws IllegalArgumentException
-	 *             if the parameter does not exist
-	 * @see PreparedStatement#setTimestamp(int, java.sql.Timestamp)
 	 */
 	public void setTimestamp(String name, Timestamp value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setTimestamp(indexes[i], value);
+		}
+	}
+	
+	/**
+	 * Sets a parameter
+	 */
+	public void setDate(String name, Date value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setDate(indexes[i], value);
+		}
+	}
+
+	/**
+	 * Sets a parameter
+	 */
+	public void setTime(String name, Time value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setTime(indexes[i], value);
+		}
+	}
+
+	/**
+	 * Sets a parameter
+	 */
+	public void setBigDecimal(String name, BigDecimal value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setBigDecimal(indexes[i], value);
 		}
 	}
 

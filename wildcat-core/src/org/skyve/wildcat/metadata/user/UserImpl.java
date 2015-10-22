@@ -381,7 +381,7 @@ public class UserImpl implements User {
 						sb.append("_id where c.").append(Bean.DOCUMENT_ID).append(" = :");
 						sb.append(Bean.DOCUMENT_ID);
 						Persistence p = AbstractPersistence.get();
-						List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId).tupleResults();
+						List<Object[]> rows = p.newSQL(sb.toString()).putParameter(Bean.DOCUMENT_ID, beanBizId, false).tupleResults();
 						if (rows.isEmpty()) { // bean is still transient - user hasn't saved
 							result = true;
 						}

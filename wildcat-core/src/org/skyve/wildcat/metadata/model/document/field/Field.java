@@ -21,7 +21,7 @@ public abstract class Field extends AbstractAttribute {
 
 	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
 	public static enum IndexType {
-		database, textual;
+		database, textual, both, none;
 	}
 
 	private boolean required;

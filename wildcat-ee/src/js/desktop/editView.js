@@ -75,17 +75,26 @@ isc.EditView.addMethods({
 				for (var binding in errors) {
 					var message = errors[binding];
 					
-					var tokens = binding.split('_');
-					if (tokens[0]) {
-						var grids = thisView._grids[tokens[0]];
-						if (grids) {
-							for (var gridID in grids) {
-								var grid = grids[gridID];
-								if (grid) {
-									if (tokens[3]) {
-										if (grid.grid) {
-											grid.grid.setFieldError(tokens[1], tokens[3], message);
-											grid.grid.markForRedraw();
+					var tokens = binding.split('__');
+					if (tokens.length == 2) { // __ exists
+						// tokens[0] is the grid binding with '_' + the rowNum on the end now
+						// tokens[1] is the fieldName
+
+						var lastUnderscore = tokens[0].lastIndexOf('_');
+						if (lastUnderscore > -1) {
+							// NB this binding may have underscores in it if it is a compound binding
+							var gridBinding = tokens[0].substring(0, lastUnderscore);
+							var grids = thisView._grids[gridBinding];
+							if (grids) {
+								var rowNum = parseInt(tokens[0].substring(lastUnderscore + 1));
+								if (isA.Number(rowNum)) {
+									for (var gridID in grids) {
+										var grid = grids[gridID];
+										if (grid) {
+											if (grid.grid) {
+												grid.grid.setFieldError(rowNum, tokens[1], message);
+												grid.grid.markForRedraw();
+											}
 										}
 									}
 								}
@@ -672,17 +681,21 @@ isc.EditView.addMethods({
 								}
 							}
 						}
-						// NB keep the selection when we refresh the data
-						var selectedRecord = grid.grid.getSelectedRecord();
+
 						grid.grid.setData(data);
-						if (selectedRecord) {
-							var index = data.findIndex('bizId', selectedRecord.bizId);
-							if (index >= 0) {
-								// NB remove the event callback temporarily
-								var method = grid.grid.selectionUpdated;
-								grid.grid.selectionUpdated = null;
-								grid.grid.selectSingleRecord(index);
-								grid.grid.selectionUpdated = method;
+
+						// NB set the selection from the server when we refresh the data
+						if (grid.selectedIdBinding) {
+							var selectedBizId = values[grid.selectedIdBinding];
+							if (selectedBizId) {
+								var index = data.findIndex('bizId', selectedBizId);
+								if (index >= 0) {
+									// NB remove the event callback temporarily
+									var method = grid.grid.selectionUpdated;
+									grid.grid.selectionUpdated = null;
+									grid.grid.selectSingleRecord(index);
+									grid.grid.selectionUpdated = method;
+								}
 							}
 						}
 					}

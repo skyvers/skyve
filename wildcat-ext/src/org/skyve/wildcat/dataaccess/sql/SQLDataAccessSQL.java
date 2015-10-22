@@ -14,17 +14,17 @@ import org.skyve.persistence.ProjectedQuery;
 import org.skyve.wildcat.persistence.AbstractQuery;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
-public class SQL extends AbstractSQL implements ProjectedQuery {
+class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	private SQLDataAccess dataAccess;
 	private Document document;
 	
-	SQL(Document document, String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(Document document, String query, SQLDataAccess dataAccess) {
 		super(document, query);
 		this.document = document;
 		this.dataAccess = dataAccess;
 	}
 
-	SQL(String moduleName, String documentName, String query, SQLDataAccess dataAccess)
+	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccess dataAccess)
 	throws MetaDataException {
 		super(moduleName, documentName, query);
 		Customer customer = CORE.getUser().getCustomer();
@@ -32,15 +32,9 @@ public class SQL extends AbstractSQL implements ProjectedQuery {
 		this.dataAccess = dataAccess;
 	}
 
-	SQL(String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(String query, SQLDataAccess dataAccess) {
 		super(query);
 		this.dataAccess = dataAccess;
-	}
-
-	@Override
-	public SQL putParameter(String name, Object value) {
-		super.putParameter(name, value);
-		return this;
 	}
 
 	@Override

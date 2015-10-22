@@ -1,37 +1,46 @@
 package org.skyve.wildcat.persistence.hibernate;
 
+import java.math.BigDecimal;
+import java.sql.Time;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
+import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.Decimal;
+import org.skyve.domain.types.Enumeration;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.domain.types.TimeOnly;
+import org.skyve.domain.types.Timestamp;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
-public class HibernateSQL extends AbstractSQL {
+class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
 	
-	public HibernateSQL(String moduleName,
-							String documentName,
-							String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(String moduleName,
+					String documentName,
+					String query,
+					AbstractHibernatePersistence persistence) {
 		super(moduleName, documentName, query);
 		this.persistence = persistence;
 	}
 
-	public HibernateSQL(Document document,
-							String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(Document document,
+					String query,
+					AbstractHibernatePersistence persistence) {
 		super(document, query);
 		this.persistence = persistence;
 	}
 
-	public HibernateSQL(String query,
-							AbstractHibernatePersistence persistence) {
+	HibernateSQL(String query,
+					AbstractHibernatePersistence persistence) {
 		super(query);
 		this.persistence = persistence;
 	}
@@ -141,8 +150,80 @@ public class HibernateSQL extends AbstractSQL {
 		Session session = persistence.getSession();
 		SQLQuery result = session.createSQLQuery(toQueryString());
 
-		for (String parameterName : getParameterNames()) {
-			result.setParameter(parameterName, getParameter(parameterName));
+		for (String name : getParameterNames()) {
+			Object value = getParameter(name);
+			
+			if (value instanceof Decimal) {
+				result.setBigDecimal(name, ((Decimal) value).bigDecimalValue());
+				continue;
+			}
+			else if (value instanceof TimeOnly) {
+				result.setTime(name,  new java.sql.Time(((Date) value).getTime()));
+				continue;
+			}
+			else if ((value instanceof Timestamp) || (value instanceof DateTime)) {
+				result.setTimestamp(name, new java.sql.Timestamp(((Date) value).getTime()));
+				continue;
+			}
+			else if ((! (value instanceof java.sql.Date)) && (value instanceof Date)) {
+				result.setDate(name, new java.sql.Date(((Date) value).getTime()));
+				continue;
+			}
+			else if (value instanceof OptimisticLock) {
+				result.setString(name, ((OptimisticLock) value).toString());
+				continue;
+			}
+			else if (value instanceof Enumeration) {
+				result.setString(name, ((Enumeration) value).toCode());
+				continue;
+			}
+			
+			AttributeType type = getParameterType(name);
+
+			if (AttributeType.bool.equals(type)) {
+				result.setParameter(name, value, Hibernate.BOOLEAN);
+			}
+			else if (AttributeType.colour.equals(type) ||
+						AttributeType.content.equals(type) ||
+						AttributeType.enumeration.equals(type) ||
+						AttributeType.text.equals(type) ||
+						AttributeType.id.equals(type)) {
+				result.setString(name, (String) value);
+			}
+			else if (AttributeType.markup.equals(type) ||
+						AttributeType.memo.equals(type)) {
+				result.setText(name, (String) value);
+			}
+			else if (AttributeType.date.equals(type)) {
+				result.setDate(name, (Date) value);
+			}
+			else if (AttributeType.dateTime.equals(type)) {
+				result.setTimestamp(name, (Date) value);
+			}
+			else if (AttributeType.decimal10.equals(type) ||
+						AttributeType.decimal2.equals(type) ||
+						AttributeType.decimal5.equals(type)) {
+				result.setBigDecimal(name, (BigDecimal) value);
+			}
+			else if (AttributeType.geometry.equals(type)) {
+				// The SpatialDialect.getGeomertyUseType() subclasses all give values of JDBC Types.ARRAY
+				result.setParameter(name, value, Hibernate.CHAR_ARRAY);
+			}
+			else if (AttributeType.integer.equals(type)) {
+				result.setParameter(name, value, Hibernate.INTEGER);
+			}
+			else if (AttributeType.longInteger.equals(type)) {
+				result.setParameter(name,  value, Hibernate.LONG);
+			}
+			else if (AttributeType.time.equals(type)) {
+				result.setTime(name, (Time) value);
+			}
+			else if (AttributeType.timestamp.equals(type)) {
+				result.setTimestamp(name, (Date) value);
+			}
+			else {
+				result.setParameter(name, value);
+			}
 		}
 		
 		return result;

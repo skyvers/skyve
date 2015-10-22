@@ -11,6 +11,7 @@ import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.persistence.SQL;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class SQLDataAccess implements AutoCloseable {
@@ -61,32 +62,32 @@ public class SQLDataAccess implements AutoCloseable {
 	
 	public SQL newSQL(String moduleName, String documentName, String query)
 	throws MetaDataException {
-		return new SQL(moduleName, documentName, query, this);
+		return new SQLDataAccessSQL(moduleName, documentName, query, this);
 	}
 	
 	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		return new SQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
+		return new SQLDataAccessSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
 	}
 	
 	public SQL newSQL(Document document, String query) {
-		return new SQL(document, query, this);
+		return new SQLDataAccessSQL(document, query, this);
 	}
 
 	public SQL newNamedSQL(Document document, String queryName) 
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
-		return new SQL(document, module.getSQL(queryName).getQuery(), this);
+		return new SQLDataAccessSQL(document, module.getSQL(queryName).getQuery(), this);
 	}
 
 	public SQL newSQL(String query) {
-		return new SQL(query, this);
+		return new SQLDataAccessSQL(query, this);
 	}
 
 	public SQL newNamedSQL(String moduleName, String queryName)
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		return new SQL(module.getSQL(queryName).getQuery(), this);
+		return new SQLDataAccessSQL(module.getSQL(queryName).getQuery(), this);
 	}
 }

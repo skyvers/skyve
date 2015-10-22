@@ -62,12 +62,12 @@ public class ContentGarbageCollectionJob implements Job {
 								sql.append(" and ").append(attributeName).append(" = :").append(attributeName);
 	
 								query = p.newSQL(sql.toString());
-								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
-								query.putParameter(attributeName, result.getContentId());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
+								query.putParameter(attributeName, result.getContentId(), false);
 							}
 							else { // bean
 								query = p.newSQL(sql.toString());
-								query.putParameter(Bean.DOCUMENT_ID, result.getBizId());
+								query.putParameter(Bean.DOCUMENT_ID, result.getBizId(), false);
 							}
 							
 							if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.finest("ContentGarbageCollectionJob: TEST REMOVAL with " + sql.toString());
@@ -78,7 +78,7 @@ public class ContentGarbageCollectionJob implements Job {
 					}
 					
 					for (String contentId : orphanedContentIds) {
-						UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove content with ID " + contentId);
+						if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ContentGarbageCollectionJob: Remove content with ID " + contentId);
 						cm.remove(contentId);
 					}
 				}
@@ -86,7 +86,7 @@ public class ContentGarbageCollectionJob implements Job {
 			finally {
 				p.commit(true);
 			}
-			Util.LOGGER.info("Successfully performed CMS garbage collection");
+			if (UtilImpl.CONTENT_TRACE) Util.LOGGER.info("Successfully performed CMS garbage collection");
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst performing CMS garbage collection", e);

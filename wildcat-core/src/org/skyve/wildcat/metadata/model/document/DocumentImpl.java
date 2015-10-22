@@ -12,10 +12,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -194,6 +196,23 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	@Override
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return Collections.unmodifiableList(uniqueConstraints);
+	}
+	
+	@Override
+	public List<UniqueConstraint> getAllUniqueConstraints() throws MetaDataException {
+		List<UniqueConstraint> result = new ArrayList<>(uniqueConstraints);
+		Extends currentExtends = getExtends();
+		if (currentExtends != null) {
+			Customer customer = CORE.getUser().getCustomer();
+			while (currentExtends != null) {
+				Module module = customer.getModule(getOwningModuleName());
+				Document baseDocument = module.getDocument(customer, currentExtends.getDocumentName());
+				result.addAll(baseDocument.getUniqueConstraints());
+				currentExtends = baseDocument.getExtends();
+			}
+		}
+		
+		return Collections.unmodifiableList(result);
 	}
 
 	public Flow getFlow() {

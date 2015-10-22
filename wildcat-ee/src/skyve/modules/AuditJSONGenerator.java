@@ -14,15 +14,15 @@ import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.JSONUtil;
 
-class AuditJSONGenerator extends BeanVisitor {
+public class AuditJSONGenerator extends BeanVisitor {
 	private Map<String, Object> audit = new TreeMap<>();
 	private Customer customer;
 	
-	AuditJSONGenerator(Customer customer) {
+	public AuditJSONGenerator(Customer customer) {
 		this.customer = customer;
 	}
 	
-	String toJSON() throws Exception {
+	public String toJSON() throws Exception {
 		return JSONUtil.marshall(customer, audit, null);
 	}
 
