@@ -48,10 +48,7 @@
             </item>
         </row>
         <row>
-            <item>
-                <textField binding="sourceVersion.auditBizVersion" disabled="true" />
-            </item>
-            <item>
+            <item colspan="3">
                 <textField binding="sourceVersion.auditBizKey" disabled="true" />
             </item>
         </row>

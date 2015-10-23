@@ -390,13 +390,15 @@
 		<documentQuery name="qAudits" documentName="Audit">
 			<description>The list of all Audits.</description>
 			<columns>
-				<column binding="timestamp" sortOrder="descending" />
+				<column binding="timestamp" />
 				<column binding="userName" />
 				<column binding="operation" />
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
-				<column binding="auditBizVersion" />
+				<column binding="millis" sortOrder="descending">
+					<projected>false</projected>
+				</column>
 			</columns>
 		</documentQuery>
 		<documentQuery name="qCommunications" documentName="Communication">

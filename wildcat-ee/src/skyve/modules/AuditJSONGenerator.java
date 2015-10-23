@@ -34,22 +34,25 @@ public class AuditJSONGenerator extends BeanVisitor {
 								Bean bean,
 								boolean visitingInheritedDocument)
 	throws Exception {
-		Map<String, Object> node = new TreeMap<>();
-
-		node.put(Bean.DOCUMENT_ID, bean.getBizId());
-		
-		for (Attribute attribute : document.getAttributes()) {
-			if (! (attribute instanceof Relation)) {
-				String name = attribute.getName();
-				node.put(name, BindUtil.getSerialized(customer, bean, name));
+		if (! visitingInheritedDocument) {
+			Map<String, Object> node = new TreeMap<>();
+	
+			node.put(Bean.DOCUMENT_ID, bean.getBizId());
+			
+			for (Attribute attribute : document.getAllAttributes()) {
+				// Not a relation
+				if (! (attribute instanceof Relation)) {
+					String name = attribute.getName();
+					node.put(name, BindUtil.getSerialized(customer, bean, name));
+				}
 			}
+	
+			if (bean instanceof PersistentBean) {
+				node.put(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
+			}
+			
+			audit.put(binding, node);
 		}
-
-		if (bean instanceof PersistentBean) {
-			node.put(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
-		}
-		
-		audit.put(binding, node);
 		
 		return true;
 	}

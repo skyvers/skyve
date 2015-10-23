@@ -25,8 +25,8 @@ import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
  * Someone who works for this organisation
  * 
  * @depend - - - Status
- * @navhas n baseOffice 0..1 Office
  * @navhas n contact 0..1 Contact
+ * @navhas n baseOffice 0..1 Office
  * @stereotype "persistent"
  */
 @XmlType

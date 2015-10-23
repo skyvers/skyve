@@ -8,7 +8,7 @@
 	<pluralAlias>Audits</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/audit16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/audit32.png</icon32x32RelativeFilePath>
-	<bizKey expression="{auditBizVersion} - {operation} by {userName} at {timestamp}" />
+	<bizKey expression="{operation} by {userName} at {timestamp}" />
 	<attributes>
 		<text name="auditModuleName" required="true">
 			<displayName>Module</displayName>
@@ -18,17 +18,14 @@
 			<displayName>Document</displayName>
 			<length>128</length>
 		</text>
-		<text name="auditBizId" required="true">
+		<id name="auditBizId" required="true">
 			<displayName>BizId</displayName>
-			<length>36</length>
-		</text>
+			<index>database</index>
+		</id>
 		<text name="auditBizKey" required="true">
 			<displayName>Description</displayName>
 			<length>128</length>
 		</text>
-		<integer name="auditBizVersion" required="true">
-			<displayName>Version</displayName>
-		</integer>
 		<enum name="operation" required="true">
 			<displayName>Operation</displayName>
 			<values>
@@ -40,13 +37,18 @@
 		<timestamp name="timestamp" required="true">
 			<displayName>Timestamp</displayName>
 		</timestamp>
+		<longInteger name="millis" required="true">
+			<displayName>Millis</displayName>
+		</longInteger>
 		<text name="userName" required="true">
 			<displayName>User</displayName>
 			<length>50</length>
 		</text>
 		<memo name="audit" required="true">
 			<displayName>Audit</displayName>
+			<index>none</index>
 		</memo>
+		<!-- The following are used to drive the edit view -->
 		<association name="sourceVersion" type="aggregation" persistent="false" required="true">
 			<displayName>Source Version To Compare</displayName>
 			<domain>dynamic</domain>

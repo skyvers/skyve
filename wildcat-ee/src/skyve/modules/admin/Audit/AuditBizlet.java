@@ -67,9 +67,9 @@ public class AuditBizlet extends Bizlet<Audit> {
 			DocumentFilter f = q.getFilter();
 			f.addEquals(Audit.auditBizIdPropertyName, audit.getAuditBizId());
 			if (forComparison) {
-				f.addLessThan(Audit.auditBizVersionPropertyName, audit.getAuditBizVersion());
+				f.addLessThan(Audit.millisPropertyName, audit.getMillis());
 			}
-			q.addOrdering(Audit.auditBizVersionPropertyName, SortDirection.descending);
+			q.addOrdering(Audit.millisPropertyName, SortDirection.descending);
 			
 			q.setFirstResult(0).setMaxResults(100);
 			List<Bean> versions = q.projectedResults();
