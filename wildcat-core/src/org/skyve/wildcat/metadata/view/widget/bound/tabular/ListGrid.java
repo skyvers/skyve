@@ -46,6 +46,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"showZoom",
 							"showEdit",
 							"showRemove",
+							"showDeselect",
 							"showFilter",
 							"showSummary",
 							"showExport",
@@ -90,6 +91,7 @@ public class ListGrid implements MetaData,
 	private Boolean showZoom;
 	private Boolean showEdit;
 	private Boolean showRemove;
+	private Boolean showDeselect;
 	private Boolean showExport;
 	private Boolean showFilter;
 	private Boolean showSummary;
@@ -306,6 +308,15 @@ public class ListGrid implements MetaData,
 	@XmlAttribute(name = "showRemove", required = false)
 	public void setShowRemove(Boolean showRemove) {
 		this.showRemove = showRemove;
+	}
+
+	public Boolean getShowDeselect() {
+		return showDeselect;
+	}
+
+	@XmlAttribute(name = "showDeselect", required = false)
+	public void setShowDeselect(Boolean showDeselect) {
+		this.showDeselect = showDeselect;
 	}
 
 	public Boolean getShowExport() {

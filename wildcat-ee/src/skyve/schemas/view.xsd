@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -1267,6 +1267,11 @@
         <xs:attribute name="disableZoom" type="xs:string"/>
         <xs:attribute name="disableEdit" type="xs:string"/>
         <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="showAdd" type="xs:boolean"/>
+        <xs:attribute name="showZoom" type="xs:boolean"/>
+        <xs:attribute name="showEdit" type="xs:boolean"/>
+        <xs:attribute name="showRemove" type="xs:boolean"/>
+        <xs:attribute name="showDeselect" type="xs:boolean"/>
         <xs:attribute name="selectedIdBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -1377,6 +1382,7 @@
     <xs:attribute name="showZoom" type="xs:boolean"/>
     <xs:attribute name="showEdit" type="xs:boolean"/>
     <xs:attribute name="showRemove" type="xs:boolean"/>
+    <xs:attribute name="showDeselect" type="xs:boolean"/>
     <xs:attribute name="showFilter" type="xs:boolean"/>
     <xs:attribute name="showSummary" type="xs:boolean"/>
     <xs:attribute name="showExport" type="xs:boolean"/>
@@ -1400,18 +1406,18 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="params"/>
       <xs:enumeration value="list"/>
       <xs:enumeration value="pick"/>
-      <xs:enumeration value="edit"/>
       <xs:enumeration value="create"/>
+      <xs:enumeration value="params"/>
+      <xs:enumeration value="edit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="centre"/>
       <xs:enumeration value="left"/>
+      <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
     </xs:restriction>
   </xs:simpleType>
@@ -1426,32 +1432,32 @@
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Upload"/>
       <xs:enumeration value="OK"/>
       <xs:enumeration value="New"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="Upload"/>
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Save"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Remove"/>
       <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="DEFAULTS"/>
       <xs:enumeration value="Download"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Report"/>
       <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Save"/>
       <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Add"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="self"/>
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
-      <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
       <xs:enumeration value="blankFrame"/>
+      <xs:enumeration value="self"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

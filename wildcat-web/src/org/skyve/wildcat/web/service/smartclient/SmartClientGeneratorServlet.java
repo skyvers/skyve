@@ -1012,13 +1012,28 @@ code.append("_view:view})");
 			code.append(",canCreate:").append(user.canCreateDocument(dataGridDocument));
 			code.append(",canUpdate:").append(user.canUpdateDocument(dataGridDocument));
 			code.append(",canDelete:").append(user.canDeleteDocument(dataGridDocument)).append(',');
-			disableCRUD(grid, code);
+			if (Boolean.FALSE.equals(grid.getShowAdd())) {
+				code.append("showAdd:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowZoom())) {
+				code.append("showZoom:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowEdit())) {
+				code.append("showEdit:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowRemove())) {
+				code.append("showRemove:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowDeselect())) {
+				code.append("showDeselect:false,");
+			}
 			if (Boolean.TRUE.equals(grid.getInline())) { // defaults to not being inline
 				code.append("inline:true,");
 			}
 			if (Boolean.TRUE.equals(grid.getWordWrap())) { // defaults to not being wrapped
 				code.append("wordWrap:true,");
 			}
+			disableCRUD(grid, code);
 			if ((relation instanceof Collection) && 
 					Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
 				code.append("_ordinal:'").append(ChildBean.ORDINAL_KEY).append("',");
@@ -1243,6 +1258,9 @@ code.append("_view:view})");
 			}
 			if (Boolean.FALSE.equals(grid.getShowRemove())) {
 				code.append("showRemove:false,");
+			}
+			if (Boolean.FALSE.equals(grid.getShowDeselect())) {
+				code.append("showDeselect:false,");
 			}
 			if (Boolean.FALSE.equals(grid.getShowFilter())) {
 				code.append("showFilter:false,");
