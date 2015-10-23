@@ -647,7 +647,8 @@ joined tables
 				}
 				
 				fw.append(indent).append("\t\t<version name=\"bizVersion\" unsaved-value=\"null\" />\n");
-				fw.append(indent).append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"50\" not-null=\"true\" />\n");
+				// bizLock length of 271 is 17 for the timestamp (yyyyMMddHHmmssSSS) + 254 (email address max length from RFC 5321)
+				fw.append(indent).append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"271\" not-null=\"true\" />\n");
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before 
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.

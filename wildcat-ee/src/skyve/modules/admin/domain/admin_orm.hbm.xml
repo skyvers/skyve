@@ -16,7 +16,7 @@
 	<class name="modules.admin.domain.Audit" table="ADM_Audit" entity-name="adminAudit">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -44,7 +44,7 @@
 	<class name="modules.admin.domain.Communication" table="ADM_Communication" entity-name="adminCommunication">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -77,7 +77,7 @@
 	<class name="modules.admin.domain.Configuration" table="ADM_Configuration" entity-name="adminConfiguration">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -97,7 +97,7 @@
 	<class name="modules.admin.domain.Contact" table="ADM_Contact" entity-name="adminContact">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -121,7 +121,7 @@
 	<class name="modules.admin.domain.DataGroup" table="ADM_DataGroup" entity-name="adminDataGroup">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -138,7 +138,7 @@
 	<class name="modules.admin.domain.DataMaintenance" table="ADM_DataMaintenance" entity-name="adminDataMaintenance">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -154,7 +154,7 @@
 	<class name="modules.admin.domain.DocumentNumber" table="ADM_DocumentNumber" entity-name="adminDocumentNumber">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -173,7 +173,7 @@
 	<class name="modules.admin.domain.Group" table="ADM_SecurityGroup" entity-name="adminGroup">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -194,7 +194,7 @@
 	<class name="modules.admin.domain.GroupRole" table="ADM_SecurityGroupRole" entity-name="adminGroupRole">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -211,7 +211,7 @@
 	<class name="modules.admin.domain.Job" table="ADM_Job" entity-name="adminJob">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -232,7 +232,7 @@
 	<class name="modules.admin.domain.JobSchedule" table="ADM_JobSchedule" entity-name="adminJobSchedule">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -252,7 +252,7 @@
 	<class name="modules.admin.domain.Snapshot" table="ADM_Snapshot" entity-name="adminSnapshot">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -271,7 +271,7 @@
 	<class name="modules.admin.domain.Tag" table="ADM_Tag" entity-name="adminTag">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -291,7 +291,7 @@
 	<class name="modules.admin.domain.Tagged" table="ADM_Tagged" entity-name="adminTagged">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -310,13 +310,13 @@
 	<class name="modules.admin.domain.User" table="ADM_SecurityUser" entity-name="adminUser">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<property name="userName" length="50" />
+		<property name="userName" length="254" />
 		<property name="password" length="30" />
 		<property name="createdDateTime" type="DateTime" />
 		<property name="homeModule" length="30" />
@@ -344,7 +344,7 @@
 	<class name="modules.admin.domain.UserLoginRecord" table="ADM_UserLoginRecord" entity-name="adminUserLoginRecord">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -361,7 +361,7 @@
 	<class name="modules.admin.domain.UserMonthlyHits" table="ADM_UserMonthlyHits" entity-name="adminUserMonthlyHits">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -380,7 +380,7 @@
 	<class name="modules.admin.domain.UserRole" table="ADM_SecurityUserRole" entity-name="adminUserRole">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />

@@ -158,7 +158,7 @@ public class User extends AbstractPersistentBean {
 	}
 
 	/**
-	 * Login name of the user.
+	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
 	/**
