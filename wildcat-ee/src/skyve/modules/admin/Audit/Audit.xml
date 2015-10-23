@@ -24,7 +24,7 @@
 		</id>
 		<text name="auditBizKey" required="true">
 			<displayName>Description</displayName>
-			<length>128</length>
+			<length>1024</length>
 		</text>
 		<enum name="operation" required="true">
 			<displayName>Operation</displayName>
@@ -42,7 +42,7 @@
 		</longInteger>
 		<text name="userName" required="true">
 			<displayName>User</displayName>
-			<length>50</length>
+			<length>254</length>
 		</text>
 		<memo name="audit" required="true">
 			<displayName>Audit</displayName>

@@ -10,7 +10,7 @@
 	<attributes>
 		<text name="userName" required="true">
 			<displayName>User Name</displayName>
-			<length>30</length>
+			<length>254</length>
 		</text>
 		<integer name="year" required="true">
 			<displayName>Year</displayName>
