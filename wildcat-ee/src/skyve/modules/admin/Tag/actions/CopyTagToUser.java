@@ -1,12 +1,14 @@
 package modules.admin.Tag.actions;
 
 import modules.admin.domain.Tag;
+import modules.admin.domain.Tagged;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class CopyTagToUser implements ServerSideAction<Tag> {
@@ -24,13 +26,23 @@ public class CopyTagToUser implements ServerSideAction<Tag> {
 		if (bean.getCopyToUser() != null) {
 
 			// copy tag and tagged items
-			Tag newTag = Util.cloneBySerialization(bean);
+			Tag newTag = Tag.newInstance();
+			newTag.setName(bean.getName());
 			newTag.setBizUserId(bean.getCopyToUser().getBizId());
-			
 			Persistence pers = CORE.getPersistence();
-			newTag = pers.save(newTag);
-
+			pers.upsertBeanTuple(newTag);
+			
 			//and copy tagged items
+			for(Bean b: EXT.iterateTagged(bean.getBizId())){
+				Tagged tgd = Tagged.newInstance();
+				tgd.setTag(newTag);
+				tgd.setTaggedBizId(b.getBizId());
+				tgd.setTaggedDocument(b.getBizDocument());
+				tgd.setTaggedModule(b.getBizModule());
+				tgd.setBizUserId(bean.getCopyToUser().getBizId());
+				
+				pers.upsertBeanTuple(tgd);
+			}
 		}
 		return new ServerSideActionResult(bean);
 	}

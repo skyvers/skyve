@@ -23,6 +23,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.web.WebContext;
+import org.skyve.wildcat.util.TagUtil;
 
 public class TagBizlet extends Bizlet<Tag> {
 	private static final long serialVersionUID = -927602139528710862L;
@@ -124,6 +125,10 @@ public class TagBizlet extends Bizlet<Tag> {
 
 			update(bean);
 			bean.originalValues().clear();
+		}
+		
+		if(ImplicitActionName.Delete.equals(actionName)){
+			TagUtil.clear(bean.getBizId());
 		}
 
 		return bean;
