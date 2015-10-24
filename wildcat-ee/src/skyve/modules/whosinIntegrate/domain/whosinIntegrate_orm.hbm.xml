@@ -16,7 +16,7 @@
 	<class name="modules.whosinIntegrate.domain.Office" table="WHO_Office" entity-name="whosinIntegrateOffice">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
@@ -38,7 +38,7 @@
 	<class name="modules.whosinIntegrate.domain.Staff" table="WHO_Staff" entity-name="whosinIntegrateStaff">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
-		<property name="bizLock" type="OptimisticLock" length="50" not-null="true" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
 		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
 		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
