@@ -35,6 +35,11 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disableZoomConditionName",
 							"disableEditConditionName",
 							"disableRemoveConditionName",
+							"showAdd",
+							"showZoom",
+							"showEdit",
+							"showRemove",
+							"showDeselect",
 							"selectedIdBinding",
 							"columns",
 							"addedActions",
@@ -62,6 +67,13 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	private String disableZoomConditionName;
 	private String disableEditConditionName;
 	private String disableRemoveConditionName;
+
+	private Boolean showAdd;
+	private Boolean showZoom;
+	private Boolean showEdit;
+	private Boolean showRemove;
+	private Boolean showDeselect;
+
 	private String selectedIdBinding;
 	
 	private Boolean inline;
@@ -178,6 +190,51 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
 	}
 	
+	public Boolean getShowAdd() {
+		return showAdd;
+	}
+
+	@XmlAttribute(name = "showAdd", required = false)
+	public void setShowAdd(Boolean showAdd) {
+		this.showAdd = showAdd;
+	}
+
+	public Boolean getShowZoom() {
+		return showZoom;
+	}
+
+	@XmlAttribute(name = "showZoom", required = false)
+	public void setShowZoom(Boolean showZoom) {
+		this.showZoom = showZoom;
+	}
+
+	public Boolean getShowEdit() {
+		return showEdit;
+	}
+
+	@XmlAttribute(name = "showEdit", required = false)
+	public void setShowEdit(Boolean showEdit) {
+		this.showEdit = showEdit;
+	}
+
+	public Boolean getShowRemove() {
+		return showRemove;
+	}
+
+	@XmlAttribute(name = "showRemove", required = false)
+	public void setShowRemove(Boolean showRemove) {
+		this.showRemove = showRemove;
+	}
+
+	public Boolean getShowDeselect() {
+		return showDeselect;
+	}
+
+	@XmlAttribute(name = "showDeselect", required = false)
+	public void setShowDeselect(Boolean showDeselect) {
+		this.showDeselect = showDeselect;
+	}
+
 	@Override
 	public String getSelectedIdBinding() {
 		return selectedIdBinding;

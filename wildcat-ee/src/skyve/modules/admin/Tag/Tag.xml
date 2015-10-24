@@ -17,6 +17,31 @@
 		<boolean name="visible">
 			<displayName>Visible</displayName>
 		</boolean>
+		<enum name="combinationsOperator" persistent="false" trackChanges="false">
+			<displayName>Operator</displayName>
+			<values>
+				<value code="Union"/>
+				<value code="Except"/>
+				<value code="Intersect"/>
+			</values>
+		</enum>
+		<memo name="combinationExplanation" persistent="false" trackChanges="false">
+			<displayName>Explanation</displayName>
+		</memo>
+		<integer name="currentTagCount" persistent="false" trackChanges="false">
+			<displayName>Current Tag Count</displayName>
+		</integer>
+		<integer name="actionTagCount" persistent="false" trackChanges="false">
+			<displayName>Other Tag Count</displayName>
+		</integer>
+		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
+			<displayName>Copy to user</displayName>
+			<documentName>User</documentName>
+		</association>
+		<text name="copyToUserTagName" persistent="false" trackChanges="false">
+			<displayName>Tag Name</displayName>
+			<length>256</length>
+		</text>
 		<text name="moduleName" >
 			<displayName>Module</displayName>
 			<description>The module to tag.</description>
@@ -69,8 +94,8 @@
 			<displayName>Column</displayName>
 		</integer>
 		<association type="aggregation" name="actionTag" persistent="false" trackChanges="false">
-			<displayName>Tag</displayName>
-			<description>The tag to use for the action to be performed on this tag.</description>
+			<displayName>Other Tag</displayName>
+			<description>The other tag to use for the action to be performed on this tag.</description>
 			<domain>dynamic</domain>
 			<documentName>Tag</documentName>
 		</association>

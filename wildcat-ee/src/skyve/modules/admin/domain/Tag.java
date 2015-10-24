@@ -15,9 +15,11 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
 /**
  * Tag
  * 
+ * @depend - - - CombinationsOperator
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
  * @navhas n actionTag 0..1 Tag
+ * @navhas n copyToUser 0..1 User
  * @stereotype "persistent"
  */
 @XmlType
@@ -38,6 +40,18 @@ public class Tag extends AbstractPersistentBean {
 	public static final String namePropertyName = "name";
 	/** @hidden */
 	public static final String visiblePropertyName = "visible";
+	/** @hidden */
+	public static final String combinationsOperatorPropertyName = "combinationsOperator";
+	/** @hidden */
+	public static final String combinationExplanationPropertyName = "combinationExplanation";
+	/** @hidden */
+	public static final String currentTagCountPropertyName = "currentTagCount";
+	/** @hidden */
+	public static final String actionTagCountPropertyName = "actionTagCount";
+	/** @hidden */
+	public static final String copyToUserPropertyName = "copyToUser";
+	/** @hidden */
+	public static final String copyToUserTagNamePropertyName = "copyToUserTagName";
 	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
 	/** @hidden */
@@ -68,6 +82,75 @@ public class Tag extends AbstractPersistentBean {
 	public static final String documentActionPropertyName = "documentAction";
 	/** @hidden */
 	public static final String documentActionResultsPropertyName = "documentActionResults";
+
+	/**
+	 * Operator
+	 **/
+	@XmlEnum
+	public static enum CombinationsOperator implements Enumeration {
+		union("Union", "Union"),
+		except("Except", "Except"),
+		intersect("Intersect", "Intersect");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private CombinationsOperator(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static CombinationsOperator fromCode(String code) {
+			CombinationsOperator result = null;
+
+			for (CombinationsOperator value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static CombinationsOperator fromDescription(String description) {
+			CombinationsOperator result = null;
+
+			for (CombinationsOperator value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				CombinationsOperator[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (CombinationsOperator value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * Filter Operator
@@ -208,6 +291,12 @@ public class Tag extends AbstractPersistentBean {
 
 	private String name;
 	private Boolean visible;
+	private CombinationsOperator combinationsOperator;
+	private String combinationExplanation;
+	private Integer currentTagCount;
+	private Integer actionTagCount;
+	private User copyToUser = null;
+	private String copyToUserTagName;
 	/**
 	 * The module to tag.
 	 **/
@@ -229,7 +318,7 @@ public class Tag extends AbstractPersistentBean {
 	private Boolean unTagSuccessful;
 	private Integer filterColumn;
 	/**
-	 * The tag to use for the action to be performed on this tag.
+	 * The other tag to use for the action to be performed on this tag.
 	 **/
 	private Tag actionTag = null;
 	/**
@@ -311,6 +400,108 @@ public class Tag extends AbstractPersistentBean {
 	public void setVisible(Boolean visible) {
 		preset(visiblePropertyName, visible);
 		this.visible = visible;
+	}
+
+	/**
+	 * {@link #combinationsOperator} accessor.
+	 **/
+	public CombinationsOperator getCombinationsOperator() {
+		return combinationsOperator;
+	}
+
+	/**
+	 * {@link #combinationsOperator} mutator.
+	 * 
+	 * @param combinationsOperator	The new value to set.
+	 **/
+	@XmlElement
+	public void setCombinationsOperator(CombinationsOperator combinationsOperator) {
+		this.combinationsOperator = combinationsOperator;
+	}
+
+	/**
+	 * {@link #combinationExplanation} accessor.
+	 **/
+	public String getCombinationExplanation() {
+		return combinationExplanation;
+	}
+
+	/**
+	 * {@link #combinationExplanation} mutator.
+	 * 
+	 * @param combinationExplanation	The new value to set.
+	 **/
+	@XmlElement
+	public void setCombinationExplanation(String combinationExplanation) {
+		this.combinationExplanation = combinationExplanation;
+	}
+
+	/**
+	 * {@link #currentTagCount} accessor.
+	 **/
+	public Integer getCurrentTagCount() {
+		return currentTagCount;
+	}
+
+	/**
+	 * {@link #currentTagCount} mutator.
+	 * 
+	 * @param currentTagCount	The new value to set.
+	 **/
+	@XmlElement
+	public void setCurrentTagCount(Integer currentTagCount) {
+		this.currentTagCount = currentTagCount;
+	}
+
+	/**
+	 * {@link #actionTagCount} accessor.
+	 **/
+	public Integer getActionTagCount() {
+		return actionTagCount;
+	}
+
+	/**
+	 * {@link #actionTagCount} mutator.
+	 * 
+	 * @param actionTagCount	The new value to set.
+	 **/
+	@XmlElement
+	public void setActionTagCount(Integer actionTagCount) {
+		this.actionTagCount = actionTagCount;
+	}
+
+	/**
+	 * {@link #copyToUser} accessor.
+	 **/
+	public User getCopyToUser() {
+		return copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUser} mutator.
+	 * 
+	 * @param copyToUser	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUser(User copyToUser) {
+		this.copyToUser = copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUserTagName} accessor.
+	 **/
+	public String getCopyToUserTagName() {
+		return copyToUserTagName;
+	}
+
+	/**
+	 * {@link #copyToUserTagName} mutator.
+	 * 
+	 * @param copyToUserTagName	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUserTagName(String copyToUserTagName) {
+		this.copyToUserTagName = copyToUserTagName;
 	}
 
 	/**

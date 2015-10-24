@@ -186,7 +186,19 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 			property.setName(name);
 
 			// Coerce the value to the attributes type if the attribute still exists
-			Attribute attribute = (nodeDocument == null) ? null : nodeDocument.getAttribute(name);
+			Attribute attribute = null;
+			if (nodeDocument != null) {
+				// NB Attribute could be on a base document - use Binder
+				Module nodeModule = c.getModule(nodeDocument.getOwningModuleName());
+				try {
+					TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, name);
+					attribute = (tmd == null) ? null : tmd.getAttribute();
+				}
+				catch (MetaDataException e) {
+					// nothing to do here - The document no longer has the given attribute
+				}
+			}
+
 			if (attribute == null) { // attribute DNE
 				property.setTitle(name);
 				property.setWidget(new TextField());
@@ -227,9 +239,22 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 			
 			List<ComparisonProperty> properties = node.getProperties();
 			for (ComparisonProperty property : properties) {
-				Object value = values.remove(property.getName());
-				Document document = node.getDocument();
-				Attribute attribute = (document == null) ? null : document.getAttribute(property.getName());
+				String propertyName = property.getName();
+				Object value = values.remove(propertyName);
+				Document nodeDocument = node.getDocument();
+				Attribute attribute = null;
+				if (nodeDocument != null) {
+					// NB Attribute could be on a base document - use Binder
+					Module nodeModule = c.getModule(nodeDocument.getOwningModuleName());
+					try {
+						TargetMetaData tmd = Binder.getMetaDataForBinding(c, nodeModule, nodeDocument, propertyName);
+						attribute = (tmd == null) ? null : tmd.getAttribute();
+					}
+					catch (MetaDataException e) {
+						// nothing to do here - The document no longer has the given attribute
+					}
+				}
+
 				if (attribute != null) {
 					Class<?> type = null;
 					if (attribute instanceof Enumeration) {

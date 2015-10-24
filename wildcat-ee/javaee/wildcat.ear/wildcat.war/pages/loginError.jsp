@@ -9,7 +9,7 @@
 %>
 <html>
 	<head>
-		<title>Biz Hub: Login Error</title>
+		<title>WILDCAT: Sign-in Error</title>
 		<base href="<%=basePath%>" />
 
 		<meta http-equiv="pragma" content="no-cache" />
@@ -21,80 +21,58 @@
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 		<% } %>
 
-		<link rel="icon" type="image/png" href="images/window/BizHub16.png" />
+		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png" />
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
 	</head>
 	<body>
 		<table class="logo" align="center">
-			<tr height="150px">
+			<tr height="128px">
 				<td>
-					<img src="images/bizhub_logo4.jpg" alt="Get Organized" />
+					<img src="images/WILDCAT.png" alt="WILDCAT" />
 				</td>
 			</tr>
 		</table>
 		<table align="center">
 			<tr>
 				<td>
-					<div class="x-box" style="width:100%;">
-						<div class="x-box-tl">
-							<div class="x-box-tr">
-								<div class="x-box-tc">
-								</div>
-							</div>
-						</div>
-						<div class="x-box-ml">
-							<div class="x-box-mr">
-								<div class="x-box-mc">
-									<table align="center">
-										<tr>
-											<td>
-												<strong style="color:FireBrick;">
-													Login Error
-												</strong>
-											</td>
-										</tr>
-									</table>
-									<table class="borderTable" width="300px" align="center">
-										<tr align="center">
-											<td style="color:FireBrick;font-size:14" >
-												<%if (request.getUserPrincipal() != null) {
-												%>
-												You are currently logged in as <em><%=request.getUserPrincipal()%></em>.
-												<br />
-												<br />
-												To access this functionality you need to login as another user with the correct permissions.
-												<br />
-												<br />
-												<%} else {
-												%>
-													Invalid username and/or password.
-												<%}
-												%>
-											</td>
-										</tr>
-									</table>
-									<br>
-									<table align="center">
-										<tr>
-											<td background="images/blankbutton2.jpg" height=35 width=70 align=center>
-												<% if (referer == null) { %>
-												<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Try again</a>
-												<% } else { %>
-													<a href="<%=referer%>">Try Again</a>
-												<% } %>
-											</td>
-										</tr>
-									</table>
-									<div></div>
-								</div>
-							</div>
-						</div>
-						<div class="x-box-bl">
-							<div class="x-box-br">
-								<div class="x-box-bc">
-								</div>
-							</div>
-						</div>
+					<div class="loginTable">
+						<table style="text-align: center; border-spacing: 10px;">
+							<tr>
+								<td>
+									<div style="font-size:28;">
+										Sign in error!
+									</div>
+								</td>
+							</tr>
+							<tr align="center">
+								<td style="font-size:18" >
+									<%if (request.getUserPrincipal() != null) {
+									%>
+									You are currently signed in as <em><%=request.getUserPrincipal()%></em>
+									<br />
+									<br />
+									To access this functionality you need to sign in as another user with the correct permissions
+									<br />
+									<br />
+									<%} else {
+									%>
+										Invalid username and/or password
+									<%}
+									%>
+								</td>
+							</tr>
+							<tr>
+								<td style="text-align: center;">
+									<div class="buttonDiv">
+									<% if (referer == null) { %>
+									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Try again</a>
+									<% } else { %>
+										<a href="<%=referer%>">Try Again</a>
+									<% } %>
+									</div>
+								</td>
+							</tr>
+						</table>
 					</div>
 				</td>
 			</tr>

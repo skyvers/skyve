@@ -2,9 +2,9 @@
 <view title="Tag" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Details">
-			<vbox border="true" pixelHeight="1" pixelPadding="10">
-				<form>
+		<tab title="Details" >
+			<vbox pixelHeight="1" pixelPadding="10" pixelMemberPadding="10">
+				<form border="true" >
 					<column percentageWidth="20" />
 					<column />
 					<column />
@@ -19,6 +19,29 @@
 						</item>
 					</row>
 				</form>
+				<form border="true" borderTitle="Copy">
+					<column percentageWidth="20"/>
+					<column/>
+					<column/>
+					<row>
+						<item>
+							<default binding="copyToUser"/>
+						</item>
+					</row>
+					<row>
+						<item>
+							<default binding="copyToUserTagName"/>
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer/>
+						</item>
+						<item>
+							<button actionName="CopyTagToUser" pixelWidth="200"/>
+						</item>
+					</row>
+				</form>
 			</vbox>
 		</tab>
 		<tab title="Combinations">
@@ -28,10 +51,57 @@
 					<column />
 					<column />
 					<column />
-					<column />
 					<row>
-						<item colspan="3">
-							<combo binding="actionTag" />
+						<item label="Tag">
+							<textField binding="name" disabled="true" />
+						</item>
+						<item >
+							<blurb>
+								<![CDATA[<i>{currentTagCount} records.</i>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item >
+							<combo binding="combinationsOperator">
+								<onChangedHandlers>
+									<server action="PrepareExplanation" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+					</row>
+					<row>
+						<item>
+							<combo binding="actionTag">
+								<onChangedHandlers>
+									<server action="PrepareExplanation" />
+								</onChangedHandlers>
+							</combo>
+						</item>
+						<item>
+							<blurb>
+								<![CDATA[<i>{actionTagCount} records.</i>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item colspan="2">
+							<blurb>
+								<![CDATA[<i>{combinationExplanation}</i>]]>
+							</blurb>
+						</item>
+					</row>
+					<row>
+						<item>
+							<spacer />
 						</item>
 					</row>
 					<row>
@@ -39,21 +109,15 @@
 							<spacer />
 						</item>
 						<item>
-							<button actionName="ExceptTag" pixelWidth="150" />
-						</item>
-						<item>
-							<button actionName="IntersectTag" pixelWidth="150" />
-						</item>
-						<item>
-							<button actionName="UnionTag" pixelWidth="150" />
+							<button actionName="PerformCombination" pixelWidth="200"/>
 						</item>
 					</row>
 				</form>
 			</vbox>
 		</tab>
 		<tab title="Processing">
-			<vbox border="true" pixelHeight="1" pixelPadding="10">
-				<form>
+			<vbox pixelPadding="10" pixelMemberPadding="10">
+				<form border="true" borderTitle="Context">
 					<column percentageWidth="20" />
 					<column />
 					<column />
@@ -92,95 +156,101 @@
 
 					</row>
 				</form>
-				<form border="true" borderTitle="Load">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item colspan="4">
-							<combo binding="attributeName">
-								<onChangedHandlers>
-									<rerender />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item colspan="4">
-							<combo binding="filterOperator" />
-						</item>
-					</row>
-					<row>
-						<item colspan="4">
-							<combo binding="filterAction" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="fileHasHeaders" />
-						</item>
-						<item colspan="2">
-							<spinner binding="filterColumn" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="UploadTagCriteria" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<textField binding="numberLoaded" disabled="true" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<textField binding="numberMatched" disabled="true" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<textField binding="numberTagged" disabled="true" />
-						</item>
-					</row>
-				</form>
-				<form border="true" borderTitle="Process">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<combo binding="documentAction" />
-						</item>
-						<item>
-							<combo binding="documentCondition" />
-						</item>
-						<item>
-							<button actionName="BulkDocumentAction" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="unTagSuccessful" triState="false" />
-						</item>
-					</row>
-					<row>
-						<item colspan="5">
-							<textArea binding="documentActionResults" />
-						</item>
-					</row>
-				</form>
+				<tabPane>
+					<tab title="Load">
+						<form border="true">
+							<column percentageWidth="20" />
+							<column />
+							<column />
+							<column />
+							<column />
+							<column />
+							<column />
+							<row>
+								<item colspan="4">
+									<combo binding="attributeName">
+										<onChangedHandlers>
+											<rerender />
+										</onChangedHandlers>
+									</combo>
+								</item>
+							</row>
+							<row>
+								<item colspan="4">
+									<combo binding="filterOperator" />
+								</item>
+							</row>
+							<row>
+								<item colspan="4">
+									<combo binding="filterAction" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<checkBox binding="fileHasHeaders" />
+								</item>
+								<item colspan="2">
+									<spinner binding="filterColumn" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<spacer />
+								</item>
+								<item>
+									<button actionName="UploadTagCriteria" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<textField binding="numberLoaded" disabled="true" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<textField binding="numberMatched" disabled="true" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<textField binding="numberTagged" disabled="true" />
+								</item>
+							</row>
+						</form>
+					</tab>
+					<tab title="Process">
+						<form border="true">
+							<column percentageWidth="20" />
+							<column />
+							<column />
+							<column />
+							<column />
+							<column />
+							<column />
+							<row>
+								<item>
+									<combo binding="documentAction" />
+								</item>
+								<item>
+									<combo binding="documentCondition" />
+								</item>
+								<item>
+									<button actionName="BulkDocumentAction" />
+								</item>
+							</row>
+							<row>
+								<item>
+									<checkBox binding="unTagSuccessful" triState="false" />
+								</item>
+							</row>
+							<row>
+								<item colspan="5">
+									<textArea binding="documentActionResults" />
+								</item>
+							</row>
+						</form>
+					</tab>
+				</tabPane>
 			</vbox>
 		</tab>
 	</tabPane>
@@ -203,6 +273,15 @@
 			relativeIconFileName="shared/icons/Job.gif" />
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
+		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false"
+			relativeIconFileName="shared/icons/Search.gif" 
+			clientValidation="false" />
+		<action className="PerformCombination" displayName="Perform Combination" inActionPanel="false"
+			clientValidation="false" toolTip="Perform the selected combination operation." confirm="Ok to perform the combination?"
+			relativeIconFileName="shared/icons/Job.gif" />
+		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false"
+			clientValidation="false" toolTip="Create a copy of this tag for another user." confirm="Ok to copy?"
+			relativeIconFileName="shared/icons/Job.gif" />
 	</actions>
 </view>
 

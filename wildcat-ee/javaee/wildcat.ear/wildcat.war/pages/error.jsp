@@ -9,7 +9,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>Biz Hub: Error Encountered</title>
+<title>WILDCAT: Problem</title>
 <base href="<%=basePath%>" />
 
 <meta http-equiv="pragma" content="no-cache" />
@@ -21,7 +21,7 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 <% } %>
 
-<link rel="icon" type="image/png" href="images/window/BizHub16.png" />
+<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png" />
 <link rel="stylesheet" type="text/css" href="css/basic-min.css" />
 </head>
 <body>
@@ -29,11 +29,11 @@
 <table align="center" height="100%" >
 	<tr><td height="30%">&nbsp;</td></tr>
 
-	<tr bgColor="367ABA">
+	<tr bgColor="4682B4">
 		<td align="center" height="5%"><strong style="color:FFFFFF"><font face="Tahoma">Request Unsuccessful</font></strong></td>
 	</tr>
-	<tr bgColor="BECE24">
-		<td style="color:333333" align="center" height="10%">
+	<tr bgColor="4682B4">
+		<td style="color:FFFFFF" align="center" height="10%">
 			<font size="2" face="Tahoma">An error occurred while processing your request.
 				<br/>
 				<br/>

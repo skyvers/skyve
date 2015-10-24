@@ -24,15 +24,15 @@
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="auditModuleName" length="128" />
 		<property name="auditDocumentName" length="128" />
-		<property name="auditBizId" length="36" />
+		<property name="auditBizId" length="36" index="adminAuditauditBizId" />
 		<property name="auditBizKey" length="128" />
-		<property name="auditBizVersion" />
 		<property name="operation" length="1">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
 			</type>
 		</property>
 		<property name="timestamp" type="Timestamp" />
+		<property name="millis" />
 		<property name="userName" length="50" />
 		<property name="audit" type="text" />
 		<filter name="adminAuditNoneFilter" condition="1=0"/>
@@ -316,7 +316,7 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<property name="userName" length="50" />
+		<property name="userName" length="254" />
 		<property name="password" length="30" />
 		<property name="createdDateTime" type="DateTime" />
 		<property name="homeModule" length="30" />

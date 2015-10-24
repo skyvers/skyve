@@ -111,14 +111,16 @@ public class Desktop extends Harness {
 		result.append("<div id=\"formHeader\">");
 		result.append("<div>");
     	result.append("<table style=\"");
-		result.append("width:100%;background:url(images/bg-body.gif) repeat-x 0 0;");
-    	result.append("\"><tr height=\"46px\"><td width=\"1%\"><img style=\"width:32px;height:32px\" src=\"resources?_doc={modoc}&_n={icon}\"/></td><td><strong>{title}</strong>{link}</td>");
+    	//result.append("width:100%;");
+    	//background:url(images/WILDCAT_body.gif) no-repeat 100% 100%;
+		result.append("width:100%;background:url(images/WILDCAT_body.png) repeat-x 0 0;");
+    	result.append("\"><tr height=\"46px\"><td width=\"1%\"><img style=\"width:32px;height:32px\" src=\"resources?_doc={modoc}&_n={icon}\"/></td><td><div class=\"titleBar\">{title}</div>{link}</td>");
     	result.append("<td width=\"10%\" align=\"right\">");
-    	result.append("<img src=\"images/bizhub_menu_logo.gif\" alt=\"Get Organized\"/></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/help.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/home.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Text Search\"><img src=\"images/textSearch.gif\"/></a></td>");
-		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Logout\"><img src=\"images/logout.gif\"/></a></td>");
+    	result.append("<img src=\"images/WILDCAT_soft_transparent.png\" alt=\"WILDCAT\"/></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/WILDCAT_home32.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/WILDCAT_help32.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/WILDCAT_search32.png\"/></a></td>");
+		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><img src=\"images/WILDCAT_logout32.png\"/></a></td>");
     	result.append("</tr></table>");
     	result.append("</div>");
     	

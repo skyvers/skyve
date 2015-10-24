@@ -48,11 +48,11 @@ public class Audit extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String auditBizKeyPropertyName = "auditBizKey";
 	/** @hidden */
-	public static final String auditBizVersionPropertyName = "auditBizVersion";
-	/** @hidden */
 	public static final String operationPropertyName = "operation";
 	/** @hidden */
 	public static final String timestampPropertyName = "timestamp";
+	/** @hidden */
+	public static final String millisPropertyName = "millis";
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
 	/** @hidden */
@@ -137,9 +137,9 @@ public class Audit extends AbstractPersistentBean {
 	private String auditDocumentName;
 	private String auditBizId;
 	private String auditBizKey;
-	private Integer auditBizVersion;
 	private Operation operation;
 	private Timestamp timestamp;
+	private Long millis;
 	private String userName;
 	private String audit;
 	private Audit sourceVersion = null;
@@ -167,7 +167,7 @@ public class Audit extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{auditBizVersion} - {operation} by {userName} at {timestamp}",
+														"{operation} by {userName} at {timestamp}",
 														this);
 		}
 		catch (Exception e) {
@@ -254,24 +254,6 @@ public class Audit extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #auditBizVersion} accessor.
-	 **/
-	public Integer getAuditBizVersion() {
-		return auditBizVersion;
-	}
-
-	/**
-	 * {@link #auditBizVersion} mutator.
-	 * 
-	 * @param auditBizVersion	The new value to set.
-	 **/
-	@XmlElement
-	public void setAuditBizVersion(Integer auditBizVersion) {
-		preset(auditBizVersionPropertyName, auditBizVersion);
-		this.auditBizVersion = auditBizVersion;
-	}
-
-	/**
 	 * {@link #operation} accessor.
 	 **/
 	public Operation getOperation() {
@@ -307,6 +289,24 @@ public class Audit extends AbstractPersistentBean {
 	public void setTimestamp(Timestamp timestamp) {
 		preset(timestampPropertyName, timestamp);
 		this.timestamp = timestamp;
+	}
+
+	/**
+	 * {@link #millis} accessor.
+	 **/
+	public Long getMillis() {
+		return millis;
+	}
+
+	/**
+	 * {@link #millis} mutator.
+	 * 
+	 * @param millis	The new value to set.
+	 **/
+	@XmlElement
+	public void setMillis(Long millis) {
+		preset(millisPropertyName, millis);
+		this.millis = millis;
 	}
 
 	/**

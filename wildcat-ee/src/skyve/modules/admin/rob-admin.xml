@@ -63,6 +63,9 @@
 					<action name="UpdateDocument"/>
 					<action name="UploadTagCriteria"/>
 					<action name="BulkDocumentAction"/>
+					<action name="PerformCombination"/>
+					<action name="PrepareExplanation"/>		
+					<action name="CopyTagToUser"/>			
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="User" permission="_R__D" />
@@ -95,6 +98,9 @@
 					<action name="UpdateDocument"/>
 					<action name="UploadTagCriteria"/>
 					<action name="BulkDocumentAction"/>
+					<action name="PerformCombination"/>
+					<action name="PrepareExplanation"/>
+					<action name="CopyTagToUser"/>					
 				</document>
 				<document name="Tagged" permission="CRUDU" />			
 			</privileges>
@@ -207,6 +213,9 @@
 					<action name="UpdateDocument"/>
 					<action name="UploadTagCriteria"/>
 					<action name="BulkDocumentAction"/>
+					<action name="PerformCombination"/>
+					<action name="PrepareExplanation"/>
+					<action name="CopyTagToUser"/>
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 								
@@ -374,15 +383,13 @@
 		<documentQuery name="qAudits" documentName="Audit">
 			<description>The list of all Audits.</description>
 			<columns>
-				<column binding="timestamp" />
+				<column binding="timestamp" sortOrder="descending" />
 				<column binding="userName" />
 				<column binding="operation" />
 				<column binding="auditModuleName" />
 				<column binding="auditDocumentName" />
 				<column binding="auditBizKey" />
-				<column binding="millis" sortOrder="descending">
-					<projected>false</projected>
-				</column>
+				<column binding="auditBizVersion" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qCommunications" documentName="Communication">

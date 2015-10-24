@@ -4,7 +4,7 @@
 <HTML>
 	<HEAD>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8">
-		<link rel="icon" type="image/png" href="images/window/BizHub16.png">
+		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png">
 		<TITLE>Browse Images</TITLE>
 		<link rel="stylesheet" type="text/css" href="../../css/basic.css"/>
 	</HEAD>
@@ -31,8 +31,8 @@
 		<script type=text/javascript>
 			data = [
 			    {
-			        image: "bizhub_logo4.gif", 
-			        name: "BizHub Logo"
+			        image: "WILDCAT_soft.png", 
+			        name: "WILDCAT Logo"
 			    }
 			];
 			imageURLPrefix = '../../../images/';

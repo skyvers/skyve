@@ -11,8 +11,13 @@
 	<bizKey expression="{userName} - {contact.bizKey}"/>
 	<attributes>
 		<text name="userName" required="true">
+			<documentation>
+				<![CDATA[
+					Length is derived from the maximum email address length from RFC 5321
+				]]>
+			</documentation>
 			<displayName>User Name</displayName>
-			<length>50</length>
+			<length>254</length>
 		</text>
 		<text name="password" >
 			<displayName>Password</displayName>

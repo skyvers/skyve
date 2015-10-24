@@ -146,6 +146,7 @@ BizListGrid.addProperties({
 	showZoom: true,
 	showEdit: true,
 	showRemove: true,
+	showDeselect: true,
 	showExport: true,
 	showFilter: true,
 	showSummary: true,
@@ -498,7 +499,9 @@ BizListGrid.addMethods({
 		if (contextMenuData.length > 0) {
 			contextMenuData.add({isSeparator: true});
 		}
-		contextMenuData.add(this.clearSelectionItem);
+		if (me.showDeselect) {
+			contextMenuData.add(this.clearSelectionItem);
+		}
 		if (me.showFilter) {
 			contextMenuData.add(clearFilterItem);
 		}
@@ -831,10 +834,12 @@ BizListGrid.addMethods({
 		if (toolStripMembers.length > 0) {
 			toolStripMembers.add("separator");
 		}
-		toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
-														false,
-														"<b>Deselect</b> all.",
-														me.clearSelectionItem.click));
+		if (me.showDeselect) {
+			toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
+															false,
+															"<b>Deselect</b> all.",
+															me.clearSelectionItem.click));
+		}
 		if (me.showFilter) {
 			toolStripMembers.add(BizUtil.createImageButton(clearFilterItem.icon,
 															false,
@@ -1586,6 +1591,14 @@ BizDataGrid.addProperties({
 	_newButton: null,
 	_zoomButton: null,
 	_editButton: null,
+	
+	// Switches to turn off tool buttons / menu items
+	showAdd: true,
+	showZoom: true,
+	showEdit: true,
+	showRemove: true,
+	showDeselect: true,
+
 	_mod: null, // module name
 	_doc: null, // document name
 	_b: null, // binding
@@ -1654,20 +1667,28 @@ BizDataGrid.addMethods({
 		me._editButton.setDisabled(true);
 
 		// the context menu of the BizDataGrid
-		var contextMenu = (config.editable) ? 
-							isc.Menu.create({
-							    showShadow: true,
-							    shadowDepth: 10,
-							    data: [
-									newItem,
-									zoomItem,
-									editItem,
-									this.deleteSelectionItem,
-							        {isSeparator: true},
-									this.clearSelectionItem
-							    ]
-							}) :
-							isc.Menu.create({data: []});
+		var contextMenuData = [];
+		if (config.editable) {
+			if (config.showAdd) {
+				contextMenuData.add(newItem);
+			}
+			if (config.showZoom) {
+				contextMenuData.add(zoomItem);
+			}
+			if (config.showEdit) {
+				contextMenuData.add(editItem);
+			}
+			if (config.showRemove) {
+				contextMenuData.add(this.deleteSelectionItem);
+			}
+			if (config.showDeselect) {
+				if (contextMenuData.length > 0) {
+					contextMenuData.add({isSeparator: true});
+				}
+				contextMenuData.add(this.clearSelectionItem);
+			}
+		}
+		var contextMenu = isc.Menu.create({showShadow: true, shadowDepth: 10, data: contextMenuData});
 		
 		me.grid = isc.ListGrid.create({
 			height: "*",
@@ -1822,22 +1843,36 @@ BizDataGrid.addMethods({
 		}
 		
 		if (config.editable) {
-			me.addMember(isc.ToolStrip.create({
-				membersMargin: 2,
-				layoutMargin: 2,
-			    width: '100%',
-				members: [
-				    me._newButton,
-				    me._zoomButton,
-					me._editButton,
-					me.deleteSelectionButton,
-					"separator",
-					BizUtil.createImageButton(me.clearSelectionItem.icon, 
-												false,
-												"<b>Deselect</b> all.",
-												me.clearSelectionItem.click)
-				]
-			}));
+			var toolStripMembers = [];
+			if (config.showAdd) {
+				toolStripMembers.add(me._newButton);
+			}
+			if (config.showZoom) {
+				toolStripMembers.add(me._zoomButton);
+			}
+			if (config.showEdit) {
+				toolStripMembers.add(me._editButton);
+			}
+			if (config.showRemove) {
+				toolStripMembers.add(me.deleteSelectionButton);
+			}
+			if (config.showDeselect) {
+				if (toolStripMembers.length > 0) {
+					toolStripMembers.add("separator");
+				}
+				toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																false,
+																"<b>Deselect</b> all.",
+																me.clearSelectionItem.click));
+			}
+			if (toolStripMembers.length > 0) {
+				me.addMember(isc.ToolStrip.create({
+					membersMargin: 2,
+					layoutMargin: 2,
+				    width: '100%',
+					members: toolStripMembers
+				}));
+			}
 		}
 		me.addMember(me.grid);
 	},

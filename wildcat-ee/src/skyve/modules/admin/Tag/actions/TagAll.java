@@ -20,7 +20,7 @@ public class TagAll implements ServerSideAction<Tag> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Update the payment batch details.
+	 * Tag all records
 	 */
 	@Override
 	public ServerSideActionResult execute(Tag bean, WebContext webContext)

@@ -69,7 +69,7 @@ isc.RPCManager.addClassMethods({
 	            fields : fields
 	        });
 	        this.loginWindow = isc.LoginWindow.create({
-				headerIconDefaults: {src: "../images/window/BizHub16.png", width: 16, height: 16},
+				headerIconDefaults: {src: "../images/window/WILDCAT_fav.png", width: 16, height: 16},
 	            title: "Session expired - please log in",
 	            autoCenter: true,
 	            autoSize: true,
