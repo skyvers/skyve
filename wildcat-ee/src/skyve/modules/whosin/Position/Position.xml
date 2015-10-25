@@ -9,8 +9,8 @@
 	<persistent name="WHO_Position" />
 	<singularAlias>Position</singularAlias>
 	<pluralAlias>Organisational Structure</pluralAlias>
-	<icon16x16RelativeFilePath>icons/document/office16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/office32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/hierarchy16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/hierarchy32.png</icon32x32RelativeFilePath>
 	<parentDocument>Position</parentDocument>
 	<bizKey expression="{positionTitle} ({staff.contact.name})"/>
 	<attributes>
