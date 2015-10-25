@@ -1669,19 +1669,19 @@ BizDataGrid.addMethods({
 		// the context menu of the BizDataGrid
 		var contextMenuData = [];
 		if (config.editable) {
-			if (config.showAdd) {
+			if (me.showAdd) {
 				contextMenuData.add(newItem);
 			}
-			if (config.showZoom) {
+			if (me.showZoom) {
 				contextMenuData.add(zoomItem);
 			}
-			if (config.showEdit) {
+			if (me.showEdit) {
 				contextMenuData.add(editItem);
 			}
-			if (config.showRemove) {
+			if (me.showRemove) {
 				contextMenuData.add(this.deleteSelectionItem);
 			}
-			if (config.showDeselect) {
+			if (me.showDeselect) {
 				if (contextMenuData.length > 0) {
 					contextMenuData.add({isSeparator: true});
 				}
@@ -1757,12 +1757,12 @@ BizDataGrid.addMethods({
 						me._eventColNum = colNum;
 						this.selectSingleRecord(record);
 						if (config.inline) {
-							if (me.canUpdate && me.canEdit && (! me._disabled)) {
+							if (me.canUpdate && me.canEdit && me.showEdit && (! me._disabled)) {
 								this.startEditing(rowNum, colNum, false);
 							}
 						}
 						else {
-							if (me.canZoom) {
+							if (me.canZoom && me.showZoom) {
 								me.zoom(false);
 							}
 						}
@@ -1844,19 +1844,19 @@ BizDataGrid.addMethods({
 		
 		if (config.editable) {
 			var toolStripMembers = [];
-			if (config.showAdd) {
+			if (me.showAdd) {
 				toolStripMembers.add(me._newButton);
 			}
-			if (config.showZoom) {
+			if (me.showZoom) {
 				toolStripMembers.add(me._zoomButton);
 			}
-			if (config.showEdit) {
+			if (me.showEdit) {
 				toolStripMembers.add(me._editButton);
 			}
-			if (config.showRemove) {
+			if (me.showRemove) {
 				toolStripMembers.add(me.deleteSelectionButton);
 			}
-			if (config.showDeselect) {
+			if (me.showDeselect) {
 				if (toolStripMembers.length > 0) {
 					toolStripMembers.add("separator");
 				}
