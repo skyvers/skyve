@@ -30,7 +30,7 @@
 <body>
 	<table class="logo" align="center">
 		<tr height="150px">
-			<td><img src="images/WILDCAT.png" alt="Get Organized" /></td>
+			<td><img src="images/WILDCAT_rev.png" alt="Get Organized" /></td>
 		</tr>
 	</table>
 	<%

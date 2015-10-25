@@ -91,7 +91,7 @@
 		<table class="logo" align="center">
 			<tr height="128px">
 				<td>
-					<img src="images/WILDCAT.png" alt="WILDCAT" />
+					<img src="images/WILDCAT_rev.png" alt="WILDCAT" />
 				</td>
 			</tr>
 		</table>
