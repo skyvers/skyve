@@ -5,8 +5,8 @@
 				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>My Status</singularAlias>
 	<pluralAlias>My Statuses</pluralAlias>
-	<icon16x16RelativeFilePath>icons/document/status16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/status32.png</icon32x32RelativeFilePath>
+	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey>
 		<![CDATA[
 		  	return "My Status";

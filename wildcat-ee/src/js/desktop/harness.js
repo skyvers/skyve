@@ -409,6 +409,6 @@ var eventData = [
 				url = 'about:blank';
 			}
 		}
-		BizUtil.popupFrame(url, "Biz Hub Help", 1024, 768);
+		BizUtil.popupFrame(url, "WILDCAT Help", 1024, 768);
 	}
 });
