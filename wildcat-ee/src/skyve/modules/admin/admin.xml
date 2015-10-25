@@ -38,7 +38,7 @@
 	<roles>
 		<role name="BasicUser">
 			<description>
-				Enough privileges and permissions to login and operate BizHub with access to the admin module only.
+				Enough privileges and permissions to login and operate WILDCAT with access to the admin module only.
 			</description>
 			<privileges>
 				<document name="Audit" permission="_R__C">
@@ -52,7 +52,9 @@
 					<action name="UpdateMyDetails"/>
 				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU" />
+				<document name="Snapshot" permission="CRUDU" >
+					<action name="CopySnapshotToUser"/>
+				</document>
 				<document name="Tag" permission="CRUDU" >	
 					<action name="Clear"/>
 					<action name="TagAll"/>
@@ -99,8 +101,7 @@
 					<action name="UploadTagCriteria"/>
 					<action name="BulkDocumentAction"/>
 					<action name="PerformCombination"/>
-					<action name="PrepareExplanation"/>
-					<action name="CopyTagToUser"/>					
+					<action name="PrepareExplanation"/>				
 				</document>
 				<document name="Tagged" permission="CRUDU" />			
 			</privileges>
@@ -202,7 +203,9 @@
 					<action name="UpdateMyDetails"/>
 				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU" />
+				<document name="Snapshot" permission="CRUDU" >
+					<action name="CopySnapshotToUser"/>
+				</document>
 				<document name="Tag" permission="CRUDU" >	
 					<action name="Clear"/>
 					<action name="TagAll"/>

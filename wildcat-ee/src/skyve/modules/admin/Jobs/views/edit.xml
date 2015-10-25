@@ -20,7 +20,8 @@
 		</tab>
 	</tabPane>
 	<actions>
-		<action className="Refresh" displayName="Refresh" />
-		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" confirm="This will delete all completed jobs.  Are you sure?" />
+		<action className="Refresh" displayName="Refresh" relativeIconFileName="shared/icons/Globe.gif"/>
+		<action className="DeleteCompletedJobs" displayName="Delete Completed Jobs" confirm="This will delete all completed jobs.  Are you sure?"
+		relativeIconFileName="shared/icons/Clear.gif" />
 	</actions>
 </view>

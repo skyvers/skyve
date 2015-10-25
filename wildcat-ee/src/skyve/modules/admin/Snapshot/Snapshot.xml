@@ -23,8 +23,17 @@
 			<length>256</length>
 		</text>
 		<memo name="snapshot" required="true">
-			<displayName>Snapshot</displayName>
+			<displayName>Snapshot Code</displayName>
 			<index>none</index>
 		</memo>
+		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
+			<displayName>Copy to user</displayName>
+			<documentName>User</documentName>
+		</association>
+		<text name="copyToUserSnapshotName" persistent="false" trackChanges="false">
+			<displayName>Snapshot Name</displayName>
+			<length>256</length>
+		</text>
+		
 	</attributes>
 </document>

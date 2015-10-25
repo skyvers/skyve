@@ -128,5 +128,8 @@
 		<condition name="fileLoaded">
 			<![CDATA[getNumberLoaded().intValue()>0]]>
 		</condition>
+		<condition name="explanation">
+			<![CDATA[getCombinationExplanation()!=null]]>
+		</condition>
 	</conditions>
 </document>

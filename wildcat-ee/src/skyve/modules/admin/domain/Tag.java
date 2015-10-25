@@ -781,6 +781,15 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	@XmlTransient
+	public boolean isExplanation() {
+		return (getCombinationExplanation()!=null);
+	}
+
+	public boolean isNotExplanation() {
+		return (! isExplanation());
+	}
+
+	@XmlTransient
 	public boolean isFileLoaded() {
 		return (getNumberLoaded().intValue()>0);
 	}

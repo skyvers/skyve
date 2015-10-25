@@ -2,9 +2,9 @@
 <view title="Tag" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
-		<tab title="Details" >
+		<tab title="Details">
 			<vbox pixelHeight="1" pixelPadding="10" pixelMemberPadding="10">
-				<form border="true" >
+				<form border="true">
 					<column percentageWidth="20" />
 					<column />
 					<column />
@@ -20,25 +20,25 @@
 					</row>
 				</form>
 				<form border="true" borderTitle="Copy">
-					<column percentageWidth="20"/>
-					<column/>
-					<column/>
+					<column percentageWidth="20" />
+					<column />
+					<column />
 					<row>
 						<item>
-							<default binding="copyToUser"/>
+							<default binding="copyToUser" />
 						</item>
 					</row>
 					<row>
 						<item>
-							<default binding="copyToUserTagName"/>
+							<default binding="copyToUserTagName" />
 						</item>
 					</row>
 					<row>
 						<item>
-							<spacer/>
+							<spacer />
 						</item>
 						<item>
-							<button actionName="CopyTagToUser" pixelWidth="200"/>
+							<button actionName="CopyTagToUser" pixelWidth="200" />
 						</item>
 					</row>
 				</form>
@@ -55,14 +55,14 @@
 						<item label="Tag">
 							<textField binding="name" disabled="true" />
 						</item>
-						<item >
+						<item>
 							<blurb>
 								<![CDATA[<i>{currentTagCount} records.</i>]]>
 							</blurb>
 						</item>
 					</row>
 					<row>
-						<item >
+						<item>
 							<combo binding="combinationsOperator">
 								<onChangedHandlers>
 									<server action="PrepareExplanation" />
@@ -84,11 +84,12 @@
 							</blurb>
 						</item>
 					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-					</row>
+				</form>
+				<form invisible="notExplanation">
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
 					<row>
 						<item>
 							<spacer />
@@ -99,17 +100,18 @@
 							</blurb>
 						</item>
 					</row>
+				</form>
+				<form >
+					<column percentageWidth="20" />
+					<column />
+					<column />
+					<column />
 					<row>
 						<item>
 							<spacer />
 						</item>
-					</row>
-					<row>
 						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="PerformCombination" pixelWidth="200"/>
+							<button actionName="PerformCombination" pixelWidth="200" />
 						</item>
 					</row>
 				</form>
@@ -273,15 +275,13 @@
 			relativeIconFileName="shared/icons/Job.gif" />
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
-		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false"
-			relativeIconFileName="shared/icons/Search.gif" 
+		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
 			clientValidation="false" />
 		<action className="PerformCombination" displayName="Perform Combination" inActionPanel="false"
 			clientValidation="false" toolTip="Perform the selected combination operation." confirm="Ok to perform the combination?"
 			relativeIconFileName="shared/icons/Job.gif" />
-		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false"
-			clientValidation="false" toolTip="Create a copy of this tag for another user." confirm="Ok to copy?"
-			relativeIconFileName="shared/icons/Job.gif" />
+		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
+			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" />
 	</actions>
 </view>
 

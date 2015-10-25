@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view type="edit" title="Snapshot" icon32x32RelativeFileName="icons/document/snapshot32.png" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" pixelPadding="10" pixelHeight="1">
-		<form>
+	<vbox pixelPadding="10" pixelMemberPadding="10" pixelHeight="1">
+		<form border="true" >
 			<column percentageWidth="10" />
 			<column />
 			<column />
@@ -23,13 +23,40 @@
 			</row>
 			<row>
 				<item colspan="2">
-					<textArea binding="snapshot" pixelHeight="400" pixelWidth="800"/>
+					<textArea binding="snapshot" pixelHeight="400" pixelWidth="800" />
 				</item>
 			</row>
 		</form>
+		<form border="true" borderTitle="Copy">
+			<column percentageWidth="20" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<default binding="copyToUser" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="copyToUserSnapshotName" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<button actionName="CopySnapshotToUser" pixelWidth="200" />
+				</item>
+			</row>
+		</form>
+
 	</vbox>
 	<actions>
 		<defaults />
+		<action className="CopySnapshotToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
+			toolTip="Create a copy of this snapshot for another user." confirm="Ok to copy?" 
+			relativeIconFileName="shared/icons/Job.gif" />
 	</actions>
 	<newParameters />
 </view>
