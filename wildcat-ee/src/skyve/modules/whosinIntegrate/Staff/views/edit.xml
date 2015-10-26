@@ -1,72 +1,83 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Staff" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form>
-		<column percentageWidth="20" />
-		<column />
-		<column />
-		<row>
-			<item>
-				<textField binding="contact.name" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<textField binding="contact.mobile" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<textField binding="contact.email1" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" disabled="notCanChange" />
-			</item>
-		</row>
+	<vbox pixelPadding="10" pixelMemberPadding="10" pixelHeight="1">
+		<hbox pixelPadding="10" border="true" borderTitle="Details">
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<textField binding="contact.name" disabled="notCanChange" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="contact.mobile" disabled="notCanChange" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="contact.email1" disabled="notCanChange" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="staffCode" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="dateOfBirth" disabled="notCanChange" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="roleTitle" disabled="notManager" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription descriptionBinding="bizKey" binding="baseOffice" disabled="notCanChange" />
+					</item>
+				</row>
+			</form>
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200" />
+					</item>
+				</row>
 
-		<row>
-			<item>
-				<textField binding="staffCode" disabled="notManager" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<textField binding="dateOfBirth" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<textField binding="roleTitle" disabled="notManager" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<lookupDescription descriptionBinding="bizKey" binding="baseOffice" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<geometry binding="location" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<combo binding="status" disabled="notCanChange" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<textField binding="dueBack" disabled="notCanChange" />
-			</item>
-		</row>
-	</form>
+			</form>
+		</hbox>
+		<form border="true" borderTitle="Status" percentageWidth="50">
+			<column percentageWidth="20" />
+			<column />
+			<row>
+				<item>
+					<geometry binding="location" disabled="notCanChange" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<combo binding="status" disabled="notCanChange" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<textField binding="dueBack" disabled="notCanChange" />
+				</item>
+			</row>
+		</form>
+	</vbox>
 	<actions>
-		<ok invisible="notCanChange"/>
-		<save invisible="notCanChange"/>
-		<cancel/>
-		<delete invisible="notManager"/>
+		<ok invisible="notCanChange" />
+		<save invisible="notCanChange" />
+		<cancel />
+		<delete invisible="notManager" />
 	</actions>
 	<newParameters />
 </view>
