@@ -80,4 +80,13 @@ public class MyStatus extends AbstractTransientBean {
 	public boolean isNotExists() {
 		return (! isExists());
 	}
+
+	@XmlTransient
+	public boolean isStaffMember() {
+		return (isUserInRole("whosinIntegrate","StaffMember"));
+	}
+
+	public boolean isNotStaffMember() {
+		return (! isStaffMember());
+	}
 }

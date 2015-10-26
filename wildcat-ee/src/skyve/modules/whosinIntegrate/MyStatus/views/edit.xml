@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Update My Status" 
-			type="edit" 
-			xmlns="http://www.skyve.org/xml/view"
-			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view title="Update My Status" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<vbox pixelPadding="10" pixelMemberPadding="10" pixelHeight="1" invisible="notExists">
 		<hbox pixelPadding="10" border="true" borderTitle="Details">
 			<form percentageWidth="50">
@@ -11,22 +8,22 @@
 				<column />
 				<row>
 					<item>
-						<textField binding="myStaff.contact.name" disabled="true"/>
+						<textField binding="myStaff.contact.name" disabled="true" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.contact.mobile" disabled="true"/>
+						<textField binding="myStaff.contact.mobile" disabled="true" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.contact.email1" disabled="true"/>
+						<textField binding="myStaff.contact.email1" disabled="true" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="myStaff.roleTitle" disabled="true"/>
+						<textField binding="myStaff.roleTitle" disabled="true" />
 					</item>
 				</row>
 			</form>
@@ -35,7 +32,7 @@
 				<column />
 				<row>
 					<item>
-						<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" editable="false"/>
+						<contentImage binding="myStaff.contact.image" pixelWidth="200" pixelHeight="200" editable="false" />
 					</item>
 				</row>
 
@@ -46,21 +43,21 @@
 			<column />
 			<row>
 				<item>
-					<default binding="myStaff.location" />
+					<geometry binding="myStaff.location" disabled="notStaffMember" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<default binding="myStaff.status" />
+					<combo binding="myStaff.status" disabled="notStaffMember" />
 				</item>
 			</row>
 			<row>
 				<item>
-					<default binding="myStaff.dueBack" />
+					<textField binding="myStaff.dueBack" disabled="notStaffMember" />
 				</item>
 			</row>
 		</form>
-	</vbox>	
+	</vbox>
 	<actions>
 		<action className="UpdateMyStatus" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif" />
 	</actions>

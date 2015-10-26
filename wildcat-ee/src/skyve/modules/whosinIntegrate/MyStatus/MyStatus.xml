@@ -22,5 +22,8 @@
 		<condition name="exists">
 			<![CDATA[getMyStaff()!=null]]>
 		</condition>
+		<condition name="staffMember">
+			<![CDATA[isUserInRole("whosinIntegrate","StaffMember")]]>
+		</condition>
 	</conditions>
 </document>
