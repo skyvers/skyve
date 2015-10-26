@@ -200,7 +200,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			intersect.append(" select taggedBizId from ADM_Tagged where ");
 			intersect.append(" tag_id = :objectTagId");
 			intersect.append(" and bizCustomer=:objectBizCustomer").append(" ) ");
-			intersect.append(" and tag_id =subjectTagId");
+			intersect.append(" and tag_id =:subjectTagId");
 			intersect.append(" and bizCustomer=:subjectBizCustomer");
 
 			SQL sql = pers.newSQL(intersect.toString());
