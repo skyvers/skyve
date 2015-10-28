@@ -282,13 +282,13 @@
 			<role name="BasicUser" />
 		</list>
 		<list name="Audits" document="Audit">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>		
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<edit document="Display" name="System Dashboard">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>					
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</edit>
@@ -411,6 +411,21 @@
 				<column binding="documentName" />
 				<column binding="subject" />
 				<column binding="tag.name" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qTagCommunications" documentName="Communication">
+			<description>Communications</description>
+			<columns>
+				<column binding="description" sortOrder="ascending" />
+				<column binding="moduleName">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>admin</filterExpression>
+				</column>
+				<column binding="documentName" >
+					<filterOperator>equal</filterOperator>
+					<filterExpression>Tag</filterExpression>
+				</column>
+				<column binding="subject" />
 			</columns>
 		</documentQuery>
 	</queries>

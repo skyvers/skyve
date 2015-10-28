@@ -94,7 +94,7 @@
 			<length>2000</length>
 		</text>
 		<boolean name="system">
-			<displayName>System</displayName>
+			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
 		</boolean>
 	</attributes>

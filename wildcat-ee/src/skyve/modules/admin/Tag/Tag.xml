@@ -96,6 +96,7 @@
 		<association type="aggregation" name="communication">
 			<displayName>Communication</displayName>
 			<documentName>Communication</documentName>
+			<queryName>qTagCommunications</queryName>
 		</association>
 		<integer name="filterColumn" persistent="false" trackChanges="false">
 			<displayName>Column</displayName>

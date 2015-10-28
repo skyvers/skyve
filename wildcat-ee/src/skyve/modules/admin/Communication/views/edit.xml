@@ -118,7 +118,7 @@
 						</item>
 						<item colspan="3">
 							<blurb>	
-								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document.</i></font>]]>
+								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document, or the user who runs the communication.</i></font>]]>
 							</blurb>
 						</item>
 					</row>
@@ -133,7 +133,7 @@
 						</item>
 						<item colspan="3">
 							<blurb>	
-								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document.</i></font>]]>
+								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
 							</blurb>
 						</item>
 					</row>
