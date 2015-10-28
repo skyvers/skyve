@@ -31,7 +31,7 @@
 			<documentName>User</documentName>
 		</association>
 		<text name="copyToUserSnapshotName" persistent="false" trackChanges="false">
-			<displayName>Snapshot Name</displayName>
+			<displayName>Snapshot Name for Copy</displayName>
 			<length>256</length>
 		</text>
 		
