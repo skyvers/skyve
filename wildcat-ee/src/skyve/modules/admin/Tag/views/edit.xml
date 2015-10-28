@@ -246,6 +246,14 @@
 								</item>
 							</row>
 							<row>
+								<item>
+									<checkBox binding="notification" triState="false" />
+								</item>
+								<item colspan="3">
+									<default binding="communication" />
+								</item>
+							</row>
+							<row>
 								<item colspan="5">
 									<textArea binding="documentActionResults" />
 								</item>

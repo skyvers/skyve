@@ -109,7 +109,7 @@
 							<textField binding="sendFrom" invisible="notEmailType" />
 						</item>
 						<item>
-							<button actionName="SendNow" pixelWidth="200" />
+							<button actionName="TestSend" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
@@ -189,7 +189,7 @@
 			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?"/>
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?"/>
-		<action clientValidation="true" className="TestSend" displayName="Test Send" inActionPanel="false"
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?"/>
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>			

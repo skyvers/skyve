@@ -90,6 +90,13 @@
 		<boolean name="unTagSuccessful" persistent="false" trackChanges="false">
 			<displayName>Untag successful documents</displayName>
 		</boolean>
+		<boolean name="notification" persistent="false" trackChanges="false">
+			<displayName>Notify when job is complete</displayName>
+		</boolean>
+		<association type="aggregation" name="communication">
+			<displayName>Communication</displayName>
+			<documentName>Communication</documentName>
+		</association>
 		<integer name="filterColumn" persistent="false" trackChanges="false">
 			<displayName>Column</displayName>
 		</integer>

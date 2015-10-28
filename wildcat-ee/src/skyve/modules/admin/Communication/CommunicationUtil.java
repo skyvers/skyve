@@ -172,13 +172,14 @@ public class CommunicationUtil {
 		emailBody = Binder.formatMessage(customer, emailBody, beans);
 
 		try {
-
 			if (RunMode.ACTION.equals(runMode)) {
 				EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody, MimeType.html, null, null, null);
 			}
 		} catch (Exception e) {
 			if (ResponseMode.SILENT.equals(responseMode)) {
 				Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
+			} else {
+				throw e;
 			}
 		}
 	}

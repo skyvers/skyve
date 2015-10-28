@@ -123,6 +123,7 @@
 					<action name="GetCount" />
 					<action name="GetResults" />
 					<action name="SendNow" />
+					<action name="TestSend" />
 					<action name="UpdateModule" />
 					<action name="UpdateDocument" />
 				</document>
@@ -140,6 +141,7 @@
 					<action name="GetCount" />
 					<action name="GetResults" />
 					<action name="SendNow" />
+					<action name="TestSend" />
 					<action name="UpdateModule" />
 					<action name="UpdateDocument" />
 				</document>
