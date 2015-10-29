@@ -67,10 +67,10 @@
 			<displayName>Number of loaded values</displayName>
 		</integer>
 		<integer name="numberMatched" persistent="false" trackChanges="false">
-			<displayName>Number of matched</displayName>
+			<displayName>Number of matching records</displayName>
 		</integer>
 		<integer name="numberTagged" persistent="false" trackChanges="false">
-			<displayName>Number of tagged values</displayName>
+			<displayName>Number of tagged records</displayName>
 		</integer>
 		<enum name="filterOperator" persistent="false" trackChanges="false">
 			<displayName>Filter Operator</displayName>

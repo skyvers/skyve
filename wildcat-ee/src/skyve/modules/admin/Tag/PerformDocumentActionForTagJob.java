@@ -125,6 +125,7 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 					sb.append(" - Unsuccessful");
 					sb.append("\n").append(e.getMessage());
 				}
+				processed++;
 				setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
 
 				log.add(sb.toString());
