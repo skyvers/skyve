@@ -2035,8 +2035,13 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
-		for (InjectBinding binding : inject.getBindings()) {
-			addBinding(binding.getBinding(), Boolean.FALSE.equals(binding.getReadOnly()));
+		if (parentVisible) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				for (InjectBinding binding : inject.getBindings()) {
+					addBinding(binding.getBinding(), Boolean.FALSE.equals(binding.getReadOnly()));
+				}
+			}
 		}
 	}
 
