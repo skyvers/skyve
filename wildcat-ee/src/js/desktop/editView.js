@@ -1896,6 +1896,10 @@ BizComparison.addMethods({
 				// create an array if we are adding a second value to the same property
 				var existing = result[binding];
 				if (existing) {
+					// not an array yet, so make it one; this can happen for unstructured audits with no metadata
+					if (! isAn.Array(existing)) {
+						existing = [existing];
+					}
 					existing.add(childResult);
 				}
 				else {
