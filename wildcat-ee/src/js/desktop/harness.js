@@ -406,7 +406,7 @@ var eventData = [
 				url = 'http://www.bizhub.com.au/help/list.html';
 			}
 			else {
-				url = 'about:blank';
+				url = 'http://www.bizhub.com.au/help/list.html';
 			}
 		}
 		BizUtil.popupFrame(url, "Biz Hub Help", 1024, 768);
