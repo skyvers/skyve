@@ -63,7 +63,7 @@ public class ThemeCharter {
 	public ThemeCharter() {
 		this.themeColour = new Color(70, 130, 180);
 	}
-	
+
 	private static class SectionColouriser {
 		private int redDiff;
 		private int greenDiff;
@@ -77,9 +77,11 @@ public class ThemeCharter {
 
 		public SectionColouriser(Color baseColour, int columnCount) {
 			this.current = baseColour;
-			this.redDiff = (baseColour.getRed() / 2) / columnCount;
-			this.greenDiff = (baseColour.getGreen() / 2) / columnCount;
-			this.blueDiff = (baseColour.getBlue() / 2) / columnCount;
+			if (columnCount != 0) {
+				this.redDiff = (baseColour.getRed() / 2) / columnCount;
+				this.greenDiff = (baseColour.getGreen() / 2) / columnCount;
+				this.blueDiff = (baseColour.getBlue() / 2) / columnCount;
+			}
 		}
 
 		public void nextColour() {
