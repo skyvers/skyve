@@ -650,9 +650,13 @@ System.out.println(criterium);
 	    				if (attribute != null) {
 							if (attribute instanceof Enumeration) {
 								type = AbstractRepository.get().getEnum((Enumeration) attribute);
+								filterOperator = transformWildcardFilterOperator(filterOperator);
 							}
 							else {
 								type = attribute.getAttributeType().getImplementingType();
+							}
+							if (attribute.getDomainType() != null) {
+								filterOperator = transformWildcardFilterOperator(filterOperator);
 							}
 	    					if (attribute instanceof ConvertableField) {
 	    						ConvertableField field = (ConvertableField) attribute;
@@ -661,6 +665,7 @@ System.out.println(criterium);
 	    					else if (attribute instanceof Association) {
 	    						type = String.class;
 	    	    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+								filterOperator = transformWildcardFilterOperator(filterOperator);
 	    					}
 	    				}
 		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
@@ -699,6 +704,12 @@ System.out.println(criterium);
 		    		start = fromString(binding, "start", startString, customer, converter, type);
 	    			end = fromString(binding, "end", endString, customer, converter, type);
 
+	    			if ((value instanceof Date) || (value instanceof Number) || (value instanceof Boolean) ||
+	    					(start instanceof Date) || (start instanceof Number) || (start instanceof Boolean) ||
+	    					(end instanceof Date) || (end instanceof Number) || (end instanceof Boolean)) {
+						filterOperator = transformWildcardFilterOperator(filterOperator);
+	    			}
+					
 		    		switch (compoundFilterOperator) {
 		    		case and:
 		    			addCriteriumToFilter(binding, filterOperator, value, start, end, tagId, filter);
@@ -872,6 +883,28 @@ System.out.println(criterium);
 		return result;
     }
     
+    private static SmartClientFilterOperator transformWildcardFilterOperator(SmartClientFilterOperator filterOperator) {
+    	if (SmartClientFilterOperator.iContains.equals(filterOperator) ||
+    			SmartClientFilterOperator.iEndsWith.equals(filterOperator) ||
+    			SmartClientFilterOperator.iEquals.equals(filterOperator) ||
+    			SmartClientFilterOperator.iregexp.equals(filterOperator) ||
+    			SmartClientFilterOperator.iStartsWith.equals(filterOperator) ||
+    			SmartClientFilterOperator.regexp.equals(filterOperator) ||
+    			SmartClientFilterOperator.startsWith.equals(filterOperator) ||
+    			SmartClientFilterOperator.substring.equals(filterOperator)) {
+    		return SmartClientFilterOperator.equals;
+    	}
+    	
+    	if (SmartClientFilterOperator.iNotContains.equals(filterOperator) ||
+    			SmartClientFilterOperator.iNotEndsWith.equals(filterOperator) ||
+    			SmartClientFilterOperator.iNotEqual.equals(filterOperator) ||
+    			SmartClientFilterOperator.iNotStartsWith.equals(filterOperator)) {
+    		return SmartClientFilterOperator.notEqual;
+    	}
+    	
+    	return filterOperator;
+    }
+
     private static void addCriteriumToFilter(String binding,
     											SmartClientFilterOperator filterOperator, 
     											Object value,

@@ -150,15 +150,19 @@ public class ListGrid extends HtmlPanelGroup {
 			DataList list = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 			list.setVar("row");
 			list.setPaginator(paginator);
-			list.setRows(10);
+			if (paginator) {
+				list.setRows(10);
+			}
 			result = list;
 		}
 		else {
 			DataTable table = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 	        table.setVar("row");
 	        table.setPaginator(paginator);
-	        table.setRowsPerPageTemplate("25,50,75,100");
-	        table.setRows(100);
+	        if (paginator) {
+		        table.setRowsPerPageTemplate("25,50,75,100");
+		        table.setRows(100);
+	        }
 	        table.setLazy(true);
 	        table.setEmptyMessage("No Items to show");
 	        
