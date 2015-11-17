@@ -21,7 +21,7 @@ public class ActivityBreakdown implements DynamicImage<Display> {
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
 		ThemeCharter charter = new ThemeCharter();
 		charter.setSql(getActivityBreakdownSQL(user));
-		return charter.getBarChartImage("", "", null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT);
+		return charter.getBarChartImage("", "", null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT, false);
 	}
 
 	public static String getActivityBreakdownSQL(User user) throws MetaDataException {

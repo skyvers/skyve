@@ -1,12 +1,17 @@
 package modules.admin;
 
 import java.awt.BasicStroke;
+import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.List;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -90,7 +95,7 @@ public class ThemeCharter {
 
 	}
 
-	public BufferedImage getBarChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, ChartAspect aspect) throws Exception {
+	public BufferedImage getBarChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, ChartAspect aspect, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
@@ -147,7 +152,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(axisFont);
 			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
-			chart.getLegend().setVisible(false);
+			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
@@ -166,7 +171,7 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getLineChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
+	public BufferedImage getLineChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
@@ -211,7 +216,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(axisFont);
 			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
-			chart.getLegend().setVisible(false);
+			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
@@ -230,7 +235,7 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getAreaChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height) throws Exception {
+	public BufferedImage getAreaChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
 			connection = EXT.getPooledJDBCConnection();
@@ -275,7 +280,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(axisFont);
 			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
 
-			chart.getLegend().setVisible(false);
+			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
@@ -294,7 +299,7 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getPieChartImage(Integer labelColumn, int width, int height, ChartAspect aspect) throws Exception {
+	public BufferedImage getPieChartImage(Integer labelColumn, int width, int height, ChartAspect aspect, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
 
@@ -333,7 +338,9 @@ public class ThemeCharter {
 			plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
 			plot.setBaseSectionOutlineStroke(new BasicStroke(2F));
 
-			chart.removeLegend();
+			if (!showLegend) {
+				chart.removeLegend();
+			}
 
 			return chart.createBufferedImage(width, height);
 		} catch (Exception e) {
@@ -355,4 +362,110 @@ public class ThemeCharter {
 	private static String labelReference(Integer columnIndex) {
 		return "{" + columnIndex.toString() + "}";
 	}
+	
+	/**
+	 * A Fabulator is an ordered coloured list of string-bigint combinations, typically to represent comparative totals
+	 * 
+	 * List<Object[]> objects is the tupleResults() returned from SQL similar to
+	 * 	"select name, count(*) from a group by name"
+	 * 
+	 * @param width
+	 * @param height
+	 * @param objects
+	 * @param focusString
+	 * @return
+	 */
+	public BufferedImage drawFabulator(int width, int height, List<Object[]> objects, String focusString) {
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+		Graphics graphics = img.createGraphics();
+		Color backCol = new Color(255, 255, 255);
+		graphics.setColor(backCol);
+		graphics.fillRect(0, 0, width, height);
+
+		Font font = new Font("Arial", Font.BOLD, 12);
+		Canvas c = new Canvas();
+		FontMetrics fm = c.getFontMetrics(font);
+		graphics.setFont(font);
+
+		boolean focusFound = false;
+		if (focusString == null) {
+			focusFound = true;
+		}
+
+		int xPad = 5;
+		int yPad = 2;
+		int topNumber = height / (fm.getHeight() + (2 * yPad));
+		if (topNumber == 0) {
+			topNumber = 1;
+		}
+		int rows = 0;
+		if (!objects.isEmpty()) {
+			rows = objects.size();
+		}
+		if (rows < topNumber) {
+			topNumber = rows;
+		}
+		if (topNumber == 0) {
+			topNumber = 1;
+		}
+
+
+		SectionColouriser colouriser = new SectionColouriser(this.themeColour, rows);
+		int counter = 0;
+
+		for (Object[] o : objects) {
+
+			// put in the string
+			Object[] values = o;
+			String label = (String) values[0];
+			BigInteger val = (BigInteger) values[1];
+
+			if (label.equals(focusString)) {
+				focusFound = true;
+			}
+
+			// draw thing if this is the focus, or the focus has been previously
+			// found
+			// , or there is still space for the focus
+			if (label.equals(focusString) || focusFound || (!focusFound && counter < topNumber - 1)) {
+				// create each object as a concatenated string drawn on top of a
+				// colour bar
+				// set random colour
+				Color barCol = colouriser.getCurrent();
+				if (label.equals(focusString)) {
+					barCol = new Color(0, 0, 0);
+				}
+				graphics.setColor(barCol);
+				int x = xPad;
+				int y = (fm.getHeight() + (yPad * 2)) * counter;
+				graphics.fillRect(0, y, width, fm.getHeight() + (yPad * 2));
+
+				StringBuilder sb = new StringBuilder();
+				if (val == null) {
+					sb.append(" ").append(0);
+				} else {
+					sb.append(val.toString());
+				}
+				sb.append(" (").append(label).append(")");
+
+				graphics.setColor(new Color(255, 255, 255));
+				if (label.equals(focusString)) {
+					graphics.setColor(new Color(255, 255, 255));
+				}
+				graphics.drawString(sb.toString(), x, y + fm.getHeight() - yPad);
+
+				// inc colour
+				colouriser.nextColour();
+				counter++;
+			}
+
+			if (counter > topNumber - 1) {
+				break;
+			}
+		}
+
+		return img;
+	}
+
 }

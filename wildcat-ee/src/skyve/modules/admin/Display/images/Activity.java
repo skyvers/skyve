@@ -23,7 +23,7 @@ public class Activity implements DynamicImage<Display> {
 	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
 		ThemeCharter charter = new ThemeCharter();
 		charter.setSql(getActivityHistorySQL(null, user));
-		return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height);
+		return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height, false);
 	}
 
 	public static String getActivityHistorySQL(modules.admin.domain.User adminUser, User user) throws Exception {

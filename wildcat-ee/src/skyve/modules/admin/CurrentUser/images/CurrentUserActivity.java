@@ -25,7 +25,7 @@ public class CurrentUserActivity implements DynamicImage<CurrentUser> {
 		if (bean != null && bean.getCurrentUser() != null) {
 			ThemeCharter charter = new ThemeCharter();
 			charter.setSql(Activity.getActivityHistorySQL(bean.getCurrentUser(), user));
-			return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height);
+			return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height, false);
 		}
 		return null;
 	}
