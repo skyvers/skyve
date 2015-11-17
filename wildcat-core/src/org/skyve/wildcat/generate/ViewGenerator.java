@@ -57,7 +57,9 @@ import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 public class ViewGenerator {
-	private static final Integer TWENTY = new Integer(20);
+	private static final Integer THIRTY_FIVE = new Integer(35);
+	private static final Integer SIXTY = new Integer(60);
+	
 	
 	private ViewGenerator() {
 		// do nothing
@@ -223,10 +225,11 @@ public class ViewGenerator {
 		}
 
 		Form form = new Form();
+		form.setBorder(Boolean.TRUE);
+		form.setPercentageWidth(SIXTY);
 		FormColumn column = new FormColumn();
-		column.setPercentageWidth(TWENTY);
+		column.setPercentageWidth(THIRTY_FIVE);
 		form.getColumns().add(column);
-		form.getColumns().add(new FormColumn());
 		form.getColumns().add(new FormColumn());
 		
 		List<MetaData> details = new ArrayList<>();
