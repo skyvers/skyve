@@ -33,11 +33,20 @@ import org.skyve.EXT;
 
 public class ThemeCharter {
 
-	private static final DecimalFormat themeNumericFormat = new DecimalFormat("#,##0");
 	private static final String EMPTY_STRING = "";
-	private static final String themeFont = "Arial";
+	private static final DecimalFormat THEME_NUMERIC_FORMAT = new DecimalFormat("#,##0");
+	private static final String THEME_FONT_NAME = "Arial";
+	private static final int THEME_NORMAL_FONT_SIZE = 12;
+	private static final int THEME_HEADER_FONT_SIZE = 14;
+	private static final Font THEME_TITLE_FONT = new Font(THEME_FONT_NAME, Font.BOLD, THEME_NORMAL_FONT_SIZE);
+	private static final Font THEME_RANGE_FONT = new Font(THEME_FONT_NAME, Font.PLAIN, THEME_HEADER_FONT_SIZE);
+	private static final Font THEME_DOMAIN_FONT = new Font(THEME_FONT_NAME, Font.PLAIN, THEME_NORMAL_FONT_SIZE);
+	
 	private static final String NO_DATA_AVAILABLE = "No data available";
-
+	private static final Color WHITE = new Color(255, 255, 255);
+	private static final Color BLACK = new Color(0, 0, 0);
+	
+	
 	private String sql;
 	private Color themeColour;
 
@@ -132,7 +141,7 @@ public class ThemeCharter {
 			// set series renderers
 			CategoryItemLabelGenerator generator = null;
 			if (labelColumn != null) {
-				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), THEME_NUMERIC_FORMAT);
 			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				if (labelColumn != null) {
@@ -146,11 +155,10 @@ public class ThemeCharter {
 			renderer.setItemLabelAnchorOffset(0);
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font(themeFont, Font.BOLD, 12));
+			title.setFont(THEME_TITLE_FONT);
 
-			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
-			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
+			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
+			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
 			chart.getLegend().setVisible(showLegend);
 
@@ -196,7 +204,7 @@ public class ThemeCharter {
 
 			CategoryItemLabelGenerator generator = null;
 			if (labelColumn != null) {
-				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), THEME_NUMERIC_FORMAT);
 			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				if (labelColumn != null) {
@@ -210,11 +218,10 @@ public class ThemeCharter {
 			renderer.setItemLabelAnchorOffset(0);
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font(themeFont, Font.BOLD, 12));
+			title.setFont(THEME_TITLE_FONT);
 
-			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
-			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
+			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
+			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
 			chart.getLegend().setVisible(showLegend);
 
@@ -260,7 +267,7 @@ public class ThemeCharter {
 
 			CategoryItemLabelGenerator generator = null;
 			if (labelColumn != null) {
-				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), themeNumericFormat);
+				generator = new StandardCategoryItemLabelGenerator(labelReference(labelColumn), THEME_NUMERIC_FORMAT);
 			}
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getColumnCount(); seriesIndex++) {
 				if (labelColumn != null) {
@@ -274,11 +281,10 @@ public class ThemeCharter {
 			renderer.setItemLabelAnchorOffset(0);
 
 			TextTitle title = chart.getTitle();
-			title.setFont(new Font(themeFont, Font.BOLD, 12));
+			title.setFont(THEME_TITLE_FONT);
 
-			Font axisFont = new Font(themeFont, Font.PLAIN, 12);
-			plot.getDomainAxis().setLabelFont(axisFont);
-			plot.getRangeAxis().setLabelFont(new Font(themeFont, Font.PLAIN, 14));
+			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
+			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
 			chart.getLegend().setVisible(showLegend);
 
@@ -375,15 +381,15 @@ public class ThemeCharter {
 	 * @param focusString
 	 * @return
 	 */
-	public BufferedImage drawFabulator(int width, int height, List<Object[]> objects, String focusString) {
+	public BufferedImage getFabulator(int width, int height, List<Object[]> objects, String focusString) {
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
 		Graphics graphics = img.createGraphics();
-		Color backCol = new Color(255, 255, 255);
+		Color backCol = WHITE;
 		graphics.setColor(backCol);
 		graphics.fillRect(0, 0, width, height);
 
-		Font font = new Font("Arial", Font.BOLD, 12);
+		Font font = THEME_TITLE_FONT;
 		Canvas c = new Canvas();
 		FontMetrics fm = c.getFontMetrics(font);
 		graphics.setFont(font);
@@ -410,7 +416,6 @@ public class ThemeCharter {
 			topNumber = 1;
 		}
 
-
 		SectionColouriser colouriser = new SectionColouriser(this.themeColour, rows);
 		int counter = 0;
 
@@ -426,15 +431,13 @@ public class ThemeCharter {
 			}
 
 			// draw thing if this is the focus, or the focus has been previously
-			// found
-			// , or there is still space for the focus
+			// found, or there is still space for the focus
 			if (label.equals(focusString) || focusFound || (!focusFound && counter < topNumber - 1)) {
 				// create each object as a concatenated string drawn on top of a
 				// colour bar
-				// set random colour
 				Color barCol = colouriser.getCurrent();
 				if (label.equals(focusString)) {
-					barCol = new Color(0, 0, 0);
+					barCol = BLACK;
 				}
 				graphics.setColor(barCol);
 				int x = xPad;
@@ -449,9 +452,9 @@ public class ThemeCharter {
 				}
 				sb.append(" (").append(label).append(")");
 
-				graphics.setColor(new Color(255, 255, 255));
+				graphics.setColor(WHITE);
 				if (label.equals(focusString)) {
-					graphics.setColor(new Color(255, 255, 255));
+					graphics.setColor(WHITE);
 				}
 				graphics.drawString(sb.toString(), x, y + fm.getHeight() - yPad);
 
