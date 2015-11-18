@@ -40,6 +40,7 @@ import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.WidgetReference;
 import org.skyve.wildcat.metadata.view.container.Tab;
 import org.skyve.wildcat.metadata.view.container.TabPane;
+import org.skyve.wildcat.metadata.view.container.VBox;
 import org.skyve.wildcat.metadata.view.container.form.Form;
 import org.skyve.wildcat.metadata.view.container.form.FormColumn;
 import org.skyve.wildcat.metadata.view.container.form.FormItem;
@@ -57,7 +58,9 @@ import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 public class ViewGenerator {
-	private static final Integer THIRTY_FIVE = new Integer(35);
+	private static final Integer ONE = new Integer(1);
+	private static final Integer TEN = new Integer(10);
+	private static final Integer THIRTY = new Integer(30);
 	private static final Integer SIXTY = new Integer(60);
 	
 	
@@ -224,17 +227,24 @@ public class ViewGenerator {
 			result.putAction(action);
 		}
 
+		VBox vbox = new VBox();
+		vbox.setBorder(Boolean.TRUE);
+		vbox.setPercentageWidth(SIXTY);
+		vbox.setPixelPadding(TEN);
+		vbox.setPixelMemberPadding(TEN);
+		vbox.setPixelHeight(ONE);
+		
 		Form form = new Form();
-		form.setBorder(Boolean.TRUE);
-		form.setPercentageWidth(SIXTY);
 		FormColumn column = new FormColumn();
-		column.setPercentageWidth(THIRTY_FIVE);
+		column.setPercentageWidth(THIRTY);
 		form.getColumns().add(column);
 		form.getColumns().add(new FormColumn());
 		
 		List<MetaData> details = new ArrayList<>();
 
 		processAttributes(customer, module, document, form, details);
+		
+		vbox.getContained().add(form);
 
 		// make a tabbed view if more than 1 detail widget or there is 1 detail widget and more than 5 form fields
 		int numberOfDetailWidgets = details.size();
@@ -245,7 +255,7 @@ public class ViewGenerator {
 			if (! form.getRows().isEmpty()) {
 				tab = new Tab();
 				tab.setTitle("General");
-				tab.getContained().add(form);
+				tab.getContained().add(vbox);
 				tabPane.getTabs().add(tab);
 			}
 			
