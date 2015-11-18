@@ -1217,6 +1217,8 @@ BizContentImageItem.addMethods({
 							"content?_n=" + newValue +
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +
+							"&_w=" + this._img.getWidth() + 
+							"&_h=" + this._img.getHeight() + 
 							"&_ctim=" + new Date().getTime();
 				this._img.setSrc(url);
 			}
