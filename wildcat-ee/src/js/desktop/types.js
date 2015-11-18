@@ -1186,17 +1186,24 @@ BizContentImageItem.addProperties({
 BizContentImageItem.addMethods({
 	init: function(config) {
 		this._img = Img.create({
-			width: config.width,
-			height: config.height,
+			width: (config.width ? config.width : '100%'),
+			height: (config.height ? config.height : '100%'),
+			imageType: 'center',
 			showEdges: true,
 			showDisabled: false,
 		    src: "[SKIN]blank.gif"
 		});
 
 		if (config.editable) {
+			var centredUploadButton = isc.HLayout.create({
+				width: 1, // make minimum width of button
+				height: (config.height ? config.height : '100%'),
+				defaultLayoutAlign: 'center', 
+				members: [BizUtil.createUploadButton(this)]
+			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._img, LayoutSpacer.create({width:3}), BizUtil.createUploadButton(this)]
+				members: [this._img, LayoutSpacer.create({width:5}), centredUploadButton]
 			});
 		}
 		else {
@@ -1217,8 +1224,8 @@ BizContentImageItem.addMethods({
 							"content?_n=" + newValue +
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +
-							"&_w=" + this._img.getWidth() + 
-							"&_h=" + this._img.getHeight() + 
+							"&_w=" + (this._img.getWidth() - 20) + // -20 for the border
+							"&_h=" + (this._img.getHeight() - 20) + // -20 for the border
 							"&_ctim=" + new Date().getTime();
 				this._img.setSrc(url);
 			}

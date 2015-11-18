@@ -5,13 +5,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Editable;
-import org.skyve.wildcat.metadata.view.AbsoluteSize;
+import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight"})
-public class ContentImage extends InputWidget implements Editable, AbsoluteSize {
+			propOrder = {"pixelWidth", 
+							"percentageWidth",
+							"pixelHeight", 
+							"percentageHeight",
+							"editable"})
+public class ContentImage extends InputWidget implements Editable, RelativeSize {
 	/**
 	 * For Serialization
 	 */
@@ -19,7 +23,9 @@ public class ContentImage extends InputWidget implements Editable, AbsoluteSize 
 
 	private Boolean editable;
 	private Integer pixelWidth;
+	private Integer percentageWidth;
 	private Integer pixelHeight;
+	private Integer percentageHeight;
 	
 	@Override
 	public Boolean getEditable() {
@@ -44,6 +50,17 @@ public class ContentImage extends InputWidget implements Editable, AbsoluteSize 
 	}
 
 	@Override
+	public Integer getPercentageWidth() {
+		return percentageWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setPercentageWidth(Integer percentageWidth) {
+		this.percentageWidth = percentageWidth;
+	}
+
+	@Override
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
@@ -52,5 +69,16 @@ public class ContentImage extends InputWidget implements Editable, AbsoluteSize 
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
+	}
+
+	@Override
+	public Integer getPercentageHeight() {
+		return percentageHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setPercentageHeight(Integer percentageHeight) {
+		this.percentageHeight = percentageHeight;
 	}
 }
