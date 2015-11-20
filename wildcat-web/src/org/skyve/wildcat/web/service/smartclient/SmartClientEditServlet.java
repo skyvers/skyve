@@ -359,7 +359,7 @@ public class SmartClientEditServlet extends HttpServlet {
                     pw.append("startRow:0,endRow:0,totalRows:0,");
                 }
                 pw.append("data:\"");
-                appendErrorText("Please address the following errors.", ms, pw);
+                appendErrorText("The action you requested cannot be performed because: ", ms, pw);
                 pw.append('"');
 	    	}
     	}
