@@ -176,7 +176,7 @@ public class InMemoryFilter implements Filter {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Enum<?> value, Enum<?> start, Enum<?> end) throws Exception {
-				return (value.equals(Binder.convert(Enum.class, Binder.get(bean, binding))));
+				return (value.equals(Binder.convert(value.getClass(), Binder.get(bean, binding))));
 			}
 		});
 	}
@@ -264,7 +264,7 @@ public class InMemoryFilter implements Filter {
 			@Override
 			@SuppressWarnings("hiding")
 			boolean evaluate(Object bean, String binding, Enum<?> value, Enum<?> start, Enum<?> end) throws Exception {
-				return (! value.equals(Binder.convert(Enum.class, Binder.get(bean, binding))));
+				return (! value.equals(Binder.convert(value.getClass(), Binder.get(bean, binding))));
 			}
 		});
 	}
