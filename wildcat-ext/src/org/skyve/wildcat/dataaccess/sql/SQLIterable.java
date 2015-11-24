@@ -8,7 +8,6 @@ import java.sql.Types;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.hibernatespatial.AbstractDBGeometryType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Decimal10;
@@ -101,7 +100,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 					}
 					else {
 						// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
-						ps.setObject(name, ((AbstractDBGeometryType) dataAccess.getGeometryUserType()).conv2DBGeometry((Geometry) value, dataAccess.getConnection()));
+						ps.setBytes(name, (byte[]) dataAccess.getGeometryUserType().conv2DBGeometry((Geometry) value, dataAccess.getConnection()));
 					}
 				}
 				else if (AttributeType.integer.equals(type)) {

@@ -68,6 +68,8 @@ import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.tool.hbm2ddl.TableMetadata;
 import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
+import org.hibernatespatial.AbstractDBGeometryType;
+import org.hibernatespatial.SpatialDialect;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -128,8 +130,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
 	private static final String DIALECT_PACKAGE = "org.hibernate.dialect.";
-
 	private static EntityManagerFactory emf = null;
+	private static AbstractDBGeometryType geometryUserType = null;
 
 	static {
 		try {
@@ -298,6 +300,15 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
+	static AbstractDBGeometryType getGeometryUserType() throws Exception {
+		if (geometryUserType == null) {
+			SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+			geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
+		}
+		
+		return geometryUserType;
+	}
+	
 	@SuppressWarnings("resource")
 	private static String[] generateExtraSchemaUpdates(Configuration cfg, boolean doUpdate)
 	throws SQLException, NamingException, ClassNotFoundException {

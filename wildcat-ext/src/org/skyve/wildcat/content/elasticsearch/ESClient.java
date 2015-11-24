@@ -43,6 +43,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.BeanContent;
+import org.skyve.wildcat.content.ContentIterable;
 import org.skyve.wildcat.content.SearchResult;
 import org.skyve.wildcat.content.SearchResults;
 import org.skyve.wildcat.metadata.user.SuperUser;
@@ -466,7 +467,7 @@ public class ESClient extends AbstractContentManager {
 	}
 	
 	@Override
-	public Iterable<SearchResult> all() throws Exception {
+	public ContentIterable all() throws Exception {
 		return new ESIterable(client);
 	}
 

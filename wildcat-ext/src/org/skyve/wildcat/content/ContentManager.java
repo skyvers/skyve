@@ -8,5 +8,5 @@ public interface ContentManager extends AutoCloseable {
 	public void remove(String contentId) throws Exception;
 	public SearchResults google(String search, int maxResults) throws Exception;
 	public void truncate(String customerName) throws Exception;
-	public Iterable<SearchResult> all() throws Exception;
+	public ContentIterable all() throws Exception;
 }

@@ -16,7 +16,7 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/SuperCSV-1.52.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate-annotations.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar" sourcepath="/Users/mike/.m2/repository/com/vividsolutions/jts/1.13/jts-1.13-sources.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/javassist-3.12.0.GA.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jasperreports-javaflow-4.7.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/uadetector-core-0.9.14.jar"/>
