@@ -8,6 +8,8 @@ import java.util.List;
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernatespatial.AbstractDBGeometryType;
+import org.hibernatespatial.SpatialDialect;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -20,9 +22,13 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.persistence.AbstractSQL;
+import org.skyve.wildcat.util.UtilImpl;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
+	private AbstractDBGeometryType geometryUserType = null; // this is only created when we come across a geometry
 	
 	HibernateSQL(String moduleName,
 					String documentName,
@@ -138,15 +144,15 @@ class HibernateSQL extends AbstractSQL {
 	public int execute()
 	throws DomainException {
 		try {
-		SQLQuery query = createQueryFromSQL();
-		return query.executeUpdate();
+			SQLQuery query = createQueryFromSQL();
+			return query.executeUpdate();
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
 	}
 	
-	private SQLQuery createQueryFromSQL() {
+	private SQLQuery createQueryFromSQL() throws Exception {
 		Session session = persistence.getSession();
 		SQLQuery result = session.createSQLQuery(toQueryString());
 
@@ -206,8 +212,12 @@ class HibernateSQL extends AbstractSQL {
 				result.setBigDecimal(name, (BigDecimal) value);
 			}
 			else if (AttributeType.geometry.equals(type)) {
-				// The SpatialDialect.getGeomertyUseType() subclasses all give values of JDBC Types.ARRAY
-				result.setParameter(name, value, Hibernate.CHAR_ARRAY);
+				if (geometryUserType == null) {
+					SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+					geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
+				}
+				// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
+				result.setParameter(name, geometryUserType.conv2DBGeometry((Geometry) value, persistence.getConnection()), Hibernate.CHAR_ARRAY);
 			}
 			else if (AttributeType.integer.equals(type)) {
 				result.setParameter(name, value, Hibernate.INTEGER);
