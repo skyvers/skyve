@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
@@ -99,11 +100,13 @@ public class CustomerResourceServlet extends HttpServlet {
 			else if (content != null) {
 				// A thumbnail image
 				if ((imageWidth > 0) && (imageHeight > 0)) {
-					BufferedImage image = ImageIO.read(content.getContentStream());
-					image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
-					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-						Thumbnails.of(image).scale(1.0).outputFormat("jpg").toOutputStream(baos);
-						result = baos.toByteArray();
+					try (InputStream stream = content.getContentStream()) {
+						BufferedImage image = ImageIO.read(stream);
+						image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
+						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+							Thumbnails.of(image).scale(1.0).outputFormat("jpg").toOutputStream(baos);
+							result = baos.toByteArray();
+						}
 					}
 				}
 				// Full content

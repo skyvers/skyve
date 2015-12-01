@@ -46,6 +46,8 @@ public class ContentGarbageCollectionJob implements Job {
 																			" : lastModified=" + result.getLastModified());
 						Date lastModified = result.getLastModified();
 						// only process this if its at least a day old.
+						// Besides cutting out busy work on a data set in flux, it'll make sure that anyones freshly uploaded
+						// content that hasn't been saved (not pointed to yet in the database) won't be removed.
 						if ((lastModified == null) || ((System.currentTimeMillis() - lastModified.getTime()) > 86400000)) {
 							Customer customer = r.getCustomer(result.getCustomerName());
 							Module module = customer.getModule(result.getModuleName());

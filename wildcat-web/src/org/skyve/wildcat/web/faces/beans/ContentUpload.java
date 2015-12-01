@@ -16,7 +16,6 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Binder;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.AttachmentContent;
@@ -116,7 +115,10 @@ public class ContentUpload {
 				contentAttributeName = contentBinding.substring(contentBindingLastDotIndex + 1);
 			}
 
-			String contentId = (String) Binder.get(contentOwner, contentAttributeName);
+			// Always insert a new attachment content node into the content repository on upload.
+			// That way, if the change is discarded (not committed), it'll still point to the original attachment.
+			// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
+			String contentId = null;
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = new AttachmentContent(customerName, 
 																	contentOwner.getBizModule(), 
@@ -127,7 +129,7 @@ public class ContentUpload {
 																	contentAttributeName,
 																	fileName,
 																	file.getInputstream());
-				content.setContentId(contentId);
+				// NB Don't set the content id as we always want a new one
 				cm.put(content);
 				contentId = content.getContentId();
 			}
