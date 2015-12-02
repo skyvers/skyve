@@ -13,6 +13,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -65,9 +67,12 @@ public abstract class AbstractBean implements Bean {
 	
 	@Override
 	public final boolean isChanged() {
-		Customer customer = null;
+		Document document = null;
 		try {
-			customer = CORE.getUser().getCustomer();
+			Customer customer = CORE.getUser().getCustomer();
+			if (customer != null) {
+				document = customer.getModule(getBizModule()).getDocument(customer, getBizDocument());
+			}
 		} 
 		catch (MetaDataException e) {
 			// do nothing - we can continue
@@ -88,9 +93,18 @@ public abstract class AbstractBean implements Bean {
 						}
 						
 						boolean trackChanges = true;
-						if (customer != null) {
+						if (document != null) {
 							try {
-								trackChanges = customer.getModule(getBizModule()).getDocument(customer, getBizDocument()).getAttribute(propertyName).isTrackChanges();
+								// If this collection is an attribute (could be on an extension object)
+								// then check the trackChanges switch, but if it isn't a metadata attribute,
+								// treat it as if it's not dirty
+								Attribute attribute = document.getAttribute(propertyName);
+								if (attribute == null) {
+									trackChanges = false; // its an extension attribute, so its not to be tracked
+								}
+								else {
+									trackChanges = attribute.isTrackChanges(); // leave it up to the metadata
+								}
 							}
 							catch (Exception e) {
 								// if we get here, leave trackChanges on
