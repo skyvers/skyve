@@ -169,6 +169,16 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	}
 
 	/**
+	 * Sets a byte[] parameter.
+	 */
+	public void setBytes(String name, byte[] value) throws SQLException {
+		int[] indexes = getIndexes(name);
+		for (int i = 0; i < indexes.length; i++) {
+			statement.setBytes(indexes[i], value);
+		}
+	}
+
+	/**
 	 * Sets a null parameter.
 	 */
 	public void setNull(String name, int sqlType) throws SQLException {

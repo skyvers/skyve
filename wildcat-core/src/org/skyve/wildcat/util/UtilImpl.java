@@ -54,6 +54,9 @@ public class UtilImpl {
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
 	
+	// Should the attachments be stored on the file system or inline.
+	public static boolean CONTENT_FILE_STORAGE = true;
+	
 	// This is set in web.xml and should only be used when the APP server in use
 	// doesn't allow us to get the absolute path of a resource - jboss 4.0.5.GA, WebLogic or any zipped deployment
 	public static String APPS_JAR_DIRECTORY;
@@ -110,8 +113,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20151025";
-	public static final String WILDCAT_VERSION = "20151025";
+	public static final String JAVASCRIPT_FILE_VERSION = "20151202";
+	public static final String WILDCAT_VERSION = "20151202";
 	public static final String SMART_CLIENT_DIR = "isomorphic10a";
 	
 	private static String absoluteBasePath;

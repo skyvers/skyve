@@ -68,6 +68,8 @@ import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
 import org.hibernate.tool.hbm2ddl.TableMetadata;
 import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
+import org.hibernatespatial.AbstractDBGeometryType;
+import org.hibernatespatial.SpatialDialect;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -128,8 +130,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
 	private static final String DIALECT_PACKAGE = "org.hibernate.dialect.";
-
 	private static EntityManagerFactory emf = null;
+	private static AbstractDBGeometryType geometryUserType = null;
 
 	static {
 		try {
@@ -298,6 +300,15 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
+	static AbstractDBGeometryType getGeometryUserType() throws Exception {
+		if (geometryUserType == null) {
+			SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+			geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
+		}
+		
+		return geometryUserType;
+	}
+	
 	@SuppressWarnings("resource")
 	private static String[] generateExtraSchemaUpdates(Configuration cfg, boolean doUpdate)
 	throws SQLException, NamingException, ClassNotFoundException {
@@ -1740,19 +1751,20 @@ t.printStackTrace();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		String parentDocumentName = document.getParentDocumentName();
+		String bizDiscriminator = null;
 		StringBuilder query = new StringBuilder(256);
 
 		// Get all attributes that are required for the table backing this document
-		// including any joined or mapped inheritence
+		// including any single or mapped inheritance
 		List<Attribute> attributes = new ArrayList<>(document.getAttributes());
 		Extends inherits = document.getExtends();
 		while (inherits != null) {
 			Module baseModule = customer.getModule(document.getOwningModuleName());
 			Document baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
-			Persistent persistent = baseDocument.getPersistent();
-			if (persistent != null) {
-				ExtensionStrategy strategy = persistent.getStrategy();
-				if (strategy.equals(ExtensionStrategy.joined) || strategy.equals(ExtensionStrategy.mapped)) {
+			Persistent basePersistent = baseDocument.getPersistent();
+			if (basePersistent != null) {
+				ExtensionStrategy baseStrategy = basePersistent.getStrategy();
+				if (ExtensionStrategy.single.equals(baseStrategy) || ExtensionStrategy.mapped.equals(baseStrategy)) {
 					attributes.addAll(baseDocument.getAttributes());
 				}
 			}
@@ -1817,6 +1829,20 @@ t.printStackTrace();
 					values.append(",:").append(CHILD_PARENT_ID);
 				}
 			}
+			
+			// Add bizDiscriminator if required
+			Persistent persistent = document.getPersistent();
+			if (persistent != null) {
+				if (ExtensionStrategy.single.equals(persistent.getStrategy())) {
+					bizDiscriminator = persistent.getDiscriminator();
+					if (bizDiscriminator == null) {
+						bizDiscriminator = new StringBuilder(64).append(module.getName()).append(document.getName()).toString();
+					}
+					columns.append(',').append(PersistentBean.DISCRIMINATOR_NAME);
+					values.append(",:").append(PersistentBean.DISCRIMINATOR_NAME);
+				}
+			}
+					
 			// Add fields and associations
 			for (Attribute attribute : attributes) {
 				if (! attribute.isPersistent()) {
@@ -1864,6 +1890,12 @@ t.printStackTrace();
 				sql.putParameter(CHILD_PARENT_ID, ((ChildBean<?>) bean).getParent().getBizId(), false);
 			}
 		}
+
+		// Bind discriminator if required
+		if (bizDiscriminator != null) {
+			sql.putParameter(PersistentBean.DISCRIMINATOR_NAME, bizDiscriminator, false);
+		}
+		
 		// Bind fields and associations
 		for (Attribute attribute : attributes) {
 			if (! attribute.isPersistent()) {

@@ -21,6 +21,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.persistence.AbstractSQL;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 class HibernateSQL extends AbstractSQL {
 	private AbstractHibernatePersistence persistence;
 	
@@ -138,15 +140,15 @@ class HibernateSQL extends AbstractSQL {
 	public int execute()
 	throws DomainException {
 		try {
-		SQLQuery query = createQueryFromSQL();
-		return query.executeUpdate();
+			SQLQuery query = createQueryFromSQL();
+			return query.executeUpdate();
 		}
 		catch (Throwable t) {
 			throw new DomainException(t);
 		}
 	}
 	
-	private SQLQuery createQueryFromSQL() {
+	private SQLQuery createQueryFromSQL() throws Exception {
 		Session session = persistence.getSession();
 		SQLQuery result = session.createSQLQuery(toQueryString());
 
@@ -206,8 +208,13 @@ class HibernateSQL extends AbstractSQL {
 				result.setBigDecimal(name, (BigDecimal) value);
 			}
 			else if (AttributeType.geometry.equals(type)) {
-				// The SpatialDialect.getGeomertyUseType() subclasses all give values of JDBC Types.ARRAY
-				result.setParameter(name, value, Hibernate.CHAR_ARRAY);
+				if (value == null) {
+					result.setParameter(name, value, Hibernate.BINARY);
+				}
+				else {
+					// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
+					result.setParameter(name, AbstractHibernatePersistence.getGeometryUserType().conv2DBGeometry((Geometry) value, persistence.getConnection()), Hibernate.BINARY);
+				}
 			}
 			else if (AttributeType.integer.equals(type)) {
 				result.setParameter(name, value, Hibernate.INTEGER);

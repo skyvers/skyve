@@ -604,6 +604,7 @@ isc.EditView.addMethods({
 		delete values._title;
 
 		// remove the value maps so they are not subsequently posted
+		// NB valueMaps may be undefined if there are none required by the view
 		var valueMaps = values._valueMaps;
 		delete values._valueMaps; // dont need these any more
 
@@ -624,18 +625,22 @@ isc.EditView.addMethods({
 						grid.setData(data);
 					}
 					else if (grid._candidateList && grid._memberList) { // we have a list membership
-						var valueMap = valueMaps[gridBinding];
 						var candidates = [];
-						for (var key in valueMap) {
-							var value = valueMap[key];
-							var element = data.find('bizId', key);
-							// if we have an element as a member, use the valueMap value as the bizKey,
-							// otherwise, the bizKey was sent up from the server so just use that.
-							if (element) {
-								element.bizKey = value;
-							}
-							else { // not assigned, so add it as a candidate
-								candidates.push({bizId: key, bizKey: value});
+						if (valueMaps) {
+							var valueMap = valueMaps[gridBinding];
+							if (valueMap) {
+								for (var key in valueMap) {
+									var value = valueMap[key];
+									var element = data.find('bizId', key);
+									// if we have an element as a member, use the valueMap value as the bizKey,
+									// otherwise, the bizKey was sent up from the server so just use that.
+									if (element) {
+										element.bizKey = value;
+									}
+									else { // not assigned, so add it as a candidate
+										candidates.push({bizId: key, bizKey: value});
+									}
+								}
 							}
 						}
 						grid.setData(candidates, data);
@@ -1896,6 +1901,10 @@ BizComparison.addMethods({
 				// create an array if we are adding a second value to the same property
 				var existing = result[binding];
 				if (existing) {
+					// not an array yet, so make it one; this can happen for unstructured audits with no metadata
+					if (! isAn.Array(existing)) {
+						existing = [existing];
+					}
 					existing.add(childResult);
 				}
 				else {

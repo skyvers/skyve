@@ -28,6 +28,11 @@ public interface PersistentBean extends Bean {
 
 	/**
 	 * 
+	 */
+	public static final String DISCRIMINATOR_NAME = "bizDiscriminator";
+
+	/**
+	 * 
 	 * @return
 	 */
 	public Integer getBizVersion();

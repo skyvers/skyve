@@ -99,7 +99,8 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						ps.setNull(name, Types.ARRAY);
 					}
 					else {
-						ps.setObject(name, value);
+						// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
+						ps.setBytes(name, (byte[]) dataAccess.getGeometryUserType().conv2DBGeometry((Geometry) value, dataAccess.getConnection()));
 					}
 				}
 				else if (AttributeType.integer.equals(type)) {

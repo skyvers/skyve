@@ -30,11 +30,11 @@
         <param-value>Production</param-value>
     </context-param>
 	<context-param>
-	<param-name>
+		<param-name>
 			javax.faces.WEBAPP_RESOURCES_DIRECTORY
 		</param-name>
 		<param-value>/WEB-INF/resources</param-value>
-		</context-param>
+	</context-param>
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
@@ -57,6 +57,11 @@
     <servlet>
 	    <servlet-name>Push Servlet</servlet-name>
 	    <servlet-class>org.primefaces.push.PushServlet</servlet-class>
+        <init-param>
+            <param-name>org.atmosphere.cpr.broadcasterCacheClass</param-name>
+            <param-value>org.atmosphere.cache.UUIDBroadcasterCache</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
 	    <async-supported>true</async-supported>
 	</servlet>
 	<servlet-mapping>

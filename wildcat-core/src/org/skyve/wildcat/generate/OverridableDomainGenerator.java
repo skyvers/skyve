@@ -614,11 +614,11 @@ joined tables
 				fw.append("\" ");
 			}
 			
-			if ((baseDocumentName != null) && ExtensionStrategy.single.equals(strategy)) {
+			if (ExtensionStrategy.single.equals(strategy)) {
 				fw.append("discriminator-value=\"");
 				String discriminator = persistent.getDiscriminator();
 				if (discriminator == null) {
-					fw.append(moduleName).append('.').append(documentName);
+					fw.append(moduleName).append(documentName);
 				}
 				else {
 					fw.append(discriminator);

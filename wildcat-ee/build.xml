@@ -58,7 +58,7 @@
 			<arg value="src/skyve/" /> <!-- source path -->
 			<arg value="demo" /> <!-- customerName -->
 			<arg value="admin" /> <!-- moduleName -->
-			<arg value="Snapshot" /> <!-- documentName -->
+			<arg value="User" /> <!-- documentName -->
 			<arg value="false" /> <!-- customer overridden view -->
 			<arg value="" /> <!-- uxui overridden view name -->
 		</java>

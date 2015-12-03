@@ -1,18 +1,23 @@
 package org.skyve.wildcat.web;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.coobird.thumbnailator.Thumbnails;
 
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
@@ -41,6 +46,8 @@ public class CustomerResourceServlet extends HttpServlet {
 		private ContentManager cm;
 		private AttachmentContent content;
 		private File file;
+		int imageWidth = 0;
+		int imageHeight = 0;
 
 		void dispose() throws Exception {
 			if (cm != null) {
@@ -55,7 +62,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			if (file != null) {
 				result = file.lastModified();
 			}
-			if (content != null) {
+			else if (content != null) {
 				result = content.getLastModified().getTime();
 			}
 
@@ -68,18 +75,44 @@ public class CustomerResourceServlet extends HttpServlet {
 
 			if (file != null) {
 				try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file))) {
-					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-						result = new byte[1024]; // 1K
-						int bytesRead = 0;
-						while ((bytesRead = bis.read(result)) > 0) {
-							baos.write(result, 0, bytesRead);
+					// A thumbnail image
+					if ((imageWidth > 0) && (imageHeight > 0)) {
+						BufferedImage image = ImageIO.read(bis);
+						image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
+						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+							Thumbnails.of(image).scale(1.0).outputFormat("png").toOutputStream(baos);
+							result = baos.toByteArray();
 						}
-						result = baos.toByteArray();
+					}
+					// Full content
+					else {
+						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+							result = new byte[1024]; // 1K
+							int bytesRead = 0;
+							while ((bytesRead = bis.read(result)) > 0) {
+								baos.write(result, 0, bytesRead);
+							}
+							result = baos.toByteArray();
+						}
 					}
 				}
 			}
-			if (content != null) {
-				result = content.getContentBytes();
+			else if (content != null) {
+				// A thumbnail image
+				if ((imageWidth > 0) && (imageHeight > 0)) {
+					try (InputStream stream = content.getContentStream()) {
+						BufferedImage image = ImageIO.read(stream);
+						image = Thumbnails.of(image).size(imageWidth, imageHeight).keepAspectRatio(true).asBufferedImage();
+						try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+							Thumbnails.of(image).scale(1.0).outputFormat("jpg").toOutputStream(baos);
+							result = baos.toByteArray();
+						}
+					}
+				}
+				// Full content
+				else {
+					result = content.getContentBytes();
+				}
 			}
 
 			return result;
@@ -92,10 +125,13 @@ public class CustomerResourceServlet extends HttpServlet {
 		MimeType getMimeType() {
 			MimeType result = MimeType.plain;
 
-			if (file != null) {
+			if ((imageWidth > 0) && (imageHeight > 0)) {
+				result = MimeType.png;
+			}
+			else if (file != null) {
 				MimeType.fromFileName(file.getName());
 			}
-			if (content != null) {
+			else if (content != null) {
 				result = content.getMimeType();
 			}
 			
@@ -105,10 +141,13 @@ public class CustomerResourceServlet extends HttpServlet {
 		String getFileName() {
 			String result = null;
 			
-			if (file != null) {
+			if ((imageWidth > 0) && (imageHeight > 0)) {
+				result = "thumbnail.png";
+			}
+			else if (file != null) {
 				result = file.getName();
 			}
-			if (content != null) {
+			else if (content != null) {
 				result = content.getFileName();
 			}
 
@@ -138,6 +177,22 @@ public class CustomerResourceServlet extends HttpServlet {
 			String binding = request.getParameter(AbstractWebContext.BINDING_NAME);
 			String resourceFileName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
 
+			try {
+				String imageWidthParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_WIDTH_NAME));
+				if (imageWidthParam != null) {
+					imageWidth = Integer.parseInt(imageWidthParam);
+				}
+				String imageHeightParam = UtilImpl.processStringValue(request.getParameter(DynamicImageServlet.IMAGE_HEIGHT_NAME));
+				if (imageWidthParam != null) {
+					imageHeight = Integer.parseInt(imageHeightParam);
+				}
+			}
+			catch (NumberFormatException e) {
+				imageWidth = 0;
+				imageHeight = 0;
+				System.err.println("Width/Height is malformed in the URL");
+			}
+			
 			if ((resourceFileName == null) || (resourceFileName.length() == 0)) {
 				System.err.println("No resource file name or data file name in the URL");
 			}

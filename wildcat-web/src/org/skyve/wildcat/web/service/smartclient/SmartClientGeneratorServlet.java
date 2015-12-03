@@ -855,6 +855,11 @@ code.append("_view:view})");
 								boolean parentVisible,
 								boolean parentEnabled)
 		throws MetaDataException {
+			// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
+			if (dataGridVariable != null) {
+				return;
+			}
+			
 			String binding = label.getBinding();
 			String value = label.getValue();
 
@@ -884,11 +889,6 @@ code.append("_view:view})");
 
 				value = null;
 				binding = "_" + formatCounter++; // _1, _2 and so on
-			}
-			
-			// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
-			if (dataGridVariable != null) {
-				return;
 			}
 			
 			HorizontalAlignment alignment = label.getTextAlignment();

@@ -78,7 +78,9 @@ public class WildcatContextListener implements ServletContextListener {
 
 		UtilImpl.APPS_JAR_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("APPS_JAR_DIRECTORY"));
 		UtilImpl.CONTENT_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("CONTENT_DIRECTORY"));
-
+		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_FILE_STORAGE"));
+		UtilImpl.CONTENT_FILE_STORAGE = (value != null) && Boolean.parseBoolean(value);
+		
 		value = UtilImpl.processStringValue(properties.getProperty("DEV_MODE"));
 		UtilImpl.DEV_MODE = (value != null) && Boolean.parseBoolean(value);
 

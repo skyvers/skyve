@@ -62,10 +62,9 @@ public class WebUtil {
 	throws Exception {
 		AbstractWebContext result = null;
 
-		if (webId != null) {
+		if ((webId != null) && (webId.length() == 72)) {
 			String conversationKey = webId.substring(0, 36);
 			String currentBeanId = webId.substring(36);
-System.out.println(conversationKey + " : " + currentBeanId);
 			Element element = getConversations().get(conversationKey);
 			if (element == null) {
 				throw new ConversationEndedException();

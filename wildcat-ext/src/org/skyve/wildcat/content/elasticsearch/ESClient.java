@@ -1,5 +1,9 @@
 package org.skyve.wildcat.content.elasticsearch;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +47,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.BeanContent;
+import org.skyve.wildcat.content.ContentIterable;
 import org.skyve.wildcat.content.SearchResult;
 import org.skyve.wildcat.content.SearchResults;
 import org.skyve.wildcat.metadata.user.SuperUser;
@@ -51,11 +56,13 @@ import org.skyve.wildcat.util.TimeUtil;
 import org.skyve.wildcat.util.UtilImpl;
 
 public class ESClient extends AbstractContentManager {
+	private static final String FILE_STORE_NAME = "WILDCAT_STORE";
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
 	static final String ATTACHMENT_INDEX_TYPE = "attachment";
 	static final String BEAN_INDEX_NAME = "beans";
 	static final String BEAN_INDEX_TYPE = "bean";
-    private static final String CONTENT = "content";
+
+	private static final String CONTENT = "content";
     private static final String ATTACHMENT = "attachment";
 
 	private static final String FILE = "file";
@@ -213,8 +220,10 @@ public class ESClient extends AbstractContentManager {
 				// Doc content
 				source.field(CONTENT, parsedContent);
 		
-				// Doc as binary attachment
-				source.field(ATTACHMENT, new String(new Base64().encode(content)));
+				// Doc as binary attachment, inlined
+				if (! UtilImpl.CONTENT_FILE_STORAGE) {
+					source.field(ATTACHMENT, new String(new Base64().encode(content)));
+				}
 				// End of our document
 				source.endObject();
 			}
@@ -227,10 +236,50 @@ public class ESClient extends AbstractContentManager {
 			if (response.isCreated()) {
 				attachment.setContentId(response.getId());
 			}
+
+			if (UtilImpl.CONTENT_FILE_STORAGE) {
+				writeContentFile(attachment.getContentId(), content);
+			}
 		}
 	}
 
+	private static void writeContentFile(String id, byte[] content) 
+	throws IOException {
+		StringBuilder path = new StringBuilder(128);
+		path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
+		path.append(id.substring(5, 10)).append('/');
+		path.append(id.substring(10, 15)).append('/');
+		path.append(id.substring(15, 20)).append('/');
+		
+		new File(path.toString()).mkdirs();
+		
+		path.append(id);
+		File file = new File(path.toString());
+		File old = null;
+		if (file.exists()) {
+			old = new File(path.toString() + "_old");
+			if (! file.renameTo(old)) {
+				throw new IOException("Could not rename " + path + " to " + path + "_old before file content store operation");
+			}
+		}
+		try {
+			try (FileOutputStream fos = new FileOutputStream(file)) {
+				fos.write(content);
+				fos.flush();
+			}
+		}
+		catch (IOException e) {
+			if ((old != null) && old.exists()) {
+				if (! old.renameTo(file)) {
+					throw new IOException("Could not rename " + path + "_old to " + path + "after file content store operation error.", e);
+				}
+			}
+			throw e;
+		}
+	}
+	
 	@Override
+	@SuppressWarnings("resource")
 	public AttachmentContent get(String contentId) throws Exception {
 		GetResponse response = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId)
 									.setFields(ATTACHMENT, 
@@ -255,7 +304,7 @@ public class ESClient extends AbstractContentManager {
 			String content_type = (String) field.getValue();
 			mimeType = MimeType.fromMimeType(content_type);
 		}
-		String content = (String) response.getField(ATTACHMENT).getValue();
+		String content = UtilImpl.CONTENT_FILE_STORAGE ? null : (String) response.getField(ATTACHMENT).getValue();
 		String fileName = null;
 		field = response.getField(FILE_FILENAME);
 		if (field != null) {
@@ -275,21 +324,52 @@ public class ESClient extends AbstractContentManager {
 		String bizId = (String) response.getField(BEAN_DOCUMENT_ID).getValue();
 		String binding = (String) response.getField(BEAN_ATTRIBUTE_NAME).getValue();
 
-		AttachmentContent result = new AttachmentContent(bizCustomer,
-															bizModule,
-															bizDocument,
-															bizDataGroupId,
-															bizUserId,
-															bizId,
-															binding,
-															fileName,
-															mimeType,
-															new Base64().decode(content));
+		String id = response.getId();
+		AttachmentContent result = null;
+		if (UtilImpl.CONTENT_FILE_STORAGE) {
+			String path = getFilePath(id);
+
+			result = new AttachmentContent(bizCustomer,
+											bizModule,
+											bizDocument,
+											bizDataGroupId,
+											bizUserId,
+											bizId,
+											binding,
+											fileName,
+											mimeType,
+											new FileInputStream(path));
+		}
+		else {
+			result = new AttachmentContent(bizCustomer,
+											bizModule,
+											bizDocument,
+											bizDataGroupId,
+											bizUserId,
+											bizId,
+											binding,
+											fileName,
+											mimeType,
+											new Base64().decode(content));
+		}
+
 		result.setLastModified(lastModified);
 		result.setContentId(response.getId());
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + "): exists");
 
 		return result;
+	}
+	
+	private static String getFilePath(String id) {
+		StringBuilder result = new StringBuilder(128);
+		
+		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
+		result.append(id.substring(5, 10)).append('/');
+		result.append(id.substring(10, 15)).append('/');
+		result.append(id.substring(15, 20)).append('/');
+		result.append(id);
+		
+		return result.toString();
 	}
 	
 	@Override
@@ -301,11 +381,38 @@ public class ESClient extends AbstractContentManager {
 	}
 
 	@Override
-	public void remove(String contentId) {
+	public void remove(String contentId) throws IOException {
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.remove(" + contentId + ")");
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
 								ATTACHMENT_INDEX_TYPE,
 								contentId).execute().actionGet();
+
+		if (UtilImpl.CONTENT_FILE_STORAGE) {
+			String path = getFilePath(contentId);
+			File file = new File(path);
+			File thirdDir = null;
+			if (file.exists()) {
+				thirdDir = file.getParentFile();
+				if (! file.delete()) {
+					throw new IOException("Could not remove " + path + " after file content store delete.");
+				}
+			}
+			
+			// Delete the folder structure housing the content file, if empty.
+			if ((thirdDir != null) && thirdDir.exists() && thirdDir.isDirectory()) {
+				File secondDir = thirdDir.getParentFile();
+				if (thirdDir.delete()) {
+					if ((secondDir != null) && secondDir.exists() && secondDir.isDirectory()) {
+						File firstDir = secondDir.getParentFile();
+						if (secondDir.delete()) {
+							if ((firstDir != null) && firstDir.exists() && firstDir.isDirectory()) {
+								firstDir.delete();
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -466,7 +573,7 @@ public class ESClient extends AbstractContentManager {
 	}
 	
 	@Override
-	public Iterable<SearchResult> all() throws Exception {
+	public ContentIterable all() throws Exception {
 		return new ESIterable(client);
 	}
 

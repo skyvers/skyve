@@ -10,19 +10,21 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
+import org.skyve.wildcat.content.ContentIterable;
 import org.skyve.wildcat.content.SearchResult;
 import org.skyve.wildcat.util.TimeUtil;
 import org.skyve.wildcat.util.UtilImpl;
 
-class ESIterable implements Iterable<SearchResult> {
+class ESIterable implements ContentIterable {
 	private Client client = null;
 
 	ESIterable(Client client) {
 		this.client = client;
 	}
 	
-	private class ESIterator implements Iterator<SearchResult> {
+	class ESIterator implements ContentIterator {
 		private Iterator<SearchHit> i = null;
+		private long totalHits = 0;
 		private String scrollId = null;
 		
 		private ESIterator() {
@@ -44,6 +46,7 @@ class ESIterable implements Iterable<SearchResult> {
 								        .actionGet();
 			scrollId = response.getScrollId();
 			SearchHits hits = response.getHits();
+			totalHits = hits.getTotalHits();
 			i = hits.iterator();
 		}
 
@@ -120,12 +123,17 @@ class ESIterable implements Iterable<SearchResult> {
 		public void remove() {
 			throw new IllegalAccessError("Cannot remove from an ESIterator.");
 		}
+		
+		@Override
+		public long getTotalHits() {
+			return totalHits;
+		}
 	}
 
 	
 	@Override
 	@SuppressWarnings("synthetic-access")
-	public Iterator<SearchResult> iterator() {
+	public ContentIterator iterator() {
 		return new ESIterator();
 	}
 }
