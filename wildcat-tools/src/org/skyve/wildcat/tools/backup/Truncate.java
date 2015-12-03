@@ -132,12 +132,12 @@ public class Truncate {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		if (args.length != 8) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <DB schema>");
+		if (args.length != 9) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <DB schema>");
 			System.exit(1);
 		}
-		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-		Collection<Table> tables = getTables(args[7]);
+		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+		Collection<Table> tables = getTables(args[8]);
 		truncate(tables, args[0]);
 	}
 }

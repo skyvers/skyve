@@ -128,14 +128,14 @@ public class Validate {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 7) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
-			for(int i = 0; i < args.length; ++i) {
+		if (args.length != 8) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+			for (int i = 0, l = args.length; i < l; i++) {
 				System.err.println("parameter " + i + " = >" + args[i] + "<");
 			}
 			System.exit(1);
 		}
-		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		Collection<Table> tables = BackupUtil.getTables();
 		validate(tables, args[0]);
 	}

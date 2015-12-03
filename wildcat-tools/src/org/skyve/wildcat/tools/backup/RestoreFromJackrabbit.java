@@ -22,6 +22,7 @@ import org.supercsv.prefs.CsvPreference;
 public class RestoreFromJackrabbit {
 	private static void restore(String customerName,
 									String contentDirectory,
+									String contentFileStorage,
 									String databaseDialect,
 									String databaseJdbcDriver,
 									String databaseConnectionUrl,
@@ -35,7 +36,8 @@ public class RestoreFromJackrabbit {
 		}
 
 		BackupUtil.initialize(customerName, 
-								contentDirectory, 
+								contentDirectory,
+								contentFileStorage,
 								databaseDialect,
 								databaseJdbcDriver, 
 								databaseConnectionUrl, 
@@ -63,9 +65,8 @@ public class RestoreFromJackrabbit {
 						continue;
 					}
 					try (FileReader fr = new FileReader(backupFile)) {
-						CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE);
-						try {
-							String[] headers = reader.getCSVHeader(true);
+						try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
+							String[] headers = reader.getHeader(true);
 	
 							Map<String, String> values = null;
 							while ((values = reader.read(headers)) != null) {
@@ -139,9 +140,6 @@ System.out.println(candidateDirectory.getAbsolutePath());
 								} // for (each header)
 							} // while (each CSV line)
 						}
-						finally {
-							reader.close();
-						}
 					}
 				} // for (each table)
 			}
@@ -152,11 +150,11 @@ System.out.println(candidateDirectory.getAbsolutePath());
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 7) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+		if (args.length != 8) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
 			System.exit(1);
 		}
-		restore(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+		restore(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		System.exit(0);
 	}
 }

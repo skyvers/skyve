@@ -31,6 +31,7 @@ final class BackupUtil {
 	
 	static void initialize(String customerName,
 							String contentDirectory,
+							String contentFileStorage,
 							String databaseDialect,
 							String databaseJdbcDriver,
 							String databaseConnectionUrl,
@@ -40,6 +41,7 @@ final class BackupUtil {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
+		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);
 		UtilImpl.DIALECT = databaseDialect;
 		UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = databaseJdbcDriver;
 		UtilImpl.STANDALONE_DATABASE_CONNECTION_URL = databaseConnectionUrl;

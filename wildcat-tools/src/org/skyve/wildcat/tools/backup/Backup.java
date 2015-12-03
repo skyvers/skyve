@@ -19,8 +19,8 @@ import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
 import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.AttachmentContent;
-import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -52,172 +52,176 @@ public class Backup {
 		
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		try {
-			try (ContentManager cm = EXT.newContentManager()) {
-				// Don't close this connection
-				@SuppressWarnings("resource")
-				Connection connection = persistence.getConnection();
-				for (Table table : tables) {
-					try (Statement statement = connection.createStatement()) {
-						StringBuilder sql = new StringBuilder(128);
-						sql.append("select * from ").append(table.name);
-						BackupUtil.secureSQL(sql, table, customerName);
-						statement.execute(sql.toString());
-						try (ResultSet resultSet = statement.getResultSet()) {
-							UtilImpl.LOGGER.info("Backup " + table.name);
-							try (FileWriter fw = new FileWriter(BACKUP_DIR_PREFIX + customerName + File.separator + table.name + ".csv",
-																	false)) {
-								CsvMapWriter writer = new CsvMapWriter(fw, CsvPreference.STANDARD_PREFERENCE);
-								try {
-									Map<String, Object> values = new TreeMap<>();
-									String[] headers = new String[table.fields.size()];
-									headers = table.fields.keySet().toArray(headers);
-	
-									writer.writeHeader(headers);
-	
-									while (resultSet.next()) {
-										values.clear();
-	
-										for (String name : table.fields.keySet()) {
-											AttributeType attributeType = table.fields.get(name);
-											Object value = null;
-	
-											if (AttributeType.association.equals(attributeType) ||
-													AttributeType.colour.equals(attributeType) ||
-													AttributeType.memo.equals(attributeType) ||
-													AttributeType.markup.equals(attributeType) ||
-													AttributeType.text.equals(attributeType) ||
-													AttributeType.enumeration.equals(attributeType)) {
-												value = resultSet.getString(name);
-												if (resultSet.wasNull()) {
-													value = "";
+			try (AbstractContentManager cm = (AbstractContentManager) EXT.newContentManager()) {
+				cm.init();
+				Thread.sleep(2000);
+				try {
+					// Don't close this connection
+					@SuppressWarnings("resource")
+					Connection connection = persistence.getConnection();
+					for (Table table : tables) {
+						try (Statement statement = connection.createStatement()) {
+							StringBuilder sql = new StringBuilder(128);
+							sql.append("select * from ").append(table.name);
+							BackupUtil.secureSQL(sql, table, customerName);
+							statement.execute(sql.toString());
+							try (ResultSet resultSet = statement.getResultSet()) {
+								UtilImpl.LOGGER.info("Backup " + table.name);
+								try (FileWriter fw = new FileWriter(BACKUP_DIR_PREFIX + customerName + File.separator + table.name + ".csv",
+																		false)) {
+									try (CsvMapWriter writer = new CsvMapWriter(fw, CsvPreference.STANDARD_PREFERENCE)) {
+										Map<String, Object> values = new TreeMap<>();
+										String[] headers = new String[table.fields.size()];
+										headers = table.fields.keySet().toArray(headers);
+		
+										writer.writeHeader(headers);
+		
+										while (resultSet.next()) {
+											values.clear();
+		
+											for (String name : table.fields.keySet()) {
+												AttributeType attributeType = table.fields.get(name);
+												Object value = null;
+		
+												if (AttributeType.association.equals(attributeType) ||
+														AttributeType.colour.equals(attributeType) ||
+														AttributeType.memo.equals(attributeType) ||
+														AttributeType.markup.equals(attributeType) ||
+														AttributeType.text.equals(attributeType) ||
+														AttributeType.enumeration.equals(attributeType)) {
+													value = resultSet.getString(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
 												}
-											}
-											else if (attributeType == AttributeType.geometry) {
-												if (geometryUserType == null) {
-													SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
-													geometryUserType = dialect.getGeometryUserType();
+												else if (attributeType == AttributeType.geometry) {
+													if (geometryUserType == null) {
+														SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+														geometryUserType = dialect.getGeometryUserType();
+													}
+													Geometry geometry = (Geometry) geometryUserType.nullSafeGet(resultSet, new String[] {name}, null);
+													if (geometry == null) {
+														value = "";
+													}
+													else {
+														value = new WKTWriter().write(geometry);
+													}
 												}
-												Geometry geometry = (Geometry) geometryUserType.nullSafeGet(resultSet, new String[] {name}, null);
-												if (geometry == null) {
-													value = "";
+												else if (attributeType == AttributeType.bool) {
+													boolean booleanValue = resultSet.getBoolean(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = Boolean.valueOf(booleanValue);
+													}
 												}
-												else {
-													value = new WKTWriter().write(geometry);
+												else if ((attributeType == AttributeType.date) ||
+															(attributeType == AttributeType.dateTime) ||
+															(attributeType == AttributeType.time) ||
+															(attributeType == AttributeType.timestamp)) {
+													Date date = resultSet.getDate(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = new Long(date.getTime());
+													}
 												}
-											}
-											else if (attributeType == AttributeType.bool) {
-												boolean booleanValue = resultSet.getBoolean(name);
-												if (resultSet.wasNull()) {
-													value = "";
+												else if ((attributeType == AttributeType.decimal2) ||
+															(attributeType == AttributeType.decimal5) ||
+															(attributeType == AttributeType.decimal10)) {
+													BigDecimal bigDecimal = resultSet.getBigDecimal(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = bigDecimal;
+													}
 												}
-												else {
-													value = Boolean.valueOf(booleanValue);
+												else if (attributeType == AttributeType.integer) {
+													int intValue = resultSet.getInt(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = new Integer(intValue);
+													}
 												}
-											}
-											else if ((attributeType == AttributeType.date) ||
-														(attributeType == AttributeType.dateTime) ||
-														(attributeType == AttributeType.time) ||
-														(attributeType == AttributeType.timestamp)) {
-												Date date = resultSet.getDate(name);
-												if (resultSet.wasNull()) {
-													value = "";
+												else if (attributeType == AttributeType.longInteger) {
+													long longValue = resultSet.getLong(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = new Long(longValue);
+													}
 												}
-												else {
-													value = new Long(date.getTime());
-												}
-											}
-											else if ((attributeType == AttributeType.decimal2) ||
-														(attributeType == AttributeType.decimal5) ||
-														(attributeType == AttributeType.decimal10)) {
-												BigDecimal bigDecimal = resultSet.getBigDecimal(name);
-												if (resultSet.wasNull()) {
-													value = "";
-												}
-												else {
-													value = bigDecimal;
-												}
-											}
-											else if (attributeType == AttributeType.integer) {
-												int intValue = resultSet.getInt(name);
-												if (resultSet.wasNull()) {
-													value = "";
-												}
-												else {
-													value = new Integer(intValue);
-												}
-											}
-											else if (attributeType == AttributeType.longInteger) {
-												long longValue = resultSet.getLong(name);
-												if (resultSet.wasNull()) {
-													value = "";
-												}
-												else {
-													value = new Long(longValue);
-												}
-											}
-											else if (attributeType == AttributeType.content) {
-												String stringValue = resultSet.getString(name);
-												if (resultSet.wasNull()) {
-													value = "";
-												}
-												else {
-													// TODO backup content versions
-													value = stringValue;
-													AttachmentContent content = null;
-													try {
-														content = cm.get(stringValue);
-														try (InputStream cis = content.getContentStream()) {
-															File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
-																								content.getBizModule() + File.separator +
-																								content.getBizDocument() + File.separator +
-																								stringValue.substring(0, 2) + File.separator +
-																								stringValue.substring(2, 4) + File.separator +
-																								stringValue.substring(4, 6) + File.separator + 
-																								stringValue);
-															if (! contentDirectory.exists()) {
-																contentDirectory.mkdirs();
-															}
-															String fileName = content.getFileName();
-															if (fileName == null) {
-																fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
-															}
-															try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
-																												File.separator + fileName)) {
-																try (BufferedOutputStream bos = new BufferedOutputStream(cos)) {
-																	byte[] bytes = new byte[1024]; // 1K
-																	int bytesRead = 0;
-																	while ((bytesRead = cis.read(bytes)) > 0) {
-																		bos.write(bytes, 0, bytesRead);
+												else if (attributeType == AttributeType.content) {
+													String stringValue = resultSet.getString(name);
+													if (resultSet.wasNull()) {
+														value = "";
+													}
+													else {
+														value = stringValue;
+														AttachmentContent content = null;
+														try {
+															content = cm.get(stringValue);
+															if (content != null) {
+																try (InputStream cis = content.getContentStream()) {
+																	File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
+																										content.getBizModule() + File.separator +
+																										content.getBizDocument() + File.separator +
+																										stringValue.substring(5, 10) + File.separator +
+																										stringValue.substring(10, 15) + File.separator +
+																										stringValue.substring(15, 20) + File.separator + 
+																										stringValue);
+																	if (! contentDirectory.exists()) {
+																		contentDirectory.mkdirs();
 																	}
-																	bos.flush();
+																	String fileName = content.getFileName();
+																	if (fileName == null) {
+																		fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
+																	}
+																	try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
+																														File.separator + fileName)) {
+																		try (BufferedOutputStream bos = new BufferedOutputStream(cos)) {
+																			byte[] bytes = new byte[1024]; // 1K
+																			int bytesRead = 0;
+																			while ((bytesRead = cis.read(bytes)) > 0) {
+																				bos.write(bytes, 0, bytesRead);
+																			}
+																			bos.flush();
+																		}
+																	}
 																}
 															}
 														}
-													}
-													catch (Exception e) {
-														if (e instanceof FileNotFoundException) {
-															System.err.println("*** ALTHOUGH THE FOLLOWING STACK TRACE DID NOT STOP THE BACKUP THIS IS SERIOUS");
-															e.printStackTrace();
-														}
-														else {
-															throw e;
+														catch (Exception e) {
+															if (e instanceof FileNotFoundException) {
+																System.err.println("*** ALTHOUGH THE FOLLOWING STACK TRACE DID NOT STOP THE BACKUP THIS IS SERIOUS");
+																e.printStackTrace();
+															}
+															else {
+																throw e;
+															}
 														}
 													}
 												}
+		
+												values.put(name, value);
 											}
-	
-											values.put(name, value);
+		
+											writer.write(values, headers);
 										}
-	
-										writer.write(values, headers);
 									}
-								}
-								finally {
-									writer.close();
 								}
 							}
 						}
 					}
+				}
+				finally {
+					cm.dispose();
 				}
 			}
 		}
@@ -227,11 +231,11 @@ public class Backup {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 7) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+		if (args.length != 8) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
 			System.exit(1);
 		}
-		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		Collection<Table> tables = BackupUtil.getTables();
 		backup(tables, args[0]);
 	}

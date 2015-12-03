@@ -30,6 +30,7 @@ import com.vividsolutions.jts.io.WKTReader;
 public class Restore {
 	private static void restore(String customerName,
 									String contentDirectory,
+									String contentFileStorage,
 									String databaseDialect,
 									String databaseJdbcDriver,
 									String databaseConnectionUrl,
@@ -43,7 +44,8 @@ public class Restore {
 		}
 
 		BackupUtil.initialize(customerName, 
-								contentDirectory, 
+								contentDirectory,
+								contentFileStorage,
 								databaseDialect,
 								databaseJdbcDriver, 
 								databaseConnectionUrl, 
@@ -92,9 +94,8 @@ public class Restore {
 						continue;
 					}
 					try (FileReader fr = new FileReader(backupFile)) {
-						CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE);
-						try {
-							String[] headers = reader.getCSVHeader(true);
+						try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
+							String[] headers = reader.getHeader(true);
 	
 							StringBuilder sql = new StringBuilder(128);
 							sql.append("insert into ").append(table.name).append(" (");
@@ -194,9 +195,9 @@ public class Restore {
 											for (String relativeContentPath : table.relativeContentPaths) {
 												File candidateDirectory = new File(backupDirectory.getAbsolutePath() + File.separator +
 																					relativeContentPath + File.separator + 
-																					stringValue.substring(0, 2) + File.separator + 
-																					stringValue.substring(2, 4) + File.separator +
-																					stringValue.substring(4, 6) + File.separator +
+																					stringValue.substring(5, 10) + File.separator + 
+																					stringValue.substring(10, 15) + File.separator +
+																					stringValue.substring(15, 20) + File.separator +
 																					stringValue);
 												File[] files = candidateDirectory.listFiles();
 												if ((files != null) && // directory exists
@@ -245,9 +246,6 @@ public class Restore {
 								connection.commit();
 							}
 						}
-						finally {
-							reader.close();
-						}
 					}
 				} // for (each table)
 			}
@@ -276,9 +274,8 @@ public class Restore {
 				}
 				
 				try (FileReader fr = new FileReader(backupFile)) {
-					CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE);
-					try {
-						String[] headers = reader.getCSVHeader(true);
+					try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
+						String[] headers = reader.getHeader(true);
 	
 						StringBuilder sql = new StringBuilder(128);
 						sql.append("update ").append(table.name);
@@ -328,9 +325,6 @@ public class Restore {
 							}
 						}
 					}
-					finally {
-						reader.close();
-					}
 				}
 			} // for (each table)
 		}
@@ -340,10 +334,10 @@ public class Restore {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 7) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+		if (args.length != 8) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
 			System.exit(1);
 		}
-		restore(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+		restore(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 	}
 }

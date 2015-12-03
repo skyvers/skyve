@@ -45,11 +45,11 @@ public class Reindex {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 7) {
-			System.err.println("args are <customerName> <content directory> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+		if (args.length != 8) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
 			System.exit(1);
 		}
-		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+		BackupUtil.initialize(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		reindex();
 		// This is required to stop the process hanging at the end on a mac bash shell
 		System.exit(0);
