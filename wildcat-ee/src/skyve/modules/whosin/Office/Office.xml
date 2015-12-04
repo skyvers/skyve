@@ -49,7 +49,9 @@
 		</geometry>
 		<boolean name="demoData">
 			<displayName>Demonstration Data</displayName>
-			<description>If this is set, the data was created by the demo data job and can safely be deleted.</description>
+			<description><![CDATA[
+			If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
+			]]></description>
 		</boolean>
 	</attributes>
 </document>
