@@ -277,7 +277,7 @@ public class ViewGenerator {
 		}
 		else {
 			if (! form.getRows().isEmpty()) {
-				result.getContained().add(form);
+				result.getContained().add(vbox);
 			}
 
 			for (MetaData detailWidget : details) {
