@@ -937,6 +937,7 @@ public class SmartClientGenerateUtils {
 			
 		    if (helpText != null) {
 				result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
+				result.append("<em><b>").append(title).append("</b></em><p/>");
 				result.append(processString(helpText, false, true));
 				result.append("',click:'isc.say(this.prompt)'}]");
 			}
