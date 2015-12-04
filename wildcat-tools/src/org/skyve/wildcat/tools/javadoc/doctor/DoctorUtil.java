@@ -253,7 +253,7 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "attributeList"));
 			table.setTitle("Attributes");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following attributes:");
-			table.setHeaderValues("Persistent Name", "Display Name" , "Type", "Size", "Required", "Persistent", "Description", "Values", "Deprecated");
+			table.setHeaderValues("Attribute Name", "Display Name" , "Type", "Size", "Required", "Persistent", "Description", "Values", "Deprecated");
 
 			for (Attribute attribute : document.getAttributes()) {
 				if ("bizKey".equals(attribute.getName())) {
