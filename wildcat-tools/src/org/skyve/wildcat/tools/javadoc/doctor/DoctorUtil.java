@@ -22,6 +22,7 @@ import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
+import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
 import org.skyve.wildcat.metadata.user.ActionPrivilege;
@@ -252,13 +253,14 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "attributeList"));
 			table.setTitle("Attributes");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following attributes:");
-			table.setHeaderValues("Field", "Type", "Length", "Required", "Description", "Values");
+			table.setHeaderValues("Persistent Name", "Display Name" , "Type", "Size", "Required", "Persistent", "Description", "Values", "Deprecated");
 
 			for (Attribute attribute : document.getAttributes()) {
 				if ("bizKey".equals(attribute.getName())) {
 					// do nothing
 				} else {
 					// get constant domain values
+					int fieldLen = 0;
 					DocList valueList = new DocList(false);
 					if(AttributeType.enumeration.equals(attribute.getAttributeType())
 							|| DomainType.constant.equals(attribute.getDomainType())){
@@ -266,18 +268,31 @@ public class DoctorUtil {
 							StringBuilder sb = new StringBuilder();
 							sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
 							valueList.getItems().add(sb.toString());
+							if(val.getCode().length()>fieldLen){
+								fieldLen = val.getCode().length();
+							}
 						}
 					}
+					
 					String description = attribute.getDocumentation();
 					if (description == null) {
 						description = attribute.getDescription();
 					}
-					table.setRowValues(attribute.getDisplayName(),
+					if(attribute instanceof LengthField){
+						LengthField lengthField = (LengthField) attribute;
+						fieldLen = lengthField.getLength();
+					}
+					
+					String size = (fieldLen==0?"":Integer.toString(fieldLen));
+					table.setRowValues(attribute.getName(), 
+										attribute.getDisplayName(),
 										attribute.getAttributeType().toString(),
-										"Length",
+										size,
 										String.valueOf(attribute.isRequired()),
+										String.valueOf(attribute.isPersistent()),
 										description,
-										valueList.toHTML());
+										valueList.toHTML(),
+										String.valueOf(attribute.isDeprecated()));
 				}
 			}
 			out.println(table.toHTML(true));
