@@ -219,7 +219,6 @@ public class Restore {
 													dataGroupId = null;
 												}
 												try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(contentFile))) {
-													// TODO restore content versions
 													AttachmentContent content = new AttachmentContent(values.get(Bean.CUSTOMER_NAME), 
 																										moduleName,
 																										documentName, 

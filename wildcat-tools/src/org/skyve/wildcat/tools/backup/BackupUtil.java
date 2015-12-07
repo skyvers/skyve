@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -47,6 +48,7 @@ final class BackupUtil {
 		UtilImpl.STANDALONE_DATABASE_CONNECTION_URL = databaseConnectionUrl;
 		UtilImpl.STANDALONE_DATABASE_USERNAME = databaseUsername;
 		UtilImpl.STANDALONE_DATABASE_PASSWORD = databasePassword;
+		UtilImpl.DDL_SYNC = false;
 		
 		AbstractRepository.set(new LocalDesignRepository());
 		SuperUser user = new SuperUser();
@@ -91,19 +93,39 @@ final class BackupUtil {
 			if (references != null) {
 				for (ExportedReference reference : references) {
 					Persistent referencePersistent = reference.getPersistent();
-					Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer,
-																												reference.getDocumentName());
-					// Add joining table for collections
-					if (reference.isCollection()) {
-						// child collections have no joining table
-						if (! CollectionType.child.equals(reference.getType())) {
-							// add the joining table to the front of the list
-							String referenceFieldName = reference.getReferenceFieldName();
-							Collection collection = (Collection) referencedDocument.getReferenceByName(referenceFieldName);
-							if (collection.isPersistent()) {
-								String tableName = referencePersistent.getPersistentIdentifier() + '_' + referenceFieldName;
-								JoinTable joinTable = new JoinTable(tableName, referencePersistent.getPersistentIdentifier());
-								tables.put(tableName, joinTable);
+					if (referencePersistent != null) {
+						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer,
+																													reference.getDocumentName());
+						// Add joining table for collections
+						if (reference.isCollection()) {
+							// child collections have no joining table
+							if (! CollectionType.child.equals(reference.getType())) {
+								String referenceFieldName = reference.getReferenceFieldName();
+								Collection collection = (Collection) referencedDocument.getReferenceByName(referenceFieldName);
+								if (collection.isPersistent()) {
+									String ownerTableName = referencePersistent.getPersistentIdentifier();
+
+									// If it is a collection defined on a mapped document pointing to this document, find
+									// the first persistent derivation with a table name to use
+									if (ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
+										List<String> derivedModocs = ((CustomerImpl) customer).getDerivedDocuments(referencedDocument);
+										for (String derivedModoc : derivedModocs) {
+											int dotIndex = derivedModoc.indexOf('.');
+											Module derivedModule = customer.getModule(derivedModoc.substring(0, dotIndex));
+											Document derivedDocument = derivedModule.getDocument(customer, derivedModoc.substring(dotIndex + 1));
+	
+											Persistent derivedPersistent = derivedDocument.getPersistent();
+											if ((derivedPersistent != null) && (derivedPersistent.getName() != null)) {
+												ownerTableName = derivedPersistent.getName();
+												break;
+											}
+										}
+									}
+									
+									String tableName = ownerTableName + '_' + referenceFieldName;
+									JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+									tables.put(tableName, joinTable);
+								}
 							}
 						}
 					}

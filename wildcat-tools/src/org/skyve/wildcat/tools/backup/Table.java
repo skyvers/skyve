@@ -11,6 +11,8 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent.ExtensionStrategy;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 
 class Table {
@@ -55,7 +57,14 @@ class Table {
 		if (document.isOrdered()) {
 			fields.put(ChildBean.ORDINAL_KEY, AttributeType.integer);
 		}
-
+		
+		Persistent persistent = document.getPersistent();
+		if (persistent != null) {
+			if (ExtensionStrategy.single.equals(persistent.getStrategy())) {
+				fields.put(PersistentBean.DISCRIMINATOR_NAME, AttributeType.text);
+			}
+		}
+		
 		for (Attribute attribute : document.getAttributes()) {
 			if (attribute.isPersistent()) {
 				AttributeType attributeType = attribute.getAttributeType();

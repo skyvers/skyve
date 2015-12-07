@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
@@ -69,8 +70,17 @@ public class Truncate {
 			persistence.commit(true);
 		}
 		
-		try (ContentManager cm = EXT.newContentManager()) {
-			cm.truncate(customerName);
+		AbstractContentManager acm = null;
+		try {
+			try (ContentManager cm = EXT.newContentManager()) {
+				acm = (AbstractContentManager) cm;
+				acm.init();
+				Thread.sleep(2000);
+				cm.truncate(customerName);
+			}
+		}
+		finally {
+			acm.dispose();
 		}
 	}
 
@@ -84,11 +94,7 @@ public class Truncate {
 				while (tableResultSet.next()) {
 					String tableName = tableResultSet.getString("TABLE_NAME");
 					tableName = tableName.toLowerCase();
-					// ignore content tables as they will be truncated through the CMS
-					if (tableName.startsWith("content_")) {
-						continue;
-					}
-					
+
 					Table table = new Table(tableName);
 					try (ResultSet columnResultSet = dmd.getColumns(c.getCatalog(), schema, tableName, null)) {
 						while (columnResultSet.next()) {
