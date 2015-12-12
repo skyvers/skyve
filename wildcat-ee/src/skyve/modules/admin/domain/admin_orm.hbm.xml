@@ -68,6 +68,11 @@
 		</property>
 		<property name="filePath" length="2000" />
 		<property name="system" />
+		<property name="unsubscribeUrl" length="500" />
+		<bag name="subscriptions" inverse="true">
+			<key column="communication_id" />
+			<one-to-many entity-name="adminSubscription" />
+		</bag>
 		<filter name="adminCommunicationNoneFilter" condition="1=0"/>
 		<filter name="adminCommunicationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminCommunicationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -266,6 +271,30 @@
 		<filter name="adminSnapshotCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminSnapshotDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminSnapshotUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.Subscription" table="ADM_Subscription" entity-name="adminSubscription">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" />
+		<property name="receiverIdentifier" length="254" />
+		<property name="declined" />
+		<property name="formatType" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
+			</type>
+		</property>
+		<property name="preferredReceiverIdentifier" length="254" />
+		<filter name="adminSubscriptionNoneFilter" condition="1=0"/>
+		<filter name="adminSubscriptionCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminSubscriptionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminSubscriptionUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.admin.domain.Tag" table="ADM_Tag" entity-name="adminTag">
@@ -513,6 +542,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminSnapshotUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionNoneFilter" />
+	<filter-def name="adminSubscriptionCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminSubscriptionUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminTagNoneFilter" />

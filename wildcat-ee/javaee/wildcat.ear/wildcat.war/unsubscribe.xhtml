@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pm="http://primefaces.org/mobile"
+	xmlns:w="http://bizhub.com.au/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+<f:view renderKitId="PRIMEFACES_MOBILE">
+	<pe:importEnum type="org.skyve.web.WebAction" var="WebAction"
+		allSuffix="ALL_ENUM_VALUES" />
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{unsubscribe.preRender}" />
+	</f:metadata>
+	<ui:composition template="phone/template.xhtml">
+		<ui:param name="baseHref" value="#{unsubscribe.baseHref}" />
+		<ui:param name="wildcatVersionComment"
+			value="#{unsubscribe.wildcatVersionComment}" />
+		<ui:param name="javascriptFileVersion"
+			value="#{unsubscribe.javascriptFileVersion}" />
+		<ui:define name="pages">
+			<pm:page id="main">
+				<pm:header fixed="true" pt:data-tap-toggle="false"
+					title="Unsubscribe">
+				</pm:header>
+				<pm:content>
+					<h:panelGroup rendered="#{unsubscribe.success}">
+						<h1 style="text-align: center">You have been unsubscribed.</h1>
+					</h:panelGroup>
+					<h:panelGroup rendered="#{not unsubscribe.success}">
+						<h1 style="text-align: center">You have not been able to
+							Unsubscribe.</h1>
+					</h:panelGroup>
+				</pm:content>
+			</pm:page>
+		</ui:define>
+	</ui:composition>
+</f:view>
+</html>

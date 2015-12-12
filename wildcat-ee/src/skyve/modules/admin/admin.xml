@@ -23,6 +23,7 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="Jobs" />
+		<document ref="Subscription"/>
 		<document ref="User" defaultQueryName="qUsers" />
 		<document ref="UserCandidateContact" />
 		<document ref="UserLoginRecord" />
@@ -67,6 +68,7 @@
 					<action name="CopyTagToUser" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
+				<document name="Subscription" permission="CRUDU"/>
 				<document name="User" permission="_R__D" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
@@ -101,6 +103,7 @@
 					<action name="PrepareExplanation" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
+				<document name="Subscription" permission="CRUDU"/>
 			</privileges>
 		</role>
 		<role name="ContactViewer">
@@ -119,6 +122,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Communication" permission="CRUDD">
+					<action name="AddUnsubscribeLink" />
 					<action name="CreateFiles" />
 					<action name="GetCount" />
 					<action name="GetResults" />
@@ -136,7 +140,8 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Communication" permission="CRUDD">
+				<document name="Communication" permission="CRUDC">
+					<action name="AddUnsubscribeLink" />
 					<action name="CreateFiles" />
 					<action name="GetCount" />
 					<action name="GetResults" />
@@ -164,9 +169,10 @@
 					<action name="Next" />
 					<action name="Back" />
 				</document>
+				<document name="Subscription" permission="CRUDC"/>
 				<document name="UserCandidateContact" permission="_____">
 				</document>
-				<document name="UserRole" permission="CRUDD" />
+				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 		</role>
 		<role name="JobMaintainer">
@@ -220,7 +226,14 @@
 					<action name="CopyTagToUser" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
-
+				<document name="Subscription" permission="CRUDU"/>
+			</privileges>
+		</role>
+		<role name="Anonymous">
+			<description>Can access publicly accessible pages anonymously.</description>
+			<privileges>
+				<document name="Communication" permission="_R__G"/>
+				<document name="Subscription" permission="CRUDG"/>
 			</privileges>
 		</role>
 	</roles>
@@ -411,6 +424,23 @@
 				<column binding="documentName" />
 				<column binding="subject" />
 				<column binding="tag.name" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qSubscriptions" documentName="Subscription">
+			<description>Subscriptions</description>
+			<columns>
+				<column binding="receiverIdentifier" sortOrder="ascending" />
+				<column binding="declined" />
+				<column binding="formatType"/>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qUserSubscriptions" documentName="Subscription">
+			<description>Subscriptions</description>
+			<columns>
+				<column binding="communication.bizKey" sortOrder="ascending" />
+				<column binding="declined" />
+				<column binding="formatType"/>
+				<column binding="preferredReceiverIdentifier"/>
 			</columns>
 		</documentQuery>
 		<documentQuery name="qTagCommunications" documentName="Communication">

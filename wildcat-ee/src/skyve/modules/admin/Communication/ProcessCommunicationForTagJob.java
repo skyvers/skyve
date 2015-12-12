@@ -52,17 +52,17 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 					switch (communication.getActionType()) {
 					case saveForBulkSend:
 
-						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user );
+						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication );
 						sb.append("\n Saved OK");
 						break;
 					case testBindingsAndOutput:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, pb, user);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication);
 						sb.append("\n Tested OK");
 						break;
 					case sendImmediately:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication);
 						sb.append("\n Sent OK");
 						break;
 					default:

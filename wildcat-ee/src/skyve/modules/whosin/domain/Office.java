@@ -57,7 +57,7 @@ public class Office extends AbstractPersistentBean {
 	 **/
 	private Geometry boundary;
 	/**
-	 * If this is set, the data was created by the demo data job and can safely be deleted.
+	 * If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
 	 **/
 	private Boolean demoData;
 

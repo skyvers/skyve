@@ -87,11 +87,7 @@
         </init-param>
         <init-param>
         	<param-name>unsecured</param-name>
-        	<param-value>
-        		<![CDATA[
-					/javax.faces.resource/
-        		]]>
-        	</param-value>
+        	<param-value>/unsubscribe.xhtml</param-value>
         </init-param>
     </filter>
     <filter-mapping>

@@ -139,6 +139,14 @@
 							<html binding="body" pixelHeight="400" pixelWidth="800" />
 						</item>
 					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item colspan="3">
+							<button actionName="AddUnsubscribeLink" />
+						</item>
+					</row>
 				</form>
 			</vbox>
 			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1" pixelPadding="10">
@@ -159,6 +167,11 @@
 				</form>
 			</vbox>
 		</tab>
+		<tab title="Subscriptions">
+			<listGrid continueConversation="true" query="qSubscriptions">
+				<filterParameter operator="equal" name="communication" binding="bizId" />
+			</listGrid>
+		</tab>
 	</tabPane>
 	<actions>
 		<defaults />
@@ -172,6 +185,8 @@
 			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?" />
 		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?" />
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link"
+			inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" />
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 	</actions>

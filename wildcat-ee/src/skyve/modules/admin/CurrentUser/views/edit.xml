@@ -71,15 +71,22 @@
 			</vbox>
 		</hbox>
 	</vbox>
-	<vbox border="true" borderTitle="Jobs" pixelPadding="10">
-		<dataGrid binding="jobs" editable="false">
-			<boundColumn binding="displayName" />
-			<boundColumn binding="status" />
-			<boundColumn binding="percentComplete" />
-			<boundColumn binding="startTime" />
-			<boundColumn binding="endTime" />
-		</dataGrid>
-	</vbox>
+	<tabPane>
+		<tab title="Jobs">
+			<dataGrid binding="jobs" editable="false">
+				<boundColumn binding="displayName" />
+				<boundColumn binding="status" />
+				<boundColumn binding="percentComplete" />
+				<boundColumn binding="startTime" />
+				<boundColumn binding="endTime" />
+			</dataGrid>
+		</tab>
+		<tab title="Subscriptions" >
+			<listGrid continueConversation="true" query="qUserSubscriptions">
+				<filterParameter operator="equal" name="receiverIdentifier" binding="currentUser.contact.email1"/>
+			</listGrid>
+		</tab>
+	</tabPane>
 	<actions>
 		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
 			inActionPanel="false" />
