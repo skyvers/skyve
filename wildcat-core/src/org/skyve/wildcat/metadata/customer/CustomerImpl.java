@@ -51,9 +51,6 @@ import org.skyve.wildcat.util.UtilImpl;
 
 public class CustomerImpl implements Customer {
 	public class ExportedReference implements Serializable {
-		/**
-		 * For Serialization.
-		 */
 		private static final long serialVersionUID = 3054965257788501970L;
 
 		private String moduleName;
@@ -62,7 +59,8 @@ public class CustomerImpl implements Customer {
 		private String documentAlias;
 		private String referenceFieldName;
 		private ReferenceType type;
-
+		private boolean required;
+		
 		public String getDocumentAlias() {
 			return documentAlias;
 		}
@@ -113,6 +111,14 @@ public class CustomerImpl implements Customer {
 
 		public void setType(ReferenceType type) {
 			this.type = type;
+		}
+
+		public boolean isRequired() {
+			return required;
+		}
+
+		public void setRequired(boolean required) {
+			this.required = required;
 		}
 	}
 
@@ -382,7 +388,7 @@ public class CustomerImpl implements Customer {
 							ref.setPersistent(document.getPersistent());
 							ref.setReferenceFieldName(reference.getName());
 							ref.setType(reference.getType());
-
+							ref.setRequired(reference.isRequired());
 							String documentNameKey = targetDocument.getOwningModuleName() +
 														'.' + targetDocument.getName();
 							List<ExportedReference> refs = exportedReferences.get(documentNameKey);
