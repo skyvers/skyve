@@ -98,6 +98,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -797,7 +798,7 @@ t.printStackTrace();
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
-										Reference parentReference,
+										Relation parentRelation,
 										Bean bean,
 										boolean visitingInheritedDocument) 
 			throws Exception {
@@ -853,7 +854,7 @@ t.printStackTrace();
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
-										Reference parentReference,
+										Relation parentRelation,
 										Bean bean,
 										boolean visitingInheritedDocument)
 			throws Exception {
@@ -966,7 +967,7 @@ t.printStackTrace();
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
-										Reference parentReference,
+										Relation parentRelation,
 										Bean bean,
 										boolean visitingInheritedDocument) 
 			throws Exception {
@@ -1014,7 +1015,7 @@ t.printStackTrace();
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
-										Reference parentReference,
+										Relation parentRelation,
 										Bean bean,
 										boolean visitingInheritedDocument) 
 			throws DomainException, MetaDataException {
@@ -1226,7 +1227,7 @@ t.printStackTrace();
 		protected final boolean accept(String binding,
 										Document visitedDocument,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningRelation,
 										Bean visitedBean,
 										boolean visitingInheritedDocument)
 		throws Exception {
@@ -1237,19 +1238,25 @@ t.printStackTrace();
 					(persistent.getName() != null) &&
 					isPersisted(visitedBean)) { // persistent document and persisted bean
 				// check if top document or we have a persistent reference
-				boolean validate = (owningReference == null) || owningReference.isPersistent();
+				boolean validate = (owningRelation == null) || owningRelation.isPersistent();
 
 				// check if binding isn't a parent binding - parent beans are not cascaded
 				validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
 
 				// don't check aggregations as they are not cascaded
-				if (validate && (owningReference instanceof Association)) {
-					validate = (((Association) owningReference).getType() != AssociationType.aggregation); // not an aggregation
+				if (validate) {
+					if (owningRelation instanceof Reference) {
+						Reference owningReference = (Reference) owningRelation;
+						ReferenceType referenceType = owningReference.getType();
+						validate = (! AssociationType.aggregation.equals(referenceType)) && 
+									(! CollectionType.aggregation.equals(referenceType));
+					}
+					// don't validate inverse relations
+					else {
+						validate = false;
+					}
 				}
-				if (validate && (owningReference instanceof Collection)) {
-					validate = (((Collection) owningReference).getType() != CollectionType.aggregation); // not an aggregation
-				}
-
+				
 				if (validate) {
 					preDeleteProcessing(visitedDocument, visitedBean);
 					// continue looking for composed objects to validate

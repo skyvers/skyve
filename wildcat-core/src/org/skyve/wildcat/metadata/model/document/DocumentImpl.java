@@ -17,14 +17,15 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -58,6 +59,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	private Map<String, Reference> referencesByFieldNames = new HashMap<>();
 
+	private Map<String, Relation> relationsByFieldNames = new HashMap<>();
+	
 	/**
 	 * This is this document's master or parent document name. This can be <code>null</code> if no parent document exists.
 	 */
@@ -233,14 +236,19 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document getReferencedDocument(Customer customer, String referenceName) 
+	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) 
 	throws MetaDataException {
-		Reference reference = getReferenceByName(referenceName);
-		if ((reference == null) || (reference.getDocumentName() == null)) {
-			throw new IllegalStateException("Document has no referenced document defined for " + referenceName);
+		Relation relation = relationsByFieldNames.get(relationName);
+		if (relation == null) {
+			throw new IllegalStateException("Document has no related document defined for " + relationName);
 		}
 
-		return customer.getModule(getOwningModuleName()).getDocument(customer, reference.getDocumentName());
+		String relatedDocumentName = relation.getDocumentName();
+		if (relatedDocumentName == null) {
+			throw new IllegalStateException("Document has no related document defined for " + relationName);
+		}
+
+		return customer.getModule(getOwningModuleName()).getDocument(customer, relatedDocumentName);
 	}
 
 	@Override
@@ -265,10 +273,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
-	public void putReference(Reference reference) {
-		referencesByDocumentNames.put(reference.getDocumentName(), reference);
-		referencesByFieldNames.put(reference.getName(), reference);
-		putAttribute(reference);
+	public void putRelation(Relation relation) {
+		relationsByFieldNames.put(relation.getName(), relation);
+		if (relation instanceof Reference) {
+			Reference reference = (Reference) relation;
+			referencesByDocumentNames.put(reference.getDocumentName(), reference);
+			referencesByFieldNames.put(reference.getName(), reference);
+		}
+		putAttribute(relation);
 	}
 
 	@Override
@@ -390,7 +402,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Attribute attribute = getAttribute(attributeName);
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
-			org.skyve.metadata.model.document.Document referencedDocument = getReferencedDocument(customer, attributeName);
+			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attributeName);
 			AbstractDocumentQuery referenceQuery = null;
 			String queryName = reference.getQueryName();
 			if (queryName != null) {

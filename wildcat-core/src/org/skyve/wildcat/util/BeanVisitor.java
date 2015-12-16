@@ -11,15 +11,15 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
-import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 
 public abstract class BeanVisitor {
 	/**
-	 * Visit a bean's references including references that are not defined. 
+	 * Visit a bean's relations including relations that are not defined. 
 	 * In this method call, the bean can be null, which will visit all bindings defined in the document. 
 	 * Each component instance is visited ONCE, if a component instance is null 
 	 * then the document metadata is used for traversal.
@@ -37,7 +37,7 @@ public abstract class BeanVisitor {
 	}
 
 	/**
-	 * Visit a bean excluding references that are not null. 
+	 * Visit a bean excluding relations that are null. 
 	 * Each instance is visited ONCE.
 	 * 
 	 * @param document
@@ -55,7 +55,7 @@ public abstract class BeanVisitor {
 	private void visit(String binding,
 						Document document,
 						Document owningDocument,
-						Reference owningReference,
+						Relation owningRelation,
 						Bean bean,
 						Customer customer,
 						Set<Bean> visitedBeans,
@@ -64,13 +64,13 @@ public abstract class BeanVisitor {
 	throws DomainException, MetaDataException {
 		if (! visitingInheritedDocument) {
 			if (bean == null) {
-				if (owningReference != null) {
-					String owningReferenceName = owningReference.getName();
-					String bindingWithoutThisReferenceName = binding.substring(0, binding.length() - owningReferenceName.length());
-					// have we seen a reference with this name before
-					int index = bindingWithoutThisReferenceName.lastIndexOf(owningReferenceName);
+				if (owningRelation != null) {
+					String owningRelationName = owningRelation.getName();
+					String bindingWithoutThisRelationName = binding.substring(0, binding.length() - owningRelationName.length());
+					// have we seen a relation with this name before
+					int index = bindingWithoutThisRelationName.lastIndexOf(owningRelationName);
 					if (index >= 0) {
-						index += owningReferenceName.length() + 1;
+						index += owningRelationName.length() + 1;
 						String potentialCircularBinding = binding.substring(index) + '.';
 						if ((index - potentialCircularBinding.length()) >= 0) { // enough in the binding to create the prior binding
 							String bindingPriorToPotentialCircularBinding = binding.substring(index - potentialCircularBinding.length(), index);
@@ -91,16 +91,35 @@ public abstract class BeanVisitor {
 		
 		StringBuilder sb = new StringBuilder(64);
 		try {
-			if (accept(binding, document, owningDocument, owningReference, bean, visitingInheritedDocument)) {
-				// NB visit references in the order they are defined in the document.
+			if (accept(binding, document, owningDocument, owningRelation, bean, visitingInheritedDocument)) {
+				// NB visit relations in the order they are defined in the document.
 				for (Attribute attribute : document.getAttributes()) {
-					if (attribute instanceof Reference) {
-						String referenceName = attribute.getName();
-						Document referencedDocument = document.getReferencedDocument(customer, referenceName);
-						Reference childReference = document.getReferenceByName(referenceName);
-						if (childReference instanceof Collection) {
+					if (attribute instanceof Relation) {
+						String relationName = attribute.getName();
+						Document referencedDocument = document.getRelatedDocument(customer, relationName);
+						Relation childRelation = (Relation) attribute;
+						if (childRelation instanceof Association) {
+							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, relationName);
+							if ((child != null) || visitNulls) {
+								sb.setLength(0);
+								if (binding.length() != 0) {
+									sb.append(binding).append('.');
+								}
+								sb.append(relationName);
+								visit(sb.toString(), 
+										referencedDocument,
+										document, 
+										childRelation, 
+										child, 
+										customer, 
+										visitedBeans, 
+										visitNulls,
+										false);
+							}
+						}
+						else { // collection or inverse
 							@SuppressWarnings("unchecked")
-							List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, referenceName);
+							List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, relationName);
 							if (children != null) {
 								int i = 0;
 								for (Bean child : children) {
@@ -109,11 +128,11 @@ public abstract class BeanVisitor {
 										if (binding.length() != 0) {
 											sb.append(binding).append('.');
 										}
-										sb.append(referenceName).append('[').append(i).append(']');
+										sb.append(relationName).append('[').append(i).append(']');
 										visit(sb.toString(), 
 												referencedDocument, 
 												document, 
-												childReference, 
+												childRelation, 
 												child, 
 												customer,
 												visitedBeans, 
@@ -127,11 +146,11 @@ public abstract class BeanVisitor {
 									if (binding.length() != 0) {
 										sb.append(binding).append('.');
 									}
-									sb.append(referenceName);
+									sb.append(relationName);
 									visit(sb.toString(), 
 											referencedDocument,
 											document, 
-											childReference, 
+											childRelation, 
 											null, 
 											customer, 
 											visitedBeans, 
@@ -144,31 +163,12 @@ public abstract class BeanVisitor {
 								if (binding.length() != 0) {
 									sb.append(binding).append('.');
 								}
-								sb.append(referenceName);
+								sb.append(relationName);
 								visit(sb.toString(), 
 										referencedDocument,
 										document, 
-										childReference, 
+										childRelation, 
 										null, 
-										customer, 
-										visitedBeans, 
-										visitNulls,
-										false);
-							}
-						}
-						else {
-							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, referenceName);
-							if ((child != null) || visitNulls) {
-								sb.setLength(0);
-								if (binding.length() != 0) {
-									sb.append(binding).append('.');
-								}
-								sb.append(referenceName);
-								visit(sb.toString(), 
-										referencedDocument,
-										document, 
-										childReference, 
-										child, 
 										customer, 
 										visitedBeans, 
 										visitNulls,
@@ -205,7 +205,7 @@ public abstract class BeanVisitor {
 				if (inherits != null) {
 					Module module = customer.getModule(document.getOwningModuleName());
 					Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
-					visit(binding, baseDocument, owningDocument, owningReference, bean, customer, visitedBeans, visitNulls, true);
+					visit(binding, baseDocument, owningDocument, owningRelation, bean, customer, visitedBeans, visitNulls, true);
 				}
 			}
 		}
@@ -226,7 +226,7 @@ public abstract class BeanVisitor {
 	 * @param binding
 	 * @param document
 	 * @param owningDocument The owning document that got us here (by recursion)
-	 * @param owningReference The owning document's reference that got us here (by recursion)
+	 * @param owningRelation The owning document's relation that got us here (by recursion)
 	 * @param bean
 	 * @return <code>false</code> to terminate, <code>true</code> to continue.
 	 * @throws Exception
@@ -234,7 +234,7 @@ public abstract class BeanVisitor {
 	protected abstract boolean accept(String binding,
 										Document document,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningRelation,
 										Bean bean,
 										boolean visitingInheritedDocument) 
 	throws Exception;

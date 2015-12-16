@@ -8,9 +8,9 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.JSONUtil;
 
@@ -30,10 +30,15 @@ public class AuditJSONGenerator extends BeanVisitor {
 	protected boolean accept(String binding,
 								Document document,
 								Document owningDocument,
-								Reference owningReference,
+								Relation owningRelation,
 								Bean bean,
 								boolean visitingInheritedDocument)
 	throws Exception {
+		// stop recursive processing if this is an inverse
+		if (owningRelation instanceof Inverse) {
+			return false;
+		}
+
 		if (! visitingInheritedDocument) {
 			Map<String, Object> node = new TreeMap<>();
 	

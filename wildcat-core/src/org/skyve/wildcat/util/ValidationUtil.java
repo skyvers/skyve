@@ -8,9 +8,9 @@ import java.util.logging.Level;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
@@ -364,7 +365,7 @@ public class ValidationUtil {
 			protected boolean accept(String binding,
 							Document document,
 							Document owningDocument,
-							Reference owningReference,
+							Relation owningRelation,
 							Bean bean,
 							boolean visitingInheritedDocument)
 			throws DomainException, MetaDataException {

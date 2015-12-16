@@ -8,9 +8,10 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.util.BeanVisitor;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
@@ -46,7 +47,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningRelation,
 										Bean bean,
 										boolean visitingInheritedDocument)
 			throws Exception {
@@ -55,13 +56,18 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 					return true;
 				}
 
+				// stop recursive processing if we have an inverse
+				if (owningRelation instanceof Inverse) {
+					return false;
+				}
+				
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
 				}
 				
 //System.out.println("OB = " + binding + " -> " + bean);
-				bindingToNodes.put(binding, createNode(binding, owningReference, currentDocument, bean, true));
+				bindingToNodes.put(binding, createNode(binding, owningRelation, currentDocument, bean, true));
 
 				return true;
 			}
@@ -74,7 +80,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningRelation,
 										Bean bean,
 										boolean visitingInheritedDocument)
 			throws Exception {
@@ -83,6 +89,11 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 					return true;
 				}
 
+				// stop recursive processing if we have an inverse
+				if (owningRelation instanceof Inverse) {
+					return false;
+				}
+				
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
@@ -90,7 +101,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 				
 				ComparisonComposite node = bindingToNodes.get(binding);
 				if (node == null) { // deleted entry
-					bindingToNodes.put(binding, createNode(binding, owningReference, currentDocument, bean, false));
+					bindingToNodes.put(binding, createNode(binding, owningRelation, currentDocument, bean, false));
 				}
 				else { // existing entry
 					updateNode(bean, node);
@@ -125,7 +136,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 	}
 	
 	private ComparisonComposite createNode(String binding,
-											Reference owningReference,
+											Relation owningRelation,
 											Document currentDocument,
 											Bean bean,
 											boolean newNode)
@@ -136,13 +147,13 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 											((PersistentBean) bean).getBizKey() : 
 											currentDocument.getSingularAlias());
 		result.setDocument(currentDocument);
-		if (owningReference == null) {
+		if (owningRelation == null) {
 			result.setReferenceName(null);
 			result.setRelationshipDescription(currentDocument.getSingularAlias());
 		}
 		else {
-			result.setReferenceName(owningReference.getName());
-			result.setRelationshipDescription(owningReference.getDisplayName());
+			result.setReferenceName(owningRelation.getName());
+			result.setRelationshipDescription(owningRelation.getDisplayName());
 		}
 		result.setMutation(newNode ? Mutation.added : Mutation.deleted);
 		addProperties(result, currentDocument, bean, newNode, binding);
@@ -183,7 +194,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 			else {
 				fqAttributeBinding = new StringBuilder(128).append(binding).append('.').append(attribute.getName()).toString();
 			}
-			if ((! (attribute instanceof Reference)) && (! excluded(fqAttributeBinding))) {
+			if ((! (attribute instanceof Relation)) && (! excluded(fqAttributeBinding))) {
 				ComparisonProperty property = new ComparisonProperty();
 				String name = attribute.getName();
 				property.setName(name);

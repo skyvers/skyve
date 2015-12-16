@@ -5,18 +5,18 @@ import java.util.List;
 
 import modules.admin.domain.DataGroup;
 
-import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.wildcat.util.BeanVisitor;
 
 public class DataGroupUtil {
 	
@@ -40,7 +40,7 @@ public class DataGroupUtil {
 
 		new BeanVisitor() {
 			@Override
-			protected boolean accept(String binding, Document doc, Document owningDocument, Reference owningReference, Bean bean, boolean visitingInheritedDocument) throws Exception {
+			protected boolean accept(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean, boolean visitingInheritedDocument) throws Exception {
 				System.out.println("binding: " + binding);
 				return true;
 			}

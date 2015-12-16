@@ -4,12 +4,12 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.metadata.model.Persistent;
-import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Reference.ReferenceType;
+import org.skyve.metadata.model.document.Relation;
 
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
@@ -18,7 +18,7 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	protected final boolean accept(String binding,
 									Document visitedDocument,
 									Document owningDocument,
-									Reference owningReference,
+									Relation owningRelation,
 									Bean visitedBean,
 									boolean visitingInheritedDocument)
 	throws Exception {
@@ -29,17 +29,23 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 				(persistent.getName() != null) &&
 				CORE.getPersistence().isPersisted(visitedBean)) { // persistent document and persisted bean
 			// check if top document or we have a persistent reference
-			boolean validate = (owningReference == null) || owningReference.isPersistent();
+			boolean validate = (owningRelation == null) || owningRelation.isPersistent();
 
 			// check if binding isn't a parent binding - parent beans are not cascaded
 			validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
 
 			// don't check aggregations as they are not cascaded
-			if (validate && (owningReference instanceof Association)) {
-				validate = (! AssociationType.aggregation.equals(owningReference.getType())); // not an aggregation
-			}
-			if (validate && (owningReference instanceof Collection)) {
-				validate = (! CollectionType.aggregation.equals(owningReference.getType())); // not an aggregation
+			if (validate) {
+				if (owningRelation instanceof Reference) {
+					Reference owningReference = (Reference) owningRelation;
+					ReferenceType referenceType = owningReference.getType();
+					validate = (! AssociationType.aggregation.equals(referenceType)) && 
+								(! CollectionType.aggregation.equals(referenceType));
+				}
+				// don't validate inverse relations
+				else {
+					validate = false;
+				}
 			}
 
 			if (validate) {

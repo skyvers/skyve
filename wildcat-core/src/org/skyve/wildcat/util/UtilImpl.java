@@ -21,11 +21,13 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.metadata.model.document.AssociationImpl;
+import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
@@ -114,7 +116,7 @@ public class UtilImpl {
 	
 	// For versioning javascript for web site
 	public static final String JAVASCRIPT_FILE_VERSION = "20151208";
-	public static final String WILDCAT_VERSION = "20151208";
+	public static final String WILDCAT_VERSION = "20151215";
 	public static final String SMART_CLIENT_DIR = "isomorphic10a";
 	
 	private static String absoluteBasePath;
@@ -188,7 +190,7 @@ public class UtilImpl {
 			protected boolean accept(String binding,
 										Document documentAccepted,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningRelation,
 										Bean beanAccepted,
 										boolean visitingInheritedDocument) 
 			throws DomainException, MetaDataException {
@@ -217,10 +219,15 @@ public class UtilImpl {
 		protected boolean accept(String binding,
 									Document documentAccepted,
 									Document owningDocument,
-									Reference owningReference,
+									Relation owningRelation,
 									Bean beanAccepted,
 									boolean visitingInheritedDocument) 
 		throws DomainException, MetaDataException {
+			// Don't check inverses as they aren't cascaded anyway
+			if (owningRelation instanceof Inverse) {
+				return false;
+			}
+
 			if (beanAccepted.isChanged()) {
 				changed = true;
 				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
