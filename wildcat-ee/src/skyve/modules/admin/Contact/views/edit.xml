@@ -28,6 +28,11 @@
 					<default binding="mobile" />
 				</item>
 			</row>
+			<row>
+				<item>
+					<default binding="resume" />
+				</item>
+			</row>
 		</form>
 		<form percentageWidth="50">
 			<column />

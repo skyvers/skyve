@@ -38,6 +38,9 @@
 		</text>
 		<content name="image">
 			<displayName>Image</displayName>
+		</content>
+		<content name="resume" >
+			<displayName>Resume</displayName>
 		</content>		
 	</attributes>
 </document>

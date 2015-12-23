@@ -42,6 +42,8 @@ public class Contact extends AbstractPersistentBean {
 	public static final String mobilePropertyName = "mobile";
 	/** @hidden */
 	public static final String imagePropertyName = "image";
+	/** @hidden */
+	public static final String resumePropertyName = "resume";
 
 	/**
 	 * Whether this contact is a person or an organisation.
@@ -119,6 +121,7 @@ public class Contact extends AbstractPersistentBean {
 	private String email1;
 	private String mobile;
 	private String image;
+	private String resume;
 
 	@Override
 	@XmlTransient
@@ -236,5 +239,23 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 	public void setImage(String image) {
 		preset(imagePropertyName, image);
 		this.image = image;
+	}
+
+	/**
+	 * {@link #resume} accessor.
+	 **/
+	public String getResume() {
+		return resume;
+	}
+
+	/**
+	 * {@link #resume} mutator.
+	 * 
+	 * @param resume	The new value to set.
+	 **/
+	@XmlElement
+	public void setResume(String resume) {
+		preset(resumePropertyName, resume);
+		this.resume = resume;
 	}
 }
