@@ -584,7 +584,6 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							throw new MetaDataException(metaDataName + " : The association [type] is required for association " +
 															relation.getName());
 						}
-						result.putReference(association);
 					}
 					else if (relation instanceof Collection) {
 						Collection collection = (Collection) relation;
@@ -609,11 +608,9 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 								}
 							}
 						}
-						result.putReference(collection);
 					}
-					else if (attribute instanceof Inverse) {
-						result.putAttribute(attribute);
-					}
+
+					result.putRelation(relation);
 				}
 			}
 		}

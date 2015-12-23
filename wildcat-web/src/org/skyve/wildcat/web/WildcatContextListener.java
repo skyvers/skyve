@@ -2,6 +2,7 @@ package org.skyve.wildcat.web;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -46,8 +47,8 @@ public class WildcatContextListener implements ServletContextListener {
 		}
 
 		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream(propertiesFilePath));
+		try (InputStream is = new FileInputStream(propertiesFilePath)) {
+			properties.load(is);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Could not find app properties file " + propertiesFilePath, e);

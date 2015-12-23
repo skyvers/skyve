@@ -62,11 +62,11 @@ public interface Document extends Model {
 	/**
 	 * 
 	 * @param customer
-	 * @param referenceName
+	 * @param relationName
 	 * @return
 	 * @throws MetaDataException
 	 */
-	public Document getReferencedDocument(Customer customer, String referenceName) 
+	public Document getRelatedDocument(Customer customer, String relationName) 
 	throws MetaDataException;
 	
 	/**

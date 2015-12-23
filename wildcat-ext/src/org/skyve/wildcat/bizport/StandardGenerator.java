@@ -24,9 +24,11 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
+import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.UtilImpl;
@@ -94,10 +96,16 @@ public final class StandardGenerator {
 			protected boolean accept(String binding,
 										Document processDocument,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningReference,
 										Bean processBean,
 										boolean visitingInheritedDocument) throws Exception {
 				UtilImpl.LOGGER.info("B = " + binding);
+
+				// stop recursive processing if this is an inverse
+				if (owningReference instanceof Inverse) {
+					return false;
+				}
+
 				// stop recursive processing if we have matched an exclusion
 				for (String exclusion : exclusions) {
 					if (binding.startsWith(exclusion)) {
@@ -157,9 +165,15 @@ public final class StandardGenerator {
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
-										Reference owningReference,
+										Relation owningReference,
 										Bean bean,
 										boolean visitingInheritedDocument) throws Exception {
+
+				// stop recursive processing if this is an inverse
+				if (owningReference instanceof Inverse) {
+					return false;
+				}
+
 				if ("".equals(binding)) { // top level
 					topBean = bean;
 				}

@@ -653,8 +653,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	    				Attribute attribute = target.getAttribute();
 	    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
 	    					// find the existing bean with retrieve
-	    					Document referenceDocument = target.getDocument().getReferencedDocument(customer, 
-	    																									attribute.getName());
+	    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
+																									attribute.getName());
 	    					Bean parameterBean = persistence.retrieve(referenceDocument, 
 																		(String) parameterValue, 
 																		false);

@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/ejb3-persistence.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jfreechart-1.0.12.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/quartz-1.6.0.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/SuperCSV-1.52.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate-annotations.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar" sourcepath="/Users/mike/.m2/repository/com/vividsolutions/jts/1.13/jts-1.13-sources.jar"/>
@@ -34,5 +33,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/tika-parsers-1.5.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/elasticsearch-1.4.2.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/lucene-core-4.10.2.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/super-csv-2.4.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

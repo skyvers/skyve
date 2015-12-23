@@ -129,7 +129,7 @@ public class CustomerResourceServlet extends HttpServlet {
 				result = MimeType.png;
 			}
 			else if (file != null) {
-				MimeType.fromFileName(file.getName());
+				result = MimeType.fromFileName(file.getName());
 			}
 			else if (content != null) {
 				result = content.getMimeType();

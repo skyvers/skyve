@@ -15,6 +15,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
@@ -67,11 +69,16 @@ public abstract class AbstractBean implements Bean {
 	
 	@Override
 	public final boolean isChanged() {
+		Customer customer = null;
+		Module module = null;
 		Document document = null;
 		try {
-			Customer customer = CORE.getUser().getCustomer();
+			customer = CORE.getUser().getCustomer();
 			if (customer != null) {
-				document = customer.getModule(getBizModule()).getDocument(customer, getBizDocument());
+				module = customer.getModule(getBizModule());
+				if (module != null) {
+					document = module.getDocument(customer, getBizDocument());
+				}
 			}
 		} 
 		catch (MetaDataException e) {
@@ -93,12 +100,22 @@ public abstract class AbstractBean implements Bean {
 						}
 						
 						boolean trackChanges = true;
-						if (document != null) {
+						if ((customer != null) && (module != null) && (document != null)) {
 							try {
 								// If this collection is an attribute (could be on an extension object)
 								// then check the trackChanges switch, but if it isn't a metadata attribute,
 								// treat it as if it's not dirty
-								Attribute attribute = document.getAttribute(propertyName);
+								Attribute attribute = null;
+								try {
+									// NB Check for base documents also
+									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, propertyName);
+									if (target != null) {
+										attribute = target.getAttribute();
+									}
+								}
+								catch (MetaDataException e) {
+									// nothing to really do here
+								}
 								if (attribute == null) {
 									trackChanges = false; // its an extension attribute, so its not to be tracked
 								}
