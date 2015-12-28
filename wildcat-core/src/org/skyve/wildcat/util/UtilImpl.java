@@ -27,7 +27,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
 import org.skyve.wildcat.metadata.model.document.AssociationImpl;
-import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
@@ -185,14 +184,13 @@ public class UtilImpl {
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
 		// Ensure that everything is loaded
-		new BeanVisitor() {
+		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
 										Document documentAccepted,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean beanAccepted,
-										boolean visitingInheritedDocument) 
+										Bean beanAccepted) 
 			throws DomainException, MetaDataException {
 				// do nothing - just visiting loads the instance from the database
 				try {
@@ -214,20 +212,19 @@ public class UtilImpl {
 	 */
 	private static class ChangedBeanVisitor extends BeanVisitor {
 		private boolean changed = false;
-		
+
+		private ChangedBeanVisitor() {
+			// Don't check inverses as they aren't cascaded anyway
+			super(false, false, false);
+		}
+
 		@Override
 		protected boolean accept(String binding,
 									Document documentAccepted,
 									Document owningDocument,
 									Relation owningRelation,
-									Bean beanAccepted,
-									boolean visitingInheritedDocument) 
+									Bean beanAccepted) 
 		throws DomainException, MetaDataException {
-			// Don't check inverses as they aren't cascaded anyway
-			if (owningRelation instanceof Inverse) {
-				return false;
-			}
-
 			if (beanAccepted.isChanged()) {
 				changed = true;
 				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");

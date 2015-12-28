@@ -37,9 +37,13 @@ public class BeanValidator {
 	}
 
 	/**
+	 * Validate a bean against its bizlet .validate().
+	 * NB This validation method does NOT recursively validate using bizlets through
+	 * the base document hierarchy as the bizlet class should be arranged in such a way as to extend the
+	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
 	 * 
-	 * @param bizlet
-	 * @param bean
+	 * @param bizlet	To validate against
+	 * @param bean	To validate
 	 * @throws ValidationException
 	 */
 	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) 

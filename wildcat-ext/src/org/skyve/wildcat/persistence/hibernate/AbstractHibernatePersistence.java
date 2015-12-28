@@ -89,14 +89,12 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
@@ -124,6 +122,7 @@ import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.BeanVisitor;
+import org.skyve.wildcat.util.CascadeDeleteBeanVisitor;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.ValidationUtil;
 
@@ -792,20 +791,17 @@ t.printStackTrace();
 	throws DomainException, MetaDataException {
 		final Customer customer = user.getCustomer();
 
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
-										Bean bean,
-										boolean visitingInheritedDocument) 
+										Bean bean) 
 			throws Exception {
-				// Don't need to set all this stuff for inherited documents as it is set at the concrete level anyway
 				Persistent persistent = document.getPersistent();
-				if ((! visitingInheritedDocument) &&
-						(persistent != null) && 
+				if ((persistent != null) && 
 						(persistent.getName() != null)) { // persistent document
 					// dataGroup and user are NOT set here - it is only set on newInstance()
 					// this allows us to set the data group programmatically.
@@ -848,15 +844,14 @@ t.printStackTrace();
 		
 		// Validate all and sundry before touching the database
 		final Customer customer = user.getCustomer();
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			@SuppressWarnings( {"synthetic-access"})
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
-										Bean bean,
-										boolean visitingInheritedDocument)
+										Bean bean)
 			throws Exception {
 				// NOTE:- We only check if the document is a persistent document here,
 				// not if the reference (if any) is persistent.
@@ -868,8 +863,8 @@ t.printStackTrace();
 				try {
 					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 
-					// persistent and concrete for this bean graph
-					if ((! visitingInheritedDocument) && (persistentName != null)) {
+					// persistent
+					if (persistentName != null) {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePreSave(bean);
 						if (! vetoed) {
@@ -884,7 +879,7 @@ t.printStackTrace();
 					
 					ValidationUtil.validateBeanAgainstDocument(document, bean);
 
-					if ((! visitingInheritedDocument) && (bizlet != null)) { // concrete for this bean graph with a bizlet
+					if (bizlet != null) { // has a bizlet
 						ValidationUtil.validateBeanAgainstBizlet(bizlet, bean);
 					}
 
@@ -962,20 +957,19 @@ t.printStackTrace();
 	throws DomainException, MetaDataException {
 		final Customer customer = user.getCustomer();
 		
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
-										Bean bean,
-										boolean visitingInheritedDocument) 
+										Bean bean) 
 			throws Exception {
 				Persistent persistent = document.getPersistent();
 				String persistentName = (persistent == null) ? null : persistent.getName();
 				
-				// persistent and concrete for this bean graph
-				if ((! visitingInheritedDocument) && (persistentName != null)) {
+				// persistent for this bean graph
+				if (persistentName != null) {
 					try {
 						CustomerImpl internalCustomer = (CustomerImpl) customer;
 						boolean vetoed = internalCustomer.interceptBeforePostSave(bean);
@@ -1010,20 +1004,19 @@ t.printStackTrace();
 	throws DomainException, MetaDataException {
 		Customer customer = user.getCustomer();
 
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
-										Bean bean,
-										boolean visitingInheritedDocument) 
+										Bean bean) 
 			throws DomainException, MetaDataException {
 				String attributeBinding = null;
 
 				try {
 					// set the transient attributes in the beanToSave
-					for (Attribute attribute : document.getAttributes()) {
+					for (Attribute attribute : document.getAllAttributes()) {
 						String attributeName = attribute.getName();
 						if ((! attribute.isPersistent()) && (! Bean.BIZ_KEY.equals(attributeName))) {
 							attributeBinding = attributeName;
@@ -1220,57 +1213,6 @@ t.printStackTrace();
 		}
 	}
 
-	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
-	
-	private abstract class DeleteValidationBeanVisitor extends BeanVisitor {
-		@Override
-		protected final boolean accept(String binding,
-										Document visitedDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean visitedBean,
-										boolean visitingInheritedDocument)
-		throws Exception {
-			// No use checking referential integrity on a bean that is not persisted as
-			// nothing will have referenced it yet.
-			Persistent persistent = visitedDocument.getPersistent();
-			if ((persistent != null) && 
-					(persistent.getName() != null) &&
-					isPersisted(visitedBean)) { // persistent document and persisted bean
-				// check if top document or we have a persistent reference
-				boolean validate = (owningRelation == null) || owningRelation.isPersistent();
-
-				// check if binding isn't a parent binding - parent beans are not cascaded
-				validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
-
-				// don't check aggregations as they are not cascaded
-				if (validate) {
-					if (owningRelation instanceof Reference) {
-						Reference owningReference = (Reference) owningRelation;
-						ReferenceType referenceType = owningReference.getType();
-						validate = (! AssociationType.aggregation.equals(referenceType)) && 
-									(! CollectionType.aggregation.equals(referenceType));
-					}
-					// don't validate inverse relations
-					else {
-						validate = false;
-					}
-				}
-				
-				if (validate) {
-					preDeleteProcessing(visitedDocument, visitedBean);
-					// continue looking for composed objects to validate
-					return true;
-				}
-			}
-
-			// stop traversing this object graph branch as this is an aggregated or a parent object
-			return false;
-		}
-		
-		abstract void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) throws Exception;
-	}
-	
 	// Do not increase visibility of this method as we don't want it to be public.
 	private void checkReferentialIntegrityOnDelete(Document document, 
 													PersistentBean beanToDelete, 
@@ -1695,11 +1637,11 @@ t.printStackTrace();
 		Document document = module.getDocument(customer, beanToDelete.getBizDocument());
 		
 		// Collect beans to be cascaded
-		new DeleteValidationBeanVisitor() {
+		new CascadeDeleteBeanVisitor() {
 			@Override
-			void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) {
+			public void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) {
 				String entityName = AbstractHibernatePersistence.this.getDocumentEntityName(documentToCascade.getOwningModuleName(),
-																						documentToCascade.getName());
+																								documentToCascade.getName());
 				Set<Bean> theseBeansToDelete = beansToDelete.get(entityName);
 				if (theseBeansToDelete == null) {
 					theseBeansToDelete = new TreeSet<>();

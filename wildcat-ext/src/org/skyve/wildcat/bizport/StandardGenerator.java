@@ -28,7 +28,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
-import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.UtilImpl;
@@ -89,7 +88,7 @@ public final class StandardGenerator {
 	 */
 	public void generateStructure(final BizPortWorkbook workbook) 
 	throws DomainException, MetaDataException {
-		new BeanVisitor() {
+		new BeanVisitor(true, false, false) {
 			// processBean can be null as we are visiting ALL
 			@Override
 			@SuppressWarnings("synthetic-access")
@@ -97,14 +96,8 @@ public final class StandardGenerator {
 										Document processDocument,
 										Document owningDocument,
 										Relation owningReference,
-										Bean processBean,
-										boolean visitingInheritedDocument) throws Exception {
+										Bean processBean) throws Exception {
 				UtilImpl.LOGGER.info("B = " + binding);
-
-				// stop recursive processing if this is an inverse
-				if (owningReference instanceof Inverse) {
-					return false;
-				}
 
 				// stop recursive processing if we have matched an exclusion
 				for (String exclusion : exclusions) {
@@ -141,7 +134,7 @@ public final class StandardGenerator {
 
 				return recurse;
 			}
-		}.visitAll(document, null, customer);
+		}.visit(document, null, customer);
 	}
 
 	/**
@@ -156,7 +149,7 @@ public final class StandardGenerator {
 	throws DomainException, MetaDataException {
 		// Recursively walks the topBean's object graph populating the relevant 
 		// sheets in the workbook.
-		BeanVisitor excelBeanVisitor = new BeanVisitor() {
+		BeanVisitor excelBeanVisitor = new BeanVisitor(false, false, false) {
 			// the top-most bean to process
 			private Bean topBean;
 
@@ -166,14 +159,7 @@ public final class StandardGenerator {
 										Document currentDocument,
 										Document owningDocument,
 										Relation owningReference,
-										Bean bean,
-										boolean visitingInheritedDocument) throws Exception {
-
-				// stop recursive processing if this is an inverse
-				if (owningReference instanceof Inverse) {
-					return false;
-				}
-
+										Bean bean) throws Exception {
 				if ("".equals(binding)) { // top level
 					topBean = bean;
 				}
@@ -229,7 +215,7 @@ public final class StandardGenerator {
 						sheet.setValue(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
 					}
 
-					for (Attribute attribute : currentDocument.getAttributes()) {
+					for (Attribute attribute : currentDocument.getAllAttributes()) {
 						AttributeType type = attribute.getAttributeType();
 						String name = attribute.getName();
 

@@ -38,13 +38,13 @@ public class DataGroupUtil {
 
 		System.out.println("For DataGroup" + dg.getName());
 
-		new BeanVisitor() {
+		new BeanVisitor(true, true, false) {
 			@Override
-			protected boolean accept(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean, boolean visitingInheritedDocument) throws Exception {
+			protected boolean accept(String binding, Document doc, Document owningDocument, Relation owningRelation, Bean bean) throws Exception {
 				System.out.println("binding: " + binding);
 				return true;
 			}
-		}.visitAll(document, b, customer);
+		}.visit(document, b, customer);
 	}
 
 	public static boolean currentAdminUserIsInDataGroup(){

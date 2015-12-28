@@ -10,35 +10,47 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.metadata.model.document.Inverse;
 
 public abstract class BeanVisitor {
+	private boolean visitNulls;
+	private boolean visitInverses;
+	private boolean vectorCyclicDetection;
+	
 	/**
-	 * Visit a bean's relations including relations that are not defined. 
-	 * In this method call, the bean can be null, which will visit all bindings defined in the document. 
-	 * Each component instance is visited ONCE, if a component instance is null 
-	 * then the document metadata is used for traversal.
+	 * Visit the structure of a bean (and it's related graph).
 	 * 
-	 * @param document The document to visit.
-	 * @param bean The bean instance to visit, can be null.
-	 * @param customer
-	 * @throws DomainException
-	 * @throws MetaDataException
+	 * @param visitNulls	Visit a bean's relations including relations that are not defined.
+	 * 						In this method call, the bean can be null, which will visit all bindings defined in the document.
+	 * 						If a component instance is null then the document metadata is used for traversal.
+	 * @param visitInverses	Visit any inverses defined in the document.
+	 * 						This option is available as inverses are weakly referenced (not validated, not cascaded).
+	 * @param vectorCyclicDetection	Cyclic dependencies are detected by keeping a breadcrumb list of beans visited.
+	 * 								If the bean has been visited before, it is not visited again.
+	 * 								This guarantees that a bean is visited ONLY ONCE.
+	 * 								But some processing types need to know where the bean was traversed from.
+	 * 								It then keeps a vector of the bean and its traversal direction.
+	 * 								eg visited contact "mike" from User "mike" through the association "contact".
+	 * 								In vector mode, a bean may be visited MORE THAN ONCE if it has multiple references
+	 * 								within the same object graph.
+	 * 
+	 * This visit method is thread-safe - the same instance can be used in multiple threads.
 	 */
-	public void visitAll(Document document, Bean bean, Customer customer) 
-	throws DomainException, MetaDataException {
-		Set<Bean> visitedBeans = new HashSet<>();
-		visit("", document, null, null, bean, customer, visitedBeans, true, false);
+	public BeanVisitor(boolean visitNulls,
+						boolean visitInverses,
+						boolean vectorCyclicDetection) {
+		this.visitNulls = visitNulls;
+		this.visitInverses = visitInverses;
+		this.vectorCyclicDetection = vectorCyclicDetection;
 	}
-
+	
 	/**
 	 * Visit a bean excluding relations that are null. 
-	 * Each instance is visited ONCE.
+	 * This method is thread-safe.
 	 * 
 	 * @param document
 	 * @param bean
@@ -46,55 +58,74 @@ public abstract class BeanVisitor {
 	 * @throws DomainException
 	 * @throws MetaDataException
 	 */
-	public void visit(Document document, Bean bean, Customer customer)
+	public void visit(Document document, 
+						Bean bean, 
+						Customer customer)
 	throws DomainException, MetaDataException {
-		Set<Bean> visitedBeans = new HashSet<>();
-		visit("", document, null, null, bean, customer, visitedBeans, false, false);
+		Set<String> visited = new HashSet<>();
+		visit("", document, null, null, bean, customer, visited);
 	}
 
+	private String determineVisitedKey(Bean bean, 
+										Document owningDocument,
+										Relation owningRelation) {
+		if (vectorCyclicDetection) {
+			StringBuilder sb = new StringBuilder(128).append(bean.getBizId());
+			if (owningRelation != null) {
+				sb.append(owningRelation.getName());
+			}
+			if (owningDocument != null) {
+				sb.append(owningDocument.getName()).append(owningDocument.getOwningModuleName());
+			}
+			return sb.toString();
+		}
+		return bean.getBizId();
+	}
+	
 	private void visit(String binding,
 						Document document,
 						Document owningDocument,
 						Relation owningRelation,
 						Bean bean,
 						Customer customer,
-						Set<Bean> visitedBeans,
-						boolean visitNulls,
-						boolean visitingInheritedDocument) 
+						Set<String> visited) 
 	throws DomainException, MetaDataException {
-		if (! visitingInheritedDocument) {
-			if (bean == null) {
-				if (owningRelation != null) {
-					String owningRelationName = owningRelation.getName();
-					String bindingWithoutThisRelationName = binding.substring(0, binding.length() - owningRelationName.length());
-					// have we seen a relation with this name before
-					int index = bindingWithoutThisRelationName.lastIndexOf(owningRelationName);
-					if (index >= 0) {
-						index += owningRelationName.length() + 1;
-						String potentialCircularBinding = binding.substring(index) + '.';
-						if ((index - potentialCircularBinding.length()) >= 0) { // enough in the binding to create the prior binding
-							String bindingPriorToPotentialCircularBinding = binding.substring(index - potentialCircularBinding.length(), index);
-							if (bindingPriorToPotentialCircularBinding.equals(potentialCircularBinding)) {
-								return;
-							}
+		if (bean == null) {
+			if (owningRelation != null) {
+				String owningRelationName = owningRelation.getName();
+				String bindingWithoutThisRelationName = binding.substring(0, binding.length() - owningRelationName.length());
+				// have we seen a relation with this name before
+				int index = bindingWithoutThisRelationName.lastIndexOf(owningRelationName);
+				if (index >= 0) {
+					index += owningRelationName.length() + 1;
+					String potentialCircularBinding = binding.substring(index) + '.';
+					if ((index - potentialCircularBinding.length()) >= 0) { // enough in the binding to create the prior binding
+						String bindingPriorToPotentialCircularBinding = binding.substring(index - potentialCircularBinding.length(), index);
+						if (bindingPriorToPotentialCircularBinding.equals(potentialCircularBinding)) {
+							return;
 						}
 					}
 				}
 			}
-			else {
-				if (visitedBeans.contains(bean)) {
-					return;
-				}
-				visitedBeans.add(bean);
+		}
+		else {
+			String key = determineVisitedKey(bean, owningDocument, owningRelation);
+			if (visited.contains(key)) {
+				return;
 			}
+			visited.add(key);
 		}
 		
 		StringBuilder sb = new StringBuilder(64);
 		try {
-			if (accept(binding, document, owningDocument, owningRelation, bean, visitingInheritedDocument)) {
-				// NB visit relations in the order they are defined in the document.
-				for (Attribute attribute : document.getAttributes()) {
+			if (accept(binding, document, owningDocument, owningRelation, bean)) {
+				// NB visit relations in the order they are defined in the documents.
+				for (Attribute attribute : document.getAllAttributes()) {
 					if (attribute instanceof Relation) {
+						if ((! visitInverses) && (attribute instanceof Inverse)) {
+							continue;
+						}
+
 						String relationName = attribute.getName();
 						Document referencedDocument = document.getRelatedDocument(customer, relationName);
 						Relation childRelation = (Relation) attribute;
@@ -112,9 +143,7 @@ public abstract class BeanVisitor {
 										childRelation, 
 										child, 
 										customer, 
-										visitedBeans, 
-										visitNulls,
-										false);
+										visited);
 							}
 						}
 						else { // collection or inverse
@@ -135,9 +164,7 @@ public abstract class BeanVisitor {
 												childRelation, 
 												child, 
 												customer,
-												visitedBeans, 
-												visitNulls,
-												false);
+												visited);
 									}
 									i++;
 								}
@@ -153,9 +180,7 @@ public abstract class BeanVisitor {
 											childRelation, 
 											null, 
 											customer, 
-											visitedBeans, 
-											visitNulls,
-											false);
+											visited);
 								}
 							}
 							else {
@@ -170,9 +195,7 @@ public abstract class BeanVisitor {
 										childRelation, 
 										null, 
 										customer, 
-										visitedBeans, 
-										visitNulls,
-										false);
+										visited);
 							}
 						}
 					}
@@ -195,17 +218,8 @@ public abstract class BeanVisitor {
 								null, 
 								parent, 
 								customer, 
-								visitedBeans, 
-								visitNulls,
-								false);
+								visited);
 					}
-				}
-				
-				Extends inherits = document.getExtends();
-				if (inherits != null) {
-					Module module = customer.getModule(document.getOwningModuleName());
-					Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
-					visit(binding, baseDocument, owningDocument, owningRelation, bean, customer, visitedBeans, visitNulls, true);
 				}
 			}
 		}
@@ -235,7 +249,6 @@ public abstract class BeanVisitor {
 										Document document,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean bean,
-										boolean visitingInheritedDocument) 
+										Bean bean) 
 	throws Exception;
 }

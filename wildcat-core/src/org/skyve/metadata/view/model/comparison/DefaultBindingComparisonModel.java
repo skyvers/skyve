@@ -11,7 +11,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.util.BeanVisitor;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
@@ -41,26 +40,15 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the new bean and add in the model structure
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean bean,
-										boolean visitingInheritedDocument)
+										Bean bean)
 			throws Exception {
-				// No need to visit inherited documents as the properties are processed with document.getAllAttributes()
-				if (visitingInheritedDocument) {
-					return true;
-				}
-
-				// stop recursive processing if we have an inverse
-				if (owningRelation instanceof Inverse) {
-					return false;
-				}
-				
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
@@ -74,26 +62,15 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		}.visit(document, boundBean, customer);
 
 		// Visit oldBean and add/modify the resulting model.
-		new BeanVisitor() {
+		new BeanVisitor(false, false, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			protected boolean accept(String binding,
 										Document currentDocument,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean bean,
-										boolean visitingInheritedDocument)
+										Bean bean)
 			throws Exception {
-				// No need to visit inherited documents as the properties are processed with document.getAllAttributes()
-				if (visitingInheritedDocument) {
-					return true;
-				}
-
-				// stop recursive processing if we have an inverse
-				if (owningRelation instanceof Inverse) {
-					return false;
-				}
-				
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
 					return false;
