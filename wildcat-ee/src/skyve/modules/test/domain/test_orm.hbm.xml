@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<typedef name="OptimisticLock" class="org.skyve.wildcat.domain.types.OptimisticLockUserType" />
+	<typedef name="Decimal2" class="org.skyve.wildcat.domain.types.Decimal2UserType" />
+	<typedef name="Decimal5" class="org.skyve.wildcat.domain.types.Decimal5UserType" />
+	<typedef name="Decimal10" class="org.skyve.wildcat.domain.types.Decimal10UserType" />
+	<typedef name="DateOnly" class="org.skyve.wildcat.domain.types.DateOnlyUserType" />
+	<typedef name="DateTime" class="org.skyve.wildcat.domain.types.DateTimeUserType" />
+	<typedef name="TimeOnly" class="org.skyve.wildcat.domain.types.TimeOnlyUserType" />
+	<typedef name="Timestamp" class="org.skyve.wildcat.domain.types.TimestampUserType" />
+	<typedef name="Enum" class="org.skyve.wildcat.domain.types.EnumUserType" />
+	<typedef name="Geometry" class="org.hibernatespatial.GeometryUserType" />
+
+	<class name="modules.test.domain.AllAttributesPersistent" table="TEST_AllAttributesPersistent" entity-name="testAllAttributesPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
+		<property name="booleanFlag" />
+		<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" column="element_id" />
+		</bag>
+		<property name="colour" />
+		<property name="date" type="DateOnly" />
+		<property name="dateTime" type="DateTime" />
+		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+		<property name="enum3" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.AllAttributesPersistent$Enum3</param>
+			</type>
+		</property>
+		<property name="geometry" type="Geometry" />
+		<property name="id" length="36" />
+		<property name="integer" />
+		<bag name="inverseAggregatedAssociation" inverse="true">
+			<key column="aggregatedAssociation_id" />
+			<one-to-many entity-name="testAllAttributesPersistent" />
+		</bag>
+		<property name="longInteger" />
+		<property name="markup" type="text" />
+		<property name="memo" type="text" />
+		<property name="text" length="255" />
+		<property name="time" type="TimeOnly" />
+		<property name="timestamp" type="Timestamp" />
+		<filter name="testAllAttributesPersistentNoneFilter" condition="1=0"/>
+		<filter name="testAllAttributesPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testAllAttributesPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testAllAttributesPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.AllAttributesRequiredPersistent" table="TEST_AllAttributesRequiredPersistent" entity-name="testAllAttributesRequiredPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesRequiredPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
+		<property name="booleanFlag" />
+		<bag name="aggregatedCollection" table="TEST_AllAttributesRequiredPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" />
+			<many-to-many entity-name="testAllAttributesRequiredPersistent" column="element_id" />
+		</bag>
+		<property name="colour" />
+		<property name="date" type="DateOnly" />
+		<property name="dateTime" type="DateTime" />
+		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+		<property name="enum3" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.AllAttributesRequiredPersistent$Enum3</param>
+			</type>
+		</property>
+		<property name="geometry" type="Geometry" />
+		<property name="id" length="36" />
+		<property name="integer" />
+		<bag name="inverseAggregatedAssociation" inverse="true">
+			<key column="aggregatedAssociation_id" />
+			<one-to-many entity-name="testAllAttributesRequiredPersistent" />
+		</bag>
+		<property name="longInteger" />
+		<property name="markup" type="text" />
+		<property name="memo" type="text" />
+		<property name="text" length="255" />
+		<property name="time" type="TimeOnly" />
+		<property name="timestamp" type="Timestamp" />
+		<filter name="testAllAttributesRequiredPersistentNoneFilter" condition="1=0"/>
+		<filter name="testAllAttributesRequiredPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testAllAttributesRequiredPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testAllAttributesRequiredPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+		<class name="modules.test.MappedExtension.MappedExtensionExtension" table="TEST_MappedExtension" entity-name="testMappedExtension">
+			<id name="bizId" length="36" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+			<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+			<property name="booleanFlag" />
+			<property name="colour" />
+			<property name="date" type="DateOnly" />
+			<property name="dateTime" type="DateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+			<property name="enum3" length="5">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" type="Geometry" />
+			<property name="id" length="36" />
+			<property name="integer" />
+			<property name="longInteger" />
+			<property name="markup" type="text" />
+			<property name="memo" type="text" />
+			<property name="text" length="255" />
+			<property name="time" type="TimeOnly" />
+			<property name="timestamp" type="Timestamp" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtension" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" />
+			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtension" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
+			<bag name="aggregatedCollection" table="TEST_MappedExtension_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+				<key column="owner_id" />
+				<many-to-many entity-name="testMappedExtension" column="element_id" />
+			</bag>
+			<bag name="composedCollection" table="TEST_MappedExtension_composedCollection" cascade="all-delete-orphan">
+				<key column="owner_id" />
+				<many-to-many entity-name="testMappedExtension" column="element_id" />
+			</bag>
+			<bag name="inverseAggregatedAssociation" inverse="true">
+				<key column="aggregatedAssociation_id" />
+				<one-to-many entity-name="testMappedExtension" />
+			</bag>
+			<filter name="testMappedExtensionNoneFilter" condition="1=0"/>
+			<filter name="testMappedExtensionCustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testMappedExtensionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testMappedExtensionUserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
+	<filter-def name="testAllAttributesPersistentNoneFilter" />
+	<filter-def name="testAllAttributesPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllAttributesPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllAttributesPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllAttributesRequiredPersistentNoneFilter" />
+	<filter-def name="testAllAttributesRequiredPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllAttributesRequiredPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAllAttributesRequiredPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionNoneFilter" />
+	<filter-def name="testMappedExtensionCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+</hibernate-mapping>

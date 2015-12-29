@@ -30,6 +30,9 @@ import org.skyve.wildcat.metadata.model.document.AssociationImpl;
 import org.skyve.wildcat.metadata.model.document.field.LengthField;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+
 public class UtilImpl {
 	/**
 	 * Disallow instantiation
@@ -460,17 +463,32 @@ public class UtilImpl {
 			case longInteger:
 				BindUtil.convertAndSet(result, name, new Integer((int) Math.random() * 10000));
 				break;
+			case enumeration:
+				// TODO work out how to set an enum value here
+				break;
+			case geometry:
+				BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
+				break;
+			case id:
+				BindUtil.set(result, name, UUID.randomUUID().toString());
+				break;
 			case markup:
 			case memo:
+				BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
+				break;
 			case text:
-				int length = ((LengthField) attribute).getLength();
-				char[] guts = new char[length];
-				for (int i = 0; i < length; i++) {
-					guts[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
-				}
-				BindUtil.set(result, name, String.valueOf(guts));
+				BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
 			}
 		}
 		return result;
+	}
+	
+	private static String randomString(int length) {
+		char[] guts = new char[length];
+		for (int i = 0; i < length; i++) {
+			guts[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+		
+		return String.valueOf(guts);
 	}
 }

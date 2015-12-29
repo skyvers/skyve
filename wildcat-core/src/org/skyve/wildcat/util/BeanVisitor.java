@@ -13,6 +13,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.Inverse;
 
@@ -127,7 +128,8 @@ public abstract class BeanVisitor {
 						}
 
 						String relationName = attribute.getName();
-						Document referencedDocument = document.getRelatedDocument(customer, relationName);
+						Module owningModule = customer.getModule(document.getOwningModuleName());
+						Document relatedDocument = owningModule.getDocument(customer, ((Relation) attribute).getDocumentName());
 						Relation childRelation = (Relation) attribute;
 						if (childRelation instanceof Association) {
 							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, relationName);
@@ -138,7 +140,7 @@ public abstract class BeanVisitor {
 								}
 								sb.append(relationName);
 								visit(sb.toString(), 
-										referencedDocument,
+										relatedDocument,
 										document, 
 										childRelation, 
 										child, 
@@ -159,7 +161,7 @@ public abstract class BeanVisitor {
 										}
 										sb.append(relationName).append('[').append(i).append(']');
 										visit(sb.toString(), 
-												referencedDocument, 
+												relatedDocument, 
 												document, 
 												childRelation, 
 												child, 
@@ -175,7 +177,7 @@ public abstract class BeanVisitor {
 									}
 									sb.append(relationName);
 									visit(sb.toString(), 
-											referencedDocument,
+											relatedDocument,
 											document, 
 											childRelation, 
 											null, 
@@ -190,7 +192,7 @@ public abstract class BeanVisitor {
 								}
 								sb.append(relationName);
 								visit(sb.toString(), 
-										referencedDocument,
+										relatedDocument,
 										document, 
 										childRelation, 
 										null, 
