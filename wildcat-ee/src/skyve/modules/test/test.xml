@@ -6,6 +6,7 @@
 	<documents>
 		<document ref="AllAttributesPersistent" />
 		<document ref="AllAttributesRequiredPersistent" />
+		<document ref="Hierarchical" />
 		<document ref="MappedBase" />
 		<document ref="MappedExtension" />
 	</documents>

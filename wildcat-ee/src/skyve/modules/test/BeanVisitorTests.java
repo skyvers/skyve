@@ -3,42 +3,21 @@ package modules.test;
 import java.util.Set;
 import java.util.TreeSet;
 
+import modules.test.domain.AllAttributesPersistent;
+
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.wildcat.util.BeanVisitor;
 
-import modules.test.domain.AllAttributesPersistent;
-
 public class BeanVisitorTests extends AbstractH2Test {
-	private Persistence p;
-	private User u;
-	private Customer c;
-	private Module m;
-	private Document d;
-
-	@Before
-	public void before() throws Exception {
-		p = CORE.getPersistence();
-		u = p.getUser();
-		c = u.getCustomer();
-		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
-		d = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
-	}
-
 	@Test
 	public void testStandard() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -60,14 +39,14 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test, c);
+		}.visit(aapd, test, c);
 		
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
 	public void testNull() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().get(0).setAggregatedAssociation(null);
 		test.getAggregatedCollection().remove(1);
@@ -119,14 +98,14 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test, c);
+		}.visit(aapd, test, c);
 		
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 	
 	@Test
 	public void testNotNull() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().get(0).setAggregatedAssociation(null);
 		test.getAggregatedCollection().remove(1);
@@ -150,18 +129,18 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test, c);
+		}.visit(aapd, test, c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 	
 	@Test
 	public void testInverses() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		// Load inverses
 		test = p.save(test);
 		p.evictAllCached();
-		test = p.retrieve(d, test.getBizId(), false);
+		test = p.retrieve(aapd, test.getBizId(), false);
 
 		Set<String> expectedBindings = new TreeSet<>();
 		expectedBindings.add("");
@@ -188,14 +167,14 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test.getAggregatedAssociation(), c);
+		}.visit(aapd, test.getAggregatedAssociation(), c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 	
 	@Test
 	public void testScalar() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.setAggregatedAssociation(test);
 		test.getAggregatedCollection().set(0, test);
 		
@@ -218,14 +197,14 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test, c);
+		}.visit(aapd, test, c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 
 	@Test
 	public void testVector() throws Exception {
-		AllAttributesPersistent test = Util.constructRandomInstance(u, m, d, 2);
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		test.getAggregatedCollection().set(0, test.getAggregatedAssociation());
 		
 		Set<String> expectedBindings = new TreeSet<>();
@@ -251,7 +230,7 @@ public class BeanVisitorTests extends AbstractH2Test {
 				return true;
 			}
 			
-		}.visit(d, test, c);
+		}.visit(aapd, test, c);
 
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}

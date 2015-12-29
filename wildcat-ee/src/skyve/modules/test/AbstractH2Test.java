@@ -1,5 +1,11 @@
 package modules.test;
 
+import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.AllAttributesRequiredPersistent;
+import modules.test.domain.Hierarchical;
+import modules.test.domain.MappedBase;
+import modules.test.domain.MappedExtension;
+
 import org.junit.After;
 import org.junit.Before;
 //import org.mockito.Mock;
@@ -9,6 +15,10 @@ import org.junit.Before;
 //import org.powermock.modules.junit4.PowerMockRunner;
 import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
@@ -42,8 +52,17 @@ public abstract class AbstractH2Test {
 //	@Mock
 //	protected WebContext webContext;
 	
+	protected Persistence p;
+	protected User u;
+	protected Customer c;
+	protected Module m;
+	protected Document aapd;
+	protected Document aarpd;
+	protected Document hd;
+	protected Document mbd;
+	protected Document med;
+	
 	@Before
-	@SuppressWarnings("static-method")
 	public void beforeBase() throws MetaDataException {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateNoContentPersistence.class;
 		UtilImpl.DIALECT = DB_DIALECT;
@@ -64,16 +83,24 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 		persistence.begin();
+		
+		p = CORE.getPersistence();
+		u = p.getUser();
+		c = u.getCustomer();
+		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
+		aapd = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
+		aarpd = m.getDocument(c, AllAttributesRequiredPersistent.DOCUMENT_NAME);
+		hd = m.getDocument(c,  Hierarchical.DOCUMENT_NAME);
+		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
+		med = m.getDocument(c, MappedExtension.DOCUMENT_NAME);
 	}
 	
 	@After
-	@SuppressWarnings("static-method")
 	public void afterBase() throws MetaDataException {
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 		// For H2 by default, closing the last connection to a database closes the database. 
 		// For an in-memory database, this means the content is lost.
 		// See http://www.h2database.com/html/features.html (In-Memory Databases)
-		Persistence p = CORE.getPersistence();
 		p.commit(true);
 		((AbstractPersistence) p).disposeAllPersistenceInstances();
 	}

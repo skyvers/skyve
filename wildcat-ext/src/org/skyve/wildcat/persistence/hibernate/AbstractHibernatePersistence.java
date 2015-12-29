@@ -1632,14 +1632,20 @@ t.printStackTrace();
 	@SuppressWarnings("synthetic-access")
 	public void preRemove(AbstractPersistentBean beanToDelete)
 	throws Exception {
-		Customer customer = user.getCustomer();
+		final Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToDelete.getBizModule());
 		Document document = module.getDocument(customer, beanToDelete.getBizDocument());
 		
 		// Collect beans to be cascaded
 		new CascadeDeleteBeanVisitor() {
 			@Override
-			public void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) {
+			public void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) 
+			throws Exception {
+				add(documentToCascade, beanToCascade);
+			}
+			
+			private void add(Document documentToCascade, Bean beanToCascade) 
+			throws Exception {
 				String entityName = AbstractHibernatePersistence.this.getDocumentEntityName(documentToCascade.getOwningModuleName(),
 																								documentToCascade.getName());
 				Set<Bean> theseBeansToDelete = beansToDelete.get(entityName);
@@ -1648,6 +1654,13 @@ t.printStackTrace();
 					beansToDelete.put(entityName, theseBeansToDelete);
 				}
 				theseBeansToDelete.add(beanToCascade);
+
+				// Ensure that this bean is registered against any entity names defined in its base documents too
+				Extends inherits = documentToCascade.getExtends();
+				if (inherits != null) {
+					Document baseDocument = customer.getModule(documentToCascade.getOwningModuleName()).getDocument(customer, inherits.getDocumentName());
+					add(baseDocument, beanToCascade);
+				}
 			}
 		}.visit(document, beanToDelete, customer);
 		

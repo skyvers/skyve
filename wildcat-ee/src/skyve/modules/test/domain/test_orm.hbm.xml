@@ -103,6 +103,23 @@
 		<filter name="testAllAttributesRequiredPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.domain.Hierarchical" table="TEST_Hierarchical" entity-name="testHierarchical">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="bizParentId" length="36" index="bizParentIdIndex" />
+		<property name="text" length="20" />
+		<filter name="testHierarchicalNoneFilter" condition="1=0"/>
+		<filter name="testHierarchicalCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testHierarchicalDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testHierarchicalUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 		<class name="modules.test.MappedExtension.MappedExtensionExtension" table="TEST_MappedExtension" entity-name="testMappedExtension">
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
@@ -171,6 +188,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testAllAttributesRequiredPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testHierarchicalNoneFilter" />
+	<filter-def name="testHierarchicalCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testHierarchicalDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testHierarchicalUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionNoneFilter" />

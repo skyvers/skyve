@@ -1,39 +1,17 @@
 package modules.test;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.skyve.CORE;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
-import org.skyve.persistence.Persistence;
-import org.skyve.util.Util;
-import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
-
 import modules.test.MappedExtension.MappedExtensionExtension;
 import modules.test.domain.MappedExtension;
 
-public class PersistenceTests extends AbstractH2Test {
-	private Persistence p;
-	private User u;
-	private Customer c;
-	private Module m;
-	private Document d;
-	
-	@Before
-	public void before() throws Exception {
-		p = CORE.getPersistence();
-		u = p.getUser();
-		c = u.getCustomer();
-		m = c.getModule(MappedExtension.MODULE_NAME);
-		d = m.getDocument(c, MappedExtension.DOCUMENT_NAME);
-	}
+import org.junit.Assert;
+import org.junit.Test;
+import org.skyve.util.Util;
+import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
 
+public class PersistenceTests extends AbstractH2Test {
 	@Test
 	public void testPersistBizLock() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 3);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 3);
 		Assert.assertNull(test.getBizLock());
 		Assert.assertNull(test.getAggregatedAssociation().getBizLock());
 		Assert.assertNull(test.getAggregatedCollection().get(0).getBizLock());
@@ -47,7 +25,7 @@ public class PersistenceTests extends AbstractH2Test {
 	
 	@Test
 	public void testPreAndPostSaveNoBase() throws Exception {
-		MappedExtensionExtension test = Util.constructRandomInstance(u, m, d, 3);
+		MappedExtensionExtension test = Util.constructRandomInstance(u, m, med, 3);
 		
 		Assert.assertFalse(test.isPreSaveCalled());
 		Assert.assertFalse(test.isPostSaveCalled());
@@ -75,7 +53,7 @@ public class PersistenceTests extends AbstractH2Test {
 	
 	@Test
 	public void testDerivedPropertiesAvailableAfterSave() throws Exception {
-		MappedExtensionExtension test = Util.constructRandomInstance(u, m, d, 4);
+		MappedExtensionExtension test = Util.constructRandomInstance(u, m, med, 4);
 		
 		Integer[] values = new Integer[] {test.getBaseDerivedInteger(),
 											test.getDerivedInteger(),
@@ -103,7 +81,7 @@ public class PersistenceTests extends AbstractH2Test {
 	
 	@Test
 	public void testComposedCascadeDelete() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().clear();
 		test = p.save(test);
@@ -120,7 +98,7 @@ public class PersistenceTests extends AbstractH2Test {
 	
 	@Test
 	public void testAggregatedCascadeDelete() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test = p.save(test);
 		
 		Assert.assertEquals(7, p.newSQL("select count(1) from TEST_MappedExtension").scalarResult(Number.class).intValue()); 
@@ -138,7 +116,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegrity() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test = p.save(test);
 		
 		p.delete(test.getAggregatedAssociation());
@@ -146,7 +124,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedCollectionReferentialIntegrity() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test = p.save(test);
 		
 		p.delete(test.getAggregatedCollection().get(0));
@@ -154,7 +132,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testComposedAssociationReferentialIntegrity() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test = p.save(test);
 		
 		p.delete(test.getComposedAssociation());
@@ -162,7 +140,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testComposedCollectionReferentialIntegrity() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, d, 2);
+		MappedExtension test = Util.constructRandomInstance(u, m, med, 2);
 		test = p.save(test);
 		
 		p.delete(test.getComposedCollection().get(0));
