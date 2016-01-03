@@ -623,7 +623,6 @@ t.printStackTrace();
 	public void resetDocumentPermissionScopes() throws MetaDataException {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
-		Customer customer = user.getCustomer();
 
 //		String userDataGroupId = user.getDataGroupId();
 //		if (Util.SECURITY_TRACE) {
@@ -632,7 +631,7 @@ t.printStackTrace();
 		
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
-			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? customer : null);
+			Customer moduleCustomer = (accessibleModuleNames.contains(moduleName) ? user.getCustomer() : null);
 			Module module = repository.getModule(moduleCustomer, moduleName);
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
@@ -640,7 +639,7 @@ t.printStackTrace();
 				Persistent persistent = document.getPersistent();
 				if ((persistent != null) &&  // is persistent document
 						(persistent.getName() != null) && // with a persistent name
-						(repository.findNearestPersistentUnmappedSuperDocument(customer, module, document) == null) && // not a sub-class (which don't have filters)
+						(repository.findNearestPersistentUnmappedSuperDocument(moduleCustomer, module, document) == null) && // not a sub-class (which don't have filters)
 						moduleName.equals(document.getOwningModuleName())) { // document belongs to this module
 					resetFilters(document);
 				}
