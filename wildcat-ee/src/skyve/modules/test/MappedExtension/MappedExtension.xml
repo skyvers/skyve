@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="MappedExtension" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Extension document.
+		]]>
+	</documentation>
+	<extends document="MappedBase" />
+	<persistent name="TEST_MappedExtension" />
+	<singularAlias>Mapped Extension</singularAlias>
+	<pluralAlias>Mapped Extension</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<!-- This can't be required since it is recursive -->
+		<association name="aggregatedAssociation" type="aggregation">
+			<displayName>Aggregated Association</displayName>
+			<documentName>MappedExtension</documentName>
+		</association>
+		<collection name="aggregatedCollection" type="aggregation">
+			<displayName>Aggregated Collection</displayName>
+			<documentName>MappedExtension</documentName>
+			<!-- This can't be required since it is recursive -->
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="composedCollection" type="composition">
+			<displayName>Composed Collection</displayName>
+			<documentName>MappedExtension</documentName>
+			<!-- This can't be required since it is recursive -->
+			<minCardinality>0</minCardinality>
+		</collection>
+		<inverse name="inverseAggregatedAssociation">
+			<displayName>Inverse</displayName>
+			<documentName>MappedExtension</documentName>
+			<referenceName>aggregatedAssociation</referenceName>
+		</inverse>
+		<integer name="derivedInteger" persistent="false" trackChanges="false">
+			<displayName>Derived Integer</displayName>
+		</integer>
+	</attributes>
+</document>

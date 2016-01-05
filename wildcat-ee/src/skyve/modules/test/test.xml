@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<module name="test" title="Test" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<homeRef>list</homeRef>
+	<homeDocument>AllAttributesPersistent</homeDocument>
+	<documents>
+		<document ref="AllAttributesPersistent" />
+		<document ref="AllAttributesRequiredPersistent" />
+		<document ref="Hierarchical" />
+		<document ref="MappedBase" />
+		<document ref="MappedExtension" />
+	</documents>
+	<menu />
+</module>

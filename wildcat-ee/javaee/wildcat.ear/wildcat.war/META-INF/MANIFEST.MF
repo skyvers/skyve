@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Ant-Version: Apache Ant 1.9.2
-Created-By: 1.7.0_60-b19 (Oracle Corporation)
+Created-By: 1.8.0_40-b26 (Oracle Corporation)
 Class-Path: lib/wildcat-core.jar lib/wildcat-ext.jar lib/antlr-2.7.6.j
  ar lib/apache-mime4j-core-0.7.2.jar lib/apache-mime4j-dom-0.7.2.jar l
  ib/asm-4.1.jar lib/asm-commons-4.1.jar lib/aspectjrt-1.6.11.jar lib/b
@@ -35,7 +35,7 @@ Class-Path: lib/wildcat-core.jar lib/wildcat-ext.jar lib/antlr-2.7.6.j
  .3.jar lib/quartz-1.6.0.jar lib/rome-0.9.jar lib/slf4j-api-1.7.7.jar 
  lib/slf4j-simple-1.7.7.jar lib/spatial4j-0.4.1.jar lib/stax-api-1.0.1
  .jar lib/super-csv-2.4.0.jar lib/tagsoup-1.2.1.jar lib/thumbnailator-
- 0.4.5.jar lib/tika-core-1.5.jar lib/tika-parsers-1.5.jar lib/uadetect
+ 0.4.8.jar lib/tika-core-1.5.jar lib/tika-parsers-1.5.jar lib/uadetect
  or-core-0.9.14.jar lib/uadetector-resources-2014.02.jar lib/vorbis-ja
  va-core-0.1-tests.jar lib/vorbis-java-core-0.1.jar lib/vorbis-java-ti
  ka-0.1.jar lib/wsdl4j-1.6.2.jar lib/xercesImpl-2.8.1.jar lib/xml-apis

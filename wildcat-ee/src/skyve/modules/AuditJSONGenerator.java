@@ -10,7 +10,6 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.util.BeanVisitor;
 import org.skyve.wildcat.util.JSONUtil;
 
@@ -19,6 +18,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 	private Customer customer;
 	
 	public AuditJSONGenerator(Customer customer) {
+		super(false, false, false);
 		this.customer = customer;
 	}
 	
@@ -31,33 +31,25 @@ public class AuditJSONGenerator extends BeanVisitor {
 								Document document,
 								Document owningDocument,
 								Relation owningRelation,
-								Bean bean,
-								boolean visitingInheritedDocument)
+								Bean bean)
 	throws Exception {
-		// stop recursive processing if this is an inverse
-		if (owningRelation instanceof Inverse) {
-			return false;
+		Map<String, Object> node = new TreeMap<>();
+
+		node.put(Bean.DOCUMENT_ID, bean.getBizId());
+		
+		for (Attribute attribute : document.getAllAttributes()) {
+			// Not a relation
+			if (! (attribute instanceof Relation)) {
+				String name = attribute.getName();
+				node.put(name, BindUtil.getSerialized(customer, bean, name));
+			}
 		}
 
-		if (! visitingInheritedDocument) {
-			Map<String, Object> node = new TreeMap<>();
-	
-			node.put(Bean.DOCUMENT_ID, bean.getBizId());
-			
-			for (Attribute attribute : document.getAllAttributes()) {
-				// Not a relation
-				if (! (attribute instanceof Relation)) {
-					String name = attribute.getName();
-					node.put(name, BindUtil.getSerialized(customer, bean, name));
-				}
-			}
-	
-			if (bean instanceof PersistentBean) {
-				node.put(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
-			}
-			
-			audit.put(binding, node);
+		if (bean instanceof PersistentBean) {
+			node.put(Bean.BIZ_KEY, ((PersistentBean) bean).getBizKey());
 		}
+		
+		audit.put(binding, node);
 		
 		return true;
 	}

@@ -23,6 +23,7 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
@@ -177,7 +178,7 @@ public class StandardLoader {
 		T result = getBeanForRow(persistence, user, document, sheet);
 
 		for (Attribute attribute : document.getAllAttributes()) {
-			if (! (attribute instanceof Reference)) {
+			if (! (attribute instanceof Relation)) {
 				String binding = attribute.getName();
 				// Ignore bizId, owner id and element id, bizKey columns
 				if (Bean.DOCUMENT_ID.equals(binding) ||

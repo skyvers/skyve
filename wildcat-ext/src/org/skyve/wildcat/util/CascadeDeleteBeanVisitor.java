@@ -14,13 +14,16 @@ import org.skyve.metadata.model.document.Relation;
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
 	
+	public CascadeDeleteBeanVisitor() {
+		super(false, false, true);
+	}
+	
 	@Override
 	protected final boolean accept(String binding,
 									Document visitedDocument,
 									Document owningDocument,
 									Relation owningRelation,
-									Bean visitedBean,
-									boolean visitingInheritedDocument)
+									Bean visitedBean)
 	throws Exception {
 		// No use checking referential integrity on a bean that is not persisted as
 		// nothing will have referenced it yet.
@@ -35,17 +38,12 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 			validate = validate && (! binding.endsWith(CHILD_PARENT_NAME_SUFFIX));
 
 			// don't check aggregations as they are not cascaded
-			if (validate) {
-				if (owningRelation instanceof Reference) {
-					Reference owningReference = (Reference) owningRelation;
-					ReferenceType referenceType = owningReference.getType();
-					validate = (! AssociationType.aggregation.equals(referenceType)) && 
-								(! CollectionType.aggregation.equals(referenceType));
-				}
-				// don't validate inverse relations
-				else {
-					validate = false;
-				}
+			if (validate && (owningRelation != null)) {
+				// Can safely cast to Reference here as we should not be visiting inverses
+				Reference owningReference = (Reference) owningRelation;
+				ReferenceType referenceType = owningReference.getType();
+				validate = (! AssociationType.aggregation.equals(referenceType)) && 
+							(! CollectionType.aggregation.equals(referenceType));
 			}
 
 			if (validate) {

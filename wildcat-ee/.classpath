@@ -20,11 +20,12 @@
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jackson-core-2.5.2.jar"/>
 	<classpathentry kind="lib" path="javaee/wildcat.ear/lib/jackson-databind-2.5.2.jar"/>
-	<classpathentry kind="lib" path="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.3.jar"/>
 	<classpathentry kind="output" path="javaee/wildcat.ear/apps.jar"/>
 </classpath>

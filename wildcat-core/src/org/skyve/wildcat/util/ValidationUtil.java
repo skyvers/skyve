@@ -18,12 +18,13 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
+import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.field.ConvertableField;
@@ -55,6 +56,7 @@ public class ValidationUtil {
 	 * @param bean The bean to validate.
 	 * @param e The exception to populate.
 	 * @throws ValidationException Thrown if validation or access errors are encountered.
+	 * @throws MetaDataException	When base the base document hierarchy cannot be accessed.
 	 */
 	public static void validateBeanAgainstDocument(Document document, Bean bean) 
 	throws ValidationException, MetaDataException {
@@ -62,13 +64,25 @@ public class ValidationUtil {
 	}
 
 	private static void validateBeanAgainstDocument(Customer customer, Document document, Bean bean)
-	throws ValidationException {
+	throws ValidationException, MetaDataException {
 		ValidationException e = new ValidationException();
-
 		for (Attribute attribute : document.getAttributes()) {
 			if (! attribute.getName().equals(Bean.BIZ_KEY)) {
 				validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 			}
+		}
+
+		Extends inherits = document.getExtends();
+		Document baseDocument = document;
+		while (inherits != null) {
+			Module baseModule = customer.getModule(baseDocument.getOwningModuleName());
+			baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
+			for (Attribute attribute : baseDocument.getAttributes()) {
+				if (! attribute.getName().equals(Bean.BIZ_KEY)) {
+					validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
+				}
+			}
+			inherits = baseDocument.getExtends();
 		}
 
 		if (! e.getMessages().isEmpty()) {
@@ -302,6 +316,16 @@ public class ValidationUtil {
 		return result;
 	}
 
+	/**
+	 * Validate a bean against its bizlet .validate().
+	 * NB This validation method does NOT recursively validate using bizlets through
+	 * the base document hierarchy as the bizlet class should be arranged in such a way as to extend the
+	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
+	 * 
+	 * @param bizlet	To validate against
+	 * @param bean	To validate
+	 * @throws ValidationException
+	 */
 	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) 
 	throws ValidationException {
 		ValidationException e = new ValidationException();
@@ -360,14 +384,13 @@ public class ValidationUtil {
 																								masterBean.getBizDocument());
 
 		// find this object within the beanBeingSaved
-		new BeanVisitor() {
+		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
 							Document document,
 							Document owningDocument,
 							Relation owningRelation,
-							Bean bean,
-							boolean visitingInheritedDocument)
+							Bean bean)
 			throws DomainException, MetaDataException {
 				if (bean == validatedBean) {
 					if (binding.length() > 0) {
@@ -385,10 +408,10 @@ public class ValidationUtil {
 	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean)
 	throws UniqueConstraintViolationException, ValidationException {
 		try {
-			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
-				if (reference instanceof Collection) {
-					Collection collection = (Collection) reference;
+			for (Attribute attribute : document.getAllAttributes()) {
+				if (attribute instanceof Collection) {
+					String referenceName = attribute.getName();
+					Collection collection = (Collection) attribute;
 					for (UniqueConstraint constraint : collection.getUniqueConstraints()) {
 						Set<String> uniqueValues = new TreeSet<>();
 

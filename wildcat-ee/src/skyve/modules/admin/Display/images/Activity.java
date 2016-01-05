@@ -79,7 +79,7 @@ public class Activity implements DynamicImage<Display> {
 		sqlB.append(" )");
 		sqlB.append(" )");
 		sqlB.append(" order by year , month ");
-
+		
 		return sqlB.toString();
 	}
 

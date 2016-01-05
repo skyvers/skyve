@@ -247,9 +247,9 @@ public class ESClient extends AbstractContentManager {
 	throws IOException {
 		StringBuilder path = new StringBuilder(128);
 		path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		path.append(id.substring(5, 10)).append('/');
-		path.append(id.substring(10, 15)).append('/');
-		path.append(id.substring(15, 20)).append('/');
+		path.append(id.substring(5, 8)).append('/');
+		path.append(id.substring(10, 13)).append('/');
+		path.append(id.substring(15, 18)).append('/');
 		
 		new File(path.toString()).mkdirs();
 		
@@ -364,9 +364,9 @@ public class ESClient extends AbstractContentManager {
 		StringBuilder result = new StringBuilder(128);
 		
 		result.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		result.append(id.substring(5, 10)).append('/');
-		result.append(id.substring(10, 15)).append('/');
-		result.append(id.substring(15, 20)).append('/');
+		result.append(id.substring(5, 8)).append('/');
+		result.append(id.substring(10, 13)).append('/');
+		result.append(id.substring(15, 18)).append('/');
 		result.append(id);
 		
 		return result.toString();

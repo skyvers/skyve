@@ -116,7 +116,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return menu;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
 	public void setMenu(Menu menu) {
 		this.menu = menu;
 	}

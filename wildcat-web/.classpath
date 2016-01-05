@@ -9,13 +9,13 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/hibernate3.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jasperreports-javaflow-4.7.0.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/thumbnailator-0.4.5.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/thumbnailator-0.4.8.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/wildcat-ee/lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/poi-3.10.1.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/poi-ooxml-3.10.1.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.2.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-extensions-3.1.0.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-5.3.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/wildcat.war/WEB-INF/lib/primefaces-extensions-4.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
