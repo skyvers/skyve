@@ -85,7 +85,6 @@
 			<displayName>Format</displayName>
 			<values>
 				<value code="email"/>
-				<value code="sms"/>
 			</values>
 		</enum>
 		<text name="filePath">
@@ -94,9 +93,19 @@
 			<length>2000</length>
 		</text>
 		<boolean name="system">
-			<displayName>System</displayName>
+			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
 		</boolean>
+		<text name="unsubscribeUrl">
+			<displayName>UnsubscribeUrl</displayName>
+			<length>500</length>
+		</text>
+		
+		<inverse name="subscriptions" >
+			<displayName>Subscriptions</displayName>
+			<documentName>Subscription</documentName>
+			<referenceName>communication</referenceName>
+		</inverse>
 	</attributes>
 	<conditions>
 		<condition name="saveAction">

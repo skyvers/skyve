@@ -4,7 +4,7 @@
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<hbox>
+	<hbox border="true" pixelHeight="1" pixelPadding="10">
 		<form percentageWidth="50">
 			<column pixelWidth="100" />
 			<column />
@@ -26,6 +26,11 @@
 			<row>
 				<item>
 					<default binding="mobile" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="resume" />
 				</item>
 			</row>
 		</form>

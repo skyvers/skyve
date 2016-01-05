@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import modules.admin.AdminUtil;
+import modules.admin.Configuration.ComplexityModel;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
-import modules.admin.domain.Configuration.PasswordComplexityModel;
 import modules.admin.domain.Contact;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
@@ -16,12 +15,10 @@ import modules.admin.domain.User;
 import modules.admin.domain.User.WizardState;
 
 import org.apache.commons.codec.binary.Base64;
-
-import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
@@ -32,6 +29,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.wildcat.util.UtilImpl;
 
 public class UserBizlet extends Bizlet<User> {
 	/**
@@ -58,7 +56,7 @@ public class UserBizlet extends Bizlet<User> {
 			bean.setBizDataGroupId(myDataGroupId);
 		}
 
-		//set defaults
+		// set defaults
 		bean.setCreatedDateTime(new DateTime());
 		bean.setWizardState(WizardState.confirmContact);
 
@@ -163,7 +161,7 @@ public class UserBizlet extends Bizlet<User> {
 		// validate username is not null, not too short and unique
 		if (user.getUserName() == null) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is required."));
-		} else if(!user.isPersisted() && user.getUserName().length()<AdminUtil.MINIMUM_USERNAME_LENGTH){
+		} else if (!user.isPersisted() && user.getUserName().length() < ComplexityModel.MINIMUM_USERNAME_LENGTH) {
 			e.getMessages().add(new Message(User.userNamePropertyName, "Username is too short."));
 		} else {
 			Persistence pers = CORE.getPersistence();
@@ -195,10 +193,14 @@ public class UserBizlet extends Bizlet<User> {
 					} else if (newPassword.equals(confirmPassword)) {
 
 						// check for suitable complexity
-						Configuration configuration = AdminUtil.getConfiguration();
-						PasswordComplexityModel cm = configuration.getPasswordComplexityModel();
-						if (!AdminUtil.validatePasswordComplexity(newPassword, cm)) {
-							Message message = new Message(ChangePassword.newPasswordPropertyName, "The password you have entered is not sufficiently complex.\n" + AdminUtil.validatePasswordComplexityMessage(cm) + "\nPlease re-enter and confirm the password.");
+						Configuration configuration = Configuration.newInstance();
+						ComplexityModel cm = new ComplexityModel(configuration.getPasswordComplexityModel());
+						if (!newPassword.matches(cm.getComparison())) {
+							StringBuilder sb = new StringBuilder(64);
+							sb.append("The password you have entered is not sufficiently complex.\n");
+							sb.append(cm.getRule());
+							sb.append("\nPlease re-enter and confirm the password.");
+							Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 							e.getMessages().add(message);
 						}
 

@@ -66,6 +66,10 @@ public class Communication extends AbstractPersistentBean {
 	public static final String filePathPropertyName = "filePath";
 	/** @hidden */
 	public static final String systemPropertyName = "system";
+	/** @hidden */
+	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
+	/** @hidden */
+	public static final String subscriptionsPropertyName = "subscriptions";
 
 	/**
 	 * Action
@@ -141,8 +145,7 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	@XmlEnum
 	public static enum FormatType implements Enumeration {
-		email("email", "email"),
-		sms("sms", "sms");
+		email("email", "email");
 
 		private String code;
 		private String description;
@@ -255,6 +258,8 @@ public class Communication extends AbstractPersistentBean {
 	 * System communications can not be deleted unless the system flag is cleared first.
 	 **/
 	private Boolean system;
+	private String unsubscribeUrl;
+	private List<Subscription> subscriptions = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -576,6 +581,41 @@ public class Communication extends AbstractPersistentBean {
 	public void setSystem(Boolean system) {
 		preset(systemPropertyName, system);
 		this.system = system;
+	}
+
+	/**
+	 * {@link #unsubscribeUrl} accessor.
+	 **/
+	public String getUnsubscribeUrl() {
+		return unsubscribeUrl;
+	}
+
+	/**
+	 * {@link #unsubscribeUrl} mutator.
+	 * 
+	 * @param unsubscribeUrl	The new value to set.
+	 **/
+	@XmlElement
+	public void setUnsubscribeUrl(String unsubscribeUrl) {
+		preset(unsubscribeUrlPropertyName, unsubscribeUrl);
+		this.unsubscribeUrl = unsubscribeUrl;
+	}
+
+	/**
+	 * {@link #subscriptions} accessor.
+	 **/
+	@XmlElement
+	public List<Subscription> getSubscriptions() {
+		return subscriptions;
+	}
+
+	/**
+	 * {@link #subscriptions} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 **/
+	public Subscription getSubscriptionsElementById(String bizId) {
+		return getElementById(subscriptions, bizId);
 	}
 
 	@XmlTransient

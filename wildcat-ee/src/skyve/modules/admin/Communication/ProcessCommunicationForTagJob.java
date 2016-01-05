@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import modules.ModulesUtil;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
+import modules.admin.domain.User;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -36,6 +38,7 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 			sb.append(" expected ").append(beans.size()).append(" matching documents.");
 			log.add(sb.toString());
 
+			User user = ModulesUtil.currentAdminUser();
 			int size = beans.size();
 			int processed = 0;
 			Iterator<Bean> it = beans.iterator();
@@ -49,17 +52,17 @@ public class ProcessCommunicationForTagJob extends WildcatJob {
 					switch (communication.getActionType()) {
 					case saveForBulkSend:
 
-						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication );
 						sb.append("\n Saved OK");
 						break;
 					case testBindingsAndOutput:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication);
 						sb.append("\n Tested OK");
 						break;
 					case sendImmediately:
 
-						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb);
+						CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, pb, user, communication);
 						sb.append("\n Sent OK");
 						break;
 					default:

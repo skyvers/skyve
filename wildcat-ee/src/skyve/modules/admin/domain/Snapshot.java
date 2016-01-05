@@ -10,6 +10,7 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
 /**
  * Snapshot
  * 
+ * @navhas n copyToUser 0..1 User
  * @stereotype "persistent"
  */
 @XmlType
@@ -34,11 +35,17 @@ public class Snapshot extends AbstractPersistentBean {
 	public static final String namePropertyName = "name";
 	/** @hidden */
 	public static final String snapshotPropertyName = "snapshot";
+	/** @hidden */
+	public static final String copyToUserPropertyName = "copyToUser";
+	/** @hidden */
+	public static final String copyToUserSnapshotNamePropertyName = "copyToUserSnapshotName";
 
 	private String moduleName;
 	private String queryName;
 	private String name;
 	private String snapshot;
+	private User copyToUser = null;
+	private String copyToUserSnapshotName;
 
 	@Override
 	@XmlTransient
@@ -145,5 +152,39 @@ public class Snapshot extends AbstractPersistentBean {
 	public void setSnapshot(String snapshot) {
 		preset(snapshotPropertyName, snapshot);
 		this.snapshot = snapshot;
+	}
+
+	/**
+	 * {@link #copyToUser} accessor.
+	 **/
+	public User getCopyToUser() {
+		return copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUser} mutator.
+	 * 
+	 * @param copyToUser	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUser(User copyToUser) {
+		this.copyToUser = copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUserSnapshotName} accessor.
+	 **/
+	public String getCopyToUserSnapshotName() {
+		return copyToUserSnapshotName;
+	}
+
+	/**
+	 * {@link #copyToUserSnapshotName} mutator.
+	 * 
+	 * @param copyToUserSnapshotName	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUserSnapshotName(String copyToUserSnapshotName) {
+		this.copyToUserSnapshotName = copyToUserSnapshotName;
 	}
 }

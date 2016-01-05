@@ -4,7 +4,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import modules.ModulesUtil;
+import modules.admin.Communication.CommunicationUtil;
+import modules.admin.Communication.CommunicationUtil.ResponseMode;
+import modules.admin.Communication.CommunicationUtil.RunMode;
+import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
+import modules.admin.domain.Communication.FormatType;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -20,6 +26,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 
 public class PerformDocumentActionForTagJob extends WildcatJob {
@@ -50,25 +57,23 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 			// get action from actionname
 			Repository rep = CORE.getRepository();
 			String documentActionName = tag.getDocumentAction();
-			ServerSideAction<Bean> act  = null;
-			if(!TagBizlet.WILDCAT_SAVE_ACTION.equals(documentActionName) 
-					&& !TagBizlet.WILDCAT_DELETE_ACTION.equals(documentActionName)
-					&& !TagBizlet.WILDCAT_VALIDATE_ACTION.equals(documentActionName)){
+			ServerSideAction<Bean> act = null;
+			if (!TagBizlet.WILDCAT_SAVE_ACTION.equals(documentActionName) && !TagBizlet.WILDCAT_DELETE_ACTION.equals(documentActionName) && !TagBizlet.WILDCAT_VALIDATE_ACTION.equals(documentActionName)) {
 				act = rep.getAction(customer, document, documentActionName);
 			}
 
 			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getModuleName(), tag.getDocumentName());
-			
-			int size=  beans.size();
+
+			int size = beans.size();
 			int processed = 0;
 			Iterator<Bean> it = beans.iterator();
 			while (it.hasNext()) {
 				PersistentBean pb = (PersistentBean) it.next();
-			
-				StringBuilder sb=  new StringBuilder();
+
+				StringBuilder sb = new StringBuilder();
 				sb.append("Action request for [").append(documentActionName);
 				sb.append("] for document [").append(tag.getDocumentName()).append("] - ");
-				if(tag.getDocumentCondition()!=null){
+				if (tag.getDocumentCondition() != null) {
 					sb.append(" with condition [").append(tag.getDocumentCondition()).append("] - ");
 				} else {
 					sb.append(" unconditionally ");
@@ -76,38 +81,32 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 				sb.append("'").append(pb.getBizKey()).append("'");
 				try {
 					boolean conditionSatisfied = true;
-					if(tag.getDocumentCondition()!=null){
+					if (tag.getDocumentCondition() != null) {
 						conditionSatisfied = conditionSatisfied && pb.evaluateCondition(tag.getDocumentCondition());
 					}
-					if(conditionSatisfied){
-						if(act!=null){
+					if (conditionSatisfied) {
+						if (act != null) {
 							CustomerImpl internalCustomer = (CustomerImpl) customer;
-							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, 
-																								documentActionName,
-																								pb,
-																								null);
-							if (! vetoed) {
-								ServerSideActionResult result = act.execute(pb, null);	
-								internalCustomer.interceptAfterServerSideAction(document, 
-																					documentActionName,
-																					result,
-																					null);
+							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, documentActionName, pb, null);
+							if (!vetoed) {
+								ServerSideActionResult result = act.execute(pb, null);
+								internalCustomer.interceptAfterServerSideAction(document, documentActionName, result, null);
 								pb = (PersistentBean) result.getBean();
 							}
-						} 
-						//remove successfully validated beans
-						if(Boolean.TRUE.equals(tag.getUnTagSuccessful())){
+						}
+						// remove successfully validated beans
+						if (Boolean.TRUE.equals(tag.getUnTagSuccessful())) {
 							EXT.untag(tag.getBizId(), pb);
-						}						
+						}
 
-						if(TagBizlet.WILDCAT_DELETE_ACTION.equals(tag.getDocumentAction())){
-							//remove from tag and delete
+						if (TagBizlet.WILDCAT_DELETE_ACTION.equals(tag.getDocumentAction())) {
+							// remove from tag and delete
 							EXT.untag(tag.getBizId(), pb);
 							pers.delete(pb);
 							pers.commit(false);
 							pers.evictCached(pb);
 							pers.begin();
-						} else if(TagBizlet.WILDCAT_VALIDATE_ACTION.equals(tag.getDocumentAction())){
+						} else if (TagBizlet.WILDCAT_VALIDATE_ACTION.equals(tag.getDocumentAction())) {
 							BeanValidator.validateBeanAgainstDocument(document, pb);
 							pers.evictCached(pb);
 						} else {
@@ -117,22 +116,42 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 							pers.begin();
 						}
 						sb.append(" - Successful");
-						
-						
+
 					} else {
 						sb.append(" - Condition not satisfied");
 					}
-					
-				} catch (Exception e){
+
+				} catch (Exception e) {
 					sb.append(" - Unsuccessful");
 					sb.append("\n").append(e.getMessage());
 				}
+				processed++;
 				setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
-				
-				log.add(sb.toString());		
+
+				log.add(sb.toString());
 			}
 		}
-		
+
+		if (Boolean.TRUE.equals(tag.getNotification())) {
+			// send email notification for completion of Job
+			Communication communication = tag.getCommunication();
+			if (communication == null) {
+				// create a default communication
+				String sendTo = ModulesUtil.getCurrentUserContact().getEmail1();
+				String subject = "Perform Document Action for Tag - Complete";
+				StringBuilder sb = new StringBuilder(128);
+				sb.append("The document action for Tag job for Tag ").append(tag.getName());
+				sb.append(" has completed.");
+				sb.append("<br/>");
+				sb.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
+				sb.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
+				CommunicationUtil.sendSimpleBeanCommunication(sendTo, subject, sb.toString(), tag, ResponseMode.SILENT, FormatType.email);
+			} else {
+				// send the communication
+				CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, tag);
+			}
+		}
+
 		setPercentComplete(100);
 		log.add("Finished Document Action for Tagged Items Job at " + new Date());
 	}

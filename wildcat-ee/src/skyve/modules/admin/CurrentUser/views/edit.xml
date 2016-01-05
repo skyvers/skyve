@@ -1,18 +1,94 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="User {currentUser.userName}"
-			type="edit"
-			xmlns="http://www.skyve.org/xml/view"
-			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form>
-		<column percentageWidth="20"/>
-		<column/>
-		<column/>
-		<row><item><textField binding="currentUser.userName" disabled="true"/></item></row>
-	</form>
-	<dataGrid binding="groups" editable="false">
-		<boundColumn binding="name"/>
-	</dataGrid>
+<view title="{currentUser.contact.name}" type="edit" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" borderTitle="Details" percentageHeight="1" pixelPadding="10">
+		<hbox>
+			<vbox percentageWidth="50" pixelPadding="10">
+				<form>
+					<column percentageWidth="30" />
+					<column />
+					<row>
+						<item>
+							<textField binding="currentUser.userName" disabled="true" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="currentUser.contact.name" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="currentUser.contact.email1" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="currentUser.contact.mobile" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="groupMembershipList" disabled="true" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="lastLogin" disabled="true" editable="false" />
+						</item>
+					</row>
+				</form>
+			</vbox>
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item showLabel="false">
+						<contentImage binding="currentUser.contact.image" pixelWidth="200" pixelHeight="200" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+		<form>
+			<column />
+			<row>
+				<item align="centre">
+					<button actionName="UpdateMyDetails" pixelWidth="100" />
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<vbox>
+		<hbox>
+			<vbox border="true" borderTitle="Activity">
+				<dynamicImage name="CurrentUserActivity" />
+			</vbox>
+			<vbox border="true" borderTitle="Activity Context">
+				<dynamicImage name="CurrentUserActivityContext" />
+			</vbox>
+		</hbox>
+	</vbox>
+	<tabPane>
+		<tab title="Jobs">
+			<dataGrid binding="jobs" editable="false">
+				<boundColumn binding="displayName" />
+				<boundColumn binding="status" />
+				<boundColumn binding="percentComplete" />
+				<boundColumn binding="startTime" />
+				<boundColumn binding="endTime" />
+			</dataGrid>
+		</tab>
+		<tab title="Subscriptions" >
+			<listGrid continueConversation="true" query="qUserSubscriptions">
+				<filterParameter operator="equal" name="receiverIdentifier" binding="currentUser.contact.email1"/>
+			</listGrid>
+		</tab>
+	</tabPane>
 	<actions>
+		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
+			inActionPanel="false" />
 	</actions>
 </view>

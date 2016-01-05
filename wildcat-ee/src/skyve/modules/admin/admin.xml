@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<module name="admin"
-			title="Admin"
-			xmlns="http://www.skyve.org/xml/module"
-			xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<module name="admin" title="Admin" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>edit</homeRef>
-	<homeDocument>ChangePassword</homeDocument>
+	<homeDocument>CurrentUser</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
-	</jobs>	
+	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
-		<document ref="MyContact" />
-		<document ref="CurrentUser"/>
-		<document ref="Communication" defaultQueryName="qCommunications"/>
+		<document ref="CurrentUser" />
+		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="Display" />
@@ -27,19 +23,20 @@
 		<document ref="Job" defaultQueryName="qCompletedJobs" />
 		<document ref="JobSchedule" defaultQueryName="qAllSchedules" />
 		<document ref="Jobs" />
+		<document ref="Subscription"/>
 		<document ref="User" defaultQueryName="qUsers" />
 		<document ref="UserCandidateContact" />
 		<document ref="UserLoginRecord" />
 		<document ref="UserMonthlyHits" />
 		<document ref="UserRole" />
-		<document ref="Snapshot" defaultQueryName="qSnapshots"/>
-		<document ref="Tag" defaultQueryName="qTags"/>
+		<document ref="Snapshot" defaultQueryName="qSnapshots" />
+		<document ref="Tag" defaultQueryName="qTags" />
 		<document ref="Tagged" />
 	</documents>
 	<roles>
 		<role name="BasicUser">
 			<description>
-				Enough privileges and permissions to login and operate BizHub with access to the admin module only.
+				Enough privileges and permissions to login and operate WILDCAT with access to the admin module only.
 			</description>
 			<privileges>
 				<document name="Audit" permission="_R__C">
@@ -49,24 +46,29 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="MyContact" permission="_____" >
-					<action name="UpdateMyDetails"/>
+				<document name="CurrentUser" permission="CR__U">
+					<action name="UpdateMyDetails" />
 				</document>
-				<document name="CurrentUser" permission="CR__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU" />
-				<document name="Tag" permission="CRUDU" >	
-					<action name="Clear"/>
-					<action name="TagAll"/>
-					<action name="ExceptTag"/>
-					<action name="IntersectTag"/>
-					<action name="UnionTag"/>
-					<action name="UpdateModule"/>
-					<action name="UpdateDocument"/>
-					<action name="UploadTagCriteria"/>
-					<action name="BulkDocumentAction"/>
+				<document name="Snapshot" permission="CRUDU">
+					<action name="CopySnapshotToUser" />
+				</document>
+				<document name="Tag" permission="CRUDU">
+					<action name="Clear" />
+					<action name="TagAll" />
+					<action name="ExceptTag" />
+					<action name="IntersectTag" />
+					<action name="UnionTag" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
+					<action name="UploadTagCriteria" />
+					<action name="BulkDocumentAction" />
+					<action name="PerformCombination" />
+					<action name="PrepareExplanation" />
+					<action name="CopyTagToUser" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
+				<document name="Subscription" permission="CRUDU"/>
 				<document name="User" permission="_R__D" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
@@ -82,24 +84,26 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="MyContact" permission="_____" >
-					<action name="UpdateMyDetails"/>
+				<document name="CurrentUser" permission="CR__U">
+					<action name="UpdateMyDetails" />
 				</document>
-				<document name="CurrentUser" permission="CR__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
-				<document name="Tag" permission="CRUDU" >	
-					<action name="Clear"/>
-					<action name="TagAll"/>
-					<action name="ExceptTag"/>
-					<action name="IntersectTag"/>
-					<action name="UnionTag"/>
-					<action name="UpdateModule"/>
-					<action name="UpdateDocument"/>
-					<action name="UploadTagCriteria"/>
-					<action name="BulkDocumentAction"/>
+				<document name="Tag" permission="CRUDU">
+					<action name="Clear" />
+					<action name="TagAll" />
+					<action name="ExceptTag" />
+					<action name="IntersectTag" />
+					<action name="UnionTag" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
+					<action name="UploadTagCriteria" />
+					<action name="BulkDocumentAction" />
+					<action name="PerformCombination" />
+					<action name="PrepareExplanation" />
 				</document>
-				<document name="Tagged" permission="CRUDU" />			
+				<document name="Tagged" permission="CRUDU" />
+				<document name="Subscription" permission="CRUDU"/>
 			</privileges>
 		</role>
 		<role name="ContactViewer">
@@ -107,7 +111,7 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
-				</document>			
+				</document>
 				<document name="Contact" permission="_R__D" />
 			</privileges>
 		</role>
@@ -116,16 +120,18 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
-				</document>			
-				<document name="Communication" permission="CRUDD">
-					<action name="CreateFiles"/>
-					<action name="GetCount"/>
-					<action name="GetResults"/>
-					<action name="SendNow"/>			
-					<action name="UpdateModule"/>
-					<action name="UpdateDocument"/>		
 				</document>
-				<document name="Contact" permission="CRUDD"/> 
+				<document name="Communication" permission="CRUDD">
+					<action name="AddUnsubscribeLink" />
+					<action name="CreateFiles" />
+					<action name="GetCount" />
+					<action name="GetResults" />
+					<action name="SendNow" />
+					<action name="TestSend" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
+				</document>
+				<document name="Contact" permission="CRUDD" />
 			</privileges>
 		</role>
 		<role name="SecurityAdministrator">
@@ -134,23 +140,25 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Communication" permission="CRUDD">
-					<action name="CreateFiles"/>
-					<action name="GetCount"/>
-					<action name="GetResults"/>
-					<action name="SendNow"/>			
-					<action name="UpdateModule"/>
-					<action name="UpdateDocument"/>					
+				<document name="Communication" permission="CRUDC">
+					<action name="AddUnsubscribeLink" />
+					<action name="CreateFiles" />
+					<action name="GetCount" />
+					<action name="GetResults" />
+					<action name="SendNow" />
+					<action name="TestSend" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
 				</document>
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
 				<document name="DataGroup" permission="CRUDC" />
-				<document name="DataMaintenance" permission="CRUDC" >
-					<action name="DataMaintenanceExportAction"/>
-					<action name="DataMaintenanceImportAction"/>
+				<document name="DataMaintenance" permission="CRUDC">
+					<action name="DataMaintenanceExportAction" />
+					<action name="DataMaintenanceImportAction" />
 				</document>
 				<document name="Display" permission="_____" />
-				<document name="DocumentNumber" permission="CRUDC"/>
+				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
 				<document name="User" permission="CRUDD">
@@ -158,12 +166,13 @@
 					<action name="GeneratePassword" />
 					<action name="GenerateUniqueUserName" />
 					<action name="New" />
-					<action name="Next"/>
-					<action name="Back"/>
+					<action name="Next" />
+					<action name="Back" />
 				</document>
+				<document name="Subscription" permission="CRUDC"/>
 				<document name="UserCandidateContact" permission="_____">
 				</document>
-				<document name="UserRole" permission="CRUDD" />
+				<document name="UserRole" permission="CRUDC" />
 			</privileges>
 		</role>
 		<role name="JobMaintainer">
@@ -173,8 +182,8 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Job" permission="CRUDD" />
-				<document name="JobSchedule" permission="CRUDD" >
-					<action name="RunJobNow"/>
+				<document name="JobSchedule" permission="CRUDD">
+					<action name="RunJobNow" />
 				</document>
 				<document name="Jobs" permission="_____">
 					<action name="DeleteCompletedJobs" />
@@ -189,114 +198,132 @@
 			<privileges>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
-				</document>			
+				</document>
 				<document name="Contact" permission="_RU_U" />
-				<document name="User" permission="_RU_U"/>
+				<document name="User" permission="_RU_U" />
 				<document name="Group" permission="_R__C" />
 				<document name="GroupRole" permission="_R__C" />
 
-				<document name="CurrentUser" permission="CR__U" />
+				<document name="CurrentUser" permission="CR__U">
+					<action name="UpdateMyDetails" />
+				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU" />
-				<document name="Tag" permission="CRUDU" >	
-					<action name="Clear"/>
-					<action name="TagAll"/>
-					<action name="ExceptTag"/>
-					<action name="IntersectTag"/>
-					<action name="UnionTag"/>
-					<action name="UpdateModule"/>
-					<action name="UpdateDocument"/>
-					<action name="UploadTagCriteria"/>
-					<action name="BulkDocumentAction"/>
+				<document name="Snapshot" permission="CRUDU">
+					<action name="CopySnapshotToUser" />
+				</document>
+				<document name="Tag" permission="CRUDU">
+					<action name="Clear" />
+					<action name="TagAll" />
+					<action name="ExceptTag" />
+					<action name="IntersectTag" />
+					<action name="UnionTag" />
+					<action name="UpdateModule" />
+					<action name="UpdateDocument" />
+					<action name="UploadTagCriteria" />
+					<action name="BulkDocumentAction" />
+					<action name="PerformCombination" />
+					<action name="PrepareExplanation" />
+					<action name="CopyTagToUser" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
-								
+				<document name="Subscription" permission="CRUDU"/>
 			</privileges>
-		</role>				
+		</role>
+		<role name="Anonymous">
+			<description>Can access publicly accessible pages anonymously.</description>
+			<privileges>
+				<document name="Communication" permission="_R__G"/>
+				<document name="Subscription" permission="CRUDG"/>
+			</privileges>
+		</role>
 	</roles>
 	<menu>
-		<edit document="ChangePassword" name="Password" >
+		<edit document="ChangePassword" name="Password">
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 		</edit>
-		<edit document="MyContact" name="My Details">
-			<role name="BasicUser" />
-			<role name="ViewUser" />
-		</edit>
-		<edit document="CurrentUser" name="Current User Details">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>
+		<edit document="CurrentUser" name="My Details">
 			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="Contacts">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>		
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</list>
 		<list document="Communication" name="Communications">
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
 		</list>
 		<group name="Security Admin">
-			<list document="Group" name="Groups">			
+			<list document="Group" name="Groups">
 				<role name="SecurityAdministrator" />
 			</list>
-			<list document="DataMaintenance" name="Data Maintenance">
+			<edit document="DataMaintenance" name="Data Maintenance">
+				<uxui name="desktop" />
+				<uxui name="tablet" />
 				<role name="SecurityAdministrator" />
-			</list>
+			</edit>
 			<list document="User" name="Users">
 				<role name="SecurityAdministrator" />
 			</list>
 			<list document="DataGroup" name="Data Groups">
+				<uxui name="desktop" />
+				<uxui name="tablet" />
 				<role name="DataAdministrator" />
 				<role name="SecurityAdministrator" />
 			</list>
 			<edit document="Configuration" name="Password Complexity">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list name="PasswordList" query="qUserPasswords">
+			<list name="Generated Credentials" query="qUserPasswords">
 				<role name="SecurityAdministrator" />
 			</list>
 		</group>
 		<list name="Snapshots" document="Snapshot">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>		
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list name="Tags" document="Tag">
-			<uxui name="desktop"/>
-			<uxui name="tablet"/>		
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
 		<list name="Audits" document="Audit">
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
-		<edit document="Display" name="Web Stats">
+		<edit document="Display" name="System Dashboard">
+			<uxui name="desktop" />
+			<uxui name="tablet" />
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</edit>
 		<list name="Document Numbers" document="DocumentNumber">
 			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
-		</list>		
+		</list>
 		<edit document="Jobs" name="Jobs">
 			<role name="JobMaintainer" />
 		</edit>
 	</menu>
 	<queries>
 		<documentQuery name="qUserPasswords" documentName="User">
-			<description>Initial Passwords for Users</description>
+			<description>Generated Credentials</description>
 			<columns>
-				<column binding="contact.name" sortOrder ="ascending" />
+				<column binding="contact.name" sortOrder="ascending" />
 				<column binding="userName" />
 				<column binding="clearTextPassword">
 					<filterOperator>notNull</filterOperator>
 				</column>
 				<column binding="createdDateTime" />
-				<column binding="passwordExpired" >
+				<column binding="passwordExpired">
 					<projected>false</projected>
 					<filterOperator>equal</filterOperator>
 					<filterExpression>true</filterExpression>
@@ -306,36 +333,25 @@
 		<documentQuery name="qContacts" documentName="Contact">
 			<description>All Contact Details</description>
 			<columns>
-				<column binding="name" sortOrder ="ascending" />
-				<column binding="contactType" sortOrder ="ascending" />
-				<column binding="email1" sortOrder ="ascending" />
-				<column binding="mobile" sortOrder ="ascending" />
-			</columns>
-		</documentQuery>
-		<documentQuery name="qMyContact" documentName="Contact">
-			<description>My Contact Details</description>
-			<columns>
 				<column binding="name" sortOrder="ascending" />
-				<column binding="bizId">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>{CONTACTID}</filterExpression>
-				</column>
+				<column binding="contactType" sortOrder="ascending" />
+				<column binding="email1" sortOrder="ascending" />
+				<column binding="mobile" sortOrder="ascending" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qUsers" documentName="User">
 			<description>All Users</description>
 			<columns>
-				<column binding="contact.name" sortOrder ="ascending" />
-				<column binding="contact.email1" sortOrder ="ascending" />
-				<column binding="contact.mobile" sortOrder ="ascending" />
-				<column binding="userName" sortOrder ="ascending" />
+				<column binding="contact.name" sortOrder="ascending" />
+				<column binding="contact.email1" sortOrder="ascending" />
+				<column binding="contact.mobile" sortOrder="ascending" />
+				<column binding="userName" sortOrder="ascending" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
-				<column binding="startTime" sortOrder="descending"/>
+				<column binding="startTime" sortOrder="descending" />
 				<column binding="displayName" />
 				<column binding="endTime" />
 				<column binding="status" />
@@ -345,8 +361,8 @@
 		<documentQuery name="qAllSchedules" documentName="JobSchedule">
 			<description>The list of all job schedule entries</description>
 			<columns>
-				<column binding="bizKey" sortOrder ="ascending" />
-				<column binding="startTime" sortOrder ="ascending" />
+				<column binding="bizKey" sortOrder="ascending" />
+				<column binding="startTime" sortOrder="ascending" />
 				<column binding="endTime" />
 			</columns>
 		</documentQuery>
@@ -375,15 +391,15 @@
 		<documentQuery name="qSnapshots" documentName="Snapshot">
 			<description>The list of all Snapshots.</description>
 			<columns>
-				<column binding="moduleName" sortOrder ="ascending" />
-				<column binding="queryName" sortOrder ="ascending" />
-				<column binding="name" sortOrder ="ascending" />
+				<column binding="moduleName" sortOrder="ascending" />
+				<column binding="queryName" sortOrder="ascending" />
+				<column binding="name" sortOrder="ascending" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qTags" documentName="Tag">
 			<description>The list of all Tags.</description>
 			<columns>
-				<column binding="name" sortOrder ="ascending" />
+				<column binding="name" sortOrder="ascending" />
 				<column binding="visible" />
 			</columns>
 		</documentQuery>
@@ -404,10 +420,42 @@
 		<documentQuery name="qCommunications" documentName="Communication">
 			<description>Communications</description>
 			<columns>
-				<column binding="description" sortOrder="ascending"/>
-				<column binding="documentName"/>
-				<column binding="subject"/>
-				<column binding="tag.name"/>
+				<column binding="description" sortOrder="ascending" />
+				<column binding="documentName" />
+				<column binding="subject" />
+				<column binding="tag.name" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qSubscriptions" documentName="Subscription">
+			<description>Subscriptions</description>
+			<columns>
+				<column binding="receiverIdentifier" sortOrder="ascending" />
+				<column binding="declined" />
+				<column binding="formatType"/>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qUserSubscriptions" documentName="Subscription">
+			<description>Subscriptions</description>
+			<columns>
+				<column binding="communication.bizKey" sortOrder="ascending" />
+				<column binding="declined" />
+				<column binding="formatType"/>
+				<column binding="preferredReceiverIdentifier"/>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qTagCommunications" documentName="Communication">
+			<description>Communications</description>
+			<columns>
+				<column binding="description" sortOrder="ascending" />
+				<column binding="moduleName">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>admin</filterExpression>
+				</column>
+				<column binding="documentName" >
+					<filterOperator>equal</filterOperator>
+					<filterExpression>Tag</filterExpression>
+				</column>
+				<column binding="subject" />
 			</columns>
 		</documentQuery>
 	</queries>

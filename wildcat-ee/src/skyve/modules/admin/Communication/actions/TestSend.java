@@ -42,7 +42,7 @@ public class TestSend implements ServerSideAction<Communication> {
 			throw new ValidationException(new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
 		}
 		
-		CommunicationUtil.sendOverrideTo(communication, CommunicationUtil.RunMode.TEST, CommunicationUtil.ResponseMode.EXPLICIT, myAddress, beans.get(0));
+		CommunicationUtil.sendOverrideTo(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, myAddress, beans.get(0));
 		
 		return new ServerSideActionResult(communication);
 	}

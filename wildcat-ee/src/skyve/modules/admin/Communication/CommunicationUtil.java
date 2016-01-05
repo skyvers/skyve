@@ -2,11 +2,14 @@ package modules.admin.Communication;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
+import modules.admin.domain.Subscription;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -15,6 +18,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -85,6 +89,40 @@ public class CommunicationUtil {
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
+		Module module = customer.getModule(Communication.MODULE_NAME);
+		Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
+		Document subDoc = module.getDocument(customer, Subscription.DOCUMENT_NAME);
+
+		String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
+		FormatType format =communication.getFormatType();
+
+		// check for Subscription
+		DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+		q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, sendTo);
+		Subscription subscription = q.beanResult();
+
+		if (subscription != null) {
+			// check for declined
+			if (Boolean.TRUE.equals(subscription.getDeclined())) {
+				StringBuilder msg = new StringBuilder(128);
+				if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
+					msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
+					msg.append(sendTo).append(" has a ").append(subDoc.getSingularAlias());
+					msg.append(" set ").append(Subscription.declinedPropertyName);
+					if(subscription.getFormatType()!=null){
+						msg.append(" for ").append(subscription.getFormatType().toDescription());
+					}
+
+					//block the communication
+					Util.LOGGER.info(msg.toString());
+					throw new Exception(msg.toString());
+				}
+			} else {
+				format = subscription.getFormatType();
+				sendTo = subscription.getPreferredReceiverIdentifier();
+				Util.LOGGER.info(document.getSingularAlias() + " redirected to " + format.toDescription() + ' ' + sendTo);
+			}
+		}
 
 		String sendFrom = communication.getSendFrom();
 		if (sendFrom == null && Boolean.TRUE.equals(communication.getSystem())) {
@@ -102,20 +140,27 @@ public class CommunicationUtil {
 			}
 		}
 
-		try (FileOutputStream fos = new FileOutputStream(communication.getFilePath())) {
+		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailBody = communication.getBody();
+		emailBody = Binder.formatMessage(customer, emailBody, beans);
 
-			String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
-			String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
-			String emailBody = communication.getBody();
-			emailBody = Binder.formatMessage(customer, emailBody, beans);
+		// Generate file name - Communication_Description_To
+		StringBuilder fileName = new StringBuilder();
+		fileName.append(communication.getFilePath());
+		String separator = System.getProperty("file.separator");
+		if (!communication.getFilePath().endsWith(separator)) {
+			fileName.append(separator);
+		}
+		fileName.append(document.getSingularAlias()).append('_');
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		fileName.append(sdf.format(new Date()));
+		fileName.append(separator);
 
-			// Generate file name - Communication_Description_To
-			StringBuilder fileName = new StringBuilder();
-			fileName.append(Communication.descriptionPropertyName);
-			fileName.append('_');
-			fileName.append(communication.getDescription());
-			fileName.append('_');
-			fileName.append(sendTo).append(".eml");
+		new File(fileName.toString()).mkdirs();
+
+		fileName.append(fileNameSafe(sendTo)).append(".eml");
+
+		try (FileOutputStream fos = new FileOutputStream(fileName.toString())) {
 
 			// add attachment
 			if (communication.getAttachment() != null) {
@@ -125,12 +170,24 @@ public class CommunicationUtil {
 					byte[] fileBytes = content.getContentBytes();
 					String attachmentName = (communication.getAttachmentFileName() == null ? "attachment" : communication.getAttachmentFileName());
 					if (RunMode.ACTION.equals(runMode)) {
-						EXT.writeMail(new String[] { sendTo }, null, sendFrom, emailSubject, htmlEnclose(emailBody), MimeType.html, attachmentName, fileBytes, content.getMimeType(), fos);
+						switch(format){
+						case email:
+							EXT.writeMail(new String[] { sendTo }, null, sendFrom, emailSubject, htmlEnclose(emailBody), MimeType.html, attachmentName, fileBytes, content.getMimeType(), fos);
+							break;
+						default:
+							break;
+						}
 					}
 				}
 			} else {
 				if (RunMode.ACTION.equals(runMode)) {
-					EXT.writeMail(new String[] { sendTo }, null, sendFrom, emailSubject, htmlEnclose(emailBody), MimeType.html, null, null, null, fos);
+					switch(format){
+					case email:
+						EXT.writeMail(new String[] { sendTo }, null, sendFrom, emailSubject, htmlEnclose(emailBody), MimeType.html, null, null, null, fos);
+						break;
+					default:
+						break;
+					}
 				}
 			}
 
@@ -167,17 +224,19 @@ public class CommunicationUtil {
 			sendFrom = UtilImpl.SMTP_SENDER;
 		}
 
-		try {
-			String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
-			String emailBody = communication.getBody();
-			emailBody = Binder.formatMessage(customer, emailBody, beans);
+		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailBody = communication.getBody();
+		emailBody = Binder.formatMessage(customer, emailBody, beans);
 
+		try {
 			if (RunMode.ACTION.equals(runMode)) {
 				EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody, MimeType.html, null, null, null);
 			}
 		} catch (Exception e) {
 			if (ResponseMode.SILENT.equals(responseMode)) {
 				Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
+			} else {
+				throw e;
 			}
 		}
 	}

@@ -17,7 +17,6 @@
 				]]>
 			</documentation>
 			<displayName>User Name</displayName>
-			<description>Login name of the user.</description>
 			<length>254</length>
 		</text>
 		<text name="password" >

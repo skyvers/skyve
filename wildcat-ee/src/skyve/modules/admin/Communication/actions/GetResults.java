@@ -26,58 +26,58 @@ public class GetResults implements ServerSideAction<Communication> {
 	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
 
 		communication.setActionType(ActionType.testBindingsAndOutput);
-	
+
 		Persistence pers = CORE.getPersistence();
-		
+
 		Communication result = pers.save(communication);
-		
+
 		String results = getResults(result);
-		
+
 		result.setResults(results);
-		
+
 		result = CommunicationUtil.kickOffJob(result);
-		
+
 		return new ServerSideActionResult(result);
 	}
-	
-	public static String getResults(Communication bean) throws Exception{
-		
+
+	public static String getResults(Communication bean) throws Exception {
+
 		if (bean.getTag() == null) {
 			throw new ValidationException(new Message(Communication.tagPropertyName, "A tag must be selected for results."));
 		}
 
 		Persistence pers = CORE.getPersistence();
 		Communication communication = pers.save(bean);
-		
+
 		Long count = TagBizlet.getTaggedCountForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
 
 		StringBuilder results = new StringBuilder();
 		results.append(count).append(" communications for ");
 		results.append(communication.getDocumentName());
-		results.append(" will be ");
-		
-		switch (communication.getActionType()){
-		case saveForBulkSend:
-			results.append(" created into the directory ");
-			results.append(communication.getFilePath());
-			results.append(".");
-			break;
-			
-		case sendImmediately:
-			results.append(" sent immediately.");
-			break;
-			
-		case testBindingsAndOutput:
-			results.append(" tested.");
-			break;
-			
-		default:
-			break;
+
+		if (communication.getActionType() != null) {
+			results.append(" will be ");
+			switch (communication.getActionType()) {
+			case saveForBulkSend:
+				results.append("created into the directory ");
+				results.append(communication.getFilePath());
+				results.append(".");
+				break;
+
+			case sendImmediately:
+				results.append("sent immediately.");
+				break;
+
+			case testBindingsAndOutput:
+				results.append("tested.");
+				break;
+
+			default:
+				break;
+			}
 		}
-		
-		System.out.println("RESULTS " + results.toString());
-		
+
 		return results.toString();
-		
+
 	}
 }

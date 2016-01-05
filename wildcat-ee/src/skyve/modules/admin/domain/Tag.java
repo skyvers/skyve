@@ -15,9 +15,12 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
 /**
  * Tag
  * 
+ * @depend - - - CombinationsOperator
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
  * @navhas n actionTag 0..1 Tag
+ * @navhas n communication 0..1 Communication
+ * @navhas n copyToUser 0..1 User
  * @stereotype "persistent"
  */
 @XmlType
@@ -39,6 +42,18 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String visiblePropertyName = "visible";
 	/** @hidden */
+	public static final String combinationsOperatorPropertyName = "combinationsOperator";
+	/** @hidden */
+	public static final String combinationExplanationPropertyName = "combinationExplanation";
+	/** @hidden */
+	public static final String currentTagCountPropertyName = "currentTagCount";
+	/** @hidden */
+	public static final String actionTagCountPropertyName = "actionTagCount";
+	/** @hidden */
+	public static final String copyToUserPropertyName = "copyToUser";
+	/** @hidden */
+	public static final String copyToUserTagNamePropertyName = "copyToUserTagName";
+	/** @hidden */
 	public static final String moduleNamePropertyName = "moduleName";
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
@@ -59,6 +74,10 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
 	/** @hidden */
+	public static final String notificationPropertyName = "notification";
+	/** @hidden */
+	public static final String communicationPropertyName = "communication";
+	/** @hidden */
 	public static final String filterColumnPropertyName = "filterColumn";
 	/** @hidden */
 	public static final String actionTagPropertyName = "actionTag";
@@ -68,6 +87,75 @@ public class Tag extends AbstractPersistentBean {
 	public static final String documentActionPropertyName = "documentAction";
 	/** @hidden */
 	public static final String documentActionResultsPropertyName = "documentActionResults";
+
+	/**
+	 * Operator
+	 **/
+	@XmlEnum
+	public static enum CombinationsOperator implements Enumeration {
+		union("Union", "Union"),
+		except("Except", "Except"),
+		intersect("Intersect", "Intersect");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private CombinationsOperator(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static CombinationsOperator fromCode(String code) {
+			CombinationsOperator result = null;
+
+			for (CombinationsOperator value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static CombinationsOperator fromDescription(String description) {
+			CombinationsOperator result = null;
+
+			for (CombinationsOperator value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				CombinationsOperator[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (CombinationsOperator value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * Filter Operator
@@ -208,6 +296,12 @@ public class Tag extends AbstractPersistentBean {
 
 	private String name;
 	private Boolean visible;
+	private CombinationsOperator combinationsOperator;
+	private String combinationExplanation;
+	private Integer currentTagCount;
+	private Integer actionTagCount;
+	private User copyToUser = null;
+	private String copyToUserTagName;
 	/**
 	 * The module to tag.
 	 **/
@@ -227,9 +321,11 @@ public class Tag extends AbstractPersistentBean {
 	private FilterOperator filterOperator;
 	private FilterAction filterAction;
 	private Boolean unTagSuccessful;
+	private Boolean notification;
+	private Communication communication = null;
 	private Integer filterColumn;
 	/**
-	 * The tag to use for the action to be performed on this tag.
+	 * The other tag to use for the action to be performed on this tag.
 	 **/
 	private Tag actionTag = null;
 	/**
@@ -314,6 +410,108 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #combinationsOperator} accessor.
+	 **/
+	public CombinationsOperator getCombinationsOperator() {
+		return combinationsOperator;
+	}
+
+	/**
+	 * {@link #combinationsOperator} mutator.
+	 * 
+	 * @param combinationsOperator	The new value to set.
+	 **/
+	@XmlElement
+	public void setCombinationsOperator(CombinationsOperator combinationsOperator) {
+		this.combinationsOperator = combinationsOperator;
+	}
+
+	/**
+	 * {@link #combinationExplanation} accessor.
+	 **/
+	public String getCombinationExplanation() {
+		return combinationExplanation;
+	}
+
+	/**
+	 * {@link #combinationExplanation} mutator.
+	 * 
+	 * @param combinationExplanation	The new value to set.
+	 **/
+	@XmlElement
+	public void setCombinationExplanation(String combinationExplanation) {
+		this.combinationExplanation = combinationExplanation;
+	}
+
+	/**
+	 * {@link #currentTagCount} accessor.
+	 **/
+	public Integer getCurrentTagCount() {
+		return currentTagCount;
+	}
+
+	/**
+	 * {@link #currentTagCount} mutator.
+	 * 
+	 * @param currentTagCount	The new value to set.
+	 **/
+	@XmlElement
+	public void setCurrentTagCount(Integer currentTagCount) {
+		this.currentTagCount = currentTagCount;
+	}
+
+	/**
+	 * {@link #actionTagCount} accessor.
+	 **/
+	public Integer getActionTagCount() {
+		return actionTagCount;
+	}
+
+	/**
+	 * {@link #actionTagCount} mutator.
+	 * 
+	 * @param actionTagCount	The new value to set.
+	 **/
+	@XmlElement
+	public void setActionTagCount(Integer actionTagCount) {
+		this.actionTagCount = actionTagCount;
+	}
+
+	/**
+	 * {@link #copyToUser} accessor.
+	 **/
+	public User getCopyToUser() {
+		return copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUser} mutator.
+	 * 
+	 * @param copyToUser	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUser(User copyToUser) {
+		this.copyToUser = copyToUser;
+	}
+
+	/**
+	 * {@link #copyToUserTagName} accessor.
+	 **/
+	public String getCopyToUserTagName() {
+		return copyToUserTagName;
+	}
+
+	/**
+	 * {@link #copyToUserTagName} mutator.
+	 * 
+	 * @param copyToUserTagName	The new value to set.
+	 **/
+	@XmlElement
+	public void setCopyToUserTagName(String copyToUserTagName) {
+		this.copyToUserTagName = copyToUserTagName;
+	}
+
+	/**
 	 * {@link #moduleName} accessor.
 	 **/
 	public String getModuleName() {
@@ -381,7 +579,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFileHasHeaders(Boolean fileHasHeaders) {
-		preset(fileHasHeadersPropertyName, fileHasHeaders);
 		this.fileHasHeaders = fileHasHeaders;
 	}
 
@@ -399,7 +596,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setNumberLoaded(Integer numberLoaded) {
-		preset(numberLoadedPropertyName, numberLoaded);
 		this.numberLoaded = numberLoaded;
 	}
 
@@ -417,7 +613,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setNumberMatched(Integer numberMatched) {
-		preset(numberMatchedPropertyName, numberMatched);
 		this.numberMatched = numberMatched;
 	}
 
@@ -435,7 +630,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setNumberTagged(Integer numberTagged) {
-		preset(numberTaggedPropertyName, numberTagged);
 		this.numberTagged = numberTagged;
 	}
 
@@ -453,7 +647,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterOperator(FilterOperator filterOperator) {
-		preset(filterOperatorPropertyName, filterOperator);
 		this.filterOperator = filterOperator;
 	}
 
@@ -471,7 +664,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterAction(FilterAction filterAction) {
-		preset(filterActionPropertyName, filterAction);
 		this.filterAction = filterAction;
 	}
 
@@ -489,8 +681,42 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setUnTagSuccessful(Boolean unTagSuccessful) {
-		preset(unTagSuccessfulPropertyName, unTagSuccessful);
 		this.unTagSuccessful = unTagSuccessful;
+	}
+
+	/**
+	 * {@link #notification} accessor.
+	 **/
+	public Boolean getNotification() {
+		return notification;
+	}
+
+	/**
+	 * {@link #notification} mutator.
+	 * 
+	 * @param notification	The new value to set.
+	 **/
+	@XmlElement
+	public void setNotification(Boolean notification) {
+		this.notification = notification;
+	}
+
+	/**
+	 * {@link #communication} accessor.
+	 **/
+	public Communication getCommunication() {
+		return communication;
+	}
+
+	/**
+	 * {@link #communication} mutator.
+	 * 
+	 * @param communication	The new value to set.
+	 **/
+	@XmlElement
+	public void setCommunication(Communication communication) {
+		preset(communicationPropertyName, communication);
+		this.communication = communication;
 	}
 
 	/**
@@ -507,7 +733,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterColumn(Integer filterColumn) {
-		preset(filterColumnPropertyName, filterColumn);
 		this.filterColumn = filterColumn;
 	}
 
@@ -525,7 +750,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setActionTag(Tag actionTag) {
-		preset(actionTagPropertyName, actionTag);
 		this.actionTag = actionTag;
 	}
 
@@ -543,7 +767,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDocumentCondition(String documentCondition) {
-		preset(documentConditionPropertyName, documentCondition);
 		this.documentCondition = documentCondition;
 	}
 
@@ -561,7 +784,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDocumentAction(String documentAction) {
-		preset(documentActionPropertyName, documentAction);
 		this.documentAction = documentAction;
 	}
 
@@ -579,7 +801,6 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDocumentActionResults(String documentActionResults) {
-		preset(documentActionResultsPropertyName, documentActionResults);
 		this.documentActionResults = documentActionResults;
 	}
 
@@ -599,6 +820,15 @@ public class Tag extends AbstractPersistentBean {
 
 	public boolean isNotDocumentSet() {
 		return (! isDocumentSet());
+	}
+
+	@XmlTransient
+	public boolean isExplanation() {
+		return (getCombinationExplanation()!=null);
+	}
+
+	public boolean isNotExplanation() {
+		return (! isExplanation());
 	}
 
 	@XmlTransient

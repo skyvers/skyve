@@ -2,17 +2,14 @@ package modules.admin.ChangePassword.actions;
 
 import java.security.MessageDigest;
 
-import modules.admin.AdminUtil;
+import modules.admin.Configuration.ComplexityModel;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.Configuration;
-import modules.admin.domain.Configuration.PasswordComplexityModel;
 
 import org.apache.commons.codec.binary.Base64;
-
-import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.CORE;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -23,6 +20,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.web.WebContext;
+import org.skyve.wildcat.util.UtilImpl;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	/**
@@ -43,13 +41,15 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		String confirmPassword = bean.getConfirmPassword();
 
 		// check for suitable complexity
-		Configuration configuration = AdminUtil.getConfiguration();
-		PasswordComplexityModel cm = configuration.getPasswordComplexityModel();
+		Configuration configuration = Configuration.newInstance();
+		ComplexityModel cm = new ComplexityModel(configuration.getPasswordComplexityModel());
 
-		if (!AdminUtil.validatePasswordComplexity(newPassword, cm)) {
-			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex.\n");
-			sb.append(AdminUtil.validatePasswordComplexityMessage(cm));
-			sb.append("\nPlease re-enter and confirm the password.");
+		if (!newPassword.matches(cm.getComparison())) {
+			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex. ");
+			sb.append(cm.getRule());
+			sb.append(" Please re-enter and confirm the password.");
+			
+			System.out.println(cm.getComparison());
 
 			Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 			throw new ValidationException(message);

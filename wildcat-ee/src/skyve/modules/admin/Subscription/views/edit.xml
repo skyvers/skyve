@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view type="edit" title="Subscription" icon32x32RelativeFileName="icons/document/communication32.png"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" percentageWidth="60" pixelHeight="1" pixelMemberPadding="10" pixelPadding="10">
+		<form>
+			<column percentageWidth="30" />
+			<column />
+			<row>
+				<item>
+					<default binding="communication" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="receiverIdentifier" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<checkBox binding="declined" triState="false"/>
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="formatType" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="preferredReceiverIdentifier" />
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+	<newParameters>
+		<parameter name="communication" />
+	</newParameters>
+</view>
+

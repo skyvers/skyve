@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="{currentUser.contact.name}" type="edit" xmlns="http://www.skyve.org/xml/view"
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column percentageWidth="30" />
+		<column />
+		<row>
+			<item>
+				<textField binding="currentUser.userName" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="currentUser.contact.name" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="currentUser.contact.email1" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="currentUser.contact.mobile" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="groupMembershipList" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="lastLogin" disabled="true" editable="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<spacer />
+			</item>
+			<item showLabel="false">
+				<contentImage binding="currentUser.contact.image" pixelWidth="200" pixelHeight="200" />
+			</item>
+		</row>
+		<row>
+			<item align="centre">
+				<button actionName="UpdateMyDetails" pixelWidth="100" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
+			inActionPanel="false" />
+	</actions>
+</view>

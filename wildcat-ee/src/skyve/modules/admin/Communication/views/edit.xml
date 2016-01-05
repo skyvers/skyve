@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view type="edit" title="Communication" 
-			xmlns="http://www.skyve.org/xml/view"
-			xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<view type="edit" title="Communication" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Manage">
-			<vbox pixelMemberPadding="10">
+			<vbox pixelMemberPadding="10" pixelPadding="10">
 				<form border="true" borderTitle="Configuration" pixelHeight="1">
 					<column percentageWidth="20" />
 					<column />
@@ -14,7 +12,7 @@
 					<column />
 					<row>
 						<item>
-							<textField binding="description" disabled="locked"/>
+							<textField binding="description" disabled="locked" />
 						</item>
 						<item>
 							<default binding="system" />
@@ -30,7 +28,7 @@
 						</item>
 					</row>
 					<row>
-						<item  colspan="2">
+						<item colspan="2">
 							<combo binding="documentName" disabled="locked">
 								<onChangedHandlers>
 									<server action="UpdateDocument" />
@@ -43,55 +41,35 @@
 							<default binding="tag" />
 						</item>
 						<item align="right">
-							<button actionName="GetCount" pixelWidth="200"/>
+							<button actionName="GetCount" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
-						<item  colspan="2">
+						<item colspan="2">
 							<textField binding="filePath" />
 						</item>
 					</row>
 				</form>
-				<form border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item colspan="2">
-							<textArea binding="results" pixelHeight="200" disabled="true"/>
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="GetResults" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="CreateFiles" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="SendNow" pixelWidth="200" />
-						</item>
-					</row>
-				</form>								
+				<hbox border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1" pixelPadding="10">
+					<form percentageWidth="80">
+						<column percentageWidth="20" />
+						<column />
+						<row>
+							<item>
+								<textArea binding="results" pixelHeight="200" disabled="true" />
+							</item>
+						</row>
+					</form>
+					<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" pixelMemberPadding="10">
+						<button actionName="GetResults" pixelWidth="200" />
+						<button actionName="CreateFiles" pixelWidth="200" />
+						<button actionName="SendNow" pixelWidth="200" />
+					</vbox>
+				</hbox>
 			</vbox>
 		</tab>
 		<tab title="Contents">
-			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelMemberPadding="10"
-				pixelPadding="10">
+			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelPadding="10">
 				<form pixelWidth="1100">
 					<column percentageWidth="20" />
 					<column />
@@ -100,8 +78,10 @@
 					<column />
 					<row>
 						<item>
-							<combo binding="formatType" >
-								<onChangedHandlers><rerender/></onChangedHandlers>
+							<combo binding="formatType">
+								<onChangedHandlers>
+									<rerender />
+								</onChangedHandlers>
 							</combo>
 						</item>
 					</row>
@@ -110,7 +90,7 @@
 							<textField binding="sendFrom" invisible="notEmailType" />
 						</item>
 						<item>
-							<button actionName="SendNow" pixelWidth="200" />
+							<button actionName="TestSend" pixelWidth="200" />
 						</item>
 					</row>
 					<row>
@@ -119,7 +99,7 @@
 						</item>
 						<item colspan="3">
 							<blurb>	
-								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document.</i></font>]]>
+								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document, or the user who runs the communication.</i></font>]]>
 							</blurb>
 						</item>
 					</row>
@@ -134,7 +114,7 @@
 						</item>
 						<item colspan="3">
 							<blurb>	
-								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document.</i></font>]]>
+								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
 							</blurb>
 						</item>
 					</row>
@@ -159,9 +139,17 @@
 							<html binding="body" pixelHeight="400" pixelWidth="800" />
 						</item>
 					</row>
+					<row>
+						<item>
+							<spacer />
+						</item>
+						<item colspan="3">
+							<button actionName="AddUnsubscribeLink" />
+						</item>
+					</row>
 				</form>
 			</vbox>
-			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1">
+			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1" pixelPadding="10">
 				<form pixelWidth="1100">
 					<column percentageWidth="20" />
 					<column />
@@ -179,6 +167,11 @@
 				</form>
 			</vbox>
 		</tab>
+		<tab title="Subscriptions">
+			<listGrid continueConversation="true" query="qSubscriptions">
+				<filterParameter operator="equal" name="communication" binding="bizId" />
+			</listGrid>
+		</tab>
 	</tabPane>
 	<actions>
 		<defaults />
@@ -187,14 +180,15 @@
 		<action clientValidation="true" className="GetCount" displayName="Get Count" inActionPanel="false"
 			relativeIconFileName="shared/icons/Search.gif" />
 		<action clientValidation="true" className="CreateFiles" displayName="Generate Files" inActionPanel="false"
-			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?"/>
+			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?" />
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
-			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?"/>
-		<action clientValidation="true" className="TestSend" displayName="Test Send" inActionPanel="false"
-			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?"/>
-		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false"/>
-		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false"/>			
+			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?" />
+		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false"
+			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?" />
+		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link"
+			inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" />
+		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
+		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 	</actions>
 	<newParameters />
 </view>
-
