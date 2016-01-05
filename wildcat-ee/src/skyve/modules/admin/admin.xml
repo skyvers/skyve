@@ -9,9 +9,11 @@
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
+		<document ref="Backup" />
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
+		<document ref="Content" />
 		<document ref="CurrentUser" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="DataGroup" />
@@ -137,6 +139,7 @@
 		<role name="SecurityAdministrator">
 			<description>Allows administration of Users and Groups.</description>
 			<privileges>
+				<document name="Backup" permission="_R__C" />
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
@@ -152,10 +155,15 @@
 				</document>
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
+				<document name="Content" permission="_R__C" />
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DataMaintenance" permission="CRUDC">
+					<action name="Backup" />
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
+					<action name="Reindex" />
+					<action name="Select" />
+					<action name="Truncate" />
 				</document>
 				<document name="Display" permission="_____" />
 				<document name="DocumentNumber" permission="CRUDC" />

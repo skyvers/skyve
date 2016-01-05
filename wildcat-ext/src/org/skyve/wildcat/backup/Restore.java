@@ -180,9 +180,9 @@ public class Restore {
 										for (String relativeContentPath : table.relativeContentPaths) {
 											File candidateDirectory = new File(backupDirectory.getAbsolutePath() + File.separator +
 																				relativeContentPath + File.separator + 
-																				stringValue.substring(5, 10) + File.separator + 
-																				stringValue.substring(10, 15) + File.separator +
-																				stringValue.substring(15, 20) + File.separator +
+																				stringValue.substring(5, 8) + File.separator + 
+																				stringValue.substring(10, 13) + File.separator +
+																				stringValue.substring(15, 18) + File.separator +
 																				stringValue);
 											File[] files = candidateDirectory.listFiles();
 											if ((files != null) && // directory exists

@@ -22,6 +22,7 @@ import org.skyve.EXT;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
+import org.skyve.wildcat.util.ThreadSafeFactory;
 import org.skyve.wildcat.util.UtilImpl;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -50,7 +51,8 @@ public class Backup {
 		
 		Collection<Table> tables = BackupUtil.getTables();
 
-		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator;
+		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + 
+									ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()) + File.separator;
 
 		File directory = new File(backupDirPrefix + customerName + File.separator);
 		directory.mkdirs();
@@ -174,9 +176,9 @@ public class Backup {
 																File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
 																									content.getBizModule() + File.separator +
 																									content.getBizDocument() + File.separator +
-																									stringValue.substring(5, 10) + File.separator +
-																									stringValue.substring(10, 15) + File.separator +
-																									stringValue.substring(15, 20) + File.separator + 
+																									stringValue.substring(5, 8) + File.separator +
+																									stringValue.substring(10, 13) + File.separator +
+																									stringValue.substring(15, 18) + File.separator + 
 																									stringValue);
 																if (! contentDirectory.exists()) {
 																	contentDirectory.mkdirs();

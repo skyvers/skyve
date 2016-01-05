@@ -1,0 +1,18 @@
+package modules.admin.DataMaintenance.actions;
+
+import modules.admin.domain.DataMaintenance;
+
+import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.web.WebContext;
+
+public class Reindex implements ServerSideAction<DataMaintenance> {
+	private static final long serialVersionUID = -5036413477264983775L;
+
+	@Override
+	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	throws Exception {
+		org.skyve.wildcat.backup.Reindex.reindex();
+		return new ServerSideActionResult(bean);
+	}
+}

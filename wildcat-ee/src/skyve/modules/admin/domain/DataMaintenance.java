@@ -28,8 +28,11 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
+	/** @hidden */
+	public static final String schemaNamePropertyName = "schemaName";
 
 	private String modDocName;
+	private String schemaName;
 
 	@Override
 	@XmlTransient
@@ -82,5 +85,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setModDocName(String modDocName) {
 		preset(modDocNamePropertyName, modDocName);
 		this.modDocName = modDocName;
+	}
+
+	/**
+	 * {@link #schemaName} accessor.
+	 **/
+	public String getSchemaName() {
+		return schemaName;
+	}
+
+	/**
+	 * {@link #schemaName} mutator.
+	 * 
+	 * @param schemaName	The new value to set.
+	 **/
+	@XmlElement
+	public void setSchemaName(String schemaName) {
+		preset(schemaNamePropertyName, schemaName);
+		this.schemaName = schemaName;
 	}
 }

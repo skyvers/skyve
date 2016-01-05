@@ -15,5 +15,9 @@
 			<domain>variant</domain>
 			<length>100</length>
 		</text>
+		<text name="schemaName">
+			<displayName>Schema Name</displayName>
+			<length>1024</length>
+		</text>
 	</attributes>
 </document>

@@ -1,37 +1,110 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Data Maintenance" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" pixelPadding="10" pixelHeight="1">
-		<form>
-			<column percentageWidth="20" />
-			<column />
-			<column />
-			<row>
-				<item>
-					<combo binding="modDocName" />
-				</item>
-			</row>
-			<row>
-				<item>
-					<spacer />
-				</item>
-				<item>
-					<button actionName="DataMaintenanceExportAction" pixelWidth="200" />
-				</item>
-			</row>
-			<row>
-				<item>
-					<spacer />
-				</item>
-				<item>
-					<button actionName="DataMaintenanceImportAction" pixelWidth="200" />
-				</item>
-			</row>
-		</form>
-	</vbox>
+	<tabPane>
+		<tab title="Export/Import">
+			<form>
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="modDocName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="DataMaintenanceExportAction" pixelWidth="200" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="DataMaintenanceImportAction" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Backup/Restore">
+			<vbox pixelMemberPadding="10">
+				<form border="true" borderTitle="Truncate">
+					<column pixelWidth="100" />
+					<column/>
+					<column pixelWidth="75" />
+					<row>
+						<item>
+							<textField binding="schemaName" />
+						</item>
+						<item align="centre">
+							<button actionName="Truncate" />
+						</item>
+					</row>
+				</form>
+				<vbox border="true" borderTitle="Backups" pixelPadding="10">
+					<listGrid model="BackupsModel" 
+								continueConversation="false" 
+								showAdd="false" 
+								showEdit="false" 
+								showExport="false" 
+								showFilter="false" 
+								showRemove="false" 
+								showSnap="false" 
+								showSummary="false" 
+								showTag="false" 
+								showZoom="false" />
+					<hbox horizontalAlignment="right" pixelPadding="10" pixelMemberPadding="10" pixelHeight="1">
+						<button actionName="Backup" pixelWidth="75" />
+<!--
+						<button actionName="Restore" pixelWidth="75" />
+-->
+					</hbox>
+				</vbox>
+			</vbox>
+		</tab>
+		<tab title="Content">
+			<listGrid model="ContentModel" 
+						continueConversation="false" 
+						showAdd="false" 
+						showEdit="false" 
+						showExport="false" 
+						showFilter="false" 
+						showRemove="false" 
+						showSnap="false" 
+						showSummary="false" 
+						showTag="false" 
+						showZoom="false">
+				<onSelectedHandlers>
+					<server action="Select" />
+				</onSelectedHandlers>
+			</listGrid>
+<!--
+			<form>
+				<column/>
+				<column/>
+				<row>
+					<item>
+						 <contentLink binding=""></contentLink>
+					</item>
+				</row>
+			</form>
+-->
+			<hbox horizontalAlignment="right" pixelPadding="10" pixelMemberPadding="10" pixelHeight="1">
+				<button actionName="Reindex" />
+			</hbox>
+		</tab>
+	</tabPane>
 	<actions>
 		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
+		<action className="Backup" displayName="Backup" inActionPanel="false" />
+		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
+		<action className="Select" displayName="Select" inActionPanel="false" />
+		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
 	</actions>
 </view>
