@@ -194,7 +194,7 @@ a.buttonlink {
 }
 
 .dhtmlPageButton:hover img {
-	border: 0;
+	border: 0px;
 	opacity: 1.0;
 	filter: alpha(opacity = 100)
 }

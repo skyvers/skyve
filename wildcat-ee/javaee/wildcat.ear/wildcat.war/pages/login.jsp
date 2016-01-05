@@ -29,7 +29,7 @@
 		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png" />
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
 
-		<script language="JavaScript">
+		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
 				if (form.customer.value.length < 1) {
@@ -182,9 +182,6 @@
 															</td>
 														</tr>
 														<tr>
-															<!-- 
-															<th></th>
-															 -->
 															<td colspan="2">
 																<br/>
 																<input type="submit" value="Sign in" style="font-size:<%=fontSize%>" />
@@ -198,9 +195,9 @@
 									</div>
 								</div>
 							</div>
-							<div >
-								<div >
-									<div >
+							<div>
+								<div>
+									<div>
 										&nbsp;
 									</div>
 								</div>
