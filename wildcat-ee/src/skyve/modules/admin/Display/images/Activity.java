@@ -68,7 +68,7 @@ public class Activity implements DynamicImage<Display> {
 			sqlB.append(c.get(Calendar.MONTH) + 1).append(',');
 			sqlB.append('0');
 		}
-		sqlB.append(" )");
+		sqlB.append(" ) rawHits");
 
 		// filter for last 12 months
 		int lastYear = c.get(Calendar.YEAR) * 100 + (c.get(Calendar.MONTH) + 1);
@@ -76,10 +76,10 @@ public class Activity implements DynamicImage<Display> {
 
 		// grouping and order
 		sqlB.append(" group by year, month");
-		sqlB.append(" )");
-		sqlB.append(" )");
+		sqlB.append(" ) sumHits");
+		sqlB.append(" ) sumHitsMonth");
 		sqlB.append(" order by year , month ");
-		
+
 		return sqlB.toString();
 	}
 
