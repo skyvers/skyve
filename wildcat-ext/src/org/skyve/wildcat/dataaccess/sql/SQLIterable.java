@@ -210,6 +210,11 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 			return nextTuple();
 		}
 		
+		@Override
+		public void remove() {
+			throw new IllegalStateException("Cannot remove from SQLIterator");
+		}
+
 		@SuppressWarnings("synthetic-access")
 		private Z nextBean() {
 			try {
