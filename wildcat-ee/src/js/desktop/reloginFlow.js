@@ -57,11 +57,14 @@ isc.RPCManager.addClassMethods({
 						}
 					},
 					required: true},
-				{type: "spacer"},
-                 {type: "button", 
-                 	title: "Login", 
+				{type: "spacer", colSpan: 2, height: 5},
+                {type: "button", 
+                 	title: "Sign In", 
                  	click: "form.loginWindow.doLogin()",
-                 	startRow: false}
+                 	startRow: true,
+                 	colSpan: 2,
+                 	width: 130,
+                 	align: 'center'}
 			]);
     		this.loginForm = isc.DynamicForm.create({
 	            numCols: 2,
@@ -70,7 +73,7 @@ isc.RPCManager.addClassMethods({
 	        });
 	        this.loginWindow = isc.LoginWindow.create({
 				headerIconDefaults: {src: "../images/window/WILDCAT_fav.png", width: 16, height: 16},
-	            title: "Session expired - please log in",
+	            title: "Session expired - please sign in",
 	            autoCenter: true,
 	            autoSize: true,
 	            showCloseButton: false,
@@ -79,29 +82,10 @@ isc.RPCManager.addClassMethods({
 	            loginForm: this.loginForm,
 	            items: [
 	            	isc.VLayout.create({
-						width: 380,
+						width: 130,
 						height: BizUtil.customer ? 90 : 120,
-						members: [
-							isc.HLayout.create({
-								width: "100%",
-								height: BizUtil.customer ? 50 : 75,
-								members: [
-									isc.Img.create({
-										width: 150,
-									    imageType: "normal",
-									    src: "loginSecurityLock.gif",
-									    layoutAlign: "center"
-									}),
-									this.loginForm
-								]
-							}),
-							isc.HTMLFlow.create({
-								contents: '<table width="100%"><tr><td align=left>' +
-											'<a href="http://www.bizhub.com.au/biz/contact.html" target="_blank"> Problems logging in? </a>' +
-											'</td><td align=right><a href="http://www.bizhub.com.au/biz/TermsOfUse.html" target="_blank"> Terms of Use </a>' +
-											'</td></tr></table>'
-							})
-						]
+						layoutMargin: 10,
+						members: [this.loginForm]
 					})
 				]
 	        });
@@ -124,54 +108,51 @@ isc.RPCManager.addClassMethods({
 
 // LoginWindow - subclass of Window, adds methods for handling login responses
 isc.defineClass("LoginWindow", "Window").addProperties({
+	// Called by user pressing the login button or hitting enter in the password field.  
+	// Submit the request to the server.
+	doLogin : function () {
+		if (this.loginForm.validate(false)) {
+		    isc.RPCManager.sendRequest({
+	    	    // let the RPCManager know not to delay this request and to discard this
+		        // request/response pair if the auth attempt fails.
+		        containsCredentials: true,
+		        // we must target the special loginSuccess.html file.  You can move it anywhere you
+		        // want, so long as your login attempts target it.
+		        actionURL: isc.RPCManager.credentialsURL,
+	        
+		        // we're not going to privide any data beyond the username, password query params
+		        useSimpleHttp: true,
+		        showPrompt: false,
+	
+		        // the actual credentials, from the form
+		        params : {
+		            j_username: (BizUtil.customer ? BizUtil.customer : this.loginForm.getValue("customer")) + 
+	    	        				"/" + this.loginForm.getValue("username"),
+					j_password: this.loginForm.getValue("password")
+	        	},
+	        	callback : this.getID()+".loginReply(rpcResponse)"
+	    	});
+	    }
+	},
 
-// called by user pressing the login button or hitting enter in the password field.  Submit the
-// request to the server.
-doLogin : function () {
-	if (this.loginForm.validate(false)) {
-	    isc.RPCManager.sendRequest({
-    	    // let the RPCManager know not to delay this request and to discard this
-	        // request/response pair if the auth attempt fails.
-	        containsCredentials: true,
-	        // we must target the special loginSuccess.html file.  You can move it anywhere you
-	        // want, so long as your login attempts target it.
-	        actionURL: isc.RPCManager.credentialsURL,
-        
-	        // we're not going to privide any data beyond the username, password query params
-	        useSimpleHttp: true,
-	        showPrompt: false,
-
-	        // the actual credentials, from the form
-	        params : {
-	            j_username: (BizUtil.customer ? BizUtil.customer : this.loginForm.getValue("customer")) + 
-    	        				"/" + this.loginForm.getValue("username"),
-				j_password: this.loginForm.getValue("password")
-        	},
-        	callback : this.getID()+".loginReply(rpcResponse)"
-    	});
-    }
-},
-
-// called when the server replies
-loginReply : function (rpcResponse) {
-    
-    // clear the form values since either way we don't want to hold on to them
-    this.loginForm.clearValues();
-    var status = rpcResponse.status;
-    if (status == isc.RPCResponse.STATUS_SUCCESS) {
-        this.loginForm.hideItem("loginFailure");
-        this.hide();
-
-        // this resubmits all transactions that we previously delayed in loginRequired.  We do
-        // this on a delay so the login.hide() renders immediately
-        isc.RPCManager.delayCall("resendTransaction", [this.transactionToResend]);
-        delete this.transactionsToResubmit;
-    } else if (status == isc.RPCResponse.STATUS_LOGIN_INCORRECT) {
-        this.loginForm.showItem("loginFailure");
-    } else if (status == isc.RPCResponse.STATUS_MAX_LOGIN_ATTEMPTS_EXCEEDED) {
-        isc.warn("Max login attempts exceeded.");
-    }
-    this.loginForm.focusInItem(BizUtil.customer ? "username" : "customer");
-}
-
+	// called when the server replies
+	loginReply : function (rpcResponse) {
+	    // clear the form values since either way we don't want to hold on to them
+	    this.loginForm.clearValues();
+	    var status = rpcResponse.status;
+	    if (status == isc.RPCResponse.STATUS_SUCCESS) {
+	        this.loginForm.hideItem("loginFailure");
+	        this.hide();
+	
+	        // this resubmits all transactions that we previously delayed in loginRequired.  We do
+	        // this on a delay so the login.hide() renders immediately
+	        isc.RPCManager.delayCall("resendTransaction", [this.transactionToResend]);
+	        delete this.transactionsToResubmit;
+	    } else if (status == isc.RPCResponse.STATUS_LOGIN_INCORRECT) {
+	        this.loginForm.showItem("loginFailure");
+	    } else if (status == isc.RPCResponse.STATUS_MAX_LOGIN_ATTEMPTS_EXCEEDED) {
+	        isc.warn("Max login attempts exceeded.");
+	    }
+	    this.loginForm.focusInItem(BizUtil.customer ? "username" : "customer");
+	}
 });
