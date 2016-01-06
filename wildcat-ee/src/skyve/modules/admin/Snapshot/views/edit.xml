@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view type="edit" title="{name}" icon32x32RelativeFileName="icons/document/snapshot32.png" xmlns="http://www.skyve.org/xml/view"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox pixelPadding="10" pixelMemberPadding="10" pixelHeight="1">
+	<vbox pixelPadding="10" pixelHeight="1">
 		<form border="true" >
 			<column percentageWidth="10" />
 			<column />

@@ -3,7 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Details">
-			<vbox pixelHeight="1" pixelPadding="10" pixelMemberPadding="10">
+			<vbox pixelHeight="1" pixelPadding="10">
 				<form border="true">
 					<column percentageWidth="20" />
 					<column />
@@ -118,7 +118,7 @@
 			</vbox>
 		</tab>
 		<tab title="Processing">
-			<vbox pixelPadding="10" pixelMemberPadding="10">
+			<vbox pixelPadding="10">
 				<form border="true" borderTitle="Context">
 					<column percentageWidth="20" />
 					<column />

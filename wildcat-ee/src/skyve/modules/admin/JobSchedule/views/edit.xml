@@ -18,7 +18,7 @@
 			</item>
 		</row>
 	</form>
-	<hbox pixelMemberPadding="10" pixelPadding="5" border="true" borderTitle="When To Execute">
+	<hbox pixelPadding="5" border="true" borderTitle="When To Execute">
 		<vbox border="true" borderTitle="Minutes" pixelWidth="200">
 			<form>
 				<column pixelWidth="0" />

@@ -2,7 +2,7 @@
 <view type="edit" title="Subscription" icon32x32RelativeFileName="icons/document/communication32.png"
 	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" xmlns="http://www.skyve.org/xml/view"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox border="true" percentageWidth="60" pixelHeight="1" pixelMemberPadding="10" pixelPadding="10">
+	<vbox border="true" percentageWidth="60" pixelHeight="1" pixelPadding="10">
 		<form>
 			<column percentageWidth="30" />
 			<column />

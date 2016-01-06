@@ -3,19 +3,19 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Manage">
-			<vbox pixelMemberPadding="10" pixelPadding="10">
+			<vbox pixelPadding="10">
 				<form border="true" borderTitle="Configuration" pixelHeight="1">
 					<column percentageWidth="20" />
 					<column />
 					<column />
-					<column />
+					<column percentageWidth="5"/>					
 					<column />
 					<row>
 						<item>
 							<textField binding="description" disabled="locked" />
 						</item>
 						<item>
-							<default binding="system" />
+							<checkBox binding="system" triState="false"/>
 						</item>
 					</row>
 					<row>
@@ -60,7 +60,7 @@
 							</item>
 						</row>
 					</form>
-					<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" pixelMemberPadding="10">
+					<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" >
 						<button actionName="GetResults" pixelWidth="200" />
 						<button actionName="CreateFiles" pixelWidth="200" />
 						<button actionName="SendNow" pixelWidth="200" />
