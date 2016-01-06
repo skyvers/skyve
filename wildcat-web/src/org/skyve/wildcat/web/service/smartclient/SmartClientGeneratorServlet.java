@@ -346,6 +346,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			if (memberPadding != null) {
 				code.append("membersMargin:").append(memberPadding).append(',');
 			}
+			else {
+				code.append("membersMargin:10,");
+			}
 		}
 
 		private boolean viewHasAtLeastOneForm = false;

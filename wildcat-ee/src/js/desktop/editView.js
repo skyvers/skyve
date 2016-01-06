@@ -45,9 +45,9 @@ isc.EditView.addClassProperties({
 isc.EditView.addMethods({
 	initWidget: function () {
 		this.overflow = 'hidden';
-		this.membersMargin = 2;
-		this.layoutMargin = 2;
-		this.margin = 2;
+		this.membersMargin = 10;
+		this.layoutMargin = 5;
+		this.margin = 5;
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
