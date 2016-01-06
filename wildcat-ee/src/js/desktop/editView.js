@@ -1441,7 +1441,7 @@ BizTabPane.addMethods({
 	
 	tabSelected: function(tabNum, tabPane, ID, tab) {
 		if (this._view.isVisible()) {
-			this._view.delayCall('refreshListGrids', [false, false], 0);
+			this._view.delayCall('refreshListGrids', [false, false, this._view.gather(false)], 0);
 		}
 	},
 	
