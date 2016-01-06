@@ -79,6 +79,9 @@ public class UtilImpl {
 	// eg /init.biz
 	public static String HOME_URI = null;
 
+	// This is the path on the server file system of the web context root
+	public static String WILDCAT_CONTEXT_REAL_PATH = null;
+	
 	// Implementations of Key WILDCAT classes
 	public static String WILDCAT_REPOSITORY_CLASS = null;
 	public static String WILDCAT_PERSISTENCE_CLASS = null;

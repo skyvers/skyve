@@ -28,6 +28,8 @@ public class WildcatContextListener implements ServletContextListener {
 	public void contextInitialized(ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
 
+		UtilImpl.WILDCAT_CONTEXT_REAL_PATH = ctx.getRealPath("/");
+		
 		// This can be set in web.xml or as a command line -D parameter, but if not set, 
 		// it defaults to <app-name>.properties where <app-name>
 		// is derived from the ear file - ie <app-name>.ear -> <app-name>.properties in the same directory.
@@ -38,9 +40,8 @@ public class WildcatContextListener implements ServletContextListener {
 			propertiesFilePath = ctx.getInitParameter("PROPERTIES_FILE_PATH");
 		}
 		if (propertiesFilePath == null) {
-			String realPath = ctx.getRealPath("/");
-			UtilImpl.LOGGER.info("REAL PATH = " + realPath);
-			File ear = new File(realPath).getParentFile();
+			UtilImpl.LOGGER.info("WILDCAT CONTEXT REAL PATH = " + UtilImpl.WILDCAT_CONTEXT_REAL_PATH);
+			File ear = new File(UtilImpl.WILDCAT_CONTEXT_REAL_PATH).getParentFile();
 			String earName = ear.getName();
 			earName = earName.substring(0, earName.length() - 4);
 			propertiesFilePath = ear.getParent() + '/' + earName + ".properties";

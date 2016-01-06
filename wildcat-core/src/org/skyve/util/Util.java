@@ -140,6 +140,10 @@ public class Util {
 		return UtilImpl.WILDCAT_CONTEXT;
 	}
 	
+	public static String getWildcatContextRealPath() {
+		return UtilImpl.WILDCAT_CONTEXT_REAL_PATH;
+	}
+	
 	public static String getHomeUri() {
 		return UtilImpl.HOME_URI;
 	}
