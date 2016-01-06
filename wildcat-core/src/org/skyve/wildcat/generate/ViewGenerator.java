@@ -13,7 +13,6 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
-import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
@@ -21,8 +20,8 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder;
@@ -40,7 +39,6 @@ import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.WidgetReference;
 import org.skyve.wildcat.metadata.view.container.Tab;
 import org.skyve.wildcat.metadata.view.container.TabPane;
-import org.skyve.wildcat.metadata.view.container.VBox;
 import org.skyve.wildcat.metadata.view.container.form.Form;
 import org.skyve.wildcat.metadata.view.container.form.FormColumn;
 import org.skyve.wildcat.metadata.view.container.form.FormItem;
@@ -48,7 +46,6 @@ import org.skyve.wildcat.metadata.view.container.form.FormRow;
 import org.skyve.wildcat.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.wildcat.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.wildcat.metadata.view.widget.bound.input.LookupDescription;
-import org.skyve.wildcat.metadata.view.widget.bound.input.TextField;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.wildcat.metadata.view.widget.bound.tabular.PickList;
@@ -58,11 +55,8 @@ import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 public class ViewGenerator {
-	private static final Integer ONE = new Integer(1);
-	private static final Integer TEN = new Integer(10);
 	private static final Integer THIRTY = new Integer(30);
 	private static final Integer SIXTY = new Integer(60);
-	
 	
 	private ViewGenerator() {
 		// do nothing
@@ -185,6 +179,11 @@ public class ViewGenerator {
 		return result;
 	}
 
+	private static class Detail {
+		String title;
+		MetaData widget;
+	}
+	
 	private static ViewImpl generateEditView(Customer customer, Module module, Document document) 
 	throws MetaDataException {
 		ViewImpl result = new ViewImpl();
@@ -227,25 +226,18 @@ public class ViewGenerator {
 			result.putAction(action);
 		}
 
-		VBox vbox = new VBox();
-		vbox.setBorder(Boolean.TRUE);
-		vbox.setPercentageWidth(SIXTY);
-		vbox.setPixelPadding(TEN);
-		vbox.setPixelMemberPadding(TEN);
-		vbox.setPixelHeight(ONE);
-		
 		Form form = new Form();
+		form.setBorder(Boolean.TRUE);
+		form.setPercentageWidth(SIXTY);
 		FormColumn column = new FormColumn();
 		column.setPercentageWidth(THIRTY);
 		form.getColumns().add(column);
 		form.getColumns().add(new FormColumn());
 		
-		List<MetaData> details = new ArrayList<>();
+		List<Detail> details = new ArrayList<>();
 
 		processAttributes(customer, module, document, form, details);
 		
-		vbox.getContained().add(form);
-
 		// make a tabbed view if more than 1 detail widget or there is 1 detail widget and more than 5 form fields
 		int numberOfDetailWidgets = details.size();
 		if ((numberOfDetailWidgets > 1) || 
@@ -255,20 +247,17 @@ public class ViewGenerator {
 			if (! form.getRows().isEmpty()) {
 				tab = new Tab();
 				tab.setTitle("General");
-				tab.getContained().add(vbox);
+				tab.getContained().add(form);
 				tabPane.getTabs().add(tab);
 			}
 			
-			for (MetaData detailWidget : details) {
+			for (Detail detail : details) {
 				tab = new Tab();
+				tab.setTitle(detail.title);
+				MetaData detailWidget = detail.widget;
 				if (detailWidget instanceof TabularWidget) {
 					TabularWidget tw = (TabularWidget) detailWidget;
-					tab.setTitle(tw.getTitle());
 					tw.setTitle(null);
-				}
-				else if (detailWidget instanceof ListMembership) {
-					ListMembership lm = (ListMembership) detailWidget;
-					tab.setTitle(lm.getCandidatesHeading());
 				}
 				tab.getContained().add(detailWidget);
 				tabPane.getTabs().add(tab);
@@ -277,11 +266,11 @@ public class ViewGenerator {
 		}
 		else {
 			if (! form.getRows().isEmpty()) {
-				result.getContained().add(vbox);
+				result.getContained().add(form);
 			}
 
-			for (MetaData detailWidget : details) {
-				result.getContained().add(detailWidget);
+			for (Detail detail : details) {
+				result.getContained().add(detail.widget);
 			}
 		}
 
@@ -292,7 +281,7 @@ public class ViewGenerator {
 											Module module, 
 											Document document,
 											Form form,
-											List<MetaData> details)
+											List<Detail> details)
 	throws MetaDataException {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
@@ -312,19 +301,27 @@ public class ViewGenerator {
 					populatePropertyNames(customer, module, detailDocument, propertyNames);
 					
 					if (collection.getDomainType() == null) {
-						details.add(generateDataGrid(collection.getType(), 
-														customer,
-														module,
-														detailDocument, 
-														attributeName, 
-														propertyNames));
+						@SuppressWarnings("synthetic-access")
+						Detail detail = new Detail();
+						detail.title = attribute.getDisplayName();
+						detail.widget = generateDataGrid(collection.getType(), 
+															customer,
+															module,
+															detailDocument, 
+															attributeName, 
+															propertyNames);
+						details.add(detail);
 					}
 					else {
+						@SuppressWarnings("synthetic-access")
+						Detail detail = new Detail();
+						detail.title = attribute.getDisplayName();
 						ListMembership membership = new ListMembership();
 						membership.setBinding(attribute.getName());
 						membership.setCandidatesHeading("Candidates");
 						membership.setMembersHeading("Members");
-						details.add(membership);
+						detail.widget = membership;
+						details.add(detail);
 					}
 				}
 				else if (attribute instanceof Inverse) {
@@ -334,12 +331,16 @@ public class ViewGenerator {
 					List<String> propertyNames = new ArrayList<>();
 					populatePropertyNames(customer, module, detailDocument, propertyNames);
 					
-					details.add(generateDataGrid(CollectionType.composition,
-													customer,
-													module,
-													detailDocument, 
-													attributeName, 
-													propertyNames));
+					@SuppressWarnings("synthetic-access")
+					Detail detail = new Detail();
+					detail.title = attribute.getDisplayName();
+					detail.widget = generateDataGrid(CollectionType.composition,
+														customer,
+														module,
+														detailDocument, 
+														attributeName, 
+														propertyNames);
+					details.add(detail);
 				}
 				else { // field or association
 					FormItem item = new FormItem();
@@ -371,14 +372,6 @@ public class ViewGenerator {
 				propertyNames.add(detailAttribute.getName());
 			}
 		}
-	}
-
-	private static TextField generateTextField(String fieldName) {
-		TextField result = new TextField();
-
-		result.setBinding(fieldName);
-
-		return result;
 	}
 
 	private static DataGrid generateDataGrid(CollectionType collectionType,

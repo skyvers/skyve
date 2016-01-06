@@ -45,9 +45,9 @@ isc.EditView.addClassProperties({
 isc.EditView.addMethods({
 	initWidget: function () {
 		this.overflow = 'hidden';
-		this.membersMargin = 10;
-		this.layoutMargin = 5;
-		this.margin = 5;
+		this.membersMargin = 2;
+		this.layoutMargin = 2;
+		this.margin = 2;
 		this._grids = {}; // map of binding -> (map of ID -> dataGrid/comparisonEditor/listMembership/map widget)
 		this._refreshedGrids = {}; // map of dataGrid/comparisonEditor/listMembership ID -> boolean (true if refreshed)
         this.Super("initWidget", arguments);
@@ -61,7 +61,7 @@ isc.EditView.addMethods({
 		this.addMember(this._actionPanel);
 
 		// the edit panel - not contained as it is implicit
-		this._editPanel = isc.BizContainer.create({layoutMargin: 2, membersMargin: 5, overflow: 'auto'});
+		this._editPanel = isc.BizContainer.create({layoutMargin: 2, membersMargin: 10, overflow: 'auto'});
 		this.addMember(this._editPanel);
 		
 		// init the values manager with the contained
