@@ -87,20 +87,19 @@
 	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
 		<delete dir="${ear-path}/lib" includes="**" />
-		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
-		<delete dir="${war-path}/WEB-INF/resources" includes="**" />
 		<delete dir="${war-path}/ckeditor332" includes="**" />
-		<delete dir="${war-path}/LABjs-1.0.2rc1" includes="**" />
 		<delete dir="${war-path}/css" includes="*-min.css" />
+		<delete dir="${war-path}/desktop" includes="**" />
 		<delete dir="${war-path}/images" includes="**" />
 		<delete dir="${war-path}/isomorphic10a" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
-		<delete dir="${war-path}/wicket" includes="**" />
-		<delete dir="${war-path}/desktop" includes="**" />
+		<delete dir="${war-path}/phone" includes="**" />
 		<delete dir="${war-path}/public" includes="**" />
 		<delete dir="${war-path}/tablet" includes="**" />
-		<delete dir="${war-path}/phone" includes="**" />
-		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp" />
+		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
+		<delete dir="${war-path}/WEB-INF/resources" includes="**" />
+		<delete dir="${war-path}/wicket" includes="**" />
+		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp,unsubscribe.xhtml" />
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
@@ -119,38 +118,15 @@
 		<copy todir="${ear-path}/META-INF" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-ear-path}/META-INF" includes="**" excludes="application.xml" />
 		</copy>
-		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
-		</copy>
-		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/WEB-INF/lib/" includes="**" />
-		</copy>
-		<copy todir="${war-path}/WEB-INF/resources" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/WEB-INF/resources/" includes="**" />
-		</copy>
+
 		<copy todir="${war-path}/ckeditor332" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/ckeditor332" includes="**" />
 		</copy>
-		<copy todir="${war-path}/LABjs-1.0.2rc1" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/LABjs-1.0.2rc1" includes="**.js" />
-		</copy>
-		<copy todir="${war-path}/wicket" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/wicket" includes="**" />
+		<copy todir="${war-path}/css" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/css" includes="*-min.css" />
 		</copy>
 		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/desktop" includes="**.xhtml,**-min.js,diff_match_patch.js" />
-		</copy>
-		<copy todir="${war-path}/public" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/public" includes="**" />
-		</copy>
-		<copy todir="${war-path}/phone" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/phone" includes="**" />
-		</copy>
-		<copy todir="${war-path}/tablet" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/tablet" includes="**" />
-		</copy>
-		<copy todir="${war-path}/css" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/css" includes="*-min.css" />
 		</copy>
 		<copy todir="${war-path}/images" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/images" includes="**" />
@@ -160,6 +136,27 @@
 		</copy>
 		<copy todir="${war-path}/pages" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/pages" includes="**" />
+		</copy>
+		<copy todir="${war-path}/phone" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/phone" includes="**" />
+		</copy>
+		<copy todir="${war-path}/public" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/public" includes="**" />
+		</copy>
+		<copy todir="${war-path}/tablet" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/tablet" includes="**" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/WEB-INF/lib/" includes="**" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/resources" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/WEB-INF/resources/" includes="**" />
+		</copy>
+		<copy todir="${war-path}/wicket" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/wicket" includes="**" />
 		</copy>
 		<copy todir="${war-path}" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}" includes="*.xhtml,*.jsp" />
