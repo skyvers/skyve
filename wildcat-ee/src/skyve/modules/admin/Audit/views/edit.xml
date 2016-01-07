@@ -4,10 +4,10 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
 		xmlns="http://www.skyve.org/xml/view" 
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form>
-        <column pixelWidth="100" />
+	<form border="true" borderTitle="Comparison">
+        <column pixelWidth="160" />
         <column />
-        <column pixelWidth="100" />
+        <column pixelWidth="160" />
         <column />
         <row>
         	<item>
@@ -26,10 +26,10 @@
         	</item>
         </row>
 	</form>
-    <form border="true" borderTitle="Source Version Details" pixelHeight="100">
-        <column pixelWidth="100" />
+    <form border="true" borderTitle="Source Version Details">
+        <column pixelWidth="160" />
         <column />
-        <column pixelWidth="100" />
+        <column pixelWidth="160" />
         <column />
         <row>
             <item>

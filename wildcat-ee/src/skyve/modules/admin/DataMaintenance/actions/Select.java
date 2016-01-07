@@ -16,6 +16,8 @@ public class Select implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
+		bean.setRefreshBackups(Boolean.FALSE);
+
 /*
 		String contentId = bean.getSelectedBizId();
 		try (ContentManager cm = EXT.newContentManager()) {

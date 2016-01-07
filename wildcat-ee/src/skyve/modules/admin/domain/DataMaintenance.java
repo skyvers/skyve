@@ -30,9 +30,15 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String modDocNamePropertyName = "modDocName";
 	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
+	/** @hidden */
+	public static final String selectedBackupTimestampFolderNamePropertyName = "selectedBackupTimestampFolderName";
+	/** @hidden */
+	public static final String refreshBackupsPropertyName = "refreshBackups";
 
 	private String modDocName;
 	private String schemaName;
+	private String selectedBackupTimestampFolderName;
+	private Boolean refreshBackups = new Boolean(true);
 
 	@Override
 	@XmlTransient
@@ -103,5 +109,57 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setSchemaName(String schemaName) {
 		preset(schemaNamePropertyName, schemaName);
 		this.schemaName = schemaName;
+	}
+
+	/**
+	 * {@link #selectedBackupTimestampFolderName} accessor.
+	 **/
+	public String getSelectedBackupTimestampFolderName() {
+		return selectedBackupTimestampFolderName;
+	}
+
+	/**
+	 * {@link #selectedBackupTimestampFolderName} mutator.
+	 * 
+	 * @param selectedBackupTimestampFolderName	The new value to set.
+	 **/
+	@XmlElement
+	public void setSelectedBackupTimestampFolderName(String selectedBackupTimestampFolderName) {
+		this.selectedBackupTimestampFolderName = selectedBackupTimestampFolderName;
+	}
+
+	/**
+	 * {@link #refreshBackups} accessor.
+	 **/
+	public Boolean getRefreshBackups() {
+		return refreshBackups;
+	}
+
+	/**
+	 * {@link #refreshBackups} mutator.
+	 * 
+	 * @param refreshBackups	The new value to set.
+	 **/
+	@XmlElement
+	public void setRefreshBackups(Boolean refreshBackups) {
+		this.refreshBackups = refreshBackups;
+	}
+
+	@XmlTransient
+	public boolean isBackupSelected() {
+		return (selectedBackupTimestampFolderName != null);
+	}
+
+	public boolean isNotBackupSelected() {
+		return (! isBackupSelected());
+	}
+
+	@XmlTransient
+	public boolean isBackupsRefreshRequired() {
+		return (Boolean.TRUE.equals(refreshBackups));
+	}
+
+	public boolean isNotBackupsRefreshRequired() {
+		return (! isBackupsRefreshRequired());
 	}
 }

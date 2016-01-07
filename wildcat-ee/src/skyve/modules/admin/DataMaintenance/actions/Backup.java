@@ -12,6 +12,8 @@ public class Backup implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
+		bean.setRefreshBackups(Boolean.TRUE);
+		
 		org.skyve.wildcat.backup.Backup.backup();
 		return new ServerSideActionResult(bean);
 	}

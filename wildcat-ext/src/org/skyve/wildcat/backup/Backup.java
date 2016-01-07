@@ -51,10 +51,10 @@ public class Backup {
 		
 		Collection<Table> tables = BackupUtil.getTables();
 
-		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + 
-									ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()) + File.separator;
+		String backupDir = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + 
+								ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()) + File.separator;
 
-		File directory = new File(backupDirPrefix + customerName + File.separator);
+		File directory = new File(backupDir);
 		directory.mkdirs();
 
 		UserType geometryUserType = null; // this is only created when we come across a geometry
@@ -71,7 +71,7 @@ public class Backup {
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
 							UtilImpl.LOGGER.info("Backup " + table.name);
-							try (FileWriter fw = new FileWriter(backupDirPrefix + customerName + File.separator + table.name + ".csv",
+							try (FileWriter fw = new FileWriter(backupDir + File.separator + table.name + ".csv",
 																	false)) {
 								try (CsvMapWriter writer = new CsvMapWriter(fw, CsvPreference.STANDARD_PREFERENCE)) {
 									Map<String, Object> values = new TreeMap<>();

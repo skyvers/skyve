@@ -4,7 +4,7 @@
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form invisible="notConfirmContact" pixelHeight="1">
+	<form invisible="notConfirmContact">
 		<column percentageWidth="20" />
 		<column />
 		<column />
@@ -39,7 +39,7 @@
 			</item>
 		</row>
 	</form>
-	<hbox invisible="candidateContactsEmpty" pixelHeight="1">
+	<hbox invisible="candidateContactsEmpty" shrinkWrap="height" pixelPadding="10">
 		<form percentageWidth="20">
 			<column />
 			<row>
@@ -59,7 +59,7 @@
 			<boundColumn binding="matchScore" />
 		</dataGrid>
 	</hbox>
-	<form invisible="notConfirmContact" pixelHeight="1">
+	<form invisible="notConfirmContact">
 		<column percentageWidth="20" />
 		<column />
 		<column />

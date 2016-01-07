@@ -3,6 +3,7 @@ package modules.admin.DataMaintenance.models;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		});
 		
 		// Sort the folder names
-		Set<String> folderNames = new TreeSet<>();
+		Set<String> folderNames = new TreeSet<>(Collections.reverseOrder());
 		if (folders != null) {
 			for (File folder : folders) {
 				folderNames.add(folder.getName());
@@ -153,10 +154,6 @@ System.out.println(start + " : " + end + " : " + page.getRows().size() + " : " +
 
 	@Override
 	public void remove(String bizId) throws Exception {
-		String customerName = CORE.getUser().getCustomerName();
-		File backupDir = new File(UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + bizId);
-		if (backupDir.exists() && backupDir.isDirectory()) {
-			backupDir.delete();
-		}
+		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 }

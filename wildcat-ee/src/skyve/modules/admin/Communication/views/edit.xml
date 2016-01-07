@@ -3,169 +3,163 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Manage">
-			<vbox pixelPadding="10">
-				<form border="true" borderTitle="Configuration" pixelHeight="1">
+			<form border="true" borderTitle="Configuration">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column percentageWidth="5"/>					
+				<column />
+				<row>
+					<item>
+						<textField binding="description" disabled="locked" />
+					</item>
+					<item>
+						<checkBox binding="system" triState="false" />
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+						<combo binding="moduleName" disabled="locked">
+							<onChangedHandlers>
+								<server action="UpdateModule" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+						<combo binding="documentName" disabled="locked">
+							<onChangedHandlers>
+								<server action="UpdateDocument" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="tag" />
+					</item>
+					<item align="right">
+						<button actionName="GetCount" pixelWidth="200" />
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+						<textField binding="filePath" />
+					</item>
+				</row>
+			</form>
+			<hbox border="true" borderTitle="Results" shrinkWrap="height">
+				<form percentageWidth="80">
 					<column percentageWidth="20" />
 					<column />
-					<column />
-					<column percentageWidth="5"/>					
-					<column />
 					<row>
 						<item>
-							<textField binding="description" disabled="locked" />
-						</item>
-						<item>
-							<checkBox binding="system" triState="false"/>
-						</item>
-					</row>
-					<row>
-						<item colspan="2">
-							<combo binding="moduleName" disabled="locked">
-								<onChangedHandlers>
-									<server action="UpdateModule" />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item colspan="2">
-							<combo binding="documentName" disabled="locked">
-								<onChangedHandlers>
-									<server action="UpdateDocument" />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item>
-							<default binding="tag" />
-						</item>
-						<item align="right">
-							<button actionName="GetCount" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item colspan="2">
-							<textField binding="filePath" />
+							<textArea binding="results" pixelHeight="200" disabled="true" />
 						</item>
 					</row>
 				</form>
-				<hbox border="true" borderTitle="Results" percentageWidth="100" pixelHeight="1" pixelPadding="10">
-					<form percentageWidth="80">
-						<column percentageWidth="20" />
-						<column />
-						<row>
-							<item>
-								<textArea binding="results" pixelHeight="200" disabled="true" />
-							</item>
-						</row>
-					</form>
-					<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" >
-						<button actionName="GetResults" pixelWidth="200" />
-						<button actionName="CreateFiles" pixelWidth="200" />
-						<button actionName="SendNow" pixelWidth="200" />
-					</vbox>
-				</hbox>
-			</vbox>
+				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" >
+					<button actionName="GetResults" pixelWidth="200" />
+					<button actionName="CreateFiles" pixelWidth="200" />
+					<button actionName="SendNow" pixelWidth="200" />
+				</vbox>
+			</hbox>
 		</tab>
 		<tab title="Contents">
-			<vbox percentageWidth="100" border="true" borderTitle="Email" pixelHeight="1" pixelPadding="10">
-				<form pixelWidth="1100">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<combo binding="formatType">
-								<onChangedHandlers>
-									<rerender />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item>
-							<textField binding="sendFrom" invisible="notEmailType" />
-						</item>
-						<item>
-							<button actionName="TestSend" pixelWidth="200" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item colspan="3">
-							<blurb>	
-								<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document, or the user who runs the communication.</i></font>]]>
-							</blurb>
-						</item>
-					</row>
-					<row>
-						<item colspan="4">
-							<textField binding="sendTo" pixelWidth="800" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item colspan="3">
-							<blurb>	
-								<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
-							</blurb>
-						</item>
-					</row>
-					<row>
-						<item colspan="4">
-							<textField binding="subject" pixelWidth="800" invisible="notEmailType" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item colspan="3">
-							<blurb>	
-								<![CDATA[<font color="green"><i>Email body can use bindings relative to the selected module document.
-								For images, either include a link to the image, or paste the encoded image into the Source view.</i></font>]]>
-							</blurb>
-						</item>
-					</row>
-					<row>
-						<item showLabel="true" colspan="4">
-							<html binding="body" pixelHeight="400" pixelWidth="800" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item colspan="3">
-							<button actionName="AddUnsubscribeLink" />
-						</item>
-					</row>
-				</form>
-			</vbox>
-			<vbox percentageWidth="100" border="true" borderTitle="Attachment" pixelHeight="1" pixelPadding="10">
-				<form pixelWidth="1100">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item>
-							<default binding="attachment" />
-						</item>
-						<item>
-							<default binding="attachmentFileName" />
-						</item>
-					</row>
-				</form>
-			</vbox>
+			<form pixelWidth="1100" border="true" borderTitle="Email">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="formatType">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sendFrom" invisible="notEmailType" />
+					</item>
+					<item>
+						<button actionName="TestSend" pixelWidth="200" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<blurb>	
+							<![CDATA[<font color="green"><i>To address: use a binding relative to the selected module document, or the user who runs the communication.</i></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item colspan="4">
+						<textField binding="sendTo" pixelWidth="800" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<blurb>	
+							<![CDATA[<font color="green"><i>Email subject can use bindings relative to the selected module document, or the user who runs the communication.</i></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item colspan="4">
+						<textField binding="subject" pixelWidth="800" invisible="notEmailType" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<blurb>	
+							<![CDATA[<font color="green"><i>Email body can use bindings relative to the selected module document.
+							For images, either include a link to the image, or paste the encoded image into the Source view.</i></font>]]>
+						</blurb>
+					</item>
+				</row>
+				<row>
+					<item showLabel="true" colspan="4">
+						<html binding="body" pixelHeight="400" pixelWidth="800" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item colspan="3">
+						<button actionName="AddUnsubscribeLink" />
+					</item>
+				</row>
+			</form>
+			<form pixelWidth="1100" border="true" borderTitle="Attachment">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="attachment" />
+					</item>
+					<item>
+						<default binding="attachmentFileName" />
+					</item>
+				</row>
+			</form>
 		</tab>
 		<tab title="Subscriptions">
 			<listGrid continueConversation="true" query="qSubscriptions">

@@ -49,6 +49,8 @@ import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
 import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.ShrinkWrap;
+import org.skyve.wildcat.metadata.view.ShrinkWrapper;
 import org.skyve.wildcat.metadata.view.VerticalAlignment;
 import org.skyve.wildcat.metadata.view.ViewImpl;
 import org.skyve.wildcat.metadata.view.ViewVisitor;
@@ -245,8 +247,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizVBox.create({");
 			size(vbox, code);
+			bordered(vbox, vbox.getPixelPadding(), code);
 			box(vbox);
-			bordered(vbox, code);
 			VerticalAlignment v = vbox.getVerticalAlignment();
 			if (v != null) {
 				switch (v) {
@@ -327,8 +329,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					throw new MetaDataException("HBox HoriaontalAlignment of " + h + " is not supported");
 				}
 			}
+			bordered(hbox, hbox.getPixelPadding(), code);
 			box(hbox);
-			bordered(hbox, code);
 			invisible(hbox.getInvisibleConditionName(), code);
 			removeTrailingComma(code);
 			code.append("});\n");
@@ -2502,42 +2504,55 @@ pickListFields:[{name:'value'}],
 			return result.toString();
 		}
 		
-		// TODO do we need to set size to "*"????
 		private void size(AbsoluteWidth sizable, StringBuilder builder) {
-			Integer width = sizable.getPixelWidth();
-			boolean specifiedWidth = false;
-			if (width != null) {
-				builder.append("width:").append(width).append(',');
-				specifiedWidth = true;
+			ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper) ? 
+										((ShrinkWrapper) sizable).getShrinkWrap() :
+										null;
+
+			if (ShrinkWrap.width.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
+				builder.append("width:1,");
 			}
 			else {
-				if (sizable instanceof RelativeSize) {
-					width = ((RelativeSize) sizable).getPercentageWidth();
-					if (width != null) {
-						builder.append("width:'").append(width).append("%',");
-						specifiedWidth = true;
-					}
-				}
-			}
-			if ((! specifiedWidth) && 
-					(visitedItem != null) && 
-					(! (sizable instanceof ContentSpecifiedWidth))) {
-				builder.append("width:'*',");
-			}
-			
-			if (sizable instanceof AbsoluteSize) {
-				// NB Don't use height:'*' if there is no specified height because blurbs won't 
-				// layout correctly based on their content.
-				// Also, it doesn't help contentImages either to put in a '*'.
-				Integer height = ((AbsoluteSize) sizable).getPixelHeight();
-				if (height != null) {
-					builder.append("height:").append(height).append(',');
+				Integer width = sizable.getPixelWidth();
+				boolean specifiedWidth = false;
+				if (width != null) {
+					builder.append("width:").append(width).append(',');
+					specifiedWidth = true;
 				}
 				else {
 					if (sizable instanceof RelativeSize) {
-						height = ((RelativeSize) sizable).getPercentageHeight();
-						if (height != null) {
-							builder.append("height:'").append(height).append("%',");
+						width = ((RelativeSize) sizable).getPercentageWidth();
+						if (width != null) {
+							builder.append("width:'").append(width).append("%',");
+							specifiedWidth = true;
+						}
+					}
+				}
+				if ((! specifiedWidth) && 
+						(visitedItem != null) && 
+						(! (sizable instanceof ContentSpecifiedWidth))) {
+					builder.append("width:'*',");
+				}
+			}
+			
+			if (sizable instanceof AbsoluteSize) {
+				if (ShrinkWrap.height.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
+					builder.append("height:1,");
+				}
+				else {
+					// NB Don't use height:'*' if there is no specified height because blurbs won't 
+					// layout correctly based on their content.
+					// Also, it doesn't help contentImages either to put in a '*'.
+					Integer height = ((AbsoluteSize) sizable).getPixelHeight();
+					if (height != null) {
+						builder.append("height:").append(height).append(',');
+					}
+					else {
+						if (sizable instanceof RelativeSize) {
+							height = ((RelativeSize) sizable).getPercentageHeight();
+							if (height != null) {
+								builder.append("height:'").append(height).append("%',");
+							}
 						}
 					}
 				}
@@ -2582,12 +2597,15 @@ pickListFields:[{name:'value'}],
 			}
 		}
 
-		private static void bordered(Bordered bordered, StringBuilder builder) {
+		private static void bordered(Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
 			if (Boolean.TRUE.equals(bordered.getBorder())) {
 				String borderTitle = bordered.getBorderTitle();
 				builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 				if (borderTitle != null) {
 					builder.append("groupTitle:'&nbsp;&nbsp;").append(borderTitle).append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
+				}
+				if (definedPixelPadding == null) {
+					builder.append("layoutMargin:10,");
 				}
 			}
 		}

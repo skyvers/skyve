@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="System Dashboard" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox>
-		<hbox>
-			<vbox border="true" borderTitle="Activity By User" percentageWidth="50">
-				<dynamicImage name="ActivityBreakdown" />
-			</vbox>
-			<vbox border="true" borderTitle="Activity Context">
-				<dynamicImage name="ActivityContext" />
-			</vbox>
-		</hbox>
-		<vbox border="true" borderTitle="Activity">
-			<dynamicImage name="Activity" />
+	<hbox>
+		<vbox border="true" borderTitle="Activity By User">
+			<dynamicImage name="ActivityBreakdown" />
 		</vbox>
-		<vbox border="true" borderTitle="Jobs" pixelPadding="10">
-			<dataGrid binding="jobs" editable="false">
-				<boundColumn binding="displayName" />
-				<boundColumn binding="status" />
-				<boundColumn binding="percentComplete" />
-				<boundColumn binding="startTime" />
-				<boundColumn binding="endTime" />
-			</dataGrid>
+		<vbox border="true" borderTitle="Activity Context">
+			<dynamicImage name="ActivityContext" />
 		</vbox>
+	</hbox>
+	<vbox border="true" borderTitle="Activity">
+		<dynamicImage name="Activity" />
+	</vbox>
+	<vbox border="true" borderTitle="Jobs">
+		<dataGrid binding="jobs" editable="false">
+			<boundColumn binding="displayName" />
+			<boundColumn binding="status" />
+			<boundColumn binding="percentComplete" />
+			<boundColumn binding="startTime" />
+			<boundColumn binding="endTime" />
+		</dataGrid>
 	</vbox>
 </view>

@@ -1,6 +1,8 @@
 package org.skyve.wildcat.metadata.view.container;
 
-public interface Box {
+import org.skyve.wildcat.metadata.view.ShrinkWrapper;
+
+public interface Box extends ShrinkWrapper {
 	public Integer getPixelPadding();
 	public void setPixelPadding(Integer pixelPadding);
 	public Integer getPixelMemberPadding();

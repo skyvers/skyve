@@ -3,49 +3,47 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Details">
-			<vbox pixelHeight="1" pixelPadding="10">
-				<form border="true">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<row>
-						<item>
-							<default binding="name" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<default binding="visible" />
-						</item>
-					</row>
-				</form>
-				<form border="true" borderTitle="Copy">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<row>
-						<item>
-							<default binding="copyToUser" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<default binding="copyToUserTagName" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="CopyTagToUser" pixelWidth="200" />
-						</item>
-					</row>
-				</form>
-			</vbox>
+			<form border="true">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="name" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="visible" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Copy">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<default binding="copyToUser" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="copyToUserTagName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="CopyTagToUser" pixelWidth="200" />
+					</item>
+				</row>
+			</form>
 		</tab>
 		<tab title="Combinations">
-			<vbox border="true" pixelHeight="1" pixelPadding="10">
+			<vbox border="true" shrinkWrap="height">
 				<form>
 					<column percentageWidth="20" />
 					<column />
@@ -101,7 +99,7 @@
 						</item>
 					</row>
 				</form>
-				<form >
+				<form>
 					<column percentageWidth="20" />
 					<column />
 					<column />
@@ -118,150 +116,148 @@
 			</vbox>
 		</tab>
 		<tab title="Processing">
-			<vbox pixelPadding="10">
-				<form border="true" borderTitle="Context">
-					<column percentageWidth="20" />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<column />
-					<row>
-						<item colspan="4">
-							<combo binding="moduleName">
-								<onChangedHandlers>
-									<server action="UpdateModule" />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item colspan="4">
-							<combo binding="documentName">
-								<onChangedHandlers>
-									<server action="UpdateDocument" />
-								</onChangedHandlers>
-							</combo>
-						</item>
-					</row>
-					<row>
-						<item>
-							<spacer />
-						</item>
-						<item>
-							<button actionName="Clear" pixelWidth="150" />
-						</item>
-						<item>
-							<button actionName="TagAll" pixelWidth="150" />
-						</item>
+			<form border="true" borderTitle="Context">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item colspan="4">
+						<combo binding="moduleName">
+							<onChangedHandlers>
+								<server action="UpdateModule" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item colspan="4">
+						<combo binding="documentName">
+							<onChangedHandlers>
+								<server action="UpdateDocument" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="Clear" pixelWidth="150" />
+					</item>
+					<item>
+						<button actionName="TagAll" pixelWidth="150" />
+					</item>
 
-					</row>
-				</form>
-				<tabPane>
-					<tab title="Load">
-						<form border="true">
-							<column percentageWidth="20" />
-							<column />
-							<column />
-							<column />
-							<column />
-							<column />
-							<column />
-							<row>
-								<item colspan="4">
-									<combo binding="attributeName">
-										<onChangedHandlers>
-											<rerender />
-										</onChangedHandlers>
-									</combo>
-								</item>
-							</row>
-							<row>
-								<item colspan="4">
-									<combo binding="filterOperator" />
-								</item>
-							</row>
-							<row>
-								<item colspan="4">
-									<combo binding="filterAction" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<checkBox binding="fileHasHeaders" />
-								</item>
-								<item colspan="2">
-									<spinner binding="filterColumn" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<spacer />
-								</item>
-								<item>
-									<button actionName="UploadTagCriteria" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<textField binding="numberLoaded" disabled="true" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<textField binding="numberMatched" disabled="true" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<textField binding="numberTagged" disabled="true" />
-								</item>
-							</row>
-						</form>
-					</tab>
-					<tab title="Process">
-						<form border="true">
-							<column percentageWidth="20" />
-							<column />
-							<column />
-							<column />
-							<column />
-							<column />
-							<column />
-							<row>
-								<item>
-									<combo binding="documentAction" />
-								</item>
-								<item>
-									<combo binding="documentCondition" />
-								</item>
-								<item>
-									<button actionName="BulkDocumentAction" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<checkBox binding="unTagSuccessful" triState="false" />
-								</item>
-							</row>
-							<row>
-								<item>
-									<checkBox binding="notification" triState="false" />
-								</item>
-								<item colspan="3">
-									<default binding="communication" />
-								</item>
-							</row>
-							<row>
-								<item colspan="5">
-									<textArea binding="documentActionResults" />
-								</item>
-							</row>
-						</form>
-					</tab>
-				</tabPane>
-			</vbox>
+				</row>
+			</form>
+			<tabPane>
+				<tab title="Load">
+					<form border="true">
+						<column percentageWidth="20" />
+						<column />
+						<column />
+						<column />
+						<column />
+						<column />
+						<column />
+						<row>
+							<item colspan="4">
+								<combo binding="attributeName">
+									<onChangedHandlers>
+										<rerender />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item colspan="4">
+								<combo binding="filterOperator" />
+							</item>
+						</row>
+						<row>
+							<item colspan="4">
+								<combo binding="filterAction" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="fileHasHeaders" />
+							</item>
+							<item colspan="2">
+								<spinner binding="filterColumn" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<spacer />
+							</item>
+							<item>
+								<button actionName="UploadTagCriteria" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<textField binding="numberLoaded" disabled="true" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<textField binding="numberMatched" disabled="true" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<textField binding="numberTagged" disabled="true" />
+							</item>
+						</row>
+					</form>
+				</tab>
+				<tab title="Process">
+					<form border="true">
+						<column percentageWidth="20" />
+						<column />
+						<column />
+						<column />
+						<column />
+						<column />
+						<column />
+						<row>
+							<item>
+								<combo binding="documentAction" />
+							</item>
+							<item>
+								<combo binding="documentCondition" />
+							</item>
+							<item>
+								<button actionName="BulkDocumentAction" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="unTagSuccessful" triState="false" />
+							</item>
+						</row>
+						<row>
+							<item>
+								<checkBox binding="notification" triState="false" />
+							</item>
+							<item colspan="3">
+								<default binding="communication" />
+							</item>
+						</row>
+						<row>
+							<item colspan="5">
+								<textArea binding="documentActionResults" />
+							</item>
+						</row>
+					</form>
+				</tab>
+			</tabPane>
 		</tab>
 	</tabPane>
 	<actions>

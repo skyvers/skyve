@@ -9,14 +9,14 @@ import org.skyve.wildcat.metadata.Container;
 import org.skyve.wildcat.metadata.view.Bordered;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Identifiable;
-import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.ShrinkWrap;
 import org.skyve.wildcat.metadata.view.VerticalAlignment;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE, name = "VBox")
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "vbox")
-public class VBox extends Container implements Identifiable, Box, RelativeSize, Invisible, Bordered {
+public class VBox extends Container implements Box, Identifiable, Invisible, Bordered {
 	/**
 	 * For Serialization.
 	 */
@@ -37,7 +37,8 @@ public class VBox extends Container implements Identifiable, Box, RelativeSize, 
 	
 	private HorizontalAlignment horizontalAlignment;
 	private VerticalAlignment verticalAlignment;
-	
+	private ShrinkWrap shrinkWrap;
+
 	private String invisibleConditionName;
 
 	@Override
@@ -155,6 +156,17 @@ public class VBox extends Container implements Identifiable, Box, RelativeSize, 
 	public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
+
+	@Override
+	public ShrinkWrap getShrinkWrap() {
+		return shrinkWrap;
+	}
+
+	@XmlAttribute(required = false)
+	public void setShrinkWrap(ShrinkWrap shrinkWrap) {
+		this.shrinkWrap = shrinkWrap;
+	}
+
 
 	@Override
 	public String getInvisibleConditionName() {

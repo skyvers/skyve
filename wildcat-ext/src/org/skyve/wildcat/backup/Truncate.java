@@ -6,9 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -37,7 +39,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("update ").append(table.name).append(" set ");
 				for (String fieldName : table.fields.keySet()) {
-					if (fieldName.endsWith("_id")) {
+					if (fieldName.toLowerCase().endsWith("_id")) {
 						sql.append(fieldName).append(" = null,");
 					}
 				}
@@ -60,7 +62,7 @@ public class Truncate {
 				}
 			}
 			
-			// delete rows from non-joining the tables
+			// delete rows from non-joining tables
 			for (Table table : tables) {
 				if (table instanceof JoinTable) {
 					continue;
@@ -87,45 +89,64 @@ public class Truncate {
 
 		try (Connection c = ((AbstractHibernatePersistence) AbstractPersistence.get()).getConnection()) {
 			DatabaseMetaData dmd = c.getMetaData();
-			try (ResultSet tableResultSet = dmd.getTables(c.getCatalog(), schema, "%", null)) {
+			String catalog = c.getCatalog();
+			try (ResultSet tableResultSet = dmd.getTables(catalog, schema, "%", null)) {
 				while (tableResultSet.next()) {
 					String tableName = tableResultSet.getString("TABLE_NAME");
-					tableName = tableName.toLowerCase();
-
-					Table table = new Table(tableName);
-					try (ResultSet columnResultSet = dmd.getColumns(c.getCatalog(), schema, tableName, null)) {
-						while (columnResultSet.next()) {
-							String columnName = columnResultSet.getString("COLUMN_NAME");
-							if (columnName.toLowerCase().endsWith("_id")) {
-								table.fields.put(columnName, AttributeType.text);
-							}
-						}
-					}
-					
-					// remove rows from joining tables
-					if ((table.fields.size() == 2) && 
-							table.fields.containsKey("owner_id") && 
-							table.fields.containsKey("element_id")) {
-						String ownerTableName = null;
-						try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(c.getCatalog(), schema, tableName)) {
-							while (foreignKeyResultSet.next()) {
-								String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
-								if ("owner_id".equals(foreignKeyColumn.toLowerCase())) {
-									ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
-									ownerTableName = ownerTableName.toLowerCase();
+					String tableType = tableResultSet.getString("TABLE_TYPE");
+					if ("TABLE".equalsIgnoreCase(tableType)) {
+						Table table = new Table(tableName);
+						boolean hasBizIdColumn = false;
+						try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
+							while (columnResultSet.next()) {
+								String columnName = columnResultSet.getString("COLUMN_NAME");
+								if (columnName.toLowerCase().endsWith("_id")) {
+									table.fields.put(columnName, AttributeType.text);
+								}
+								if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
+									hasBizIdColumn = true;
 								}
 							}
 						}
-						if (ownerTableName == null) { // is null when the foreign key is not defined
-							table = null; // skip this table
+
+						// detect joining tables
+						boolean joinTable = (table.fields.size() == 2);
+						if (joinTable) {
+							// check for owner_id and element_id
+							Set<String> columnNames = table.fields.keySet();
+							for (String columnName : columnNames) {
+								if ((! "owner_id".equalsIgnoreCase(columnName)) &&
+										(! "element_id".equalsIgnoreCase(columnName))) {
+									joinTable = false;
+									break;
+								}
+							}
+							
+							if (joinTable) {
+								String ownerTableName = null;
+								try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
+									while (foreignKeyResultSet.next()) {
+										String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
+										if ("owner_id".equalsIgnoreCase(foreignKeyColumn)) {
+											ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
+										}
+									}
+								}
+
+								if (ownerTableName == null) { // is null when the foreign key is not defined
+									table = null; // skip this table
+									joinTable = false;
+								}
+								else {
+									table = new JoinTable(tableName, ownerTableName);
+								}
+							}
 						}
-						else {
-							table = new JoinTable(tableName, ownerTableName);
+						
+						if ((table != null) && 
+								(joinTable || hasBizIdColumn)) {
+							result.add(table);
 						}
-					}
-					
-					if (table != null) {
-						result.add(table);
 					}
 				}
 			}

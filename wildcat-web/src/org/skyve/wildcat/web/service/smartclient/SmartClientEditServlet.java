@@ -645,30 +645,36 @@ public class SmartClientEditServlet extends HttpServlet {
 			for (String parameterBinding : parameters.keySet()) {
 				if (newParameterNamesToBindings.containsKey(parameterBinding)) {
 	    			Object parameterValue = parameters.get(parameterBinding);
-	    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
-																			processModule, 
-																			processDocument, 
-																			parameterBinding);
-	    			if (target != null) {
-	    				Attribute attribute = target.getAttribute();
-	    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
-	    					// find the existing bean with retrieve
-	    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
-																									attribute.getName());
-	    					Bean parameterBean = persistence.retrieve(referenceDocument, 
-																		(String) parameterValue, 
-																		false);
-	    					if (! user.canReadBean(parameterBean.getBizId(), 
-	    											parameterBean.getBizModule(), 
-	    											parameterBean.getBizDocument(), 
-	    											parameterBean.getBizCustomer(), 
-	    											parameterBean.getBizDataGroupId(),
-	    											parameterBean.getBizUserId())) {
-	    						throw new SecurityException("this data", user.getName());
-	    					}
-	    					parameterValue = parameterBean;
-	    				}
+	    			if (parameterValue != null) {
+		    			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+																				processModule, 
+																				processDocument, 
+																				parameterBinding);
+		    			if (target != null) {
+		    				Attribute attribute = target.getAttribute();
+		    				if ((attribute instanceof Association) && (parameterValue instanceof String)) {
+		    					// find the existing bean with retrieve
+		    					Document referenceDocument = target.getDocument().getRelatedDocument(customer, 
+																										attribute.getName());
+		    					Bean parameterBean = persistence.retrieve(referenceDocument, 
+																			(String) parameterValue, 
+																			false);
+		    					// NB parameterBean can be null if it wasn't found in the retrieve above
+		    					if (parameterBean != null) {
+			    					if (! user.canReadBean(parameterBean.getBizId(), 
+			    											parameterBean.getBizModule(), 
+			    											parameterBean.getBizDocument(), 
+			    											parameterBean.getBizCustomer(), 
+			    											parameterBean.getBizDataGroupId(),
+			    											parameterBean.getBizUserId())) {
+			    						throw new SecurityException("this data", user.getName());
+			    					}
+		    					}
+		    					parameterValue = parameterBean;
+		    				}
+		    			}
 	    			}
+	    			
 	    			// For the new parameters on the target edit view, if it has a binding defined,
 	    			// use it, otherwise rely on the name.
 	    			// This allows us to bind on something other than the parameter name given.

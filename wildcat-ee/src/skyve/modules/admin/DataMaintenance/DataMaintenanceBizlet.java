@@ -15,10 +15,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
 public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -35,22 +31,21 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-
-		List<DomainValue> result = new ArrayList<>();
-
 		if (DataMaintenance.modDocNamePropertyName.equals(attributeName)) {
-			Customer customer = CORE.getUser().getCustomer();
-			for (Module mod : customer.getModules()) {
-				for (String d : mod.getDocumentRefs().keySet()) {
-					result.add(new DomainValue(mod.getName() + '.' + d, mod.getTitle() + '.' + d));
+			List<DomainValue> result = new ArrayList<>();
+
+			// If database has just been truncated, the user and customer will not exist
+			Customer c = CORE.getUser().getCustomer();
+			for (Module m : c.getModules()) {
+				for (String d : m.getDocumentRefs().keySet()) {
+					result.add(new DomainValue(m.getName() + '.' + d, m.getTitle() + '.' + d));
 				}
 			}
 			Collections.sort(result, new DomainValueSortByCode());
+
 			return result;
 		}
 
 		return super.getVariantDomainValues(attributeName);
 	}
-
-
 }

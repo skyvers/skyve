@@ -159,10 +159,12 @@
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
+					<action name="BackupSelected" />
+					<action name="DeleteBackup" />
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
 					<action name="Reindex" />
-					<action name="Select" />
+					<action name="Restore" />
 					<action name="Truncate" />
 				</document>
 				<document name="Display" permission="_____" />

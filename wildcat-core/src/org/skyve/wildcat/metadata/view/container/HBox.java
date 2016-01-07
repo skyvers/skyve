@@ -9,14 +9,14 @@ import org.skyve.wildcat.metadata.Container;
 import org.skyve.wildcat.metadata.view.Bordered;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Identifiable;
-import org.skyve.wildcat.metadata.view.RelativeSize;
+import org.skyve.wildcat.metadata.view.ShrinkWrap;
 import org.skyve.wildcat.metadata.view.VerticalAlignment;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE, name = "HBox")
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "hbox")
-public class HBox extends Container implements Box, Identifiable, RelativeSize, Invisible, Bordered {
+public class HBox extends Container implements Box, Identifiable, Invisible, Bordered {
 	/**
 	 * For Serialization.
 	 */
@@ -37,6 +37,7 @@ public class HBox extends Container implements Box, Identifiable, RelativeSize, 
 	
 	private Integer pixelPadding;
 	private Integer pixelMemberPadding;
+	private ShrinkWrap shrinkWrap;
 	
 	private String invisibleConditionName;
 
@@ -138,22 +139,32 @@ public class HBox extends Container implements Box, Identifiable, RelativeSize, 
 		this.pixelMemberPadding = pixelMemberPadding;
 	}
 
-	@XmlAttribute(required = false)
 	public VerticalAlignment getVerticalAlignment() {
 		return verticalAlignment;
 	}
 
+	@XmlAttribute(required = false)
 	public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
 
-	@XmlAttribute(required = false)
 	public HorizontalAlignment getHorizontalAlignment() {
 		return horizontalAlignment;
 	}
 
+	@XmlAttribute(required = false)
 	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
+	}
+
+	@Override
+	public ShrinkWrap getShrinkWrap() {
+		return shrinkWrap;
+	}
+
+	@XmlAttribute(required = false)
+	public void setShrinkWrap(ShrinkWrap shrinkWrap) {
+		this.shrinkWrap = shrinkWrap;
 	}
 
 	@Override

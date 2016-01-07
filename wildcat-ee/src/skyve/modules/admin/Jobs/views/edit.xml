@@ -13,7 +13,7 @@
 				<boundColumn binding="percentComplete" title="Percent Complete" />
 				<boundColumn binding="log" title="Log" />
 			</dataGrid>
-			<listGrid query="qCompletedJobs" title="Completed Jobs" continueConversation="false" />
+			<listGrid query="qCompletedJobs" title="Completed Jobs" continueConversation="false" showAdd="false" />
 		</tab>
 		<tab title="Schedule">
 			<listGrid query="qAllSchedules" title="Job Schedule" continueConversation="false" />

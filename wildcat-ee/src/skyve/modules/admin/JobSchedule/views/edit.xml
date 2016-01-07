@@ -5,7 +5,7 @@
 		xmlns="http://www.skyve.org/xml/view"
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form percentageWidth="100" border="true" borderTitle="Job Details">
+	<form border="true" borderTitle="Job Details">
 		<column percentageWidth="20" />
 		<column percentageWidth="40" />
 		<column percentageWidth="40" />
@@ -18,7 +18,7 @@
 			</item>
 		</row>
 	</form>
-	<hbox pixelPadding="5" border="true" borderTitle="When To Execute">
+	<hbox border="true" borderTitle="When To Execute">
 		<vbox border="true" borderTitle="Minutes" pixelWidth="200">
 			<form>
 				<column pixelWidth="0" />

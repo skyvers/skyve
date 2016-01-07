@@ -19,5 +19,24 @@
 			<displayName>Schema Name</displayName>
 			<length>1024</length>
 		</text>
+		<id name="selectedBackupTimestampFolderName" persistent="false" trackChanges="false">
+			<displayName>Selected Backup Timestamp Folder Name</displayName>
+		</id>
+		<boolean name="refreshBackups" persistent="false" trackChanges="false">
+			<displayName>Refresh Backups</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
 	</attributes>
+	<conditions>
+		<condition name="backupSelected">
+			<![CDATA[
+				selectedBackupTimestampFolderName != null
+			]]>
+		</condition>
+		<condition name="backupsRefreshRequired">
+			<![CDATA[
+				Boolean.TRUE.equals(refreshBackups)
+			]]>
+		</condition>
+	</conditions>
 </document>

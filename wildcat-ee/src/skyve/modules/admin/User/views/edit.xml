@@ -3,76 +3,72 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Profile">
-			<vbox border="true" pixelPadding="10" pixelHeight="1" percentageWidth="50">
-				<form>
-					<column percentageWidth="20" />
-					<column />
-					<row>
-						<item>
-							<textField binding="userName" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<lookupDescription binding="contact" descriptionBinding="name" />
-						</item>
-					</row>
-					<row>
-						<item label="Data Group">
-							<textField binding="dataGroup.name" disabled="true" invisible="notInDataGroup" />
-						</item>
-						<item>
-							<combo binding="dataGroup" invisible="inDataGroup" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<combo binding="homeModule" />
-						</item>
-					</row>
-				</form>
-			</vbox>
+			<form border="true" percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<textField binding="userName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="contact" descriptionBinding="name" />
+					</item>
+				</row>
+				<row>
+					<item label="Data Group">
+						<textField binding="dataGroup.name" disabled="true" invisible="notInDataGroup" />
+					</item>
+					<item>
+						<combo binding="dataGroup" invisible="inDataGroup" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="homeModule" />
+					</item>
+				</row>
+			</form>
 		</tab>
 
 		<tab title="Groups">
-			<vbox border="true" pixelPadding="10" percentageHeight="50">
+			<vbox border="true" percentageHeight="50">
 				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
 			</vbox>
-			<vbox></vbox>
+			<vbox />
 		</tab>
 		<tab title="Roles">
-			<vbox border="true" pixelPadding="10" percentageHeight="50">
+			<vbox border="true" percentageHeight="50">
 				<dataGrid title="User Roles" binding="roles">
 					<boundColumn binding="roleName" title="Role Name" />
 				</dataGrid>
 			</vbox>
-			<vbox></vbox>
+			<vbox />
 		</tab>
 		<tab title="Password">
-			<vbox border="true" pixelPadding="10" pixelHeight="1" percentageWidth="50">
-				<form>
-					<column percentageWidth="30" />
-					<column />
-					<row>
-						<item>
-							<password binding="newPassword" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<password binding="confirmPassword" />
-						</item>
-					</row>
-					<row>
-						<item>
-							<checkBox binding="passwordExpired" invisible="notSecurityAdministrator" />
-						</item>
-						<item>
-							<textField binding="clearTextPassword" disabled="true" invisible="notSecurityAdministrator" />
-						</item>
-					</row>
-				</form>
-			</vbox>
+			<form border="true" percentageWidth="50">
+				<column percentageWidth="30" />
+				<column />
+				<row>
+					<item>
+						<password binding="newPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="confirmPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="passwordExpired" invisible="notSecurityAdministrator" />
+					</item>
+					<item>
+						<textField binding="clearTextPassword" disabled="true" invisible="notSecurityAdministrator" />
+					</item>
+				</row>
+			</form>
 		</tab>
 	</tabPane>
 	<actions>

@@ -27,11 +27,13 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class Restore {
-	public static void restore() 
+	public static void restore(String timestampFolderName) 
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
-		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName;
+		String backupDirectoryPath = UtilImpl.CONTENT_DIRECTORY + 
+										"backup_" + customerName + 
+										File.separator + timestampFolderName;
 		File backupDirectory = new File(backupDirectoryPath);
 		if ((! backupDirectory.exists()) || (! backupDirectory.isDirectory())) {
 			throw new IllegalArgumentException(backupDirectoryPath + " is not a directory");
@@ -304,14 +306,14 @@ public class Restore {
 	}
 
 	public static void main(String[] args) throws Exception {
-		if (args.length != 8) {
-			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password>");
+		if (args.length != 9) {
+			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <backup timestamp>");
 			System.exit(1);
 		}
 
 		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		try {
-			restore();
+			restore(args[8]);
 		}
 		finally {
 			BackupUtil.finalise();
