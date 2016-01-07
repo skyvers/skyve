@@ -87,7 +87,7 @@
 	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
 		<delete dir="${ear-path}/lib" includes="**" />
-		<delete dir="${war-path}/ckeditor332" includes="**" />
+		<delete dir="${war-path}/ckeditor456" includes="**" />
 		<delete dir="${war-path}/css" includes="*-min.css" />
 		<delete dir="${war-path}/desktop" includes="**" />
 		<delete dir="${war-path}/images" includes="**" />
@@ -119,8 +119,8 @@
 			<fileset dir="${wildcat-ear-path}/META-INF" includes="**" excludes="application.xml" />
 		</copy>
 
-		<copy todir="${war-path}/ckeditor332" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/ckeditor332" includes="**" />
+		<copy todir="${war-path}/ckeditor456" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/ckeditor456" includes="**" />
 		</copy>
 		<copy todir="${war-path}/css" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/css" includes="*-min.css" />

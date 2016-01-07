@@ -1610,7 +1610,7 @@ BizHTMLItem.addMethods({
 					this._show();
 				}
 				else {
-					BizUtil.loadJS('ckeditor332/ckeditor.js', function() {
+					BizUtil.loadJS('ckeditor456/ckeditor.js', function() {
 						me._editButton._show();
 					});
 				}
@@ -1627,7 +1627,7 @@ BizHTMLItem.addMethods({
 						'_CKEditor', 
 						{customConfig: '',
 							resize_enabled: false,
-							skin: 'v2',
+							skin: 'moono',
 							autoUpdateElement: false,
 							baseFloatZIndex: 9000000,
 							filebrowserImageBrowseUrl: "pages/htmlEdit/browseImages.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
@@ -1698,7 +1698,7 @@ BizHTMLItem.addMethods({
 				this._pane.setContents(newValue);
 			}
 			else {
-				this._pane.setContents('Empty');
+				this._pane.setContents('');
 			}
 	   }
 	   return this.Super("setValue", [newValue]);
