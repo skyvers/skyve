@@ -1948,8 +1948,6 @@ isc.ClassFactory.defineClass("BizDynamicImage", "VLayout");
 //	_img: null
 BizDynamicImage.addMethods({
 	initWidget : function () {
-		this.showEdges = true;
-		this.edgeSize = 2;
 		this.overflow = 'hidden';
 
 		this.wZoom = 100;

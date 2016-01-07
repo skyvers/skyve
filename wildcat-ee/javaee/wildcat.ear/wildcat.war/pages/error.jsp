@@ -29,19 +29,19 @@
 <table align="center" height="100%" >
 	<tr><td height="30%">&nbsp;</td></tr>
 
-	<tr bgColor="4682B4">
-		<td align="center" height="5%"><strong style="color:FFFFFF"><font face="Tahoma">Request Unsuccessful</font></strong></td>
+	<tr bgColor="#4682B4">
+		<td align="center" height="5%"><strong style="color:#FFFFFF"><font face="Tahoma">Request Unsuccessful</font></strong></td>
 	</tr>
-	<tr bgColor="4682B4">
-		<td style="color:FFFFFF" align="center" height="10%">
+	<tr bgColor="#4682B4">
+		<td style="color:#FFFFFF" align="center" height="10%">
 			<font size="2" face="Tahoma">An error occurred while processing your request.
 				<br/>
 				<br/>
 					Return <a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"
-					target="_top">here</a> and try again, 
+					target="_top" style="color:white">here</a> and try again, 
 					or <a href="mailto:info@bizhub.com.au?subject=Exception Report&body=<%=(exception == null) ? "[No Message]" : exception.getLocalizedMessage()%> 
 					for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : "[Not Logged In]"%> 
-					 <%=new java.util.Date()%>">report the problem</a>.
+					 <%=new java.util.Date()%>" style="color:white">report the problem</a>.
 			</font> 
 		</td>
 	</tr>

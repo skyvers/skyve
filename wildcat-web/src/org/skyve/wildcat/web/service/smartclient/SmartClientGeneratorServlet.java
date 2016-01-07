@@ -207,7 +207,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentVisible,
 								boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizContainer.create({membersMargin:10});\n");
+			code.append("var ").append(variable).append("=BizContainer.create({membersMargin:10,layoutMargin:10});\n");
 
 			containerVariables.push(variable);
 		}
@@ -373,7 +373,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
 				borderBox.setPercentageWidth(form.getPercentageWidth());
 				borderBox.setPixelWidth(form.getPixelWidth());
-				borderBox.setPixelPadding(Integer.valueOf(5));
+				borderBox.setPixelPadding(Integer.valueOf(10));
 
 				// If no height is specified, use a height of 1 pixel 
 				// which makes the bordered vbox expand to fit its contents

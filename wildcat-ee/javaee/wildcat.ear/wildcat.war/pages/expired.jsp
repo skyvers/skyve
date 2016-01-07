@@ -26,7 +26,7 @@
 	</head>
 	<body>
 		<table class="logo" align="center">
-			<tr height="128px">
+			<tr height="150px">
 				<td>
 					<img src="images/WILDCAT_rev.png" alt="WILDCAT" />
 				</td>
