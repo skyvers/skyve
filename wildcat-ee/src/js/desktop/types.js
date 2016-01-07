@@ -1610,7 +1610,7 @@ BizHTMLItem.addMethods({
 					this._show();
 				}
 				else {
-					$LAB.script("ckeditor332/ckeditor.js").wait(function() {
+					BizUtil.loadJS('ckeditor332/ckeditor.js', function() {
 						me._editButton._show();
 					});
 				}
