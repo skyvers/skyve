@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="216" height="22" version="1.1">
+  <defs>
+    <path id="plusButtonOuterPath" d="M 36,0 h -31 a 3,3 0 0 0 -3,3 v 16 a 3,3 0 0 0 3,3 h 31 z" />
+    <path id="plusButtonInnerPath" d="M 36,1 h -31 a 2,2 0 0 0 -2,2 v 16 a 2,2 0 0 0 2,2 h 31 z" />
+    <path id="plusIcon" d="M 13.5,12 h 5 v 5 h 2 v -5 h 5 v -2 h -5 v -5 h -2 v 5 h -5 z" />
+    <path id="plusButtonInnerShadow" d="M 35,1 h 1 v 20 h -1 v -20 z" fill="#fff" fill-opacity=".8" />
+
+    <path id="minusButtonOuterPath" d="M 0,0 h 31 a 3,3 0 0 1 3,3 v 16 a 3,3 0 0 1 -3,3 h -31 z" />
+    <path id="minusButtonInnerPath" d="M 1,1 h 30 a 2,2 0 0 1 2,2 v 16 a 2,2 0 0 1 -2,2 h -30 z" />
+    <path id="minusIcon" d="M 10.5,12 h 12 v -2 h -12 z" />
+
+    <linearGradient id="disabledBorderGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bfbfbf" />
+      <stop offset="15%" stop-color="#ababab" />
+      <stop offset="85%" stop-color="#ababab" />
+      <stop offset="100%" stop-color="#c9b6b6" />
+    </linearGradient>
+    <linearGradient id="disabledGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <!-- linear-gradient(top, #ffffff 0%, #f0f0f0 100%) -->
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0f0f0" />
+    </linearGradient>
+    <linearGradient id="upGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <!-- linear-gradient(top, #ffffff 0%, #e0e0e0 100%) -->
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e0e0" />
+    </linearGradient>
+    <linearGradient id="downGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <!-- linear-gradient(top, #f1f2f3 0%, #f1f2f3 41%, #b1d7f6 100%) -->
+      <stop offset="0%" stop-color="#f1f2f3" />
+      <stop offset="41%" stop-color="#f1f2f3" />
+      <stop offset="100%" stop-color="#b1d7f6" />
+    </linearGradient>
+
+    <!--
+    http://stackoverflow.com/questions/20778568/how-to-make-an-inset-drop-shadow-in-svg
+    http://stackoverflow.com/questions/20976219/css3-box-shadow-svg-equivalent/20976413#20976413
+    -->
+    <filter id="swInsetShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="blur" />
+      <feOffset dy="-1" dx="1" in="blur" result="blurOffset" />
+      <feComposite in="blurOffset" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff" />
+      <feFlood flood-color="white" flood-opacity="1" result="flood" />
+      <feComposite in="flood" in2="shadowDiff" operator="in" result="composite" />
+      <feComposite in="composite" in2="SourceGraphic" operator="over" />
+    </filter>
+    <filter id="seInsetShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="0.5" result="blur" />
+      <feOffset dy="-1" dx="-1" in="blur" result="blurOffset" />
+      <feComposite in="blurOffset" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff" />
+      <feFlood flood-color="white" flood-opacity="1" result="flood" />
+      <feComposite in="flood" in2="shadowDiff" operator="in" result="composite" />
+      <feComposite in="composite" in2="SourceGraphic" operator="over" />
+    </filter>
+    <filter id="downInsetShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
+      <feOffset dy="0" dx="0" in="blur" result="blurOffset" />
+      <feComposite in="blurOffset" in2="SourceAlpha" operator="arithmetic" k2="-2" k3="2" result="shadowDiff" />
+      <feFlood flood-color="#a0d5f3" flood-opacity="1" result="flood" />
+      <feComposite in="flood" in2="shadowDiff" operator="in" result="composite" />
+      <feComposite in="composite" in2="SourceGraphic" operator="over" />
+    </filter>
+  </defs>
+  <g>
+    <!-- minus_Disabled -->
+    <use xlink:href="#minusButtonOuterPath" x="0" y="0" fill="url(#disabledBorderGradient)" />
+    <use xlink:href="#minusButtonInnerPath" x="0" y="0" fill="url(#disabledGradient)" />
+    <use xlink:href="#minusIcon" x="0" y="0" fill="#ababab" />
+
+    <!-- minus -->
+    <use xlink:href="#minusButtonOuterPath" x="36" y="0" fill="#ababab" />
+    <use xlink:href="#minusButtonInnerPath" x="36" y="0" fill="url(#upGradient)" filter="url(#seInsetShadow)" />
+    <use xlink:href="#minusIcon" x="36" y="0" fill="#444444" />
+
+    <!-- minus_Focused -->
+    <use xlink:href="#minusButtonOuterPath" x="72" y="0" fill="#597db1" />
+    <use xlink:href="#minusButtonInnerPath" x="72" y="0" fill="url(#downGradient)" filter="url(#downInsetShadow)" />
+    <use xlink:href="#minusIcon" x="72" y="0" fill="#444444" />
+
+    <!-- plus_Disabled -->
+    <use xlink:href="#plusButtonOuterPath" x="108" y="0" fill="url(#disabledBorderGradient)" />
+    <use xlink:href="#plusButtonInnerPath" x="108" y="0" fill="url(#disabledGradient)" />
+    <use xlink:href="#plusIcon" x="108" y="0" fill="#ababab" />
+    <use xlink:href="#plusButtonInnerShadow" x="108" y="0" />
+
+    <!-- plus -->
+    <use xlink:href="#plusButtonOuterPath" x="144" y="0" fill="#ababab" />
+    <use xlink:href="#plusButtonInnerPath" x="144" y="0" fill="url(#upGradient)" filter="url(#swInsetShadow)" />
+    <use xlink:href="#plusIcon" x="144" y="0" fill="#444444" />
+    <use xlink:href="#plusButtonInnerShadow" x="144" y="0" />
+
+    <!-- plus_Focused -->
+    <use xlink:href="#plusButtonOuterPath" x="180" y="0" fill="#597db1" />
+    <use xlink:href="#plusButtonInnerPath" x="180" y="0" fill="url(#downGradient)" filter="url(#downInsetShadow)" />
+    <use xlink:href="#plusIcon" x="180" y="0" fill="#444444" />
+    <use xlink:href="#plusButtonInnerShadow" x="180" y="0" />
+  </g>
+</svg>

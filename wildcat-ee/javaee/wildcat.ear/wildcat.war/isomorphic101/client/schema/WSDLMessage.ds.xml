@@ -1,0 +1,9 @@
+isc.DataSource.create({
+    inheritsFrom:"DataSource",
+    Constructor:"WSDLMessage",
+    allowAdvancedCriteria:true,
+    ID:"WSDLMessage",
+    addGlobalId:false,
+    fields:[
+    ]
+})

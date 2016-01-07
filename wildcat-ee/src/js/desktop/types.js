@@ -698,28 +698,6 @@ isc.SimpleType.create({
 	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
 });
 
-isc.ClassFactory.defineClass("BizDollarsAndCentsItem", "BizDecimal2Item");
-BizDollarsAndCentsItem.addProperties({
-    showHint: true,
-    showHintInField: true,
-   	hint: '(+/-)$$$$$.cc'
-});
-isc.SimpleType.create({
-	name: "bizDollarsAndCents",
-	inheritsFrom: "float",
-	editorType: "BizDollarsAndCentsItem",
-	editFormatter: function(internalValue, field, form, record) {
-		return this.shortDisplayFormatter(internalValue, field, form, record);
-	},
-	normalDisplayFormatter: function(internalValue, field, component, record) {
-		return this.shortDisplayFormatter(internalValue, field, component, record);
-	},
-	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDollarsAndCentsItem.format(internalValue, 2);
-	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
-});
-
 isc.ClassFactory.defineClass("BizIntegerPercentageItem", "TextItem");
 BizIntegerPercentageItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float

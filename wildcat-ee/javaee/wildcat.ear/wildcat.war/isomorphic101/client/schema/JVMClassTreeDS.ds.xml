@@ -1,0 +1,35 @@
+isc.DataSource.create({
+    operationBindings:[
+        {
+            operationType:"fetch"
+        }
+    ],
+    allowAdvancedCriteria:true,
+    ID:"JVMClassTreeDS",
+    fields:[
+        {
+            name:"name",
+            validators:[
+            ]
+        },
+        {
+            name:"path",
+            validators:[
+            ],
+            primaryKey:true
+        },
+        {
+            name:"parentID",
+            hidden:true,
+            foreignKey:"JVMClassTreeDS.path",
+            validators:[
+            ]
+        },
+        {
+            name:"isFolder",
+            type:"boolean",
+            validators:[
+            ]
+        }
+    ]
+})
