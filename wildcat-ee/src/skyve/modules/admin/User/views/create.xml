@@ -1,74 +1,72 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Create a new User"
-		type="create"
-		xmlns="http://www.skyve.org/xml/view"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form invisible="notConfirmContact">
-		<column percentageWidth="20" />
-		<column />
-		<column />
-		<row>
-			<item>
-				<spacer />
-			</item>
-			<item colspan="2">
-				<blurb textAlignment="left">
+<view title="Create a new User" type="create" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" shrinkWrap="height">
+		<form invisible="notConfirmContact">
+			<column percentageWidth="20" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item colspan="2">
+					<blurb textAlignment="left">
 					<![CDATA[
 						<i>Enter an existing <b>contact name and/or email</b> of the user you wish to create and press the <b>Search</b> button.</i>
 					]]>
 				</blurb>
-			</item>
-		</row>
-		<row>
-			<item>
-				<default binding="searchContactName" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<default binding="searchEmail" />
-			</item>
-		</row>
-		<row>
-			<item>
-				<spacer />
-			</item>
-			<item>
-				<button actionName="Check" pixelWidth="150" />
-			</item>
-		</row>
-	</form>
-	<hbox invisible="candidateContactsEmpty" shrinkWrap="height" pixelPadding="10">
-		<form percentageWidth="20">
-			<column />
+				</item>
+			</row>
 			<row>
 				<item>
-					<label value="Matches :" textAlignment="right" />
+					<default binding="searchContactName" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="searchEmail" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<button actionName="Check" pixelWidth="150" />
 				</item>
 			</row>
 		</form>
-		<dataGrid binding="candidateContacts" editable="false" pixelHeight="200">
-			<containerColumn title="Actions" pixelWidth="70" alignment="centre">
-				<link value="Select">
-					<actionReference action="Select" />
-				</link>
-			</containerColumn>
-			<boundColumn binding="contact.name" />
-			<boundColumn binding="contact.email1" />
-			<boundColumn binding="matchScore" />
-		</dataGrid>
-	</hbox>
-	<form invisible="notConfirmContact">
-		<column percentageWidth="20" />
-		<column />
-		<column />
-		<row>
-			<item>
-				<spacer />
-			</item>
-			<item colspan="2">
-				<blurb textAlignment="left">
+		<hbox invisible="candidateContactsEmpty" shrinkWrap="height">
+			<form percentageWidth="20">
+				<column />
+				<row>
+					<item>
+						<label value="Matches :" textAlignment="right" />
+					</item>
+				</row>
+			</form>
+			<dataGrid binding="candidateContacts" editable="false" pixelHeight="200">
+				<containerColumn title="Actions" pixelWidth="70" alignment="centre">
+					<link value="Select">
+						<actionReference action="Select" />
+					</link>
+				</containerColumn>
+				<boundColumn binding="contact.name" />
+				<boundColumn binding="contact.email1" />
+				<boundColumn binding="matchScore" />
+			</dataGrid>
+		</hbox>
+		<form invisible="notConfirmContact">
+			<column percentageWidth="20" />
+			<column />
+			<column />
+			<row>
+				<item>
+					<spacer />
+				</item>
+				<item colspan="2">
+					<blurb textAlignment="left">
 					<![CDATA[
 						<b><i>OR</i> </b>
 						<br/>
@@ -76,87 +74,45 @@
 						<i>Press the <b>New Contact</b> button to add a user who is a new contact.</i>
 					]]>
 				</blurb>
-			</item>
-		</row>
-		<row>
-			<item>
-				<spacer />
-			</item>
-			<item>
-				<button actionName="New" pixelWidth="150" />
-			</item>
-		</row>
-	</form>
-	<hbox invisible="notCreateContact">
-		<form percentageWidth="60">
-			<column percentageWidth="30" />
-			<column />
-			<row>
-				<item>
-					<default binding="contact.name" />
 				</item>
 			</row>
 			<row>
-				<item required="true">
-					<default binding="contact.email1" />
+				<item>
+					<spacer />
+				</item>
+				<item>
+					<button actionName="New" pixelWidth="150" />
 				</item>
 			</row>
 		</form>
-		<form percentageWidth="40">
-			<column />
-			<column />
-			<column />
-			<row>
-				<item>
-					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
-				</item>
-			</row>
-		</form>
-	</hbox>
-	<hbox invisible="notConfirmUserNameAndPassword">
-		<form percentageWidth="60">
-			<column percentageWidth="30" />
-			<column />
-			<row>
-				<item>
-					<textField binding="contact.name" disabled="true" />
-				</item>
-			</row>
-			<row>
-				<item required="true">
-					<textField binding="contact.email1" />
-				</item>
-			</row>
-			<row>
-				<item>
-					<default binding="userName" />
-				</item>
-			</row>
-			<row>
-				<item>
-					<password binding="newPassword" />
-				</item>
-			</row>
-			<row>
-				<item>
-					<password binding="confirmPassword" />
-				</item>
-			</row>
-		</form>
-		<form percentageWidth="40">
-			<column />
-			<column />
-			<column />
-			<row>
-				<item>
-					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
-				</item>
-			</row>
-		</form>
-	</hbox>
-	<hbox invisible="notConfirmGroupMemberships">
-		<vbox percentageWidth="60">
-			<form>
+		<hbox invisible="notCreateContact">
+			<form percentageWidth="60">
+				<column percentageWidth="30" />
+				<column />
+				<row>
+					<item>
+						<default binding="contact.name" />
+					</item>
+				</row>
+				<row>
+					<item required="true">
+						<default binding="contact.email1" />
+					</item>
+				</row>
+			</form>
+			<form percentageWidth="40">
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+		<hbox invisible="notConfirmUserNameAndPassword">
+			<form percentageWidth="60">
 				<column percentageWidth="30" />
 				<column />
 				<row>
@@ -171,33 +127,76 @@
 				</row>
 				<row>
 					<item>
-						<textField binding="userName" />
+						<default binding="userName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="newPassword" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="confirmPassword" />
 					</item>
 				</row>
 			</form>
-			<hbox percentageWidth="100" pixelHeight="300">
-				<form percentageWidth="30">
+			<form percentageWidth="40">
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+		<hbox invisible="notConfirmGroupMemberships">
+			<vbox percentageWidth="60">
+				<form>
+					<column percentageWidth="30" />
 					<column />
 					<row>
 						<item>
-							<label value="Groups :" textAlignment="right" />
+							<textField binding="contact.name" disabled="true" />
+						</item>
+					</row>
+					<row>
+						<item required="true">
+							<textField binding="contact.email1" />
+						</item>
+					</row>
+					<row>
+						<item>
+							<textField binding="userName" />
 						</item>
 					</row>
 				</form>
-				<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
-			</hbox>
-		</vbox>
-		<form percentageWidth="40">
-			<column />
-			<column />
-			<column />
-			<row>
-				<item>
-					<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
-				</item>
-			</row>
-		</form>
-	</hbox>
+				<hbox percentageWidth="100" pixelHeight="300">
+					<form percentageWidth="30">
+						<column />
+						<row>
+							<item>
+								<label value="Groups :" textAlignment="right" />
+							</item>
+						</row>
+					</form>
+					<listMembership binding="groups" candidatesHeading="Unassigned" membersHeading="Assigned" listWidth="300" />
+				</hbox>
+			</vbox>
+			<form percentageWidth="40">
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelHeight="160" pixelWidth="160" />
+					</item>
+				</row>
+			</form>
+		</hbox>
+	</vbox>
 	<actions>
 		<defaults invisible="notConfirmGroupMemberships" />
 		<cancel invisible="confirmGroupMemberships" />
