@@ -1,16 +1,16 @@
-package modules.admin.Display;
+package modules.admin.SystemDashboard;
 
 import java.util.List;
 
-import modules.admin.domain.Display;
 import modules.admin.domain.Job;
+import modules.admin.domain.SystemDashboard;
 
 import org.skyve.CORE;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
-public class DisplayBizlet extends Bizlet<Display> {
+public class SystemDashboardBizlet extends Bizlet<SystemDashboard> {
 
 	/**
 	 * 
@@ -18,7 +18,7 @@ public class DisplayBizlet extends Bizlet<Display> {
 	private static final long serialVersionUID = 8137854247367804199L;
 
 	@Override
-	public Display newInstance(Display bean) throws Exception {
+	public SystemDashboard newInstance(SystemDashboard bean) throws Exception {
 		Persistence pers = CORE.getPersistence();
 		// find jobs
 		// TODO - work out why I only get one job

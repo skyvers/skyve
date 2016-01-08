@@ -2,7 +2,7 @@
 <module name="admin" title="Admin" xmlns="http://www.skyve.org/xml/module" xsi:schemaLocation="http://www.skyve.org/xml/module ../../schemas/module.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<homeRef>edit</homeRef>
-	<homeDocument>CurrentUser</homeDocument>
+	<homeDocument>UserDashboard</homeDocument>
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
@@ -14,11 +14,11 @@
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
 		<document ref="Content" />
-		<document ref="CurrentUser" />
+		<document ref="UserDashboard" />
 		<document ref="Communication" defaultQueryName="qCommunications" />
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
-		<document ref="Display" />
+		<document ref="SystemDashboard" />
 		<document ref="DocumentNumber" />
 		<document ref="Group" />
 		<document ref="GroupRole" />
@@ -48,7 +48,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="CurrentUser" permission="CR__U">
+				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
@@ -86,7 +86,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_D" />
-				<document name="CurrentUser" permission="CR__U">
+				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
@@ -167,7 +167,7 @@
 					<action name="Restore" />
 					<action name="Truncate" />
 				</document>
-				<document name="Display" permission="_____" />
+				<document name="SystemDashboard" permission="_____" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
@@ -214,7 +214,7 @@
 				<document name="Group" permission="_R__C" />
 				<document name="GroupRole" permission="_R__C" />
 
-				<document name="CurrentUser" permission="CR__U">
+				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
 				<document name="DocumentNumber" permission="CRUDC" />
@@ -252,7 +252,7 @@
 			<role name="BasicUser" />
 			<role name="ViewUser" />
 		</edit>
-		<edit document="CurrentUser" name="My Details">
+		<edit document="UserDashboard" name="User Dashboard">
 			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="Contacts">
@@ -309,7 +309,7 @@
 			<uxui name="tablet" />
 			<role name="BasicUser" />
 		</list>
-		<edit document="Display" name="System Dashboard">
+		<edit document="SystemDashboard" name="System Dashboard">
 			<uxui name="desktop" />
 			<uxui name="tablet" />
 			<role name="DataAdministrator" />

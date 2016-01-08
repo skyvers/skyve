@@ -10,14 +10,14 @@ import org.skyve.CORE;
 import org.skyve.wildcat.domain.AbstractTransientBean;
 
 /**
- * Display
+ * SystemDashboard
  * 
  * @navhas n jobs 0..n Job
  * @stereotype "transient"
  */
 @XmlType
 @XmlRootElement
-public class Display extends AbstractTransientBean {
+public class SystemDashboard extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -27,7 +27,7 @@ public class Display extends AbstractTransientBean {
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "Display";
+	public static final String DOCUMENT_NAME = "SystemDashboard";
 
 	/** @hidden */
 	public static final String jobsPropertyName = "jobs";
@@ -37,23 +37,23 @@ public class Display extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return Display.MODULE_NAME;
+		return SystemDashboard.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return Display.DOCUMENT_NAME;
+		return SystemDashboard.DOCUMENT_NAME;
 	}
 
-	public static Display newInstance() throws Exception {
+	public static SystemDashboard newInstance() throws Exception {
 		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof Display) && 
-					this.getBizId().equals(((Display) o).getBizId()));
+		return ((o instanceof SystemDashboard) && 
+					this.getBizId().equals(((SystemDashboard) o).getBizId()));
 	}
 
 	/**

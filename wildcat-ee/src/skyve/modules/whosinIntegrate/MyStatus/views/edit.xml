@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Update My Status" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<vbox pixelPadding="10" pixelHeight="1" invisible="notExists">
-		<hbox pixelPadding="10" border="true" borderTitle="Details">
+	<form invisible="exists" border="true" percentageWidth="50">
+		<column />
+		<row>
+			<item>
+				<label value="You are not a staff member for the Who's In (Integrate) module." />
+			</item>
+		</row>
+	</form>
+	<vbox invisible="notExists">
+		<hbox border="true" borderTitle="Details" shrinkWrap="height">
 			<form percentageWidth="50">
 				<column percentageWidth="20" />
 				<column />

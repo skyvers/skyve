@@ -133,7 +133,7 @@
 				</row>
 				<row>
 					<item showLabel="true" colspan="4">
-						<html binding="body" pixelHeight="400" pixelWidth="800" />
+						<html binding="body" pixelHeight="300" pixelWidth="800" />
 					</item>
 				</row>
 				<row>

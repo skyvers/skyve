@@ -14,7 +14,7 @@ import org.skyve.wildcat.domain.AbstractTransientBean;
 import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
 
 /**
- * CurrentUser
+ * UserDashboard
  * 
  * @navhas n jobs 0..n Job
  * @navhas n currentUser 0..1 User
@@ -24,7 +24,7 @@ import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
  */
 @XmlType
 @XmlRootElement
-public class CurrentUser extends AbstractTransientBean {
+public class UserDashboard extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -34,7 +34,7 @@ public class CurrentUser extends AbstractTransientBean {
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "CurrentUser";
+	public static final String DOCUMENT_NAME = "UserDashboard";
 
 	/** @hidden */
 	public static final String currentUserPropertyName = "currentUser";
@@ -59,23 +59,23 @@ public class CurrentUser extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return CurrentUser.MODULE_NAME;
+		return UserDashboard.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return CurrentUser.DOCUMENT_NAME;
+		return UserDashboard.DOCUMENT_NAME;
 	}
 
-	public static CurrentUser newInstance() throws Exception {
+	public static UserDashboard newInstance() throws Exception {
 		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof CurrentUser) && 
-					this.getBizId().equals(((CurrentUser) o).getBizId()));
+		return ((o instanceof UserDashboard) && 
+					this.getBizId().equals(((UserDashboard) o).getBizId()));
 	}
 
 	/**

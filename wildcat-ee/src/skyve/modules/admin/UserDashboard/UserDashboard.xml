@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<document name="CurrentUser"
+<document name="UserDashboard"
 				xmlns="http://www.skyve.org/xml/document"
 	xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<singularAlias>My Details</singularAlias>
-	<pluralAlias>My Details</pluralAlias>
+	<singularAlias>User Dashboard</singularAlias>
+	<pluralAlias>User Dashboards</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey expression="My Details"/>
+	<bizKey expression="User Dashboard"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >
 			<displayName>Current User</displayName>
