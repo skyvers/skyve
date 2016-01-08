@@ -1,4 +1,4 @@
-package modules.admin.Display.images;
+package modules.admin.SystemDashboard.images;
 
 import java.awt.image.BufferedImage;
 import java.text.DateFormatSymbols;
@@ -6,21 +6,21 @@ import java.util.Calendar;
 import java.util.Date;
 
 import modules.admin.ThemeCharter;
-import modules.admin.domain.Display;
+import modules.admin.domain.SystemDashboard;
 
 import org.jfree.chart.plot.PlotOrientation;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 import org.skyve.wildcat.util.TimeUtil;
 
-public class Activity implements DynamicImage<Display> {
+public class Activity implements DynamicImage<SystemDashboard> {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 920018115413956116L;
 
 	@Override
-	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
+	public BufferedImage getImage(SystemDashboard display, int width, int height, User user) throws Exception {
 		ThemeCharter charter = new ThemeCharter();
 		charter.setSql(getActivityHistorySQL(null, user));
 		return charter.getAreaChartImage("", "Activity", null, PlotOrientation.VERTICAL, width, height, false);

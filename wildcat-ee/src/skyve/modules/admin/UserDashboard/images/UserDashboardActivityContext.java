@@ -2,7 +2,7 @@ package modules.admin.UserDashboard.images;
 
 import java.awt.image.BufferedImage;
 
-import modules.admin.Display.images.ActivityContext;
+import modules.admin.SystemDashboard.images.ActivityContext;
 import modules.admin.domain.UserDashboard;
 
 import org.skyve.metadata.model.document.DynamicImage;

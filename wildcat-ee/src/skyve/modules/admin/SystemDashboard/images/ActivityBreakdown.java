@@ -1,24 +1,24 @@
-package modules.admin.Display.images;
+package modules.admin.SystemDashboard.images;
 
 import java.awt.image.BufferedImage;
 
 import modules.admin.ThemeCharter;
 import modules.admin.ThemeCharter.ChartAspect;
-import modules.admin.domain.Display;
+import modules.admin.domain.SystemDashboard;
 
 import org.jfree.chart.plot.PlotOrientation;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class ActivityBreakdown implements DynamicImage<Display> {
+public class ActivityBreakdown implements DynamicImage<SystemDashboard> {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -4758170827473887904L;
 
 	@Override
-	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
+	public BufferedImage getImage(SystemDashboard display, int width, int height, User user) throws Exception {
 		ThemeCharter charter = new ThemeCharter();
 		charter.setSql(getActivityBreakdownSQL(user));
 		return charter.getBarChartImage("", "", null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT, false);

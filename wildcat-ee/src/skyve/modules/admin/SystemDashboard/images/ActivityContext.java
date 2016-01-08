@@ -1,4 +1,4 @@
-package modules.admin.Display.images;
+package modules.admin.SystemDashboard.images;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import modules.admin.domain.Display;
+import modules.admin.domain.SystemDashboard;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -20,14 +20,14 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class ActivityContext implements DynamicImage<Display> {
+public class ActivityContext implements DynamicImage<SystemDashboard> {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -4758170827473887904L;
 
 	@Override
-	public BufferedImage getImage(Display display, int width, int height, User user) throws Exception {
+	public BufferedImage getImage(SystemDashboard display, int width, int height, User user) throws Exception {
 		return getActivityContextPieImage(null, width, height, user);
 	}
 

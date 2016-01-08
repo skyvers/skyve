@@ -3,7 +3,7 @@ package modules.admin.UserDashboard.images;
 import java.awt.image.BufferedImage;
 
 import modules.admin.ThemeCharter;
-import modules.admin.Display.images.Activity;
+import modules.admin.SystemDashboard.images.Activity;
 import modules.admin.domain.UserDashboard;
 
 import org.jfree.chart.plot.PlotOrientation;
