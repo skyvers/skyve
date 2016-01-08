@@ -56,10 +56,10 @@
 	</vbox>
 	<hbox>
 		<vbox border="true" borderTitle="Activity">
-			<dynamicImage name="CurrentUserActivity" />
+			<dynamicImage name="UserDashboardActivity" />
 		</vbox>
 		<vbox border="true" borderTitle="Activity Context">
-			<dynamicImage name="CurrentUserActivityContext" />
+			<dynamicImage name="UserDashboardActivityContext" />
 		</vbox>
 	</hbox>
 	<tabPane>

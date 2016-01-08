@@ -1,7 +1,7 @@
-package modules.admin.CurrentUser.actions;
+package modules.admin.UserDashboard.actions;
 
 import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.CurrentUser;
+import modules.admin.domain.UserDashboard;
 import modules.admin.domain.User;
 
 import org.skyve.CORE;
@@ -10,14 +10,14 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
-public class UpdateMyDetails implements ServerSideAction<CurrentUser> {
+public class UpdateMyDetails implements ServerSideAction<UserDashboard> {
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = -4317908281075686229L;
 
 	@Override
-	public ServerSideActionResult execute(CurrentUser bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult execute(UserDashboard bean, WebContext webContext) throws Exception {
 
 		Persistence pers= CORE.getPersistence();
 		

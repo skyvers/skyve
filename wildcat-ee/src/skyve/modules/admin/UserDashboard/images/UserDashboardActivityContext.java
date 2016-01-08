@@ -1,14 +1,14 @@
-package modules.admin.CurrentUser.images;
+package modules.admin.UserDashboard.images;
 
 import java.awt.image.BufferedImage;
 
 import modules.admin.Display.images.ActivityContext;
-import modules.admin.domain.CurrentUser;
+import modules.admin.domain.UserDashboard;
 
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
-public class CurrentUserActivityContext implements DynamicImage<CurrentUser> {
+public class UserDashboardActivityContext implements DynamicImage<UserDashboard> {
 	/**
 	 * For Serialization
 	 */
@@ -18,7 +18,7 @@ public class CurrentUserActivityContext implements DynamicImage<CurrentUser> {
 	 * Construct a line chart of hits for this user over the last 12 months
 	 */
 	@Override
-	public BufferedImage getImage(CurrentUser bean, int width, int height, User user) throws Exception {
+	public BufferedImage getImage(UserDashboard bean, int width, int height, User user) throws Exception {
 		
 		if (bean != null && bean.getCurrentUser() != null) {
 			return ActivityContext.getActivityContextPieImage(bean.getCurrentUser(), width, height, user);
