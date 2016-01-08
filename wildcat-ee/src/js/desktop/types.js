@@ -1322,8 +1322,10 @@ BizLookupDescriptionItem.addMethods({
 		if (config.editable) {
 			this._form = isc.DynamicForm.create({
 				writeFormTag: false, // ensure there are no nested forms
-				numCols: 2,
-				colWidths: ['*', 60]
+				numCols: 3,
+				colWidths: ['*', 1, 53],
+				margin: 0,
+				cellPadding: 0
 			});
 
 			this._splitButton =	BizUtil.createSplitButton(
@@ -1376,6 +1378,7 @@ BizLookupDescriptionItem.addMethods({
 			
 			this._form.setItems([
 			    combo,
+			    {type: 'spacer', width: 1},
 		        {name: '_splitButton', showTitle: false, type: 'canvas', canvas: this._splitButton}
 		    ]);
 		}
