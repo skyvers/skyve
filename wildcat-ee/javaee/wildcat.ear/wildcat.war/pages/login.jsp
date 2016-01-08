@@ -12,8 +12,10 @@
 	String fontSize = (mobile ? "18px" : "18px");
 	String fieldWidth = (mobile ? "120px" : "120px");
 %>
+<!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<title>WILDCAT: Sign-in</title>
 		<base href="<%=basePath%>" />
 		

@@ -5,8 +5,10 @@
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
 %>
+<!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<title>WILDCAT: Signed-out</title>
 		<base href="<%=basePath%>" />
 

@@ -84,8 +84,10 @@
 	}
 %>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 	<head> 
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&sensor=false&region=AU"></script>
 <%--

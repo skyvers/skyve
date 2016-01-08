@@ -1,8 +1,9 @@
 <%@ page language="java"%>
 <%@page import="org.skyve.wildcat.util.UtilImpl" %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE html>
 <HTML>
 	<HEAD>
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8">
 		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png">
 		<TITLE>Browse Images</TITLE>

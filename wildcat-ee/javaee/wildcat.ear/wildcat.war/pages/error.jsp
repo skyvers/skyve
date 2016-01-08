@@ -6,9 +6,10 @@
 						request.getServerPort() + request.getContextPath() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 <title>WILDCAT: Problem</title>
 <base href="<%=basePath%>" />
 
