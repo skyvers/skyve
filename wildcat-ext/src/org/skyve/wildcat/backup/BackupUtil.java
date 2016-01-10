@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -68,6 +69,9 @@ final class BackupUtil {
 			cm.dispose();
 			Thread.sleep(2000);
 		}
+		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
+		p.rollback();
+		p.disposeAllPersistenceInstances();
 	}
 	
 	static Collection<Table> getTables() throws Exception {

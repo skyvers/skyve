@@ -75,7 +75,7 @@ public class Truncate {
 			}
 		}
 		finally {
-			persistence.commit(true);
+			persistence.commit(false);
 		}
 		
 		try (ContentManager cm = EXT.newContentManager()) {
@@ -161,6 +161,14 @@ public class Truncate {
 			System.exit(1);
 		}
 		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-		truncate(args[8]);
+		try {
+			truncate(args[8]);
+		}
+		finally {
+			BackupUtil.finalise();
+			
+			// This is required to stop the process hanging at the end
+			System.exit(0);
+		}
 	}
 }

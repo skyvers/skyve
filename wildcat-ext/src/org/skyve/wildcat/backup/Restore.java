@@ -317,6 +317,9 @@ public class Restore {
 		}
 		finally {
 			BackupUtil.finalise();
+			
+			// This is required to stop the process hanging at the end
+			System.exit(0);
 		}
 	}
 }

@@ -123,7 +123,7 @@ public class Validate {
 			}
 		}
 		finally {
-			persistence.commit(true);
+			persistence.commit(false);
 		}
 	}
 
@@ -142,6 +142,9 @@ public class Validate {
 		}
 		finally {
 			BackupUtil.finalise();
+			
+			// This is required to stop the process hanging at the end
+			System.exit(0);
 		}
 	}
 }

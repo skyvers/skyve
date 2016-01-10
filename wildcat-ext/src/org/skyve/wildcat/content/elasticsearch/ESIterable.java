@@ -41,7 +41,8 @@ class ESIterable implements ContentIterable {
 													ESClient.BEAN_DOCUMENT_ID,
 													ESClient.BEAN_ATTRIBUTE_NAME,
 													ESClient.LAST_MODIFIED,
-													ESClient.FILE_LAST_MODIFIED)
+													ESClient.FILE_LAST_MODIFIED,
+													ESClient.CONTENT)
 								        .execute()
 								        .actionGet();
 			scrollId = response.getScrollId();
@@ -91,6 +92,8 @@ class ESIterable implements ContentIterable {
 			hit.setModuleName(bizModule);
 			hit.setDocumentName(bizDocument);
 			hit.setBizId(bizId);
+
+			hit.setExcerpt((String) searchHit.field(ESClient.CONTENT).value()); 
 
 			SearchHitField field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
 			if (field != null) {

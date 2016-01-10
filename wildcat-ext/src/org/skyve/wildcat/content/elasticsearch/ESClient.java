@@ -62,7 +62,7 @@ public class ESClient extends AbstractContentManager {
 	static final String BEAN_INDEX_NAME = "beans";
 	static final String BEAN_INDEX_TYPE = "bean";
 
-	private static final String CONTENT = "content";
+	public static final String CONTENT = "content";
     private static final String ATTACHMENT = "attachment";
 
 	private static final String FILE = "file";

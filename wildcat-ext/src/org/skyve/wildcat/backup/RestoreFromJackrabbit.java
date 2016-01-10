@@ -132,7 +132,7 @@ System.out.println(candidateDirectory.getAbsolutePath());
 			}
 		}
 		finally {
-			persistence.commit(true);
+			persistence.commit(false);
 		}
 	}
 
@@ -148,6 +148,8 @@ System.out.println(candidateDirectory.getAbsolutePath());
 		}
 		finally {
 			BackupUtil.finalise();
+			
+			// This is required to stop the process hanging at the end
 			System.exit(0);
 		}
 	}
