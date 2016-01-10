@@ -42,7 +42,7 @@
 							<table align="center" style="border-spacing: 10px;">
 								<tr>
 									<td style=";text-align:center">
-										<div style="font-size:28;">You are signed out</div>
+										<div style="font-size:28px;">You are signed out</div>
 									</td>
 								</tr>
 								<tr>

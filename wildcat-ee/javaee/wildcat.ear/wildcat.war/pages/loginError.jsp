@@ -28,7 +28,7 @@
 	</head>
 	<body>
 		<table class="logo" align="center">
-			<tr height="128px">
+			<tr height="150px">
 				<td>
 					<img src="images/WILDCAT_rev.png" alt="WILDCAT" />
 				</td>
@@ -41,13 +41,13 @@
 						<table style="text-align: center; border-spacing: 10px;">
 							<tr>
 								<td>
-									<div style="font-size:28;">
+									<div style="font-size:28px;">
 										Sign in error!
 									</div>
 								</td>
 							</tr>
 							<tr align="center">
-								<td style="font-size:18" >
+								<td style="font-size:18px" >
 									<%if (request.getUserPrincipal() != null) {
 									%>
 									You are currently signed in as <em><%=request.getUserPrincipal()%></em>

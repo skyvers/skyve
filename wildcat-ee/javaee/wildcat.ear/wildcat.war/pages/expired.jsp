@@ -41,14 +41,14 @@
 						<table style="text-align: center; border-spacing: 10px;">
 							<tr>
 								<td style="text-align:center">
-									<div style="font-size:28;">
+									<div style="font-size:28px;">
 										Session expired!
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td >
-									<div style="font-size:18;">
+									<div style="font-size:18px;">
 									Your session has expired due to inactivity.
 									</div>
 								</td>

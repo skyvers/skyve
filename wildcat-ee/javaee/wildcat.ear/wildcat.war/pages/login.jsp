@@ -91,7 +91,7 @@
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
 		<table class="logo" align="center">
-			<tr height="128px">
+			<tr height="150px">
 				<td>
 					<img src="images/WILDCAT_rev.png" alt="WILDCAT" />
 				</td>
@@ -127,13 +127,13 @@
 											</tr>
 											</noscript>
 											<tr>
-												<td style="font-size:14;text-align:center">
+												<td style="font-size:14px;text-align:center">
 													<%if (request.getUserPrincipal() != null) {
 													%>
 													You are logged in as <em><%=request.getUserPrincipal()%></em>. To access this functionality you need to login as another user with the correct permissions.
 													<%} else {
 													%>
-													<div style="font-size:28;">Please sign in</div>
+													<div style="font-size:28px;">Please sign in</div>
 													<%}
 													%>
 												</td>
@@ -151,7 +151,7 @@
 																<table>
 																	<% if (customer == null) { %>
 																		<tr>
-																			<td style="font-size:18">
+																			<td style="font-size:18px">
 																				Customer
 																			</td>
 																			<td>
@@ -160,7 +160,7 @@
 																		</tr>
 																	<% } %>
 																	<tr>
-																		<td style="font-size:18">
+																		<td style="font-size:18px">
 																			Username
 																		</rd>
 																		<td>
@@ -171,7 +171,7 @@
 																		</td>
 																	</tr>
 																	<tr>
-																		<td style="font-size:18">
+																		<td style="font-size:18px">
 																			Password
 																		</td>
 																		<td>
