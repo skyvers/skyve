@@ -767,8 +767,8 @@ isc.BizUtil.addClassMethods({
 					click: buttonClick
 				}),
 				isc.MenuButton.create({
-					title: "",
-					width: 25,
+					title: '',
+					width: 23,
 					alignMenuLeft: false,
 					canHover: true,
 					getHoverHTML: function() {return splitTooltip;},
