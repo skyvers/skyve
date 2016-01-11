@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import modules.ModulesUtil.DomainValueSortByCode;
-import modules.admin.domain.DataMaintenance;
-
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+
+import modules.ModulesUtil.DomainValueSortByDescription;
+import modules.admin.domain.DataMaintenance;
 
 public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 	private static final long serialVersionUID = 1L;
@@ -34,14 +35,17 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 		if (DataMaintenance.modDocNamePropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
 
-			// If database has just been truncated, the user and customer will not exist
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
-				for (String d : m.getDocumentRefs().keySet()) {
-					result.add(new DomainValue(m.getName() + '.' + d, m.getTitle() + '.' + d));
+				for (String k : m.getDocumentRefs().keySet()) {
+					Document d = m.getDocument(c, k);
+					if (d.getPersistent() != null) {
+						result.add(new DomainValue(String.format("%s.%s", m.getName(), k), 
+													String.format("%s.%s", m.getTitle(), d.getSingularAlias())));
+					}
 				}
 			}
-			Collections.sort(result, new DomainValueSortByCode());
+			Collections.sort(result, new DomainValueSortByDescription());
 
 			return result;
 		}

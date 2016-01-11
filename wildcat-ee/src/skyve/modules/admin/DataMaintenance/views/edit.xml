@@ -69,10 +69,35 @@
 			</vbox>
 		</tab>
 		<tab title="Content">
-			<listGrid model="ContentModel" continueConversation="false" showAdd="false" showEdit="false" showExport="false"
-				showFilter="false" showRemove="false" showSnap="false" showSummary="false" showTag="false" showZoom="false">
+			<listGrid model="ContentModel" 
+						selectedIdBinding="selectedContentId"
+						continueConversation="false" 
+						showAdd="false"
+						showEdit="false" 
+						showExport="false"
+						showFilter="false" 
+						showRemove="false" 
+						showSnap="false" 
+						showSummary="false" 
+						showTag="false" 
+						showZoom="false"
+						postRefresh="contentRefreshRequired">
+				<onSelectedHandlers>
+					<server action="ContentSelected" />
+				</onSelectedHandlers>
 			</listGrid>
-			<!-- <form> <column/> <column/> <row> <item> <contentLink binding=""></contentLink> </item> </row> </form> -->
+			<form border="true" borderTitle="Selected Content" invisible="notAttachmentSelected">
+				<column />
+				<row>
+					<item align="centre">
+						<blurb>
+							<![CDATA[
+								{contentLink}
+							]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
 			<hbox horizontalAlignment="right" shrinkWrap="height">
 				<button actionName="Reindex" />
 			</hbox>
@@ -83,10 +108,11 @@
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
 		<action className="Backup" displayName="Backup" inActionPanel="false" />
+		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
+		<action className="ContentSelected" displayName="ContentSelected" inActionPanel="false" />
 		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to delete this backup folder from the server filesystem?" />
 		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
-		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
 		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
 	</actions>
 </view>

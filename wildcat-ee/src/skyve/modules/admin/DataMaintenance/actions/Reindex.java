@@ -12,7 +12,7 @@ public class Reindex implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
-		bean.setRefreshBackups(Boolean.TRUE);
+		bean.setRefreshContent(Boolean.TRUE);
 
 		org.skyve.wildcat.backup.Reindex.reindex();
 		return new ServerSideActionResult(bean);

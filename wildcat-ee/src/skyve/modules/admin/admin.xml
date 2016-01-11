@@ -160,9 +160,10 @@
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
 					<action name="BackupSelected" />
-					<action name="DeleteBackup" />
+					<action name="ContentSelected" />
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
+					<action name="DeleteBackup" />
 					<action name="Reindex" />
 					<action name="Restore" />
 					<action name="Truncate" />

@@ -22,10 +22,20 @@
 		<id name="selectedBackupTimestampFolderName" persistent="false" trackChanges="false">
 			<displayName>Selected Backup Timestamp Folder Name</displayName>
 		</id>
+		<id name="selectedContentId" persistent="false" trackChanges="false">
+			<displayName>Selected Content Id</displayName>
+		</id>
 		<boolean name="refreshBackups" persistent="false" trackChanges="false">
 			<displayName>Refresh Backups</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
+		<boolean name="refreshContent" persistent="false" trackChanges="false">
+			<displayName>Refresh Content</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<memo name="contentLink" persistent="false" trackChanges="false">
+			<displayName>Content Link</displayName>
+		</memo>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">
@@ -36,6 +46,21 @@
 		<condition name="backupsRefreshRequired">
 			<![CDATA[
 				Boolean.TRUE.equals(refreshBackups)
+			]]>
+		</condition>
+		<condition name="contentSelected">
+			<![CDATA[
+				selectedContentId != null
+			]]>
+		</condition>
+		<condition name="contentRefreshRequired">
+			<![CDATA[
+				Boolean.TRUE.equals(refreshContent)
+			]]>
+		</condition>
+		<condition name="attachmentSelected">
+			<![CDATA[
+				contentLink != null
 			]]>
 		</condition>
 	</conditions>

@@ -44,6 +44,8 @@ public class Content extends AbstractTransientBean {
 	public static final String attributeNamePropertyName = "attributeName";
 	/** @hidden */
 	public static final String lastModifiedPropertyName = "lastModified";
+	/** @hidden */
+	public static final String contentPropertyName = "content";
 
 	private String contentId;
 	private String customerName;
@@ -52,6 +54,7 @@ public class Content extends AbstractTransientBean {
 	private String contentBizId;
 	private String attributeName;
 	private Timestamp lastModified;
+	private String content;
 
 	@Override
 	@XmlTransient
@@ -201,5 +204,23 @@ public class Content extends AbstractTransientBean {
 	public void setLastModified(Timestamp lastModified) {
 		preset(lastModifiedPropertyName, lastModified);
 		this.lastModified = lastModified;
+	}
+
+	/**
+	 * {@link #content} accessor.
+	 **/
+	public String getContent() {
+		return content;
+	}
+
+	/**
+	 * {@link #content} mutator.
+	 * 
+	 * @param content	The new value to set.
+	 **/
+	@XmlElement
+	public void setContent(String content) {
+		preset(contentPropertyName, content);
+		this.content = content;
 	}
 }

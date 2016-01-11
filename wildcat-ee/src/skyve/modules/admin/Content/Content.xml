@@ -32,5 +32,8 @@
 		<timestamp name="lastModified">
 			<displayName>Last Modified</displayName>
 		</timestamp>
+		<memo name="content">
+			<displayName>Content</displayName>
+		</memo>
 	</attributes>
 </document>

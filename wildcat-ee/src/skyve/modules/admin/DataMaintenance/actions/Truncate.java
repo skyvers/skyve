@@ -12,7 +12,7 @@ public class Truncate implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
-		bean.setRefreshBackups(Boolean.FALSE);
+		bean.setRefreshContent(Boolean.TRUE);
 
 		org.skyve.wildcat.backup.Truncate.truncate(bean.getSchemaName());
 		return new ServerSideActionResult(bean);

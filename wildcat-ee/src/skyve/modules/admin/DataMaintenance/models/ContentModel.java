@@ -53,6 +53,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		projections.add(Content.documentNamePropertyName);
 		projections.add(Content.lastModifiedPropertyName);
 		projections.add(Content.moduleNamePropertyName);
+		projections.add(Content.contentPropertyName);
 		
 		QueryColumnImpl column = new QueryColumnImpl();
 		column.setBinding(Content.customerNamePropertyName);
@@ -82,6 +83,10 @@ public class ContentModel extends ListModel<DataMaintenance> {
 		column.setBinding(Content.lastModifiedPropertyName);
 		column.setSortable(false);
 		columns.add(column);
+		column = new QueryColumnImpl();
+		column.setBinding(Content.contentPropertyName);
+		column.setSortable(false);
+		columns.add(column);
 	}
 	
 	@Override
@@ -106,13 +111,11 @@ public class ContentModel extends ListModel<DataMaintenance> {
 
 	@Override
 	public Filter getFilter() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Filter newFilter() throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -131,7 +134,7 @@ public class ContentModel extends ListModel<DataMaintenance> {
 				SearchResult hit = it.next();
 				if (i >= start) {
 					Map<String, Object> properties = new TreeMap<>();
-					properties.put(Bean.DOCUMENT_ID, hit.getBizId());
+					properties.put(Bean.DOCUMENT_ID, hit.getContentId());
 					properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, hit.getLastModified()));
 					properties.put(PersistentBean.TAGGED_NAME, null);
 					properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
@@ -143,19 +146,9 @@ public class ContentModel extends ListModel<DataMaintenance> {
 					properties.put(Content.documentNamePropertyName, hit.getDocumentName());
 					properties.put(Content.lastModifiedPropertyName, new Timestamp(hit.getLastModified()));
 					properties.put(Content.moduleNamePropertyName, hit.getModuleName());
+					properties.put(Content.contentPropertyName, hit.getExcerpt());
 					rows.add(new MapBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
-/*
-					Content c = Content.newInstance();
-					c.setAttributeName(hit.getAttributeName());
-					c.setContentBizId(hit.getBizId());
-					c.setContentId(hit.getContentId());
-					c.setCustomerName(hit.getCustomerName());
-					c.setDocumentName(hit.getDocumentName());
-					c.setLastModified(new Timestamp(hit.getLastModified()));
-					c.setModuleName(hit.getModuleName());
-					
-					rows.add(c);
-*/
+
 					if (i >= end) {
 						break;
 					}

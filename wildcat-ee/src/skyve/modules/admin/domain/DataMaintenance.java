@@ -33,12 +33,21 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String selectedBackupTimestampFolderNamePropertyName = "selectedBackupTimestampFolderName";
 	/** @hidden */
+	public static final String selectedContentIdPropertyName = "selectedContentId";
+	/** @hidden */
 	public static final String refreshBackupsPropertyName = "refreshBackups";
+	/** @hidden */
+	public static final String refreshContentPropertyName = "refreshContent";
+	/** @hidden */
+	public static final String contentLinkPropertyName = "contentLink";
 
 	private String modDocName;
 	private String schemaName;
 	private String selectedBackupTimestampFolderName;
+	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
+	private Boolean refreshContent = new Boolean(true);
+	private String contentLink;
 
 	@Override
 	@XmlTransient
@@ -129,6 +138,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #selectedContentId} accessor.
+	 **/
+	public String getSelectedContentId() {
+		return selectedContentId;
+	}
+
+	/**
+	 * {@link #selectedContentId} mutator.
+	 * 
+	 * @param selectedContentId	The new value to set.
+	 **/
+	@XmlElement
+	public void setSelectedContentId(String selectedContentId) {
+		this.selectedContentId = selectedContentId;
+	}
+
+	/**
 	 * {@link #refreshBackups} accessor.
 	 **/
 	public Boolean getRefreshBackups() {
@@ -143,6 +169,49 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setRefreshBackups(Boolean refreshBackups) {
 		this.refreshBackups = refreshBackups;
+	}
+
+	/**
+	 * {@link #refreshContent} accessor.
+	 **/
+	public Boolean getRefreshContent() {
+		return refreshContent;
+	}
+
+	/**
+	 * {@link #refreshContent} mutator.
+	 * 
+	 * @param refreshContent	The new value to set.
+	 **/
+	@XmlElement
+	public void setRefreshContent(Boolean refreshContent) {
+		this.refreshContent = refreshContent;
+	}
+
+	/**
+	 * {@link #contentLink} accessor.
+	 **/
+	public String getContentLink() {
+		return contentLink;
+	}
+
+	/**
+	 * {@link #contentLink} mutator.
+	 * 
+	 * @param contentLink	The new value to set.
+	 **/
+	@XmlElement
+	public void setContentLink(String contentLink) {
+		this.contentLink = contentLink;
+	}
+
+	@XmlTransient
+	public boolean isAttachmentSelected() {
+		return (contentLink != null);
+	}
+
+	public boolean isNotAttachmentSelected() {
+		return (! isAttachmentSelected());
 	}
 
 	@XmlTransient
@@ -161,5 +230,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	public boolean isNotBackupsRefreshRequired() {
 		return (! isBackupsRefreshRequired());
+	}
+
+	@XmlTransient
+	public boolean isContentRefreshRequired() {
+		return (Boolean.TRUE.equals(refreshContent));
+	}
+
+	public boolean isNotContentRefreshRequired() {
+		return (! isContentRefreshRequired());
+	}
+
+	@XmlTransient
+	public boolean isContentSelected() {
+		return (selectedContentId != null);
+	}
+
+	public boolean isNotContentSelected() {
+		return (! isContentSelected());
 	}
 }
