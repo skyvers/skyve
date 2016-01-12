@@ -1506,7 +1506,6 @@ t.printStackTrace();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(beanToReindex.getBizModule());
 		Document document = module.getDocument(customer, beanToReindex.getBizDocument());
-		boolean hasContent = false;
 		for (Attribute attribute : document.getAllAttributes()) {
 			if (attribute instanceof Field) {
 				Field field = (Field) attribute;
@@ -1518,18 +1517,16 @@ t.printStackTrace();
 					if (AttributeType.markup.equals(type)) {
 						value = extractTextFromMarkup(value);
 					}
-					properties.put(fieldName, value);
-				}
-				if (AttributeType.content.equals(field.getAttributeType())) {
-					hasContent = true;
+					value = Util.processStringValue(value);
+					if (value != null) {
+						properties.put(fieldName, value);
+					}
 				}
 			}
 		}
 
 		if (properties.isEmpty()) {
-			if (! hasContent) {
-				removeBeanContent(beanToReindex);
-			}
+			removeBeanContent(beanToReindex);
 		}
 		else {
 			putBeanContent(content);

@@ -19,6 +19,8 @@ import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
@@ -97,6 +99,36 @@ public class Backup {
 												if (resultSet.wasNull()) {
 													value = "";
 												}
+												if ("".equals(value)) {
+													// bizId is mandatory
+													if (name.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
+														throw new IllegalStateException(table.name + " is missing a " + Bean.DOCUMENT_ID + " value.");
+													}
+													// bizLock is mandatory
+													if (name.equalsIgnoreCase(PersistentBean.LOCK_NAME)) {
+														throw new IllegalStateException(table.name + " with " + 
+																							Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																							" is missing a " + PersistentBean.LOCK_NAME + " value.");
+													}
+													// bizKey is mandatory
+													if (name.equalsIgnoreCase(Bean.BIZ_KEY)) {
+														throw new IllegalStateException(table.name + " with " + 
+																							Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																							" is missing a " + Bean.BIZ_KEY + " value.");
+													}
+													// bizCustomer is mandatory
+													if (name.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
+														throw new IllegalStateException(table.name + " with " + 
+																							Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																							" is missing a " + Bean.CUSTOMER_NAME + " value.");
+													}
+													// bizUserId is mandatory
+													if (name.equalsIgnoreCase(Bean.USER_ID)) {
+														throw new IllegalStateException(table.name + " with " + 
+																							Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																							" is missing a " + Bean.USER_ID + " value.");
+													}
+												}
 											}
 											else if (attributeType == AttributeType.geometry) {
 												if (geometryUserType == null) {
@@ -151,6 +183,14 @@ public class Backup {
 												else {
 													value = new Integer(intValue);
 												}
+												// bizVersion is mandatory
+												if ("".equals(value) && 
+														name.equalsIgnoreCase(PersistentBean.VERSION_NAME)) {
+													throw new IllegalStateException(table.name + " with " + 
+																						Bean.DOCUMENT_ID + " = " + values.get(Bean.DOCUMENT_ID) +
+																						" is missing a " + PersistentBean.VERSION_NAME + " value.");
+												}
+
 											}
 											else if (attributeType == AttributeType.longInteger) {
 												long longValue = resultSet.getLong(name);
