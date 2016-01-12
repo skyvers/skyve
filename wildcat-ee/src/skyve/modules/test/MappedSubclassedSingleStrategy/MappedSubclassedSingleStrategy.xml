@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="MappedSubclassedSingleStrategy" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Another Extension document to test that the generated class extends 
+			MappedExtensionExtension.java
+		]]>
+	</documentation>
+	<extends document="MappedExtensionSingleStrategy" />
+	<persistent name="TEST_MappedExtensionSingleStrategy" strategy="single" discriminator="MSA" />
+	<singularAlias>Mapped Subclassed Single Strategy</singularAlias>
+	<pluralAlias>Mapped Subclassed Single Strategy</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<integer name="subclassInteger">
+			<displayName>Subclass Integer</displayName>
+		</integer>
+	</attributes>
+</document>

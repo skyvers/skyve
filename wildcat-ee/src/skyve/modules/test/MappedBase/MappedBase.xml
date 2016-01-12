@@ -76,7 +76,7 @@
 		<!-- This can't be required since it is recursive -->
 		<association name="composedAssociation" type="composition">
 			<displayName>Composed Association</displayName>
-			<documentName>MappedExtension</documentName>
+			<documentName>MappedExtensionSingleStrategy</documentName>
 		</association>
 	</attributes>
 </document>

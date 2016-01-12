@@ -120,7 +120,61 @@
 		<filter name="testHierarchicalUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-		<class name="modules.test.MappedExtension.MappedExtensionExtension" table="TEST_MappedExtension" entity-name="testMappedExtension">
+		<class name="modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
+			<id name="bizId" length="36" />
+			<discriminator column="bizDiscriminator" type="string" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+			<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+			<property name="booleanFlag" />
+			<property name="colour" />
+			<property name="date" type="DateOnly" />
+			<property name="dateTime" type="DateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+			<property name="enum3" length="5">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" type="Geometry" />
+			<property name="id" length="36" />
+			<property name="integer" />
+			<property name="longInteger" />
+			<property name="markup" type="text" />
+			<property name="memo" type="text" />
+			<property name="text" length="255" />
+			<property name="time" type="TimeOnly" />
+			<property name="timestamp" type="Timestamp" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" />
+			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionSingleStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
+			<bag name="aggregatedCollection" table="TEST_MappedExtensionSingleStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+				<key column="owner_id" />
+				<many-to-many entity-name="testMappedExtensionSingleStrategy" column="element_id" />
+			</bag>
+			<bag name="composedCollection" table="TEST_MappedExtensionSingleStrategy_composedCollection" cascade="all-delete-orphan">
+				<key column="owner_id" />
+				<many-to-many entity-name="testMappedExtensionSingleStrategy" column="element_id" />
+			</bag>
+			<bag name="inverseAggregatedAssociation" inverse="true">
+				<key column="aggregatedAssociation_id" />
+				<one-to-many entity-name="testMappedExtensionSingleStrategy" />
+			</bag>
+			<subclass name="modules.test.domain.MappedSubclassedSingleStrategy" discriminator-value="MSA" entity-name="testMappedSubclassedSingleStrategy">
+				<property name="subclassInteger" />
+			</subclass>
+			<filter name="testMappedExtensionSingleStrategyNoneFilter" condition="1=0"/>
+			<filter name="testMappedExtensionSingleStrategyCustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testMappedExtensionSingleStrategyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testMappedExtensionSingleStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
+		<class name="modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension" table="TEST_MappedExtensionJoinedStrategy" entity-name="testMappedExtensionJoinedStrategy">
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -150,24 +204,28 @@
 			<property name="text" length="255" />
 			<property name="time" type="TimeOnly" />
 			<property name="timestamp" type="Timestamp" />
-			<many-to-one name="composedAssociation" entity-name="testMappedExtension" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" />
-			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtension" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
-			<bag name="aggregatedCollection" table="TEST_MappedExtension_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" />
+			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionJoinedStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" />
+			<bag name="aggregatedCollection" table="TEST_MappedExtensionJoinedStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
 				<key column="owner_id" />
-				<many-to-many entity-name="testMappedExtension" column="element_id" />
+				<many-to-many entity-name="testMappedExtensionJoinedStrategy" column="element_id" />
 			</bag>
-			<bag name="composedCollection" table="TEST_MappedExtension_composedCollection" cascade="all-delete-orphan">
+			<bag name="composedCollection" table="TEST_MappedExtensionJoinedStrategy_composedCollection" cascade="all-delete-orphan">
 				<key column="owner_id" />
-				<many-to-many entity-name="testMappedExtension" column="element_id" />
+				<many-to-many entity-name="testMappedExtensionJoinedStrategy" column="element_id" />
 			</bag>
 			<bag name="inverseAggregatedAssociation" inverse="true">
 				<key column="aggregatedAssociation_id" />
-				<one-to-many entity-name="testMappedExtension" />
+				<one-to-many entity-name="testMappedExtensionJoinedStrategy" />
 			</bag>
-			<filter name="testMappedExtensionNoneFilter" condition="1=0"/>
-			<filter name="testMappedExtensionCustomerFilter" condition="bizCustomer=:customerParam"/>
-			<filter name="testMappedExtensionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
-			<filter name="testMappedExtensionUserIdFilter" condition="bizUserId=:userIdParam"/>
+			<joined-subclass name="modules.test.domain.MappedSubclassedJoinedStrategy" table="TEST_MappedSubclassedJoinedStrategy" entity-name="testMappedSubclassedJoinedStrategy">
+				<key column="bizId" />
+				<property name="subclassInteger" />
+			</joined-subclass>
+			<filter name="testMappedExtensionJoinedStrategyNoneFilter" condition="1=0"/>
+			<filter name="testMappedExtensionJoinedStrategyCustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testMappedExtensionJoinedStrategyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testMappedExtensionJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
 	<filter-def name="testAllAttributesPersistentNoneFilter" />
@@ -200,14 +258,24 @@
 	<filter-def name="testHierarchicalUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
-	<filter-def name="testMappedExtensionNoneFilter" />
-	<filter-def name="testMappedExtensionCustomerFilter">
+	<filter-def name="testMappedExtensionSingleStrategyNoneFilter" />
+	<filter-def name="testMappedExtensionSingleStrategyCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
 	</filter-def>
-	<filter-def name="testMappedExtensionDataGroupIdFilter">
+	<filter-def name="testMappedExtensionSingleStrategyDataGroupIdFilter">
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
-	<filter-def name="testMappedExtensionUserIdFilter">
+	<filter-def name="testMappedExtensionSingleStrategyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionJoinedStrategyNoneFilter" />
+	<filter-def name="testMappedExtensionJoinedStrategyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionJoinedStrategyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testMappedExtensionJoinedStrategyUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 </hibernate-mapping>

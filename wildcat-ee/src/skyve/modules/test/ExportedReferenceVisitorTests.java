@@ -1,12 +1,13 @@
 package modules.test;
 
-import modules.test.domain.Hierarchical;
-import modules.test.domain.MappedExtension;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.util.Util;
 import org.skyve.wildcat.util.ExportedReferenceVisitor.Dereferencer;
+
+import modules.test.domain.Hierarchical;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class ExportedReferenceVisitorTests extends AbstractH2Test {
 	@Test
@@ -30,8 +31,8 @@ public class ExportedReferenceVisitorTests extends AbstractH2Test {
 	}
 	
 	@Test
-	public void testDereferencerOnMappedExtension() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, med, 3);
+	public void testDereferencerOnMappedExtensionSingleStrategy() throws Exception {
+		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 3);
 		
 		// weave a web with the aggregated association
 		test.setComposedAssociation(test.getAggregatedAssociation());
@@ -44,7 +45,29 @@ public class ExportedReferenceVisitorTests extends AbstractH2Test {
 		
 		p.evictAllCached();
 		
-		test = p.retrieve(med, test.getBizId(), false);
+		test = p.retrieve(messd, test.getBizId(), false);
+		Assert.assertNull(test.getAggregatedAssociation());
+		Assert.assertNull(test.getComposedAssociation());
+		Assert.assertEquals(test.getAggregatedCollection().size(), 1);
+		Assert.assertEquals(test.getComposedCollection().size(), 1);
+	}
+
+	@Test
+	public void testDereferencerOnMappedSubclassedSingleStrategy() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 3);
+		
+		// weave a web with the aggregated association
+		test.setComposedAssociation(test.getAggregatedAssociation());
+		test.getComposedCollection().set(0, test.getAggregatedAssociation());
+		test.getAggregatedCollection().set(0, test.getAggregatedAssociation());
+		
+		test = p.save(test);
+		
+		new Dereferencer().visit(test.getAggregatedAssociation());
+		
+		p.evictAllCached();
+		
+		test = p.retrieve(msssd, test.getBizId(), false);
 		Assert.assertNull(test.getAggregatedAssociation());
 		Assert.assertNull(test.getComposedAssociation());
 		Assert.assertEquals(test.getAggregatedCollection().size(), 1);

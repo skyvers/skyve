@@ -4,7 +4,10 @@ import modules.AuditJSONGenerator;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedBase;
-import modules.test.domain.MappedExtension;
+import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedJoinedStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
 
 import org.junit.Test;
 import org.skyve.util.Util;
@@ -35,10 +38,34 @@ public class AuditJSONGeneratorTests extends AbstractH2Test {
 	}
 
 	@Test
-	public void testMappedExtension() throws Exception {
-		MappedExtension test = Util.constructRandomInstance(u, m, med, 5);
+	public void testMappedExtensionSingleStrategy() throws Exception {
+		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 5);
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
-		ajg.visit(med, test, c);
-		System.out.println("Audit ME = " + ajg.toJSON());
+		ajg.visit(messd, test, c);
+		System.out.println("Audit MESS = " + ajg.toJSON());
+	}
+
+	@Test
+	public void testMappedExtensionJoinedStrategy() throws Exception {
+		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 5);
+		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
+		ajg.visit(mejsd, test, c);
+		System.out.println("Audit MEJS = " + ajg.toJSON());
+	}
+
+	@Test
+	public void testMappedSubclassedSingleStrategy() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 5);
+		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
+		ajg.visit(msssd, test, c);
+		System.out.println("Audit MSSS = " + ajg.toJSON());
+	}
+
+	@Test
+	public void testMappedSubclassedJoinedStrategy() throws Exception {
+		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 5);
+		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
+		ajg.visit(msjsd, test, c);
+		System.out.println("Audit MSJS = " + ajg.toJSON());
 	}
 }

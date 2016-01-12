@@ -4,7 +4,10 @@ import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedBase;
-import modules.test.domain.MappedExtension;
+import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedJoinedStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -60,7 +63,10 @@ public abstract class AbstractH2Test {
 	protected Document aarpd;
 	protected Document hd;
 	protected Document mbd;
-	protected Document med;
+	protected Document mejsd;
+	protected Document messd;
+	protected Document msjsd;
+	protected Document msssd;
 	
 	@Before
 	public void beforeBase() throws MetaDataException {
@@ -92,7 +98,10 @@ public abstract class AbstractH2Test {
 		aarpd = m.getDocument(c, AllAttributesRequiredPersistent.DOCUMENT_NAME);
 		hd = m.getDocument(c,  Hierarchical.DOCUMENT_NAME);
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
-		med = m.getDocument(c, MappedExtension.DOCUMENT_NAME);
+		mejsd = m.getDocument(c, MappedExtensionJoinedStrategy.DOCUMENT_NAME);
+		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
+		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
+		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
 	}
 	
 	@After

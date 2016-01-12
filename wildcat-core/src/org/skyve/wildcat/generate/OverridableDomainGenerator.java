@@ -1975,7 +1975,7 @@ joined tables
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
 
-			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + module.getName() + '/' + documentName + '/' + documentName + "Extension.java";
+			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + '/' + baseDocumentName + '/' + baseDocumentName + "Extension.java";
 			if (new File(extensionPath).exists()) {
 				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName + "Extension");
 			}
@@ -2122,7 +2122,7 @@ joined tables
 				fw.append("Ext");
 			}
 			
-			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + module.getName() + '/' + documentName + '/' + documentName + "Extension.java";
+			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + '/' + baseDocumentName + '/' + baseDocumentName + "Extension.java";
 			if (new File(extensionPath).exists()) {
 				fw.append(" extends ").append(baseDocumentName).append("Extension");
 			}

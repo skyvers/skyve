@@ -8,7 +8,10 @@
 		<document ref="AllAttributesRequiredPersistent" />
 		<document ref="Hierarchical" />
 		<document ref="MappedBase" />
-		<document ref="MappedExtension" />
+		<document ref="MappedExtensionJoinedStrategy" />
+		<document ref="MappedExtensionSingleStrategy" />
+		<document ref="MappedSubclassedJoinedStrategy" />
+		<document ref="MappedSubclassedSingleStrategy" />
 	</documents>
 	<menu />
 </module>

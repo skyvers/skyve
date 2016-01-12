@@ -1,8 +1,8 @@
-package modules.test.MappedExtension;
+package modules.test.MappedExtensionJoinedStrategy;
 
-import modules.test.domain.MappedExtension;
+import modules.test.domain.MappedExtensionJoinedStrategy;
 
-public class MappedExtensionExtension extends MappedExtension {
+public class MappedExtensionJoinedStrategyExtension extends MappedExtensionJoinedStrategy {
 	private static final long serialVersionUID = 627637583737021757L;
 
 	private boolean preSaveCalled = false;

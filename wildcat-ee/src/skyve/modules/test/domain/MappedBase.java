@@ -34,7 +34,7 @@ import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
  * A base document using the mapped strategy.
  * 
  * @depend - - - Enum3
- * @navcomposed n composedAssociation 0..1 MappedExtension
+ * @navcomposed n composedAssociation 0..1 MappedExtensionSingleStrategy
  * @stereotype "persistent"
  */
 @XmlType
@@ -177,7 +177,7 @@ public class MappedBase extends AbstractPersistentBean {
 	private TimeOnly time;
 	private Timestamp timestamp;
 	private Integer baseDerivedInteger;
-	private MappedExtension composedAssociation = null;
+	private MappedExtensionSingleStrategy composedAssociation = null;
 
 	@Override
 	@XmlTransient
@@ -552,7 +552,7 @@ public class MappedBase extends AbstractPersistentBean {
 	/**
 	 * {@link #composedAssociation} accessor.
 	 **/
-	public MappedExtension getComposedAssociation() {
+	public MappedExtensionSingleStrategy getComposedAssociation() {
 		return composedAssociation;
 	}
 
@@ -562,7 +562,7 @@ public class MappedBase extends AbstractPersistentBean {
 	 * @param composedAssociation	The new value to set.
 	 **/
 	@XmlElement
-	public void setComposedAssociation(MappedExtension composedAssociation) {
+	public void setComposedAssociation(MappedExtensionSingleStrategy composedAssociation) {
 		preset(composedAssociationPropertyName, composedAssociation);
 		this.composedAssociation = composedAssociation;
 	}
