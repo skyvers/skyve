@@ -62,9 +62,10 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button actionName="Backup" pixelWidth="75" />
-					<button actionName="DeleteBackup" pixelWidth="75" />
-					<button actionName="Restore" pixelWidth="75" />
+					<button actionName="Backup" pixelWidth="100" />
+					<button actionName="ZipBackup" pixelWidth="100" />
+					<button actionName="DeleteBackup" pixelWidth="100" />
+					<button actionName="Restore" pixelWidth="100" />
 				</hbox>
 			</vbox>
 		</tab>
@@ -114,5 +115,6 @@
 		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
 		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
+		<download className="ZipBackup" displayName="Download Zip" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
 	</actions>
 </view>

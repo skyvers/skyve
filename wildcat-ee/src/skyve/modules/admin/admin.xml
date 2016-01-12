@@ -167,6 +167,7 @@
 					<action name="Reindex" />
 					<action name="Restore" />
 					<action name="Truncate" />
+					<action name="ZipBackup" />
 				</document>
 				<document name="SystemDashboard" permission="_____" />
 				<document name="DocumentNumber" permission="CRUDC" />
