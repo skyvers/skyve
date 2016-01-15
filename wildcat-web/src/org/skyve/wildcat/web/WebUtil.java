@@ -62,7 +62,9 @@ public class WebUtil {
 	throws Exception {
 		AbstractWebContext result = null;
 
-		if ((webId != null) && (webId.length() == 72)) {
+		// NB - Can't check for 72 char webId as bizIds could be non UUIDs for legacy data stores...
+		// So check that they are > 36 (UUID length + something at least)
+		if ((webId != null) && (webId.length() > 36)) {
 			String conversationKey = webId.substring(0, 36);
 			String currentBeanId = webId.substring(36);
 			Element element = getConversations().get(conversationKey);
