@@ -44,7 +44,7 @@ public abstract class AbstractBean implements Bean {
 				if (propertyValue != null) {
 					if (! originalValues.containsKey(propertyName)) {
 						originalValues.put(propertyName,  oldValue);
-						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue);
+						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
 				}
 			}
@@ -52,7 +52,7 @@ public abstract class AbstractBean implements Bean {
 				if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
 					if (! originalValues.containsKey(propertyName)) {
 						originalValues.put(propertyName,  oldValue);
-						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue);
+						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
 				}
 			}
