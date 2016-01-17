@@ -818,7 +818,7 @@ t.printStackTrace();
 					// That means we can't rely on preUpdate event listener as preUpdate may not get fired if this 
 					// bean hasn't changed, but the related dependent bean has changed requiring the update to bizKey.
 					PersistentBean persistentBean = (PersistentBean) bean;
-					persistentBean.setBizKey(persistentBean.getBizKey());
+					persistentBean.setBizKey(Util.processStringValue(persistentBean.getBizKey()));
 
 					// This only sets the bizLock if the bean is about to be inserted
 					// If we set it here on update, we are making the bean dirty even if there
@@ -894,7 +894,7 @@ t.printStackTrace();
 						// That means we can't rely on preUpdate event listener as preUpdate may not get fired if this 
 						// bean hasn't changed, but the related dependent bean has changed requiring the update to bizKey.
 						PersistentBean persistentBean = (PersistentBean) bean;
-						persistentBean.setBizKey(persistentBean.getBizKey());
+						persistentBean.setBizKey(Util.processStringValue(persistentBean.getBizKey()));
 					}
 				}
 				catch (ValidationException e) {
@@ -1837,7 +1837,7 @@ t.printStackTrace();
 			sql.putParameter(Bean.USER_ID, bean.getBizUserId(), false);
 		}
 		sql.putParameter(Bean.DATA_GROUP_ID, bean.getBizDataGroupId(), false);
-		sql.putParameter(Bean.BIZ_KEY, bean.getBizKey(), false);
+		sql.putParameter(Bean.BIZ_KEY, Util.processStringValue(bean.getBizKey()), false);
 
 		// Bind parent if required
 		if (parentDocumentName != null) {
