@@ -462,17 +462,19 @@ ReportDialog.addClassProperties({
 				isc.VLayout.create({
 					backgroundImage: 'background.png',
 					backgroundRepeat: 'repeat',
-					width: 120,
-					height: 140,
+					width: 134,
+					height: 130,
 					layoutAlign: "center",
 					margin: 0,
 					membersMargin: 10,
 					members: [
-						isc.Img.create({
-						    imageType: "normal",
-						    src: "reporting/reporting.png",
-						    layoutAlign: "center"
-						}),
+						isc.HLayout.create({width: 134, align: 'center', members: [
+							isc.Img.create({
+							    imageType: "normal",
+							    src: "reporting/reporting.png",
+							    layoutAlign: "center"
+							})
+						]}),
 						isc.HLayout.create({width: 134, align: 'center', members: [buttonDefn]})
 					]
 				}),
@@ -634,6 +636,6 @@ ReportDialog.addClassProperties({
 		
 		_reportViewButton._view = view;
 		_reportViewButton._params = params;
-		WindowStack.popup(null, "Report", true, [ReportDialog._reportLayout], 175, 450);
+		WindowStack.popup(null, "Report", true, [ReportDialog._reportLayout], 180, 480);
 	}
 });
