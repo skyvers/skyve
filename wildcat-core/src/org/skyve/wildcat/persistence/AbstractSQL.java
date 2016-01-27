@@ -81,7 +81,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 
 	@Override
 	public SQL putParameter(String name, String value, boolean memo) {
-		return putParameter(name, value, AttributeType.memo);
+		return putParameter(name, value, memo ? AttributeType.memo : AttributeType.text);
 	}
 
 	@Override
