@@ -20,7 +20,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -184,9 +184,9 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						String associationBindingPart = associationBinding.substring(0, dotIndex);
 						target = BindUtil.getMetaDataForBinding(customer, owningModule, document, associationBindingPart);
 						attribute = target.getAttribute();
-						Reference association = (Reference) attribute;
+						Relation relation = (Relation) attribute;
 						// Association could be null if 'parent' used in query
-						if ((association != null) && (! association.isRequired())) {
+						if ((relation != null) && (! relation.isRequired())) {
 							leftJoin = true;
 							break;
 						}

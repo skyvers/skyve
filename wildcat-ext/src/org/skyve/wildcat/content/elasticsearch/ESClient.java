@@ -158,52 +158,102 @@ public class ESClient extends AbstractContentManager {
 	}
 	
 	@Override
-	public void put(AttachmentContent attachment)
+	public void put(AttachmentContent attachment) 
+	throws Exception {
+		put(attachment, true);
+	}
+	
+	@Override
+	public void put(AttachmentContent attachment, boolean index)
 	throws Exception {
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
 		
 			// Set the maximum length of strings returned by the parseToString method, -1 sets no limit
 			byte[] content = attachment.getContentBytes();
-			try (BytesStreamInput contentStream = new BytesStreamInput(content, false)) {
-				Metadata metadata = new Metadata();
-				String parsedContent = "";
-				try {
-					parsedContent = TIKA.parseToString(contentStream, metadata, 100000);
+			if (index) {
+				try (BytesStreamInput contentStream = new BytesStreamInput(content, false)) {
+					Metadata metadata = new Metadata();
+					String parsedContent = "";
+					try {
+						parsedContent = TIKA.parseToString(contentStream, metadata, 100000);
+					}
+					catch (TikaException e) {
+						UtilImpl.LOGGER.log(Level.SEVERE, 
+												"ESClient.put(): Attachment could not be parsed by TIKA and so has not been textually indexed",
+												e);
+					}
+					
+					// File
+					MimeType contentType = attachment.getMimeType();
+					source.startObject(FILE)
+							.field(FILENAME, attachment.getFileName())
+							.field(LAST_MODIFIED, new Date())
+							.field(CONTENT_TYPE,
+									(contentType != null) ? 
+										contentType.toString() : 
+										metadata.get(HttpHeaders.CONTENT_TYPE));
+					if (metadata.get(HttpHeaders.CONTENT_LENGTH) != null) {
+						// We try to get CONTENT_LENGTH from Tika first
+						source.field(FILESIZE, metadata.get(HttpHeaders.CONTENT_LENGTH));
+					}
+					else {
+						// Otherwise, we use our byte[] length
+						source.field(FILESIZE, content.length);
+					}
+					source.endObject(); // File
+	
+					// Meta
+					String title = metadata.get(TikaCoreProperties.TITLE);
+					source.startObject(META)
+							.field(AUTHOR, metadata.get(MSOffice.AUTHOR))
+							.field(TITLE,
+									(title != null) ? title : attachment.getFileName())
+							.field(DATE, metadata.get(TikaCoreProperties.CREATED))
+							.array(KEYWORDS,
+									Strings.commaDelimitedListToStringArray(metadata.get(TikaCoreProperties.KEYWORDS)))
+							.endObject(); // Meta
+			
+					// Bean
+					source.startObject(BEAN)
+							.field(Bean.CUSTOMER_NAME, attachment.getBizCustomer())
+							.field(Bean.DATA_GROUP_ID, attachment.getBizDataGroupId())
+							.field(Bean.USER_ID, attachment.getBizUserId())
+							.field(Bean.MODULE_KEY, attachment.getBizModule())
+							.field(Bean.DOCUMENT_KEY, attachment.getBizDocument())
+							.field(Bean.DOCUMENT_ID, attachment.getBizId())
+							.field(ATTRIBUTE_NAME, attachment.getAttributeName())
+							.endObject(); // Bean
+		
+					// Doc content
+					source.field(CONTENT, parsedContent);
+			
+					// Doc as binary attachment, inlined
+					if (! UtilImpl.CONTENT_FILE_STORAGE) {
+						source.field(ATTACHMENT, new String(new Base64().encode(content)));
+					}
+					// End of our document
+					source.endObject();
 				}
-				catch (TikaException e) {
-					UtilImpl.LOGGER.log(Level.SEVERE, 
-											"ESClient.put(): Attachment could not be parsed by TIKA and so has not been textually indexed",
-											e);
-				}
-				
+			}
+			else {
 				// File
 				MimeType contentType = attachment.getMimeType();
 				source.startObject(FILE)
 						.field(FILENAME, attachment.getFileName())
 						.field(LAST_MODIFIED, new Date())
-						.field(CONTENT_TYPE,
-								(contentType != null) ? 
-									contentType.toString() : 
-									metadata.get(HttpHeaders.CONTENT_TYPE));
-				if (metadata.get(HttpHeaders.CONTENT_LENGTH) != null) {
-					// We try to get CONTENT_LENGTH from Tika first
-					source.field(FILESIZE, metadata.get(HttpHeaders.CONTENT_LENGTH));
-				}
-				else {
-					// Otherwise, we use our byte[] length
-					source.field(FILESIZE, content.length);
-				}
+						.field(CONTENT_TYPE, (contentType != null) ? 
+												contentType.toString() : 
+												null);
+				// No indexing, so we use our byte[] length
+				source.field(FILESIZE, content.length);
 				source.endObject(); // File
 
 				// Meta
-				String title = metadata.get(TikaCoreProperties.TITLE);
 				source.startObject(META)
-						.field(AUTHOR, metadata.get(MSOffice.AUTHOR))
-						.field(TITLE,
-								(title != null) ? title : attachment.getFileName())
-						.field(DATE, metadata.get(TikaCoreProperties.CREATED))
-						.array(KEYWORDS,
-								Strings.commaDelimitedListToStringArray(metadata.get(TikaCoreProperties.KEYWORDS)))
+						.field(AUTHOR, (String) null)
+						.field(TITLE, attachment.getFileName())
+						.field(DATE, (String) null)
+						.array(KEYWORDS, new String[0])
 						.endObject(); // Meta
 		
 				// Bean
@@ -217,9 +267,6 @@ public class ESClient extends AbstractContentManager {
 						.field(ATTRIBUTE_NAME, attachment.getAttributeName())
 						.endObject(); // Bean
 	
-				// Doc content
-				source.field(CONTENT, parsedContent);
-		
 				// Doc as binary attachment, inlined
 				if (! UtilImpl.CONTENT_FILE_STORAGE) {
 					source.field(ATTACHMENT, new String(new Base64().encode(content)));
@@ -227,7 +274,6 @@ public class ESClient extends AbstractContentManager {
 				// End of our document
 				source.endObject();
 			}
-			
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.put(): " + source.string());
 			IndexResponse response = client.prepareIndex(ATTACHMENT_INDEX_NAME, 
 															ATTACHMENT_INDEX_TYPE,

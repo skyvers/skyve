@@ -15,11 +15,17 @@ import org.primefaces.model.UploadedFile;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
+import org.skyve.wildcat.metadata.model.document.field.Content;
+import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
@@ -129,8 +135,20 @@ public class ContentUpload {
 																	contentAttributeName,
 																	fileName,
 																	file.getInputstream());
+
+				// Determine if we should index the content or not
+				boolean index = true; // default
+				Module module = customer.getModule(contentOwner.getBizModule());
+				// NB - Could be a base document attribute
+				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, module.getDocument(customer, contentOwner.getBizDocument()), contentAttributeName);
+				Attribute attribute = target.getAttribute();
+				if (attribute instanceof Content) {
+					IndexType indexType = ((Content) attribute).getIndex();
+					index = ((indexType == null) || IndexType.textual.equals(indexType) || IndexType.both.equals(indexType));
+				}
+
 				// NB Don't set the content id as we always want a new one
-				cm.put(content);
+				cm.put(content, index);
 				contentId = content.getContentId();
 			}
 
