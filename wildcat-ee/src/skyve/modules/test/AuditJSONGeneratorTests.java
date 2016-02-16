@@ -1,6 +1,7 @@
 package modules.test;
 
 import modules.AuditJSONGenerator;
+import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedBase;
@@ -27,6 +28,14 @@ public class AuditJSONGeneratorTests extends AbstractH2Test {
 		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
 		ajg.visit(aarpd, test, c);
 		System.out.println("Audit AARP  = " + ajg.toJSON());
+	}
+
+	@Test
+	public void testAllAttributesInverseOneToOnePersistent() throws Exception {
+		AllAttributesInverseOneToOnePersistent test = Util.constructRandomInstance(u, m, aai121pd, 5);
+		AuditJSONGenerator ajg = new AuditJSONGenerator(c);
+		ajg.visit(aai121pd, test, c);
+		System.out.println("Audit AAI121RP  = " + ajg.toJSON());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package modules.test;
 
+import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.Hierarchical;
@@ -60,6 +61,7 @@ public abstract class AbstractH2Test {
 	protected Customer c;
 	protected Module m;
 	protected Document aapd;
+	protected Document aai121pd;
 	protected Document aarpd;
 	protected Document hd;
 	protected Document mbd;
@@ -95,6 +97,7 @@ public abstract class AbstractH2Test {
 		c = u.getCustomer();
 		m = c.getModule(AllAttributesPersistent.MODULE_NAME);
 		aapd = m.getDocument(c, AllAttributesPersistent.DOCUMENT_NAME);
+		aai121pd = m.getDocument(c, AllAttributesInverseOneToOnePersistent.DOCUMENT_NAME);
 		aarpd = m.getDocument(c, AllAttributesRequiredPersistent.DOCUMENT_NAME);
 		hd = m.getDocument(c,  Hierarchical.DOCUMENT_NAME);
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);

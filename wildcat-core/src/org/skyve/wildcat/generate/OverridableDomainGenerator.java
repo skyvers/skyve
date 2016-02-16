@@ -1041,47 +1041,62 @@ joined tables
 				Persistent inversePersistent = inverseDocument.getPersistent();
 				String inverseReferenceName = inverse.getReferenceName();
 				String inverseModuleName = inverseDocument.getOwningModuleName();
-
-				fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
-				if (InverseRelationship.manyToMany.equals(inverse.getRelationship())) {
-					String catalog = inversePersistent.getCatalog();
-					if (catalog != null) {
-						fw.append("\" catalog=\"").append(catalog);
-					}
-					String schema = inversePersistent.getSchema();
-					if (schema != null) {
-						fw.append("\" schema=\"").append(schema);
-					}
-					fw.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
-				}
-				fw.append("\" inverse=\"true\">\n");
-
-				fw.append(indentation).append("\t\t\t<key column=\"");
-				if (InverseRelationship.manyToMany.equals(inverse.getRelationship())) {
-					fw.append("element");
-				}
-				else {
-					fw.append(inverseReferenceName);
-				}
-				fw.append("_id\" />\n");
-				if (InverseRelationship.manyToMany.equals(inverse.getRelationship())) {
-					fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
-				}
-				else {
-					fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
-				}
-
-				// reference overridden document if applicable
-				if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
-					fw.append(customerName);
-				}
-				fw.append(inverseModuleName).append(inverseDocumentName);
+				InverseRelationship inverseRelationship = inverse.getRelationship();
 				
-				if (InverseRelationship.manyToMany.equals(inverse.getRelationship())) {
-					fw.append("\" column=\"owner_id");
+				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
+					fw.append("\t\t<one-to-one name=\"").append(inverse.getName());
+
+					fw.append("\" entity-name=\"");
+					// reference overridden document if applicable
+					if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
+						fw.append(customerName);
+					}
+					fw.append(inverseModuleName).append(inverseDocumentName);
+					
+					fw.append("\" property-ref=\"").append(inverseReferenceName).append("\" />\n");
 				}
-				fw.append("\" />\n");
-				fw.append(indentation).append("\t\t</bag>\n");
+				else {
+					fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
+					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
+						String catalog = inversePersistent.getCatalog();
+						if (catalog != null) {
+							fw.append("\" catalog=\"").append(catalog);
+						}
+						String schema = inversePersistent.getSchema();
+						if (schema != null) {
+							fw.append("\" schema=\"").append(schema);
+						}
+						fw.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
+					}
+					fw.append("\" inverse=\"true\">\n");
+	
+					fw.append(indentation).append("\t\t\t<key column=\"");
+					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
+						fw.append("element");
+					}
+					else {
+						fw.append(inverseReferenceName);
+					}
+					fw.append("_id\" />\n");
+					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
+						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
+					}
+					else {
+						fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
+					}
+	
+					// reference overridden document if applicable
+					if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
+						fw.append(customerName);
+					}
+					fw.append(inverseModuleName).append(inverseDocumentName);
+					
+					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
+						fw.append("\" column=\"owner_id");
+					}
+					fw.append("\" />\n");
+					fw.append(indentation).append("\t\t</bag>\n");
+				}
 			}
 			else {
 				Field field = (Field) attribute;
@@ -1633,6 +1648,7 @@ joined tables
 		String propertyClassName = inverse.getDocumentName();
 		String propertyPackageName = module.getDocument(customer, propertyClassName).getOwningModuleName();
 		String name = inverse.getName();
+		boolean many = (! InverseRelationship.oneToOne.equals(inverse.getRelationship()));
 		boolean deprecated = inverse.isDeprecated();
 
 		String propertyPackagePath = "modules." + propertyPackageName + ".domain";
@@ -1647,16 +1663,23 @@ joined tables
 
 		String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 
-		imports.add("java.util.List");
-		imports.add("java.util.ArrayList");
-	
+		if (many) {
+			imports.add("java.util.List");
+			imports.add("java.util.ArrayList");
+		}
+		
 		attributeJavadoc(inverse, attributes);
 		if (deprecated) {
 			attributes.append("\t@Deprecated\n");
 		}
-		attributes.append("\tprivate List<").append(propertyClassName).append("> ").append(name);
-		attributes.append(" = new ArrayList<>();\n");
-
+		if (many) {
+			attributes.append("\tprivate List<").append(propertyClassName).append("> ").append(name);
+			attributes.append(" = new ArrayList<>();\n");
+		}
+		else {
+			attributes.append("\tprivate ").append(propertyClassName).append(" ").append(name).append(";\n");
+		}
+		
 		// Accessor method
 		accessorJavadoc(inverse, methods, false);
 		if (overriddenInverse) { // method in base class
@@ -1666,21 +1689,28 @@ joined tables
 			methods.append("\n\t@Deprecated");
 		}
 		methods.append("\n\t@XmlElement");
-		methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
+		if (many) {
+			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
+		}
+		else {
+			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
+		}
 		methods.append("\t\treturn ").append(name).append(";\n");
 		methods.append("\t}\n");
 		
 		// Mapped Accessor method
-		accessorJavadoc(inverse, methods, true);
-		if (overriddenInverse) { // method in base class
-			methods.append("\n\t@Override");
+		if (many) {
+			accessorJavadoc(inverse, methods, true);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
+			methods.append("\t}\n");
 		}
-		if (deprecated) {
-			methods.append("\n\t@Deprecated");
-		}
-		methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
-		methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
-		methods.append("\t}\n");
 	}
 	
 	@SuppressWarnings("synthetic-access")

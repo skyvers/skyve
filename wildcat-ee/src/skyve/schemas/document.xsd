@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/document" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/document" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/document" xmlns:tns="http://www.skyve.org/xml/document" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -514,6 +514,7 @@
           <xs:element name="documentName" type="xs:string" form="qualified"/>
           <xs:element name="referenceName" type="xs:string" form="qualified"/>
         </xs:sequence>
+        <xs:attribute name="cardinality" type="tns:inverseCardinality"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -559,41 +560,41 @@
 
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="mapped"/>
-      <xs:enumeration value="single"/>
       <xs:enumeration value="joined"/>
+      <xs:enumeration value="single"/>
+      <xs:enumeration value="mapped"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="capital"/>
       <xs:enumeration value="lower"/>
       <xs:enumeration value="upper"/>
-      <xs:enumeration value="capital"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="luhnCheckDigit"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="isbnCheckDigit"/>
       <xs:enumeration value="creditCard"/>
       <xs:enumeration value="email"/>
-      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
       <xs:enumeration value="url"/>
       <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="isbnCheckDigit"/>
       <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ipv4Address"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="variant"/>
       <xs:enumeration value="dynamic"/>
+      <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
     </xs:restriction>
   </xs:simpleType>
@@ -601,33 +602,40 @@
   <xs:simpleType name="indexType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="database"/>
+      <xs:enumeration value="both"/>
       <xs:enumeration value="none"/>
       <xs:enumeration value="textual"/>
-      <xs:enumeration value="both"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="composition"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="composition"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="composition"/>
-      <xs:enumeration value="child"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="child"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="inverseCardinality">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="many"/>
+      <xs:enumeration value="one"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="global"/>
       <xs:enumeration value="customer"/>
-      <xs:enumeration value="dataGroup"/>
       <xs:enumeration value="user"/>
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="global"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

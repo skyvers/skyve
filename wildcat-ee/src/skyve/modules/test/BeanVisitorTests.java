@@ -3,6 +3,7 @@ package modules.test;
 import java.util.Set;
 import java.util.TreeSet;
 
+import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
 
 import org.junit.Assert;
@@ -135,7 +136,7 @@ public class BeanVisitorTests extends AbstractH2Test {
 	}
 	
 	@Test
-	public void testInverses() throws Exception {
+	public void testManyToOneInverses() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
 		// Load inverses
 		test = p.save(test);
@@ -172,6 +173,44 @@ public class BeanVisitorTests extends AbstractH2Test {
 		Assert.assertEquals(expectedBindings, actualBindings);
 	}
 	
+	@Test
+	public void testOneToOneInverses() throws Exception {
+		AllAttributesInverseOneToOnePersistent test = Util.constructRandomInstance(u, m, aai121pd, 2);
+		// Load inverses
+		test = p.save(test);
+		p.evictAllCached();
+		test = p.retrieve(aai121pd, test.getBizId(), false);
+
+		Set<String> expectedBindings = new TreeSet<>();
+		expectedBindings.add("");
+		// inverse
+		String expectedBinding = AllAttributesPersistent.inverseAggregatedAssociationPropertyName;
+		expectedBindings.add(expectedBinding);
+		expectedBinding = Binder.createCompoundBinding(expectedBinding, AllAttributesPersistent.aggregatedCollectionPropertyName);
+		// inverse.aggregatedCollection[0]
+		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 0));
+		// inverse.aggregatedCollection[1]
+		expectedBindings.add(Binder.createIndexedBinding(expectedBinding, 1));
+		
+		final Set<String> actualBindings = new TreeSet<>();
+
+		new BeanVisitor(false, true, false) {
+			@Override
+			protected boolean accept(String binding, 
+										Document document, 
+										Document owningDocument,
+										Relation owningRelation, 
+										Bean bean) throws Exception {
+				System.out.println("B = " + binding);
+				actualBindings.add(binding);
+				return true;
+			}
+			
+		}.visit(aai121pd, test.getAggregatedAssociation(), c);
+
+		Assert.assertEquals(expectedBindings, actualBindings);
+	}
+
 	@Test
 	public void testScalar() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);

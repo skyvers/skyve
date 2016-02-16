@@ -1,5 +1,6 @@
 package org.skyve.wildcat.metadata.model.document;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -13,7 +14,7 @@ import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
-			propOrder = {"domainType", "documentName", "referenceName"})
+			propOrder = {"cardinality", "domainType", "documentName", "referenceName"})
 public class Inverse extends AbstractAttribute implements Relation {
 	/**
 	 * For Serialization
@@ -22,13 +23,23 @@ public class Inverse extends AbstractAttribute implements Relation {
 
 	@XmlTransient
 	public static enum InverseRelationship {
+		oneToOne,
 		oneToMany,
 		manyToMany
 	}
 	
+	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	public static enum InverseCardinality {
+		one, many;
+	}
+
 	private String documentName;
 	private String referenceName;
+	/**
+	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
+	 */
 	private InverseRelationship relationship;
+	private InverseCardinality cardinality;
 	
 	public Inverse() {
 		setAttributeType(AttributeType.inverse);
@@ -63,13 +74,28 @@ public class Inverse extends AbstractAttribute implements Relation {
 		this.referenceName = UtilImpl.processStringValue(referenceName);
 	}
 
+	/**
+	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
+	 */
 	public InverseRelationship getRelationship() {
 		return relationship;
 	}
 
+	/**
+	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
+	 */
 	@XmlTransient
 	public void setRelationship(InverseRelationship relationship) {
 		this.relationship = relationship;
+	}
+
+	public InverseCardinality getCardinality() {
+		return cardinality;
+	}
+
+	@XmlAttribute
+	public void setCardinality(InverseCardinality cardinality) {
+		this.cardinality = cardinality;
 	}
 
 	@Override

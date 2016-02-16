@@ -16,6 +16,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.Inverse;
+import org.skyve.wildcat.metadata.model.document.Inverse.InverseCardinality;
 
 public abstract class BeanVisitor {
 	private boolean visitNulls;
@@ -131,7 +132,10 @@ public abstract class BeanVisitor {
 						Module owningModule = customer.getModule(document.getOwningModuleName());
 						Document relatedDocument = owningModule.getDocument(customer, ((Relation) attribute).getDocumentName());
 						Relation childRelation = (Relation) attribute;
-						if (childRelation instanceof Association) {
+						// association or one to one inverse
+						if ((childRelation instanceof Association) ||
+								((childRelation instanceof Inverse) && 
+									InverseCardinality.one.equals(((Inverse) childRelation).getCardinality()))) {
 							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, relationName);
 							if ((child != null) || visitNulls) {
 								sb.setLength(0);
@@ -148,7 +152,7 @@ public abstract class BeanVisitor {
 										visited);
 							}
 						}
-						else { // collection or inverse
+						else { // collection or many-sided inverse
 							@SuppressWarnings("unchecked")
 							List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, relationName);
 							if (children != null) {

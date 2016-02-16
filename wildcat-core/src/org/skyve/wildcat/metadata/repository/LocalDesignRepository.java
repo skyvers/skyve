@@ -47,6 +47,7 @@ import org.skyve.wildcat.generate.ViewGenerator;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
+import org.skyve.wildcat.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.wildcat.metadata.model.document.Inverse.InverseRelationship;
 import org.skyve.wildcat.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.wildcat.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
@@ -564,23 +565,23 @@ public class LocalDesignRepository extends AbstractRepository {
 						// check each document reference query name links to a module query
 						for (String referenceName : result.getReferenceNames()) {
 							String queryName = result.getReferenceByName(referenceName).getQueryName();
-							Module documentModule = getModule(customer, documentModuleName);
-							if ((queryName != null) && (documentModule.getDocumentQuery(queryName) == null)) {
-								StringBuilder mde = new StringBuilder(documentName);
-								mde.append(" : The reference ");
+								Module documentModule = getModule(customer, documentModuleName);
+								if ((queryName != null) && (documentModule.getDocumentQuery(queryName) == null)) {
+									StringBuilder mde = new StringBuilder(documentName);
+									mde.append(" : The reference ");
 								mde.append(referenceName);
-								mde.append(" has a query ");
-								mde.append(queryName);
-								mde.append(" that does not exist in module ");
-								if (customer != null) {
-									mde.append(customer.getName());
-									mde.append(".");
+									mde.append(" has a query ");
+									mde.append(queryName);
+									mde.append(" that does not exist in module ");
+									if (customer != null) {
+										mde.append(customer.getName());
+										mde.append(".");
+									}
+									mde.append(documentModuleName);
+									
+									throw new MetaDataException(mde.toString());
 								}
-								mde.append(documentModuleName);
-								
-								throw new MetaDataException(mde.toString());
 							}
-						}
 
 						// Add actions in privileges to the document to enable good view generation
 						for (Role role : module.getRoles()) {
@@ -1170,11 +1171,19 @@ public class LocalDesignRepository extends AbstractRepository {
 													inverse.getName() + " in document " + 
 													documentIdentifier + " is not a valid reference within the document " + 
 													targetModule.getName() + '.' + targetDocumentName);
-					
+				}
+				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
+				if (one && (targetReference instanceof Collection)) {
+					throw new MetaDataException("The target [referenceName] of " + 
+													targetReferenceName + " in Inverse " +
+													inverse.getName() + " in document " + 
+													documentIdentifier + " points to a valid collection within the document " + 
+													targetModule.getName() + '.' + targetDocumentName + 
+													" but the cardinality of the inverse is set to one.");
 				}
 				inverse.setRelationship((targetReference instanceof Collection) ?
 											InverseRelationship.manyToMany :
-											InverseRelationship.oneToMany);
+											(one ? InverseRelationship.oneToOne : InverseRelationship.oneToMany));
 			}
 		}
 		
