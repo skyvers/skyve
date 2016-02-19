@@ -24,6 +24,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Job;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.persistence.AbstractPersistence;
@@ -93,22 +94,29 @@ public class JobScheduler {
 											Scheduler.DEFAULT_GROUP,
 											ContentInitJob.class);
 		detail.setDurability(false);
-		SimpleTrigger trigger = new SimpleTrigger("CMS Init Trigger",
-													Scheduler.DEFAULT_GROUP);
+		Trigger trigger = new SimpleTrigger("CMS Init Trigger",
+												Scheduler.DEFAULT_GROUP);
 		JOB_SCHEDULER.scheduleJob(detail, trigger);
 
-		// Do CMS garbage collection every 1 hour and 7 seconds
+		// Do CMS garbage collection as schedule in the CRON expression in the application properties file
 		detail = new JobDetail("CMS Garbage Collection",
 								Scheduler.DEFAULT_GROUP,
 								ContentGarbageCollectionJob.class);
 		detail.setDurability(true);
-		trigger = new SimpleTrigger("CMS Garbage Collection Trigger",
-										Scheduler.DEFAULT_GROUP,
-										new Date(new Date().getTime() + 60000), // start in 1 minute once the CMS has settled down
-										null,
-										SimpleTrigger.REPEAT_INDEFINITELY,
-										3607000L); // note: 1 hr 7 secs
-		JOB_SCHEDULER.scheduleJob(detail, trigger);
+		trigger = new CronTrigger("CMS Garbage Collection Trigger",
+									Scheduler.DEFAULT_GROUP,
+									"CMS Garbage Collection",
+									Scheduler.DEFAULT_GROUP,
+									new Date(new Date().getTime() + 300000), // start in 5 minutes once the CMS has settled down
+									null,
+									UtilImpl.CONTENT_GC_CRON);
+		try {
+			JOB_SCHEDULER.scheduleJob(detail, trigger);
+			Util.LOGGER.info("CMS Garbage Collection Job scheduled for " +trigger.getNextFireTime());
+		}
+		catch (SchedulerException e) {
+			Util.LOGGER.severe("CMS Garbage Collection Job was not scheduled because - " + e.getLocalizedMessage());
+		}
 	}
 
 	/**

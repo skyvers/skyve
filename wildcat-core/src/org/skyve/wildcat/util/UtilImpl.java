@@ -57,6 +57,10 @@ public class UtilImpl {
 	// This is set in the web.xml but defaults to windows
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
+
+	// The cron expression to use to fire off the content garbage collection
+	// Defaults to run at 7 past the hour every hour.
+	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
 	
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
@@ -120,8 +124,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20160216";
-	public static final String WILDCAT_VERSION = "20160216";
+	public static final String JAVASCRIPT_FILE_VERSION = "20160219";
+	public static final String WILDCAT_VERSION = "20160219";
 	public static final String SMART_CLIENT_DIR = "isomorphic101";
 	
 	private static String absoluteBasePath;

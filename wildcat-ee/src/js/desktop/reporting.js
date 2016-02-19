@@ -472,6 +472,7 @@ ReportDialog.addClassProperties({
 							isc.Img.create({
 							    imageType: "normal",
 							    src: "reporting/reporting.png",
+							    height: 96,
 							    layoutAlign: "center"
 							})
 						]}),
