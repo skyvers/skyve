@@ -130,6 +130,16 @@ public interface Persistence extends Serializable {
 
 	/**
 	 * 
+	 * @param owningBean
+	 * @param collectionName
+	 * @throws DomainException
+	 * @throws MetaDataException
+	 */
+	public void insertCollectionTuples(PersistentBean owningBean, String collectionName)
+	throws DomainException, MetaDataException;
+
+	/**
+	 * 
 	 * @param document
 	 * @param id
 	 * @param forUpdate

@@ -1949,6 +1949,36 @@ t.printStackTrace();
 		}
 	}
 	
+	@Override
+	public void insertCollectionTuples(PersistentBean owningBean, String collectionName)
+	throws DomainException, MetaDataException {
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(owningBean.getBizModule());
+		Document document = module.getDocument(customer, owningBean.getBizDocument());
+		StringBuilder query = new StringBuilder(256);
+		query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
+		query.append(" (owner_id,element_id) values (:owner_id,:element_id)");
+
+		List<PersistentBean> elementBeans = null;
+		try {
+			@SuppressWarnings("unchecked")
+			List<PersistentBean> list = (List<PersistentBean>) BindUtil.get(owningBean, collectionName);
+			elementBeans = list;
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not get collection " + collectionName + 
+										" from bean " + owningBean, e);
+		}
+		
+		for (Bean elementBean : elementBeans) {
+			SQL sql = newSQL(query.toString());
+			sql.putParameter("owner_id", owningBean.getBizId(), false);
+			sql.putParameter("element_id", elementBean.getBizId(), false);
+
+			sql.execute();
+		}
+	}
+
 	/**
 	 * In case of emergency, break glass
 	 */
