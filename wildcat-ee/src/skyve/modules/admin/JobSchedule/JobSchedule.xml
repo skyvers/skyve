@@ -462,7 +462,7 @@
 			<displayName>Run As</displayName>
 			<description>The user to run the job</description>
 			<documentName>User</documentName>
-			<queryName>qUsers</queryName>
+			<queryName>qActiveUsers</queryName>
 		</association>
 	</attributes>
 </document>

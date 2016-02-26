@@ -366,6 +366,19 @@
 				<column binding="userName" sortOrder="ascending" />
 			</columns>
 		</documentQuery>
+		<documentQuery name="qActiveUsers" documentName="User">
+			<description>All Active Users</description>
+			<columns>
+				<column binding="contact.name" sortOrder="ascending" />
+				<column binding="contact.email1" sortOrder="ascending" />
+				<column binding="contact.mobile" sortOrder="ascending" />
+				<column binding="userName" sortOrder="ascending" />
+				<column binding="inactive">
+					<filterOperator>nullOrEqual</filterOperator>
+					<filterExpression>false</filterExpression>
+				</column>
+			</columns>
+		</documentQuery>
 		<documentQuery name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>

@@ -8,7 +8,9 @@
 	<pluralAlias>Users</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
-	<bizKey expression="{userName} - {contact.bizKey}"/>
+	<bizKey >
+		<![CDATA[return modules.admin.User.UserBizlet.bizKey(this);]]>
+	</bizKey>
 	<attributes>
 		<text name="userName" required="true">
 			<documentation>
@@ -157,6 +159,9 @@
 		<boolean name="contactSelected" persistent="false">
 			<displayName>The contact selected for this user.</displayName>
 			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="inactive">
+			<displayName>Inactive</displayName>
 		</boolean>
 	</attributes>
 	<conditions>

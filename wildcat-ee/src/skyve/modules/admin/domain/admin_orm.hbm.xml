@@ -385,6 +385,7 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="adminUserRole" />
 		</bag>
+		<property name="inactive" />
 		<filter name="adminUserNoneFilter" condition="1=0"/>
 		<filter name="adminUserCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminUserDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -81,6 +81,8 @@ public class User extends AbstractPersistentBean {
 	public static final String candidateContactsPropertyName = "candidateContacts";
 	/** @hidden */
 	public static final String contactSelectedPropertyName = "contactSelected";
+	/** @hidden */
+	public static final String inactivePropertyName = "inactive";
 
 	/**
 	 * The create user wizard is staged into the following states which roughly follow in order.
@@ -243,6 +245,7 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private List<UserCandidateContact> candidateContacts = new ArrayList<>();
 	private Boolean contactSelected = new Boolean(false);
+	private Boolean inactive;
 
 	@Override
 	@XmlTransient
@@ -263,14 +266,7 @@ public class User extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-		try {
-			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{userName} - {contact.bizKey}",
-														this);
-		}
-		catch (Exception e) {
-			return "Unknown";
-		}
+return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	@Override
@@ -668,6 +664,24 @@ public class User extends AbstractPersistentBean {
 	public void setContactSelected(Boolean contactSelected) {
 		preset(contactSelectedPropertyName, contactSelected);
 		this.contactSelected = contactSelected;
+	}
+
+	/**
+	 * {@link #inactive} accessor.
+	 **/
+	public Boolean getInactive() {
+		return inactive;
+	}
+
+	/**
+	 * {@link #inactive} mutator.
+	 * 
+	 * @param inactive	The new value to set.
+	 **/
+	@XmlElement
+	public void setInactive(Boolean inactive) {
+		preset(inactivePropertyName, inactive);
+		this.inactive = inactive;
 	}
 
 	@XmlTransient

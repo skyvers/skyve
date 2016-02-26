@@ -234,4 +234,22 @@ public class UserBizlet extends Bizlet<User> {
 			e.getMessages().add(new Message("At least 1 role or group is required to enable correct login for this user."));
 		}
 	}
+
+	public static String bizKey(User user) {
+		org.skyve.metadata.user.User mUser = CORE.getUser();
+
+		StringBuilder sb = new StringBuilder(64);
+		try {
+			Customer customer = mUser.getCustomer();
+			if (Boolean.TRUE.equals(user.getInactive())) {
+				sb.append("INACTIVE ");
+			}
+			sb.append(Binder.formatMessage(customer, "{userName} - {contact.bizKey}", user));
+
+		} catch (Exception e) {
+			sb.append("Unknown");
+		}
+		return sb.toString();
+
+	}
 }

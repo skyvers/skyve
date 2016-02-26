@@ -29,6 +29,7 @@
 		<association type="aggregation" name="copyToUser" persistent="false" trackChanges="false">
 			<displayName>Copy to user</displayName>
 			<documentName>User</documentName>
+			<queryName>qActiveUsers</queryName>
 		</association>
 		<text name="copyToUserSnapshotName" persistent="false" trackChanges="false">
 			<displayName>Snapshot Name for Copy</displayName>
