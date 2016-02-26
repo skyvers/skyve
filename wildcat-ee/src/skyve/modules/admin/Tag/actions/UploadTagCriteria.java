@@ -46,8 +46,8 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module modFilter = customer.getModule(tag.getModuleName());
-		Document docFilter = modFilter.getDocument(customer, tag.getDocumentName());
+		Module modFilter = customer.getModule(tag.getUploadModuleName());
+		Document docFilter = modFilter.getDocument(customer, tag.getUploadDocumentName());
 		Attribute attrFilter = docFilter.getAttribute(tag.getAttributeName());
 
 		Module modTag = customer.getModule(Tag.MODULE_NAME);
@@ -74,7 +74,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 				break;
 			}
 			
-			DocumentQuery q = persistence.newDocumentQuery(tag.getModuleName(), tag.getDocumentName());
+			DocumentQuery q = persistence.newDocumentQuery(tag.getUploadModuleName(), tag.getUploadDocumentName());
 			
 			// general try - if value is not of the expected type or empty, throw an exception
 			Object operand = null;
@@ -129,16 +129,16 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 					//add bean to tagged
 					Tagged tagged = Tagged.newInstance();
 					tagged.setTag(tag);
-					tagged.setTaggedModule(tag.getModuleName());
-					tagged.setTaggedDocument(tag.getDocumentName());
+					tagged.setTaggedModule(tag.getUploadModuleName());
+					tagged.setTaggedDocument(tag.getUploadDocumentName());
 					tagged.setTaggedBizId(b.getBizId());
 					
 					persistence.upsertBeanTuple(tagged);
 				} else if (FilterAction.unTagRecordsThatMatch.equals(tag.getFilterAction())){
 					//remove the tagged record
 					DocumentQuery qTagged = persistence.newDocumentQuery(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
-					qTagged.getFilter().addEquals(Tagged.taggedModulePropertyName, tag.getModuleName());
-					qTagged.getFilter().addEquals(Tagged.taggedDocumentPropertyName, tag.getDocumentName());
+					qTagged.getFilter().addEquals(Tagged.taggedModulePropertyName, tag.getUploadModuleName());
+					qTagged.getFilter().addEquals(Tagged.taggedDocumentPropertyName, tag.getUploadDocumentName());
 					qTagged.getFilter().addEquals(Tagged.taggedBizIdPropertyName, b.getBizId());
 					
 					List<Tagged> taggeds = qTagged.beanResults();

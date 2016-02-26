@@ -115,29 +115,25 @@
 				</form>
 			</vbox>
 		</tab>
-		<tab title="Processing">
+		<tab title="Load">
 			<form border="true" borderTitle="Context">
 				<column percentageWidth="20" />
 				<column />
 				<column />
-				<column />
-				<column />
-				<column />
-				<column />
 				<row>
-					<item colspan="4">
-						<combo binding="moduleName">
+					<item>
+						<combo binding="uploadModuleName">
 							<onChangedHandlers>
-								<server action="UpdateModule" />
+								<server action="UpdateUploadModule" />
 							</onChangedHandlers>
 						</combo>
 					</item>
 				</row>
 				<row>
-					<item colspan="4">
-						<combo binding="documentName">
+					<item>
+						<combo binding="uploadDocumentName">
 							<onChangedHandlers>
-								<server action="UpdateDocument" />
+								<server action="UpdateUploadDocument" />
 							</onChangedHandlers>
 						</combo>
 					</item>
@@ -149,136 +145,160 @@
 					<item>
 						<button actionName="Clear" pixelWidth="150" />
 					</item>
+				</row>
+				<row>
+					<item>
+						<spacer />
+					</item>
 					<item>
 						<button actionName="TagAll" pixelWidth="150" />
 					</item>
-
 				</row>
 			</form>
-			<tabPane>
-				<tab title="Load">
-					<form border="true">
-						<column percentageWidth="20" />
-						<column />
-						<column />
-						<column />
-						<column />
-						<column />
-						<column />
-						<row>
-							<item colspan="4">
-								<combo binding="attributeName">
-									<onChangedHandlers>
-										<rerender />
-									</onChangedHandlers>
-								</combo>
-							</item>
-						</row>
-						<row>
-							<item colspan="4">
-								<combo binding="filterOperator" />
-							</item>
-						</row>
-						<row>
-							<item colspan="4">
-								<combo binding="filterAction" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<checkBox binding="fileHasHeaders" />
-							</item>
-							<item colspan="2">
-								<spinner binding="filterColumn" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<spacer />
-							</item>
-							<item>
-								<button actionName="UploadTagCriteria" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<textField binding="numberLoaded" disabled="true" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<textField binding="numberMatched" disabled="true" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<textField binding="numberTagged" disabled="true" />
-							</item>
-						</row>
-					</form>
-				</tab>
-				<tab title="Process">
-					<form border="true">
-						<column percentageWidth="20" />
-						<column />
-						<column />
-						<column />
-						<column />
-						<column />
-						<column />
-						<row>
-							<item>
-								<combo binding="documentAction" />
-							</item>
-							<item>
-								<combo binding="documentCondition" />
-							</item>
-							<item>
-								<button actionName="BulkDocumentAction" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<checkBox binding="unTagSuccessful" triState="false" />
-							</item>
-						</row>
-						<row>
-							<item>
-								<checkBox binding="notification" triState="false" />
-							</item>
-							<item colspan="3">
-								<default binding="communication" />
-							</item>
-						</row>
-						<row>
-							<item colspan="5">
-								<textArea binding="documentActionResults" />
-							</item>
-						</row>
-					</form>
-				</tab>
-			</tabPane>
+			<form border="true" borderTitle="Match">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="attributeName">
+							<onChangedHandlers>
+								<rerender />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="filterOperator" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="filterAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="fileHasHeaders" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="filterColumn" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Load">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="UploadTagCriteria" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="numberLoaded" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="numberMatched" disabled="true" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="numberTagged" disabled="true" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Action">
+			<form border="true" borderTitle="Context">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="actionModuleName">
+							<onChangedHandlers>
+								<server action="UpdateActionModule" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="actionDocumentName">
+							<onChangedHandlers>
+								<server action="UpdateActionDocument" />
+							</onChangedHandlers>
+						</combo>
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Action">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<combo binding="documentAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="documentCondition" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<checkBox binding="unTagSuccessful" triState="false" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Notification">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="notification" triState="false" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="communication" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Perform">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<row>
+					<item>
+						<spacer />
+					</item>
+					<item>
+						<button actionName="BulkDocumentAction" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="documentActionResults" />
+					</item>
+				</row>
+			</form>
 		</tab>
 	</tabPane>
 	<actions>
 		<defaults />
-		<upload className="UploadTagCriteria" displayName="Upload Tag Criteria" inActionPanel="false"
-			toolTip="Upload criteria for tagging records" disabled="notAttributeSet" />
-		<action className="Clear" displayName="Clear Tag" inActionPanel="false" toolTip="Clear tagged records."
-			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" />
-		<action className="TagAll" displayName="Tag All" inActionPanel="false" toolTip="Tag all instances of this document."
-			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" />
-		<action className="ExceptTag" displayName="Except" inActionPanel="false" toolTip="Exclude records in the action Tag."
-			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" />
-		<action className="IntersectTag" displayName="Intersect" inActionPanel="false"
-			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" />
-		<action className="UnionTag" displayName="Union" inActionPanel="false" toolTip="Add records from the action Tag."
-			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" />
-		<action className="BulkDocumentAction" displayName="Bulk Document Action" inActionPanel="false"
-			toolTip="Perform the selected document action for all applicable tagged records." confirm="Ok to perform the action for this document type?"
-			relativeIconFileName="shared/icons/Job.gif" />
-		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
-		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
 			clientValidation="false" />
 		<action className="PerformCombination" displayName="Perform Combination" inActionPanel="false"
@@ -286,6 +306,29 @@
 			relativeIconFileName="shared/icons/Job.gif" />
 		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
 			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" />
+
+		<action className="ExceptTag" displayName="Except" inActionPanel="false" toolTip="Exclude records in the action Tag."
+			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" />
+		<action className="IntersectTag" displayName="Intersect" inActionPanel="false"
+			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" />
+		<action className="UnionTag" displayName="Union" inActionPanel="false" toolTip="Add records from the action Tag."
+			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" />
+
+		<action className="UpdateUploadModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
+		<action className="UpdateUploadDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
+		<action className="Clear" displayName="Clear Tag" inActionPanel="false" toolTip="Clear tagged records."
+			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" />
+		<action className="TagAll" displayName="Tag All" inActionPanel="false" toolTip="Tag all instances of this document."
+			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" />
+		<upload className="UploadTagCriteria" displayName="Upload Tag Criteria" inActionPanel="false"
+			toolTip="Upload criteria for tagging records" disabled="notAttributeSet" />
+
+		<action className="BulkDocumentAction" displayName="Run Tag Action Job" inActionPanel="false"
+			toolTip="Perform the selected document action for all applicable tagged records." confirm="Ok to perform the action for this document type?"
+			relativeIconFileName="shared/icons/Job.gif" />
+		<action className="UpdateActionModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
+		<action className="UpdateActionDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
+
 	</actions>
 </view>
 

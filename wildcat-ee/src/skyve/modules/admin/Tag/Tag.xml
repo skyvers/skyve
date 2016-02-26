@@ -42,13 +42,13 @@
 			<displayName>Tag Name</displayName>
 			<length>256</length>
 		</text>
-		<text name="moduleName" >
+		<text name="uploadModuleName" >
 			<displayName>Module</displayName>
 			<description>The module to tag.</description>
 			<domain>variant</domain>
 			<length>500</length>
 		</text>
-		<text name="documentName" >
+		<text name="uploadDocumentName" >
 			<displayName>Document</displayName>
 			<description>The document to tag.</description>
 			<domain>dynamic</domain>
@@ -60,7 +60,7 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
-		<boolean name="fileHasHeaders" persistent="false" trackChanges="false">
+		<boolean name="fileHasHeaders">
 			<displayName>Upload File has Column Headers</displayName>
 		</boolean>
 		<integer name="numberLoaded" persistent="false" trackChanges="false">
@@ -72,7 +72,7 @@
 		<integer name="numberTagged" persistent="false" trackChanges="false">
 			<displayName>Number of tagged records</displayName>
 		</integer>
-		<enum name="filterOperator" persistent="false" trackChanges="false">
+		<enum name="filterOperator">
 			<displayName>Filter Operator</displayName>
 			<values>
 				<value code="equals" description="Equals"/>
@@ -80,17 +80,29 @@
 				<value code="contains" description="Contains"/>
 			</values>
 		</enum>
-		<enum name="filterAction" persistent="false" trackChanges="false">
+		<enum name="filterAction">
 			<displayName>Filter Action</displayName>
 			<values>
 				<value code="tag" description="Tag records that match" />
 				<value code="unTag" description="UnTag records that match"/>
 			</values>
 		</enum>
-		<boolean name="unTagSuccessful" persistent="false" trackChanges="false">
+		<text name="actionModuleName" >
+			<displayName>Module</displayName>
+			<description>The module for the tag Action.</description>
+			<domain>variant</domain>
+			<length>500</length>
+		</text>
+		<text name="actionDocumentName" >
+			<displayName>Document</displayName>
+			<description>The document for the tag Action.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<boolean name="unTagSuccessful">
 			<displayName>Untag successful documents</displayName>
 		</boolean>
-		<boolean name="notification" persistent="false" trackChanges="false">
+		<boolean name="notification">
 			<displayName>Notify when job is complete</displayName>
 		</boolean>
 		<association type="aggregation" name="communication">
@@ -98,7 +110,7 @@
 			<documentName>Communication</documentName>
 			<queryName>qTagCommunications</queryName>
 		</association>
-		<integer name="filterColumn" persistent="false" trackChanges="false">
+		<integer name="filterColumn">
 			<displayName>Column</displayName>
 		</integer>
 		<association type="aggregation" name="actionTag" persistent="false" trackChanges="false">
@@ -107,31 +119,28 @@
 			<domain>dynamic</domain>
 			<documentName>Tag</documentName>
 		</association>
-		<text name="documentCondition" persistent="false" trackChanges="false">
+		<text name="documentCondition">
 			<displayName>Condition</displayName>
 			<description>The condition which must be satisfied for the tagged document, for the action to be executed.</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
-		<text name="documentAction" persistent="false" trackChanges="false">
+		<text name="documentAction">
 			<displayName>Action</displayName>
 			<description>The action to be executed on the tagged document (provided the specified condition is satisfied for that document).</description>
 			<domain>dynamic</domain>
 			<length>1000</length>
 		</text>
 		<memo name="documentActionResults" persistent="false" trackChanges="false">
-			<displayName>Results</displayName>
+			<displayName>Request</displayName>
 		</memo>
 	</attributes>
 	<conditions>
-		<condition name="moduleSet">
-			<![CDATA[getModuleName()!=null]]>
-		</condition>
-		<condition name="documentSet">
-			<![CDATA[getModuleName()!=null && getDocumentName()!=null]]>
+		<condition name="actionSet">
+			<![CDATA[getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null]]>
 		</condition>
 		<condition name="attributeSet">
-			<![CDATA[getAttributeName()!=null]]>
+			<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
 		</condition>
 		<condition name="fileLoaded">
 			<![CDATA[getNumberLoaded().intValue()>0]]>

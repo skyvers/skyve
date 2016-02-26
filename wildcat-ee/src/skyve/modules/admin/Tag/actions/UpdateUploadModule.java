@@ -6,7 +6,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-public class UpdateModule implements ServerSideAction<Tag> {
+public class UpdateUploadModule implements ServerSideAction<Tag> {
 	/**
 	 * For Serialization
 	 */
@@ -19,8 +19,8 @@ public class UpdateModule implements ServerSideAction<Tag> {
 	public ServerSideActionResult execute(Tag bean, WebContext webContext)
 	throws Exception {
 		
-		bean.setDocumentName(null);
-		UpdateDocument.resetDocument(bean);
+		bean.setUploadDocumentName(null);
+		UpdateUploadDocument.resetDocument(bean);
 		
 		return new ServerSideActionResult(bean);
 	}

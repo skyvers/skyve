@@ -12,8 +12,8 @@ import org.skyve.CORE;
 /**
  * Extension document.
  * 
- * @navhas n aggregatedCollection 0..n MappedExtensionJoinedStrategy
  * @navcomposed n composedCollection 0..n MappedExtensionJoinedStrategy
+ * @navhas n aggregatedCollection 0..n MappedExtensionJoinedStrategy
  * @navhas n aggregatedAssociation 0..1 MappedExtensionJoinedStrategy
  * @stereotype "persistent"
  */

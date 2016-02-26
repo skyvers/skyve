@@ -26,11 +26,8 @@ import org.skyve.web.WebContext;
 import org.skyve.wildcat.util.TagUtil;
 
 public class TagBizlet extends Bizlet<Tag> {
-	private static final long serialVersionUID = -927602139528710862L;
 
-	public static String WILDCAT_SAVE_ACTION = "WILDCATResave";
-	public static String WILDCAT_DELETE_ACTION = "WILDCATDelete";
-	public static String WILDCAT_VALIDATE_ACTION = "WILDCATValidate";
+	private static final long serialVersionUID = -927602139528710862L;
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Tag bean) throws Exception {
@@ -40,9 +37,19 @@ public class TagBizlet extends Bizlet<Tag> {
 
 		Customer customer = pers.getUser().getCustomer();
 
-		if (Tag.documentNamePropertyName.equals(attributeName)) {
-			if (bean.getModuleName() != null) {
-				Module module = customer.getModule(bean.getModuleName());
+		if (Tag.actionDocumentNamePropertyName.equals(attributeName)) {
+			if (bean.getActionModuleName() != null) {
+				Module module = customer.getModule(bean.getActionModuleName());
+				for (String documentName : module.getDocumentRefs().keySet()) {
+					Document document = module.getDocument(customer, documentName);
+					result.add(new DomainValue(document.getName(), document.getDescription()));
+				}
+			}
+		}
+
+		if (Tag.uploadDocumentNamePropertyName.equals(attributeName)) {
+			if (bean.getUploadModuleName() != null) {
+				Module module = customer.getModule(bean.getUploadModuleName());
 				for (String documentName : module.getDocumentRefs().keySet()) {
 					Document document = module.getDocument(customer, documentName);
 					result.add(new DomainValue(document.getName(), document.getDescription()));
@@ -51,9 +58,9 @@ public class TagBizlet extends Bizlet<Tag> {
 		}
 
 		if (Tag.attributeNamePropertyName.equals(attributeName)) {
-			if (bean.getModuleName() != null && bean.getDocumentName() != null) {
-				Module module = customer.getModule(bean.getModuleName());
-				Document document = module.getDocument(customer, bean.getDocumentName());
+			if (bean.getUploadModuleName() != null && bean.getUploadDocumentName() != null) {
+				Module module = customer.getModule(bean.getUploadModuleName());
+				Document document = module.getDocument(customer, bean.getUploadDocumentName());
 				for (Attribute attribute : document.getAllAttributes()) {
 					result.add(new DomainValue(attribute.getName(), attribute.getDisplayName()));
 				}
@@ -74,24 +81,23 @@ public class TagBizlet extends Bizlet<Tag> {
 		}
 
 		if (Tag.documentActionPropertyName.equals(attributeName)) {
-			if (bean.getModuleName() != null && bean.getDocumentName() != null) {
+			if (bean.getActionModuleName() != null && bean.getActionDocumentName() != null) {
 
-				Module module = customer.getModule(bean.getModuleName());
-				Document document = module.getDocument(customer, bean.getDocumentName());
+				Module module = customer.getModule(bean.getActionModuleName());
+				Document document = module.getDocument(customer, bean.getActionDocumentName());
 				for (String act : document.getDefinedActionNames()) {
 					result.add(new DomainValue(act));
 				}
+
 				// add default save action
-				result.add(new DomainValue(WILDCAT_SAVE_ACTION, "Save Documents"));
-				result.add(new DomainValue(WILDCAT_DELETE_ACTION, "Delete Documents"));
-				result.add(new DomainValue(WILDCAT_VALIDATE_ACTION, "Validate Documents"));
+				result.addAll(TagDefaultAction.toDomainValues());
 			}
 		}
 
 		if (Tag.documentConditionPropertyName.equals(attributeName)) {
-			if (bean.getModuleName() != null && bean.getDocumentName() != null) {
-				Module module = customer.getModule(bean.getModuleName());
-				Document document = module.getDocument(customer, bean.getDocumentName());
+			if (bean.getActionModuleName() != null && bean.getActionDocumentName() != null) {
+				Module module = customer.getModule(bean.getActionModuleName());
+				Document document = module.getDocument(customer, bean.getActionDocumentName());
 				for (String act : document.getConditionNames()) {
 					result.add(new DomainValue(act));
 				}
@@ -104,10 +110,15 @@ public class TagBizlet extends Bizlet<Tag> {
 	@Override
 	public Tag preExecute(ImplicitActionName actionName, Tag bean, Bean parentBean, WebContext webContext) throws Exception {
 		if (ImplicitActionName.Edit.equals(actionName)) {
-			if (bean.getModuleName() == null) {
+			if (bean.getUploadModuleName() == null) {
 				Module homeModule = CORE.getUser().getCustomer().getHomeModule();
-				bean.setModuleName(homeModule.getName());
-				bean.setDocumentName(homeModule.getHomeDocumentName());
+				bean.setUploadModuleName(homeModule.getName());
+				bean.setUploadDocumentName(homeModule.getHomeDocumentName());
+			}
+			if (bean.getActionModuleName() == null) {
+				Module homeModule = CORE.getUser().getCustomer().getHomeModule();
+				bean.setActionModuleName(homeModule.getName());
+				bean.setActionDocumentName(homeModule.getHomeDocumentName());
 			}
 			if (bean.getFileHasHeaders() == null) {
 				bean.setFileHasHeaders(Boolean.TRUE);
@@ -126,8 +137,8 @@ public class TagBizlet extends Bizlet<Tag> {
 			update(bean);
 			bean.originalValues().clear();
 		}
-		
-		if(ImplicitActionName.Delete.equals(actionName)){
+
+		if (ImplicitActionName.Delete.equals(actionName)) {
 			TagUtil.clear(bean.getBizId());
 		}
 
@@ -140,7 +151,7 @@ public class TagBizlet extends Bizlet<Tag> {
 		List<DomainValue> result = new ArrayList<>();
 
 		Customer customer = CORE.getUser().getCustomer();
-		if (Tag.moduleNamePropertyName.equals(attributeName)) {
+		if (Tag.uploadModuleNamePropertyName.equals(attributeName) || Tag.actionModuleNamePropertyName.equals(attributeName)) {
 			for (Module module : customer.getModules()) {
 				result.add(new DomainValue(module.getName(), module.getTitle()));
 			}
@@ -224,7 +235,7 @@ public class TagBizlet extends Bizlet<Tag> {
 
 		if (subject != null && object != null) {
 			for (Bean bean : EXT.iterateTagged(object.getBizId())) {
-				//EXT method handles if this bean was not tagged
+				// EXT method handles if this bean was not tagged
 				EXT.untag(subject.getBizId(), bean);
 			}
 

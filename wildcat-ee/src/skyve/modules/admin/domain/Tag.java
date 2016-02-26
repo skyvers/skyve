@@ -54,9 +54,9 @@ public class Tag extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String copyToUserTagNamePropertyName = "copyToUserTagName";
 	/** @hidden */
-	public static final String moduleNamePropertyName = "moduleName";
+	public static final String uploadModuleNamePropertyName = "uploadModuleName";
 	/** @hidden */
-	public static final String documentNamePropertyName = "documentName";
+	public static final String uploadDocumentNamePropertyName = "uploadDocumentName";
 	/** @hidden */
 	public static final String attributeNamePropertyName = "attributeName";
 	/** @hidden */
@@ -71,6 +71,10 @@ public class Tag extends AbstractPersistentBean {
 	public static final String filterOperatorPropertyName = "filterOperator";
 	/** @hidden */
 	public static final String filterActionPropertyName = "filterAction";
+	/** @hidden */
+	public static final String actionModuleNamePropertyName = "actionModuleName";
+	/** @hidden */
+	public static final String actionDocumentNamePropertyName = "actionDocumentName";
 	/** @hidden */
 	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
 	/** @hidden */
@@ -305,11 +309,11 @@ public class Tag extends AbstractPersistentBean {
 	/**
 	 * The module to tag.
 	 **/
-	private String moduleName;
+	private String uploadModuleName;
 	/**
 	 * The document to tag.
 	 **/
-	private String documentName;
+	private String uploadDocumentName;
 	/**
 	 * The name of the attribute to tag.
 	 **/
@@ -320,6 +324,14 @@ public class Tag extends AbstractPersistentBean {
 	private Integer numberTagged;
 	private FilterOperator filterOperator;
 	private FilterAction filterAction;
+	/**
+	 * The module for the tag Action.
+	 **/
+	private String actionModuleName;
+	/**
+	 * The document for the tag Action.
+	 **/
+	private String actionDocumentName;
 	private Boolean unTagSuccessful;
 	private Boolean notification;
 	private Communication communication = null;
@@ -512,39 +524,39 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #moduleName} accessor.
+	 * {@link #uploadModuleName} accessor.
 	 **/
-	public String getModuleName() {
-		return moduleName;
+	public String getUploadModuleName() {
+		return uploadModuleName;
 	}
 
 	/**
-	 * {@link #moduleName} mutator.
+	 * {@link #uploadModuleName} mutator.
 	 * 
-	 * @param moduleName	The new value to set.
+	 * @param uploadModuleName	The new value to set.
 	 **/
 	@XmlElement
-	public void setModuleName(String moduleName) {
-		preset(moduleNamePropertyName, moduleName);
-		this.moduleName = moduleName;
+	public void setUploadModuleName(String uploadModuleName) {
+		preset(uploadModuleNamePropertyName, uploadModuleName);
+		this.uploadModuleName = uploadModuleName;
 	}
 
 	/**
-	 * {@link #documentName} accessor.
+	 * {@link #uploadDocumentName} accessor.
 	 **/
-	public String getDocumentName() {
-		return documentName;
+	public String getUploadDocumentName() {
+		return uploadDocumentName;
 	}
 
 	/**
-	 * {@link #documentName} mutator.
+	 * {@link #uploadDocumentName} mutator.
 	 * 
-	 * @param documentName	The new value to set.
+	 * @param uploadDocumentName	The new value to set.
 	 **/
 	@XmlElement
-	public void setDocumentName(String documentName) {
-		preset(documentNamePropertyName, documentName);
-		this.documentName = documentName;
+	public void setUploadDocumentName(String uploadDocumentName) {
+		preset(uploadDocumentNamePropertyName, uploadDocumentName);
+		this.uploadDocumentName = uploadDocumentName;
 	}
 
 	/**
@@ -579,6 +591,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFileHasHeaders(Boolean fileHasHeaders) {
+		preset(fileHasHeadersPropertyName, fileHasHeaders);
 		this.fileHasHeaders = fileHasHeaders;
 	}
 
@@ -647,6 +660,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterOperator(FilterOperator filterOperator) {
+		preset(filterOperatorPropertyName, filterOperator);
 		this.filterOperator = filterOperator;
 	}
 
@@ -664,7 +678,44 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterAction(FilterAction filterAction) {
+		preset(filterActionPropertyName, filterAction);
 		this.filterAction = filterAction;
+	}
+
+	/**
+	 * {@link #actionModuleName} accessor.
+	 **/
+	public String getActionModuleName() {
+		return actionModuleName;
+	}
+
+	/**
+	 * {@link #actionModuleName} mutator.
+	 * 
+	 * @param actionModuleName	The new value to set.
+	 **/
+	@XmlElement
+	public void setActionModuleName(String actionModuleName) {
+		preset(actionModuleNamePropertyName, actionModuleName);
+		this.actionModuleName = actionModuleName;
+	}
+
+	/**
+	 * {@link #actionDocumentName} accessor.
+	 **/
+	public String getActionDocumentName() {
+		return actionDocumentName;
+	}
+
+	/**
+	 * {@link #actionDocumentName} mutator.
+	 * 
+	 * @param actionDocumentName	The new value to set.
+	 **/
+	@XmlElement
+	public void setActionDocumentName(String actionDocumentName) {
+		preset(actionDocumentNamePropertyName, actionDocumentName);
+		this.actionDocumentName = actionDocumentName;
 	}
 
 	/**
@@ -681,6 +732,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setUnTagSuccessful(Boolean unTagSuccessful) {
+		preset(unTagSuccessfulPropertyName, unTagSuccessful);
 		this.unTagSuccessful = unTagSuccessful;
 	}
 
@@ -698,6 +750,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setNotification(Boolean notification) {
+		preset(notificationPropertyName, notification);
 		this.notification = notification;
 	}
 
@@ -733,6 +786,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setFilterColumn(Integer filterColumn) {
+		preset(filterColumnPropertyName, filterColumn);
 		this.filterColumn = filterColumn;
 	}
 
@@ -767,6 +821,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDocumentCondition(String documentCondition) {
+		preset(documentConditionPropertyName, documentCondition);
 		this.documentCondition = documentCondition;
 	}
 
@@ -784,6 +839,7 @@ public class Tag extends AbstractPersistentBean {
 	 **/
 	@XmlElement
 	public void setDocumentAction(String documentAction) {
+		preset(documentActionPropertyName, documentAction);
 		this.documentAction = documentAction;
 	}
 
@@ -805,21 +861,21 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	@XmlTransient
+	public boolean isActionSet() {
+		return (getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null);
+	}
+
+	public boolean isNotActionSet() {
+		return (! isActionSet());
+	}
+
+	@XmlTransient
 	public boolean isAttributeSet() {
-		return (getAttributeName()!=null);
+		return (getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null);
 	}
 
 	public boolean isNotAttributeSet() {
 		return (! isAttributeSet());
-	}
-
-	@XmlTransient
-	public boolean isDocumentSet() {
-		return (getModuleName()!=null && getDocumentName()!=null);
-	}
-
-	public boolean isNotDocumentSet() {
-		return (! isDocumentSet());
 	}
 
 	@XmlTransient
@@ -838,14 +894,5 @@ public class Tag extends AbstractPersistentBean {
 
 	public boolean isNotFileLoaded() {
 		return (! isFileLoaded());
-	}
-
-	@XmlTransient
-	public boolean isModuleSet() {
-		return (getModuleName()!=null);
-	}
-
-	public boolean isNotModuleSet() {
-		return (! isModuleSet());
 	}
 }

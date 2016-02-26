@@ -9,8 +9,8 @@ import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.Communication.CommunicationUtil.RunMode;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Tag;
 import modules.admin.domain.Communication.FormatType;
+import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -51,18 +51,20 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 			Persistence pers = CORE.getPersistence();
 			User user = pers.getUser();
 			Customer customer = user.getCustomer();
-			Module module = customer.getModule(tag.getModuleName());
-			Document document = module.getDocument(customer, tag.getDocumentName());
+			Module module = customer.getModule(tag.getActionModuleName());
+			Document document = module.getDocument(customer, tag.getActionDocumentName());
 
 			// get action from actionname
 			Repository rep = CORE.getRepository();
-			String documentActionName = tag.getDocumentAction();
+
 			ServerSideAction<Bean> act = null;
-			if (!TagBizlet.WILDCAT_SAVE_ACTION.equals(documentActionName) && !TagBizlet.WILDCAT_DELETE_ACTION.equals(documentActionName) && !TagBizlet.WILDCAT_VALIDATE_ACTION.equals(documentActionName)) {
-				act = rep.getAction(customer, document, documentActionName);
+
+			// retrieve action for non-default actions only
+			if (!TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
+				act = rep.getAction(customer, document, tag.getDocumentAction());
 			}
 
-			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getModuleName(), tag.getDocumentName());
+			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
 
 			int size = beans.size();
 			int processed = 0;
@@ -71,8 +73,8 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 				PersistentBean pb = (PersistentBean) it.next();
 
 				StringBuilder sb = new StringBuilder();
-				sb.append("Action request for [").append(documentActionName);
-				sb.append("] for document [").append(tag.getDocumentName()).append("] - ");
+				sb.append("Action request for [").append(tag.getDocumentAction());
+				sb.append("] for document [").append(tag.getActionDocumentName()).append("] - ");
 				if (tag.getDocumentCondition() != null) {
 					sb.append(" with condition [").append(tag.getDocumentCondition()).append("] - ");
 				} else {
@@ -87,10 +89,10 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 					if (conditionSatisfied) {
 						if (act != null) {
 							CustomerImpl internalCustomer = (CustomerImpl) customer;
-							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, documentActionName, pb, null);
+							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, tag.getDocumentAction(), pb, null);
 							if (!vetoed) {
 								ServerSideActionResult result = act.execute(pb, null);
-								internalCustomer.interceptAfterServerSideAction(document, documentActionName, result, null);
+								internalCustomer.interceptAfterServerSideAction(document, tag.getDocumentAction(), result, null);
 								pb = (PersistentBean) result.getBean();
 							}
 						}
@@ -99,16 +101,21 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 							EXT.untag(tag.getBizId(), pb);
 						}
 
-						if (TagBizlet.WILDCAT_DELETE_ACTION.equals(tag.getDocumentAction())) {
+						if (TagDefaultAction.tagDelete.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							// remove from tag and delete
 							EXT.untag(tag.getBizId(), pb);
 							pers.delete(pb);
 							pers.commit(false);
 							pers.evictCached(pb);
 							pers.begin();
-						} else if (TagBizlet.WILDCAT_VALIDATE_ACTION.equals(tag.getDocumentAction())) {
+						} else if (TagDefaultAction.tagValidate.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
 							BeanValidator.validateBeanAgainstDocument(document, pb);
 							pers.evictCached(pb);
+						} else if (TagDefaultAction.tagUpsert.equals(TagDefaultAction.fromCode(tag.getDocumentAction()))) {
+							pers.upsertBeanTuple(pb);
+							pers.commit(false);
+							pers.evictCached(pb);
+							pers.begin();
 						} else {
 							pers.save(pb);
 							pers.commit(false);

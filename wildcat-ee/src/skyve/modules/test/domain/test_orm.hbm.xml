@@ -42,7 +42,10 @@
 		<property name="geometry" type="Geometry" />
 		<property name="id" length="36" />
 		<property name="integer" />
-		<one-to-one name="inverseAggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggregatedAssociation" />
+		<bag name="inverseAggregatedAssociation" inverse="true">
+			<key column="aggregatedAssociation_id" />
+			<one-to-many entity-name="testAllAttributesInverseOneToOnePersistent" />
+		</bag>
 		<property name="longInteger" />
 		<property name="markup" type="text" />
 		<property name="memo" type="text" />

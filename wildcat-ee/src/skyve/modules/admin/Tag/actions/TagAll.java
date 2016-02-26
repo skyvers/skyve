@@ -28,15 +28,15 @@ public class TagAll implements ServerSideAction<Tag> {
 		
 		Persistence pers = CORE.getPersistence();
 		
-		DocumentQuery q = pers.newDocumentQuery(bean.getModuleName(), bean.getDocumentName());
+		DocumentQuery q = pers.newDocumentQuery(bean.getUploadModuleName(), bean.getUploadDocumentName());
 		
 		List<Bean> beans = q.projectedResults();
 		for(Bean b: beans){
 			//add bean to tagged
 			Tagged tagged = Tagged.newInstance();
 			tagged.setTag(bean);
-			tagged.setTaggedModule(bean.getModuleName());
-			tagged.setTaggedDocument(bean.getDocumentName());
+			tagged.setTaggedModule(bean.getUploadModuleName());
+			tagged.setTaggedDocument(bean.getUploadDocumentName());
 			tagged.setTaggedBizId(b.getBizId());
 			
 			pers.upsertBeanTuple(tagged);
