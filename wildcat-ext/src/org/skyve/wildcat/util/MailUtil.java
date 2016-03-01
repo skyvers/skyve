@@ -27,17 +27,15 @@ public class MailUtil {
 	private MailUtil() {
 		// no-op
 	}
-	
+
 	public static final void writeMail(String[] recipientEmailAddresses,
 											String[] ccEmailAddresses,
 											String senderEmailAddress,
 											String subject,
 											String body,
 											MimeType contentType, 
-											String attachmentFileName,
-											byte[] attachment, 
-											MimeType attachmentType,
-											OutputStream out)
+											OutputStream out,
+											MailAttachment... attachments)
 	throws ValidationException {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
@@ -46,10 +44,8 @@ public class MailUtil {
 												subject,
 												body,
 												contentType,
-												attachmentFileName,
-												attachment,
-												attachmentType,
-												true);
+												true,
+												attachments);
 			// Write the message
 			if (! UtilImpl.SMTP_TEST_BOGUS_SEND) {
 				message.writeTo(out);
@@ -60,16 +56,14 @@ public class MailUtil {
 			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not written..."));
 		}
 	}
-	
+
 	public static final void sendMail(String[] recipientEmailAddresses,
 										String[] ccEmailAddresses,
 										String senderEmailAddress,
 										String subject,
 										String body,
 										MimeType contentType, 
-										String attachmentFileName,
-										byte[] attachment, 
-										MimeType attachmentType)
+										MailAttachment... attachments)
 	throws ValidationException {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
@@ -78,10 +72,8 @@ public class MailUtil {
 												subject,
 												body,
 												contentType,
-												attachmentFileName,
-												attachment,
-												attachmentType,
-												false);
+												false,
+												attachments);
 			// Send the message
 			if (! UtilImpl.SMTP_TEST_BOGUS_SEND) { // if we are not in test mode
 				Transport.send(message);
@@ -92,17 +84,15 @@ public class MailUtil {
 			throw new ValidationException(new org.skyve.domain.messages.Message("Email was not sent..."));
 		}
 	}
-
+	
 	private static final MimeMessage createMail(String[] recipientEmailAddresses,
 													String[] ccEmailAddresses,
 													String senderEmailAddress,
 													String subject,
 													String body,
-													MimeType contentType, 
-													String attachmentFileName,
-													byte[] attachment, 
-													MimeType attachmentType,
-													boolean forWriting)
+													MimeType contentType,
+													boolean forWriting,
+													MailAttachment... attachments)
 	throws AddressException, MessagingException {
 		UtilImpl.LOGGER.info("@@@@@@@@@@@@ EMAIL @@@@@@@@@@@@");
 		UtilImpl.LOGGER.info("TO:");
@@ -174,10 +164,12 @@ public class MailUtil {
 		messageBodyPart.setContent(body, contentType.toString());
 		multipart.addBodyPart(messageBodyPart);
 
-		// add the attachment
-		MimeBodyPart bodyPart = addAttachment(attachment, attachmentType, attachmentFileName);
-		if(null != bodyPart) {
-			multipart.addBodyPart(bodyPart);
+		// add attachments
+		for(MailAttachment attachment: attachments){
+			MimeBodyPart bodyPart = addAttachment(attachment);
+			if(null != bodyPart) {
+				multipart.addBodyPart(bodyPart);
+			}
 		}
 
 		// Put all parts into the message
@@ -198,18 +190,17 @@ public class MailUtil {
 		}
 	}
 	
-	private static final MimeBodyPart addAttachment(byte[] attachment,
-			MimeType attachmentType, String attachmentFileName) throws MessagingException {
+	private static final MimeBodyPart addAttachment(MailAttachment mailAttachment) throws MessagingException {
 		
 		// if there is an attachement to send 
-		if(null != attachment) {
+		if(null != mailAttachment && mailAttachment.getAttachment()!=null) {
 			
 			// add attachment
 			MimeBodyPart messageBodyPart = new MimeBodyPart();
-			DataSource source = new ByteArrayDataSource(attachment,
-					attachmentType.toString());
+			DataSource source = new ByteArrayDataSource(mailAttachment.getAttachment(),
+					mailAttachment.getAttachmentMimeType().toString());
 			messageBodyPart.setDataHandler(new DataHandler(source));
-			messageBodyPart.setFileName(attachmentFileName);
+			messageBodyPart.setFileName(mailAttachment.getAttachmentFileName());
 			return messageBodyPart;
 		}
 		
