@@ -34,6 +34,7 @@ import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.job.JobDescription;
 import org.skyve.wildcat.job.JobScheduler;
+import org.skyve.wildcat.util.MailAttachment;
 import org.skyve.wildcat.util.MailUtil;
 import org.skyve.wildcat.util.ReportUtil;
 import org.skyve.wildcat.util.TagUtil;
@@ -103,7 +104,8 @@ public class EXT {
 	}
 	
 	/**
-	 * Write an email to the output stream <code>out</code> in MIME RFC 822 format.
+	 * Write an email to the output stream <code>out</code> in MIME RFC 822 format with multiple attachments.
+	 * 
 	 * Outlook can load this format.
 	 * Note - "on behalf of"...
 	 * If the sender email address differs from the wildcat configured email credentials then,
@@ -126,10 +128,8 @@ public class EXT {
 									String subject,
 									String body,
 									MimeType contentType, 
-									String attachmentFileName,
-									byte[] attachment, 
-									MimeType attachmentType,
-									OutputStream out)
+									OutputStream out,
+									MailAttachment... attachments)
 	throws ValidationException {
 		MailUtil.writeMail(recipientEmailAddresses,
 							ccEmailAddresses,
@@ -137,10 +137,8 @@ public class EXT {
 							subject,
 							body,
 							contentType,
-							attachmentFileName,
-							attachment,
-							attachmentType,
-							out);
+							out,
+							attachments);
 	}
 
 	/**
@@ -162,21 +160,18 @@ public class EXT {
 									String subject,
 									String body,
 									MimeType contentType, 
-									String attachmentFileName,
-									byte[] attachment, 
-									MimeType attachmentType)
+									MailAttachment... attachments)
 	throws ValidationException {
+		
 		MailUtil.sendMail(recipientEmailAddresses,
 							ccEmailAddresses,
 							senderEmailAddress,
 							subject,
 							body,
 							contentType,
-							attachmentFileName,
-							attachment,
-							attachmentType);
+							attachments);
 	}
-	
+
 	/**
 	 * Run a job once. 
 	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 

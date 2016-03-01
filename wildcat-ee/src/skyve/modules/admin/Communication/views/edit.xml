@@ -7,7 +7,7 @@
 				<column percentageWidth="20" />
 				<column />
 				<column />
-				<column percentageWidth="5"/>					
+				<column percentageWidth="5" />
 				<column />
 				<row>
 					<item>
@@ -59,7 +59,7 @@
 						</item>
 					</row>
 				</form>
-				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200" >
+				<vbox horizontalAlignment="centre" verticalAlignment="middle" pixelHeight="200">
 					<button actionName="GetResults" pixelWidth="200" />
 					<button actionName="CreateFiles" pixelWidth="200" />
 					<button actionName="SendNow" pixelWidth="200" />
@@ -140,11 +140,16 @@
 					<item>
 						<spacer />
 					</item>
-					<item colspan="3">
+					<item >
 						<button actionName="AddUnsubscribeLink" />
+					</item>
+					<item>
+						<checkBox binding="includeCalendar" triState="false"/>
 					</item>
 				</row>
 			</form>
+		</tab>
+		<tab title="Attachments">
 			<form pixelWidth="1100" border="true" borderTitle="Attachment">
 				<column percentageWidth="20" />
 				<column />
@@ -153,10 +158,54 @@
 				<column />
 				<row>
 					<item>
-						<default binding="attachment" />
+						<default binding="attachment1" />
 					</item>
 					<item>
-						<default binding="attachmentFileName" />
+						<default binding="attachmentFileName1" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="attachment2" />
+					</item>
+					<item>
+						<default binding="attachmentFileName2" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="attachment3" />
+					</item>
+					<item>
+						<default binding="attachmentFileName3" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Calendar">
+			<form border="true" borderTitle="Calendar">
+				<column percentageWidth="20" />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item colspan="2">
+						<default binding="calendarTitleExpression"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="calendarStartTime"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="calendarEndTime"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+						<default binding="calendarDescriptionExpression"/>
 					</item>
 				</row>
 			</form>

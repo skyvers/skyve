@@ -5,8 +5,8 @@
 	<singularAlias>Communication</singularAlias>
 	<pluralAlias>Communications</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>	
-	<bizKey expression="{description}"/>
+	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
+	<bizKey expression="{description}" />
 	<attributes>
 		<text name="description" required="true">
 			<displayName>Description</displayName>
@@ -35,23 +35,23 @@
 			<length>500</length>
 		</text>
 		<text name="sendTo">
-			<displayName>To</displayName>
+			<displayName>To (expression)</displayName>
 			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
 		<text name="sendFrom">
-			<displayName>From</displayName>
+			<displayName>From (expression)</displayName>
 			<description>The address to send from.</description>
 			<length>250</length>
 			<validator type="email" />
 		</text>
 		<text name="subject">
-			<displayName>Subject</displayName>
+			<displayName>Subject (expression)</displayName>
 			<description>The subject of the communication. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
 		<markup name="body">
-			<displayName>Body</displayName>
+			<displayName>Body (expression)</displayName>
 			<description><![CDATA[
 			The body of the communication.  
 			<p/>
@@ -65,10 +65,26 @@
 		<memo name="results" persistent="false">
 			<displayName>Results</displayName>
 		</memo>
-		<content name="attachment">
-			<displayName>Attachment</displayName>
+		<content name="attachment1">
+			<displayName>Attachment 1</displayName>
 		</content>
-		<text name="attachmentFileName">
+		<text name="attachmentFileName1">
+			<displayName>Attachment File Name</displayName>
+			<description>The file name for the attachment as it will appear to receivers.</description>
+			<length>250</length>
+		</text>
+		<content name="attachment2">
+			<displayName>Attachment 2</displayName>
+		</content>
+		<text name="attachmentFileName2">
+			<displayName>Attachment File Name</displayName>
+			<description>The file name for the attachment as it will appear to receivers.</description>
+			<length>250</length>
+		</text>
+		<content name="attachment3">
+			<displayName>Attachment 3</displayName>
+		</content>
+		<text name="attachmentFileName3">
 			<displayName>Attachment File Name</displayName>
 			<description>The file name for the attachment as it will appear to receivers.</description>
 			<length>250</length>
@@ -76,15 +92,15 @@
 		<enum name="actionType" trackChanges="false" persistent="false">
 			<displayName>Action</displayName>
 			<values>
-				<value code="save" description="Save for bulk send"/>
-				<value code="send" description="Send Immediately"/>
-				<value code="test" description="Test bindings and output"/>
+				<value code="save" description="Save for bulk send" />
+				<value code="send" description="Send Immediately" />
+				<value code="test" description="Test bindings and output" />
 			</values>
 		</enum>
 		<enum name="formatType">
 			<displayName>Format</displayName>
 			<values>
-				<value code="email"/>
+				<value code="email" />
 			</values>
 		</enum>
 		<text name="filePath">
@@ -100,8 +116,39 @@
 			<displayName>UnsubscribeUrl</displayName>
 			<length>500</length>
 		</text>
-		
-		<inverse name="subscriptions" >
+		<boolean name="includeCalendar">
+			<displayName>Include Calendar Item</displayName>
+			<description>
+				<![CDATA[<b>Include Calendar Item</b>:
+				<br/>
+				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+				]]>
+			</description>
+		</boolean>
+		<text name="calendarTitleExpression">
+			<displayName>Title (expression)</displayName>
+			<description>Specify the title for the calendar item as a binding expression relative to the module document.</description>
+			<length>200</length>
+		</text>
+		<dateTime name="calendarStartTime">
+			<displayName>Start Time</displayName>
+		</dateTime>
+		<dateTime name="calendarEndTime">
+			<displayName>End Time</displayName>
+		</dateTime>
+		<text name="calendarDescriptionExpression">
+			<displayName>Description (expression)</displayName>
+			<description><![CDATA[
+			<b>Description (expression)</b>
+			<br/>
+			Specify a description for the calendar item as a binding expression relative to the module document.
+			<br/>
+			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
+			]]>
+			</description>
+			<length>500</length>
+		</text>
+		<inverse name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>
 			<referenceName>communication</referenceName>
@@ -116,6 +163,9 @@
 		</condition>
 		<condition name="locked">
 			<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
+		</condition>
+		<condition name="includesCalendar">
+			<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
 		</condition>
 	</conditions>
 </document>
