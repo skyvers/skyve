@@ -5,12 +5,16 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
+import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.wildcat.domain.AbstractPersistentBean;
+import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
 
 /**
  * Communication
@@ -55,9 +59,17 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
-	public static final String attachmentPropertyName = "attachment";
+	public static final String attachment1PropertyName = "attachment1";
 	/** @hidden */
-	public static final String attachmentFileNamePropertyName = "attachmentFileName";
+	public static final String attachmentFileName1PropertyName = "attachmentFileName1";
+	/** @hidden */
+	public static final String attachment2PropertyName = "attachment2";
+	/** @hidden */
+	public static final String attachmentFileName2PropertyName = "attachmentFileName2";
+	/** @hidden */
+	public static final String attachment3PropertyName = "attachment3";
+	/** @hidden */
+	public static final String attachmentFileName3PropertyName = "attachmentFileName3";
 	/** @hidden */
 	public static final String actionTypePropertyName = "actionType";
 	/** @hidden */
@@ -68,6 +80,16 @@ public class Communication extends AbstractPersistentBean {
 	public static final String systemPropertyName = "system";
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
+	/** @hidden */
+	public static final String includeCalendarPropertyName = "includeCalendar";
+	/** @hidden */
+	public static final String calendarTitleExpressionPropertyName = "calendarTitleExpression";
+	/** @hidden */
+	public static final String calendarStartTimePropertyName = "calendarStartTime";
+	/** @hidden */
+	public static final String calendarEndTimePropertyName = "calendarEndTime";
+	/** @hidden */
+	public static final String calendarDescriptionExpressionPropertyName = "calendarDescriptionExpression";
 	/** @hidden */
 	public static final String subscriptionsPropertyName = "subscriptions";
 
@@ -243,11 +265,21 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private String body;
 	private String results;
-	private String attachment;
+	private String attachment1;
 	/**
 	 * The file name for the attachment as it will appear to receivers.
 	 **/
-	private String attachmentFileName;
+	private String attachmentFileName1;
+	private String attachment2;
+	/**
+	 * The file name for the attachment as it will appear to receivers.
+	 **/
+	private String attachmentFileName2;
+	private String attachment3;
+	/**
+	 * The file name for the attachment as it will appear to receivers.
+	 **/
+	private String attachmentFileName3;
 	private ActionType actionType;
 	private FormatType formatType;
 	/**
@@ -259,6 +291,26 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private Boolean system;
 	private String unsubscribeUrl;
+	/**
+	 * <b>Include Calendar Item</b>:
+				<br/>
+				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+	 **/
+	private Boolean includeCalendar;
+	/**
+	 * Specify the title for the calendar item as a binding expression relative to the module document.
+	 **/
+	private String calendarTitleExpression;
+	private DateTime calendarStartTime;
+	private DateTime calendarEndTime;
+	/**
+	 * <b>Description (expression)</b>
+			<br/>
+			Specify a description for the calendar item as a binding expression relative to the module document.
+			<br/>
+			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
+	 **/
+	private String calendarDescriptionExpression;
 	private List<Subscription> subscriptions = new ArrayList<>();
 
 	@Override
@@ -477,39 +529,111 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #attachment} accessor.
+	 * {@link #attachment1} accessor.
 	 **/
-	public String getAttachment() {
-		return attachment;
+	public String getAttachment1() {
+		return attachment1;
 	}
 
 	/**
-	 * {@link #attachment} mutator.
+	 * {@link #attachment1} mutator.
 	 * 
-	 * @param attachment	The new value to set.
+	 * @param attachment1	The new value to set.
 	 **/
 	@XmlElement
-	public void setAttachment(String attachment) {
-		preset(attachmentPropertyName, attachment);
-		this.attachment = attachment;
+	public void setAttachment1(String attachment1) {
+		preset(attachment1PropertyName, attachment1);
+		this.attachment1 = attachment1;
 	}
 
 	/**
-	 * {@link #attachmentFileName} accessor.
+	 * {@link #attachmentFileName1} accessor.
 	 **/
-	public String getAttachmentFileName() {
-		return attachmentFileName;
+	public String getAttachmentFileName1() {
+		return attachmentFileName1;
 	}
 
 	/**
-	 * {@link #attachmentFileName} mutator.
+	 * {@link #attachmentFileName1} mutator.
 	 * 
-	 * @param attachmentFileName	The new value to set.
+	 * @param attachmentFileName1	The new value to set.
 	 **/
 	@XmlElement
-	public void setAttachmentFileName(String attachmentFileName) {
-		preset(attachmentFileNamePropertyName, attachmentFileName);
-		this.attachmentFileName = attachmentFileName;
+	public void setAttachmentFileName1(String attachmentFileName1) {
+		preset(attachmentFileName1PropertyName, attachmentFileName1);
+		this.attachmentFileName1 = attachmentFileName1;
+	}
+
+	/**
+	 * {@link #attachment2} accessor.
+	 **/
+	public String getAttachment2() {
+		return attachment2;
+	}
+
+	/**
+	 * {@link #attachment2} mutator.
+	 * 
+	 * @param attachment2	The new value to set.
+	 **/
+	@XmlElement
+	public void setAttachment2(String attachment2) {
+		preset(attachment2PropertyName, attachment2);
+		this.attachment2 = attachment2;
+	}
+
+	/**
+	 * {@link #attachmentFileName2} accessor.
+	 **/
+	public String getAttachmentFileName2() {
+		return attachmentFileName2;
+	}
+
+	/**
+	 * {@link #attachmentFileName2} mutator.
+	 * 
+	 * @param attachmentFileName2	The new value to set.
+	 **/
+	@XmlElement
+	public void setAttachmentFileName2(String attachmentFileName2) {
+		preset(attachmentFileName2PropertyName, attachmentFileName2);
+		this.attachmentFileName2 = attachmentFileName2;
+	}
+
+	/**
+	 * {@link #attachment3} accessor.
+	 **/
+	public String getAttachment3() {
+		return attachment3;
+	}
+
+	/**
+	 * {@link #attachment3} mutator.
+	 * 
+	 * @param attachment3	The new value to set.
+	 **/
+	@XmlElement
+	public void setAttachment3(String attachment3) {
+		preset(attachment3PropertyName, attachment3);
+		this.attachment3 = attachment3;
+	}
+
+	/**
+	 * {@link #attachmentFileName3} accessor.
+	 **/
+	public String getAttachmentFileName3() {
+		return attachmentFileName3;
+	}
+
+	/**
+	 * {@link #attachmentFileName3} mutator.
+	 * 
+	 * @param attachmentFileName3	The new value to set.
+	 **/
+	@XmlElement
+	public void setAttachmentFileName3(String attachmentFileName3) {
+		preset(attachmentFileName3PropertyName, attachmentFileName3);
+		this.attachmentFileName3 = attachmentFileName3;
 	}
 
 	/**
@@ -602,6 +726,100 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #includeCalendar} accessor.
+	 **/
+	public Boolean getIncludeCalendar() {
+		return includeCalendar;
+	}
+
+	/**
+	 * {@link #includeCalendar} mutator.
+	 * 
+	 * @param includeCalendar	The new value to set.
+	 **/
+	@XmlElement
+	public void setIncludeCalendar(Boolean includeCalendar) {
+		preset(includeCalendarPropertyName, includeCalendar);
+		this.includeCalendar = includeCalendar;
+	}
+
+	/**
+	 * {@link #calendarTitleExpression} accessor.
+	 **/
+	public String getCalendarTitleExpression() {
+		return calendarTitleExpression;
+	}
+
+	/**
+	 * {@link #calendarTitleExpression} mutator.
+	 * 
+	 * @param calendarTitleExpression	The new value to set.
+	 **/
+	@XmlElement
+	public void setCalendarTitleExpression(String calendarTitleExpression) {
+		preset(calendarTitleExpressionPropertyName, calendarTitleExpression);
+		this.calendarTitleExpression = calendarTitleExpression;
+	}
+
+	/**
+	 * {@link #calendarStartTime} accessor.
+	 **/
+	public DateTime getCalendarStartTime() {
+		return calendarStartTime;
+	}
+
+	/**
+	 * {@link #calendarStartTime} mutator.
+	 * 
+	 * @param calendarStartTime	The new value to set.
+	 **/
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	@XmlElement
+	public void setCalendarStartTime(DateTime calendarStartTime) {
+		preset(calendarStartTimePropertyName, calendarStartTime);
+		this.calendarStartTime = calendarStartTime;
+	}
+
+	/**
+	 * {@link #calendarEndTime} accessor.
+	 **/
+	public DateTime getCalendarEndTime() {
+		return calendarEndTime;
+	}
+
+	/**
+	 * {@link #calendarEndTime} mutator.
+	 * 
+	 * @param calendarEndTime	The new value to set.
+	 **/
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	@XmlElement
+	public void setCalendarEndTime(DateTime calendarEndTime) {
+		preset(calendarEndTimePropertyName, calendarEndTime);
+		this.calendarEndTime = calendarEndTime;
+	}
+
+	/**
+	 * {@link #calendarDescriptionExpression} accessor.
+	 **/
+	public String getCalendarDescriptionExpression() {
+		return calendarDescriptionExpression;
+	}
+
+	/**
+	 * {@link #calendarDescriptionExpression} mutator.
+	 * 
+	 * @param calendarDescriptionExpression	The new value to set.
+	 **/
+	@XmlElement
+	public void setCalendarDescriptionExpression(String calendarDescriptionExpression) {
+		preset(calendarDescriptionExpressionPropertyName, calendarDescriptionExpression);
+		this.calendarDescriptionExpression = calendarDescriptionExpression;
+	}
+
+	/**
 	 * {@link #subscriptions} accessor.
 	 **/
 	@XmlElement
@@ -625,6 +843,15 @@ public class Communication extends AbstractPersistentBean {
 
 	public boolean isNotEmailType() {
 		return (! isEmailType());
+	}
+
+	@XmlTransient
+	public boolean isIncludesCalendar() {
+		return (Boolean.TRUE.equals(getIncludeCalendar()));
+	}
+
+	public boolean isNotIncludesCalendar() {
+		return (! isIncludesCalendar());
 	}
 
 	@XmlTransient

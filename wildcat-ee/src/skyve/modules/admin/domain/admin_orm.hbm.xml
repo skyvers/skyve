@@ -59,8 +59,12 @@
 		<property name="sendFrom" length="250" />
 		<property name="subject" length="250" />
 		<property name="body" type="text" />
-		<property name="attachment" length="36" />
-		<property name="attachmentFileName" length="250" />
+		<property name="attachment1" length="36" />
+		<property name="attachmentFileName1" length="250" />
+		<property name="attachment2" length="36" />
+		<property name="attachmentFileName2" length="250" />
+		<property name="attachment3" length="36" />
+		<property name="attachmentFileName3" length="250" />
 		<property name="formatType" length="5">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
@@ -69,6 +73,11 @@
 		<property name="filePath" length="2000" />
 		<property name="system" />
 		<property name="unsubscribeUrl" length="500" />
+		<property name="includeCalendar" />
+		<property name="calendarTitleExpression" length="200" />
+		<property name="calendarStartTime" type="DateTime" />
+		<property name="calendarEndTime" type="DateTime" />
+		<property name="calendarDescriptionExpression" length="500" />
 		<bag name="subscriptions" inverse="true">
 			<key column="communication_id" />
 			<one-to-many entity-name="adminSubscription" />
