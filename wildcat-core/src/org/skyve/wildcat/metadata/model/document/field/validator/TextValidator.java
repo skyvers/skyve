@@ -13,8 +13,8 @@ import org.apache.commons.validator.routines.checkdigit.IBANCheckDigit;
 import org.apache.commons.validator.routines.checkdigit.ISINCheckDigit;
 import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.apache.commons.validator.routines.checkdigit.VerhoeffCheckDigit;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -58,7 +58,7 @@ public class TextValidator extends FieldValidator<String> {
 		// for client-side (if applicable)
 		if (regularExpression == null) {
 			if (ValidatorType.email.equals(type)) {
-				regularExpression = "^([a-zA-Z0-9_\\.\\-])+@([a-zA-Z0-9_\\.\\-])+$";
+				regularExpression = "^([a-zA-Z0-9_\\.\\-\\'])+@([a-zA-Z0-9_\\.\\-])+$";
 			}
 			else if (ValidatorType.creditCard.equals(type)) {
 				regularExpression = "^\\d{16}$";

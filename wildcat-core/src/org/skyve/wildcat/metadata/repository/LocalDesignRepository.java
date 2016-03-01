@@ -22,6 +22,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.Reference;
@@ -1173,13 +1174,23 @@ public class LocalDesignRepository extends AbstractRepository {
 													targetModule.getName() + '.' + targetDocumentName);
 				}
 				boolean one = InverseCardinality.one.equals(inverse.getCardinality());
-				if (one && (targetReference instanceof Collection)) {
-					throw new MetaDataException("The target [referenceName] of " + 
-													targetReferenceName + " in Inverse " +
-													inverse.getName() + " in document " + 
-													documentIdentifier + " points to a valid collection within the document " + 
-													targetModule.getName() + '.' + targetDocumentName + 
-													" but the cardinality of the inverse is set to one.");
+				if (targetReference instanceof Collection) {
+					if (one) {
+						throw new MetaDataException("The target [referenceName] of " + 
+														targetReferenceName + " in Inverse " +
+														inverse.getName() + " in document " + 
+														documentIdentifier + " points to a valid collection within the document " + 
+														targetModule.getName() + '.' + targetDocumentName + 
+														" but the cardinality of the inverse is set to one.");
+					}
+					if (CollectionType.child.equals(((Collection) targetReference).getType())) {
+						throw new MetaDataException("The target [referenceName] of " + 
+														targetReferenceName + " in Inverse " +
+														inverse.getName() + " in document " + 
+														documentIdentifier + " points to a valid collection within the document " + 
+														targetModule.getName() + '.' + targetDocumentName + 
+														" but the collection is a child collection.  The [parent] attribute should be used instead of an inverse reference.");
+					}
 				}
 				inverse.setRelationship((targetReference instanceof Collection) ?
 											InverseRelationship.manyToMany :
