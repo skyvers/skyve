@@ -27,6 +27,7 @@ public enum MimeType {
 	csh("application/x-csh", "csh"), 
 	css("text/css", "css"), 
 	csv("text/csv", "csv"),
+	cal("text/calendar", "cal"),
 	director("application/x-director", "dcr", "dir", "dxr"), 
 	dll("application/x-msdownload", "dll"), 
 	docm("application/vnd.ms-word.document.macroEnabled.12", "docm"), 
