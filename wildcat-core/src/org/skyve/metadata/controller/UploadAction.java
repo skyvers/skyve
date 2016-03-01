@@ -91,7 +91,8 @@ public abstract class UploadAction<T extends Bean> implements MetaData {
 	 * @param bean	The bean to execute on.
 	 * @param file	The file to process.
 	 * @param webContext	The context to manipulate.
+	 * @return	The bean param or a replaced bean instance.
 	 * @throws Exception
 	 */
-	public abstract void upload(T bean, UploadedFile file, WebContext webContext) throws Exception;
+	public abstract T upload(T bean, UploadedFile file, WebContext webContext) throws Exception;
 }

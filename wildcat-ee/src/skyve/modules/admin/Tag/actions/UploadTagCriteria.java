@@ -39,7 +39,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 	private static final long serialVersionUID = -8154709480999519405L;
 	
 	@Override
-	public void upload(Tag tag,
+	public Tag upload(Tag tag,
 						UploadedFile file,
 						WebContext webContext)
 	throws Exception {
@@ -155,8 +155,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 		}
 		tag.setNumberLoaded(new Integer(numberLoaded));
 
-		
-		webContext.setCurrentBean(tag);
+		return tag;
 	}
 	
 

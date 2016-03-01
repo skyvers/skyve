@@ -105,8 +105,8 @@ public class FileUpload {
 			}
 	
 			Bean currentBean = webContext.getCurrentBean();
-			Bean bean = currentBean;
 
+			Bean bean = currentBean;
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
@@ -133,7 +133,14 @@ public class FileUpload {
 													mimeType);
 			boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
 			if (! vetoed) {
-				uploadAction.upload(bean, bizFile, webContext);
+				bean = uploadAction.upload(bean, bizFile, webContext);
+				if (binding == null) {
+					webContext.setCurrentBean(bean);
+				}
+				else {
+					BindUtil.set(currentBean, binding, bean);
+				}
+				
 				customer.interceptAfterUploadAction(document, action, bean, bizFile, webContext);
 			}
 			
