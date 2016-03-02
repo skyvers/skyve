@@ -35,12 +35,19 @@
 		<column />
 		<row>
 			<item showLabel="false">
-				<textArea binding="log" pixelHeight="500" />
+				<!-- Log binding must NOT be indented as it is inside a pre tag -->
+				<blurb>
+					<![CDATA[
+						<pre>
+{log}
+						</pre>
+					]]>
+				</blurb>
 			</item>
 		</row>
 	</form>
 	<actions>
-		<cancel/>
+		<cancel />
+		<zoomOut />
 	</actions>
 </view>
-

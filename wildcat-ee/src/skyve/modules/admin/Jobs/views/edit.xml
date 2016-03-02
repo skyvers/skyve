@@ -7,7 +7,7 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Actual">
-			<dataGrid binding="runningJobs" title="Running Jobs" editable="false">
+			<dataGrid binding="runningJobs" title="Running Jobs" showAdd="false" showEdit="false" showRemove="false">
 				<boundColumn binding="startTime" title="Start Time" />
 				<boundColumn binding="displayName" title="Name" />
 				<boundColumn binding="percentComplete" title="Percent Complete" />
