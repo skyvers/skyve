@@ -168,6 +168,7 @@ public class AttachmentContent extends Content {
 	}
 	
 	public final byte[] getContentBytes() throws IOException {
+		
 		if (bytes == null) {			
 			bytes = FileUtil.getFileBytes(stream);
 		}
