@@ -1,13 +1,12 @@
 package org.skyve.wildcat.content;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
 import org.skyve.content.MimeType;
+import org.skyve.wildcat.util.FileUtil;
 
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
@@ -169,23 +168,8 @@ public class AttachmentContent extends Content {
 	}
 	
 	public final byte[] getContentBytes() throws IOException {
-		if (bytes == null) {
-			try {
-				try (BufferedInputStream bis = new BufferedInputStream(stream)) {
-					try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-						byte[] temp = new byte[1024]; // 1K
-						int bytesRead = 0;
-						while ((bytesRead = bis.read(temp)) > 0) {
-							baos.write(temp, 0, bytesRead);
-						}
-						bytes = baos.toByteArray();
-					}
-				}
-			}
-			finally {
-				stream.close();
-				stream = null;
-			}
+		if (bytes == null) {			
+			bytes = FileUtil.getFileBytes(stream);
 		}
 		
 		return bytes;
