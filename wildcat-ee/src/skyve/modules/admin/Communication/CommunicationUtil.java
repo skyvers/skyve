@@ -29,6 +29,7 @@ import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
+import org.skyve.wildcat.util.FileUtil;
 import org.skyve.wildcat.util.MailAttachment;
 import org.skyve.wildcat.util.TimeUtil;
 import org.skyve.wildcat.util.UtilImpl;
@@ -159,22 +160,14 @@ public class CommunicationUtil {
 		}
 
 		// Generate file name - Communication_Description_To
-		StringBuilder fileName = new StringBuilder();
-		fileName.append(communication.getFilePath());
-		String separator = System.getProperty("file.separator");
-		if (!communication.getFilePath().endsWith(separator)) {
-			fileName.append(separator);
-		}
-		fileName.append(document.getSingularAlias()).append('_');
+		StringBuilder subFolder = new StringBuilder();
+		subFolder.append(document.getSingularAlias()).append('_');
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-		fileName.append(sdf.format(new Date()));
-		fileName.append(separator);
+		subFolder.append(sdf.format(new Date()));
 
-		new File(fileName.toString()).mkdirs();
+		String filePath = FileUtil.constructSafeFilePath(communication.getFilePath(), sendTo, ".eml", true, subFolder.toString());
 
-		fileName.append(fileNameSafe(sendTo)).append(".eml");
-
-		try (FileOutputStream fos = new FileOutputStream(fileName.toString())) {
+		try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
 			// add attachments
 

@@ -91,6 +91,8 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String calendarDescriptionExpressionPropertyName = "calendarDescriptionExpression";
 	/** @hidden */
+	public static final String mailImagePropertyName = "mailImage";
+	/** @hidden */
 	public static final String subscriptionsPropertyName = "subscriptions";
 
 	/**
@@ -311,6 +313,7 @@ public class Communication extends AbstractPersistentBean {
 			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
 	 **/
 	private String calendarDescriptionExpression;
+	private String mailImage;
 	private List<Subscription> subscriptions = new ArrayList<>();
 
 	@Override
@@ -817,6 +820,24 @@ public class Communication extends AbstractPersistentBean {
 	public void setCalendarDescriptionExpression(String calendarDescriptionExpression) {
 		preset(calendarDescriptionExpressionPropertyName, calendarDescriptionExpression);
 		this.calendarDescriptionExpression = calendarDescriptionExpression;
+	}
+
+	/**
+	 * {@link #mailImage} accessor.
+	 **/
+	public String getMailImage() {
+		return mailImage;
+	}
+
+	/**
+	 * {@link #mailImage} mutator.
+	 * 
+	 * @param mailImage	The new value to set.
+	 **/
+	@XmlElement
+	public void setMailImage(String mailImage) {
+		preset(mailImagePropertyName, mailImage);
+		this.mailImage = mailImage;
 	}
 
 	/**

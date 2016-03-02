@@ -11,10 +11,12 @@
 				<column />
 				<row>
 					<item>
-						<textField binding="description" disabled="locked" />
-					</item>
-					<item>
 						<checkBox binding="system" triState="false" />
+					</item>				
+				</row>
+				<row>
+					<item>
+						<textField binding="description" disabled="locked" />
 					</item>
 				</row>
 				<row>
@@ -67,8 +69,9 @@
 			</hbox>
 		</tab>
 		<tab title="Contents">
-			<form pixelWidth="1100" border="true" borderTitle="Email">
+			<form border="true" borderTitle="Email">
 				<column percentageWidth="20" />
+				<column />
 				<column />
 				<column />
 				<column />
@@ -102,7 +105,7 @@
 				</row>
 				<row>
 					<item colspan="4">
-						<textField binding="sendTo" pixelWidth="800" />
+						<textField binding="sendTo" />
 					</item>
 				</row>
 				<row>
@@ -117,7 +120,7 @@
 				</row>
 				<row>
 					<item colspan="4">
-						<textField binding="subject" pixelWidth="800" invisible="notEmailType" />
+						<textField binding="subject" invisible="notEmailType" />
 					</item>
 				</row>
 				<row>
@@ -136,21 +139,29 @@
 						<html binding="body" pixelHeight="300" pixelWidth="800" />
 					</item>
 				</row>
+			</form>
+			<form border="true" borderTitle="Options">
+				<column percentageWidth="20"/>
+				<column percentageWidth="10"/>
+				<column/>
+				<column/>
+				<column/>
+				<column/>
 				<row>
 					<item>
-						<spacer />
-					</item>
-					<item >
-						<button actionName="AddUnsubscribeLink" />
+						<checkBox binding="includeCalendar" triState="false" />
 					</item>
 					<item>
-						<checkBox binding="includeCalendar" triState="false"/>
+						<button actionName="AddUnsubscribeLink" pixelWidth="200" />
+					</item>
+					<item>
+						<button actionName="AddImage" pixelWidth="200" />
 					</item>
 				</row>
 			</form>
 		</tab>
-		<tab title="Attachments">
-			<form pixelWidth="1100" border="true" borderTitle="Attachment">
+		<tab title="Options">
+			<form border="true" borderTitle="Attachments">
 				<column percentageWidth="20" />
 				<column />
 				<column />
@@ -181,8 +192,6 @@
 					</item>
 				</row>
 			</form>
-		</tab>
-		<tab title="Calendar">
 			<form border="true" borderTitle="Calendar">
 				<column percentageWidth="20" />
 				<column />
@@ -190,22 +199,22 @@
 				<column />
 				<row>
 					<item colspan="2">
-						<default binding="calendarTitleExpression"/>
+						<default binding="calendarTitleExpression" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<default binding="calendarStartTime"/>
+						<default binding="calendarStartTime" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<default binding="calendarEndTime"/>
+						<default binding="calendarEndTime" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<default binding="calendarDescriptionExpression"/>
+						<default binding="calendarDescriptionExpression" />
 					</item>
 				</row>
 			</form>
@@ -230,6 +239,9 @@
 			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?" />
 		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link"
 			inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" />
+
+		<upload className="AddImage" displayName="Add Uploaded Image" inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" />
+
 		<action className="UpdateModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 	</actions>

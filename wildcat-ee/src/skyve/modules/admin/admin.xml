@@ -129,6 +129,7 @@
 				</document>
 				<document name="Communication" permission="CRUDD">
 					<action name="AddUnsubscribeLink" />
+					<action name="AddImage" />
 					<action name="CreateFiles" />
 					<action name="GetCount" />
 					<action name="GetResults" />
@@ -149,6 +150,7 @@
 				</document>
 				<document name="Communication" permission="CRUDC">
 					<action name="AddUnsubscribeLink" />
+					<action name="AddImage" />
 					<action name="CreateFiles" />
 					<action name="GetCount" />
 					<action name="GetResults" />

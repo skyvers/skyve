@@ -122,6 +122,8 @@
 				<![CDATA[<b>Include Calendar Item</b>:
 				<br/>
 				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+				<br/>
+				Check Options page for more.
 				]]>
 			</description>
 		</boolean>
@@ -148,6 +150,10 @@
 			</description>
 			<length>500</length>
 		</text>
+		<content name="mailImage" persistent="false">
+			<displayName>Image</displayName>
+		</content>
+		
 		<inverse name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>

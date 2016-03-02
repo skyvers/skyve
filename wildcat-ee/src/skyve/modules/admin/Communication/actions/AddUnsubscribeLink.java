@@ -7,6 +7,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 public class AddUnsubscribeLink implements ServerSideAction<Communication> {
+	
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	private static final String UNSUBSCRIBE_LINK = "<a href=\"{unsubscribeUrl}\">Unsubscribe</a>";
@@ -19,6 +20,8 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 
 		Communication result = communication;
 
+		System.out.println(result.getBody());
+		
 		String body = result.getBody();
 		if (body == null) {
 			result.setBody(UNSUBSCRIBE_LINK);
@@ -29,6 +32,9 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 				result.setBody(result.getBody() + "<p/>" + UNSUBSCRIBE_LINK);
 			}
 		}
+		
+		System.out.println(result.getBody());
+		
 		return new ServerSideActionResult(result);
 	}
 }
