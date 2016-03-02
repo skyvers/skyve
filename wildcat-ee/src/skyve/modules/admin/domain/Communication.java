@@ -297,6 +297,8 @@ public class Communication extends AbstractPersistentBean {
 	 * <b>Include Calendar Item</b>:
 				<br/>
 				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+				<br/>
+				Check Options page for more.
 	 **/
 	private Boolean includeCalendar;
 	/**

@@ -175,7 +175,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	private Geometry geometry;
 	private String id;
 	private Integer integer;
-	private List<AllAttributesInverseOneToOnePersistent> inverseAggregatedAssociation = new ArrayList<>();
+	private AllAttributesInverseOneToOnePersistent inverseAggregatedAssociation;
 	private Long longInteger;
 	private String markup;
 	private String memo;
@@ -473,17 +473,8 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	 * {@link #inverseAggregatedAssociation} accessor.
 	 **/
 	@XmlElement
-	public List<AllAttributesInverseOneToOnePersistent> getInverseAggregatedAssociation() {
+	public AllAttributesInverseOneToOnePersistent getInverseAggregatedAssociation() {
 		return inverseAggregatedAssociation;
-	}
-
-	/**
-	 * {@link #inverseAggregatedAssociation} accessor.
-	 * 
-	 * @param bizId	The bizId of the element in the list.
-	 **/
-	public AllAttributesInverseOneToOnePersistent getInverseAggregatedAssociationElementById(String bizId) {
-		return getElementById(inverseAggregatedAssociation, bizId);
 	}
 
 	/**
