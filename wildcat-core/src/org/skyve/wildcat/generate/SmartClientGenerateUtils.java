@@ -283,7 +283,7 @@ public class SmartClientGenerateUtils {
 							@SuppressWarnings("unchecked")
 							Converter<String> converter = (Converter<String>) text.getConverterForCustomer(customer); 
 							StringBuilder sb = new StringBuilder(128);
-							sb.append("{expression:'").append(validator.getRegularExpression().replaceAll("'", "\'"));
+							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
 							sb.append("',type:'regexp',errorMessage:'");
 							sb.append(processString(validator.constructMessage(title, converter)));
 							sb.append("'}");
