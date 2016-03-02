@@ -5,8 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Basic file utilities
@@ -74,7 +72,7 @@ public class FileUtil {
 	 * @param unsafeFolderNames
 	 * @return the full filepath (and filename with extension if provided)
 	 */
-	public static String constructFilePath(String safeBasePath, String unsafeFileName, String extension, boolean makeDirectories, String... unsafeFolderNames) {
+	public static String constructSafeFilePath(String safeBasePath, String unsafeFileName, String extension, boolean makeDirectories, String... unsafeFolderNames) {
 		
 		StringBuilder filePath = new StringBuilder();
 		filePath.append(safeBasePath);
