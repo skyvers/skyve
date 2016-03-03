@@ -297,6 +297,8 @@ public class Communication extends AbstractPersistentBean {
 	 * <b>Include Calendar Item</b>:
 				<br/>
 				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
+				<br/>
+				Check Options page for more.
 	 **/
 	private Boolean includeCalendar;
 	/**
@@ -857,6 +859,9 @@ public class Communication extends AbstractPersistentBean {
 		return getElementById(subscriptions, bizId);
 	}
 
+	/**
+	 * emailType
+	 */
 	@XmlTransient
 	public boolean isEmailType() {
 		return (FormatType.email.equals(this.getFormatType()));
@@ -866,6 +871,9 @@ public class Communication extends AbstractPersistentBean {
 		return (! isEmailType());
 	}
 
+	/**
+	 * includesCalendar
+	 */
 	@XmlTransient
 	public boolean isIncludesCalendar() {
 		return (Boolean.TRUE.equals(getIncludeCalendar()));
@@ -875,6 +883,9 @@ public class Communication extends AbstractPersistentBean {
 		return (! isIncludesCalendar());
 	}
 
+	/**
+	 * locked
+	 */
 	@XmlTransient
 	public boolean isLocked() {
 		return (isPersisted() && Boolean.TRUE.equals(getSystem()));
@@ -884,6 +895,9 @@ public class Communication extends AbstractPersistentBean {
 		return (! isLocked());
 	}
 
+	/**
+	 * saveAction
+	 */
 	@XmlTransient
 	public boolean isSaveAction() {
 		return (ActionType.saveForBulkSend.equals(this.getActionType()));

@@ -210,6 +210,9 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 		this.boundary = boundary;
 	}
 
+	/**
+	 * created
+	 */
 	@XmlTransient
 	@Override
 	public boolean isCreated() {
@@ -221,6 +224,9 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 		return (! isCreated());
 	}
 
+	/**
+	 * manager
+	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));

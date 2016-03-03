@@ -57,13 +57,19 @@
 	</attributes>
 	<conditions>
 		<condition name="manager">
-			<![CDATA[isUserInRole("whosin","Manager")]]>
+			<expression>
+				<![CDATA[isUserInRole("whosin","Manager")]]>
+			</expression>
 		</condition>	
 		<condition name="me">
-			<![CDATA[modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this)]]>
+			<expression>
+				<![CDATA[modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this)]]>
+			</expression>
 		</condition>
 		<condition name="canChange">
-			<![CDATA[isManager() || isMe()]]>
+			<expression>
+				<![CDATA[isManager() || isMe()]]>
+			</expression>
 		</condition>
 	</conditions>
 </document>

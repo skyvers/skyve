@@ -205,6 +205,9 @@ public class DataMaintenance extends AbstractPersistentBean {
 		this.contentLink = contentLink;
 	}
 
+	/**
+	 * attachmentSelected
+	 */
 	@XmlTransient
 	public boolean isAttachmentSelected() {
 		return (contentLink != null);
@@ -214,6 +217,9 @@ public class DataMaintenance extends AbstractPersistentBean {
 		return (! isAttachmentSelected());
 	}
 
+	/**
+	 * backupSelected
+	 */
 	@XmlTransient
 	public boolean isBackupSelected() {
 		return (selectedBackupTimestampFolderName != null);
@@ -223,6 +229,9 @@ public class DataMaintenance extends AbstractPersistentBean {
 		return (! isBackupSelected());
 	}
 
+	/**
+	 * backupsRefreshRequired
+	 */
 	@XmlTransient
 	public boolean isBackupsRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshBackups));
@@ -232,6 +241,9 @@ public class DataMaintenance extends AbstractPersistentBean {
 		return (! isBackupsRefreshRequired());
 	}
 
+	/**
+	 * contentRefreshRequired
+	 */
 	@XmlTransient
 	public boolean isContentRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshContent));
@@ -241,6 +253,9 @@ public class DataMaintenance extends AbstractPersistentBean {
 		return (! isContentRefreshRequired());
 	}
 
+	/**
+	 * contentSelected
+	 */
 	@XmlTransient
 	public boolean isContentSelected() {
 		return (selectedContentId != null);

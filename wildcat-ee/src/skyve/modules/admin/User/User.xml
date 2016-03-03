@@ -167,35 +167,55 @@
 	<conditions>
 		<!-- Evaluation of Wizard State -->
 		<condition name="confirmContact">
-			<![CDATA[WizardState.confirmContact.equals(getWizardState())]]>
+			<expression>
+				<![CDATA[WizardState.confirmContact.equals(getWizardState())]]>
+			</expression>
 		</condition>
 		<condition name="createContact">
-			<![CDATA[WizardState.createContact.equals(getWizardState())]]>
+			<expression>
+				<![CDATA[WizardState.createContact.equals(getWizardState())]]>
+			</expression>
 		</condition>
 		<condition name="confirmUserNameAndPassword">
-			<![CDATA[WizardState.confirmUserNameAndPassword.equals(getWizardState())]]>
+			<expression>
+				<![CDATA[WizardState.confirmUserNameAndPassword.equals(getWizardState())]]>
+			</expression>
 		</condition>
 		<condition name="confirmGroupMemberships">
-			<![CDATA[WizardState.confirmGroupMemberships.equals(getWizardState())]]>
+			<expression>
+				<![CDATA[WizardState.confirmGroupMemberships.equals(getWizardState())]]>
+			</expression>
 		</condition>
 		<condition name="showNextButton">
-			<![CDATA[isCreateContact() || isConfirmUserNameAndPassword() ]]>
+			<expression>
+				<![CDATA[isCreateContact() || isConfirmUserNameAndPassword() ]]>
+			</expression>
 		</condition>
 
 		<condition name="created">
-			<![CDATA[isPersisted()]]>
+			<expression>
+				<![CDATA[isPersisted()]]>
+			</expression>
 		</condition>
 		<condition name="inDataGroup">
-			<![CDATA[! isUserInDataGroup(null)]]>
+			<expression>
+				<![CDATA[! isUserInDataGroup(null)]]>
+			</expression>
 		</condition>
 		<condition name="securityAdministrator">
-			<![CDATA[isUserInRole("admin","SecurityAdministrator")]]>
+			<expression>
+				<![CDATA[isUserInRole("admin","SecurityAdministrator")]]>
+			</expression>
 		</condition>
 		<condition name="designer">
-			<![CDATA[isUserInRole("design", "BizHubDesigner")]]>
+			<expression>
+				<![CDATA[isUserInRole("design", "BizHubDesigner")]]>
+			</expression>
 		</condition>
 		<condition name="candidateContactsEmpty">
-			<![CDATA[candidateContacts.isEmpty()]]>
+			<expression>
+				<![CDATA[candidateContacts.isEmpty()]]>
+			</expression>
 		</condition>
 	</conditions>
 	<uniqueConstraints>

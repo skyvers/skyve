@@ -91,6 +91,12 @@ public interface Document extends Model {
 	 * 
 	 * @return
 	 */
+	public Condition getCondition(String conditionName);
+
+	/**
+	 * 
+	 * @return
+	 */
 	public Set<String> getDefinedActionNames();
 
 	/**

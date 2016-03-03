@@ -162,16 +162,24 @@
 	</attributes>
 	<conditions>
 		<condition name="saveAction">
-			<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
+			<expression>
+				<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
+			</expression>
 		</condition>
 		<condition name="emailType">
-			<![CDATA[FormatType.email.equals(this.getFormatType())]]>
+			<expression>
+				<![CDATA[FormatType.email.equals(this.getFormatType())]]>
+			</expression>
 		</condition>
 		<condition name="locked">
-			<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
+			<expression>
+				<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
+			</expression>
 		</condition>
 		<condition name="includesCalendar">
-			<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
+			</expression>
 		</condition>
 	</conditions>
 </document>

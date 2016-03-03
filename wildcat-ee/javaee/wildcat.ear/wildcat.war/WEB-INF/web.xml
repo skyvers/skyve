@@ -223,6 +223,24 @@
 		<url-pattern>*.gif</url-pattern>
 	</filter-mapping>
 
+	<!-- Frame-busting/Anti Click-jacking defence -->
+	<filter>
+		<filter-name>FrameBustingAntiClickJackingFilter</filter-name>
+		<filter-class>org.skyve.wildcat.web.filter.ResponseHeaderFilter</filter-class>
+		<init-param>
+			<param-name>Content-Security-Policy</param-name>
+			<param-value>frame-ancestors 'self'</param-value>
+		</init-param>
+		<init-param>
+			<param-name>X-Frame-Options</param-name>
+			<param-value>SAMEORIGIN</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>FrameBustingAntiClickJackingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.WebServlet</servlet-class>
