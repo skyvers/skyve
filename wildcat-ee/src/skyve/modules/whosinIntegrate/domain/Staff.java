@@ -325,6 +325,9 @@ return getContact().getName();
 		this.dueBack = dueBack;
 	}
 
+	/**
+	 * canChange
+	 */
 	@XmlTransient
 	public boolean isCanChange() {
 		return (isManager() || isMe());
@@ -334,6 +337,9 @@ return getContact().getName();
 		return (! isCanChange());
 	}
 
+	/**
+	 * manager
+	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));
@@ -343,6 +349,9 @@ return getContact().getName();
 		return (! isManager());
 	}
 
+	/**
+	 * me
+	 */
 	@XmlTransient
 	public boolean isMe() {
 		return (modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this));

@@ -1104,7 +1104,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 
 		// Check that conditions do not start with is or not
-		for (String conditionName : ((DocumentImpl) document).getConditionsCode().keySet()) {
+		for (String conditionName : ((DocumentImpl) document).getConditionNames()) {
 			if (conditionName.startsWith("is")) {
 				throw new MetaDataException("Condition " + conditionName + " in document " + documentIdentifier + " cannot start with 'is' - the 'is' prefix is generated in the bean method.");
 			}

@@ -28,6 +28,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.model.document.AssociationImpl;
 import org.skyve.wildcat.metadata.model.document.CollectionImpl;
+import org.skyve.wildcat.metadata.model.document.ConditionImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
 import org.skyve.wildcat.metadata.model.document.Inverse;
 import org.skyve.wildcat.metadata.model.document.UniqueConstraintImpl;
@@ -95,7 +96,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String parentDocument;
 	private BizKey bizKey;
 	private List<Attribute> attributes = new ArrayList<>();
-	private List<Condition> conditions = new ArrayList<>();
+	private List<ConditionMetaData> conditions = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 	private String documentation;
 
@@ -208,7 +209,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "conditions")
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "condition", required = true)
-	public List<Condition> getConditions() {
+	public List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
@@ -617,8 +618,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 		// Set conditions
 		if (conditions != null) {
-			for (Condition condition : conditions) {
-				String conditionName = condition.getName();
+			for (ConditionMetaData conditionMetaData : conditions) {
+				String conditionName = conditionMetaData.getName();
 				if (conditionName == null) {
 					throw new MetaDataException(metaDataName + " : A condition [name] is required.");
 				}
@@ -629,12 +630,17 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 					throw new MetaDataException(metaDataName + " : Condition name clashes with field/association/reference/condition named " + 
 													conditionName);
 				}
-				String conditionExpression = condition.getExpression();
+				String conditionExpression = conditionMetaData.getExpression();
 				if (conditionExpression == null) {
 					throw new MetaDataException(metaDataName + " : A condition [expression] is required.");
 				}
 
-				if (result.getConditionsCode().put(conditionName, conditionExpression) != null) {
+				ConditionImpl condition = new ConditionImpl();
+				condition.setExpression(conditionExpression);
+				condition.setDocumentation(conditionMetaData.getDocumentation());
+				condition.setDescription(conditionMetaData.getDescription());
+				
+				if (result.getConditions().put(conditionName, condition) != null) {
 					throw new MetaDataException(metaDataName + " : A duplicate condition of " + conditionName + " is defined.");
 				}
 			}

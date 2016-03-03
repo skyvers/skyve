@@ -225,7 +225,7 @@ class ViewValidator extends ViewVisitor {
 									String testConditionName,
 									String widgetIdentifier)
 	throws MetaDataException {
-		if (! currentDocument.getConditionsCode().containsKey(testConditionName)) {
+		if (! currentDocument.getConditionNames().contains(testConditionName)) {
 			Extends extension = currentDocument.getExtends();
 			if (extension == null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 

@@ -39,29 +39,39 @@
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">
-			<![CDATA[
-				selectedBackupTimestampFolderName != null
-			]]>
+			<expression>
+				<![CDATA[
+					selectedBackupTimestampFolderName != null
+				]]>
+			</expression>
 		</condition>
 		<condition name="backupsRefreshRequired">
-			<![CDATA[
-				Boolean.TRUE.equals(refreshBackups)
-			]]>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshBackups)
+				]]>
+			</expression>
 		</condition>
 		<condition name="contentSelected">
-			<![CDATA[
-				selectedContentId != null
-			]]>
+			<expression>
+				<![CDATA[
+					selectedContentId != null
+				]]>
+			</expression>
 		</condition>
 		<condition name="contentRefreshRequired">
-			<![CDATA[
-				Boolean.TRUE.equals(refreshContent)
-			]]>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshContent)
+				]]>
+			</expression>
 		</condition>
 		<condition name="attachmentSelected">
-			<![CDATA[
-				contentLink != null
-			]]>
+			<expression>
+				<![CDATA[
+					contentLink != null
+				]]>
+			</expression>
 		</condition>
 	</conditions>
 </document>

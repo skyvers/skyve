@@ -860,6 +860,9 @@ public class Tag extends AbstractPersistentBean {
 		this.documentActionResults = documentActionResults;
 	}
 
+	/**
+	 * actionSet
+	 */
 	@XmlTransient
 	public boolean isActionSet() {
 		return (getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null);
@@ -869,6 +872,9 @@ public class Tag extends AbstractPersistentBean {
 		return (! isActionSet());
 	}
 
+	/**
+	 * attributeSet
+	 */
 	@XmlTransient
 	public boolean isAttributeSet() {
 		return (getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null);
@@ -878,6 +884,9 @@ public class Tag extends AbstractPersistentBean {
 		return (! isAttributeSet());
 	}
 
+	/**
+	 * explanation
+	 */
 	@XmlTransient
 	public boolean isExplanation() {
 		return (getCombinationExplanation()!=null);
@@ -887,6 +896,9 @@ public class Tag extends AbstractPersistentBean {
 		return (! isExplanation());
 	}
 
+	/**
+	 * fileLoaded
+	 */
 	@XmlTransient
 	public boolean isFileLoaded() {
 		return (getNumberLoaded().intValue()>0);

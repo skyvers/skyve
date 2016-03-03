@@ -684,6 +684,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		this.inactive = inactive;
 	}
 
+	/**
+	 * candidateContactsEmpty
+	 */
 	@XmlTransient
 	public boolean isCandidateContactsEmpty() {
 		return (candidateContacts.isEmpty());
@@ -693,6 +696,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isCandidateContactsEmpty());
 	}
 
+	/**
+	 * confirmContact
+	 */
 	@XmlTransient
 	public boolean isConfirmContact() {
 		return (WizardState.confirmContact.equals(getWizardState()));
@@ -702,6 +708,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isConfirmContact());
 	}
 
+	/**
+	 * confirmGroupMemberships
+	 */
 	@XmlTransient
 	public boolean isConfirmGroupMemberships() {
 		return (WizardState.confirmGroupMemberships.equals(getWizardState()));
@@ -711,6 +720,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isConfirmGroupMemberships());
 	}
 
+	/**
+	 * confirmUserNameAndPassword
+	 */
 	@XmlTransient
 	public boolean isConfirmUserNameAndPassword() {
 		return (WizardState.confirmUserNameAndPassword.equals(getWizardState()));
@@ -720,6 +732,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isConfirmUserNameAndPassword());
 	}
 
+	/**
+	 * createContact
+	 */
 	@XmlTransient
 	public boolean isCreateContact() {
 		return (WizardState.createContact.equals(getWizardState()));
@@ -729,6 +744,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isCreateContact());
 	}
 
+	/**
+	 * created
+	 */
 	@XmlTransient
 	@Override
 	public boolean isCreated() {
@@ -740,6 +758,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isCreated());
 	}
 
+	/**
+	 * designer
+	 */
 	@XmlTransient
 	public boolean isDesigner() {
 		return (isUserInRole("design", "BizHubDesigner"));
@@ -749,6 +770,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isDesigner());
 	}
 
+	/**
+	 * inDataGroup
+	 */
 	@XmlTransient
 	public boolean isInDataGroup() {
 		return (! isUserInDataGroup(null));
@@ -758,6 +782,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isInDataGroup());
 	}
 
+	/**
+	 * securityAdministrator
+	 */
 	@XmlTransient
 	public boolean isSecurityAdministrator() {
 		return (isUserInRole("admin","SecurityAdministrator"));
@@ -767,6 +794,9 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (! isSecurityAdministrator());
 	}
 
+	/**
+	 * showNextButton
+	 */
 	@XmlTransient
 	public boolean isShowNextButton() {
 		return (isCreateContact() || isConfirmUserNameAndPassword());

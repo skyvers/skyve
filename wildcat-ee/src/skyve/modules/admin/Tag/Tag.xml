@@ -138,16 +138,24 @@
 	</attributes>
 	<conditions>
 		<condition name="actionSet">
-			<![CDATA[getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null]]>
+			<expression>
+				<![CDATA[getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null]]>
+			</expression>
 		</condition>
 		<condition name="attributeSet">
-			<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
+			<expression>
+				<![CDATA[getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null]]>
+			</expression>
 		</condition>
 		<condition name="fileLoaded">
-			<![CDATA[getNumberLoaded().intValue()>0]]>
+			<expression>
+				<![CDATA[getNumberLoaded().intValue()>0]]>
+			</expression>
 		</condition>
 		<condition name="explanation">
-			<![CDATA[getCombinationExplanation()!=null]]>
+			<expression>
+				<![CDATA[getCombinationExplanation()!=null]]>
+			</expression>
 		</condition>
 	</conditions>
 </document>

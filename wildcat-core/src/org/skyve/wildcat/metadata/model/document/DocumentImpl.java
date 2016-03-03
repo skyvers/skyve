@@ -21,6 +21,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.DynamicImage;
@@ -73,9 +74,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	private String bizKeyExpression;
 
 	/**
-	 * A map of condition name -> condition code.
+	 * A map of condition name -> Condition.
 	 */
-	private Map<String, String> conditionsCode = new TreeMap<>();
+	private Map<String, Condition> conditions = new TreeMap<>();
 
 	/**
 	 * Action names defined in module privileges - Used when generating views.
@@ -317,8 +318,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		this.ordered = ordered;
 	}
 
-	public Map<String, String> getConditionsCode() {
-		return conditionsCode;
+	public Map<String, Condition> getConditions() {
+		return conditions;
 	}
 	
 	@Override
@@ -437,9 +438,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public Set<String> getConditionNames() {
-		return conditionsCode.keySet();
+		return conditions.keySet();
 	}
 	
+	@Override
+	public Condition getCondition(String conditionName) {
+		return conditions.get(conditionName);
+	}
+
 	@Override
 	public View getView(String uxui, Customer customer, ViewType type) throws MetaDataException {
 		AbstractRepository repository = AbstractRepository.get();

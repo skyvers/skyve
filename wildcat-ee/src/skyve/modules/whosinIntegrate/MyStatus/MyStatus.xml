@@ -20,10 +20,14 @@
 	</attributes>
 	<conditions>
 		<condition name="exists">
-			<![CDATA[getMyStaff()!=null]]>
+			<expression>
+				<![CDATA[getMyStaff()!=null]]>
+			</expression>
 		</condition>
 		<condition name="staffMember">
-			<![CDATA[isUserInRole("whosinIntegrate","StaffMember")]]>
+			<expression>
+				<![CDATA[isUserInRole("whosinIntegrate","StaffMember")]]>
+			</expression>
 		</condition>
 	</conditions>
 </document>

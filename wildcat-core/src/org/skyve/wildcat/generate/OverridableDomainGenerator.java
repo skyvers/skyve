@@ -26,6 +26,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
@@ -2025,10 +2026,10 @@ joined tables
 		}
 		
 		// Add conditions
-		Map<String, String> conditions = ((DocumentImpl) document).getConditionsCode();
+		Map<String, Condition> conditions = ((DocumentImpl) document).getConditions();
 		if (conditions != null) {
 			for (String conditionName : conditions.keySet()) {
-				String code = conditions.get(conditionName);
+				Condition condition = conditions.get(conditionName);
 
 				if ((! overridden) ||
 						(documentClass == null) ||
@@ -2037,13 +2038,25 @@ joined tables
 					
 					boolean overriddenCondition = "created".equals(conditionName);
 					
+					// Generate/Include UML doc
+					String description = condition.getDocumentation();
+					if (description == null) {
+						description = condition.getDescription();
+					}
+					if (description == null) {
+						description = conditionName;
+					}
+					methods.append("\n\t/**");
+					methods.append("\n\t * ").append(description);
+					methods.append("\n\t */");
+
 					methods.append("\n\t@XmlTransient");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
 					methods.append("\n\tpublic boolean is").append(Character.toUpperCase(conditionName.charAt(0)));
 					methods.append(conditionName.substring(1)).append("() {\n");
-					methods.append("\t\treturn (").append(code).append(");\n");
+					methods.append("\t\treturn (").append(condition.getExpression()).append(");\n");
 					methods.append("\t}\n");
 
 					if (overriddenCondition) {

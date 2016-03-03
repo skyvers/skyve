@@ -72,6 +72,9 @@ public class MyStatus extends AbstractTransientBean {
 		this.myStaff = myStaff;
 	}
 
+	/**
+	 * exists
+	 */
 	@XmlTransient
 	public boolean isExists() {
 		return (getMyStaff()!=null);
@@ -81,6 +84,9 @@ public class MyStatus extends AbstractTransientBean {
 		return (! isExists());
 	}
 
+	/**
+	 * staffMember
+	 */
 	@XmlTransient
 	public boolean isStaffMember() {
 		return (isUserInRole("whosinIntegrate","StaffMember"));
