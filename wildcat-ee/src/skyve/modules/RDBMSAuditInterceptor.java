@@ -14,9 +14,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.persistence.DocumentFilter;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.persistence.SQL;
 import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 
 public class RDBMSAuditInterceptor extends Interceptor {
@@ -58,11 +57,22 @@ public class RDBMSAuditInterceptor extends Interceptor {
 	private static void ensureOriginalInsertAuditExists(PersistentBean bean) throws Exception {
 		// Check if we have an insert audit record.
 		Persistence p = CORE.getPersistence();
-		DocumentQuery q = p.newDocumentQuery(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
-		q.addBoundProjection(Bean.DOCUMENT_ID);
-		DocumentFilter f = q.getFilter();
-		f.addEquals(Audit.auditBizIdPropertyName, bean.getBizId());
-		f.addEquals(Audit.operationPropertyName, Operation.insert);
+		Customer c = p.getUser().getCustomer();
+		Module m = c.getModule(Audit.MODULE_NAME);
+		String persistentIdentifier = m.getDocument(c, Audit.DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+		SQL q = p.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s and %s = :%s", 
+										Bean.DOCUMENT_ID, 
+										persistentIdentifier,
+										Audit.auditBizIdPropertyName,
+										Audit.auditBizIdPropertyName,
+										Bean.CUSTOMER_NAME,
+										Bean.CUSTOMER_NAME,
+										Audit.operationPropertyName,
+										Audit.operationPropertyName));
+		q.putParameter(Audit.auditBizIdPropertyName, bean.getBizId(), false);
+		q.putParameter(Bean.CUSTOMER_NAME, c.getName(), false);
+		q.putParameter(Audit.operationPropertyName, Operation.insert);
+
 
 		// if not we need to create one
 		if (q.scalarResults(String.class).isEmpty()) {
