@@ -82,19 +82,24 @@ isc.AdvancedFilter.addMethods({
 		if (this.toggleButton.selected) {
 			// copy simple criteria to the advanced criteria object
 // CRITERIA CONVERSION DOESN'T WORK TERRIBLY WELL - it leaves the filter builder in an inconsistent state
-//			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria());
+//			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria(true));
 //			this._filterBuilder.setCriteria(newCriteria);
 
 			this.filterableComponent.grid.setShowFilterEditor(false);
+			this.filterableComponent.grid.filterData(this._filterBuilder.getCriteria());
+
 			// ensure we show and hide the whole panel 
 			// otherwise mouse gestures don't work well on the list filter editor in IE7
 			this.show();
 		}
 		else {
+			// CRITERIA CONVERSION DOESN'T WORK TERRIBLY WELL - it leaves the grid filter editor with an advanced criteria which sux
 			// copy advanced criteria to the simple criteria object
-			this.filterableComponent.grid.setFilterEditorCriteria(this._filterBuilder.getCriteria());
+//			this.filterableComponent.grid.setFilterEditorCriteria(this._filterBuilder.getCriteria());
 
 			this.filterableComponent.grid.setShowFilterEditor(true);
+			this.filterableComponent.grid.setFilterEditorCriteria({});
+			this.filterableComponent.grid.filterData({});
 			// ensure we show and hide the whole panel 
 			// otherwise mouse gestures don't work on well on the list filter editor in IE7
 			this.hide();

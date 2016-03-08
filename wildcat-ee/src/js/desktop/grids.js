@@ -261,7 +261,7 @@ BizListGrid.addMethods({
 			// If we have defined filter criteria on a listgrid, convert to an advanced criteria
 			var result = me._advancedFilter.toggleButton.selected ?
 							me._advancedFilter.getCriteria() :
-							me.grid.getFilterEditorCriteria();
+							me.grid.getFilterEditorCriteria(true);
 
 			// if params are defined, ensure they are added to the filter criteria
 			// NB only listgrid's have config.params (and thus me._view is defined)
@@ -571,7 +571,7 @@ BizListGrid.addMethods({
 										d: me._dataSource.ID, 
 										s: {criteria: me._advancedFilter.toggleButton.selected ?
 														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria(),
+														me.grid.getFilterEditorCriteria(true),
 												advancedCriteriaStyle: me._advancedFilter.getStyle(),
 												fieldState: me.grid.getFieldState(),
 												sortState: me.grid.getSortState(),
@@ -639,7 +639,7 @@ BizListGrid.addMethods({
 							i: snapId,
 							s: {criteria: me._advancedFilter.toggleButton.selected ?
 											me._advancedFilter.getCriteria() :
-											me.grid.getFilterEditorCriteria(),
+											me.grid.getFilterEditorCriteria(true),
 									advancedCriteriaStyle: me._advancedFilter.getStyle(),
 									fieldState: me.grid.getFieldState(),
 									sortState: me.grid.getSortState(),
@@ -856,35 +856,38 @@ BizListGrid.addMethods({
     			me._advancedFilter.toggleButton
 			]);
 		}
-		if (me.showExport) {
-			toolStripMembers.addList([
-                "separator",
-                BizUtil.createImageButton(exportItem.icon,
-											false,
-											"<b>Export</b> table data.",
-											exportItem.click)
-			]);
+		if (config && config.isPickList) {} else {
+			if (me.showExport) {
+				toolStripMembers.addList([
+	                "separator",
+	                BizUtil.createImageButton(exportItem.icon,
+												false,
+												"<b>Export</b> table data.",
+												exportItem.click)
+				]);
+			}
+			if (me.showSnap) {
+				toolStripMembers.addList([
+					"separator",
+					isc.Label.create({
+						width: 60,
+					    contents: "Snapshot:"
+					}),
+					snapMenuButton
+				]);
+			}
+			if (me.showTag) {
+				toolStripMembers.addList([
+					"separator",
+					isc.Label.create({
+						width: 30,
+					    contents: "Tag:"
+					}),
+					tagsMenuButton
+				]);
+			}
 		}
-		if (me.showSnap) {
-			toolStripMembers.addList([
-				"separator",
-				isc.Label.create({
-					width: 60,
-				    contents: "Snapshot:"
-				}),
-				snapMenuButton
-			]);
-		}
-		if (me.showTag) {
-			toolStripMembers.addList([
-				"separator",
-				isc.Label.create({
-					width: 30,
-				    contents: "Tag:"
-				}),
-				tagsMenuButton
-			]);
-		}
+		
 		me._toolbar = isc.ToolStrip.create({
 			membersMargin: 2,
 			layoutMargin: 2,
@@ -1050,9 +1053,13 @@ BizListGrid.addMethods({
 					me.bizEdited();
 				}
 			},
-			// override to put summaryRow into the request parameters
+			// override to put summaryRow etc into the request parameters
 			// This ensures that the server sends back an extra summary row
 			// grid.dataProperties.transformData() is overridden to expect the summary row
+			// Also adds extra criteria from the <filterParameter/> in the xml
+			// Notice that if extra filter parameters are sent, 
+			// they are added to a copy of the editor criteria, not the incoming criteria argument,
+			// as the argument is polluted with the extra criteria from the Super call below on subsequent calls.
 			filterData: function(criteria, callback, requestProperties) {
 				var result = criteria;
 				
@@ -1079,29 +1086,26 @@ BizListGrid.addMethods({
 				if (config && config.contConv) { // indicates that the conversation is to be continued
 					requestProperties.params._cc = '';
 				}
-				
+
+				var editorCriteria = me._advancedFilter.toggleButton.selected ?
+										me._advancedFilter.getCriteria() :
+										me.grid.getFilterEditorCriteria(true);
+				if (editorCriteria) {} else {
+					editorCriteria = {};
+				}
+
 				// if params are defined, ensure they are added to the filter criteria
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
-				// NB result could be an advanced criteria after this call whereas critiera could be a simple criteria still
+				// NB result could be an advanced criteria after this call whereas criteria could be a simple criteria still
 				if (config && config.params) {
-					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
+					result = BizUtil.completeFilterCriteria(editorCriteria, config.params, me._view);
 				}
-				
+
 				this.Super("filterData", [result, callback, requestProperties]);
 
-				// The super call above sets the grid's filter editor data, 
-				// but 'result' could be an advanced criteria, so reset it if and only if it was a simple criteria to start with
-				if (criteria) {
-					if (criteria.operator) {
-						// Commented this out as a geometry critiera in the grid filter line searches produces an advanced criteria
-						// this.setFilterEditorCriteria({});
-					}
-					else {
-						this.setFilterEditorCriteria(criteria);
-					}
-				}
-				else {
-					this.setFilterEditorCriteria({});
+				// set the grid criteria to the old version of the criteria, if it is displayed
+				if (me._advancedFilter.toggleButton.selected) {} else {
+					me.grid.setFilterEditorCriteria(editorCriteria);
 				}
 			},
 	
@@ -1125,7 +1129,7 @@ BizListGrid.addMethods({
 								me.grid.invalidateCache();
 								me.grid.filterData(me._advancedFilter.toggleButton.selected ?
 														me._advancedFilter.getCriteria() :
-														me.grid.getFilterEditorCriteria());
+														me.grid.getFilterEditorCriteria(true));
 							}
 						}];
 
@@ -1283,11 +1287,11 @@ BizListGrid.addMethods({
 		this.grid.invalidateCache();
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
-									this.grid.getFilterEditorCriteria());
+									this.grid.getFilterEditorCriteria(true));
 /*
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
-									this.grid.getFilterEditorCriteria(),
+									this.grid.getFilterEditorCriteria(true),
 								function(dsResponse, data, dsRequest) {
 									if (dsResponse.status >= 0) { // success
 										var selectedIndex = data.findIndex('bizId', selectedBizId);
