@@ -216,9 +216,9 @@ public class Backup {
 																File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
 																									content.getBizModule() + File.separator +
 																									content.getBizDocument() + File.separator +
-																									stringValue.substring(5, 8) + File.separator +
-																									stringValue.substring(10, 13) + File.separator +
-																									stringValue.substring(15, 18) + File.separator + 
+																									stringValue.substring(5, 7) + File.separator +
+																									stringValue.substring(10, 12) + File.separator +
+																									stringValue.substring(15, 17) + File.separator + 
 																									stringValue);
 																if (! contentDirectory.exists()) {
 																	contentDirectory.mkdirs();
