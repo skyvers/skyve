@@ -7,7 +7,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
@@ -22,7 +21,7 @@ public class StaffBizlet extends Bizlet<Staff> {
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 
 		if (ImplicitActionName.Edit.equals(actionName)) {
-			Position position = getPositionOf(bean);
+			Position position = bean.getPosition();
 			if (position != null) {
 				bean.setReportsTo(position.getParent());
 			} else {
@@ -31,16 +30,21 @@ public class StaffBizlet extends Bizlet<Staff> {
 		}
 
 		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			Position pos = getPositionOf(bean);
-			if (pos != null) {
+			Persistence pers = CORE.getPersistence();
+			Position myPosition = bean.getPosition();
+
+			if (myPosition != null) {
 
 				// assign reports to of the associated position
-				pos.setReportsTo(bean.getReportsTo());
+				myPosition.setReportsTo(bean.getReportsTo());
+
+				// need to update the position that contains this staff
+				myPosition.setPositionTitle(bean.getRoleTitle());
+				myPosition = pers.save(myPosition);
 
 			} else if (bean.originalValues().containsKey(Staff.reportsToPropertyName)) {
 
 				// create a new position and set the reports to
-				Persistence pers = CORE.getPersistence();
 
 				Position newPosition = Position.newInstance();
 				newPosition.setStaff(bean);
@@ -49,23 +53,9 @@ public class StaffBizlet extends Bizlet<Staff> {
 
 				newPosition = pers.save(newPosition);
 			}
+
 		}
 
 		return super.preExecute(actionName, bean, parentBean, webContext);
-	}
-
-	public static Position getPositionOf(Staff bean) throws Exception {
-
-		if (bean.isPersisted()) {
-			Persistence pers = CORE.getPersistence();
-			DocumentQuery q = pers.newDocumentQuery(Position.MODULE_NAME, Position.DOCUMENT_NAME);
-			q.getFilter().addEquals(Position.staffPropertyName, bean);
-
-			Position position = q.beanResult();
-			return position;
-		}
-
-		return null;
-
 	}
 }

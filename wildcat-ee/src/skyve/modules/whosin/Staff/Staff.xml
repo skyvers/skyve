@@ -11,7 +11,7 @@
 	<pluralAlias>Staff Members</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/group16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/group32.png</icon32x32RelativeFilePath>
-	<bizKey expression="{contact.name}"/>
+	<bizKey expression="{contact.name} {contact.mobile}"/>
 	<attributes>
 		<association name="contact" type="aggregation">
 			<displayName>Contact</displayName>
@@ -58,5 +58,10 @@
 			<displayName>Reports To</displayName>
 			<documentName>Position</documentName>
 		</association>
+		<inverse cardinality="one" name="position">
+			<displayName>Position</displayName>
+			<documentName>Position</documentName>
+			<referenceName>staff</referenceName>
+		</inverse>
 	</attributes>
 </document>

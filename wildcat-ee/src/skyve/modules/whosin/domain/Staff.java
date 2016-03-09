@@ -64,6 +64,8 @@ public class Staff extends AbstractPersistentBean {
 	public static final String demoDataPropertyName = "demoData";
 	/** @hidden */
 	public static final String reportsToPropertyName = "reportsTo";
+	/** @hidden */
+	public static final String positionPropertyName = "position";
 
 	/**
 	 * Status
@@ -157,6 +159,7 @@ public class Staff extends AbstractPersistentBean {
 	 **/
 	private Boolean demoData;
 	private Position reportsTo = null;
+	private Position position;
 
 	@Override
 	@XmlTransient
@@ -179,7 +182,7 @@ public class Staff extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{contact.name}",
+														"{contact.name} {contact.mobile}",
 														this);
 		}
 		catch (Exception e) {
@@ -376,5 +379,13 @@ public class Staff extends AbstractPersistentBean {
 	public void setReportsTo(Position reportsTo) {
 		preset(reportsToPropertyName, reportsTo);
 		this.reportsTo = reportsTo;
+	}
+
+	/**
+	 * {@link #position} accessor.
+	 **/
+	@XmlElement
+	public Position getPosition() {
+		return position;
 	}
 }

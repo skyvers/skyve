@@ -75,7 +75,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{positionTitle} ({staff.contact.name})",
+														"{positionTitle} ({staff.contact.name} {staff.contact.mobile})",
 														this);
 		}
 		catch (Exception e) {

@@ -12,7 +12,7 @@
 	<icon16x16RelativeFilePath>icons/document/hierarchy16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/hierarchy32.png</icon32x32RelativeFilePath>
 	<parentDocument>Position</parentDocument>
-	<bizKey expression="{positionTitle} ({staff.contact.name})"/>
+	<bizKey expression="{positionTitle} ({staff.contact.name} {staff.contact.mobile})"/>
 	<attributes>
 		<text name="positionTitle">
 			<displayName>Position Title</displayName>
