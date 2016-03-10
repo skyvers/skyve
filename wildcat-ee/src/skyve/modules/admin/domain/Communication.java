@@ -860,7 +860,7 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * emailType
+	 * Email type format
 	 */
 	@XmlTransient
 	public boolean isEmailType() {
@@ -872,7 +872,7 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * includesCalendar
+	 * Includes Calendar
 	 */
 	@XmlTransient
 	public boolean isIncludesCalendar() {
@@ -884,7 +884,7 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * locked
+	 * Locked
 	 */
 	@XmlTransient
 	public boolean isLocked() {
@@ -896,7 +896,7 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * saveAction
+	 * Save for Bulk Send
 	 */
 	@XmlTransient
 	public boolean isSaveAction() {

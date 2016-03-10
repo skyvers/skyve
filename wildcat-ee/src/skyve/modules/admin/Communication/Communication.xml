@@ -161,22 +161,26 @@
 		</inverse>
 	</attributes>
 	<conditions>
-		<condition name="saveAction">
+		<condition name="saveAction" >
+			<description>Save for Bulk Send</description>
 			<expression>
 				<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
 			</expression>
 		</condition>
 		<condition name="emailType">
+			<description>Email type format</description>
 			<expression>
 				<![CDATA[FormatType.email.equals(this.getFormatType())]]>
 			</expression>
 		</condition>
 		<condition name="locked">
+			<description>Locked</description>
 			<expression>
 				<![CDATA[isPersisted() && Boolean.TRUE.equals(getSystem())]]>
 			</expression>
 		</condition>
 		<condition name="includesCalendar">
+			<description>Includes Calendar</description>
 			<expression>
 				<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
 			</expression>

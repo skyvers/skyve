@@ -50,11 +50,13 @@
 	</attributes>
 	<conditions>
 		<condition name="created">
+			<description>Created</description>
 			<expression>
 				<![CDATA[isPersisted()]]>
 			</expression>
 		</condition>
 		<condition name="manager">
+			<description>Manager</description>
 			<expression>
 				<![CDATA[isUserInRole("whosin","Manager")]]>
 			</expression>

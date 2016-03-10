@@ -211,7 +211,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 	}
 
 	/**
-	 * created
+	 * Created
 	 */
 	@XmlTransient
 	@Override
@@ -225,7 +225,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 	}
 
 	/**
-	 * manager
+	 * Manager
 	 */
 	@XmlTransient
 	public boolean isManager() {

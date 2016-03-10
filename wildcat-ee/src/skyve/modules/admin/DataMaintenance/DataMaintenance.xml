@@ -39,6 +39,7 @@
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">
+			<description>Backup Selected</description>
 			<expression>
 				<![CDATA[
 					selectedBackupTimestampFolderName != null
@@ -46,6 +47,7 @@
 			</expression>
 		</condition>
 		<condition name="backupsRefreshRequired">
+			<description>Refresh Backups</description>
 			<expression>
 				<![CDATA[
 					Boolean.TRUE.equals(refreshBackups)
@@ -53,6 +55,7 @@
 			</expression>
 		</condition>
 		<condition name="contentSelected">
+			<description>Content Selected</description>
 			<expression>
 				<![CDATA[
 					selectedContentId != null
@@ -60,6 +63,7 @@
 			</expression>
 		</condition>
 		<condition name="contentRefreshRequired">
+			<description>Content Refresh Required</description>
 			<expression>
 				<![CDATA[
 					Boolean.TRUE.equals(refreshContent)
@@ -67,6 +71,7 @@
 			</expression>
 		</condition>
 		<condition name="attachmentSelected">
+			<description>Attachment Selected</description>
 			<expression>
 				<![CDATA[
 					contentLink != null

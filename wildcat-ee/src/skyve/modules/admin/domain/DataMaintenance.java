@@ -206,7 +206,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * attachmentSelected
+	 * Attachment Selected
 	 */
 	@XmlTransient
 	public boolean isAttachmentSelected() {
@@ -218,7 +218,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * backupSelected
+	 * Backup Selected
 	 */
 	@XmlTransient
 	public boolean isBackupSelected() {
@@ -230,7 +230,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * backupsRefreshRequired
+	 * Refresh Backups
 	 */
 	@XmlTransient
 	public boolean isBackupsRefreshRequired() {
@@ -242,7 +242,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * contentRefreshRequired
+	 * Content Refresh Required
 	 */
 	@XmlTransient
 	public boolean isContentRefreshRequired() {
@@ -254,7 +254,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * contentSelected
+	 * Content Selected
 	 */
 	@XmlTransient
 	public boolean isContentSelected() {

@@ -861,7 +861,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * actionSet
+	 * Action Set
 	 */
 	@XmlTransient
 	public boolean isActionSet() {
@@ -873,7 +873,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * attributeSet
+	 * Attribute Set
 	 */
 	@XmlTransient
 	public boolean isAttributeSet() {
@@ -885,7 +885,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * explanation
+	 * Explanation exists
 	 */
 	@XmlTransient
 	public boolean isExplanation() {
@@ -897,7 +897,7 @@ public class Tag extends AbstractPersistentBean {
 	}
 
 	/**
-	 * fileLoaded
+	 * File Loaded
 	 */
 	@XmlTransient
 	public boolean isFileLoaded() {

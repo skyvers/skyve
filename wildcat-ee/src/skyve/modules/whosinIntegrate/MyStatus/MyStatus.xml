@@ -20,11 +20,13 @@
 	</attributes>
 	<conditions>
 		<condition name="exists">
+			<description>My Staff exists</description>
 			<expression>
 				<![CDATA[getMyStaff()!=null]]>
 			</expression>
 		</condition>
 		<condition name="staffMember">
+			<description>Is a Staff Member</description>
 			<expression>
 				<![CDATA[isUserInRole("whosinIntegrate","StaffMember")]]>
 			</expression>

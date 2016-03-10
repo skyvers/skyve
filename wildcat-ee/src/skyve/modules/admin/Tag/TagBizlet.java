@@ -15,6 +15,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -99,7 +100,8 @@ public class TagBizlet extends Bizlet<Tag> {
 				Module module = customer.getModule(bean.getActionModuleName());
 				Document document = module.getDocument(customer, bean.getActionDocumentName());
 				for (String act : document.getConditionNames()) {
-					result.add(new DomainValue(act));
+					Condition condition = document.getCondition(act);
+					result.add(new DomainValue(act, condition.getDescription()));
 				}
 			}
 		}

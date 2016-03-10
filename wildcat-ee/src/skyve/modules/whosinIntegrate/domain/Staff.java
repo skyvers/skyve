@@ -326,7 +326,7 @@ return getContact().getName();
 	}
 
 	/**
-	 * canChange
+	 * Can Change
 	 */
 	@XmlTransient
 	public boolean isCanChange() {
@@ -338,7 +338,7 @@ return getContact().getName();
 	}
 
 	/**
-	 * manager
+	 * Manager
 	 */
 	@XmlTransient
 	public boolean isManager() {
@@ -350,7 +350,7 @@ return getContact().getName();
 	}
 
 	/**
-	 * me
+	 * Is me
 	 */
 	@XmlTransient
 	public boolean isMe() {

@@ -685,7 +685,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * candidateContactsEmpty
+	 * Candidate Contacts is empty
 	 */
 	@XmlTransient
 	public boolean isCandidateContactsEmpty() {
@@ -697,7 +697,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * confirmContact
+	 * Confirm Contact step
 	 */
 	@XmlTransient
 	public boolean isConfirmContact() {
@@ -709,7 +709,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * confirmGroupMemberships
+	 * Confirm Group Memberships step
 	 */
 	@XmlTransient
 	public boolean isConfirmGroupMemberships() {
@@ -721,7 +721,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * confirmUserNameAndPassword
+	 * Confirm User Name and Password step
 	 */
 	@XmlTransient
 	public boolean isConfirmUserNameAndPassword() {
@@ -733,7 +733,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * createContact
+	 * Create Contact step
 	 */
 	@XmlTransient
 	public boolean isCreateContact() {
@@ -745,7 +745,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * created
+	 * Created
 	 */
 	@XmlTransient
 	@Override
@@ -759,7 +759,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * designer
+	 * Designer
 	 */
 	@XmlTransient
 	public boolean isDesigner() {
@@ -771,7 +771,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * inDataGroup
+	 * In Data Group
 	 */
 	@XmlTransient
 	public boolean isInDataGroup() {
@@ -783,7 +783,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * securityAdministrator
+	 * Security Administrator
 	 */
 	@XmlTransient
 	public boolean isSecurityAdministrator() {
@@ -795,7 +795,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
-	 * showNextButton
+	 * Show Next Button
 	 */
 	@XmlTransient
 	public boolean isShowNextButton() {

@@ -73,7 +73,7 @@ public class MyStatus extends AbstractTransientBean {
 	}
 
 	/**
-	 * exists
+	 * My Staff exists
 	 */
 	@XmlTransient
 	public boolean isExists() {
@@ -85,7 +85,7 @@ public class MyStatus extends AbstractTransientBean {
 	}
 
 	/**
-	 * staffMember
+	 * Is a Staff Member
 	 */
 	@XmlTransient
 	public boolean isStaffMember() {
