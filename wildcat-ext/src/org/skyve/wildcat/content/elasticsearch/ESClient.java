@@ -293,9 +293,9 @@ public class ESClient extends AbstractContentManager {
 	throws IOException {
 		StringBuilder path = new StringBuilder(128);
 		path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
-		path.append(id.substring(5, 8)).append('/');
-		path.append(id.substring(10, 13)).append('/');
-		path.append(id.substring(15, 18)).append('/');
+		path.append(id.substring(5, 7)).append('/');
+		path.append(id.substring(10, 12)).append('/');
+		path.append(id.substring(15, 17)).append('/');
 		
 		new File(path.toString()).mkdirs();
 		
