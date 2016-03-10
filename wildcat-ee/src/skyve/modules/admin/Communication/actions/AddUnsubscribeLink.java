@@ -20,8 +20,6 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 
 		Communication result = communication;
 
-		System.out.println(result.getBody());
-		
 		String body = result.getBody();
 		if (body == null) {
 			result.setBody(UNSUBSCRIBE_LINK);
@@ -32,8 +30,6 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 				result.setBody(result.getBody() + "<p/>" + UNSUBSCRIBE_LINK);
 			}
 		}
-		
-		System.out.println(result.getBody());
 		
 		return new ServerSideActionResult(result);
 	}
