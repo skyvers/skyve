@@ -22,6 +22,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.util.ThreadSafeFactory;
@@ -213,13 +214,13 @@ public class Backup {
 														content = cm.get(stringValue);
 														if (content != null) {
 															try (InputStream cis = content.getContentStream()) {
-																File contentDirectory = new File(directory.getAbsolutePath() + File.separator +
-																									content.getBizModule() + File.separator +
-																									content.getBizDocument() + File.separator +
-																									stringValue.substring(5, 7) + File.separator +
-																									stringValue.substring(10, 12) + File.separator +
-																									stringValue.substring(15, 17) + File.separator + 
-																									stringValue);
+																StringBuilder contentPath = new StringBuilder(256);
+																contentPath.append(directory.getAbsolutePath()).append('/');
+																contentPath.append(content.getBizModule()).append('/');
+																contentPath.append(content.getBizDocument()).append('/');
+																AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath);
+																contentPath.append(stringValue);
+																File contentDirectory = new File(contentPath.toString());
 																if (! contentDirectory.exists()) {
 																	contentDirectory.mkdirs();
 																}

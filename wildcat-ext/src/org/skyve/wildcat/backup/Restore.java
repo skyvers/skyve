@@ -17,6 +17,7 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.util.UtilImpl;
@@ -80,6 +81,9 @@ public class Restore {
 					System.err.println("***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist");
 					continue;
 				}
+
+				long rowCount = 0;
+
 				try (FileReader fr = new FileReader(backupFile)) {
 					try (CsvMapReader reader = new CsvMapReader(fr, CsvPreference.STANDARD_PREFERENCE)) {
 						String[] headers = reader.getHeader(true);
@@ -180,12 +184,12 @@ public class Restore {
 										String documentName = null;
 										final String fileName = stringValue;
 										for (String relativeContentPath : table.relativeContentPaths) {
-											File candidateDirectory = new File(backupDirectory.getAbsolutePath() + File.separator +
-																				relativeContentPath + File.separator + 
-																				stringValue.substring(5, 7) + File.separator + 
-																				stringValue.substring(10, 12) + File.separator +
-																				stringValue.substring(15, 17) + File.separator +
-																				stringValue);
+											StringBuilder contentPath = new StringBuilder(256);
+											contentPath.append(backupDirectory.getAbsolutePath()).append('/');
+											contentPath.append(relativeContentPath).append('/');
+											AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentPath);
+											contentPath.append(stringValue);
+											File candidateDirectory = new File(contentPath.toString());
 											File[] files = candidateDirectory.listFiles();
 											if ((files != null) && // directory exists
 													(files.length == 1)) { // has the file in it
@@ -224,12 +228,14 @@ public class Restore {
 								} // for (each header)
 
 								statement.executeUpdate();
+								rowCount++;
 							} // while (each CSV line)
 
 							connection.commit();
 						}
 					}
 				}
+				UtilImpl.LOGGER.info("restored table " + table.name + " with " + rowCount + " rows.");
 			} // for (each table)
 		}
 	}
