@@ -101,7 +101,7 @@ public class TagBizlet extends Bizlet<Tag> {
 				Document document = module.getDocument(customer, bean.getActionDocumentName());
 				for (String act : document.getConditionNames()) {
 					Condition condition = document.getCondition(act);
-					result.add(new DomainValue(act, condition.getDescription()));
+					result.add(new DomainValue(act, (condition.getDescription()==null?act:condition.getDescription())));
 				}
 			}
 		}
