@@ -516,17 +516,19 @@ public class ESClient extends AbstractContentManager {
 			String bizDataGroupId = (String) fieldValue(searchHit, BEAN_DATA_GROUP_ID);
 			String bizUserId = (String) fieldValue(searchHit, BEAN_USER_ID);
 			String bizId = (String) fieldValue(searchHit, BEAN_DOCUMENT_ID);
-			if (allow(bizCustomer,
-						bizModule,
-						bizDocument,
-						bizDataGroupId,
-						bizUserId,
-						bizId)) {
+			if (canReadContent(bizCustomer,
+								bizModule,
+								bizDocument,
+								bizDataGroupId,
+								bizUserId,
+								bizId)) {
 				SearchResult hit = new SearchResult();
 	
 				hit.setCustomerName(bizCustomer);
 				hit.setModuleName(bizModule);
 				hit.setDocumentName(bizDocument);
+				hit.setBizDataGroupId(bizDataGroupId);
+				hit.setBizUserId(bizUserId);
 				hit.setBizId(bizId);
 				hit.setScore((int) (searchHit.score() * 100.0));
 	
@@ -581,37 +583,6 @@ public class ESClient extends AbstractContentManager {
 			return field.value();
 		}
 		return null;
-	}
-	
-	private static boolean allow(String bizCustomer,
-									String bizModule,
-									String bizDocument,
-									String bizDataGroupId,
-									String bizUserId,
-									String bizId) {
-		AbstractPersistence persistence = AbstractPersistence.get();
-		User user = persistence.getUser();
-		if (user instanceof SuperUser) {
-			return true;
-		}
-
-		try {
-			if (! user.canReadBean(bizId, bizModule, bizDocument, bizCustomer, bizDataGroupId, bizUserId)) {
-				return false;
-			}
-		}
-		catch (MetaDataException e) {
-			// This can happen when a document was indexed but then the customer access was taken away
-			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not get the document for " + bizModule + '.' + bizDocument);
-			return false;
-		}
-		catch (DomainException e) {
-			// This happens when the data was deleted but the CMS was not kept in sync
-			if (UtilImpl.SECURITY_TRACE) System.err.println("Could not retrieve bean " + bizModule + '.' + bizDocument + " with ID " + bizId);
-			return false;
-		}
-
-		return true;
 	}
 	
 	@Override

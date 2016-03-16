@@ -1,6 +1,7 @@
 package modules.admin.DataMaintenance.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,8 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.Util;
+import org.skyve.wildcat.content.AbstractContentManager;
 import org.skyve.wildcat.content.ContentIterable.ContentIterator;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.content.SearchResult;
@@ -132,33 +135,52 @@ public class ContentModel extends ListModel<DataMaintenance> {
 			int i = 0;
 			while (it.hasNext()) {
 				SearchResult hit = it.next();
-				if (i >= start) {
-					Map<String, Object> properties = new TreeMap<>();
-					properties.put(Bean.DOCUMENT_ID, hit.getContentId());
-					properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, hit.getLastModified()));
-					properties.put(PersistentBean.TAGGED_NAME, null);
-					properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-					properties.put(Bean.BIZ_KEY, hit.getContentId());
-					properties.put(Content.attributeNamePropertyName, hit.getAttributeName());
-					properties.put(Content.contentBizIdPropertyName, hit.getBizId());
-					properties.put(Content.contentIdPropertyName, hit.getContentId());
-					properties.put(Content.customerNamePropertyName, hit.getCustomerName());
-					properties.put(Content.documentNamePropertyName, hit.getDocumentName());
-					properties.put(Content.lastModifiedPropertyName, new Timestamp(hit.getLastModified()));
-					properties.put(Content.moduleNamePropertyName, hit.getModuleName());
-					properties.put(Content.contentPropertyName, hit.getExcerpt());
-					rows.add(new MapBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
-
-					if (i >= end) {
-						break;
+				String bizCustomer = hit.getCustomerName();
+				String bizModule = hit.getModuleName();
+				String bizDocument = hit.getDocumentName();
+				String bizDataGroupId = hit.getBizDataGroupId();
+				String bizUserId = hit.getBizUserId();
+				String bizId = hit.getBizId();
+				if (AbstractContentManager.canReadContent(bizCustomer, 
+															bizModule, 
+															bizDocument, 
+															bizDataGroupId, 
+															bizUserId, 
+															bizId)) {
+					if (i >= start) {
+						String contentId = hit.getContentId();
+						Date lastModified = hit.getLastModified();
+						Map<String, Object> properties = new TreeMap<>();
+						properties.put(Bean.DOCUMENT_ID, contentId);
+						properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, lastModified));
+						properties.put(PersistentBean.TAGGED_NAME, null);
+						properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
+						properties.put(Bean.BIZ_KEY, contentId);
+						properties.put(Content.attributeNamePropertyName, hit.getAttributeName());
+						properties.put(Content.contentBizIdPropertyName, bizId);
+						properties.put(Content.contentIdPropertyName, contentId);
+						properties.put(Content.customerNamePropertyName, bizCustomer);
+						properties.put(Content.documentNamePropertyName, bizDocument);
+						properties.put(Content.lastModifiedPropertyName, new Timestamp(lastModified));
+						properties.put(Content.moduleNamePropertyName, bizModule);
+						properties.put(Content.contentPropertyName, hit.getExcerpt());
+						rows.add(new MapBean(Content.MODULE_NAME, Content.DOCUMENT_NAME, properties));
+	
+						if (i >= end) {
+							break;
+						}
 					}
+					i++;
 				}
-				i++;
 			}
 			Page page = new Page();
 			page.setTotalRows(it.getTotalHits());
 			page.setRows(rows);
-System.out.println(start + " : " + end + " : " + page.getRows().size() + " : " + page.getTotalRows());
+			Util.LOGGER.info(String.format("Content Model start = %d : end = %d : size = %d : total rows = %d ",
+											Integer.valueOf(start),
+											Integer.valueOf(end),
+											Integer.valueOf(page.getRows().size()),
+											Long.valueOf(page.getTotalRows())));
 
 			Map<String, Object> properties = new TreeMap<>();
 			properties.put(PersistentBean.FLAG_COMMENT_NAME, null);

@@ -9,6 +9,8 @@ public final class SearchResult {
 	private String customerName;
 	private String moduleName;
 	private String documentName;
+	private String bizDataGroupId;
+	private String bizUserId;
 	private String bizId;
 	private String attributeName;
 	private Date lastModified;
@@ -59,6 +61,22 @@ public final class SearchResult {
 
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
+	}
+
+	public String getBizDataGroupId() {
+		return bizDataGroupId;
+	}
+
+	public void setBizDataGroupId(String bizDataGroupId) {
+		this.bizDataGroupId = bizDataGroupId;
+	}
+
+	public String getBizUserId() {
+		return bizUserId;
+	}
+
+	public void setBizUserId(String bizUserId) {
+		this.bizUserId = bizUserId;
 	}
 
 	public String getBizId() {

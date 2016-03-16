@@ -38,6 +38,8 @@ class ESIterable implements ContentIterable {
 										.addFields(ESClient.BEAN_CUSTOMER_NAME,
 													ESClient.BEAN_MODULE_KEY,
 													ESClient.BEAN_DOCUMENT_KEY,
+													ESClient.BEAN_DATA_GROUP_ID,
+													ESClient.BEAN_USER_ID,
 													ESClient.BEAN_DOCUMENT_ID,
 													ESClient.BEAN_ATTRIBUTE_NAME,
 													ESClient.LAST_MODIFIED,
@@ -84,6 +86,12 @@ class ESIterable implements ContentIterable {
 			String bizCustomer = (String) searchHit.field(ESClient.BEAN_CUSTOMER_NAME).value();
 			String bizModule = (String) searchHit.field(ESClient.BEAN_MODULE_KEY).value();
 			String bizDocument = (String) searchHit.field(ESClient.BEAN_DOCUMENT_KEY).value();
+			String bizDataGroupId = null;
+			SearchHitField field = searchHit.field(ESClient.BEAN_DATA_GROUP_ID);
+			if (field != null) {
+				bizDataGroupId = field.value();
+			}
+			String bizUserId = (String) searchHit.field(ESClient.BEAN_USER_ID).value();
 			String bizId = (String) searchHit.field(ESClient.BEAN_DOCUMENT_ID).value();
 
 			SearchResult hit = new SearchResult();
@@ -91,11 +99,13 @@ class ESIterable implements ContentIterable {
 			hit.setCustomerName(bizCustomer);
 			hit.setModuleName(bizModule);
 			hit.setDocumentName(bizDocument);
+			hit.setBizDataGroupId(bizDataGroupId);
+			hit.setBizUserId(bizUserId);
 			hit.setBizId(bizId);
 
 			hit.setExcerpt((String) searchHit.field(ESClient.CONTENT).value()); 
 
-			SearchHitField field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
+			field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
 			if (field != null) {
 				hit.setAttributeName((String) field.getValue());
 			}
