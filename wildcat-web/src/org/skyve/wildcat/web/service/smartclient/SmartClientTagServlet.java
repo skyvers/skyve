@@ -242,8 +242,6 @@ public class SmartClientTagServlet extends HttpServlet {
 		Map<String, Object> criteria = (Map<String, Object>) JSONUtil.unmarshall(user, criteriaJSON);
 		if (criteria != null) {
 			String operator = (String) criteria.get("operator");
-
-			Filter filter = model.getFilter();
 			if (operator != null) { // advanced criteria
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> advancedCriteria = (List<Map<String, Object>>) criteria.get("criteria");
@@ -253,10 +251,10 @@ public class SmartClientTagServlet extends HttpServlet {
 																			CompoundFilterOperator.valueOf(operator),
 																			advancedCriteria,
 																			tagId,
-																			model,
-																			filter);
+																			model);
 			}
 			else { // simple criteria
+				Filter filter = model.getFilter();
 				SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
 																		drivingDocument,
 																		customer,

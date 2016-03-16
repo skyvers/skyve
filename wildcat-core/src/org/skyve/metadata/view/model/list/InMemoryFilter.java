@@ -3,8 +3,6 @@ package org.skyve.metadata.view.model.list;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -12,7 +10,6 @@ import org.apache.commons.collections.PredicateUtils;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.util.Binder;
-import org.skyve.wildcat.domain.MapBean;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -764,43 +761,7 @@ public class InMemoryFilter implements Filter {
 		return predicates.isEmpty();
 	}
 	
-	void filter(List<Bean> rows) {
+	public void filter(List<Bean> rows) {
 		CollectionUtils.filter(rows, PredicateUtils.allPredicate(predicates));
-	}
-	
-	public static void main(String[] args) {
-		List<Bean> poo = new ArrayList<>(4);
-
-		Map<String, Object> map = new TreeMap<>();
-		map.put("name", "Ted");
-		MapBean bean = new MapBean("admin", "Contact", map);
-		poo.add(bean);
-
-		map = new TreeMap<>();
-		map.put("name", "Fred");
-		bean = new MapBean("admin", "Contact", map);
-		poo.add(bean);
-
-		map = new TreeMap<>();
-		map.put("name", "Jed");
-		bean = new MapBean("admin", "Contact", map);
-		poo.add(bean);
-
-		map = new TreeMap<>();
-		map.put("name", "Ned");
-		bean = new MapBean("admin", "Contact", map);
-		poo.add(bean);
-
-		map = new TreeMap<>();
-		map.put("name", null);
-		bean = new MapBean("admin", "Contact", map);
-		poo.add(bean);
-
-
-		InMemoryFilter f = new InMemoryFilter();
-		f.addNotStartsWith("name", "Je");
-		
-		f.filter(poo);
-		System.out.println(poo);
 	}
 }

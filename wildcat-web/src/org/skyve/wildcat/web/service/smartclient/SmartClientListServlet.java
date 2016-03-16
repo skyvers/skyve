@@ -352,10 +352,9 @@ public class SmartClientListServlet extends HttpServlet {
 		model.setSortParameters(sortParameters);
 		model.setSummary(summaryType);
 		model.setSelectedTagId(tagId);
-		Filter filter = model.getFilter();
 		
 		// Add filter criteria to query
-		addFilterCriteriaToQuery(module, queryDocument, user, operator, criteria, parameters, tagId, model, filter);
+		addFilterCriteriaToQuery(module, queryDocument, user, operator, criteria, parameters, tagId, model);
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
@@ -365,7 +364,9 @@ public class SmartClientListServlet extends HttpServlet {
 			beans.add(summaryBean);
 		}
 		long totalRows = page.getTotalRows();
-System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + page.getRows().size());
+		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("totalRows = %d, row size = %d", 
+																		Long.valueOf(page.getTotalRows()), 
+																		Integer.valueOf(page.getRows().size())));
 		Set<String> projections = model.getProjections();
 
 		message.append("{response:{");
@@ -391,8 +392,7 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 		    										String[] criteria,
 		    										SortedMap<String, Object> parameters,
 		    										String tagId,
-													ListModel<?> model, 
-													Filter filter) 
+													ListModel<?> model) 
     throws Exception {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
@@ -419,8 +419,7 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
     											compoundFilterOperator,
     											advancedCriteria,
     											tagId,
-												model,
-												filter);
+												model);
     		
     		mutableParameters.remove("operator");
     		mutableParameters.remove("criteria");
@@ -433,7 +432,7 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 										filterOperator,
 										mutableParameters,
 										tagId,
-										filter);
+										model.getFilter());
     }
 
     /**
@@ -455,7 +454,10 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 			    										String tagId,
 		    											Filter filter) 
     throws Exception {
-		for (String binding : criteria.keySet()) {
+    	// This doesn't need to set up a sub-filter as its just ANDing criteria
+    	// and the other criteria already added should have taken care of bracketing
+    	// for correct operator precedence.
+    	for (String binding : criteria.keySet()) {
 			Object value = criteria.get(binding);
 			if ("".equals(value)) {
 				value = null;
@@ -556,9 +558,13 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 															CompoundFilterOperator compoundFilterOperator,
 															List<Map<String, Object>> criteria,
 															String tagId,
-															ListModel<?> model,
-															Filter filter)
+															ListModel<?> model)
 	throws Exception {
+		// We have to unconditionally add a new filter here as the metadata query
+		// might have a filter stanza in it which we can't detect and we need to ensure
+		// any filtering done here is AND'd with any existing criteria (hard-coded in a filter stanza or not)
+		Filter filter = model.getFilter();
+		Filter newFilter = model.newFilter();
 		addAdvancedFilterCriteriaToQueryInternal(module,
 													document,
 													user,
@@ -566,7 +572,8 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 													criteria,
 													tagId,
 													model,
-													filter);
+													newFilter);
+		filter.addAnd(newFilter);
 	}
     
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
@@ -584,7 +591,7 @@ System.out.println(page.getTotalRows() + " : " + page.getSummary() + " : " + pag
 		if (criteria != null) {
 			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
 			for (Map<String, Object> criterium : criteria) {
-System.out.println(criterium);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSONUtil.marshall(null, criterium, null));
 				String binding = ((String) criterium.get("fieldName"));
 				if (binding != null) {
 					binding = binding.replace('_', '.');
@@ -596,14 +603,14 @@ System.out.println(criterium);
 					CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 					@SuppressWarnings("unchecked")
 					List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterium.get("criteria");
-					addAdvancedFilterCriteriaToQuery(module,
-														document,
-														user,
-														subCompoundFilterOperator,
-														subCritiera,
-														tagId,
-														model,
-														subFilter);
+					addAdvancedFilterCriteriaToQueryInternal(module,
+																document,
+																user,
+																subCompoundFilterOperator,
+																subCritiera,
+																tagId,
+																model,
+																subFilter);
 					if (! subFilter.isEmpty()) {
 						if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
 							filter.addOr(subFilter);

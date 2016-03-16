@@ -29,7 +29,11 @@ public class DocumentFilterImpl implements DocumentFilter {
 	DocumentFilterImpl(AbstractDocumentQuery owningQuery, String filterClause) {
 		setQuery(owningQuery);
 		if (filterClause != null) {
-			this.filterClause.append(new AbstractBizQL(filterClause).toQueryString(false));
+			// NB we include brackets here in case there are lower precedence operators in the clause
+			// like ORs etc - the brackets ensure that we respect the intention of the query
+			// without worrying about operator precedence.
+			// Extra brackets are removed by Hibernate during query parse
+			this.filterClause.append('(').append(new AbstractBizQL(filterClause).toQueryString(false)).append(')');
 		}
 	}
 
