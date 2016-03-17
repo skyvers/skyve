@@ -33,6 +33,15 @@
 		<%
 			request.getSession().invalidate();
 			request.logout();
+			// remove all cookies too
+			Cookie[] cookies = request.getCookies();
+			if (cookies != null && cookies.length > 0) {
+				for (Cookie cookie : cookies) {
+					cookie.setValue("-");
+					cookie.setMaxAge(0);
+					response.addCookie(cookie);
+				}
+			}
 		%>
 		<form>
 			<table align="center">
