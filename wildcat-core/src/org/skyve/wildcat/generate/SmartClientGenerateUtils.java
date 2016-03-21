@@ -283,6 +283,7 @@ public class SmartClientGenerateUtils {
 							@SuppressWarnings("unchecked")
 							Converter<String> converter = (Converter<String>) text.getConverterForCustomer(customer); 
 							StringBuilder sb = new StringBuilder(128);
+							// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
 							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
 							sb.append("',type:'regexp',errorMessage:'");
 							sb.append(processString(validator.constructMessage(title, converter)));
@@ -1516,7 +1517,7 @@ public class SmartClientGenerateUtils {
 			return null;
 		}
 
-		String result = value.replace("'", "\\'");
+		String result = value.replace("\\", "\\\\").replace("'", "\\'");
 		if (escapeDoubleQuotes) {
 			result = result.replace("\"", "&quot;");
 		}
