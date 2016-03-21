@@ -84,6 +84,9 @@
 				Enough privileges and permissions to login, change password and update own contact details.
 			</description>
 			<privileges>
+				<document name="Audit" permission="_R__C">
+					<action name="SourceVersionChanged" />
+				</document>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
