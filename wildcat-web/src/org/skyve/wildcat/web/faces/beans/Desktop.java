@@ -79,6 +79,7 @@ public class Desktop extends Harness {
 					listDataSources(customer, user, result);
 	
 					result.append("BizUtil.customer='").append(customer.getName()).append("';");
+					result.append("BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
 					if (ViewType.list.equals(getViewType())) { // we have a home ref that is a list view
 						result.append("details.showMember(ListView.contents);");
 						// TODO should cater for map, tree, calendar etc

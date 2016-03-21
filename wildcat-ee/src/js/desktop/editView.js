@@ -1724,7 +1724,7 @@ BizComparison.addMethods({
 			fields: []
 		});
 
-		BizUtil.loadJS('desktop/diff_match_patch.js', function() {
+		BizUtil.loadJS('desktop/diff_match_patch.js?v=' + BizUtil.version, function() {
 			me._comparisonForm.diff_match_patch = new diff_match_patch();
 			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});

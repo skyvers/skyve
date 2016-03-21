@@ -214,9 +214,9 @@ isc.BizMap.addMethods({
 		}
 		else {
 			isc.BizMap.id = this.ID;
-			BizUtil.loadJS('wicket/wicket.js', function() {
-				BizUtil.loadJS('wicket/wicket-gmap3.js', function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&sensor=false&libraries=drawing&callback=isc.BizMap.initialise');
+			BizUtil.loadJS('wicket/wicket.js?v=' + BizUtil.version, function() {
+				BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + BizUtil.version, function() {
+					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMap.initialise');
 				});
 			});
 			return this.Super('draw', arguments);

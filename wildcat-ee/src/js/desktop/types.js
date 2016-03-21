@@ -1717,9 +1717,9 @@ isc.BizMapPicker.addMethods({
 		else {
 			isc.BizMapPicker.id = this.ID;
 
-			BizUtil.loadJS('wicket/wicket.js', function() {
-				BizUtil.loadJS('wicket/wicket-gmap3.js', function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&sensor=false&libraries=drawing&' +
+			BizUtil.loadJS('wicket/wicket.js?v=' + BizUtil.version, function() {
+				BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + BizUtil.version, function() {
+					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&' +
             						'callback=isc.BizMapPicker.initialise');
 				});
 			});
