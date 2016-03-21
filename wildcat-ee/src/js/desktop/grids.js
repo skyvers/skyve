@@ -1044,8 +1044,11 @@ BizListGrid.addMethods({
 				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
 			},
 			selectionUpdated: function(record, recordList) {
+				if (me.selectedIdBinding) {
+					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+				}
 				if (me.bizSelected) {
-					me.bizSelected(record ? record.bizId : null);
+					me.bizSelected();
 				}
 			},
 			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
@@ -1790,8 +1793,11 @@ BizDataGrid.addMethods({
 				me._newButton.setDisabled(me._disabled || (! me.canCreate) || (! me.canAdd));
 			},
 			selectionUpdated: function(record, recordList) {
+				if (me.selectedIdBinding) {
+					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+				}
 				if (me.bizSelected) {
-					me.bizSelected(record ? record.bizId : null);
+					me.bizSelected();
 				}
 			},
 

@@ -2374,11 +2374,7 @@ pickListFields:[{name:'value'}],
 				code.append("],");
 				dataGridFieldsIncomplete = false;
 			}
-			code.append("bizSelected:function(bizId){var view=this._view;");
-			String selectedIdBinding = selectable.getSelectedIdBinding();
-			if (selectedIdBinding != null) {
-				code.append("view._vm.setValue(this.selectedIdBinding,bizId);");
-			}
+			code.append("bizSelected:function(){var view=this._view;");
 		}
 
 		@Override
