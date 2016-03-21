@@ -935,7 +935,7 @@ code.append("_view:view})");
 					title = displayName;
 				}
 				title = SmartClientGenerateUtils.processString(title);
-				code.append("endRow:false,title:'").append(title).append("',type:'blurb',");
+				code.append("endRow:false,title:'").append(SmartClientGenerateUtils.processString(title)).append("',type:'blurb',");
 				if (binding == null) {
 					code.append("defaultValue:'").append(SmartClientGenerateUtils.processString((value == null) ? displayName : value, false, false));
 				}
@@ -1154,7 +1154,7 @@ code.append("_view:view})");
 			code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 			
 			String title = column.getTitle();
-			code.append((title == null) ? " " : title).append('\'');
+			code.append((title == null) ? " " : SmartClientGenerateUtils.processString(title)).append('\'');
 			HorizontalAlignment alignment = column.getAlignment();
 			if (alignment != null) {
 				code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
@@ -1313,7 +1313,7 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value: '");
+			code.append("var ").append(variable).append("=BizLabel.create({value:'");
 			code.append(SmartClientGenerateUtils.processString(list.getTitle()));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1331,7 +1331,7 @@ code.append("_view:view})");
 											boolean parentVisible,
 											boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value: '");
+			code.append("var ").append(variable).append("=BizLabel.create({value:'");
 			code.append(SmartClientGenerateUtils.processString(column.getTitle()));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1371,7 +1371,7 @@ code.append("_view:view})");
 											boolean parentVisible,
 											boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value: '");
+			code.append("var ").append(variable).append("=BizLabel.create({value:'");
 			code.append("check membership").append(membership.getBinding());
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -2598,7 +2598,8 @@ pickListFields:[{name:'value'}],
 				String borderTitle = bordered.getBorderTitle();
 				builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 				if (borderTitle != null) {
-					builder.append("groupTitle:'&nbsp;&nbsp;").append(borderTitle).append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
+					builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(borderTitle));
+					builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 				}
 				if (definedPixelPadding == null) {
 					builder.append("layoutMargin:10,");
