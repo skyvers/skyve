@@ -55,39 +55,45 @@ public class RDBMSAuditInterceptor extends Interceptor {
 	
 	// Ensure an insert audit either exists already or is inserted
 	private static void ensureOriginalInsertAuditExists(PersistentBean bean) throws Exception {
-		// Check if we have an insert audit record.
 		Persistence p = CORE.getPersistence();
 		Customer c = p.getUser().getCustomer();
-		Module m = c.getModule(Audit.MODULE_NAME);
-		String persistentIdentifier = m.getDocument(c, Audit.DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
-		SQL q = p.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s and %s = :%s", 
-										Bean.DOCUMENT_ID, 
-										persistentIdentifier,
-										Audit.auditBizIdPropertyName,
-										Audit.auditBizIdPropertyName,
-										Bean.CUSTOMER_NAME,
-										Bean.CUSTOMER_NAME,
-										Audit.operationPropertyName,
-										Audit.operationPropertyName));
-		q.putParameter(Audit.auditBizIdPropertyName, bean.getBizId(), false);
-		q.putParameter(Bean.CUSTOMER_NAME, c.getName(), false);
-		q.putParameter(Audit.operationPropertyName, Operation.insert);
 
-
-		// if not we need to create one
-		if (q.scalarResults(String.class).isEmpty()) {
-			// To do this we need to get the database state before this update operation
-			// We can do this by getting a new persistence and loading the record,
-			// getting the JSON for it and then inserting it in our current thread's persistence.
-			AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) p.getClass().newInstance();
-			try {
-				tempP.setUser(p.getUser());
-				PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), false);
-				audit(oldBean, Operation.insert, true);
-			}
-			finally {
-				// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
-				tempP.getEntityManager().close();
+		// check to see if an audit is required
+		Module am = c.getModule(bean.getBizModule());
+		Document ad = am.getDocument(c, bean.getBizDocument());
+		if (ad.isAudited()) {
+			// Check if there exists an insert audit record.
+			Module m = c.getModule(Audit.MODULE_NAME);
+			String persistentIdentifier = m.getDocument(c, Audit.DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			SQL q = p.newSQL(String.format("select %s from %s where %s = :%s and %s = :%s and %s = :%s", 
+											Bean.DOCUMENT_ID, 
+											persistentIdentifier,
+											Audit.auditBizIdPropertyName,
+											Audit.auditBizIdPropertyName,
+											Bean.CUSTOMER_NAME,
+											Bean.CUSTOMER_NAME,
+											Audit.operationPropertyName,
+											Audit.operationPropertyName));
+			q.putParameter(Audit.auditBizIdPropertyName, bean.getBizId(), false);
+			q.putParameter(Bean.CUSTOMER_NAME, c.getName(), false);
+			q.putParameter(Audit.operationPropertyName, Operation.insert);
+	
+	
+			// if not we need to create one
+			if (q.scalarResults(String.class).isEmpty()) {
+				// To do this we need to get the database state before this update operation
+				// We can do this by getting a new persistence and loading the record,
+				// getting the JSON for it and then inserting it in our current thread's persistence.
+				AbstractHibernatePersistence tempP = (AbstractHibernatePersistence) p.getClass().newInstance();
+				try {
+					tempP.setUser(p.getUser());
+					PersistentBean oldBean = tempP.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), false);
+					audit(oldBean, Operation.insert, true);
+				}
+				finally {
+					// Can't call tempP.commit(true) here as it would remove the current thread's Persistence as well
+					tempP.getEntityManager().close();
+				}
 			}
 		}
 	}
@@ -97,33 +103,37 @@ public class RDBMSAuditInterceptor extends Interceptor {
 		Persistence p = CORE.getPersistence();
 		User u = p.getUser();
 		Customer c = u.getCustomer();
-		Audit a = Audit.newInstance();
 		
+		// check to see if an audit is required
 		Module am = c.getModule(bean.getBizModule());
 		Document ad = am.getDocument(c, bean.getBizDocument());
-		AuditJSONGenerator generator = new AuditJSONGenerator(c);
-		generator.visit(ad, bean, c);
-		a.setAudit(generator.toJSON());
-		a.setAuditModuleName(bean.getBizModule());
-		a.setAuditDocumentName(bean.getBizDocument());
-		a.setAuditBizId(bean.getBizId());
-		a.setAuditBizKey(bean.getBizKey());
-		if (originalInsert) {
-			OptimisticLock lock = bean.getBizLock();
-			long millis = lock.getTimestamp().getTime();
-			a.setMillis(Long.valueOf(millis));
-			a.setTimestamp(new Timestamp(millis));
-			a.setUserName(lock.getUsername());
-			a.setOperation(Operation.insert);
+		if (ad.isAudited()) {
+			Audit a = Audit.newInstance();
+
+			AuditJSONGenerator generator = new AuditJSONGenerator(c);
+			generator.visit(ad, bean, c);
+			a.setAudit(generator.toJSON());
+			a.setAuditModuleName(bean.getBizModule());
+			a.setAuditDocumentName(bean.getBizDocument());
+			a.setAuditBizId(bean.getBizId());
+			a.setAuditBizKey(bean.getBizKey());
+			if (originalInsert) {
+				OptimisticLock lock = bean.getBizLock();
+				long millis = lock.getTimestamp().getTime();
+				a.setMillis(Long.valueOf(millis));
+				a.setTimestamp(new Timestamp(millis));
+				a.setUserName(lock.getUsername());
+				a.setOperation(Operation.insert);
+			}
+			else {
+				long millis = System.currentTimeMillis();
+				a.setMillis(Long.valueOf(millis));
+				a.setTimestamp(new Timestamp(millis));
+				a.setUserName(u.getName());
+				a.setOperation(operation);
+			}
+			p.upsertBeanTuple(a);
 		}
-		else {
-			long millis = System.currentTimeMillis();
-			a.setMillis(Long.valueOf(millis));
-			a.setTimestamp(new Timestamp(millis));
-			a.setUserName(u.getName());
-			a.setOperation(operation);
-		}
-		p.upsertBeanTuple(a);
 	}
 	
 	public static void audit(PersistentBean bean, Operation operation)

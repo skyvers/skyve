@@ -21,7 +21,7 @@
 			<displayName>User Name</displayName>
 			<length>254</length>
 		</text>
-		<text name="password" >
+		<text name="password" audited="false">
 			<displayName>Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<!--  The password is checked and populated in the Bizlet -->
@@ -37,12 +37,12 @@
 			<domain>variant</domain>
 			<length>30</length>
 		</text>
-		<text name="newPassword" persistent="false">
+		<text name="newPassword" persistent="false" audited="false">
 			<displayName>New Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
 		</text>
-		<text name="confirmPassword" persistent="false">
+		<text name="confirmPassword" persistent="false" audited="false">
 			<displayName>Confirm Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
@@ -56,7 +56,7 @@
 			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
 			<length>100</length>
 		</text>
-		<text name="clearTextPassword" >
+		<text name="clearTextPassword" audited="false">
 			<displayName>Generated Password</displayName>
 			<description>
 				The newly assigned password - this password must be changed at your next login.

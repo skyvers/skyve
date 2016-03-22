@@ -33,13 +33,20 @@ public class AuditJSONGenerator extends BeanVisitor {
 								Relation owningRelation,
 								Bean bean)
 	throws Exception {
+		if (! document.isAudited()) {
+			return false;
+		}
+		if ((owningRelation != null) && (! owningRelation.isAudited())) {
+			return false;
+		}
+
 		Map<String, Object> node = new TreeMap<>();
 
 		node.put(Bean.DOCUMENT_ID, bean.getBizId());
 		
 		for (Attribute attribute : document.getAllAttributes()) {
-			// Not a relation
-			if (! (attribute instanceof Relation)) {
+			// Is audited and is not a relation
+			if (attribute.isAudited() && (! (attribute instanceof Relation))) {
 				String name = attribute.getName();
 				node.put(name, BindUtil.getSerialized(customer, bean, name));
 			}

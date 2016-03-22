@@ -6,6 +6,7 @@
 	<persistent name="ADM_UserLoginRecord" />
 	<singularAlias>User Login Record</singularAlias>
 	<pluralAlias>User Login Records</pluralAlias>
+	<audited>false</audited>
 	<bizKey expression="{userName} @ {loginDateTime}"/>
 	<attributes>
 		<text name="userName" required="true">
