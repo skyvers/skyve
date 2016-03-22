@@ -64,6 +64,13 @@ public interface Model extends NamedMetaData {
 	 */
 	public Extends getExtends();
 	
+	/**
+	 * Should this document be audited.
+	 * 
+	 * @return
+	 */
+	public boolean isAudited();
+	
 	public String getIcon16x16RelativeFileName();
 
 	public String getIcon32x32RelativeFileName();

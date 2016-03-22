@@ -28,7 +28,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"description", 
 							"defaultWidgetReference",
 							"deprecatedBool",
-							"trackChangesBool"})
+							"trackChangesBool",
+							"auditedBool"})
 public abstract class AbstractAttribute extends org.skyve.wildcat.metadata.repository.NamedMetaData implements Attribute {
 	/**
 	 * For Serialization
@@ -42,6 +43,7 @@ public abstract class AbstractAttribute extends org.skyve.wildcat.metadata.repos
 	private InputWidget defaultInputWidget;
 	private boolean deprecated;
 	private boolean trackChanges = true;
+	private boolean audited = true;
 	private String documentation;
 	
 	@Override
@@ -162,6 +164,21 @@ public abstract class AbstractAttribute extends org.skyve.wildcat.metadata.repos
 	@XmlAttribute(name="trackChanges", required = false)
 	public void setTrackChangesBool(Boolean trackChanges) {
 		this.trackChanges = trackChanges.booleanValue();
+	}
+
+	@Override
+	public boolean isAudited() {
+		return audited;
+	}
+
+	@XmlTransient
+	public void setAudited(boolean audited) {
+		this.audited = audited;
+	}
+
+	@XmlAttribute(name="audited", required = false)
+	public void setAuditedBool(Boolean audited) {
+		this.audited = audited.booleanValue();
 	}
 
 	@Override

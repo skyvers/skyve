@@ -30,6 +30,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private String pluralAlias;
 	private String icon16x16RelativeFileName;
 	private String icon32x32RelativeFileName;
+	private boolean audited = true;
 	private String name;
 	private String description;
 
@@ -108,6 +109,15 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
+	}
+
+	@Override
+	public boolean isAudited() {
+		return audited;
+	}
+
+	public void setAudited(boolean audited) {
+		this.audited = audited;
 	}
 
 	@Override

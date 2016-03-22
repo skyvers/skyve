@@ -74,6 +74,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"persistent", 
 							"singularAlias", 
 							"pluralAlias",
+							"audited",
 							"icon16x16RelativeFilePath",
 							"icon32x32RelativeFilePath",
 							"description",
@@ -92,6 +93,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String pluralAlias;
 	private String icon16x16RelativeFilePath;
 	private String icon32x32RelativeFilePath;
+	private java.lang.Boolean audited;
 	private String description;
 	private String parentDocument;
 	private BizKey bizKey;
@@ -152,6 +154,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
 	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
+	}
+
+	public java.lang.Boolean getAudited() {
+		return audited;
+	}
+
+	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	public void setAudited(java.lang.Boolean audited) {
+		this.audited = audited;
 	}
 
 	public String getDescription() {
@@ -269,6 +280,9 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setIcon16x16RelativeFileName(icon16);
 		result.setIcon32x32RelativeFileName(icon32);
+		
+		// audited defaults to true when not present
+		result.setAudited(java.lang.Boolean.FALSE.equals(getAudited()) ? false : true);
 		
 		result.setDescription(getDescription());
 		

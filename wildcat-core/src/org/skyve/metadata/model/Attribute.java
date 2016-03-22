@@ -111,10 +111,18 @@ public interface Attribute extends NamedMetaData {
 	public boolean isDeprecated();
 	
 	/**
+	 * Should mutations to this attribute be tracked and make the object "changed".
 	 * 
 	 * @return
 	 */
 	public boolean isTrackChanges();
+
+	/**
+	 * Should this attribute be audited.
+	 * 
+	 * @return
+	 */
+	public boolean isAudited();
 
 	/**
 	 * 
