@@ -7,6 +7,7 @@
 <%@ page import="org.skyve.metadata.view.View.ViewType"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebAction"%>
+<%@ page import="org.skyve.web.WebContext"%>
 <%@ page import="org.skyve.wildcat.metadata.repository.router.Router"%>
 <%@ page import="org.skyve.wildcat.metadata.repository.router.RouteCriteria"%>
 <%@ page import="org.skyve.wildcat.persistence.AbstractPersistence"%>
@@ -38,9 +39,7 @@
 		sb.append(Util.getHomeUrl()).append("home.jsp");
 		if ((m != null) && (d != null)) {
 			sb.append("?m=").append(m);
-			if (d != null) {
-				sb.append("&d=").append(d);
-			}
+			sb.append("&d=").append(d);
 			if (a != null) {
 				sb.append("&a").append(a);
 			}
@@ -58,7 +57,7 @@
 	}
 	else {
 		// Get the user
-		User user = (User) request.getSession().getAttribute(AbstractWebContext.USER_SESSION_ATTRIBUTE_NAME);
+		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		if (user == null) { // if the user is not established yet (but we've logged in...)
 			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
