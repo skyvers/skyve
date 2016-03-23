@@ -40,7 +40,7 @@ import org.skyve.wildcat.util.XMLUtil;
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private UIResources uiResources;
 	private HTMLResources htmlResources;
-	private LoginResources loginResources;
+	private LoginResourcesMetaData loginResources;
 	private ConverterName defaultDateConverter;
 	private ConverterName defaultTimeConverter;
 	private ConverterName defaultDateTimeConverter;
@@ -67,12 +67,12 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		this.htmlResources = htmlResources;
 	}
 
-	public LoginResources getLoginResources() {
+	public LoginResourcesMetaData getLoginResources() {
 		return loginResources;
 	}
 
 	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE)
-	public void setLoginResources(LoginResources loginResources) {
+	public void setLoginResources(LoginResourcesMetaData loginResources) {
 		this.loginResources = loginResources;
 	}
 
@@ -144,7 +144,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setUiResources((uiResources == null) ? new UIResources() : uiResources);
 		result.setHtmlResources((htmlResources == null) ? new HTMLResources() : htmlResources);
-		result.setLoginResources((loginResources == null) ? new LoginResources() : loginResources);
+		result.setLoginResources((loginResources == null) ? new LoginResourcesMetaData() : loginResources);
 
 		ConverterName converterName = getDefaultDateConverter();
 		if (converterName == null) {

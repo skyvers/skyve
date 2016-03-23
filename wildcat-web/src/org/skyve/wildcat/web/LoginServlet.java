@@ -1,10 +1,6 @@
 package org.skyve.wildcat.web;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -13,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.skyve.content.MimeType;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
@@ -76,88 +71,64 @@ public class LoginServlet extends HttpServlet {
 			AbstractRepository repository = AbstractRepository.get();
 
 			if (LOGIN_PATH.equals(servletPath)) {
+				String url = "/pages/login.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String loginRelativeFileName = customer.getLoginResources().getLoginPageRelativeFileName();
-					if (loginRelativeFileName != null) {
-						response.setContentType(MimeType.html.toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
-						pumpOutResource(loginRelativeFileName, customerName, repository, response);
-						return;
+					String value = customer.getLoginResources().getLoginPageURL();
+					if (value != null) {
+						url = value;
 					}
 				}
 
 				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher("/pages/login.jsp");
+				RequestDispatcher rd = request.getRequestDispatcher(url);
 				rd.forward(request, response);
 			}
 			else if (LOGGED_OUT_PATH.equals(servletPath)) {
+				String url = "/pages/loggedOut.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String loggedOutRelativeFileName = customer.getLoginResources().getLoggedOutPageRelativeFileName();
-					if (loggedOutRelativeFileName != null) {
-						response.setContentType(MimeType.html.toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
-						pumpOutResource(loggedOutRelativeFileName, customerName, repository, response);
-						return;
+					String value = customer.getLoginResources().getLoggedOutPageURL();
+					if (value != null) {
+						url = value;
 					}
 				}
 
 				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher("/pages/loggedOut.jsp");
+				RequestDispatcher rd = request.getRequestDispatcher(url);
 				rd.forward(request, response);
 			}
 			else if (LOGIN_ERROR_PATH.equals(servletPath)) {
+				String url = "/pages/loginError.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String loginErrorRelativeFileName = customer.getLoginResources().getLoginErrorPageRelativeFileName();
-					if (loginErrorRelativeFileName != null) {
-						response.setContentType(MimeType.html.toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
-						pumpOutResource(loginErrorRelativeFileName, customerName, repository, response);
-						return;
+					String value = customer.getLoginResources().getLoginErrorPageURL();
+					if (value != null) {
+						url = value;
 					}
 				}
 
 				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher("/pages/loginError.jsp");
+				RequestDispatcher rd = request.getRequestDispatcher(url);
 				rd.forward(request, response);
 			}
 			else if (SMART_CLIENT_JAVASCRIPT_LOGIN.equals(servletPath)) {
+				String url = "/desktop/reloginFlow.js";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					String smartClientJavascriptRelativeFileName = customer.getLoginResources().getSmartClientJavascriptRelativeFileName();
-					if (smartClientJavascriptRelativeFileName != null) {
-						response.setContentType(MimeType.javascript.toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
-						pumpOutResource(smartClientJavascriptRelativeFileName, customerName, repository, response);
-						return;
+					String value = customer.getLoginResources().getSmartClientJavascriptURL();
+					if (value != null) {
+						url = value;
 					}
 				}
 
 				// forward to jsp
-				RequestDispatcher rd = request.getRequestDispatcher("/desktop/reloginFlow.js");
+				RequestDispatcher rd = request.getRequestDispatcher(url);
 				rd.forward(request, response);
 			}
 		}
 		catch (MetaDataException e) {
 			throw new ServletException("Could not obtain the customer for name " + customerName, e);
-		}
-	}
-	
-	private static void pumpOutResource(String relativeResourceFileName, 
-											String customerName, 
-											AbstractRepository repository,
-											HttpServletResponse response)
-	throws IOException {
-		File page = repository.findResourceFile(relativeResourceFileName, customerName, null);
-		try (PrintWriter pw = response.getWriter()) {
-			try (BufferedReader file = new BufferedReader(new FileReader(page))) {
-				String line = null;
-				while ((line = file.readLine()) != null) {
-					pw.println(line);
-				}
-			}
 		}
 	}
 }

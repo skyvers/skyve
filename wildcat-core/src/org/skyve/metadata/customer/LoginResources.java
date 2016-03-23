@@ -8,23 +8,23 @@ public interface LoginResources {
 	 * 
 	 * @return
 	 */
-	public String getLoginPageRelativeFileName();
+	public String getLoginPageURL();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getLoginErrorPageRelativeFileName();
+	public String getLoginErrorPageURL();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getLoggedOutPageRelativeFileName();
+	public String getLoggedOutPageURL();
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String getSmartClientJavascriptRelativeFileName();
+	public String getSmartClientJavascriptURL();
 }
