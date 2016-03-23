@@ -55,9 +55,13 @@ public class ActivityContext implements DynamicImage<SystemDashboard> {
 
 			Color baseColour = new Color(70, 130, 180);
 			Color nextColour = baseColour;
-			int redDiff = (baseColour.getRed() / 2) / plot.getDataset().getItemCount();
-			int greenDiff = (baseColour.getGreen() / 2) / plot.getDataset().getItemCount();
-			int blueDiff = (baseColour.getBlue() / 2) / plot.getDataset().getItemCount();
+			int itemDivisor = plot.getDataset().getItemCount();
+			if (itemDivisor < 1) {
+				itemDivisor = 1;
+			}
+			int redDiff = (baseColour.getRed() / 2) / itemDivisor;
+			int greenDiff = (baseColour.getGreen() / 2) / itemDivisor;
+			int blueDiff = (baseColour.getBlue() / 2) / itemDivisor;
 
 			for (int seriesIndex = 0; seriesIndex < plot.getDataset().getItemCount(); seriesIndex++) {
 				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), nextColour);
