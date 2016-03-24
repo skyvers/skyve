@@ -1,10 +1,22 @@
 package org.skyve.wildcat.util;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import org.skyve.content.MimeType;
+import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 /**
  * Basic file utilities
@@ -102,6 +114,86 @@ public class FileUtil {
 		}
 
 		return filePath.toString();
+	}
+
+	/**
+	 * Prepare a zip download for the directory
+	 * 
+	 * @param directoryPath
+	 * @param zipName
+	 * @param webContext
+	 * @return
+	 * @throws Exception
+	 */
+	public static Download prepareZipDownload(String directoryPath, String zipName, WebContext webContext)
+	throws Exception {
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream(20480)) {
+			File backupDir = new File(directoryPath);
+			if (backupDir.exists() && backupDir.isDirectory()) {
+
+				try (ZipOutputStream zip = new ZipOutputStream(out)) {
+					List<File> fileList = new ArrayList<>();
+		
+					getAllFiles(backupDir, fileList);
+		
+					for (File file : fileList) {
+						if (! file.isDirectory()) { // we only zip files, not directories
+							addToZip(backupDir, file, zip);
+						}
+					}
+					
+					zip.flush();
+				}
+			}
+			
+			out.flush();
+			return new Download(zipName, new ByteArrayInputStream(out.toByteArray()), MimeType.zip);
+		}
+	}
+	
+	/**
+	 * Get all files from a directory
+	 * 
+	 * @param dir
+	 * @param fileList
+	 */
+	private static void getAllFiles(File dir, List<File> fileList) {
+		File[] files = dir.listFiles();
+		for (File file : files) {
+			fileList.add(file);
+			if (file.isDirectory()) {
+				getAllFiles(file, fileList);
+			}
+		}
+	}
+
+	/**
+	 * Add files within a directory to a zip file
+	 * @param directoryToZip
+	 * @param file
+	 * @param zos
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static void addToZip(File directoryToZip, File file, ZipOutputStream zos)
+	throws FileNotFoundException, IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			// we want the zipEntry's path to be a relative path that is relative
+			// to the directory being zipped, so chop off the rest of the path
+			String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
+																	file.getCanonicalPath().length());
+			Util.LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
+			ZipEntry zipEntry = new ZipEntry(zipFilePath);
+			zos.putNextEntry(zipEntry);
+
+			byte[] bytes = new byte[1024];
+			int length = 0;
+			while ((length = fis.read(bytes)) >= 0) {
+				zos.write(bytes, 0, length);
+			}
+
+			zos.closeEntry();
+		}
 	}
 
 }
