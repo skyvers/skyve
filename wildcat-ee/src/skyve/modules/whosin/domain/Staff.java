@@ -388,4 +388,13 @@ public class Staff extends AbstractPersistentBean {
 	public Position getPosition() {
 		return position;
 	}
+
+	/**
+	 * {@link #position} mutator.
+	 * 
+	 * @param position	The new value to set.
+	 **/
+	public void setPosition(Position position) {
+		this.position = position;
+	}
 }
