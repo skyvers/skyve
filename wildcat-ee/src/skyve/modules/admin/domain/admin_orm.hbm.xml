@@ -70,7 +70,6 @@
 				<param name="enumClass">modules.admin.domain.Communication$FormatType</param>
 			</type>
 		</property>
-		<property name="filePath" length="2000" />
 		<property name="system" />
 		<property name="unsubscribeUrl" length="500" />
 		<property name="includeCalendar" />

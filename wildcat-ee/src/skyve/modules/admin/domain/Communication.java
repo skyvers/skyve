@@ -75,7 +75,9 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String formatTypePropertyName = "formatType";
 	/** @hidden */
-	public static final String filePathPropertyName = "filePath";
+	public static final String selectedBatchTimestampFolderNamePropertyName = "selectedBatchTimestampFolderName";
+	/** @hidden */
+	public static final String refreshBatchesPropertyName = "refreshBatches";
 	/** @hidden */
 	public static final String systemPropertyName = "system";
 	/** @hidden */
@@ -284,10 +286,8 @@ public class Communication extends AbstractPersistentBean {
 	private String attachmentFileName3;
 	private ActionType actionType;
 	private FormatType formatType;
-	/**
-	 * The path (local to the server) where bulk files will be created.
-	 **/
-	private String filePath;
+	private String selectedBatchTimestampFolderName;
+	private Boolean refreshBatches = new Boolean(true);
 	/**
 	 * System communications can not be deleted unless the system flag is cleared first.
 	 **/
@@ -677,21 +677,37 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #filePath} accessor.
+	 * {@link #selectedBatchTimestampFolderName} accessor.
 	 **/
-	public String getFilePath() {
-		return filePath;
+	public String getSelectedBatchTimestampFolderName() {
+		return selectedBatchTimestampFolderName;
 	}
 
 	/**
-	 * {@link #filePath} mutator.
+	 * {@link #selectedBatchTimestampFolderName} mutator.
 	 * 
-	 * @param filePath	The new value to set.
+	 * @param selectedBatchTimestampFolderName	The new value to set.
 	 **/
 	@XmlElement
-	public void setFilePath(String filePath) {
-		preset(filePathPropertyName, filePath);
-		this.filePath = filePath;
+	public void setSelectedBatchTimestampFolderName(String selectedBatchTimestampFolderName) {
+		this.selectedBatchTimestampFolderName = selectedBatchTimestampFolderName;
+	}
+
+	/**
+	 * {@link #refreshBatches} accessor.
+	 **/
+	public Boolean getRefreshBatches() {
+		return refreshBatches;
+	}
+
+	/**
+	 * {@link #refreshBatches} mutator.
+	 * 
+	 * @param refreshBatches	The new value to set.
+	 **/
+	@XmlElement
+	public void setRefreshBatches(Boolean refreshBatches) {
+		this.refreshBatches = refreshBatches;
 	}
 
 	/**
@@ -857,6 +873,30 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	public Subscription getSubscriptionsElementById(String bizId) {
 		return getElementById(subscriptions, bizId);
+	}
+
+	/**
+	 * Batch Selected
+	 */
+	@XmlTransient
+	public boolean isBatchSelected() {
+		return (selectedBatchTimestampFolderName != null);
+	}
+
+	public boolean isNotBatchSelected() {
+		return (! isBatchSelected());
+	}
+
+	/**
+	 * Refresh Batches
+	 */
+	@XmlTransient
+	public boolean isBatchesRefreshRequired() {
+		return (Boolean.TRUE.equals(refreshBatches));
+	}
+
+	public boolean isNotBatchesRefreshRequired() {
+		return (! isBatchesRefreshRequired());
 	}
 
 	/**

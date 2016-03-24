@@ -140,6 +140,9 @@
 					<action name="TestSend" />
 					<action name="UpdateModule" />
 					<action name="UpdateDocument" />
+					<action name="BatchSelected" />
+					<action name="DeleteBatch" />
+					<action name="ZipBatch" />
 				</document>
 				<document name="Contact" permission="CRUDD" />
 			</privileges>
@@ -161,6 +164,10 @@
 					<action name="TestSend" />
 					<action name="UpdateModule" />
 					<action name="UpdateDocument" />
+					<action name="BatchSelected" />
+					<action name="DeleteBatch" />
+					<action name="ZipBatch" />
+					
 				</document>
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
