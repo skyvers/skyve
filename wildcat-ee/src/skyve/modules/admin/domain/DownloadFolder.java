@@ -8,13 +8,13 @@ import org.skyve.CORE;
 import org.skyve.wildcat.domain.AbstractTransientBean;
 
 /**
- * Backup
+ * DownloadFolder
  * 
  * @stereotype "transient"
  */
 @XmlType
 @XmlRootElement
-public class Backup extends AbstractTransientBean {
+public class DownloadFolder extends AbstractTransientBean {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -24,7 +24,7 @@ public class Backup extends AbstractTransientBean {
 	/** @hidden */
 	public static final String MODULE_NAME = "admin";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "Backup";
+	public static final String DOCUMENT_NAME = "DownloadFolder";
 
 	/** @hidden */
 	public static final String namePropertyName = "name";
@@ -34,23 +34,23 @@ public class Backup extends AbstractTransientBean {
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return Backup.MODULE_NAME;
+		return DownloadFolder.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return Backup.DOCUMENT_NAME;
+		return DownloadFolder.DOCUMENT_NAME;
 	}
 
-	public static Backup newInstance() throws Exception {
+	public static DownloadFolder newInstance() throws Exception {
 		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof Backup) && 
-					this.getBizId().equals(((Backup) o).getBizId()));
+		return ((o instanceof DownloadFolder) && 
+					this.getBizId().equals(((DownloadFolder) o).getBizId()));
 	}
 
 	/**

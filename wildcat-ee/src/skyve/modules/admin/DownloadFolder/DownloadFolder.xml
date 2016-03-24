@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<document name="Backup" 
+<document name="DownloadFolder" 
 			xmlns="http://www.skyve.org/xml/document" 
 			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<singularAlias>Backup</singularAlias>
-	<pluralAlias>Backup</pluralAlias>
+	<singularAlias>DownloadFolder</singularAlias>
+	<pluralAlias>DownloadFolders</pluralAlias>
 	<attributes>
 		<text name="name">
 			<displayName>Name</displayName>

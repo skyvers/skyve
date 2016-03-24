@@ -9,7 +9,7 @@
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
-		<document ref="Backup" />
+		<document ref="DownloadFolder" />
 		<document ref="ChangePassword" />
 		<document ref="Configuration" />
 		<document ref="Contact" defaultQueryName="qContacts" />
@@ -150,7 +150,7 @@
 		<role name="SecurityAdministrator">
 			<description>Allows administration of Users and Groups.</description>
 			<privileges>
-				<document name="Backup" permission="_R__C" />
+				<document name="DownloadFolder" permission="_R__C" />
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
