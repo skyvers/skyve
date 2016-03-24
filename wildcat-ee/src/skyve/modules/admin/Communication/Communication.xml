@@ -103,11 +103,15 @@
 				<value code="email" />
 			</values>
 		</enum>
-		<text name="filePath">
-			<displayName>Result Folder</displayName>
-			<description>The path (local to the server) where bulk files will be created.</description>
-			<length>2000</length>
-		</text>
+		<id name="selectedBatchTimestampFolderName" persistent="false" trackChanges="false">
+			<displayName>Selected Batch Timestamp Folder Name</displayName>
+		</id>
+		<boolean name="refreshBatches" persistent="false" trackChanges="false">
+			<displayName>Refresh Batches</displayName>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		
+		
 		<boolean name="system">
 			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
@@ -185,5 +189,22 @@
 				<![CDATA[Boolean.TRUE.equals(getIncludeCalendar())]]>
 			</expression>
 		</condition>
+		<condition name="batchSelected">
+			<description>Batch Selected</description>
+			<expression>
+				<![CDATA[
+					selectedBatchTimestampFolderName != null
+				]]>
+			</expression>
+		</condition>		
+		<condition name="batchesRefreshRequired">
+			<description>Refresh Batches</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(refreshBatches)
+				]]>
+			</expression>
+		</condition>
+		
 	</conditions>
 </document>

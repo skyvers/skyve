@@ -4,8 +4,6 @@ import modules.admin.Communication.CommunicationUtil;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.ActionType;
 
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -23,10 +21,6 @@ public class CreateFiles implements ServerSideAction<Communication> {
 	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
 
 		communication.setActionType(ActionType.saveForBulkSend);
-		
-		if(communication.getFilePath()==null){
-			throw new ValidationException(new Message(Communication.filePathPropertyName, "Value is required for this action"));
-		}
 		
 		Communication result = CommunicationUtil.kickOffJob(communication);
 		
