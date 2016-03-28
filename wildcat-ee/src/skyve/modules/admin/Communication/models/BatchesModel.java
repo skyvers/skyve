@@ -1,4 +1,4 @@
-package modules.admin.DataMaintenance.models;
+package modules.admin.Communication.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.SortedMap;
 import java.util.TreeSet;
 
 import modules.admin.DownloadFolder.DownloadFolderBizlet;
-import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.Communication;
 import modules.admin.domain.DownloadFolder;
 
 import org.skyve.CORE;
@@ -23,14 +23,14 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.wildcat.metadata.module.query.QueryColumnImpl;
 import org.skyve.wildcat.util.UtilImpl;
 
-public class BackupsModel extends ListModel<DataMaintenance> {
+public class BatchesModel extends ListModel<Communication> {
 	private static final long serialVersionUID = -7192916420761744760L;
 
 	private Document drivingDocument = null;
 	private Set<String> projections = new TreeSet<>();
 	private List<QueryColumn> columns = new ArrayList<>(1);
-	
-	public BackupsModel() throws Exception {
+
+	public BatchesModel() throws Exception {
 		Customer c = CORE.getUser().getCustomer();
 		drivingDocument = c.getModule(DownloadFolder.MODULE_NAME).getDocument(c, DownloadFolder.DOCUMENT_NAME);
 
@@ -46,7 +46,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		column.setSortable(false);
 		columns.add(column);
 	}
-	
+
 	@Override
 	public String getDescription() {
 		return "All DownloadFolders";
@@ -82,8 +82,8 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	@Override
 	public Page fetch() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName;
-		
+		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
+
 		return DownloadFolderBizlet.fetch(backupDirPrefix, getStartRow(), getEndRow());
 	}
 
@@ -93,8 +93,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	}
 
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties)
-	throws Exception {
+	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 

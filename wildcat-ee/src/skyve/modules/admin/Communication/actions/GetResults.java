@@ -59,9 +59,7 @@ public class GetResults implements ServerSideAction<Communication> {
 			results.append(" will be ");
 			switch (communication.getActionType()) {
 			case saveForBulkSend:
-				results.append("created into the directory ");
-				results.append(communication.getFilePath());
-				results.append(".");
+				results.append("created as a batch for download.");
 				break;
 
 			case sendImmediately:

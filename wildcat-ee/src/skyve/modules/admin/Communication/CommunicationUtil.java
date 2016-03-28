@@ -1,6 +1,5 @@
 package modules.admin.Communication;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,8 +14,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -134,16 +131,6 @@ public class CommunicationUtil {
 			sendFrom = UtilImpl.SMTP_SENDER;
 		}
 
-		try {
-			validatePath(communication);
-		} catch (Exception e) {
-			if (ResponseMode.SILENT.equals(responseMode)) {
-				Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
-			} else {
-				throw e;
-			}
-		}
-
 		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
 		String emailBodyMain = communication.getBody();
 		emailBodyMain = Binder.formatMessage(customer, emailBodyMain, beans);
@@ -161,11 +148,13 @@ public class CommunicationUtil {
 
 		// Generate file name - Communication_Description_To
 		StringBuilder subFolder = new StringBuilder();
-		subFolder.append(document.getSingularAlias()).append('_');
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		subFolder.append(sdf.format(new Date()));
 
-		String filePath = FileUtil.constructSafeFilePath(communication.getFilePath(), sendTo, ".eml", true, subFolder.toString());
+		String customerName = CORE.getUser().getCustomerName();
+		String batchDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
+
+		String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
 
 		try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
@@ -266,34 +255,6 @@ public class CommunicationUtil {
 	public static void sendOverrideTo(Communication communication, RunMode runMode, ResponseMode responseMode, String sendTo, Bean... beans) throws Exception {
 		String[] sendToArray = new String[] { sendTo };
 		sendOverrideTo(communication, runMode, responseMode, sendToArray, beans);
-	}
-
-	/**
-	 * Validates the nominated path exists and/or can be created
-	 * 
-	 * @param communication
-	 * @throws Exception
-	 */
-	public static void validatePath(Communication communication) throws Exception {
-		if (communication == null) {
-			throw new Exception("There communication item is null.");
-		}
-
-		String path = communication.getFilePath();
-		if (path == null) {
-			throw new ValidationException(new Message(Communication.filePathPropertyName, "The directory is empty - you must specify where reports can be created."));
-		}
-		File reportDir = new File(path);
-		if (!reportDir.exists()) {
-			reportDir.mkdirs();
-			if (!reportDir.exists()) {
-				throw new ValidationException(new Message(Communication.filePathPropertyName, "The directory " + reportDir.getAbsolutePath() + " does not exist & can not be created."));
-			}
-		}
-
-		if (!reportDir.isDirectory()) {
-			throw new ValidationException(new Message(Communication.filePathPropertyName, "The directory " + reportDir.getAbsolutePath() + " is not a directory."));
-		}
 	}
 
 	/**
