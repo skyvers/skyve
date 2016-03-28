@@ -145,6 +145,85 @@
 		<filter name="testAllAttributesRequiredPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+		<class name="modules.test.domain.AnyDerived1" table="TEST_AnyDerived1" entity-name="testAnyDerived1">
+			<id name="bizId" length="36" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+			<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+			<property name="text" length="20" />
+			<property name="text1" length="20" />
+			<filter name="testAnyDerived1NoneFilter" condition="1=0"/>
+			<filter name="testAnyDerived1CustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testAnyDerived1DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testAnyDerived1UserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
+		<class name="modules.test.domain.AnyDerived2" table="TEST_AnyDerived2" entity-name="testAnyDerived2">
+			<id name="bizId" length="36" />
+			<version name="bizVersion" unsaved-value="null" />
+			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+			<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+			<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+			<property name="bizFlagComment" length="1024" />
+			<property name="bizDataGroupId" length="36" />
+			<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+			<property name="text" length="20" />
+			<property name="text2" length="20" />
+			<filter name="testAnyDerived2NoneFilter" condition="1=0"/>
+			<filter name="testAnyDerived2CustomerFilter" condition="bizCustomer=:customerParam"/>
+			<filter name="testAnyDerived2DataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+			<filter name="testAnyDerived2UserIdFilter" condition="bizUserId=:userIdParam"/>
+		</class>
+
+	<class name="modules.test.domain.ArcOneToMany" table="TEST_ArcOneToMany" entity-name="testArcOneToMany">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<bag name="arcs" table="TEST_ArcOneToMany_arcs" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" />
+		<many-to-any meta-type="string" id-type="string">
+			<meta-value value="testAnyDerived1" class="testAnyDerived1" />
+			<meta-value value="testAnyDerived2" class="testAnyDerived2" />
+			<column name="arcs_type" />
+			<column name="arcs_id" length="36" />
+		</many-to-any>
+		</bag>
+		<filter name="testArcOneToManyNoneFilter" condition="1=0"/>
+		<filter name="testArcOneToManyCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testArcOneToManyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testArcOneToManyUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.ArcOneToOne" table="TEST_ArcOneToOne" entity-name="testArcOneToOne">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<any name="arc" meta-type="string" id-type="string">
+			<meta-value value="testAnyDerived1" class="testAnyDerived1" />
+			<meta-value value="testAnyDerived2" class="testAnyDerived2" />
+			<column name="arc_type" />
+			<column name="arc_id" length="36" />
+		</any>
+		<filter name="testArcOneToOneNoneFilter" condition="1=0"/>
+		<filter name="testArcOneToOneCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testArcOneToOneDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testArcOneToOneUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.test.domain.Hierarchical" table="TEST_Hierarchical" entity-name="testHierarchical">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -298,6 +377,46 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testAllAttributesRequiredPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived1NoneFilter" />
+	<filter-def name="testAnyDerived1CustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived1DataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived1UserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived2NoneFilter" />
+	<filter-def name="testAnyDerived2CustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived2DataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testAnyDerived2UserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToManyNoneFilter" />
+	<filter-def name="testArcOneToManyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToManyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToManyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToOneNoneFilter" />
+	<filter-def name="testArcOneToOneCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToOneDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testArcOneToOneUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testHierarchicalNoneFilter" />

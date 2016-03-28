@@ -60,13 +60,11 @@
 											<%
 												if (referer == null) {
 											%>
-											<a
-												href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"
-												 >Sign in</a>
+											<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Sign in</a>
 											<%
 												} else {
 											%>
-											<a href="<%=referer%>" >Sign in</a>
+											<a href="<%=referer%>">Sign in</a>
 											<%
 												}
 											%>

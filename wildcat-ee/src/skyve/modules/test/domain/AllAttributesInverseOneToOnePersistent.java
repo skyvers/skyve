@@ -478,6 +478,15 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
+	 * {@link #inverseAggregatedAssociation} mutator.
+	 * 
+	 * @param inverseAggregatedAssociation	The new value to set.
+	 **/
+	public void setInverseAggregatedAssociation(AllAttributesInverseOneToOnePersistent inverseAggregatedAssociation) {
+		this.inverseAggregatedAssociation = inverseAggregatedAssociation;
+	}
+
+	/**
 	 * {@link #longInteger} accessor.
 	 **/
 	public Long getLongInteger() {

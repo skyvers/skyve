@@ -1597,8 +1597,7 @@ joined tables
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
 		}
-		else { // this is an association
-			// Attribute
+		else { // this is an association Attribute
 			attributeJavadoc(reference, attributes);
 			if (deprecated) {
 				attributes.append("\t@Deprecated\n");
@@ -1710,6 +1709,20 @@ joined tables
 			}
 			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
+			methods.append("\t}\n");
+		}
+		// Mutator method
+		else {
+			mutatorJavadoc(inverse, methods, false);
+			if (overriddenInverse) { // method in base class
+				methods.append("\n\t@Override");
+			}
+			if (deprecated) {
+				methods.append("\n\t@Deprecated");
+			}
+			methods.append("\n\tpublic void set").append(methodName).append("(");
+			methods.append(propertyClassName).append(' ').append(name).append(") {\n");
+			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			methods.append("\t}\n");
 		}
 	}
