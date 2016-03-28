@@ -14,6 +14,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -193,6 +195,25 @@ public class FileUtil {
 			}
 
 			zos.closeEntry();
+		}
+	}
+
+	
+	/**
+	 * Delete file with exception if unsuccessful
+	 * 
+	 * @param f
+	 * @throws ValidationException
+	 */
+	public static void delete(File f) throws ValidationException {
+		if (f.isDirectory()) {
+			for (File c : f.listFiles()) {
+				delete(c);
+			}
+		}
+		
+		if (! f.delete()) {
+			throw new ValidationException(new Message(f.getAbsolutePath() + " was not deleted"));
 		}
 	}
 
