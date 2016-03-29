@@ -64,6 +64,7 @@ import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
 import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
+import org.skyve.wildcat.metadata.view.event.EventSource;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
@@ -1996,6 +1997,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitRerenderEventAction(RerenderEventAction rerender,
+											EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled)
 	throws MetaDataException {

@@ -126,6 +126,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	if (gridBinding != null) {
 			    		gridBinding = gridBinding.replace('_', '.');
 			    	}
+			    	String source = request.getParameter(AbstractWebContext.SOURCE_NAME);
 			    	String editIdCounter = request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER);
 			    	String createIdCounter = request.getParameter(SmartClientWebContext.CREATE_ID_COUNTER);
 	
@@ -233,6 +234,7 @@ public class SmartClientEditServlet extends HttpServlet {
 								processBean,
 								formBinding,
 								gridBinding,
+								source,
 								null,
 								actionName, 
 								Integer.parseInt(editIdCounter),
@@ -257,10 +259,11 @@ public class SmartClientEditServlet extends HttpServlet {
 									processModule,
 									processDocument,
 									formBinding,
+									source,
 									(String) parameters.get(Bean.DOCUMENT_ID),
 									Integer.parseInt(editIdCounter),
 									Integer.parseInt(createIdCounter),
-									(action == null),
+									action,
 									parameters,
 									persistence, 
 									pw);
@@ -281,6 +284,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									processBean,
 									formBinding,
 									gridBinding,
+									source,
 									action,
 									null,
 									Integer.parseInt(editIdCounter),
@@ -429,10 +433,11 @@ public class SmartClientEditServlet extends HttpServlet {
 								Module processModule,
 								Document processDocument,
 								String formBinding,
+								String source, // the source of a rerender event
 								String bizId,
 								int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 								int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
-								boolean fireExecuteCallbacks, // callbacks not fired after a zoom out on the parent view post
+								ImplicitActionName action,
 								SortedMap<String, Object> parameters, 
 								AbstractPersistence persistence,
 								PrintWriter pw)
@@ -452,7 +457,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							processBean,
 	    							parameters);
 	    		
-	    		if (fireExecuteCallbacks) {
+	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.New, processBean, null, webContext);
 					if (! vetoed) {
@@ -462,6 +467,18 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.New, processBean, null, webContext);
+					}
+	    		}
+	    		else if (source != null) { // rerender event
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
+					if (! vetoed) {
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+			    			processBizlet.preRerender(source, processBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+						}
+						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
 	    		}
 	    	}
@@ -487,7 +504,7 @@ public class SmartClientEditServlet extends HttpServlet {
 		    			throw new SecurityException("this data", user.getName());
 		    		}
 	    		}
-	    		if (fireExecuteCallbacks) {
+	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, null, webContext);
 					if (! vetoed) {
@@ -497,6 +514,18 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, null, webContext);
+					}
+	    		}
+	    		else if (source != null) { // rerender event
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
+					if (! vetoed) {
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+			    			processBizlet.preRerender(source, processBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+						}
+						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
 	    		}
 	    	}
@@ -558,7 +587,7 @@ public class SmartClientEditServlet extends HttpServlet {
     			}
 
 	    		// call preExecute()
-	    		if (fireExecuteCallbacks) {
+	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					if (! vetoed) {
@@ -570,7 +599,19 @@ public class SmartClientEditServlet extends HttpServlet {
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, processBean, parentBean, webContext);
 					}
 	    		}
-
+	    		else if (source != null) { // rerender event
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
+					if (! vetoed) {
+						if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+			    			processBizlet.preRerender(source, processBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+						}
+						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
+					}
+	    		}
+	    		
 	    		// add the newInstance to the context bean
 	    		if (referenceValue instanceof List<?>) {
 	    			((List<Bean>) referenceValue).add(processBean);
@@ -586,7 +627,7 @@ public class SmartClientEditServlet extends HttpServlet {
     			else {
     				processBean = (Bean) referenceValue;
     			}
-	    		if (fireExecuteCallbacks) {
+	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
 					boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
 					if (! vetoed) {
@@ -596,6 +637,18 @@ public class SmartClientEditServlet extends HttpServlet {
 			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preExecute", "Exiting " + processBizlet.getClass().getName() + ".preExecute: " + processBean);
 						}
 						internalCustomer.interceptAfterPreExecute(ImplicitActionName.Edit, processBean, parentBean, webContext);
+					}
+	    		}
+	    		else if (source != null) { // rerender event
+					CustomerImpl internalCustomer = (CustomerImpl) customer;
+					boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processBean, webContext);
+					if (! vetoed) {
+		    			if (processBizlet != null) {
+							if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processBean + ", " + webContext);
+			    			processBizlet.preRerender(source, processBean, webContext);
+			    			if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processBean);
+		    			}
+						internalCustomer.interceptAfterPreRerender(source, processBean, webContext);
 					}
 	    		}
     		}
@@ -698,6 +751,7 @@ public class SmartClientEditServlet extends HttpServlet {
 								Bean processBean,
 								String formBinding, // the response is in terms of this binding
 								String gridBinding, // the processing may be in terms of this binding
+								String source, // the source of a rerender event (if applicable)
 								ImplicitActionName implicitAction,
 								String customActionName,
 								int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
@@ -747,6 +801,19 @@ public class SmartClientEditServlet extends HttpServlet {
 																		result, 
 																		webContext);
 					processedBean = result.getBean();
+				}
+			}
+			else if (source != null) { // rerender event
+				CustomerImpl internalCustomer = (CustomerImpl) customer;
+				boolean vetoed = internalCustomer.interceptBeforePreRerender(source, processedBean, webContext);
+				if (! vetoed) {
+					Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
+					if (processBizlet != null) {
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Entering " + processBizlet.getClass().getName() + ".preRerender: " + source + ", " + processedBean + ", " + webContext);
+						processBizlet.preRerender(source, processedBean, webContext);
+						if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, processBizlet.getClass().getName(), "preRerender", "Exiting " + processBizlet.getClass().getName() + ".preRerender: " + processedBean);
+					}
+					internalCustomer.interceptAfterPreRerender(source, processedBean, webContext);
 				}
 			}
 		}

@@ -40,6 +40,7 @@ isc.EditView.addClassProperties({
 // _doc: null - The document name this view belongs to
 // _b: null - The binding within the document this view is bound to
 // _saved - whether the [Save] button has been pressed
+// _source - the source of a rerender event
 // _openedFromDataGrid - whether this view was opened from a data grid record or not
 // _grids: {} - a map of grids by their binding
 isc.EditView.addMethods({
@@ -291,6 +292,10 @@ isc.EditView.addMethods({
 			if (parentContext) {
 				params._c = parentContext;
 			}
+			if (this._source) {
+				params._s = this._source;
+				this._source = null;
+			}
 			
 			var me = this;
 			this._vm.fetchData(
@@ -339,8 +344,17 @@ isc.EditView.addMethods({
 				}, 
 				{httpMethod: 'POST', params: params, willHandleError: true});
 		}
+		else {
+			this._source = null;
+		}
 	},
 
+	// called on the server-side code generation for rerender actions
+	rerenderAction: function(source) {
+		this._source = source;
+		this.saveInstance(null);
+	},
+	
 	// action - sent to server and use to determine whether to popoff the window on the window stack
 	// successCallback - successCallback(instance) called on successful save
 	saveInstance: function(action, // name of the action being performed
@@ -369,6 +383,10 @@ isc.EditView.addMethods({
 			if (this._b) {
 				params._b = this._b;
 			}
+			if (this._source) {
+				params._s = this._source;
+				this._source = null;
+			}
 			
 			var me = this;
 			this._vm.saveData(
@@ -378,9 +396,9 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // redundant success test
 						// if we came from a lookupDescription, this will be not null
 						var lookupDescription = null;
+						var opener = WindowStack.getOpener();
 						
 						if (action == 'ZoomOut') {
-							var opener = WindowStack.getOpener();
 							var openerValues = opener.gather(false);
 							// copy the context to the opener
 							openerValues._c = data._c;
@@ -410,10 +428,11 @@ isc.EditView.addMethods({
 								}
 							}
 
-							
 							var openerValue = openerValues[childBinding];
+							opener._source = childBinding;
 							if (isc.isAn.Array(openerValue)) { // we have zoomed in from a grid, so refresh the parent
 								WindowStack.popoff(true);
+								opener._source = null;
 								return;
 							}
 							else { // we have zoomed in from a lookup description, so call the event
@@ -455,9 +474,11 @@ isc.EditView.addMethods({
 											lookupDescription.bizEditedForServer(lookupDescription.form,
 																					lookupDescription,
 																					data.bizId);
+											opener._source = null;
 										}
 										else {
 											WindowStack.popoff(true);
+											opener._source = null;
 										}
 									}
 									else {
@@ -466,14 +487,17 @@ isc.EditView.addMethods({
 											lookupDescription.bizAddedForServer(lookupDescription.form,
 																					lookupDescription,
 																					data.bizId);
+											opener._source = null;
 										}
 										else {
 											WindowStack.popoff(true);
+											opener._source = null;
 										}
 									}
 								}
 								else {
 									WindowStack.popoff(true); // rerender the opener view
+									opener._source = null;
 								}
 							}
 						}
@@ -492,6 +516,9 @@ isc.EditView.addMethods({
 				}, 
 				{params: params, willHandleError: true}
 			);
+		}
+		else {
+			this._source = null;
 		}
 	},
 
@@ -1242,17 +1269,21 @@ BizButton.addMethods({
 					this._view.saveInstance(this.actionName);
 				}
 				else {
+					var opener = WindowStack.getOpener();
 					WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action was taken
+					opener._source = null;
 				}
 			}
 			else if (this.type == "C") { // Cancel on edit view and child edit view
 				var me = this;
 				var changedOnServer = this._view.gather(false)._changed;
+				var opener = WindowStack.getOpener();
 				if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 					isc.ask('There are unsaved changes in the ' + this._view._singular + '.  Do you wish to cancel?',
 							function(value) {
 								if (value) {
 									WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+									opener._source = null;
 								}
 							},
 							{title:'Discard Unsaved Changes?'}
@@ -1260,6 +1291,7 @@ BizButton.addMethods({
 				}
 				else {
 					WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+					opener._source = null;
 				}
 			}
 			else if (this.type == "D") { // Delete on edit view

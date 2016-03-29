@@ -663,6 +663,25 @@ public class CustomerImpl implements Customer {
 		}
 	}
 
+	public boolean interceptBeforePreRerender(String source, Bean bean, WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : interceptors.values()) {
+			if (interceptor.getInterceptor(this).beforePreRerender(source, bean, webContext)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void interceptAfterPreRerender(String source,
+											Bean result,
+											WebContext webContext)
+	throws Exception {
+		for (InterceptorMetaData interceptor : reversedInterceptors) {
+			interceptor.getInterceptor(this).afterPreRerender(source, result, webContext);
+		}
+	}
+
 	public boolean interceptBeforeServerSideAction(Document document,
 													String actionName, 
 													Bean bean,
