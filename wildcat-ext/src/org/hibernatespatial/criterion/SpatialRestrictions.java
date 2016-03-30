@@ -28,10 +28,11 @@
  */
 package org.hibernatespatial.criterion;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import org.hibernate.criterion.Criterion;
 import org.hibernatespatial.SpatialRelation;
+
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Static Factory Class for creating spatial criterion types.
@@ -143,7 +144,7 @@ public class SpatialRestrictions {
                 return within(propertyName, value);
             default:
                 throw new IllegalArgumentException(
-                        "Non-existant spatial relation passed.");
+                        "Non-existent spatial relation passed.");
         }
     }
 }

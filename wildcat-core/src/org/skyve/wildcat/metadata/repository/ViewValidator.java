@@ -356,7 +356,7 @@ class ViewValidator extends ViewVisitor {
 	private void validateActionName(String actionName, String widgetIdentifier)
 	throws MetaDataException {
 		if ((actionName != null) && (view.getAction(actionName) == null)) {
-			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existant action " + actionName);
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existent action " + actionName);
 		}
 	}
 	
@@ -1432,7 +1432,7 @@ class ViewValidator extends ViewVisitor {
 						}
 					}
 					catch (Exception e) {
-						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existant action " + actionName, e);
+						throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existent action " + actionName, e);
 					}
 				}
 				else {

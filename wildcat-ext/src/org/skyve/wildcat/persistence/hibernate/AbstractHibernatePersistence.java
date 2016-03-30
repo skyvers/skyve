@@ -549,17 +549,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return moduleName + documentName;
 	}
 
-	private void treatPersistenceThrowable(Throwable t, OperationType operationType, OptimisticLock persistentLock) 
+	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) 
 	throws DomainException, MetaDataException {
 t.printStackTrace();
 		if (t instanceof javax.persistence.OptimisticLockException) {
-			throw new OptimisticLockException(user.getCustomer(), operationType, persistentLock);
+			session.refresh(bean);
+			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
 		}
 		else if (t instanceof StaleObjectStateException) {
-			throw new OptimisticLockException(user.getCustomer(), operationType, persistentLock);
+			session.refresh(bean);
+			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
 		}
 		else if (t instanceof EntityNotFoundException) {
-			throw new OptimisticLockException(user.getCustomer(), operationType, persistentLock);
+			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
 		}
 		else if (t instanceof DomainException) {
 			throw (DomainException) t;
@@ -945,7 +947,7 @@ t.printStackTrace();
 			}
 		}
 		catch (Throwable t) {
-			treatPersistenceThrowable(t, OperationType.update, bean.getBizLock());
+			treatPersistenceThrowable(t, OperationType.update, bean);
 		}
 
 		return result;
@@ -1204,7 +1206,7 @@ t.printStackTrace();
 				}
 			}
 			catch (Throwable t) {
-				treatPersistenceThrowable(t, OperationType.update, newBean.getBizLock());
+				treatPersistenceThrowable(t, OperationType.update, newBean);
 			}
 			finally {
 				beansToDelete.clear();
