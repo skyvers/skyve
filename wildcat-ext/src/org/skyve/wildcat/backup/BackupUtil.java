@@ -3,8 +3,8 @@ package org.skyve.wildcat.backup;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
@@ -12,8 +12,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.wildcat.content.AbstractContentManager;
@@ -123,7 +123,7 @@ final class BackupUtil {
 									String ownerTableName = referencePersistent.getPersistentIdentifier();
 
 									// If it is a collection defined on a mapped document pointing to this document, find
-									// the first persistent derivation with a table name to use
+									// all persistent derivations with a table name to use
 									if (ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
 										List<String> derivedModocs = ((CustomerImpl) customer).getDerivedDocuments(referencedDocument);
 										for (String derivedModoc : derivedModocs) {
@@ -134,14 +134,21 @@ final class BackupUtil {
 											Persistent derivedPersistent = derivedDocument.getPersistent();
 											if ((derivedPersistent != null) && (derivedPersistent.getName() != null)) {
 												ownerTableName = derivedPersistent.getName();
-												break;
+												String tableName = ownerTableName + '_' + referenceFieldName;
+												if (! tables.containsKey(tableName)) {
+													JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+													tables.put(tableName, joinTable);
+												}
 											}
 										}
 									}
-									
-									String tableName = ownerTableName + '_' + referenceFieldName;
-									JoinTable joinTable = new JoinTable(tableName, ownerTableName);
-									tables.put(tableName, joinTable);
+									else {
+										String tableName = ownerTableName + '_' + referenceFieldName;
+										if (! tables.containsKey(tableName)) {
+											JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+											tables.put(tableName, joinTable);
+										}
+									}
 								}
 							}
 						}
