@@ -16,6 +16,8 @@ public class ZipBatch extends DownloadAction<Communication> {
 	@Override
 	public Download download(Communication bean, WebContext webContext) throws Exception {
 		
+		bean.setRefreshBatches(Boolean.FALSE);
+		
 		String customerName = CORE.getUser().getCustomerName();
 		String batchPath = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName + File.separator + bean.getSelectedBatchTimestampFolderName();
 		String zipName = String.format("batch_%s_%s.zip", customerName, bean.getSelectedBatchTimestampFolderName());

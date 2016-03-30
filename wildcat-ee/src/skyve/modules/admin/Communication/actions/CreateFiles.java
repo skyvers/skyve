@@ -23,6 +23,7 @@ public class CreateFiles implements ServerSideAction<Communication> {
 		communication.setActionType(ActionType.saveForBulkSend);
 		
 		Communication result = CommunicationUtil.kickOffJob(communication);
+		result.setRefreshBatches(Boolean.TRUE);
 		
 		return new ServerSideActionResult(result);
 	}

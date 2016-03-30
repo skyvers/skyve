@@ -17,6 +17,9 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 	@Override
 	public ServerSideActionResult execute(Communication bean, WebContext webContext)
 	throws Exception {
+		
+		bean.setRefreshBatches(Boolean.TRUE);
+		
 		String customerName = CORE.getUser().getCustomerName();
 		File backupDir = new File(UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName + File.separator + bean.getSelectedBatchTimestampFolderName());
 		if (backupDir.exists() && backupDir.isDirectory()) {
