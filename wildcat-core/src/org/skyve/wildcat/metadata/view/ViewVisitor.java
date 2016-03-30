@@ -27,6 +27,7 @@ import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
 import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
+import org.skyve.wildcat.metadata.view.event.EventSource;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
@@ -471,6 +472,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 														boolean parentEnabled)
 	throws MetaDataException;
 	public abstract void visitRerenderEventAction(RerenderEventAction rerender,
+													EventSource source,
 													boolean parentVisible,
 													boolean parentEnabled)
 	throws MetaDataException;
@@ -914,7 +916,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = changeable.getChangedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnChangedEventHandler(changeable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(changeable, actions, parentVisible, parentEnabled);
 			visitedOnChangedEventHandler(changeable, parentVisible, parentEnabled);
 		}
 	}
@@ -926,13 +928,13 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = focusable.getFocusActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnFocusEventHandler(focusable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(focusable, actions, parentVisible, parentEnabled);
 			visitedOnFocusEventHandler(focusable, parentVisible, parentEnabled);
 		}
 		actions = focusable.getBlurActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnBlurEventHandler(focusable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(focusable, actions, parentVisible, parentEnabled);
 			visitedOnBlurEventHandler(focusable, parentVisible, parentEnabled);
 		}
 	}
@@ -947,13 +949,13 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = lookup.getPickedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnPickedEventHandler(lookup, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(lookup, actions, parentVisible, parentEnabled);
 			visitedOnPickedEventHandler(lookup, parentVisible, parentEnabled);
 		}
 		actions = lookup.getClearedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnClearedEventHandler(lookup, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(lookup, actions, parentVisible, parentEnabled);
 			visitedOnClearedEventHandler(lookup, parentVisible, parentEnabled);
 		}
 	}
@@ -965,7 +967,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = addable.getAddedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnAddedEventHandler(addable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(addable, actions, parentVisible, parentEnabled);
 			visitedOnAddedEventHandler(addable, parentVisible, parentEnabled);
 		}
 	}
@@ -977,7 +979,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = editable.getEditedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnEditedEventHandler(editable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(editable, actions, parentVisible, parentEnabled);
 			visitedOnEditedEventHandler(editable, parentVisible, parentEnabled);
 		}
 	}
@@ -989,7 +991,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = removable.getRemovedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnRemovedEventHandler(removable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(removable, actions, parentVisible, parentEnabled);
 			visitedOnRemovedEventHandler(removable, parentVisible, parentEnabled);
 		}
 	}
@@ -1001,17 +1003,17 @@ public abstract class ViewVisitor extends ActionVisitor {
 		List<EventAction> actions = selectable.getSelectedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
-			visitActions(actions, parentVisible, parentEnabled);
+			visitActions(selectable, actions, parentVisible, parentEnabled);
 			visitedOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
 		}
 	}
 
-	private void visitActions(List<EventAction> actions, boolean parentVisible, boolean parentEnabled)
+	private void visitActions(EventSource source, List<EventAction> actions, boolean parentVisible, boolean parentEnabled)
 	throws MetaDataException {
 		if (actions != null) {
 			for (EventAction action : actions) {
 				if (action instanceof RerenderEventAction) {
-					visitRerenderEventAction((RerenderEventAction) action, parentVisible, parentEnabled);
+					visitRerenderEventAction((RerenderEventAction) action, source, parentVisible, parentEnabled);
 				}
 				else if (action instanceof ServerSideActionEventAction) {
 					visitServerSideActionEventAction((ServerSideActionEventAction) action, parentVisible, parentEnabled);

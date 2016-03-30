@@ -1,6 +1,7 @@
 package org.skyve.wildcat.metadata.view.widget.bound;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.widget.bound.Bound;
@@ -25,5 +26,14 @@ public abstract class AbstractBound implements Bound {
 	@XmlAttribute(required = false)
 	public void setBinding(String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
+	}
+
+	/**
+	 * Return the event source string = binding.
+	 */
+	@Override
+	@XmlTransient
+	public String getSource() {
+		return binding;
 	}
 }

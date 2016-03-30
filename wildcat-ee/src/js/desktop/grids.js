@@ -1045,7 +1045,12 @@ BizListGrid.addMethods({
 			},
 			selectionUpdated: function(record, recordList) {
 				if (me.selectedIdBinding) {
+					// NB:- selection should not affect whether the form is dirty or not
+					var changes = me._view._vm.valuesHaveChanged();
 					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+					if (changes) {} else {
+						me._view._vm.rememberValues();
+					}
 				}
 				if (me.bizSelected) {
 					me.bizSelected();
@@ -1532,6 +1537,8 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 										// NB bean must have been saved earlier as checked in the 
 										// calling event if using the same conversation
 										if (contConv) { // continuing conversation
+											// set rerender source from datasource
+											me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
 											me._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
 										}
 										else { // no conversation propagation
@@ -1540,11 +1547,15 @@ alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + s
 												delete instance._apply;
 												// apply changes to current form before zoom in
 												me._view.saveInstance(null, function() {
+													// set rerender source from datasource
+													me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
 													// now zoom in, after changes applied
 													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 												});
 											}
 											else { // no changes - just zoom right in there
+												// set rerender source from datasource
+												me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
 												me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 											}
 										}
@@ -1794,7 +1805,12 @@ BizDataGrid.addMethods({
 			},
 			selectionUpdated: function(record, recordList) {
 				if (me.selectedIdBinding) {
+					// NB:- selection should not affect whether the form is dirty or not
+					var changes = me._view._vm.valuesHaveChanged();
 					me._view._vm.setValue(me.selectedIdBinding, record ? record.bizId : null);
+					if (changes) {} else {
+						me._view._vm.rememberValues();
+					}
 				}
 				if (me.bizSelected) {
 					me.bizSelected();

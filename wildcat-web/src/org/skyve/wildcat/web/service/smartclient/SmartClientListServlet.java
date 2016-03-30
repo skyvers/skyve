@@ -573,7 +573,9 @@ public class SmartClientListServlet extends HttpServlet {
 													tagId,
 													model,
 													newFilter);
-		filter.addAnd(newFilter);
+		if (! newFilter.isEmpty()) {
+			filter.addAnd(newFilter);
+		}
 	}
     
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;

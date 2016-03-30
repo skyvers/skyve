@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.MetaData;
@@ -403,5 +404,14 @@ public class ListGrid implements MetaData,
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
 	public List<EventAction> getSelectedActions() {
 		return selectedActions;
+	}
+	
+	/**
+	 * Return the event source string = query name (or model name).
+	 */
+	@Override
+	@XmlTransient
+	public String getSource() {
+		return (queryName == null) ? modelName : queryName;
 	}
 }

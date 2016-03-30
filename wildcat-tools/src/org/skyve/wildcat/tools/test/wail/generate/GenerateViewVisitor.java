@@ -21,6 +21,7 @@ import org.skyve.wildcat.metadata.view.container.form.FormRow;
 import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Changeable;
 import org.skyve.wildcat.metadata.view.event.Editable;
+import org.skyve.wildcat.metadata.view.event.EventSource;
 import org.skyve.wildcat.metadata.view.event.Focusable;
 import org.skyve.wildcat.metadata.view.event.Removable;
 import org.skyve.wildcat.metadata.view.event.RerenderEventAction;
@@ -761,6 +762,7 @@ class GenerateViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitRerenderEventAction(RerenderEventAction rerender,
+			EventSource source,
 			boolean parentVisible, boolean parentEnabled)
 			throws MetaDataException {
 		// TODO Auto-generated method stub

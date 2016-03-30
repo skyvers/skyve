@@ -28,7 +28,8 @@ import org.skyve.web.WebContext;
  * preExecute() - called before an implicit action is executed.
  * 					parentBean parameter is not null when adding or editing (zooming) in a grid or lookup
  * 					(ie when ImplicitActionName.Add or ImplicitActionName.Edit is used).
- *
+ * preRerender() - called before a rerender is performed.
+ * 					This occurs on zoom out operation (data/list/tree/map/calendar/lookup) and during rerender event action.
  * @param <T>	The type of document bean we want to process with this Bizlet.
  */
 public abstract class Bizlet<T extends Bean> implements MetaData {
@@ -206,5 +207,17 @@ public abstract class Bizlet<T extends Bean> implements MetaData {
 	 */
 	public T preExecute(ImplicitActionName actionName, T bean, Bean parentBean, WebContext webContext) throws Exception {
 		return bean;
+	}
+	
+	/**
+	 * Provides a point to manipulate the parent bean post zoom out or before the rerender event action.
+	 * @param source	The binding of the control that triggered the rerender 
+	 * 					or the query/document/model of the list/tree/map/calendar etc.
+	 * @param bean	The bean that is being rerendered.
+	 * @param webContext	The web context.
+	 * @throws Exception
+	 */
+	public void preRerender(String source, T bean, WebContext webContext) throws Exception {
+		// do nothing
 	}
 }

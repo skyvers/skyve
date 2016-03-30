@@ -3,6 +3,7 @@ package org.skyve.wildcat.metadata.view.widget.bound.tabular;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.widget.bound.Bound;
@@ -14,9 +15,6 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
 			propOrder = {"binding", "editable", "inputWidget"})
 public class DataGridBoundColumn extends DataGridColumn implements Bound {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -26924109323814766L;
 
 	private String binding;
@@ -32,6 +30,15 @@ public class DataGridBoundColumn extends DataGridColumn implements Bound {
 	@XmlAttribute
 	public void setBinding(String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
+	}
+
+	/**
+	 * Return the event source string = binding.
+	 */
+	@Override
+	@XmlTransient
+	public String getSource() {
+		return binding;
 	}
 
 	public WidgetReference getInputWidget() {

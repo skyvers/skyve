@@ -191,8 +191,8 @@
 		<bag name="arcs" table="TEST_ArcOneToMany_arcs" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" />
 		<many-to-any meta-type="string" id-type="string">
-			<meta-value value="testAnyDerived1" class="testAnyDerived1" />
-			<meta-value value="testAnyDerived2" class="testAnyDerived2" />
+			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
+			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
 			<column name="arcs_type" />
 			<column name="arcs_id" length="36" />
 		</many-to-any>
@@ -213,8 +213,8 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<any name="arc" meta-type="string" id-type="string">
-			<meta-value value="testAnyDerived1" class="testAnyDerived1" />
-			<meta-value value="testAnyDerived2" class="testAnyDerived2" />
+			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
+			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
 			<column name="arc_type" />
 			<column name="arc_id" length="36" />
 		</any>

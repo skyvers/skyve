@@ -27,6 +27,7 @@ public abstract class AbstractWebContext implements Serializable, org.skyve.web.
 	public static final String GRID_BINDING_NAME = "_g";
 	public static final String QUERY_NAME = "_q";
 	public static final String ACTION_NAME = "_a";
+	public static final String SOURCE_NAME = "_s";
 	public static final String CUSTOMER_COOKIE_NAME = "customer";
 	public static final String REPORT_NAME = "_n";
 	public static final String RESOURCE_FILE_NAME = "_n";

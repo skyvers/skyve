@@ -167,6 +167,18 @@ public abstract class Interceptor implements MetaData {
 	}
 
 	@SuppressWarnings({"unused", "static-method"})
+	public boolean beforePreRerender(String source, Bean bean, WebContext webContext) 
+	throws Exception {
+		return false;
+	}
+	
+	@SuppressWarnings("unused")
+	public void afterPreRerender(String source, Bean result, WebContext webContext)
+	throws Exception {
+		// no-op
+	}
+
+	@SuppressWarnings({"unused", "static-method"})
 	public boolean beforeServerSideAction(Document document, 
 											String actionName, 
 											Bean bean, 
