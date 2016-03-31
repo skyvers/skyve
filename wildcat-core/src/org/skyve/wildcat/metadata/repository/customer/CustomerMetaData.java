@@ -3,6 +3,7 @@ package org.skyve.wildcat.metadata.repository.customer;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -17,6 +18,7 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.NamedMetaData;
 import org.skyve.wildcat.metadata.repository.PersistentMetaData;
@@ -27,7 +29,8 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlRootElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "customer")
 @XmlType(namespace = XMLUtil.CUSTOMER_NAMESPACE, 
 			name = "customer",
-			propOrder = {"uiResources",
+			propOrder = {"language",
+							"uiResources",
 							"htmlResources", 
 							"loginResources", 
 							"defaultDateConverter", 
@@ -38,6 +41,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"homeModule", 
 							"interceptors"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
+	private String language;
 	private UIResources uiResources;
 	private HTMLResources htmlResources;
 	private LoginResourcesMetaData loginResources;
@@ -48,6 +52,16 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private List<CustomerModuleMetaData> modules = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private String homeModule;
+
+	
+	public String getLanguage() {
+		return language;
+	}
+
+	@XmlAttribute
+	public void setLanguage(String language) {
+		this.language = Util.processStringValue(language);
+	}
 
 	public UIResources getUiResources() {
 		return uiResources;
@@ -142,6 +156,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		}
 		result.setName(value);
 
+		result.setLanguageTag(getLanguage());
 		result.setUiResources((uiResources == null) ? new UIResources() : uiResources);
 		result.setHtmlResources((htmlResources == null) ? new HTMLResources() : htmlResources);
 		result.setLoginResources((loginResources == null) ? new LoginResourcesMetaData() : loginResources);

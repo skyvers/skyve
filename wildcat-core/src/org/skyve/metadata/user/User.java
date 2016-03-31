@@ -1,5 +1,6 @@
 package org.skyve.metadata.user;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,6 +20,18 @@ public interface User extends NamedMetaData {
 	 */
 	public String getId();
 	public void setId(String id);
+	
+	public String getLanguageTag();
+	
+	/**
+	 * Determine the user's locale in the following way.
+	 * If user's language tag is set, use this.
+	 * If the customer's language tag is set, use this.
+	 * Otherwise, use the locale of the browser.
+	 * 
+	 * @return	The appropriate locale.
+	 */
+	public Locale getLocale();
 	
 	/**
 	 * 

@@ -1,6 +1,7 @@
 package org.skyve.wildcat.metadata.user;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -41,11 +42,18 @@ public class UserImpl implements User {
 
 	private String id;
 	private String name;
+	private String languageTag;
 	private String contactId;
 	private String contactName;
 	private String customerName;
 	private String dataGroupId;
 	private String homeModuleName;
+	
+	/**
+	 * Locale either derived from the language tag or from the Http Servlet Request.
+	 * Note that this is not serialized.
+	 */
+	private transient Locale locale;
 
 	/**
 	 * User (session) attributes. Keep this small since the user is in the web session.
@@ -101,6 +109,32 @@ public class UserImpl implements User {
 		this.name = name;
 	}
 
+	@Override
+	public String getLanguageTag() {
+		return languageTag;
+	}
+	
+	public void setLanguageTag(String languageTag) {
+		this.languageTag = languageTag;
+		if (languageTag == null) {
+			locale = null;
+		}
+		else {
+			locale = Locale.forLanguageTag(languageTag);
+		}
+	}
+	
+	@Override
+	public Locale getLocale() {
+		return locale;
+	}
+
+	public void setLocale(Locale locale) {
+		if (languageTag == null) {
+			this.locale = locale;
+		}
+	}
+	
 	@Override
 	public String getContactId() {
 		return contactId;

@@ -1,17 +1,20 @@
-<%@ page language="java"%>
-<%@ page isErrorPage="true"%>
-<%@ page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page isErrorPage="true"%>
+<%@page import="java.util.Locale"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.wildcat.web.UserAgent"%>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						request.getServerPort() + request.getContextPath() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
+	Locale locale = request.getLocale();
 %>
 <!DOCTYPE html>
-<html>
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title>WILDCAT: Sign-in Error</title>
+		<title><%=Util.i18n("page.loginError.title", locale)%></title>
 		<base href="<%=basePath%>" />
 
 		<meta http-equiv="pragma" content="no-cache" />
@@ -42,25 +45,17 @@
 							<tr>
 								<td>
 									<div style="font-size:28px;">
-										Sign in error!
+										<%=Util.i18n("page.loginError.banner", locale)%>
 									</div>
 								</td>
 							</tr>
 							<tr align="center">
 								<td style="font-size:18px" >
-									<%if (request.getUserPrincipal() != null) {
-									%>
-									You are currently signed in as <em><%=request.getUserPrincipal()%></em>
-									<br />
-									<br />
-									To access this functionality you need to sign in as another user with the correct permissions
-									<br />
-									<br />
-									<%} else {
-									%>
+									<% if (request.getUserPrincipal() != null) { %>
+										<%=Util.i18n("page.loginError.alreadyLoggedIn", locale)%>
+									<% } else { %>
 										Invalid username and/or password
-									<%}
-									%>
+									<% } %>
 								</td>
 							</tr>
 							<tr>

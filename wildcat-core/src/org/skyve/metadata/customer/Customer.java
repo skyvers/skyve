@@ -21,6 +21,11 @@ import org.skyve.metadata.module.Module;
  */
 public interface Customer extends NamedMetaData {
 	/**
+	 * The language tag for the entire customer.
+	 */
+	public String getLanguageTag();
+	
+	/**
 	 * @return Returns the defaultDateConverter.
 	 */
 	public Converter<DateOnly> getDefaultDateConverter();

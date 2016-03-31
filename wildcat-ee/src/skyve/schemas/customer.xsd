@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/customer" xmlns:tns="http://www.skyve.org/xml/customer" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/customer" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/customer" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -11,7 +11,7 @@
         <xs:sequence>
           <xs:element name="uiResources" type="tns:uiResources" form="qualified" minOccurs="0"/>
           <xs:element name="htmlResources" type="tns:htmlResources" form="qualified" minOccurs="0"/>
-          <xs:element name="loginResources" type="tns:loginResources" form="qualified" minOccurs="0"/>
+          <xs:element name="loginResources" type="tns:LoginResources" form="qualified" minOccurs="0"/>
           <xs:element name="defaultDateConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="defaultTimeConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="defaultDateTimeConverter" type="ns1:converterName" form="qualified"/>
@@ -32,6 +32,7 @@
             </xs:complexType>
           </xs:element>
         </xs:sequence>
+        <xs:attribute name="language" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -46,7 +47,7 @@
     <xs:attribute name="css" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="loginResources">
+  <xs:complexType name="LoginResources">
     <xs:sequence/>
     <xs:attribute name="loggedOutPage" type="xs:string"/>
     <xs:attribute name="loginErrorPage" type="xs:string"/>

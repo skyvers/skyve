@@ -1,10 +1,32 @@
-<%@ page language="java"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.Locale"%>
+<%@page import="org.skyve.CORE"%>
+<%@page import="org.skyve.metadata.customer.Customer"%>
+<%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.wildcat.web.WebUtil"%>
 <%@ page import="org.skyve.wildcat.web.UserAgent"%>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						request.getServerPort() + request.getContextPath() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
+
+	// Determine the locale
+	Locale locale = request.getLocale();
+	if (customer != null) {
+		try {
+			Customer c = CORE.getRepository().getCustomer(customer);
+			if (c != null) {
+				String languageTag = c.getLanguageTag();
+				if (languageTag != null) {
+					locale = Locale.forLanguageTag(languageTag);
+				}
+			}
+		}
+		catch (Exception e) {
+			// cannot get locale - do nothing
+		}
+	}
+	
 	String customerFieldName = "customer";
 	String userFieldName = "user";
 
@@ -13,10 +35,10 @@
 	String fieldWidth = (mobile ? "120px" : "120px");
 %>
 <!DOCTYPE html>
-<html>
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title>WILDCAT: Sign-in</title>
+		<title><%=Util.i18n("page.login.title", locale)%></title>
 		<base href="<%=basePath%>" />
 		
 		<meta http-equiv="pragma" content="no-cache" />
@@ -35,17 +57,17 @@
 			<!--
 			function testMandatoryFields(form) {
 				if (form.customer.value.length < 1) {
-					alert('Please enter your Customer name');
+					alert('<%=Util.i18n("page.login.customer.error.required", locale)%>');
 					form.customer.focus();
 					return false;
 				}
 				else if (form.user.value.length < 1) {
-					alert('Please enter your User name');
+					alert('<%=Util.i18n("page.login.user.error.required", locale)%>');
 					form.user.focus();
 					return false;
 				}
 				else if (form.j_password.value.length < 1) {
-					alert('Please enter your Password');
+					alert('<%=Util.i18n("page.login.password.error.required", locale)%>');
 					form.j_password.focus();
 					return false;
 				}
@@ -120,7 +142,7 @@
 												<td>
 													<center>
 														<p>
-															<b>Warning: JavaScript is not enabled. The WILDCAT application requires that JavaScript be enabled.</b>
+															<b><%=Util.i18n("page.login.javascriptDisabled", locale)%></b>
 														</p>
 													</center>
 												</td>
@@ -128,14 +150,11 @@
 											</noscript>
 											<tr>
 												<td style="font-size:14px;text-align:center">
-													<%if (request.getUserPrincipal() != null) {
-													%>
-													You are logged in as <em><%=request.getUserPrincipal()%></em>. To access this functionality you need to login as another user with the correct permissions.
-													<%} else {
-													%>
-													<div style="font-size:28px;">Please sign in</div>
-													<%}
-													%>
+													<% if (request.getUserPrincipal() != null) { %>
+														<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
+													<% } else { %>
+														<div style="font-size:28px;">Please sign in</div>
+													<% } %>
 												</td>
 											</tr>
 											<tr>
@@ -152,7 +171,7 @@
 																	<% if (customer == null) { %>
 																		<tr>
 																			<td style="font-size:18px">
-																				Customer
+																				<%=Util.i18n("page.login.customer.label", locale)%>
 																			</td>
 																			<td>
 																				<input type="text" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" autocorrect="off" autocapitalize="off" name="customer">
@@ -161,8 +180,8 @@
 																	<% } %>
 																	<tr>
 																		<td style="font-size:18px">
-																			Username
-																		</rd>
+																			<%=Util.i18n("page.login.user.label", locale)%>
+																		</td>
 																		<td>
 																			<% if (customer != null) { %>
 																				<input type="hidden" name="customer" value="<%=customer%>" />
@@ -172,7 +191,7 @@
 																	</tr>
 																	<tr>
 																		<td style="font-size:18px">
-																			Password
+																			<%=Util.i18n("page.login.password.label", locale)%>
 																		</td>
 																		<td>
 																			<input type="password" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" name="j_password">
@@ -186,7 +205,7 @@
 														<tr>
 															<td colspan="2">
 																<br/>
-																<input type="submit" value="Sign in" style="font-size:<%=fontSize%>" />
+																<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" style="font-size:<%=fontSize%>" />
 															</td>
 														</tr>
 													</table>

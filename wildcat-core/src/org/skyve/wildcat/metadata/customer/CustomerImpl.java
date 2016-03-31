@@ -164,6 +164,8 @@ public class CustomerImpl implements Customer {
 	 */
 	private String name;
 
+	private String languageTag;
+	
 	private UIResources uiResources;
 	private HTMLResources htmlResources;
 	private LoginResources loginResources;
@@ -207,6 +209,15 @@ public class CustomerImpl implements Customer {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@Override
+	public String getLanguageTag() {
+		return languageTag;
+	}
+
+	public void setLanguageTag(String languageTag) {
+		this.languageTag = languageTag;
 	}
 
 	/**

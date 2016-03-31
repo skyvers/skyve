@@ -1,6 +1,10 @@
 package org.skyve.util;
 
+import java.awt.ComponentOrientation;
 import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.skyve.domain.Bean;
@@ -90,6 +94,24 @@ public class Util {
 	 */
 	public static String processStringValue(String value) {
 		return UtilImpl.processStringValue(value);
+	}
+	
+	/**
+	 * Internationalises a string and performs message formatting on tokens like {0}, {1} etc.
+	 */
+	public static String i18n(String key, Locale locale, String... values) {
+		String pattern = key;
+		
+		ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
+		if (bundle.containsKey(key)) {
+			pattern = bundle.getString(key);
+		}
+		
+		return MessageFormat.format(pattern, (Object[]) values);
+	}
+	
+	public static boolean isRTL(Locale locale) {
+		return (! ComponentOrientation.getOrientation(locale).isLeftToRight());
 	}
 
 	/**

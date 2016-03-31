@@ -40,7 +40,10 @@ public class LocalSecureRepository extends LocalDesignRepository {
 
 		SQLMetaDataUtil.populateUser(result);
 		resetMenus(result);
-
+		if (result.getLanguageTag() == null) {
+			result.setLanguageTag(result.getCustomer().getLanguageTag());
+		}
+		
 		return result;
 	}
 }

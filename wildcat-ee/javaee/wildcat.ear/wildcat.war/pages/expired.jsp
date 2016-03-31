@@ -1,14 +1,37 @@
-<%@ page language="java"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page isErrorPage="true"%>
-<%@ page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page import="java.util.Locale"%>
+<%@page import="org.skyve.CORE"%>
+<%@page import="org.skyve.metadata.customer.Customer"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page import="org.skyve.wildcat.web.WebUtil"%>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						request.getServerPort() + request.getContextPath() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
+	
+	// Determine the locale
+	String customer = WebUtil.determineCustomerWithoutSession(request);
+	Locale locale = request.getLocale();
+	if (customer != null) {
+		try {
+			Customer c = CORE.getRepository().getCustomer(customer);
+			if (c != null) {
+				String languageTag = c.getLanguageTag();
+				if (languageTag != null) {
+					locale = Locale.forLanguageTag(languageTag);
+				}
+			}
+		}
+		catch (Exception e) {
+			// cannot get locale - do nothing
+		}
+	}
 %>
 <!DOCTYPE html>
-<html>
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<title>WILDCAT: Session ended</title>

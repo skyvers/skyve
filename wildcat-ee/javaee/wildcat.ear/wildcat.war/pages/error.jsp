@@ -1,13 +1,21 @@
-<%@ page language="java"%>
-<%@ page isErrorPage="true"%>
-<%@ page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page isErrorPage="true"%>
+<%@page import="java.security.Principal"%>
+<%@page import="java.util.Locale"%>
+<%@page import="org.skyve.metadata.user.User"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page import="org.skyve.wildcat.web.WebUtil"%>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 						request.getServerPort() + request.getContextPath() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
+	Principal p = request.getUserPrincipal();
+	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
 %>
 <!DOCTYPE html>
-<html>
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 <title>WILDCAT: Problem</title>

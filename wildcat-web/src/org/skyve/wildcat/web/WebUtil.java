@@ -18,6 +18,7 @@ import org.skyve.util.StateUtil;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.WebStatsUtil;
@@ -137,7 +138,10 @@ public class WebUtil {
 		else {
 			AbstractPersistence.get().setUser(user);
 		}
-
+		if (user != null) {
+			((UserImpl) user).setLocale(request.getLocale());
+		}
+		
 		return user;
 	}
 	

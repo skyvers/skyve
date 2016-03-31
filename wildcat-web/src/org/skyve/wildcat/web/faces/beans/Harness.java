@@ -1,6 +1,7 @@
 package org.skyve.wildcat.web.faces.beans;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Set;
 
 import org.skyve.metadata.MetaDataException;
@@ -9,6 +10,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.user.UserImpl;
@@ -78,11 +80,19 @@ public abstract class Harness implements Serializable {
 	
 	@SuppressWarnings("static-method")
 	public final String getBaseHref() {
-		return org.skyve.util.Util.getWildcatContextUrl() + '/';
+		return Util.getWildcatContextUrl() + '/';
+	}
+	
+	private String dir;
+	public final String getDir() {
+		return dir;
 	}
 	
 	public final void initialise(Customer customer, UserImpl user)
 	throws MetaDataException, SecurityException {
+		Locale locale = user.getLocale();
+		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
+		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");
 		sb.append(customer.getUiResources().getLogoRelativeFileName());
