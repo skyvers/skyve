@@ -100,14 +100,20 @@ public class Util {
 	 * Internationalises a string and performs message formatting on tokens like {0}, {1} etc.
 	 */
 	public static String i18n(String key, Locale locale, String... values) {
-		String pattern = key;
+		String result = key;
 		
-		ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
-		if (bundle.containsKey(key)) {
-			pattern = bundle.getString(key);
+		if ((key != null) && (locale != null)) {
+			ResourceBundle bundle = ResourceBundle.getBundle("resources.i18n", locale);
+			if (bundle.containsKey(key)) {
+				result = bundle.getString(key);
+			}
+			
+			if ((values != null) && (values.length > 0)) {
+				result = MessageFormat.format(result, (Object[]) values);
+			}
 		}
-		
-		return MessageFormat.format(pattern, (Object[]) values);
+
+		return result;
 	}
 	
 	public static boolean isRTL(Locale locale) {

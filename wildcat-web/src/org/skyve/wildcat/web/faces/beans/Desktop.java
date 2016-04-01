@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -155,7 +156,7 @@ public class Desktop extends Harness {
 				result.append(thisModuleName);
 				result.append("',");
 				result.append("title:'");
-				result.append(SmartClientGenerateUtils.processString(thisModule.getTitle()));
+				result.append(SmartClientGenerateUtils.processString(Util.i18n(thisModule.getTitle(), getLocale())));
 				result.append("',");
 
 				renderMenuStructure(customer, thisModule, menu.getItems(), uxui, result);
@@ -251,32 +252,34 @@ public class Desktop extends Harness {
 		}
 	}
 
-	private static void renderMenuStructure(Customer customer,
-												Module module, 
-												List<MenuItem> items, 
-												String uxui,
-												StringBuilder result) 
+	private void renderMenuStructure(Customer customer,
+										Module module, 
+										List<MenuItem> items, 
+										String uxui,
+										StringBuilder result) 
 	throws MetaDataException, IOException {
 		result.append("root:{name:'");
-		result.append(module.getName());
+		result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getName(), getLocale())));
 		result.append("',sub:[");
 		renderMenuItems(customer, module, items, uxui, result);
 		result.append("]}");
 	}
 
-	private static void renderMenuItems(Customer customer,
-											Module module, 
-											List<MenuItem> items, 
-											String uxui,
-											StringBuilder result)
+	private void renderMenuItems(Customer customer,
+									Module module, 
+									List<MenuItem> items, 
+									String uxui,
+									StringBuilder result)
 	throws MetaDataException, IOException {
+		Locale locale = getLocale();
+		
 		for (int i = 0, l = items.size(); i < l; i++) {
 			MenuItem item = items.get(i);
 			if (item.isApplicable(uxui)) {
 				if (item instanceof MenuGroup) {
 					MenuGroup group = (MenuGroup) item;
 					result.append("{desc:'");
-					result.append(group.getName());
+					result.append(SmartClientGenerateUtils.processString(Util.i18n(group.getName(), locale)));
 					result.append("', sub:[");
 					renderMenuItems(customer, module, group.getItems(), uxui, result);
 					// print a comma if not the last module being processed
@@ -398,7 +401,7 @@ public class Desktop extends Harness {
 						}
 					}
 					result.append("',desc:'");
-					result.append(SmartClientGenerateUtils.processString(item.getName()));
+					result.append(SmartClientGenerateUtils.processString(Util.i18n(item.getName(), locale)));
 					result.append("',ref:'");
 					result.append(ref);
 					if (icon16 != null) {

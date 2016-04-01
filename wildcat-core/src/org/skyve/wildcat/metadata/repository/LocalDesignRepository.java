@@ -801,7 +801,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public User retrieveUser(String userPrincipal) throws MetaDataException {
+	public UserImpl retrieveUser(String userPrincipal) throws MetaDataException {
 		throw new UnsupportedOperationException();
 	}
 

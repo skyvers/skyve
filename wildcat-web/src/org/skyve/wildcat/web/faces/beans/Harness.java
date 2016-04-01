@@ -88,9 +88,14 @@ public abstract class Harness implements Serializable {
 		return dir;
 	}
 	
+	private Locale locale;
+	public Locale getLocale() {
+		return locale;
+	}
+	
 	public final void initialise(Customer customer, UserImpl user)
 	throws MetaDataException, SecurityException {
-		Locale locale = user.getLocale();
+		locale = user.getLocale();
 		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
 		
 		StringBuilder sb = new StringBuilder(64);

@@ -65,17 +65,11 @@
 								<tr>
 									<td style="text-align: center;">
 										<div class="buttonDiv">
-											<%
-												if (referer == null) {
-											%>
-											<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Sign in</a>
-											<%
-												} else {
-											%>
-											<a href="<%=referer%>">Sign in</a>
-											<%
-												}
-											%>
+											<% if (referer == null) { %>
+												<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>">Sign in</a>
+											<% } else { %>
+												<a href="<%=referer%>">Sign in</a>
+											<% } %>
 										</div>
 									</td>
 								</tr>

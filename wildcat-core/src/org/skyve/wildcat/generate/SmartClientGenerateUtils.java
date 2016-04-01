@@ -2,6 +2,7 @@ package org.skyve.wildcat.generate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -43,6 +44,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
@@ -217,6 +219,7 @@ public class SmartClientGenerateUtils {
 
 	protected static class SmartClientAttributeDefinition {
         protected SmartClientLookupDefinition lookup;
+        protected Locale locale;
 		protected String name;
 		protected String title;
 		protected String type = "text";
@@ -233,8 +236,10 @@ public class SmartClientGenerateUtils {
 		protected SmartClientAttributeDefinition(Customer customer, 
 													Module module,
 													Document document,
+													Locale locale,
 													String binding)
 		throws MetaDataException {
+			this.locale = locale;
 			name = binding.replace('.', '_');
 			title = name;
 
@@ -260,7 +265,7 @@ public class SmartClientGenerateUtils {
 				if (domainType != null) {
 					// constant domain types
 					if (DomainType.constant.equals(domainType)) {
-						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute);
+						valueMap = getConstantDomainValueMapString(customer, bindingDocument, bindingAttribute, locale);
 					}
 					else { // variant or dynamic
 						// this valueMap will be replaced in client logic but this defn ensures that the
@@ -286,7 +291,7 @@ public class SmartClientGenerateUtils {
 							// NB don't use processString for regular expression as \n could be a valid part of the expression and needs to remain
 							sb.append("{expression:'").append(validator.getRegularExpression().replace("\\", "\\\\").replace("'", "\\'"));
 							sb.append("',type:'regexp',errorMessage:'");
-							sb.append(processString(validator.constructMessage(title, converter)));
+							sb.append(processString(validator.constructMessage(Util.i18n(title, locale), converter)));
 							sb.append("'}");
 							validation = sb.toString();
 						}
@@ -334,7 +339,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:Date.parseSchemaDate('").append(Binder.convert(java.util.Date.class, max)).append("'),");
 							}
 							sb.append("type:'dateRange',errorMessage:'");
-							sb.append(processString(dateValidator.constructMessage(title, converter)));
+							sb.append(processString(dateValidator.constructMessage(Util.i18n(title, locale), converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -353,13 +358,13 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'floatRange',errorMessage:'");
-							sb.append(processString(decimalValidator.constructMessage(title, converter)));
+							sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
 							sb.append("'}");
 
 							Integer precision = decimalValidator.getPrecision();
 							if (precision != null) {
 								sb.append(",{precision:").append(precision).append(",roundToPrecision:true,type:'floatPrecision',errorMessage:'");
-								sb.append(processString(decimalValidator.constructMessage(title, converter)));
+								sb.append(processString(decimalValidator.constructMessage(Util.i18n(title, locale), converter)));
 								sb.append("'}");
 							}
 							validation = sb.toString();
@@ -378,7 +383,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(integerValidator.constructMessage(title, converter)));
+							sb.append(processString(integerValidator.constructMessage(Util.i18n(title, locale), converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -397,7 +402,7 @@ public class SmartClientGenerateUtils {
 								sb.append("max:").append(max).append(',');
 							}
 							sb.append("type:'integerRange',errorMessage:'");
-							sb.append(processString(longValidator.constructMessage(title, converter)));
+							sb.append(processString(longValidator.constructMessage(Util.i18n(title, locale), converter)));
 							sb.append("'}");
 
 							validation = sb.toString();
@@ -719,9 +724,10 @@ public class SmartClientGenerateUtils {
                                             InputWidget widget,
                                             String dataGridBindingOverride)
         throws MetaDataException {
-            super(customer, 
+            super(customer,
                     module, 
                     document, 
+                    user.getLocale(),
                     (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride);
             // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 			if ("enum".equals(type)) {
@@ -820,7 +826,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(title));
+            result.append(processString(Util.i18n(title, locale)));
             result.append("',type:'");
             result.append(type).append('\'');
             if (defaultValueJavascriptExpression != null) {
@@ -831,7 +837,8 @@ public class SmartClientGenerateUtils {
             }
             appendEditorProperties(result, true);
             if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(title)).append(" is required.'");
+            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
+            	result.append(processString(Util.i18n("is required", locale))).append(".'");
             }
             if (valueMap != null) {
                 result.append(",valueMap:").append(valueMap);
@@ -898,7 +905,7 @@ public class SmartClientGenerateUtils {
             result.append("name:'");
             result.append(name);
             result.append("',title:'");
-            result.append(processString(title));
+            result.append(processString(Util.i18n(title, locale)));
             result.append("',type:'");
             result.append(type);
             if (editorType != null) {
@@ -914,7 +921,8 @@ public class SmartClientGenerateUtils {
                 result.append(",valueMap:").append(valueMap);
             }
             if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(title)).append(" is required.'");
+            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
+            	result.append(processString(Util.i18n("is required", locale))).append(".'");
             }
             else {
                 if ("select".equals(type)) {
@@ -938,8 +946,8 @@ public class SmartClientGenerateUtils {
 			
 		    if (helpText != null) {
 				result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
-				result.append(processString(helpText, false, true));
-				result.append("',click:'isc.say(this.prompt, null, {title:\"").append(title).append("\"})'}]");
+				result.append(processString(Util.i18n(helpText, locale), false, true));
+				result.append("',click:'isc.say(this.prompt, null, {title:\"").append(Util.i18n(title, locale)).append("\"})'}]");
 			}
 
 		    if (lookup != null) {
@@ -987,6 +995,7 @@ public class SmartClientGenerateUtils {
 			super(customer, 
 					module,
 					document,
+					user.getLocale(),
 					(column.getBinding() == null) ? column.getName() : column.getBinding());
 			String displayName = column.getDisplayName();
 			if (displayName != null) {
@@ -1080,7 +1089,7 @@ public class SmartClientGenerateUtils {
 			result.append("name:'");
 			result.append(name);
 			result.append("',title:'");
-			result.append(processString(title));
+			result.append(processString(Util.i18n(title, locale)));
 			result.append("',type:'");
 			result.append(type);
 			if (editorType != null) {
@@ -1097,7 +1106,8 @@ public class SmartClientGenerateUtils {
 				result.append(",valueMap:").append(valueMap);
 			}
 			if (required) {
-            	result.append(",bizRequired:true,requiredMessage:'").append(processString(title)).append(" is required.'");
+            	result.append(",bizRequired:true,requiredMessage:'").append(processString(Util.i18n(title, locale))).append(' ');
+            	result.append(processString(Util.i18n("is required", locale))).append(".'");
 			}
 			if (! canFilter) {
 				result.append(",canFilter:false");
@@ -1125,7 +1135,8 @@ public class SmartClientGenerateUtils {
 
 	private static String getConstantDomainValueMapString(Customer customer,
 															Document document,
-															Attribute attribute) 
+															Attribute attribute,
+															Locale locale) 
 	throws MetaDataException {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 
@@ -1136,7 +1147,7 @@ public class SmartClientGenerateUtils {
 		sb.append('{');
 		for (DomainValue value : values) {
 			sb.append('\'').append(value.getCode()).append("':'");
-			sb.append(processString(value.getDescription())).append("',");
+			sb.append(processString(Util.i18n(value.getDescription(), locale))).append("',");
 		}
 		if (values.isEmpty()) { // no values
 			sb.append('}');
@@ -1148,17 +1159,18 @@ public class SmartClientGenerateUtils {
 		return sb.toString();
 	}
 
-	public static Map<String, String> getConstantDomainValueMap(Customer customer,
+	public static Map<String, String> getConstantDomainValueMap(User user,
 																	Document document,
 																	Attribute attribute)
 	throws MetaDataException {
-		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
+		Locale locale = user.getLocale();
+		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) user.getCustomer(), 
 																				DomainType.constant, 
 																				attribute, 
 																				null);
 		Map<String, String> result = new TreeMap<>(); 
 		for (DomainValue value : values) {
-			result.put(value.getCode(), processString(value.getDescription()));
+			result.put(value.getCode(), processString(Util.i18n(value.getDescription(), locale)));
 		}
 		
 		return result;
@@ -1377,6 +1389,8 @@ public class SmartClientGenerateUtils {
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) 
 	throws MetaDataException {
+		Locale locale = user.getLocale();
+		
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 		
@@ -1421,12 +1435,16 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));
 		toAppendTo.append(",canDelete:").append(user.canDeleteDocument(drivingDocument));
 		toAppendTo.append(",title:'");
-		toAppendTo.append(processString(description));
+		toAppendTo.append(processString(Util.i18n(description, locale)));
 		toAppendTo.append("',fields:[");
 
 		if (! config) {
-			toAppendTo.append("{name:'bizTagged',title:'Tag',type:'boolean',validOperators:['equals']},");
-			toAppendTo.append("{name:'bizFlagComment',title:'Flag'},"); //,length:1024} long length makes filter builder use a text area
+			toAppendTo.append("{name:'bizTagged',title:'");
+			toAppendTo.append(processString(Util.i18n("Tag", locale), false, true));
+			toAppendTo.append("',type:'boolean',validOperators:['equals']},");
+			toAppendTo.append("{name:'bizFlagComment',title:'");
+			toAppendTo.append(processString(Util.i18n("Flag", locale), false, true));
+			toAppendTo.append("'},"); //,length:1024} long length makes filter builder use a text area
 		}
 		
 		if (drivingDocumentName.equals(drivingDocument.getParentDocumentName())) { // hierarchical

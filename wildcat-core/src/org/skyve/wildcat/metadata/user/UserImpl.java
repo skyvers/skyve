@@ -124,12 +124,20 @@ public class UserImpl implements User {
 		}
 	}
 	
+    /**
+     * Reinstate the transient locale value from the language tag after Serialization.
+     */
+    private Object readResolve() {
+        setLanguageTag(languageTag);
+        return this;
+    }
+
 	@Override
 	public Locale getLocale() {
 		return locale;
 	}
 
-	public void setLocale(Locale locale) {
+	public void setWebLocale(Locale locale) {
 		if (languageTag == null) {
 			this.locale = locale;
 		}

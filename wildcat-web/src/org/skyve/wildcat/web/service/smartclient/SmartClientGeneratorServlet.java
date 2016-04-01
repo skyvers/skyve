@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
 import java.util.Stack;
 
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
@@ -130,6 +132,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	
 	private static class SmartClientViewVisitor extends ViewVisitor {
 		private User user;
+		private Locale locale;
 		private boolean noCreateView;
 		private int variableCounter = 0;
 
@@ -151,6 +154,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					(DocumentImpl) document,
 					(ViewImpl) view);
 			this.user = user;
+			this.locale = (user == null) ? null : user.getLocale();
 			this.noCreateView = noCreateView;
 		}
 
@@ -223,7 +227,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			String tabPaneVariable = containerVariables.peek();
 			Integer tabNumber = tabNumbers.pop();
 			code.append(tabPaneVariable).append(".addBizTab({name:'").append(tabNumber).append("',title:'");
-			code.append(SmartClientGenerateUtils.processString(tab.getTitle()));
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(tab.getTitle(), locale)));
 			String icon16 = tab.getIcon16x16RelativeFileName();
 			if (icon16 != null) {
 				code.append("',icon:'../resources?_n=").append(icon16);
@@ -279,7 +283,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					code.append("defaultLayoutAlign:'right',");
 					break;
 				default:
-					throw new MetaDataException("VBox HoriaontalAlignment of " + h + " is not supported");
+					throw new MetaDataException("VBox HorizontalAlignment of " + h + " is not supported");
 				}
 			}
 			invisible(vbox.getInvisibleConditionName(), code);
@@ -706,13 +710,13 @@ code.append("_view:view})");
 			if (formVariable == null) {
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append("=BizLabel.create({value: '");
-				code.append(SmartClientGenerateUtils.processString(button.getCommand()));
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(button.getCommand(), locale)));
 				code.append("'});\n");
 				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 			}
 			else {
 				code.append("type:'blurb',defaultValue:'dialog button ");
-				code.append(SmartClientGenerateUtils.processString(button.getCommand())).append("',");
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(button.getCommand(), locale))).append("',");
 				disabled(button.getDisabledConditionName(), code);
 				invisible(button.getInvisibleConditionName(), code);
 			}
@@ -830,9 +834,7 @@ code.append("_view:view})");
 				if (label == null) {
 					label = "Link";
 				}
-				else {
-					label = SmartClientGenerateUtils.processString(label);
-				}
+				label = SmartClientGenerateUtils.processString(Util.i18n(label, locale));
 				code.append("title:'").append(label).append("',");
 				code.append("type:'blurb',name:'_");
 				code.append(formatCounter++).append("',"); // _1, _2 and so on
@@ -914,7 +916,7 @@ code.append("_view:view})");
 				
 				if (binding == null) {
 					code.append("value:'");
-					code.append(SmartClientGenerateUtils.processString((value == null) ? displayName : value, false, false));
+					code.append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
 				}
 				else {
 					code.append("binding:'").append(binding.replace('.', '_'));
@@ -935,10 +937,10 @@ code.append("_view:view})");
 				if (title == null) {
 					title = displayName;
 				}
-				title = SmartClientGenerateUtils.processString(title);
+				title = SmartClientGenerateUtils.processString(Util.i18n(title, locale));
 				code.append("endRow:false,title:'").append(SmartClientGenerateUtils.processString(title)).append("',type:'blurb',");
 				if (binding == null) {
-					code.append("defaultValue:'").append(SmartClientGenerateUtils.processString((value == null) ? displayName : value, false, false));
+					code.append("defaultValue:'").append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
 				}
 				else {
 					code.append("name:'").append(binding.replace('.', '_'));
@@ -1047,7 +1049,7 @@ code.append("_view:view})");
 			String title = grid.getTitle();
 			if (title != null) {
 				code.append("title:'");
-				code.append(SmartClientGenerateUtils.processString(grid.getTitle())).append("',");
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
 			}
 			String selectedIdBinding = grid.getSelectedIdBinding();
 			if (selectedIdBinding != null) {
@@ -1117,7 +1119,7 @@ code.append("_view:view})");
 
 				String title = column.getTitle();
 				if (title != null) {
-					def.setTitle(title);
+					def.setTitle(Util.i18n(title, locale));
 				}
 				HorizontalAlignment textAlignment = column.getAlignment();
 				if (textAlignment != null) {
@@ -1155,7 +1157,7 @@ code.append("_view:view})");
 			code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 			
 			String title = column.getTitle();
-			code.append((title == null) ? " " : SmartClientGenerateUtils.processString(title)).append('\'');
+			code.append((title == null) ? " " : SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append('\'');
 			HorizontalAlignment alignment = column.getAlignment();
 			if (alignment != null) {
 				code.append(",align:'").append(alignment.toAlignmentString()).append('\'');
@@ -1237,7 +1239,7 @@ code.append("_view:view})");
 			String title = grid.getTitle();
 			if (title != null) {
 				code.append("title:'");
-				code.append(SmartClientGenerateUtils.processString(grid.getTitle())).append("',");
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
 			}
 			code.append("dataSource:'").append(dataSourceId).append("',");
 			code.append("name:'").append(listGridVariable).append("',");
@@ -1315,7 +1317,7 @@ code.append("_view:view})");
 									boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizLabel.create({value:'");
-			code.append(SmartClientGenerateUtils.processString(list.getTitle()));
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(list.getTitle(), locale)));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 		}
@@ -1333,7 +1335,7 @@ code.append("_view:view})");
 											boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizLabel.create({value:'");
-			code.append(SmartClientGenerateUtils.processString(column.getTitle()));
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(column.getTitle(), locale)));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 		}
@@ -1557,12 +1559,12 @@ code.append("_view:view})");
 			String heading = membership.getCandidatesHeading();
 			if (heading != null) {
 				code.append(",candidatesHeading:'");
-				code.append(SmartClientGenerateUtils.processString(heading)).append('\'');
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(heading, locale))).append('\'');
 			}
 			heading = membership.getMembersHeading();
 			if (heading != null) {
 				code.append(",membersHeading:'");
-				code.append(SmartClientGenerateUtils.processString(heading)).append('\'');
+				code.append(SmartClientGenerateUtils.processString(Util.i18n(heading, locale))).append('\'');
 			}
 			if ((relation instanceof Collection) && 
 					Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
@@ -2595,12 +2597,12 @@ pickListFields:[{name:'value'}],
 			}
 		}
 
-		private static void bordered(Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
+		private void bordered(Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
 			if (Boolean.TRUE.equals(bordered.getBorder())) {
 				String borderTitle = bordered.getBorderTitle();
 				builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 				if (borderTitle != null) {
-					builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(borderTitle));
+					builder.append("groupTitle:'&nbsp;&nbsp;").append(SmartClientGenerateUtils.processString(Util.i18n(borderTitle, locale)));
 					builder.append("&nbsp;&nbsp;',groupLabelStyleName:'bizhubBorderLabel',");
 				}
 				if (definedPixelPadding == null) {
@@ -2836,7 +2838,7 @@ pickListFields:[{name:'value'}],
 			result.append("',type:'");
 			result.append(actionType);
 			result.append("',displayName:'");
-			result.append((displayName == null) ? implicitName : SmartClientGenerateUtils.processString(displayName));
+			result.append((displayName == null) ? ((implicitName == null) ? " " : Util.i18n(implicitName.getDisplayName(), locale)) : SmartClientGenerateUtils.processString(Util.i18n(displayName, locale)));
 			result.append("',tabIndex:999,");
 			if (revisedRelativeIconFileName != null) {
 				result.append("icon:'").append("../resources?_doc=");
@@ -2849,10 +2851,10 @@ pickListFields:[{name:'value'}],
 			disabled(disabledConditionName, result);
 			invisible(invisibleConditionName, result);
 			if (tooltip != null) {
-				result.append("tooltip:'").append(SmartClientGenerateUtils.processString(tooltip)).append("',");
+				result.append("tooltip:'").append(SmartClientGenerateUtils.processString(Util.i18n(tooltip, locale))).append("',");
 			}
 			if (confirmationText != null) {
-				result.append("confirm:'").append(SmartClientGenerateUtils.processString(confirmationText)).append("',");
+				result.append("confirm:'").append(SmartClientGenerateUtils.processString(Util.i18n(confirmationText, locale))).append("',");
 			}
 			appendParameters(parameters, result);
 			result.append("_view:view})");
@@ -2910,7 +2912,7 @@ pickListFields:[{name:'value'}],
 			}
 			String title = (visitedItem == null) ? null : visitedItem.getLabel();
 			if (title != null) {
-				def.setTitle(title);
+				def.setTitle(Util.i18n(title, locale));
 			}
 			Boolean required = (visitedItem == null) ? null : visitedItem.getRequired();
 			if (required != null) {
@@ -3005,7 +3007,7 @@ pickListFields:[{name:'value'}],
 					icon = document.getIcon32x32RelativeFileName();
 				}
 				pw.append("',_icon:'").append(SmartClientGenerateUtils.processString(icon));
-				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(document.getSingularAlias()));
+				pw.append("',_singular:'").append(SmartClientGenerateUtils.processString(Util.i18n(document.getSingularAlias(), user.getLocale())));
 				pw.append("',_ecnt:").append(module.getName()).append('.').append(document.getName()).append("_ecnt");
 				pw.append(",_ccnt:").append(module.getName()).append('.').append(document.getName()).append("_ccnt});");
 

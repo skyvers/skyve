@@ -20,6 +20,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 
@@ -345,4 +346,10 @@ public abstract class AbstractRepository implements Repository {
 	public abstract void validateDocument(Customer customer, Document document) throws MetaDataException;
 
 	public abstract void validateView(Customer customer, Document document, View view, String uxui) throws MetaDataException;
+
+	/**
+	 * Override the interface method on AbstractRepository to return UserImpl.
+	 */
+	@Override
+	public abstract UserImpl retrieveUser(String userName) throws MetaDataException;
 }

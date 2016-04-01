@@ -117,9 +117,9 @@ public class WebUtil {
 														String userPrincipal,
 														boolean useSession)
 	throws Exception {
-		User user = null;
+		UserImpl user = null;
 		if (useSession) {
-			user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+			user = (UserImpl) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		}
 		if (user == null) {
 			// This can happen using SSO when the session expires as the servlets are not protected by normal Java EE security
@@ -139,7 +139,7 @@ public class WebUtil {
 			AbstractPersistence.get().setUser(user);
 		}
 		if (user != null) {
-			((UserImpl) user).setLocale(request.getLocale());
+			user.setWebLocale(request.getLocale());
 		}
 		
 		return user;
