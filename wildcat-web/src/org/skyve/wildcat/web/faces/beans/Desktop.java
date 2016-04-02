@@ -49,6 +49,11 @@ public class Desktop extends Harness {
 		return script;
 	}
 	
+	private String localeScript;
+	public String getLocaleScript() {
+		return localeScript;
+	}
+	
 	@SuppressWarnings("static-method")
 	public String getSmartClientDir() {
 		return UtilImpl.SMART_CLIENT_DIR;
@@ -66,7 +71,9 @@ public class Desktop extends Harness {
 			    	Customer customer = user.getCustomer();
 			    	
 			    	initialise(customer, user);
-	
+
+					createLocaleScriptIfRequired();
+
 			    	String bizModule = getBizModuleParameter();
 			    	String bizDocument = getBizDocumentParameter();
 			    	String bizId = getBizIdParameter();
@@ -128,6 +135,143 @@ public class Desktop extends Harness {
     	return result.toString();
 	}
 
+	private void createLocaleScriptIfRequired() {
+		Locale locale = getLocale();
+		String language = locale.getLanguage();
+		String country = locale.getCountry();
+
+		Locale hu_HU = new Locale("hu", "HU");
+		Locale nb_NO = new Locale("nb", "NO");
+		Locale pl_PL = new Locale("pl", "PL");
+		Locale pt_BR = new Locale("pt", "BR");
+		Locale ro_RO = new Locale("ro", "RO");
+		Locale ru_RU = new Locale("ru", "RU");
+		Locale sr_Latn = new Locale("sr", "SR", "Latn");
+		Locale sv_SE = new Locale("sv", "SE");
+		Locale uk_UA = new Locale("uk", "UA");
+		Locale zh_CN = new Locale("zh", "CN");
+		Locale zh_TW = new Locale("zh", "TW");
+		
+		if (new Locale("ar").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ar.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("ba").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ba.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("cr").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_cr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("cs").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_cs.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("de").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_de.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("el").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_el.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("es").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_es.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("fi").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_fi.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (Locale.FRANCE.getLanguage().equals(language)) {
+			if (Locale.FRANCE.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_fr_FR.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_fr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (new Locale("hr").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_hr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (hu_HU.getLanguage().equals(language)) {
+			if (hu_HU.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_hu_HU.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (new Locale("id").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_id.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("it").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_it.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("ja").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ja.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (new Locale("ko").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ko.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (nb_NO.getLanguage().equals(language)) {
+			if (nb_NO.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_.nb_NOproperties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (new Locale("nl").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_nl.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (pl_PL.getLanguage().equals(language)) {
+			if (pl_PL.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_pl_PL.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_pl.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (pt_BR.getLanguage().equals(language)) {
+			if (pt_BR.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_pt_BR.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_pt.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (ro_RO.getLanguage().equals(language)) {
+			if (ro_RO.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ro_RO.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (ru_RU.getLanguage().equals(language)) {
+			if (ru_RU.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ru_RU.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_ru.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (new Locale("sk").getLanguage().equals(language)) {
+			localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_sk.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+		}
+		else if (sr_Latn.getLanguage().equals(language)) {
+			if (sr_Latn.getVariant().equals(locale.getVariant())) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_sr_Latn.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_sr.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (sv_SE.getLanguage().equals(language)) {
+			if (sv_SE.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_sv_SE.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (uk_UA.getLanguage().equals(language)) {
+			if (uk_UA.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_uk_UA.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+		else if (zh_CN.getLanguage().equals(language)) {
+			if (zh_CN.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_zh_CN.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+			else if (zh_TW.getCountry().equals(country)) {
+				localeScript = String.format("<script type=\"text/javascript\" src=\"%s/locales/frameworkMessages_zh_TW.properties\"></script>", UtilImpl.SMART_CLIENT_DIR);
+			}
+		}
+	}
+	
 	private void constructMenu(Customer customer, 
 								UserImpl user, 
 								String moduleName,

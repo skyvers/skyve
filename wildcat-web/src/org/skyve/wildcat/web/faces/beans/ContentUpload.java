@@ -1,5 +1,6 @@
 package org.skyve.wildcat.web.faces.beans;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -26,6 +27,7 @@ import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.metadata.model.document.field.Content;
 import org.skyve.wildcat.metadata.model.document.field.Field.IndexType;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
@@ -33,7 +35,9 @@ import org.skyve.wildcat.web.WebUtil;
 
 @ManagedBean(name = "_wildcatContent")
 @RequestScoped
-public class ContentUpload {
+public class ContentUpload extends Localisable {
+	private static final long serialVersionUID = -6769960348990922565L;
+
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
     private String context;
     
@@ -42,6 +46,13 @@ public class ContentUpload {
 
     @ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
     private String contentBinding;
+
+	@PostConstruct
+	public void postConstruct() {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		UserImpl user = (UserImpl) persistence.getUser();
+		initialise(user);
+	}
 
     public String getContext() {
 		return context;

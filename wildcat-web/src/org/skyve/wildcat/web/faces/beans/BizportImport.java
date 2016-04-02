@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -30,14 +31,18 @@ import org.skyve.wildcat.bizport.POIWorkbook;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
+import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean(name = "_wildcatBizImport")
 @RequestScoped
-public class BizportImport {
+public class BizportImport extends Localisable {
+	private static final long serialVersionUID = -8452779436908784172L;
+
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
     private String context;
     
@@ -46,6 +51,13 @@ public class BizportImport {
 
     @ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
     private String action;
+
+	@PostConstruct
+	public void postConstruct() {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		UserImpl user = (UserImpl) persistence.getUser();
+		initialise(user);
+	}
 
     public String getContext() {
 		return context;

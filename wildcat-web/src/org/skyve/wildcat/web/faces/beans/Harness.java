@@ -1,7 +1,5 @@
 package org.skyve.wildcat.web.faces.beans;
 
-import java.io.Serializable;
-import java.util.Locale;
 import java.util.Set;
 
 import org.skyve.metadata.MetaDataException;
@@ -16,7 +14,7 @@ import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.UtilImpl;
 
-public abstract class Harness implements Serializable {
+public abstract class Harness extends Localisable {
 	private static final long serialVersionUID = 2805839690076647L;
 
 	private String logoRelativeFileNameUrl;
@@ -83,20 +81,9 @@ public abstract class Harness implements Serializable {
 		return Util.getWildcatContextUrl() + '/';
 	}
 	
-	private String dir;
-	public final String getDir() {
-		return dir;
-	}
-	
-	private Locale locale;
-	public Locale getLocale() {
-		return locale;
-	}
-	
 	public final void initialise(Customer customer, UserImpl user)
 	throws MetaDataException, SecurityException {
-		locale = user.getLocale();
-		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
+		super.initialise(user);
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");

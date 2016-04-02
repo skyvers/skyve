@@ -2,6 +2,7 @@ package org.skyve.wildcat.web.faces.beans;
 
 import java.text.DecimalFormat;
 
+import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -24,6 +25,7 @@ import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.ThreadSafeFactory;
 import org.skyve.wildcat.util.UtilImpl;
@@ -32,7 +34,9 @@ import org.skyve.wildcat.web.WebUtil;
 
 @ManagedBean(name = "_wildcatUpload")
 @RequestScoped
-public class FileUpload {
+public class FileUpload extends Localisable {
+	private static final long serialVersionUID = -8705052124876109265L;
+
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
     private String context;
     
@@ -44,6 +48,13 @@ public class FileUpload {
 
     public String getContext() {
 		return context;
+	}
+
+	@PostConstruct
+	public void postConstruct() {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		UserImpl user = (UserImpl) persistence.getUser();
+		initialise(user);
 	}
 
 	public void setContext(String context) {

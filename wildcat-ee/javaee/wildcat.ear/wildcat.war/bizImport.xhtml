@@ -6,7 +6,7 @@
 		xmlns:p="http://primefaces.org/ui">
     <f:view contentType="text/html">
 		<h:head>
-			<title>Import</title>
+			<title>#{_wildcatBizImport.i18n['page.bizImport.title']}</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -37,10 +37,10 @@
 						<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
 						<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
 					</p:column>
-					<p:column headerText="Where">
+					<p:column headerText="#{_wildcatBizImport.i18n['page.bizImport.where']}">
 						<span style="font-weight: bold;">#{problem.where}</span>
 					</p:column>
-					<p:column headerText="What">
+					<p:column headerText="#{_wildcatBizImport.i18n['page.bizImport.what']}">
 						#{problem.what}
 					</p:column>
 				</p:dataTable>
