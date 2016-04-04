@@ -59,16 +59,16 @@
 							<table align="center" style="border-spacing: 10px;">
 								<tr>
 									<td style=";text-align:center">
-										<div style="font-size:28px;">You are signed out</div>
+										<div style="font-size:28px;"><%=Util.i18n("page.logout.banner", locale)%></div>
 									</td>
 								</tr>
 								<tr>
 									<td style="text-align: center;">
 										<div class="buttonDiv">
 											<% if (referer == null) { %>
-												<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>">Sign in</a>
+												<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
 											<% } else { %>
-												<a href="<%=referer%>">Sign in</a>
+												<a href="<%=referer%>"><%=Util.i18n("page.login.banner", locale)%></a>
 											<% } %>
 										</div>
 									</td>

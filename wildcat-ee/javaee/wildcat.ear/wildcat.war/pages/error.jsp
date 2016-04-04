@@ -18,7 +18,7 @@
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 <head>
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-<title>WILDCAT: Problem</title>
+<title><%=Util.i18n("page.error.title", locale)%></title>
 <base href="<%=basePath%>" />
 
 <meta http-equiv="pragma" content="no-cache" />
@@ -39,18 +39,20 @@
 	<tr><td height="30%">&nbsp;</td></tr>
 
 	<tr bgColor="#4682B4">
-		<td align="center" height="5%"><strong style="color:#FFFFFF"><font face="Tahoma">Request Unsuccessful</font></strong></td>
+		<td align="center" height="5%"><strong style="color:#FFFFFF"><font face="Tahoma"><%=Util.i18n("page.error.banner", locale)%></font></strong></td>
 	</tr>
 	<tr bgColor="#4682B4">
 		<td style="color:#FFFFFF" align="center" height="10%">
-			<font size="2" face="Tahoma">An error occurred while processing your request.
+			<font size="2" face="Tahoma">
+				<%=Util.i18n("page.error.explanation", locale)%>
 				<br/>
 				<br/>
-					Return <a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"
-					target="_top" style="color:white">here</a> and try again, 
-					or <a href="mailto:info@bizhub.com.au?subject=Exception Report&body=<%=(exception == null) ? "[No Message]" : exception.getLocalizedMessage()%> 
-					for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : "[Not Logged In]"%> 
-					 <%=new java.util.Date()%>" style="color:white">report the problem</a>.
+					<%=Util.i18n("page.loginError.retry", locale)%>
+					<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>" target="_top" style="color:white"><%=Util.i18n("page.error.retry.link", locale)%></a> 
+					<%=Util.i18n("page.error.alternative", locale)%> 
+					<a href="mailto:info@bizhub.com.au?subject=Exception Report&body=<%=(exception == null) ? Util.i18n("page.loginError.noMessage", locale) : exception.getLocalizedMessage()%> 
+					for <%=(request.getUserPrincipal() != null) ? request.getUserPrincipal().getName() : Util.i18n("page.loginError.notLoggedIn", locale)%> 
+					 <%=new java.util.Date()%>" style="color:white"><%=Util.i18n("page.loginError.report", locale)%></a>
 			</font> 
 		</td>
 	</tr>

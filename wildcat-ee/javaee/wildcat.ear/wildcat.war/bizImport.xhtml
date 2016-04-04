@@ -32,7 +32,7 @@
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
 			    <p:dataTable id="problems" value="#{_wildcatBizImport.problems}" var="problem">
-					<f:facet name="header">Problems</f:facet>
+					<f:facet name="header">#{_wildcatBizImport.i18n['page.bizImport.problems']}</f:facet>
 					<p:column width="40" style="text-align:center">
 						<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
 						<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />

@@ -153,7 +153,7 @@
 													<% if (request.getUserPrincipal() != null) { %>
 														<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
 													<% } else { %>
-														<div style="font-size:28px;">Please sign in</div>
+														<div style="font-size:28px;"><%=Util.i18n("page.login.banner", locale)%></div>
 													<% } %>
 												</td>
 											</tr>

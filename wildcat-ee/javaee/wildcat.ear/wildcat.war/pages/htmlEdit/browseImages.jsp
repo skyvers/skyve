@@ -6,7 +6,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8">
 		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png">
-		<TITLE>Browse Images</TITLE>
+		<TITLE><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></TITLE>
 		<link rel="stylesheet" type="text/css" href="../../css/basic.css"/>
 	</HEAD>
 	<BODY BGCOLOR='#e0e0e0' MARGINHEIGHT=0 MARGINWIDTH=0 LEFTMARGIN=0 TOPMARGIN=0>

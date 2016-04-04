@@ -6,7 +6,7 @@
 		xmlns:p="http://primefaces.org/ui">
     <f:view contentType="text/html">
 		<h:head>
-			<title>Content Upload</title>
+			<title>#{_wildcatContent.i18n['page.contentUpload.title']}</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -30,7 +30,7 @@
 								update="messages"
 								multiple="false"
 								fileLimit="1"
-								fileLimitMessage="Only 1 file allowed.  Remove the existing file first" />
+								fileLimitMessage="#{__wildcatContent.i18n['page.contentUpload.error']}" />
 			    <p:growl id="messages" showDetail="true" />
 			</h:form>
 		</h:body>

@@ -34,7 +34,7 @@
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title>WILDCAT: Session ended</title>
+		<title><%=Util.i18n("page.expired.title", locale)%></title>
 		<base href="<%=basePath%>" />
 
 		<meta http-equiv="pragma" content="no-cache" />
@@ -65,14 +65,14 @@
 							<tr>
 								<td style="text-align:center">
 									<div style="font-size:28px;">
-										Session expired!
+										<%=Util.i18n("page.expired.banner", locale)%>
 									</div>
 								</td>
 							</tr>
 							<tr>
 								<td >
 									<div style="font-size:18px;">
-									Your session has expired due to inactivity.
+									<%=Util.i18n("page.expired.explanation", locale)%>
 									</div>
 								</td>
 							</tr>
@@ -80,9 +80,9 @@
 								<td style="text-align: center">
 									<div class="buttonDiv">
 									<% if (referer == null) { %>
-									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Start over</a>
+									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } else { %>
-										<a href="<%=referer%>">Start over</a>
+										<a href="<%=referer%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } %>
 									</div>
 								</td>

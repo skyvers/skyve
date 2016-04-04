@@ -26,8 +26,8 @@
 			<ui:define name="pages">
 				<pm:page id="edit">
 					<pm:header title="#{wildcat.title}" fixed="true">
-						<p:button value="Home" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
-						<p:button value="Logout" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
+						<p:button value="#{wildcat.i18n['phone.home']}" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
+						<p:button value="#{wildcat.i18n['phone.logout']}" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
 					</pm:header>
 					<pm:content>
 						<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />

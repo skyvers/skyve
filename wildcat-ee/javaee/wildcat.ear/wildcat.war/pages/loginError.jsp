@@ -54,7 +54,7 @@
 									<% if (request.getUserPrincipal() != null) { %>
 										<%=Util.i18n("page.loginError.alreadyLoggedIn", locale)%>
 									<% } else { %>
-										Invalid username and/or password
+										<%=Util.i18n("page.loginError.invalid", locale)%>
 									<% } %>
 								</td>
 							</tr>
@@ -62,9 +62,9 @@
 								<td style="text-align: center;">
 									<div class="buttonDiv">
 									<% if (referer == null) { %>
-									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>">Try again</a>
+									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } else { %>
-										<a href="<%=referer%>">Try Again</a>
+										<a href="<%=referer%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } %>
 									</div>
 								</td>
