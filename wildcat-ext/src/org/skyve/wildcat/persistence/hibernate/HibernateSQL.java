@@ -1,13 +1,14 @@
 package org.skyve.wildcat.persistence.hibernate;
 
-import java.math.BigDecimal;
-import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernatespatial.AbstractDBGeometryType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateTime;
@@ -183,29 +184,103 @@ class HibernateSQL extends AbstractSQL {
 			AttributeType type = getParameterType(name);
 
 			if (AttributeType.bool.equals(type)) {
-				result.setParameter(name, value, Hibernate.BOOLEAN);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.BOOLEAN);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.BOOLEAN);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.BOOLEAN);
+				}
 			}
 			else if (AttributeType.colour.equals(type) ||
 						AttributeType.content.equals(type) ||
-						AttributeType.enumeration.equals(type) ||
-						AttributeType.text.equals(type) ||
-						AttributeType.id.equals(type)) {
-				result.setString(name, (String) value);
+						AttributeType.text.equals(type)) {
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.STRING);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.STRING);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.STRING);
+				}
+			}
+			else if (AttributeType.enumeration.equals(type)) {
+				if (value instanceof Collection) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Collection<?>) value) {
+						param.add((object instanceof Enumeration) ? ((Enumeration) object).toCode() : object);
+					}
+					result.setParameterList(name, param, Hibernate.STRING);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Object[]) value) {
+						param.add((object instanceof Enumeration) ? ((Enumeration) object).toCode() : object);
+					}
+					result.setParameterList(name, param, Hibernate.STRING);
+				}
+				else {
+					result.setParameter(name, (value instanceof Enumeration) ? ((Enumeration) value).toCode() : value, Hibernate.STRING);
+				}
 			}
 			else if (AttributeType.markup.equals(type) ||
 						AttributeType.memo.equals(type)) {
-				result.setText(name, (String) value);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.TEXT);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.TEXT);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.TEXT);
+				}
 			}
 			else if (AttributeType.date.equals(type)) {
-				result.setDate(name, (Date) value);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.DATE);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.DATE);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.DATE);
+				}
 			}
-			else if (AttributeType.dateTime.equals(type)) {
-				result.setTimestamp(name, (Date) value);
+			else if (AttributeType.dateTime.equals(type) ||
+						AttributeType.timestamp.equals(type)) {
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.TIMESTAMP);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.TIMESTAMP);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.TIMESTAMP);
+				}
 			}
 			else if (AttributeType.decimal10.equals(type) ||
 						AttributeType.decimal2.equals(type) ||
 						AttributeType.decimal5.equals(type)) {
-				result.setBigDecimal(name, (BigDecimal) value);
+				if (value instanceof Collection) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Collection<?>) value) {
+						param.add((object instanceof Decimal) ? ((Decimal) object).bigDecimalValue() : object);
+					}
+					result.setParameterList(name, param, Hibernate.BIG_DECIMAL);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Object[]) value) {
+						param.add((object instanceof Decimal) ? ((Decimal) object).bigDecimalValue() : object);
+					}
+					result.setParameterList(name, param, Hibernate.BIG_DECIMAL);
+				}
+				else {
+					result.setParameter(name, (value instanceof Decimal) ? ((Decimal) value).bigDecimalValue() : value, Hibernate.BIG_DECIMAL);
+				}
 			}
 			else if (AttributeType.geometry.equals(type)) {
 				if (value == null) {
@@ -213,20 +288,93 @@ class HibernateSQL extends AbstractSQL {
 				}
 				else {
 					// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
-					result.setParameter(name, AbstractHibernatePersistence.getGeometryUserType().conv2DBGeometry((Geometry) value, persistence.getConnection()), Hibernate.BINARY);
+					AbstractDBGeometryType geometryType = AbstractHibernatePersistence.getGeometryUserType();
+					if (value instanceof Collection) {
+						List<Object> param = new ArrayList<>();
+						for (Object object : (Collection<?>) value) {
+							if (object instanceof Geometry) {
+								param.add(geometryType.conv2DBGeometry((Geometry) object, persistence.getConnection()));
+							}
+							else {
+								param.add(object);
+							}
+						}
+						result.setParameterList(name, param, Hibernate.BINARY);
+					}
+					else if (value.getClass().isArray()) {
+						List<Object> param = new ArrayList<>();
+						for (Object object : (Object[]) value) {
+							if (object instanceof Geometry) {
+								param.add(geometryType.conv2DBGeometry((Geometry) object, persistence.getConnection()));
+							}
+							else {
+								param.add(object);
+							}
+						}
+						result.setParameterList(name, param, Hibernate.BINARY);
+					}
+					else {
+						if (value instanceof Geometry) {
+							result.setParameter(name, AbstractHibernatePersistence.getGeometryUserType().conv2DBGeometry((Geometry) value, persistence.getConnection()), Hibernate.BINARY);
+						}
+						else {
+							result.setParameter(name, value, Hibernate.BINARY);
+						}
+					}
 				}
 			}
 			else if (AttributeType.integer.equals(type)) {
-				result.setParameter(name, value, Hibernate.INTEGER);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.INTEGER);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.INTEGER);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.INTEGER);
+				}
 			}
 			else if (AttributeType.longInteger.equals(type)) {
-				result.setParameter(name,  value, Hibernate.LONG);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.LONG);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.LONG);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.LONG);
+				}
 			}
 			else if (AttributeType.time.equals(type)) {
-				result.setTime(name, (Time) value);
+				if (value instanceof Collection) {
+					result.setParameterList(name, (Collection<?>) value, Hibernate.TIME);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					result.setParameterList(name, (Object[]) value, Hibernate.TIME);
+				}
+				else {
+					result.setParameter(name, value, Hibernate.TIME);
+				}
 			}
-			else if (AttributeType.timestamp.equals(type)) {
-				result.setTimestamp(name, (Date) value);
+			else if (AttributeType.association.equals(type) ||
+						AttributeType.id.equals(type)) {
+				if (value instanceof Collection) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Collection<?>) value) {
+						param.add((object instanceof Bean) ? ((Bean) object).getBizId() : object);
+					}
+					result.setParameterList(name, param, Hibernate.STRING);
+				}
+				else if ((value != null) && value.getClass().isArray()) {
+					List<Object> param = new ArrayList<>();
+					for (Object object : (Object[]) value) {
+						param.add((object instanceof Bean) ? ((Bean) object).getBizId() : object);
+					}
+					result.setParameterList(name, param, Hibernate.STRING);
+				}
+				else {
+					result.setParameter(name, (value instanceof Bean) ? ((Bean) value).getBizId() : value, Hibernate.STRING);
+				}
 			}
 			else {
 				result.setParameter(name, value);
