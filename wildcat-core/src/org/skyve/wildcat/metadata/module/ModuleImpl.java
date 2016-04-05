@@ -10,7 +10,6 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -18,8 +17,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
@@ -130,24 +129,17 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				result.getColumns().add(column);
 */
 				
-				processColumns(customer, document, result.getColumns());
+				processColumns(document, result.getColumns());
 			}
 		}
 
 		return result;
 	}
 
-	private void processColumns(Customer customer, Document document, List<QueryColumn> columns)
+	private static void processColumns(Document document, List<QueryColumn> columns)
 	throws MetaDataException {
 		boolean firstColumn = true;
-		Extends inherits = document.getExtends();
-		if (inherits != null) {
-			Document baseDocument = getDocument(customer, inherits.getDocumentName());
-			processColumns(customer, baseDocument, columns);
-			firstColumn = false;
-		}
-
-		for (Attribute attribute : document.getAttributes()) {
+		for (Attribute attribute : document.getAllAttributes()) {
 			if (attribute.isPersistent() && (! attribute.isDeprecated())) {
 				// Note - collections not included in generated queries
 				if (attribute instanceof Field) {
