@@ -160,7 +160,7 @@ public abstract class AbstractBean implements Bean {
 	
 	@Override
 	public final boolean isNotChanged() {
-		return originalValues.isEmpty();
+		return ! isChanged();
 	}
 	
 	@SuppressWarnings("static-method")
