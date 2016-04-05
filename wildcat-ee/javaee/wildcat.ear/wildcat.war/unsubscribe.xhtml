@@ -24,14 +24,14 @@
 		<ui:define name="pages">
 			<pm:page id="main">
 				<pm:header fixed="true" pt:data-tap-toggle="false"
-					title="#{unsubscribe.i18n['unsubscribe.title']}">
+					title="#{unsubscribe.i18n['page.unsubscribe.title']}">
 				</pm:header>
 				<pm:content>
 					<h:panelGroup rendered="#{unsubscribe.success}">
-						<h1 style="text-align: center">#{unsubscribe.i18n['unsubscribe.success']}</h1>
+						<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.success']}</h1>
 					</h:panelGroup>
 					<h:panelGroup rendered="#{not unsubscribe.success}">
-						<h1 style="text-align: center">#{unsubscribe.i18n['unsubscribe.error']}</h1>
+						<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.error']}</h1>
 					</h:panelGroup>
 				</pm:content>
 			</pm:page>
