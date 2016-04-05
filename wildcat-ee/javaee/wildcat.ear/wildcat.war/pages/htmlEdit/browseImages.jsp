@@ -1,15 +1,29 @@
-<%@ page language="java"%>
-<%@page import="org.skyve.wildcat.util.UtilImpl" %>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@page import="java.security.Principal"%>
+<%@page import="java.util.Locale"%>
+<%@page import="org.skyve.metadata.user.User"%>
+<%@page import="org.skyve.util.Util"%>
+<%@page import="org.skyve.wildcat.util.UtilImpl"%>
+<%@page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page import="org.skyve.wildcat.web.WebUtil"%>
+<%
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
+						request.getServerPort() + request.getContextPath() + "/";
+	boolean mobile = UserAgent.getType(request).isMobile();
+	Principal p = request.getUserPrincipal();
+	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
+	Locale locale = (user == null) ? request.getLocale() : user.getLocale();
+%>
 <!DOCTYPE html>
-<HTML>
-	<HEAD>
+<html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
+	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8">
+		<meta http-equiv="Content-Type" CONTENT="text/html; CHARSET=utf-8">
 		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png">
-		<TITLE><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></TITLE>
+		<title><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></title>
 		<link rel="stylesheet" type="text/css" href="../../css/basic.css"/>
-	</HEAD>
-	<BODY BGCOLOR='#e0e0e0' MARGINHEIGHT=0 MARGINWIDTH=0 LEFTMARGIN=0 TOPMARGIN=0>
+	</head>
+	<body BGCOLOR='#e0e0e0' MARGINHEIGHT=0 MARGINWIDTH=0 LEFTMARGIN=0 TOPMARGIN=0>
 		<script type="text/javascript">var isomorphicDir='../../<%=UtilImpl.SMART_CLIENT_DIR%>/modules/ISC_Containers.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Grids.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Forms.js"></script>
@@ -17,18 +31,6 @@
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Calendar.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_RichTextEditor.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/wildcat/load_skin.js"></script>
-<%--
-		<script type="text/javascript">var isomorphicDir='../../<%=UtilImpl.SMART_CLIENT_DIR%>/';</script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Core.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Foundation.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Containers.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Grids.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Forms.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_DataBinding.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_Calendar.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/client/modules/ISC_RichTextEditor.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/wildcat/load_skin.js"></script>
---%>
 		<script type=text/javascript>
 			data = [
 			    {

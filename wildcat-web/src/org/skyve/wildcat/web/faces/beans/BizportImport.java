@@ -36,7 +36,6 @@ import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
-import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean(name = "_wildcatBizImport")
 @RequestScoped
