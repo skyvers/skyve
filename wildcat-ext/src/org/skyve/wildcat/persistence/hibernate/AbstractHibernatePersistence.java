@@ -787,6 +787,11 @@ t.printStackTrace();
 		session.evict(bean);
 	}
 
+	@Override
+	public void refresh(Bean bean) {
+		session.refresh(bean);
+	}
+
 	// populate all implicit mandatory fields required
 	private void setMandatories(Document document, final Bean beanToSave)
 	throws DomainException, MetaDataException {

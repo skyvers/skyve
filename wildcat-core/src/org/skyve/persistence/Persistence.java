@@ -56,6 +56,11 @@ public interface Persistence extends Serializable {
 	public void evictCached(Bean bean);
 	
 	/**
+	 * Refresh the bean's state from the database.
+	 */
+	public void refresh(Bean bean);
+	
+	/**
 	 * 
 	 * @param document
 	 * @param beanToSave
