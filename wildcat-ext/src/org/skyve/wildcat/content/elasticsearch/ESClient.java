@@ -348,7 +348,12 @@ public class ESClient extends AbstractContentManager {
 			String content_type = (String) field.getValue();
 			mimeType = MimeType.fromMimeType(content_type);
 		}
-		String content = UtilImpl.CONTENT_FILE_STORAGE ? null : (String) response.getField(ATTACHMENT).getValue();
+		field = response.getField(ATTACHMENT);
+		if (field == null) {
+			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + ").attachment: DNE");
+			return null;
+		}
+		String content = UtilImpl.CONTENT_FILE_STORAGE ? null : (String) field.getValue();
 		String fileName = null;
 		field = response.getField(FILE_FILENAME);
 		if (field != null) {
