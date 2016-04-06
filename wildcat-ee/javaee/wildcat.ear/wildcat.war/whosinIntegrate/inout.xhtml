@@ -7,8 +7,9 @@
 		xmlns:pm="http://primefaces.org/mobile"
 		xmlns:w="http://bizhub.com.au/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
-    <f:view renderKitId="PRIMEFACES_MOBILE">
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		dir="#{inOutView.dir}">
+    <f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{inOutView.encoding}">
 		<f:metadata>
 			<f:viewParam name="i" value="#{inOutView.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{inOutView.preRender}"/>

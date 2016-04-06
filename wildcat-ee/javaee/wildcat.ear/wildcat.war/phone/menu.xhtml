@@ -7,8 +7,9 @@
 		xmlns:pm="http://primefaces.org/mobile"
 		xmlns:w="http://bizhub.com.au/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
-    <f:view renderKitId="PRIMEFACES_MOBILE">
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		dir="#{wildcat.dir}">
+    <f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{wildcat.encoding}">
 		<ui:composition template="./template.xhtml">
 			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />

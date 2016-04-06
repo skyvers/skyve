@@ -5,8 +5,9 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:w="http://bizhub.com.au/ui">
-	<f:view contentType="text/html">
+		xmlns:w="http://bizhub.com.au/ui"
+		dir="#{wildcat.dir}">
+	<f:view contentType="text/html" encoding="#{wildcat.encoding}">
 		<f:metadata>
 			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />
 			<f:viewParam name="m" value="#{wildcat.bizModuleParameter}" />

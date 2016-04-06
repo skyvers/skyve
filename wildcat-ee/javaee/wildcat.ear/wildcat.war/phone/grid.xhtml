@@ -9,7 +9,7 @@
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 		dir="#{wildcat.dir}">
-    <f:view renderKitId="PRIMEFACES_MOBILE">
+    <f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{wildcat.encoding}">
 		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
 			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />

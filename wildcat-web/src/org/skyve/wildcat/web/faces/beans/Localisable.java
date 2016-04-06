@@ -9,6 +9,7 @@ import java.util.Set;
 import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.util.UtilImpl;
+import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.faces.FacesAction;
 
 public abstract class Localisable implements Serializable {
@@ -92,7 +93,12 @@ public abstract class Localisable implements Serializable {
 		}
 	}
 
+	
 	private String dir;
+	/**
+	 * Used in the faces html tag.
+	 * @return	The text direction - rtl or ltr.
+	 */
 	public final String getDir() {
 		return dir;
 	}
@@ -102,6 +108,15 @@ public abstract class Localisable implements Serializable {
 		return locale;
 	}
 
+	/**
+	 * Used in the facs view tag
+	 * @return UTF-8
+	 */
+	@SuppressWarnings("static-method")
+	public String getEncoding() {
+		return ServletConstants.UTF8;
+	}
+	
 	private I18nMapAdapter i18n = new I18nMapAdapter();
 	public Map<String, String> getI18n() {
 		return i18n;

@@ -8,7 +8,9 @@ import modules.admin.Communication.CommunicationBizlet;
 import modules.admin.Subscription.SubscriptionBizlet;
 
 import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.Persistence;
+import org.skyve.wildcat.metadata.user.UserImpl;
 import org.skyve.wildcat.web.faces.FacesAction;
 import org.skyve.wildcat.web.faces.beans.Harness;
 
@@ -32,6 +34,9 @@ public class Unsubscribe extends Harness {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (!fc.isPostback()) {
 					Persistence p = CORE.getPersistence();
+					UserImpl internalUser = (UserImpl) p.getUser();
+					Customer customer = internalUser.getCustomer();
+					initialise(customer, internalUser);
 
 					String bizCustomer = fc.getExternalContext().getRequestParameterMap().get("c");
 					String communicationId = fc.getExternalContext().getRequestParameterMap().get("i");
