@@ -70,7 +70,7 @@ public class Desktop extends Harness {
 			    	UserImpl user = (UserImpl) persistence.getUser();
 			    	Customer customer = user.getCustomer();
 			    	
-			    	initialise(customer, user);
+			    	initialise(customer, user, fc.getExternalContext().getRequestLocale());
 
 					createLocaleScriptIfRequired();
 

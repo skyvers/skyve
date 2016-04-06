@@ -6,6 +6,9 @@
 		xmlns:p="http://primefaces.org/ui"
 		dir="#{_wildcatContent.dir}">
     <f:view contentType="text/html" encoding="#{_wildcatContent.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{_wildcatContent.preRender}" />
+		</f:metadata>
 		<h:head>
 			<title>#{_wildcatContent.i18n['page.contentUpload.title']}</title>
 			<style>

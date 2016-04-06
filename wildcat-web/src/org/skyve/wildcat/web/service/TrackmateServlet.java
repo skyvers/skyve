@@ -310,7 +310,6 @@ public class TrackmateServlet extends HttpServlet {
 					}
 
 					pw.print(result.toString());
-					response.setContentLength(result.length());
 				} catch (InvocationTargetException e) {
 					throw e.getTargetException();
 				}

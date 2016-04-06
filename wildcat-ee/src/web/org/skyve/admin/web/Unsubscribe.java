@@ -32,12 +32,14 @@ public class Unsubscribe extends Harness {
 			@SuppressWarnings("synthetic-access")
 			public Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
-				if (!fc.isPostback()) {
+				if (! fc.isPostback()) {
 					Persistence p = CORE.getPersistence();
 					UserImpl internalUser = (UserImpl) p.getUser();
-					Customer customer = internalUser.getCustomer();
-					initialise(customer, internalUser);
-
+					if (internalUser != null) { // NB not necessarily logged in
+						Customer customer = internalUser.getCustomer();
+						initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
+					}
+					
 					String bizCustomer = fc.getExternalContext().getRequestParameterMap().get("c");
 					String communicationId = fc.getExternalContext().getRequestParameterMap().get("i");
 					String receiverIdentifier = fc.getExternalContext().getRequestParameterMap().get("r");

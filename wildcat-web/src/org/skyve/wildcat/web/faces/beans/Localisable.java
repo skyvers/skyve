@@ -109,7 +109,7 @@ public abstract class Localisable implements Serializable {
 	}
 
 	/**
-	 * Used in the facs view tag
+	 * Used in the faces view tag
 	 * @return UTF-8
 	 */
 	@SuppressWarnings("static-method")
@@ -122,8 +122,14 @@ public abstract class Localisable implements Serializable {
 		return i18n;
 	}
 	
-	protected final void initialise(UserImpl user) {
-		locale = user.getLocale();
+	protected final void initialise(UserImpl user, Locale requestLocale) {
+		locale = requestLocale;
+		if (user != null) {
+			Locale userLocale = user.getLocale();
+			if (userLocale != null) {
+				locale = userLocale;
+			}
+		}
 		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
 		i18n.setLocale(locale);
 	}

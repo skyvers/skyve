@@ -1,5 +1,7 @@
 package org.skyve.wildcat.web.faces.actions;
 
+import javax.faces.context.FacesContext;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
@@ -26,7 +28,9 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 		UserImpl internalUser = (UserImpl) persistence.getUser();
 		Customer customer = internalUser.getCustomer();
 
-		facesView.initialise(customer, internalUser);
+		facesView.initialise(customer, 
+								internalUser, 
+								FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
 
 		WebAction webAction = facesView.getWebActionParameter();
 		if (webAction == null) {

@@ -10,6 +10,9 @@
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 		dir="#{wildcat.dir}">
     <f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{wildcat.encoding}">
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{wildcat.preRender}" />
+		</f:metadata>
 		<ui:composition template="./template.xhtml">
 			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
 			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />

@@ -1,5 +1,6 @@
 package org.skyve.wildcat.web.faces.beans;
 
+import java.util.Locale;
 import java.util.Set;
 
 import org.skyve.metadata.MetaDataException;
@@ -81,9 +82,9 @@ public abstract class Harness extends Localisable {
 		return Util.getWildcatContextUrl() + '/';
 	}
 	
-	public final void initialise(Customer customer, UserImpl user)
+	public final void initialise(Customer customer, UserImpl user, Locale requestLocale)
 	throws MetaDataException, SecurityException {
-		super.initialise(user);
+		super.initialise(user, requestLocale);
 		
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("resources?_n=");

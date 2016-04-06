@@ -91,11 +91,9 @@ public class MapServlet extends HttpServlet {
 
 					if (result != null) {
 						pw.print(result);
-						response.setContentLength(result.length());
 					}
 					else {
 						pw.print("{}");
-						response.setContentLength(2);
 					}
 				}
 				catch (InvocationTargetException e) {
@@ -106,7 +104,6 @@ public class MapServlet extends HttpServlet {
 				t.printStackTrace();
 				persistence.rollback();
 				pw.print("{}");
-				response.setContentLength(2);
 			}
 			finally {
 				if (persistence != null) {

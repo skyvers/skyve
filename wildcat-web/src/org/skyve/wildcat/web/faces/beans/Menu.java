@@ -56,7 +56,7 @@ public class Menu extends Harness {
 					UserImpl internalUser = (UserImpl) persistence.getUser();
 					Customer customer = internalUser.getCustomer();
 
-					initialise(customer, internalUser);
+					initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
 					
 					Router router = CORE.getRepository().getRouter();
 					String uxui = ((UxUiSelector) router.getUxuiSelector()).select((HttpServletRequest) fc.getExternalContext().getRequest());

@@ -2,7 +2,6 @@ package org.skyve.wildcat.web.faces.beans;
 
 import java.text.DecimalFormat;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -14,12 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
+import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.messages.SecurityException;
@@ -31,6 +32,7 @@ import org.skyve.wildcat.util.ThreadSafeFactory;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
+import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean(name = "_wildcatUpload")
 @RequestScoped
@@ -50,11 +52,17 @@ public class FileUpload extends Localisable {
 		return context;
 	}
 
-	@PostConstruct
-	public void postConstruct() {
-		AbstractPersistence persistence = AbstractPersistence.get();
-		UserImpl user = (UserImpl) persistence.getUser();
-		initialise(user);
+	public void preRender() {
+		new FacesAction<Void>() {
+			@Override
+			public Void callback() throws Exception {
+				Persistence p = CORE.getPersistence();
+				UserImpl internalUser = (UserImpl) p.getUser();
+				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				
+				return null;
+			}
+		}.execute();
 	}
 
 	public void setContext(String context) {

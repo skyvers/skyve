@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -17,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
+import org.skyve.CORE;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.domain.Bean;
@@ -25,6 +25,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.bizport.POIWorkbook;
@@ -36,6 +37,7 @@ import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
+import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean(name = "_wildcatBizImport")
 @RequestScoped
@@ -51,13 +53,19 @@ public class BizportImport extends Localisable {
     @ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
     private String action;
 
-	@PostConstruct
-	public void postConstruct() {
-		AbstractPersistence persistence = AbstractPersistence.get();
-		UserImpl user = (UserImpl) persistence.getUser();
-		initialise(user);
+	public void preRender() {
+		new FacesAction<Void>() {
+			@Override
+			public Void callback() throws Exception {
+				Persistence p = CORE.getPersistence();
+				UserImpl internalUser = (UserImpl) p.getUser();
+				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				
+				return null;
+			}
+		}.execute();
 	}
-
+	
     public String getContext() {
 		return context;
 	}

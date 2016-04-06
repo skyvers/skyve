@@ -1,6 +1,5 @@
 package org.skyve.wildcat.web.faces.beans;
 
-import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
@@ -13,12 +12,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
@@ -32,6 +33,7 @@ import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
 import org.skyve.wildcat.web.WebUtil;
+import org.skyve.wildcat.web.faces.FacesAction;
 
 @ManagedBean(name = "_wildcatContent")
 @RequestScoped
@@ -47,12 +49,19 @@ public class ContentUpload extends Localisable {
     @ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
     private String contentBinding;
 
-	@PostConstruct
-	public void postConstruct() {
-		AbstractPersistence persistence = AbstractPersistence.get();
-		UserImpl user = (UserImpl) persistence.getUser();
-		initialise(user);
+	public void preRender() {
+		new FacesAction<Void>() {
+			@Override
+			public Void callback() throws Exception {
+				Persistence p = CORE.getPersistence();
+				UserImpl internalUser = (UserImpl) p.getUser();
+				initialise(internalUser, FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
+				
+				return null;
+			}
+		}.execute();
 	}
+	
 
     public String getContext() {
 		return context;
