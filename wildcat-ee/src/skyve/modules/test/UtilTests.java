@@ -1,5 +1,7 @@
 package modules.test;
 
+import java.nio.charset.Charset;
+
 import modules.test.domain.AllAttributesPersistent;
 
 import org.junit.Assert;
@@ -97,5 +99,46 @@ public class UtilTests extends AbstractH2Test {
 		test.getAggregatedCollection().get(0).setText("TEST");
 		
 		Assert.assertTrue("Should have changed", Util.hasChanged(test));
+	}
+	
+	@Test
+	@SuppressWarnings({ "static-method", "synthetic-access" })
+	public void testUTF8Length() {
+		Charset utf8 = Charset.forName("UTF-8");
+		AllCodepointsIterator iterator = new AllCodepointsIterator();
+		while (iterator.hasNext()) {
+			String test = new String(Character.toChars(iterator.next()));
+			Assert.assertEquals(test.getBytes(utf8).length, Util.UTF8Length(test));
+		}
+	}
+
+	private static class AllCodepointsIterator {
+		private static final int MAX = 0x10FFFF; //see http://unicode.org/glossary/
+		private static final int SURROGATE_FIRST = 0xD800;
+		private static final int SURROGATE_LAST = 0xDFFF;
+		private int codepoint = 0;
+		public boolean hasNext() {
+			return codepoint < MAX;
+		}
+		public int next() {
+			int ret = codepoint;
+			codepoint = next(codepoint);
+			return ret;
+		}
+		
+		private static int next(int codepoint) {
+			int result = codepoint;
+			while (result++ < MAX) {
+				if (result == SURROGATE_FIRST) {
+					result = SURROGATE_LAST + 1;
+				}
+				if (! Character.isDefined(result)) {
+					continue;
+				}
+				return result;
+			}
+			
+			return MAX;
+		}
 	}
 }
