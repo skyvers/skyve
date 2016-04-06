@@ -10,6 +10,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -129,17 +130,29 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				result.getColumns().add(column);
 */
 				
-				processColumns(document, result.getColumns());
+				processColumns(customer, document, result.getColumns());
 			}
 		}
 
 		return result;
 	}
 
-	private static void processColumns(Document document, List<QueryColumn> columns)
+	private void processColumns(Customer customer, Document document, List<QueryColumn> columns)
 	throws MetaDataException {
+		// NB We have to manually traverse the document inheritence hierarchy with the given customer
+		// as we cannot use document.getAllAttributes() as this method is called from 
+		// the domain generator and there is no Persistence set in there.
 		boolean firstColumn = true;
-		for (Attribute attribute : document.getAllAttributes()) {
+		Extends inherits = document.getExtends();
+		if (inherits != null) {
+			Document baseDocument = getDocument(customer, inherits.getDocumentName());
+			processColumns(customer, baseDocument, columns);
+			if (! columns.isEmpty()) {
+				firstColumn = false;
+			}
+		}
+
+		for (Attribute attribute : document.getAttributes()) {
 			if (attribute.isPersistent() && (! attribute.isDeprecated())) {
 				// Note - collections not included in generated queries
 				if (attribute instanceof Field) {
