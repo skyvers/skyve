@@ -194,9 +194,11 @@ ListView.addClassProperties({
 		ListView.contents.hideMember(ListView._portal);
 		ListView.contents.showMember(ListView._map);
 
-		var ds = eval(ID);
-		ListView._map.setDataSource(ds);
-		ListView._setHeading("MAP", ds.icon, ds.modoc);
+//		var ds = eval(ID);
+//		ListView._map.setDataSource(ds);
+//		ListView._setHeading("MAP", ds.icon, ds.modoc);
+		ListView._map.setDataSource(ID);
+		ListView._setHeading('MAP', 'shared/icons/Home.png', '');
 	},
 	
 	showPortal: function() {
