@@ -18,8 +18,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jts-1.13.jar" sourcepath="/Users/mike/.m2/repository/com/vividsolutions/jts/1.13/jts-1.13-sources.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/javassist-3.12.0.GA.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/jasperreports-javaflow-4.7.0.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/uadetector-core-0.9.14.jar"/>
-	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/uadetector-resources-2014.02.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/lib/javaee-api-7.0.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/geodb-0.7.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/slf4j-api-1.7.7.jar"/>
@@ -34,5 +32,6 @@
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/elasticsearch-1.4.2.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/lucene-core-4.10.2.jar"/>
 	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/super-csv-2.4.0.jar"/>
+	<classpathentry kind="lib" path="/wildcat-ee/javaee/wildcat.ear/lib/UserAgentUtils-1.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
