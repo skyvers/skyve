@@ -1481,6 +1481,10 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(link, "bizContentLink");
+			String value = link.getValue();
+			if (value != null) {
+				code.append("value:'").append(SmartClientGenerateUtils.processString(Util.i18n(value, locale))).append("',");
+			}
 			disabled(link.getDisabledConditionName(), code);
 			invisible(link.getInvisibleConditionName(), code);
 			editable(link.getEditable(), code);

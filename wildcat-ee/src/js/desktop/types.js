@@ -1090,6 +1090,8 @@ BizContentLinkItem.addProperties({
 //name
 //title
 //icons
+// editable
+// value - the content link value (not the href)
 BizContentLinkItem.addMethods({
 	init: function(config) {
 		this._link = HTMLFlow.create({
@@ -1123,7 +1125,7 @@ BizContentLinkItem.addMethods({
 				"&_b=" + this.name.replaceAll('_', '.') +
 				"&_ctim=" + new Date().getTime();
 
-				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">' + this.canvas.linkHTML(url, "Content", "_blank") + '</div>');
+				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">' + this.canvas.linkHTML(url, (this.value ? this.value : "Content"), "_blank") + '</div>');
 			}
 			else {
 				this._link.setContents('<div style="line-height:25px;vertical-align:middle;">&lt;Empty&gt;</div>');
