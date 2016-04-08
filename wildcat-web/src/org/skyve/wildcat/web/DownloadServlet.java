@@ -20,6 +20,7 @@ import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
@@ -86,7 +87,7 @@ public class DownloadServlet extends HttpServlet {
 		            
 		            if (result != null) {
 						response.setContentType(result.getMimeType().toString());
-						response.setCharacterEncoding(ServletConstants.UTF8);
+						response.setCharacterEncoding(Util.UTF8);
 						StringBuilder header = new StringBuilder(64);
 						Disposition disposition = result.getDisposition();
 						header.append((disposition == null) ? 
@@ -114,10 +115,10 @@ public class DownloadServlet extends HttpServlet {
 				System.err.println("Problem generating the download - " + t.toString());
 				t.printStackTrace();
 				response.setContentType(MimeType.html.toString());
-				response.setCharacterEncoding(ServletConstants.UTF8);
-				out.write("<html><head/><body><h3>".getBytes(ServletConstants.UTF8));
-				out.write("An error occured whilst processing your report.".getBytes(ServletConstants.UTF8));
-				out.write("</body></html>".getBytes(ServletConstants.UTF8));
+				response.setCharacterEncoding(Util.UTF8);
+				out.write("<html><head/><body><h3>".getBytes(Util.UTF8));
+				out.write("An error occured whilst processing your report.".getBytes(Util.UTF8));
+				out.write("</body></html>".getBytes(Util.UTF8));
 			}
 			finally {
 				persistence.commit(true);

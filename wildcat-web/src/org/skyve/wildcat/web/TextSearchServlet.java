@@ -20,6 +20,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.content.SearchResult;
@@ -54,7 +55,7 @@ public class TextSearchServlet extends HttpServlet {
 				SearchResults results = cm.google(criteria, 100);
 
 	            response.setContentType(MimeType.json.toString());
-	            response.setCharacterEncoding(ServletConstants.UTF8);
+	            response.setCharacterEncoding(Util.UTF8);
 	            response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 	            response.addDateHeader("Expires", 0); // never
 

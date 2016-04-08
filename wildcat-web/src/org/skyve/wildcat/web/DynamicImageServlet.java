@@ -21,6 +21,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 
@@ -39,7 +40,7 @@ public class DynamicImageServlet extends HttpServlet {
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-Control", "private,no-cache,no-store");
 		ImageFormat format = null;
 		try (OutputStream out = response.getOutputStream()) {

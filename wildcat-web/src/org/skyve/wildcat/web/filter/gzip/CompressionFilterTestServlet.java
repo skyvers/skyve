@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.content.MimeType;
-import org.skyve.wildcat.web.ServletConstants;
+import org.skyve.util.Util;
 
 /**
  * Very Simple test servlet to test compression filter
@@ -47,7 +47,7 @@ public class CompressionFilterTestServlet extends HttpServlet {
 
         try (ServletOutputStream out = response.getOutputStream()) {
 	        response.setContentType(MimeType.plain.toString());
-	        response.setCharacterEncoding(ServletConstants.UTF8);
+	        response.setCharacterEncoding(Util.UTF8);
 	
 	        Enumeration<?> e = request.getHeaders("Accept-Encoding");
 	        while (e.hasMoreElements()) {

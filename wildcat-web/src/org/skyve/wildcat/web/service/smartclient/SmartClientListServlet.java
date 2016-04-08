@@ -45,6 +45,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.MapBean;
 import org.skyve.wildcat.domain.messages.SecurityException;
@@ -56,7 +57,6 @@ import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.TagUtil;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
-import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.SortParameter;
 import org.skyve.wildcat.web.WebUtil;
 
@@ -91,7 +91,7 @@ public class SmartClientListServlet extends HttpServlet {
 	throws IOException {
 
         response.setContentType(MimeType.json.toString());
-        response.setCharacterEncoding(ServletConstants.UTF8);
+        response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 

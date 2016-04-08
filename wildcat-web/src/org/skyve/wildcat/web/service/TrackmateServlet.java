@@ -39,13 +39,13 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.UtilImpl;
-import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.WebUtil;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -119,7 +119,7 @@ public class TrackmateServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 
@@ -274,7 +274,7 @@ public class TrackmateServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 

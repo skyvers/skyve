@@ -24,6 +24,8 @@ public class Util {
 	 */
 	public static final Logger LOGGER = UtilImpl.LOGGER;
 
+	public static final String UTF8 = "UTF-8";
+	
 	/**
 	 * Disallow instantiation
 	 */

@@ -2954,7 +2954,7 @@ pickListFields:[{name:'value'}],
 		String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
 
 		response.setContentType(MimeType.javascript.toString());
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 		try (PrintWriter pw = response.getWriter()) {

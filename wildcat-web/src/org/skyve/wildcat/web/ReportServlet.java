@@ -54,6 +54,7 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.Util;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.wildcat.jasperreports.ReportDesignParameters.ReportColumn;
@@ -251,7 +252,7 @@ public class ReportServlet extends HttpServlet {
 												HttpSession session,
 												HttpServletResponse response)
 	throws IOException {
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 
 		StringBuilder sb = new StringBuilder(64);
 		switch (format) {
@@ -352,8 +353,8 @@ public class ReportServlet extends HttpServlet {
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info(valuesParam);
 				if (valuesParam == null) {
 					response.setContentType(MimeType.html.toString());
-					response.setCharacterEncoding(ServletConstants.UTF8);
-					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(ServletConstants.UTF8));
+					response.setCharacterEncoding(Util.UTF8);
+					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(Util.UTF8));
 					return;
 				}
 	

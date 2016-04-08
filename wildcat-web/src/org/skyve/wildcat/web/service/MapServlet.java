@@ -22,10 +22,10 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.map.DefaultCollectionMapModel;
 import org.skyve.metadata.view.model.map.DefaultQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.Util;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.web.AbstractWebContext;
-import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.WebUtil;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -59,7 +59,7 @@ public class MapServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 

@@ -40,6 +40,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.generate.SmartClientGenerateUtils;
@@ -79,7 +80,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
         response.setContentType(MimeType.json.toString());
-        response.setCharacterEncoding(ServletConstants.UTF8);
+        response.setCharacterEncoding(Util.UTF8);
         response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 		try (PrintWriter pw = response.getWriter()) {

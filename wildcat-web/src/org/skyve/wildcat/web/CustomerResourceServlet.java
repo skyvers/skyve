@@ -26,6 +26,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.AttachmentContent;
@@ -328,7 +329,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			}
 
 			response.setContentType(resource.getMimeType().toString());
-			response.setCharacterEncoding(ServletConstants.UTF8);
+			response.setCharacterEncoding(Util.UTF8);
 			if (resource.isContent()) {
 				StringBuilder disposition = new StringBuilder(32);
 				disposition.append("inline; filename=\"");

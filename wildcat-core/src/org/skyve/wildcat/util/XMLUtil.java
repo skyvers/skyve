@@ -2,8 +2,11 @@ package org.skyve.wildcat.util;
 
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
@@ -14,6 +17,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
 import org.skyve.metadata.MetaDataException;
+import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.repository.customer.CustomerMetaData;
 import org.skyve.wildcat.metadata.repository.document.DocumentMetaData;
 import org.skyve.wildcat.metadata.repository.module.ModuleMetaData;
@@ -88,10 +92,18 @@ public class XMLUtil {
 
 	public static Router unmarshalRouter(String file) 
 	throws MetaDataException {
-		try (FileReader fr = new FileReader(file)) {
-			Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(ROUTER_SCHEMA);
-			return (Router) unmarshaller.unmarshal(fr);
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(ROUTER_SCHEMA);
+						return (Router) unmarshaller.unmarshal(br);
+					}
+				}
+			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal router at " + file, e);
@@ -116,10 +128,18 @@ public class XMLUtil {
 
 	public static CustomerMetaData unmarshalCustomer(String file) 
 	throws MetaDataException {
-		try (FileReader fr = new FileReader(file)) {
-			Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(CUSTOMER_SCHEMA);
-			return (CustomerMetaData) unmarshaller.unmarshal(fr);
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(CUSTOMER_SCHEMA);
+						return (CustomerMetaData) unmarshaller.unmarshal(br);
+					}
+				}
+			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal customer at " + file, e);
@@ -146,10 +166,18 @@ public class XMLUtil {
 
 	public static ModuleMetaData unmarshalModule(String file) 
 	throws MetaDataException {
-		try (FileReader fr = new FileReader(file)) {
-			Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(MODULE_SCHEMA);
-			return (ModuleMetaData) unmarshaller.unmarshal(fr);
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(MODULE_SCHEMA);
+						return (ModuleMetaData) unmarshaller.unmarshal(br);
+					}
+				}
+			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal module at " + file, e);
@@ -176,10 +204,18 @@ public class XMLUtil {
 
 	public static DocumentMetaData unmarshalDocument(String file) 
 	throws MetaDataException {
-		try (FileReader fr = new FileReader(file)) {
-			Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(DOCUMENT_SCHEMA);
-			return (DocumentMetaData) unmarshaller.unmarshal(fr);
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(DOCUMENT_SCHEMA);
+						return (DocumentMetaData) unmarshaller.unmarshal(br);
+					}
+				}
+			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal document at " + file, e);
@@ -212,10 +248,18 @@ public class XMLUtil {
 
 	public static ViewMetaData unmarshalView(String file) 
 	throws MetaDataException {
-		try (FileReader fr = new FileReader(file)) {
-			Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(VIEW_SCHEMA);
-			return (ViewMetaData) unmarshaller.unmarshal(fr);
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(VIEW_SCHEMA);
+						return (ViewMetaData) unmarshaller.unmarshal(br);
+					}
+				}
+			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal view at " + file, e);

@@ -114,7 +114,7 @@ public abstract class Localisable implements Serializable {
 	 */
 	@SuppressWarnings("static-method")
 	public String getEncoding() {
-		return ServletConstants.UTF8;
+		return Util.UTF8;
 	}
 	
 	private I18nMapAdapter i18n = new I18nMapAdapter();

@@ -20,13 +20,13 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.domain.messages.SecurityException;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.JSONUtil;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
-import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.WebUtil;
 
 /**
@@ -53,7 +53,7 @@ public class SmartClientPrevServlet extends HttpServlet {
     private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
 	throws IOException {
     	response.setContentType(MimeType.json.toString());
-        response.setCharacterEncoding(ServletConstants.UTF8);
+        response.setCharacterEncoding(Util.UTF8);
 		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
 		response.addDateHeader("Expires", 0); // never
 		try (PrintWriter pw = response.getWriter()) {

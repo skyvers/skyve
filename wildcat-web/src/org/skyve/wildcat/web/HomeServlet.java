@@ -40,7 +40,7 @@ public class HomeServlet extends HttpServlet {
 	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.html.toString());
-		response.setCharacterEncoding(ServletConstants.UTF8);
+		response.setCharacterEncoding(Util.UTF8);
 		
 		String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
 		Cookie cookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, 
