@@ -348,12 +348,21 @@ public class ESClient extends AbstractContentManager {
 			String content_type = (String) field.getValue();
 			mimeType = MimeType.fromMimeType(content_type);
 		}
-		field = response.getField(ATTACHMENT);
-		if (field == null) {
-			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + ").attachment: DNE");
-			return null;
+
+		// content is null when we are storing content on the file system, 
+		// otherwise its the base64 encoded stream straight out of the index.
+		String content = null;
+		if (! UtilImpl.CONTENT_FILE_STORAGE) {
+			field = response.getField(ATTACHMENT);
+			// NB This can occur when a content repository is changed from file storage to index
+			// stored and is not properly cleaned up with backup/restore.
+			if (field == null) {
+				if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + ") - Attachment: DNE");
+				return null;
+			}
+			content = (String) field.getValue();
 		}
-		String content = UtilImpl.CONTENT_FILE_STORAGE ? null : (String) field.getValue();
+		
 		String fileName = null;
 		field = response.getField(FILE_FILENAME);
 		if (field != null) {
@@ -377,6 +386,11 @@ public class ESClient extends AbstractContentManager {
 		AttachmentContent result = null;
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			String path = getFilePath(id);
+			File file = new File(path);
+			if (! file.exists()) {
+				if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + path + ") - File DNE");
+				return null;
+			}
 
 			result = new AttachmentContent(bizCustomer,
 											bizModule,
@@ -387,7 +401,7 @@ public class ESClient extends AbstractContentManager {
 											binding,
 											fileName,
 											mimeType,
-											new FileInputStream(path));
+											new FileInputStream(file));
 		}
 		else {
 			result = new AttachmentContent(bizCustomer,
