@@ -566,9 +566,9 @@
 
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="joined"/>
       <xs:enumeration value="single"/>
       <xs:enumeration value="mapped"/>
-      <xs:enumeration value="joined"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -582,18 +582,18 @@
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ean13CheckDigit"/>
       <xs:enumeration value="isinCheckDigit"/>
       <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="email"/>
       <xs:enumeration value="internetDomain"/>
       <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="ipAddress"/>
       <xs:enumeration value="url"/>
-      <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
       <xs:enumeration value="luhnCheckDigit"/>
       <xs:enumeration value="isbnCheckDigit"/>
+      <xs:enumeration value="email"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -607,10 +607,10 @@
 
   <xs:simpleType name="indexType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="textual"/>
-      <xs:enumeration value="database"/>
       <xs:enumeration value="both"/>
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="database"/>
+      <xs:enumeration value="textual"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -631,17 +631,17 @@
 
   <xs:simpleType name="inverseCardinality">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="many"/>
       <xs:enumeration value="one"/>
+      <xs:enumeration value="many"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="global"/>
       <xs:enumeration value="user"/>
       <xs:enumeration value="customer"/>
-      <xs:enumeration value="global"/>
-      <xs:enumeration value="dataGroup"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

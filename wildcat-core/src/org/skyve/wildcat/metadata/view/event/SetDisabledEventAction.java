@@ -26,13 +26,13 @@ public class SetDisabledEventAction extends AbstractBound implements EventAction
 	}
 
 	@Override
-	@XmlAttribute(name = "disabled", required = true)
+	@XmlAttribute(name = "disabled")
 	public void setDisabledConditionName(String disabledConditionName) {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 
 	@Override
-	@XmlAttribute(name = "enabled", required = false)
+	@XmlAttribute(name = "enabled")
 	public void setEnabledConditionName(String enabledConditionName) {
 		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
 	}

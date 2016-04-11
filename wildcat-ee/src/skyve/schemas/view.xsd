@@ -191,7 +191,9 @@
       <xs:extension base="tns:abstractBound">
         <xs:sequence/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -311,7 +313,8 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractBound">
         <xs:sequence/>
-        <xs:attribute name="disabled" type="xs:string" use="required"/>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -320,7 +323,8 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractBound">
         <xs:sequence/>
-        <xs:attribute name="invisible" type="xs:string" use="required"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -445,9 +449,13 @@
         </xs:sequence>
         <xs:attribute name="query" type="xs:string"/>
         <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
         <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
         <xs:attribute name="disableClear" type="xs:string"/>
+        <xs:attribute name="enableClear" type="xs:string"/>
         <xs:attribute name="disablePick" type="xs:string"/>
+        <xs:attribute name="enablePick" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -638,7 +646,9 @@
     <xs:attribute name="relativeIconFileName" type="xs:string"/>
     <xs:attribute name="confirm" type="xs:string"/>
     <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="bizExportAction">
@@ -783,6 +793,7 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="VBox">
@@ -801,6 +812,7 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
+        <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="widgetId" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -822,6 +834,7 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
+        <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="widgetId" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -841,7 +854,9 @@
     <xs:attribute name="borderTitle" type="xs:string"/>
     <xs:attribute name="defaultLabelAlign" type="tns:horizontalAlignment"/>
     <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="formColumn">
@@ -927,8 +942,10 @@
     <xs:attribute name="dialogWidth" type="xs:int"/>
     <xs:attribute name="dialogHeight" type="xs:int"/>
     <xs:attribute name="modalDialog" type="xs:boolean"/>
-    <xs:attribute name="invisibleConditionName" type="xs:string"/>
-    <xs:attribute name="disabledConditionName" type="xs:string"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
+    <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="geoLocator">
@@ -942,7 +959,9 @@
     <xs:attribute name="postcodeBinding" type="xs:string"/>
     <xs:attribute name="countryBinding" type="xs:string"/>
     <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="label">
@@ -954,6 +973,7 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="formatted" type="xs:boolean"/>
         <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
       </xs:extension>
@@ -967,6 +987,7 @@
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="textAlignment" type="tns:horizontalAlignment"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -978,6 +999,7 @@
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1006,6 +1028,7 @@
     <xs:attribute name="value" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="actionReference">
@@ -1110,7 +1133,9 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="tab" final="extension restriction">
@@ -1120,7 +1145,9 @@
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="icon16x16RelativeFileName" type="xs:string"/>
         <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
         <xs:attribute name="selected" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
@@ -1136,6 +1163,7 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dynamicImage">
@@ -1156,6 +1184,7 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="listMembership">
@@ -1267,10 +1296,15 @@
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="wrap" type="xs:boolean"/>
         <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
         <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
         <xs:attribute name="disableZoom" type="xs:string"/>
+        <xs:attribute name="enableZoom" type="xs:string"/>
         <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
         <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="enableRemove" type="xs:string"/>
         <xs:attribute name="showAdd" type="xs:boolean"/>
         <xs:attribute name="showZoom" type="xs:boolean"/>
         <xs:attribute name="showEdit" type="xs:boolean"/>
@@ -1291,6 +1325,7 @@
         <xs:attribute name="pixelHeight" type="xs:int"/>
         <xs:attribute name="percentageHeight" type="xs:int"/>
         <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -1377,11 +1412,17 @@
     <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="disabled" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
     <xs:attribute name="disableAdd" type="xs:string"/>
+    <xs:attribute name="enableAdd" type="xs:string"/>
     <xs:attribute name="disableZoom" type="xs:string"/>
+    <xs:attribute name="enableZoom" type="xs:string"/>
     <xs:attribute name="disableEdit" type="xs:string"/>
+    <xs:attribute name="enableEdit" type="xs:string"/>
     <xs:attribute name="disableRemove" type="xs:string"/>
+    <xs:attribute name="enableRemove" type="xs:string"/>
     <xs:attribute name="showAdd" type="xs:boolean"/>
     <xs:attribute name="showZoom" type="xs:boolean"/>
     <xs:attribute name="showEdit" type="xs:boolean"/>
@@ -1411,9 +1452,9 @@
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="create"/>
-      <xs:enumeration value="params"/>
       <xs:enumeration value="list"/>
       <xs:enumeration value="pick"/>
+      <xs:enumeration value="params"/>
       <xs:enumeration value="edit"/>
     </xs:restriction>
   </xs:simpleType>
@@ -1428,48 +1469,48 @@
 
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="width"/>
-      <xs:enumeration value="height"/>
       <xs:enumeration value="both"/>
+      <xs:enumeration value="height"/>
+      <xs:enumeration value="width"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="verticalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="top"/>
       <xs:enumeration value="bottom"/>
+      <xs:enumeration value="top"/>
       <xs:enumeration value="middle"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Remove"/>
+      <xs:enumeration value="Navigate"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Upload"/>
       <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="New"/>
       <xs:enumeration value="DEFAULTS"/>
+      <xs:enumeration value="OK"/>
       <xs:enumeration value="Save"/>
       <xs:enumeration value="Download"/>
       <xs:enumeration value="ZoomOut"/>
       <xs:enumeration value="Report"/>
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="OK"/>
       <xs:enumeration value="Add"/>
-      <xs:enumeration value="Delete"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Upload"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Edit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="modalWindow"/>
-      <xs:enumeration value="namedFame"/>
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
       <xs:enumeration value="self"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="blankFrame"/>
+      <xs:enumeration value="namedFame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

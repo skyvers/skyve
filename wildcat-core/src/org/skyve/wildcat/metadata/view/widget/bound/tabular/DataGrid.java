@@ -34,9 +34,13 @@ import org.skyve.wildcat.util.XMLUtil;
 							"disabledConditionName", 
 							"enabledConditionName", 
 							"disableAddConditionName",
+							"enableAddConditionName",
 							"disableZoomConditionName",
+							"enableZoomConditionName",
 							"disableEditConditionName",
+							"enableEditConditionName",
 							"disableRemoveConditionName",
+							"enableRemoveConditionName",
 							"showAdd",
 							"showZoom",
 							"showEdit",
@@ -166,6 +170,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 	
 	@Override
+	@XmlAttribute(name = "enableAdd", required = false)
+	public void setEnableAddConditionName(String enableAddConditionName) {
+		this.disableAddConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableAddConditionName));
+	}
+
+	@Override
 	public String getDisableZoomConditionName() {
 		return disableZoomConditionName;
 	}
@@ -174,6 +184,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	@XmlAttribute(name = "disableZoom", required = false)
 	public void setDisableZoomConditionName(String disableZoomConditionName) {
 		this.disableZoomConditionName = UtilImpl.processStringValue(disableZoomConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "enableZoom", required = false)
+	public void setEnableZoomConditionName(String enableZoomConditionName) {
+		this.disableZoomConditionName =  BindUtil.negateCondition(UtilImpl.processStringValue(enableZoomConditionName));
 	}
 
 	@Override
@@ -188,6 +204,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 
 	@Override
+	@XmlAttribute(name = "enableEdit", required = false)
+	public void setEnableEditConditionName(String enableEditConditionName) {
+		this.disableEditConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableEditConditionName));
+	}
+
+	@Override
 	public String getDisableRemoveConditionName() {
 		return disableRemoveConditionName;
 	}
@@ -198,6 +220,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
 	}
 	
+	@Override
+	@XmlAttribute(name = "enableRemove", required = false)
+	public void setEnableRemoveConditionName(String enableRemoveConditionName) {
+		this.disableRemoveConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableRemoveConditionName));
+	}
+
 	public Boolean getShowAdd() {
 		return showAdd;
 	}

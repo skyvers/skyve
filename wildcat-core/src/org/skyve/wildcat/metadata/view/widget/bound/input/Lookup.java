@@ -13,6 +13,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.util.Util;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
@@ -28,9 +30,13 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
 			propOrder = {"query",
 							"disableEditConditionName",
+							"enableEditConditionName",
 							"disableAddConditionName",
+							"enableAddConditionName",
 							"disableClearConditionName",
+							"enableClearConditionName",
 							"disablePickConditionName",
+							"enablePickConditionName",
 							"pickedActions",
 							"clearedActions",
 							"editedActions",
@@ -71,7 +77,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 
 	@XmlAttribute(name = "disableEdit", required = false)
 	public void setDisableEditConditionName(String disableEditConditionName) {
-		this.disableEditConditionName = disableEditConditionName;
+		this.disableEditConditionName = UtilImpl.processStringValue(disableEditConditionName);
+	}
+
+	@XmlAttribute(name = "enableEdit", required = false)
+	public void setEnableEditConditionName(String enableEditConditionName) {
+		this.disableEditConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableEditConditionName));
 	}
 
 	public String getDisableAddConditionName() {
@@ -80,7 +91,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 
 	@XmlAttribute(name = "disableAdd", required = false)
 	public void setDisableAddConditionName(String disableAddConditionName) {
-		this.disableAddConditionName = disableAddConditionName;
+		this.disableAddConditionName = Util.processStringValue(disableAddConditionName);
+	}
+
+	@XmlAttribute(name = "enableAdd", required = false)
+	public void setEnableAddConditionName(String enableAddConditionName) {
+		this.disableAddConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableAddConditionName));
 	}
 
 	public String getDisableClearConditionName() {
@@ -89,7 +105,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 
 	@XmlAttribute(name = "disableClear", required = false)
 	public void setDisableClearConditionName(String disableClearConditionName) {
-		this.disableClearConditionName = disableClearConditionName;
+		this.disableClearConditionName = Util.processStringValue(disableClearConditionName);
+	}
+
+	@XmlAttribute(name = "enableClear", required = false)
+	public void setEnableClearConditionName(String enableClearConditionName) {
+		this.disableClearConditionName = BindUtil.negateCondition(Util.processStringValue(enableClearConditionName));
 	}
 
 	public String getDisablePickConditionName() {
@@ -98,7 +119,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 
 	@XmlAttribute(name = "disablePick", required = false)
 	public void setDisablePickConditionName(String disablePickConditionName) {
-		this.disablePickConditionName = disablePickConditionName;
+		this.disablePickConditionName = Util.processStringValue(disablePickConditionName);
+	}
+
+	@XmlAttribute(name = "enablePick", required = false)
+	public void setEnablePickConditionName(String enablePickConditionName) {
+		this.disablePickConditionName = BindUtil.negateCondition(Util.processStringValue(enablePickConditionName));
 	}
 
 	@Override

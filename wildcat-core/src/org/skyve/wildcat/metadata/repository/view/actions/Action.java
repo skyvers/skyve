@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -16,7 +17,9 @@ import org.skyve.wildcat.util.XMLUtil;
 							"relativeIconFileName", 
 							"confirmationText",
 							"disabledConditionName",
-							"invisibleConditionName"})
+							"enabledConditionName",
+							"invisibleConditionName",
+							"visibleConditionName"})
 public abstract class Action {
 	protected ImplicitActionName implicitName;
 
@@ -86,6 +89,11 @@ public abstract class Action {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
 	public String getDisabledConditionName() {
 		return disabledConditionName;
 	}
@@ -95,6 +103,11 @@ public abstract class Action {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 	
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = new ActionImpl();
 

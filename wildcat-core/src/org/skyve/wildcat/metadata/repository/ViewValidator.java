@@ -203,7 +203,7 @@ class ViewValidator extends ViewVisitor {
 	throws MetaDataException {
 		// ignore true and false when checking the condition exists
 		if ((conditionName != null) && (! "true".equals(conditionName)) && (! "false".equals(conditionName))) {
-			// revert the sense of the condition if it starts with "not"
+			// reverse the sense of the condition if it starts with "not"
 			String testConditionName = conditionName;
 			if (testConditionName.startsWith("not")) {
 				if (! Character.isUpperCase(testConditionName.charAt(3))) {
@@ -1960,7 +1960,12 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							null);
-		validateConditionName(setDisabled.getDisabledConditionName(), widgetIdentifier);
+		String disabledConditionName = setDisabled.getDisabledConditionName();
+		if (disabledConditionName == null) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+											" requires a [disabled] or [enabled] condition name.");
+		}
+		validateConditionName(disabledConditionName, widgetIdentifier);
 	}
 
 	@Override
@@ -1993,6 +1998,11 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							null);
-		validateConditionName(setInvisible.getInvisibleConditionName(), widgetIdentifier);
+		String invisibleConditionName = setInvisible.getInvisibleConditionName();
+		if (invisibleConditionName == null) {
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
+											" requires an [invisible] or [visible] condition name.");
+		}
+		validateConditionName(invisibleConditionName, widgetIdentifier);
 	}
 }

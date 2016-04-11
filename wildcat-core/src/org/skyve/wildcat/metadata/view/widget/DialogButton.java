@@ -118,7 +118,7 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	}
 
 	@Override
-	@XmlAttribute(required = false)
+	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
@@ -135,7 +135,7 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	}
 
 	@Override
-	@XmlAttribute(required = false)
+	@XmlAttribute(name = "disabled", required = false)
 	public void setDisabledConditionName(String disabledConditionName) {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}

@@ -26,13 +26,13 @@ public class SetInvisibleEventAction extends AbstractBound implements EventActio
 	}
 
 	@Override
-	@XmlAttribute(name = "invisible", required = true)
+	@XmlAttribute(name = "invisible")
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
 	@Override
-	@XmlAttribute(name = "visible", required = false)
+	@XmlAttribute(name = "visible")
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
