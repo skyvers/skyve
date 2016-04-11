@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
 import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
@@ -24,7 +25,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"pixelWidth", 
 							"pixelHeight", 
 							"textAlignment",
-							"invisibleConditionName"})
+							"invisibleConditionName",
+							"visibleConditionName"})
 public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth {
 	/**
 	 * For Serialization
@@ -86,6 +88,12 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
 	public HorizontalAlignment getTextAlignment() {

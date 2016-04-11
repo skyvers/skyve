@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.Container;
 import org.skyve.wildcat.metadata.view.Bordered;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
@@ -176,5 +177,11 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

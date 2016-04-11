@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -17,7 +18,8 @@ import org.skyve.wildcat.util.XMLUtil;
 						"percentageWidth",
 						"pixelHeight", 
 						"percentageHeight",
-						"invisibleConditionName"})
+						"invisibleConditionName",
+						"visibleConditionName"})
 public class StaticImage implements MetaData, RelativeSize, Invisible {
 	/**
 	 * For Serialization
@@ -95,5 +97,11 @@ public class StaticImage implements MetaData, RelativeSize, Invisible {
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

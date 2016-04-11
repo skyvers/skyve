@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.AbsoluteWidth;
 import org.skyve.wildcat.metadata.view.reference.ActionReference;
 import org.skyve.wildcat.metadata.view.reference.ContentReference;
@@ -33,7 +34,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"target",
 							"value",
 							"pixelWidth",
-							"invisibleConditionName"})
+							"invisibleConditionName",
+							"visibleConditionName"})
 public class Link implements MetaData, Invisible, AbsoluteWidth {
 	/**
 	 * For Serialization
@@ -102,5 +104,11 @@ public class Link implements MetaData, Invisible, AbsoluteWidth {
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

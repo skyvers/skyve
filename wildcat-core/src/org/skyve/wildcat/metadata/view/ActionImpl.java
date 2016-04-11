@@ -10,6 +10,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.repository.AbstractRepository;
 import org.skyve.wildcat.metadata.repository.view.actions.AddAction;
 import org.skyve.wildcat.metadata.repository.view.actions.BizExportAction;
@@ -172,6 +173,11 @@ public class ActionImpl implements Action {
 	}
 
 	@Override
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(visibleConditionName);
+	}
+
+	@Override
 	public String getDisabledConditionName() {
 		return disabledConditionName;
 	}
@@ -180,7 +186,13 @@ public class ActionImpl implements Action {
 	public void setDisabledConditionName(String disabledConditionName) {
 		this.disabledConditionName = disabledConditionName;
 	}
-	
+
+	@Override
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(enabledConditionName);
+	}
+
+
 	public org.skyve.wildcat.metadata.repository.view.actions.Action toRepositoryAction() {
 		org.skyve.wildcat.metadata.repository.view.actions.Action result = null;
 		if (implicitName == null) { // custom action

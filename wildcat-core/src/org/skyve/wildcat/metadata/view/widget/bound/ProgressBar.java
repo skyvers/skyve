@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -12,7 +13,7 @@ import org.skyve.wildcat.util.XMLUtil;
 // TODO Implement the rendering of this
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "invisibleConditionName"})
+			propOrder = {"pixelWidth", "pixelHeight", "invisibleConditionName", "visibleConditionName"})
 public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSize {
 	/**
 	 * For Serialization
@@ -54,5 +55,11 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

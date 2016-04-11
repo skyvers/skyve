@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.Identifiable;
 import org.skyve.wildcat.metadata.view.event.Addable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
@@ -31,6 +32,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"editable",
 							"wordWrap",
 							"disabledConditionName", 
+							"enabledConditionName", 
 							"disableAddConditionName",
 							"disableZoomConditionName",
 							"disableEditConditionName",
@@ -146,6 +148,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 	
+	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
 	@Override
 	public String getDisableAddConditionName() {
 		return disableAddConditionName;

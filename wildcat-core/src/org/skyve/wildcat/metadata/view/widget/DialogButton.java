@@ -14,6 +14,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -27,7 +28,9 @@ import org.skyve.wildcat.util.XMLUtil;
 							"dialogHeight", 
 							"modalDialog",
 							"invisibleConditionName", 
+							"visibleConditionName",
 							"disabledConditionName", 
+							"enabledConditionName",
 							"parameters"})
 public class DialogButton implements MetaData, Parameterizable, Disableable, Invisible {
 	/**
@@ -121,6 +124,12 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	}
 
 	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
+	@Override
 	public String getDisabledConditionName() {
 		return disabledConditionName;
 	}
@@ -129,5 +138,11 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	@XmlAttribute(required = false)
 	public void setDisabledConditionName(String disabledConditionName) {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
+	}
+	
+	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
 	}
 }

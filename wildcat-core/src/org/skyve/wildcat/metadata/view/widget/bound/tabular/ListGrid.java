@@ -17,6 +17,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.metadata.view.event.Editable;
 import org.skyve.wildcat.metadata.view.event.EventAction;
@@ -38,7 +39,9 @@ import org.skyve.wildcat.util.XMLUtil;
 							"pixelHeight",
 							"percentageHeight",
 							"disabledConditionName",
+							"enabledConditionName",
 							"invisibleConditionName",
+							"visibleConditionName",
 							"disableAddConditionName",
 							"disableZoomConditionName",
 							"disableEditConditionName",
@@ -221,6 +224,12 @@ public class ListGrid implements MetaData,
 	}
 
 	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
+	@Override
 	public String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
@@ -231,6 +240,12 @@ public class ListGrid implements MetaData,
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 	
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
 	@Override
 	public String getDisableAddConditionName() {
 		return disableAddConditionName;

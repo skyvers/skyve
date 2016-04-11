@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.widget.bound.AbstractBound;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -28,5 +29,11 @@ public class SetInvisibleEventAction extends AbstractBound implements EventActio
 	@XmlAttribute(name = "invisible", required = true)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

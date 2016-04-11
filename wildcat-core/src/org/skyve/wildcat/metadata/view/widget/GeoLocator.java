@@ -7,6 +7,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
+import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
@@ -111,6 +113,12 @@ public class GeoLocator implements MetaData, Disableable, Invisible {
 	}
 
 	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
+	@Override
 	public String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
@@ -118,5 +126,11 @@ public class GeoLocator implements MetaData, Disableable, Invisible {
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

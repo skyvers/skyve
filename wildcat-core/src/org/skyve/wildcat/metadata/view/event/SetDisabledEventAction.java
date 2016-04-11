@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Disableable;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.widget.bound.AbstractBound;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -28,5 +29,11 @@ public class SetDisabledEventAction extends AbstractBound implements EventAction
 	@XmlAttribute(name = "disabled", required = true)
 	public void setDisabledConditionName(String disabledConditionName) {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
 	}
 }

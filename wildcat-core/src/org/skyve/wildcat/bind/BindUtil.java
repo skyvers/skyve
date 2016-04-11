@@ -197,20 +197,22 @@ public final class BindUtil {
 	public static String negateCondition(String condition) {
         String result = null;
 
-        if ("true".equals(condition)) {
-            result = "false";
-        }
-        else if ("false".equals(condition)) {
-            result = "true";
-        }
-        else if (condition.startsWith("not")) {
-            result = Introspector.decapitalize(condition.substring(3));
-        }
-        else {
-            StringBuilder sb = new StringBuilder(condition.length() + 3);
-            sb.append("not").append(Character.valueOf(Character.toUpperCase(condition.charAt(0))));
-            sb.append(condition.substring(1));
-            result = sb.toString();
+        if (condition != null) {
+	        if ("true".equals(condition)) {
+	            result = "false";
+	        }
+	        else if ("false".equals(condition)) {
+	            result = "true";
+	        }
+	        else if (condition.startsWith("not")) {
+	            result = Introspector.decapitalize(condition.substring(3));
+	        }
+	        else {
+	            StringBuilder sb = new StringBuilder(condition.length() + 3);
+	            sb.append("not").append(Character.valueOf(Character.toUpperCase(condition.charAt(0))));
+	            sb.append(condition.substring(1));
+	            result = sb.toString();
+	        }
         }
         
         return result;

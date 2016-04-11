@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.metadata.view.widget.bound.AbstractBound;
 import org.skyve.wildcat.util.UtilImpl;
@@ -17,7 +18,8 @@ import org.skyve.wildcat.util.XMLUtil;
 							"percentageWidth",
 							"pixelHeight",
 							"percentageHeight",
-							"invisibleConditionName"})
+							"invisibleConditionName",
+							"visibleConditionName"})
 public abstract class TabularWidget extends AbstractBound implements RelativeSize, Invisible {
 	/**
 	 * For Serialization
@@ -97,5 +99,11 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

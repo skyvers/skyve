@@ -11,6 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.Identifiable;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.util.UtilImpl;
@@ -24,7 +25,9 @@ import org.skyve.wildcat.util.XMLUtil;
 							"pixelHeight",
 							"percentageHeight",
 							"disabledConditionName", 
+							"enabledConditionName",
 							"invisibleConditionName", 
+							"visibleConditionName",
 							"tabs"})
 public final class TabPane implements MetaData, Identifiable, RelativeSize, Disableable, Invisible {
 	/**
@@ -114,6 +117,12 @@ public final class TabPane implements MetaData, Identifiable, RelativeSize, Disa
 	}
 
 	@Override
+	@XmlAttribute(name = "enabled", required = false)
+	public void setEnabledConditionName(String enabledConditionName) {
+		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
+	@Override
 	public String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
@@ -122,5 +131,11 @@ public final class TabPane implements MetaData, Identifiable, RelativeSize, Disa
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 }

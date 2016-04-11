@@ -13,6 +13,7 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.wildcat.util.UtilImpl;
@@ -28,6 +29,7 @@ import org.skyve.wildcat.util.XMLUtil;
 							"pixelHeight", 
 							"percentageHeight",
 							"invisibleConditionName",
+							"visibleConditionName",
 							"parameters"})
 public class DynamicImage implements MetaData, RelativeSize, Invisible, Parameterizable {
 	/**
@@ -129,6 +131,12 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	@Override
+	@XmlAttribute(name = "visible", required = false)
+	public void setVisibleConditionName(String visibleConditionName) {
+		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
 	@Override
