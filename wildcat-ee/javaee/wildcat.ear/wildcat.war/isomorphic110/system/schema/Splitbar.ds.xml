@@ -1,0 +1,17 @@
+<DataSource	ID="Splitbar"	Constructor="Splitbar" inheritsFrom="StretchImg">
+	<fields>
+		<field name="canCollapse" type="boolean"/>
+        <field name="canDrag" type="boolean"/>
+        <field name="capSize" type="integer"/>
+        <field name="gripImgSuffix" type="string"/>
+        <field name="src" type="string"/>
+        <field name="hSrc" type="string"/>
+        <field name="vSrc" type="string"/>
+        <field name="showGrip" type="boolean"/>
+        <field name="showClosedGrip" type="boolean"/>
+        <field name="showDownGrip" type="boolean"/>
+        <field name="showRollOverGrip" type="boolean"/>
+        <field name="hResizeCursor" type="cursorEnum"/>
+        <field name="vResizeCursor" type="cursorEnum"/>
+	</fields>
+</DataSource>

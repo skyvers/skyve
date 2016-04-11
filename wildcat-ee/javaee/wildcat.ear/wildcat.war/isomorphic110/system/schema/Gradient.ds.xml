@@ -1,0 +1,9 @@
+<DataSource ID="Gradient">
+    <fields>
+        <field name="ref" type="identifier" xmlAttribute="true" title="Identifier"/>
+        <field name="id"  type="string"/>
+        <field name="colorStops"  type="ColorStop" multiple="true" />
+        <field name="startColor" type="color"/>
+        <field name="endColor"  type="color"/>
+    </fields>
+</DataSource>

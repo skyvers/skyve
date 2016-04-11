@@ -1,0 +1,16 @@
+<DataSource ID="ValueMapItem" inheritsFrom="CanvasItem" Constructor="ValueMapItem">
+    <fields>
+		<field name="newOptionRowMessage"  type="string" visibility="internal"/>
+        <field name="displayTitle" type="string" visibility="internal"/>
+        <field name="valueTitle"    type="string" visibility="internal"/>
+        <field name="showMapTypeButton" type="string" visibility="internal"/>
+        <field name="undefinedKeyErrorMessage" type="string" visibility="internal"/>
+        <field name="duplicateValueErrorMessage" type="string" visibility="internal"/>
+        <field name="saveAsArrayTitle" type="string" visibility="internal"/>
+        <field name="saveAsObjectTitle" type="string" visibility="internal"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+    </fields>
+</DataSource>

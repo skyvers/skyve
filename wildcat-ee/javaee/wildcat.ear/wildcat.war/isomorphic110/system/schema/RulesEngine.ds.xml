@@ -1,0 +1,7 @@
+<DataSource ID="RulesEngine" Constructor="RulesEngine">
+    <fields>
+        <members type="Canvas" multiple="true"/>
+        <rulesData type="Rule" multiple="true"/>
+    </fields>
+</DataSource>
+        

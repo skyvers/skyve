@@ -1,0 +1,12 @@
+<DataSource	ID="RelationItem" inheritsFrom="CanvasItem" Constructor="RelationItem">
+	<fields>
+        <field name="showEditButton"    type="boolean"/>
+        <field name="editButtonDefaults"        type="Canvas" propertiesOnly="true"/>
+        <field name="showRemoveButton"         type="boolean"/>
+        <field name="removeButtonDefaults"  type="Canvas" propertiesOnly="true"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+	</fields>
+</DataSource>

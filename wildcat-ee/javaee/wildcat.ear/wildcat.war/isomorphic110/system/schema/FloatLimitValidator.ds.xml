@@ -1,0 +1,8 @@
+<Object ID="FloatLimitValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="floatLimit" addGlobalId="false">
+    <fields>
+        <min type="float"/>
+        <max type="float"/>
+        <precision type="integer"/>
+        <roundToPrecision type="boolean"/>
+    </fields>
+</Object>

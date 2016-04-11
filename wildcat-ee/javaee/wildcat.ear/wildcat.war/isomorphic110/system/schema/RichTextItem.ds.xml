@@ -1,0 +1,6 @@
+<DataSource ID="RichTextItem" inheritsFrom="CanvasItem" Constructor="RichTextItem">
+	<fields>
+		<field name="controlGroups" multiple="true" type="string"/>
+	</fields>
+</DataSource>
+

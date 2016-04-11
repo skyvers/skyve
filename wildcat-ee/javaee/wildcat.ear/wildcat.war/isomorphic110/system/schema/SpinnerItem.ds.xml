@@ -1,0 +1,7 @@
+<DataSource	ID="SpinnerItem" inheritsFrom="TextItem" Constructor="SpinnerItem" >
+	<fields>
+        <field name="step"  type="float"/>
+        <field name="max"   type="number"/>
+        <field name="min"   type="number"/>
+	</fields>
+</DataSource>

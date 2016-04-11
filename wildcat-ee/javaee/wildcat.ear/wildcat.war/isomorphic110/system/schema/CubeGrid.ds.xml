@@ -1,0 +1,148 @@
+<DataSource ID="CubeGrid"   Constructor="CubeGrid"  inheritsFrom="ListGrid">
+    <fields>
+        <!-- Data & Metadata -->
+        <field  name="data" type="CellRecord"    multiple="true" />
+        <field  name="cellIdProperty"   type="string" />
+        <field  name="valueProperty"    type="string" />
+        <field  name="valueTitle"    type="string" />
+        <field  name="facets"   type="Facet"    multiple="true" />
+        <field  name="rollupValue"  type="FacetValueId" />
+        <field  name="metricFacetId"  type="string" />
+        
+        <!-- Facet Layout -->
+        <field  name="columnFacets" type="FacetId"  multiple="true" />
+        <field  name="rowFacets"    type="FacetId"  multiple="true" />
+        <field  name="hideEmptyFacetValues" type="boolean" />
+        <field  name="fixedFacetValues" type="FacetValues" />
+        <field  name="facetValueGroups" type="FacetValueGroup"  multiple="true"
+                visibility="internal"/>
+        <field  name="canMoveFacets"    type="boolean" />
+        <field  name="canReorderColumns"    type="boolean" />
+        <!-- backcompat -->
+        <field  name="rows"     type="sideFacetsObject" visibility="hidden" />
+        <field  name="columns"  type="sideFacetsObject" visibility="hidden"/>
+
+        <!-- Facet Expansion -->
+        <field  name="canCollapseFacets"    type="boolean" />
+        <field  name="canMinimizeFacets"    type="boolean" />
+
+        <!-- Grid Layout -->
+        <field  name="bodyMinWidth" type="number" />
+        <field  name="bodyMinHeight" type="number" />
+        <field  name="defaultFacetWidth"    type="number" />
+        <field  name="padTitles"    type="boolean" />
+        <field  name="wrapFacetTitles"  type="boolean" />
+        <field  name="wrapFacetValueTitles" type="boolean" />
+        <field  name="autoSizeHeaders"  type="boolean" />
+        <field  name="facetTitleAlign"  type="alignEnum" />
+        <field  name="facetValueAlign"  type="alignEnum" />
+        <field  name="cellAlign"    type="alignEnum" />
+        <field  name="canResizeColumns" type="boolean" />
+        <field  name="canMinimizeColumns"   type="boolean" />
+        
+        <!-- Grid Formatting -->
+        <field  name="baseStyle"    type="string" />
+        <field  name="bodyStyleName"    type="string" />
+        <field  name="alternateRecordStyles"    type="boolean" />
+
+
+        <!-- Highlighting -->
+        <field  name="hilites"  type="CubeGridHilite" multiple="true" />
+        <field  name="hiliteProperty"   type="string" />
+
+        <!-- Selection -->
+        <field  name="canSelectValues"  type="boolean" />
+        <field  name="canSelectHeaders" type="boolean" />
+        <field  name="autoSelectValues" type="enum" >
+            <valueMap>
+                <value>cols</value>
+                <value>rows</value>
+                <value>both</value>
+                <value>none</value>
+            </valueMap>
+        </field>
+        <field  name="autoSelectHeaders"    type="boolean" />
+        <field  name="simpleDeselect"   type="boolean" />
+
+        <!-- Mouse Events -->
+
+        <!-- Inline Editing -->
+        <field  name="canEdit"  type="boolean" />
+
+        <!-- Hover Tips -->
+        <field  name="facetValueHoverWidth" type="measure" />
+        <field  name="facetValueHoverHeight" type="measure"/>
+        <field  name="facetValueHoverAlign" type="alignEnum"/>
+        <field  name="facetValueHoverVAlign"    type="valignEnum"/>
+        <field  name="facetValueHoverStyle"     type="cssClass"/>
+ 
+        <field  name="facetLabelHoverWidth" type="measure"/>
+        <field  name="facetLabelHoverHeight" type="measure"/>
+        <field  name="facetLabelHoverAlign" type="alignEnum"/>
+        <field  name="facetLabelHoverVAlign"    type="valignEnum"/>
+        <field  name="facetLabelHoverStyle"     type="cssClass"/>
+        
+        <!-- Context Menus -->
+        <field  name="showCellContextMenus" type="boolean" visibility="experimental"/>
+        <field  name="showFacetValueContextMenus"   type="boolean" visibility="experimental"/>
+        <field  name="showFacetContextMenus"    type="boolean" visibility="experimental"/>
+        <field  name="contextMenuProperties"    type="Menu" propertiesOnly="true" visibility="experimental" />
+
+        <!-- Column Controls -->
+        <field  name="controlLabels"    type="valueMap" visibility="infa"/>
+        <field  name="canCloseColumns"  type="boolean" visibility="infa"/>
+        <field  name="canSortData"  type="boolean" visibility="infa"/>
+        <field  name="canSortFacets"    type="boolean" visibility="infa"/>
+        <field  name="sortedFacetValues"    type="FacetValue"   multiple="true" visibility="infa" />
+        <field  name="sortedFacetId"    type="FacetId" visibility="infa"/>
+        <field  name="sortDirection"    type="boolean" visibility="infa"/>
+
+        <!-- Charting -->
+        <field  name="chartConstructor"    type="string" />
+        <field  name="chartType"    type="string" />
+        <field  name="chartConfirmThreshold"    type="int" />
+        
+        <!-- Summary Row - Internal -->
+        <field  name="showColumnSummary"    type="boolean"  visibility="internal" />
+        <field  name="summaryHilite"    type="hiliteId" visibility="internal" />
+        <field  name="summaryBorder"    type="cssLineStyle"    visibility="internal" />
+        <field  name="summaryValue" type="FacetValueId" visibility="internal" />
+        <field  name="summaryTitle" type="string"   visibility="internal" />
+
+        <!-- Advanced - Internal -->
+        <field  name="rowHeaderGridMode"    type="boolean"  visibility="internal" />
+        <field  name="innerHeaderControlSize"   type="number" />
+        <field  name="innerHeaderReorderHandleWidth"    type="number" />
+        <field  name="enableCharting"   type="boolean" />
+        <field  name="mergeRowFacets"   type="facetEnum" />
+    </fields>
+    <types>
+        <type   ID="FacetId"    inheritsFrom="identifier" />
+        <type   ID="FacetValueId"   inheritsFrom="identifier" />
+        <type   ID="FacetValues"    inheritsFrom="Object" />
+        <type   ID="sideFacetsObject">
+            <fields>
+                <field  name="facets"   type="FacetId"  multiple="true" />
+            </fields>
+        </type>
+        <type   ID="facetEnum"  inheritsFrom="enum" >
+            <valueMap>
+                <value>true</value>
+                <value>false</value>
+                <value>number</value>
+            </valueMap>
+        </type>
+        <type   ID="cssLineStyle"   inheritsFrom="string" />
+        
+        <!-- types used in Facet and FacetValue -->
+        <type   ID="selectionBoundaryEnum"  inheritsFrom="enum" >
+            <valueMap>
+                <value>before</value>
+                <value>after</value>
+                <value>both</value>
+            </valueMap>
+        </type>
+
+    </types>
+    
+</DataSource>

@@ -1,0 +1,6 @@
+<DataSource ID="UserSummary">
+    <fields>
+        <field name="text" type="string" xmlAttribute="true"/>
+        <field name="summaryVars" type="ValueMap"/>
+    </fields>
+</DataSource>

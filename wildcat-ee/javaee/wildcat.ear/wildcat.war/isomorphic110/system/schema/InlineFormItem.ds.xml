@@ -1,0 +1,5 @@
+<DataSource	ID="InlineFormItem" inheritsFrom="FormItem" Constructor="InlineFormItem">
+    <fields>
+        <field name="formProperties" type="DynamicForm" propertiesOnly="true"/>
+    </fields>
+</DataSource>

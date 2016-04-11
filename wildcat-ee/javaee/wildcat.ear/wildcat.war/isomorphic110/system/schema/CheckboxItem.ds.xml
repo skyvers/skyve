@@ -1,0 +1,23 @@
+<DataSource	ID="CheckboxItem" inheritsFrom="CycleItem" Constructor="CheckboxItem">
+	<fields>
+		<!-- 
+		Unfortunately this doesn't quite work yet because the valueMap is output as	"true"/"false"
+		instead of true/false
+		-->		
+		<field name="defaultValue"  editorType="radioGroup"  type="boolean"  title="Default Value" defaultValue="false">	
+		    <valueMap>
+		        <value>true</value>
+				<value>false</value>
+			</valueMap>
+		</field>
+		<field name="required" inapplicable="true"/>        
+		<field name="type" inapplicable="true"/>        
+		<field name="showTitle" inapplicable="true"/>        
+        <field name="titleAlign" inapplicable="true" />        
+        <!-- label has to be visible for checkbox items for it to make any sense -->
+		<field name="showLabel" type="boolean" inapplicable="true"/>        
+        <field name="checkedImage"  type="string" title="Checked Image"/>
+        <field name="uncheckedImage"  type="string" title="Unchecked Image"/>
+        <field name="unsetImage"  type="string" title="Unset Image"/>
+	</fields>
+</DataSource>

@@ -1,0 +1,27 @@
+<DataSource ID="FormItemIcon" inheritsFrom="Object"
+            autoIdField="name">
+	<fields>
+        <field name="name"       type="string" basic="true"/>
+        <field name="src"        type="string" basic="true"/>
+        <field name="showOver"   type="boolean" />
+        <field name="overSrc"    type="string" />
+        <field name="width"      type="number" basic="true"/>
+        <field name="height"     type="number" basic="true"/>
+        <field name="neverDisable" type="boolean" />
+        <field name="showFocused" type="boolean" />
+        <field name="prompt"     type="string" />
+        <field name="disabled"   type="boolean" />
+        <field name="enableWhen"  type="AdvancedCriteria" isRuleCriteria="true" basic="true" />
+        <field name="visibleWhen" type="AdvancedCriteria" isRuleCriteria="true" basic="true" />
+    </fields>
+    <methods>
+        <method name="click">
+            <description>Fires when this icon is clicked</description>
+            <params>
+                <param name="form" type="DynamicForm"/>
+                <param name="item" type="FormItem"/>
+                <param name="icon" type="FormItemIcon"/>
+            </params>
+        </method>
+    </methods>
+</DataSource>

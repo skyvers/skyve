@@ -1,0 +1,9 @@
+<DataSource ID="ValuesManager" Constructor="ValuesManager">
+	<fields>
+		<field name="dataSource" xmlAttribute="true" idAllowed="true" type="string" />
+		<field name="serviceName" type="string"/>
+		<field name="serviceNamespace" type="string"/>
+		<field name="unknownErrorMessage" type="string"/>
+		<field name="members" type="DynamicForm" multiple="true" propertiesOnly="true"/>
+    </fields>
+</DataSource>

@@ -1,0 +1,1 @@
+<DataSource ID="ColorPickerItem" inheritsFrom="ColorItem" Constructor="ColorItem"/>

@@ -1,0 +1,6 @@
+<DataSource	ID="DrawBlockConnector" inheritsFrom="DrawCurve" Constructor="DrawBlockConnector" >
+    <fields>
+        <field name="controlPoint1" type="Point" title="Control Point 1"/>
+        <field name="controlPoint2" type="Point" title="Control Point 2"/>
+    </fields>
+</DataSource>

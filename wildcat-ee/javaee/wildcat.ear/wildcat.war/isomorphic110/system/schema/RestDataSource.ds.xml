@@ -1,0 +1,17 @@
+<DataSource ID="RestDataSource"	inheritsFrom="DataSource" Constructor="RestDataSource">
+    <fields>
+        <field name="fetchDataURL" type="string" xmlAttribute="true"/>
+        <field name="addDataURL" type="string" xmlAttribute="true"/>
+        <field name="removeDataURL" type="string" xmlAttribute="true"/>
+        <field name="updateDataURL" type="string" xmlAttribute="true"/>
+
+        <field name="xmlRecordXPath" type="XPath"/>
+        <field name="jsonRecordXPath" type="XPath"/>
+        
+        <field name="metaDataPrefix" type="string"/>
+        
+        <field name="prettyPrintJSON" type="boolean"/>
+        <field name="sendMetaData" type="boolean"/>
+    </fields>
+</DataSource>
+

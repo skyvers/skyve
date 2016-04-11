@@ -1,0 +1,10 @@
+<DataSource	ID="TimeItem" inheritsFrom="TextItem" Constructor="TimeItem">
+	<fields>
+		<field name="showSeconds"	type="boolean" title="Show Seconds" defaultValue="false"/>
+		<field name="show24HourTime"	type="boolean"	title="Show 24Hour Time" defaultValue="true"/>
+   		<field name="length" type="positiveInteger" title="Length" inapplicable="true"/>        
+		<field name="required" 			type="boolean"  title="Required"/>      
+        <field name="displayFormat" type="string"/>      
+        <field name="type" inapplicable="true"/>
+	</fields>
+</DataSource>

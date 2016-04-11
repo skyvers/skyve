@@ -1,0 +1,23 @@
+<DataSource ID="SplitPane"   inheritsFrom="VLayout"   Constructor="SplitPane">
+    <fields>
+        <field name="detailPane" type="Canvas"/>
+        <field name="listPane" type="Canvas"/>
+        <field name="listTitle" type="string" basic="true"/>
+        <field name="navigationPane" type="Canvas"/>
+        <field name="navigationTitle" type="string" basic="true"/>
+        <field name="detailTitle" type="string" basic="true"/>
+        <field name="autoNavigate" type="boolean"/>
+        <field name="listPaneTitleTemplate" type="string"/>
+        <field name="detailPaneTitleTemplate" type="string"/>
+
+        <!-- in visualBuilder these are not applicable, so hiding this prop -->
+        <field name="align"         type="anyAlignEnum" hidden="true"/>
+        <field name="defaultLayoutAlign" type="anyAlignEnum" hidden="true"/> 
+        <field name="layoutMargin"  type="positiveInteger" hidden="true"/>
+        <field name="membersMargin" type="positiveInteger" hidden="true"/>
+    </fields>
+    <methods>
+        <method name="navigateListPane" action="true" icon="[SKINIMG]/actions/forward.png"/>
+        <method name="navigateDetailPane" action="true" icon="[SKINIMG]/actions/forward.png"/>
+    </methods>
+</DataSource>

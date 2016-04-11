@@ -1,0 +1,10 @@
+<DataSource	 ID="DrawLine" inheritsFrom="DrawItem" Constructor="DrawLine" >
+    <fields>
+        <field name="startPoint" type="Point" title="Start Point" />
+        <field name="endPoint" type="Point" title="End Point"/>
+        <field name="startLeft" type="integer" title="Start Left"/>
+        <field name="startTop" type="integer" title="Start Top"/>
+        <field name="endLeft" type="integer" title="End Left"/>
+        <field name="endTop" type="integer" title="End Top"/>
+    </fields>
+</DataSource>

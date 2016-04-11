@@ -1,0 +1,14 @@
+<DataSource	ID="Toolbar" inheritsFrom="Canvas" Constructor="Toolbar">
+	<fields>
+		<field name="vertical"	type="boolean"	/>
+		<field name="canReorderItems"	type="boolean"	/>
+		<field name="canResizeItems"	type="boolean"	/>
+		<field name="buttonConstructor"	type="className"/>
+		<field name="buttonDefaults"	type="Button"	propertiesOnly="true"/>
+		<field name="buttons"	type="Button"	multiple="true"	propertiesOnly="true"/>
+        
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+	</fields>
+</DataSource>

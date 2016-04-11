@@ -1,0 +1,82 @@
+<DataSource	ID="TreeGrid"	Constructor="TreeGrid" inheritsFrom="ListGrid">
+	<fields>
+		<field name="fields"			type="TreeGridField"  multiple="true" rebuildOnChange="true"/>
+		<field name="data"			type="Tree"/>
+        <field name="dataProperties" type="ResultTree"/>
+        <field name="initialData"       type="List"/>
+		<field name="loadDataOnDemand"	type="boolean"/>
+		<field name="treeFieldTitle"	type="string"/>
+		<field name="showRoot"			type="boolean"/>
+		<field name="separateFolders"	type="boolean"/>
+		<field name="showConnectors"	type="boolean"/>
+		<field name="displayNodeType"	type="enum">	<!-- should come from Tree class  -->
+			<valueMap>
+				<value></value><!-- null in code to mean "foldersAndLeaves" -->
+				<value>folders</value>
+				<value>leaves</value>
+			</valueMap>
+		</field>
+        <field name="animateFolders"      type="boolean"/>
+        <field name="animateFolderSpeed"  type="number"/>
+        <field name="animateFolderTime"   type="number"/>
+        <field name="animateFolderEffect"   type="AnimationAcceleration"/>
+
+		<field name="indentSize"		type="positiveInteger"/>
+		<field name="iconSize"			type="positiveInteger"/>
+        <field name="nodeIcon"          type="string"/>
+        <field name="folderIcon"        type="string"/>
+        <field name="openIconSuffix"    type="string"/>
+        <field name="dropIconSuffix"    type="string"/>
+        <field name="closedIconSuffix"    type="string"/>
+		<field name="manyItemsImage"	type="URL"/>
+		<field name="openerImage"	type="URL"/>
+		<field name="connectorImage"	type="URL"/>
+
+        <field name="canReparentNodes" type="boolean"/>
+        <field name="canDropOnLeaves"  type="boolean"/>
+
+        <field name="showOpenIcons"  type="boolean"/>
+        <field name="showDropIcons"  type="boolean"/>
+
+        <field name="customIconProperty"  type="string"/>
+        <field name="showCustomIconOpen"  type="boolean"/>
+        <field name="showCustomIconDrop"  type="boolean"/>
+
+        <field name="customIconOpenProperty"  type="string"/>
+        <field name="customIconDropProperty"  type="string"/>
+
+        <!-- deprecated -->
+		<field name="folderOpenImage"	type="URL"/>
+		<field name="folderClosedImage"	type="URL"/>
+		<field name="folderDropImage"	type="URL"/>
+		<field name="fileImage"			type="URL"/>
+
+        <field name="parentAlreadyContainsChildMessage" type="string"/>
+        <field name="cantDragIntoSelfMessage" type="string"/>
+        <field name="cantDragIntoChildMessage" type="string"/>
+
+        <!-- visualBuilder: enable databinding on this component -->
+		<field name="dataSource"		type="DataSource" idAllowed="true"/>
+
+        <!-- suppress inapplicable ListGrid settings from appearing in Visual Builder -->
+        <field name="canGroupBy" type="boolean" basic="false"/>
+        <field name="showFilterEditor" type="boolean" basic="false"/>
+	</fields>
+    <groups>
+        <group>treeField</group>
+        <group>dragging</group>
+        <group>cellStyling</group>
+        <group>emptyMessage</group>
+        <group>sizing</group>
+        <group>selection</group>
+        <group>sorting</group>
+        <group>editing</group>
+    </groups>
+    
+    <methods>
+        <method name="nodeClick" basic="true" />
+        <method name="leafClick" basic="true" />
+        <method name="folderClick" basic="true" />
+    </methods>
+    
+</DataSource>

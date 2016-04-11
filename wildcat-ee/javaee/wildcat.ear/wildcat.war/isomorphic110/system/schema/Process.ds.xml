@@ -1,0 +1,26 @@
+<DataSource ID="Process" inheritsFrom="Task" Constructor="Process">
+	<fields>
+	    <field name="autoStart" type="boolean" />
+	    <field name="wizard" type="boolean" />
+        <field name="containerId" type="string" />
+        <field name="startElement" type="string" />
+        <field name="sequences" type="ProcessSequence" multiple="true" />
+        <field name="elements" type="ProcessElement" multiple="true" />
+        <field name="state" type="Record" />
+        <field name="views" type="Canvas" multiple="true" propertiesOnly="true" />
+
+        <field name="sequence" type="ProcessSequence" moveTo="sequences" hidden="true" />
+        <field name="Sequence" type="ProcessSequence" moveTo="sequences" hidden="true" />
+        <field name="serviceTask" type="ServiceTask" moveTo="elements" hidden="true" />
+        <field name="ServiceTask" type="ServiceTask" moveTo="elements" hidden="true" />
+        <field name="stateTask" type="StateTask" moveTo="elements" hidden="true" />
+        <field name="StateTask" type="StateTask" moveTo="elements" hidden="true" />
+        <field name="userTask" type="UserTask" moveTo="elements" hidden="true" />
+        <field name="UserTask" type="UserTask" moveTo="elements" hidden="true" />
+        <field name="DecisionGateway" type="DecisionGateway" moveTo="elements" hidden="true" />
+        <field name="decisionGateway" type="DecisionGateway" moveTo="elements" hidden="true" />
+        <field name="XORGateway" type="XORGateway" moveTo="elements" hidden="true" />
+        
+	</fields>
+</DataSource>
+

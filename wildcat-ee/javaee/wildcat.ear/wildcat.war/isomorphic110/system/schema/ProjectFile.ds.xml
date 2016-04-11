@@ -1,0 +1,13 @@
+<DataSource ID="ProjectFile">
+    <!-- Defines default fields for the 'projectFile' serverType ... you
+         can use inheritsFrom="ProjectFile" to inherit these fields. -->
+    <fields>
+        <field name="fileName" type="text" />
+        <field name="fileType" type="text" />
+        <field name="fileFormat" type="text" />
+        
+        <field name="fileContents" type="text" length="10485760"/>
+        <field name="fileLastModified" type="datetime" storeMilliseconds="true"/>
+        <field name="fileSize" type="integer" />
+    </fields>
+</DataSource>

@@ -1,0 +1,9 @@
+<DataSource	ID="DrawPane" inheritsFrom="Canvas" Constructor="DrawPane" >
+    <fields>
+		<field name="rotation" type="float" title="Rotation" defaultValue="0.0"/>	
+        <field name="zoomLevel" type="float" title="Zoom Level" defaultValue="1.0"/>	
+        <field name="drawItems" type="DrawItem" title="Draw Items" multiple="true"/>
+        <field name="canDrag" type="boolean" title="Can Drag" defaultValue="false"/>
+        <field name="gradients" type="Gradient" title="Gradients" multiple="true"/>
+    </fields>
+</DataSource>

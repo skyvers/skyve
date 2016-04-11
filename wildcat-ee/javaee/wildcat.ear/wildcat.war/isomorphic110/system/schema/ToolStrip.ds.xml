@@ -1,0 +1,7 @@
+<DataSource ID="ToolStrip" inheritsFrom="Layout" Constructor="ToolStrip">
+    <fields>
+        <field name="vertical"          type="boolean"/>
+        <field name="separatorClass"    type="string"/>
+        <field name="separatorSize"    type="int"/>
+    </fields>
+</DataSource>

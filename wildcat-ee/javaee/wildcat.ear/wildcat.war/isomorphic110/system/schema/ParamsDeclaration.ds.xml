@@ -1,0 +1,8 @@
+<DataSource ID="ParamsDeclaration">
+    <fields>
+        <field name="name" type="string"/>
+        <filed name="type" type="string"/>
+        <field name="optional" type="boolean"/>
+        <field name="description" type="string"/>
+    </fields>
+</DataSource>

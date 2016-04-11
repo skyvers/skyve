@@ -1,0 +1,7 @@
+<DataSource	ID="MockDataSource" inheritsFrom="DataSource" Constructor="MockDataSource"
+            addGlobalId="false">
+	<fields>
+        <field name="mockData" type="string"/>
+        <field name="mockDataType" type="string"/>
+	</fields>
+</DataSource>

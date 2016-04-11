@@ -1,0 +1,10 @@
+<DataSource ID="TreeNode" inheritsFrom="ListGridRecord">
+	<fields>
+        <field name="isFolder"  type="boolean"/>
+        <field name="name"      type="string"/>
+        <field name="title"     type="string"/>
+        <field name="id"        type="string"/>
+        <field name="parentId"  type="string"/>
+		<field name="children"	type="TreeNode" multiple="true"/>		
+	</fields>
+</DataSource>

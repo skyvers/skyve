@@ -1,0 +1,17 @@
+<DataSource	ID="Rangebar"    inheritsFrom="Progressbar" Constructor="Rangebar">
+    <fields>
+		<field name="value" type="integer"/>
+		<field name="minValue" type="integer"/>
+		<field name="maxValue" type="integer"/>
+
+		<field name="title" type="integer"/>
+		<field name="showTitle" type="boolean"/>
+
+		<field name="showRange" type="boolean"/>
+
+		<field name="showValue" type="boolean"/>
+        
+        <field name="minValueLabel" type="string"/>
+        <field name="maxValueLabel" type="string"/>
+	</fields>
+</DataSource>

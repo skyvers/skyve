@@ -1,0 +1,8 @@
+<Object ID="FloatRangeValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="floatRange" addGlobalId="false">
+	<fields>
+		<max type="float"/>
+		<min type="float"/>
+		<exclusive type="boolean"/>
+	</fields>
+</Object>
+

@@ -1,0 +1,6 @@
+<DataSource ID="StateTask" inheritsFrom="Task" Constructor="StateTask">
+	<fields>
+        <field name="value" />
+        <field name="failureElement" type="string" />
+	</fields>
+</DataSource>

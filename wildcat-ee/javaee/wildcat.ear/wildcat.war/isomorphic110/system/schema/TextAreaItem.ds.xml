@@ -1,0 +1,12 @@
+<DataSource	ID="TextAreaItem" inheritsFrom="FormItem" Constructor="TextAreaItem" >
+	<fields>
+		<field name="wrap"		type="enum" title="Wrap Style">
+			<valueMap OFF="off" SOFT="soft" HARD="hard"/>
+		</field>
+        <!-- not implemented -->
+   		<field name="length" type="positiveInteger" title="Length" visibility="internal" hidden="true"/>
+	</fields>
+
+	<substituteClasses>BlurbItem, StaticTextItem, TextItem</substituteClasses>
+
+</DataSource>

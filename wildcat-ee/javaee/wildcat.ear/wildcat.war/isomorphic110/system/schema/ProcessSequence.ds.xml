@@ -1,0 +1,16 @@
+<DataSource ID="ProcessSequence" inheritsFrom="ProcessElement" Constructor="ProcessSequence">
+	<fields>
+	    <field name="elements" type="ProcessElement" multiple="true" />
+
+            <field name="serviceTask" type="ServiceTask" moveTo="elements" hidden="true" />
+            <field name="ServiceTask" type="ServiceTask" moveTo="elements" hidden="true" />
+            <field name="stateTask" type="StateTask" moveTo="elements" hidden="true" />
+            <field name="StateTask" type="StateTask" moveTo="elements" hidden="true" />
+            <field name="userTask" type="UserTask" moveTo="elements" hidden="true" />
+            <field name="UserTask" type="UserTask" moveTo="elements" hidden="true" />
+            <field name="DecisionGateway" type="DecisionGateway" moveTo="elements" hidden="true" />
+            <field name="decisionGateway" type="DecisionGateway" moveTo="elements" hidden="true" />
+            <field name="XORGateway" type="XORGateway" moveTo="elements" hidden="true" />
+	</fields>
+</DataSource>
+

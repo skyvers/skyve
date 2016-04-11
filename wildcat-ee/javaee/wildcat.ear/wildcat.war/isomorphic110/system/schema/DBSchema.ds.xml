@@ -1,0 +1,21 @@
+<DataSource ID="DBSchema">
+    <fields>
+        <field name="name"/>
+        <field name="itemType"/>
+        <field name="type"/>
+        <field name="length" type="integer"/>
+        <field name="primaryKey" type="boolean"/>
+
+        <field name="path" primaryKey="true" hidden="true"/>
+        <field name="parentID" hidden="true" foreignKey="DBSchema.path"/>
+    </fields>
+
+    <operationBindings>
+    	<binding operationType="fetch" language="groovy"><script><![CDATA[
+            if (!com.isomorphic.auth.DevModeAuthFilter.devModeAuthorized(request)) throw new Exception("Not Authorized");
+            import com.isomorphic.sql.*;
+           
+
+	    ]]></script></binding>
+    </operationBindings>
+</DataSource>

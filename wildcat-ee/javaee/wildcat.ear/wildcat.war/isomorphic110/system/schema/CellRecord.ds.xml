@@ -1,0 +1,6 @@
+<DataSource ID="CellRecord">
+    <fields>
+        <field  name="enabled"  type="boolean" />
+        <field  name="canEdit"  type="boolean" visibility="experimental"/>
+    </fields>
+</DataSource>

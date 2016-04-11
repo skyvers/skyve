@@ -1,0 +1,14 @@
+<DataSource ID="NavItem" inheritsFrom="ListGridRecord" autoIdField="id">
+
+    <fields>
+        <field name="id" title="Identifier" type="string" basic="true"/>
+        <field name="title" type="string" basic="true"/>
+        <field name="isHeader" type="boolean" basic="true"/>
+        <field name="isSeparator" type="boolean" basic="true"/>
+        <field name="icon" type="URL" />
+        <field name="pane" type="Canvas" />
+        <field name="items" type="NavItem" multiple="true" />
+        <field name="linkText" type="string" inapplicable="true"/>
+    </fields>
+
+</DataSource>

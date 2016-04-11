@@ -1,0 +1,12 @@
+<DataSource ID="RichTextEditor"   Constructor="RichTextEditor"  inheritsFrom="VLayout">
+    <fields>
+        <field  name="controlGroups"   type="string" multiple="true"/>
+        <field  name="fontControls"   type="string" multiple="true"/>
+        <field  name="colorControls"   type="string" multiple="true"/>
+        <field  name="formatControls"   type="string" multiple="true"/>
+        <field  name="styleControls"   type="string" multiple="true"/>
+        <field  name="value"   type="string" />
+        <field  name="fontNames" type="valueMap"/>
+        <field  name="fontSizes" type="valueMap"/>
+    </fields>    
+</DataSource>

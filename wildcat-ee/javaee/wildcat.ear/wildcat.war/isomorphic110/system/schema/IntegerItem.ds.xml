@@ -1,0 +1,4 @@
+<DataSource ID="IntegerItem" inheritsFrom="TextItem" Constructor="IntegerItem" >
+    <fields>
+    </fields>
+</DataSource>

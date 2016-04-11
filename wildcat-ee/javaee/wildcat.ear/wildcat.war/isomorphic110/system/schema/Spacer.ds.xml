@@ -1,0 +1,14 @@
+<DataSource	ID="Spacer" inheritsFrom="Canvas" Constructor="LayoutSpacer" 
+            showLocalFieldsOnly="true" showSuperClassActions="false">
+    <fields>
+		<field name="width"				type="measure" title="Width"/>	
+		<field name="height"			type="measure" title="Height"/>
+		<field name="visibility"		type="visibilityEnum" title="Visibility"/>	
+
+        <!-- turn off these fields so you can't DnD into them in VB -->
+		<field name="children"		type="Canvas" multiple="true"	propertiesOnly="true" 
+               inapplicable="true"/>
+		<field name="peers" type="Canvas" multiple="true" propertiesOnly="true" 
+               inapplicable="true"/>
+    </fields>
+</DataSource>

@@ -1,0 +1,9 @@
+<DataSource ID="RadialGradient" inheritsFrom="Gradient">
+    <fields>
+        <field  name="cx"  type="integer"/>
+        <field  name="cy"  type="integer"/>
+        <field  name="r"  type="string"/>
+        <field  name="fx" type="string"/>
+        <field name="fy" type="string" defaultValue="0"/>
+    </fields>
+</DataSource>

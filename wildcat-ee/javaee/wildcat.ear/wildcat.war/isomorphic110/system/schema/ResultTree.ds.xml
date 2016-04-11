@@ -1,0 +1,6 @@
+<DataSource ID="ResultTree" inheritsFrom="Tree">
+    <fields>
+        <field name="dataSource" type="string" idAllowed="true"/>
+        <field name="loadDataOnDemand" type="boolean"/>
+    </fields>
+</DataSource>

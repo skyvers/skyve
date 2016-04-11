@@ -1,0 +1,9 @@
+<DataSource ID="DSRequestModifier">
+    <fields>
+        <field name="fieldName" type="string"/>
+        <field name="operator" type="string"/>
+        <field name="value" type="string"/>
+        <field name="start" type="string"/>
+        <field name="end" type="string"/>
+    </fields>
+</DataSource>

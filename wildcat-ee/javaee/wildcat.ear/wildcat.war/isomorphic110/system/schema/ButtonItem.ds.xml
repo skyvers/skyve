@@ -1,0 +1,38 @@
+<DataSource	ID="ButtonItem" inheritsFrom="CanvasItem" Constructor="ButtonItem">
+	<fields>
+        <field name="baseStyle"         type="cssClass"/>
+        <field name="icon" type="string"/>
+        <field name="autoFit" type="boolean"/>
+
+        <field name="buttonConstructor" type="className"/>
+        <field name="buttonProperties"  type="Object"/>
+
+		<field name="defaultValue"      inapplicable="true"/>   
+        <field name="defaultDynamicValue" inapplicable="true"/>
+
+		<field name="redrawOnChange" inapplicable="true"/>
+
+		<field name="required" 		 inapplicable="true"/>  
+		<field name="validators"	 inapplicable="true"/>
+		<field name="validateOnChange" inapplicable="true"/>
+
+        <field name="type" inapplicable="true"/>
+
+        <field name="showTitle" inapplicable="true"/>
+        <field name="titleAlign" inapplicable="true"/>
+        <field name="wrapTitle" inapplicable="true"/>
+        <field name="titleStyle" inapplicable="true"/>
+        <field name="titleOrientation" inapplicable="true"/>
+        
+        <field name="textBoxStyle" inapplicable="true"/>
+        <field name="hintStyle" inapplicable="true"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+        
+	</fields>
+    <methods>
+        <method action="event" title="Click" name="click" basic="true" />
+    </methods>
+</DataSource>

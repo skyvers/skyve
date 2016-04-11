@@ -1,0 +1,11 @@
+<Object ID="ReadOnlyRule" __autoConstruct="DataSource" inheritsFrom="Rule" Constructor="readOnly" addGlobalId="false">
+    <fields>
+        <field name="fieldAppearance" type="enum">
+            <valueMap>
+                <value>readOnly</value>
+                <value>hidden</value>
+                <value>disabled</value>
+            </valueMap>
+        </field>
+    </fields>
+</Object>

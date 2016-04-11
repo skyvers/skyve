@@ -1,0 +1,11 @@
+<DataSource	ID="DrawImage" inheritsFrom="DrawItem" Constructor="DrawImage" >
+    <fields>
+        <field name="left" type="integer" title="Left" defaultValue="0"/>
+        <field name="top" type="integer" title="Top" defaultValue="0"/>
+        <field name="width" type="integer" title="Width" defaultValue="16"/>
+        <field name="height" type="integer" title="Height" defaultValue="16"/>
+        <field name="title" type="text" title="Title"/>
+        <field name="src" type="URL" title="Source"/>
+        <field name="image" type="Image" title="Image"/>
+    </fields>
+</DataSource>

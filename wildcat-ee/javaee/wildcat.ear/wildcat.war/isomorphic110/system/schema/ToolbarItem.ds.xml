@@ -1,0 +1,16 @@
+<DataSource	ID="ToolbarItem" inheritsFrom="CanvasItem" Constructor="ToolbarItem">
+	<fields>
+		<field name="buttons"				type="ButtonItem"		multiple="true"	
+                    propertiesOnly="true"/>
+
+		<field name="spacing"				type="positiveInteger" title="Spacing"/>
+		<field name="separatorWidth"		type="positiveInteger" title="Separator Width"/>
+        <field name="buttonConstructor"     type="className" />
+        <field name="buttonProperties"		type="Object" />
+        <field name="buttonBaseStyle"		type="cssClass"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+	</fields>
+</DataSource>

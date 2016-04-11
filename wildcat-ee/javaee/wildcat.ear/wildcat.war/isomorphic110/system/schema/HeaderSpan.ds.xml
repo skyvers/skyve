@@ -1,0 +1,14 @@
+<DataSource	ID="HeaderSpan">
+    <fields>
+        <field name="align" type="alignEnum" />
+		<field name="fields" type="string" multiple="true"/>
+        <field name="headerBaseStyle" type="cssClass" />
+        <field name="headerTitle" type="string"/>
+        <field name="headerTitleStyle" type="cssClass" />
+        <field name="height" type="integer"/>
+        <field name="name" type="identifier"/>
+        <field name="spans" type="HeaderSpan" multiple="true"/>
+        <field name="title" type="string"/>
+        <field name="valign" type="valignEnum" />
+    </fields>
+</DataSource>

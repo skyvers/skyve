@@ -1,0 +1,10 @@
+<DataSource ID="Project" Constructor="Project">
+    <fields>
+        <field name="screens" type="ScreenTree" />
+        <field name="currentScreenFileName" type="string" />
+        <field name="datasources" type="Record" multiple="true" />
+
+        <!-- backcompat -->
+        <field name="currentScreenID" type="any" />
+    </fields>
+</DataSource>

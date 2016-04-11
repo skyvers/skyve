@@ -1,0 +1,143 @@
+<DataSource ID="DynamicForm" inheritsFrom="Canvas" Constructor="DynamicForm">
+    <fields>
+        <!-- don't show in ComponentEditor -->
+		<field name="values" 			type="Object" hidden="true"/>
+		<field name="errors" 			type="Object" hidden="true"/>
+        
+        <!-- NOTE: fields comes second so it's preferred by VisualISC D&D -->
+		<field name="items" 			type="FormItem" multiple="true" propertiesOnly="true"/>
+		<field name="fields" 			type="FormItem" multiple="true" propertiesOnly="true" rebuildOnChange="true"/>
+
+        <!-- layout -->
+		<field name="numCols" xmlAttribute="true" type="integer" title="Number of Columns" basic="true"/>
+        <!-- note not marked multiple="true" since the XML representation is an attribute which
+		     we want applied to the form as a String, not an Array of a single String -->
+		<field name="colWidths" xmlAttribute="true" title="Column Widths"
+               multiple="true" editorType="ArrayItem" basic="true" />
+		<field name="overflow" xmlAttribute="true" type="overflowEnum" basic="true"/>	
+		<field name="cellPadding" 		type="positiveInteger" title="Cell Padding"/>
+		<field name="cellSpacing" 		type="positiveInteger" title="Cell Spacing" visibility="internal"/>
+		<field name="minColWidth" 		type="positiveInteger"/>
+		<field name="fixedColWidths"	type="boolean"/>
+		<field name="cellBorder" 		type="positiveInteger" title="Cell Border"/>
+
+		<field name="itemLayout" 		type="string" visibility="absForm"/>
+
+        <!-- submitting.  Don't show within vISC, where emphasis is on databinding -->
+		<field name="action" 			type="URL" title="Action URL" hidden="true"/>
+		<field name="target" 			type="string" title="Submit Target Frame" hidden="true"/>
+		<field name="method" 			type="enum" title="Submit Method" hidden="true">
+			<valueMap>
+				<value>GET</value>
+				<value>POST</value>
+			</valueMap>
+		</field>
+		<field name="encoding"			type="enum" title="Encoding">
+			<valueMap>
+				<value>normal</value>
+				<value>multipart</value>
+			</valueMap>
+		</field>
+		<field name="canSubmit" 	type="boolean"/>
+        <field name="saveOnEnter"   type="boolean" />
+		<field name="sectionVisibilityMode" type="enum">
+			<valueMap>
+				<value>mutex</value>
+				<value>multiple</value> 
+			</valueMap>
+		</field>
+
+        <!-- titling -->
+		<field name="titleOrientation"  type="string" title="Title Orientation" basic="true">
+            <valueMap left="left" top="top" right="right"/>
+        </field>
+		<field name="titlePrefix" 		type="HTMLString" title="Title Prefix"/>
+		<field name="rightTitlePrefix" 	type="HTMLString" title="Right Title Prefix"/>
+		<field name="titleSuffix" 		type="HTMLString" title="Title Suffix"/>
+		<field name="rightTitleSuffix"  type="HTMLString" title="Right Title Suffix"/>
+		<field name="titleWidth" 		type="measure"/>
+		<field name="wrapItemTitles" type="boolean" basic="true"/>        
+		<field name="hiliteRequiredFields" type="boolean" title="Highlight Required Fields"/>
+		<field name="requiredTitlePrefix" type="HTMLString" title="Required Title Prefix"/>
+		<field name="requiredTitleSuffix" type="HTMLString" title="Required Title Suffix"/>
+		<field name="requiredRightTitlePrefix" type="HTMLString" title="Required Right Title Prefix"/>
+		<field name="requiredRightTitleSuffix" type="HTMLString" title="Required Right Title Suffix"/>
+		
+        <field name="autoFocus" 		type="boolean" title="Auto Focus"/>
+		<field name="selectOnFocus" 	type="boolean" title="Select On Focus" />
+		<field name="validateOnChange" 	type="boolean" title="Validate On Change"/>
+		<field name="unknownErrorMessage" type="HTMLString" title="Unspecified Validator Error Message"/>
+        <field name="showInlineErrors" type="boolean" title="Show Inline Errors"/>
+        <field name="errorItemProperties" type="FormItem" propertiesOnly="true"/>
+        <field name="errorItemCellStyle" type="cssClass"/>
+        <field name="errorsPreamble" type="HTMLString" />
+        <field name="validationURL" 	type="URL"/>
+        <field name="cancelParamName"	type="string"/>
+        <field name="cancelParamValue"	type="string"/>
+        
+        <!-- hovers -->
+        <field name="itemHoverDelay" type="number"/>
+        <field name="itemHoverWidth" type="measure" />
+        <field name="itemHoverHeight" type="measure" />
+        <field name="itemHoverAlign" type="alignEnum" />
+        <field name="itemHoverVAlign" type="valignEnum" />
+        <field name="itemHoverStyle" type="cssClass" />
+        <field name="itemHoverOpacity" type="number" />
+        	
+        <!-- override children field as advanced, for editing -->
+		<field name="children" type="Canvas" multiple="true" propertiesOnly="true"
+               inapplicable="true"/>	
+		<field name="peers" type="Canvas" multiple="true" propertiesOnly="true" 
+               inapplicable="true"/>
+
+        <!-- visualBuilder: enable databinding on this component -->
+		<field name="dataSource"		type="DataSource" hidden="false" idAllowed="true"/>
+        <field name="initialCriteria"   type="AdvancedCriteria"/>
+        <field name="selectionComponent" type="Canvas" hidden="true"/>
+
+        <field name="longTextEditorThreshold" type="positiveInteger" title="Long Text Editor Threshold"/>
+        <field name="longTextEditorType"      type="string" title="Long Text Editor Type"/>
+
+		<field name="fieldIdProperty" 		type="string" visibility="internal"/>
+		<field name="titleField" 		type="string" visibility="internal"/>
+		<field name="autoSendTarget" 		type="boolean" visibility="internal"/>
+		<field name="autoSendTargetFieldName" type="propertyName" visibility="internal"/>
+		<field name="showTitlesWithErrorMessages" 	type="boolean"/>
+        <field name="valuesManager" type="ValuesManager" idAllowed="true"/>
+        
+        <field name="showErrorIcons" type="boolean"/>
+        <field name="showErrorText" type="boolean"/>
+        <field name="showErrorStyle" type="boolean"/>
+
+        <field name="canEdit" type="boolean" xmlAttribute="true" />
+        
+    </fields>
+
+    <groups>
+        <group>tableLayout</group>
+        <group>appearance</group>
+        <group>sizing</group>
+        <group>focus</group>
+        <group>formTitles</group>
+    </groups>
+
+    <methods>
+        <method action="true" title="Edit Selected" name="editSelectedData"
+                icon="[SKINIMG]/actions/edit.png"/>
+        <method action="true" title="Edit Record" name="editRecord"
+                icon="[SKINIMG]/actions/edit.png"/>
+        <method action="true" title="Edit New Record" name="editNewRecord"
+                icon="[SKINIMG]/actions/add.png"/>
+        <method action="true" title="Save Data" name="saveData" 
+                icon="[SKINIMG]/actions/save.png"/>
+        <method action="true" title="Set Values" name="setValues"
+                icon="[SKINIMG]/actions/forward.png"/>
+        <method action="true" title="Clear Values" name="clearValues"
+                icon="[SKINIMG]/actions/undo.png"/>
+        <method action="true" title="Reset Values" name="reset" 
+                icon="[SKINIMG]/actions/first.png"/>
+        <method action="true" title="Validate Values" name="validate"/>
+        <method action="true" title="Item Changed" name="itemChanged" basic="true"/>
+    </methods>
+
+</DataSource>

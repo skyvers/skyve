@@ -1,0 +1,1 @@
+<Object ID="IsFunctionValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="isFunction" addGlobalId="false" />

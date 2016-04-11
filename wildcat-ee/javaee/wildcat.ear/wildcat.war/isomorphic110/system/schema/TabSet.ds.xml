@@ -1,0 +1,63 @@
+<DataSource	ID="TabSet" inheritsFrom="Canvas" Constructor="TabSet">
+	<fields>
+		<field name="tabs"					type="Tab"			propertiesOnly="true"	multiple="true"/>
+		<field name="tabBarDefaults" 		type="TabBar" 		propertiesOnly="true"/>
+		<field name="tabBarProperties" 		type="TabBar" 		propertiesOnly="true"/>
+        <field name="tabProperties"         type="Tab"          propertiesOnly="true"/>
+        
+        <field name="tabBarControls"        type="Canvas"       multiple="true"/>
+        <field name="showTabScroller"       type="boolean"  />
+        <field name="showTabPicker"         type="boolean"  />
+        <field name="animateTabScrolling"   type="boolean"  />
+        <field name="scrollerButtonSize"    type="positiveInteger"   />
+        <field name="pickerButtonSize"      type="positiveInteger"  />
+        <field name="scrollerHSrc"          type="string" />
+        <field name="scrollerVSrc"          type="string" />
+        <field name="pickerButtonHSrc"      type="string" />
+        <field name="pickerButtonVSrc"      type="string" />
+        
+        <field name="useSimpleTabs"         type="boolean" visibility="internal"/>
+        <field name="simpleTabBaseStyle"    type="cssClass" visibility="internal"/>
+        
+        <field name="canReorderTabs"  type="boolean"/>
+        <field name="canCloseTabs"  type="boolean" basic="true"/>
+        <field name="closeTabIcon"  type="string" />
+        <field name="destroyPanes" type="boolean" />
+
+        <!-- not currently for on the fly setting in vBuilder -->
+		<field name="tabBarPosition"		type="sideEnum" /> 
+		<field name="tabBarAlign"			type="sideEnum" />
+
+		<field name="tabBarThickness"		type="positiveInteger"/>
+		<field name="selectedTab"			type="positiveInteger"/>
+		<field name="paneContainerDefaults" type="Canvas" 		propertiesOnly="true" visibility="internal"/>
+		<field name="paneContainerClassName" type="cssClass" visibility="internal"/>
+		<field name="paneContainerOverflow"	type="overflowEnum"/>
+
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+        <field name="canSelectText" inapplicable="true"/>
+        
+        <field name="showPaneContainerEdges" type="boolean"/>
+        <field name="showPartialEdges" type="boolean"/>
+        <field name="symmetricEdges" type="boolean"/>
+        <field name="topEdgeSizes" type="EdgeSizes"/>
+        <field name="bottomEdgeSizes" type="EdgeSizes"/>
+        <field name="leftEdgeSizes" type="EdgeSizes"/>
+        <field name="rightEdgeSizes" type="EdgeSizes"/>
+        
+        <field name="topEdgeOffsets" type="EdgeSizes"/>
+        <field name="bottomEdgeOffsets" type="EdgeSizes"/>
+        <field name="leftEdgeOffsets" type="EdgeSizes"/>
+        <field name="rightEdgeOffsets" type="EdgeSizes"/>
+        <field name="closeTabIconSize" type="number" advanced="true"/>
+	</fields>
+    <groups>
+        <group>tabBar</group>
+        <group>appearance</group>
+        <group>sizing</group>
+        <group>TabSet Methods</group>
+    </groups>
+
+</DataSource>

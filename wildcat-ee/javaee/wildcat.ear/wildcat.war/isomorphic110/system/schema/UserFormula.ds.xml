@@ -1,0 +1,6 @@
+<DataSource ID="UserFormula">
+    <fields>
+        <field name="text" type="string" xmlAttribute="true"/>
+        <field name="formulaVars" type="ValueMap"/>
+    </fields>
+</DataSource>

@@ -1,0 +1,6 @@
+<DataSource ID="MenuBar" inheritsFrom="Toolbar" Constructor="MenuBar">
+	<fields>
+		<field name="menus" type="Menu" multiple="true" propertiesOnly="true"/>
+        <field name="tabIndex" type="number"/>
+	</fields>
+</DataSource>

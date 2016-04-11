@@ -1,0 +1,7 @@
+<Object ID="PopulateRule" __autoConstruct="DataSource" inheritsFrom="Rule" Constructor="populate" addGlobalId="false" >
+	<fields>
+		<formula type="string"/>
+		<formulaVars type="ValueMap"/>
+	</fields>
+</Object>
+

@@ -1,0 +1,5 @@
+<DataSource ID="ToolStripSpacer" inheritsFrom="Img" Constructor="ToolStripSpacer">
+    <fields>
+        <field name="space" type="Number" xmlAttribute="true" />
+    </fields>
+</DataSource>

@@ -1,0 +1,3 @@
+<DataSource ID="WindowHeaderIcon" inheritsFrom="Img" Constructor="WindowHeaderIcon"
+            showLocalFieldsOnly="true" showSuperClassEvents="false">
+</DataSource>

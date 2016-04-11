@@ -1,0 +1,13 @@
+<DataSource	ID="DrawLabel" inheritsFrom="DrawItem" Constructor="DrawLabel" >
+    <fields>
+        <field name="contents" type="text" title="Contents"/>
+        <field name="left" type="integer" title="Left" defaultValue="0"/>
+        <field name="top" type="integer" title="Top" defaultValue="0"/>
+        <field name="alignment" type="text" title="Alignment" defaultValue="start"/>
+        <field name="fontFamily" type="text" title="Font Family" defaultValue="Tahoma"/>
+        <field name="fontSize" type="integer" title="Font Size" defaultValue="18"/>
+        <field name="fontWeight" type="text" title="Font Weight" defaultValue="bold"/>
+        <field name="fontStyle" type="text" title="Font Style" defaultValue="normal"/>
+        <field name="rotation" type="float" title="Rotation"/>
+    </fields>
+</DataSource>

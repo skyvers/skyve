@@ -1,0 +1,5 @@
+<DataSource ID="NativeCheckboxItem" inheritsFrom="FormItem" Constructor="NativeCheckboxItem">
+    <fields>
+        <field name="showLabel" type="boolean"/>
+    </fields>
+</DataSource>

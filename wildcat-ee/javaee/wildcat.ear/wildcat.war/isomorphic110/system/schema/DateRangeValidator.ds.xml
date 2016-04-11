@@ -1,0 +1,8 @@
+<Object ID="DateRangeValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="dateRange" addGlobalId="false">
+	<fields>
+		<max type="date"/>
+		<min type="date"/>
+		<exclusive type="boolean"/>
+	</fields>
+</Object>
+

@@ -1,0 +1,13 @@
+<DataSource ID="ScreenNode" inheritsFrom="TreeNode">
+    <fields>
+        <field name="mockupMode" type="boolean" />
+        <field name="fileName" type="string" />
+        <field name="contents" type="string" />
+
+        <!-- current screen in screens tree -->
+        <field name="isCurrent" type="boolean" />
+
+        <!-- Redefine children for the more specific type -->
+        <field name="children" type="ScreenNode" multiple="true" />
+    </fields>
+</DataSource>

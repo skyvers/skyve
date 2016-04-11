@@ -1,0 +1,21 @@
+<DataSource ID="NavPanel" inheritsFrom="SplitPane" Constructor="NavPanel">
+    <fields>
+        <field name="headerStyle" type="CSSStyleName" />
+        <field name="isTree" type="boolean" />
+        <field name="navItems" type="NavItem" multiple="true" />
+        <field name="currentItemId" type="string" basic="true" />
+
+        <field name="detailPane" type="Canvas" inapplicable="true" />
+        <field name="detailTitle" inapplicable="true" />
+        <field name="listPane" type="Canvas" inapplicable="true" />
+        <field name="listTitle" inapplicable="true" />
+        <field name="navigationPane" type="Canvas" inapplicable="true" />
+        <field name="autoNavigate" inapplicable="true"/>
+        <field name="listPaneTitleTemplate" inapplicable="true"/>
+        <field name="detailPaneTitleTemplate" inapplicable="true"/>
+    </fields>
+    <methods>
+        <method name="navigateListPane" action="true" inapplicable="true"/>
+        <method name="navigateDetailPane" action="true" inapplicable="true"/>
+    </methods>
+</DataSource>

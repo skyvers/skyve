@@ -1,0 +1,15 @@
+<DataSource	ID="PickTreeItem" inheritsFrom="CanvasItem" Constructor="PickTreeItem">
+	<fields>
+        <field name="buttonDefaults"    type="Canvas"   propertiesOnly="true"/>
+        <field name="dataSource"        type="string" idAllowed="true"/>
+        <field name="valueTree"         type="Tree"/>
+        <field name="loadDataOnDemand"  type="boolean"/>
+        <field name="canSelectParentItems" type="boolean"/>
+        <field name="valueField"        type="string"/>
+        <field name="emptyMenuMessage"  type="string"/>
+
+		<field name="canvas" inapplicable="true"/>
+		<field name="canvasConstructor" inapplicable="true"/>
+		<field name="canvasProperties" inapplicable="true"/>
+	</fields>
+</DataSource>

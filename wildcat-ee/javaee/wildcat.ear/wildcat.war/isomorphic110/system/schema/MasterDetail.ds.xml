@@ -1,0 +1,18 @@
+<DataSource ID="MasterDetail"   inheritsFrom="VLayout"  Constructor="MasterDetail">
+	<fields>
+        <field name="detailDataSource" type="DataSource"/>
+        <field name="dataSource" type="DataSource" inapplicable="false" hidden="false" idAllowed="true"/>
+        
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+    </fields>
+    <methods>
+        <method title="Fetch Related Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png">
+            <params>
+                <param type="ListGridRecord"/>
+            </params>
+        </method>
+    </methods>
+</DataSource>

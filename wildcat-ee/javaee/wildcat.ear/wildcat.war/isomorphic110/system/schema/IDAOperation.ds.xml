@@ -1,0 +1,44 @@
+<DataSource ID="IDAOperation">
+	<fields>
+		<field name="ID" type="string" />
+		<field name="dataSource" type="string" />
+        <!-- synonym -->
+		<field name="dataSources" type="string" />
+		<field name="filterType" type="enum" >
+            <valueMap>
+                <value>basic</value>
+                <value>windowed</value>
+                <value>local</value>
+            </valueMap>
+        </field>
+		<field name="type" type="enum" >
+			<valueMap>
+				<value>summary</value>
+				<value>filter</value>
+				<value>insert</value>
+				<value>update</value>
+				<value>replace</value>
+				<value>delete</value>
+				<value>custom</value>
+			</valueMap>
+		</field>
+
+        <!-- BackCompat: resultSize is obsolete, new name is batchSize -->
+        <field name="resultSize" type="integer"/>
+        <field name="batchSize" type="integer"/>
+
+		<field name="constraints" type="UserTypeFieldMap"/>
+		<field name="outputs" type="UserTypeFieldMap"/>
+		<field name="replyCallback" type="eventHandler" />
+        <field name="loadDataOnDemand" type="boolean" />
+		<field name="prompt" type="HTMLString" />
+	</fields>
+	<types>
+		<type ID="UserTypeFieldMap" type="DataSource"
+              serverConstructor="com.isomorphic.datasource.UserTypeFieldMap">
+			<fields>
+               <field name="userType" type="string" />
+            </fields>
+        </type>
+	</types>
+</DataSource>

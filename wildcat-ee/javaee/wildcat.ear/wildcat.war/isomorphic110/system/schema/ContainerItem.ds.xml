@@ -1,0 +1,10 @@
+<DataSource	ID="ContainerItem" inheritsFrom="FormItem" Constructor="ContainerItem">
+	<fields>
+		<field name="items"		type="FormItem"	multiple="true"	inapplicable="true"/>		
+		<field name="cellSpacing"	type="positiveInteger"	inapplicable="true"/>
+		<field name="cellPadding"	type="positiveInteger"	inapplicable="true"/>
+		<field name="cellBorder"	type="positiveInteger"	inapplicable="true"/>
+		<field name="recalculateItemsOnRedraw"	type="boolean"	inapplicable="true" 
+                                                            title="Recalculate Items On Redraw"/>
+	</fields>
+</DataSource>	

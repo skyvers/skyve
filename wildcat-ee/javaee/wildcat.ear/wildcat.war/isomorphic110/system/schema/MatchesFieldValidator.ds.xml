@@ -1,0 +1,5 @@
+<Object ID="MatchesFieldValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="matchesField" addGlobalId="false">
+    <fields>
+        <otherField type="string"/>
+    </fields>
+</Object>

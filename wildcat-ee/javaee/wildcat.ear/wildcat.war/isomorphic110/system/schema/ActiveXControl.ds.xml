@@ -1,0 +1,9 @@
+<DataSource	ID="ActiveXControl" inheritsFrom="BrowserPlugin" Constructor="ActiveXControl">
+    <fields>
+		<field name="id"         type="string"/>
+		<field name="codeBase"   type="URL"/>
+		<field name="uuid"       type="string"/>
+		<field name="params"	 type="object"/>
+		<field name="classID"    type="string"/>
+    </fields>
+</DataSource>

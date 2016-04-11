@@ -1,0 +1,11 @@
+<DataSource ID="Deck" inheritsFrom="Layout" Constructor="Deck">
+
+    <fields>
+        <field name="panes" type="Canvas" multiple="true" />
+        <!-- mark this as inapplicable, so visualBuilder use addPane method instead of -->
+        <!-- setCurrentPane which otherwise do nothing because panes should contain currentPane -->
+        <field name="currentPane" type="Canvas" inapplicable="true" />
+        <field name="children" type="Canvas" multiple="true" propertiesOnly="true" inapplicable="true"/>
+    </fields>
+
+</DataSource>

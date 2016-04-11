@@ -1,0 +1,12 @@
+<DataSource ID="MenuButton" inheritsFrom="Button" Constructor="MenuButton">
+
+	<fields>
+        <field name="menu"              type="Menu" />
+        <field name="menuAnimationEffect"   type="string" visibility="animation"/>
+        <field name="showMenuButtonImage"    type="boolean" />
+        <field name="menuButtonImage"   type="imageProperty" /> 
+        <field name="menuButtonImageUp" type="imageProperty" /> 
+        <field name="showMenuBelow"     type="boolean" />
+	</fields>
+
+</DataSource>

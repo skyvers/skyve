@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<svg id="isc_svg_body" 
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g id="isc_svg_box"></g>
+  <defs id="isc_svg_defs">
+    <filter id="isc_ds1">
+      <feOffset result="offOut" in="SourceAlpha" dx="2.4" dy="2.4"/>
+      <feGaussianBlur result="blurOut" in="offOut" stdDeviation="1.8"/>
+      <feColorMatrix result="cmatOut" in="blurOut" type="matrix"
+        values="1 0 0 0   0
+                0 1 0 0   0
+                0 0 1 0   0
+                0 0 0 0.8 0"/>
+      <feBlend in="SourceGraphic" in2="cmatOut" mode="normal"/>
+    </filter>
+  </defs>
+  <script type="text/javascript"><![CDATA[
+    
+    window.addEventListener("load", function () {
+        setTimeout(function () {
+            var $wnd = parent,
+                drawPaneID = $wnd.isc.getParams(window).isc_dp_id,
+                drawPane = $wnd[drawPaneID];
+            if (drawPane != null) drawPane.svgLoaded();
+        }, 1);
+    }, false);
+  ]]></script>
+</svg>

@@ -1,0 +1,7 @@
+<DataSource	ID="DOMGrid" inheritsFrom="TreeGrid" Constructor="DOMGrid">
+    <fields>
+        <!-- property can't really be initialized from XML because rootElement is intended to be
+             a live XML document or element -->
+        <field name="rootElement" type="string"/>
+    </fields>
+</DataSource>

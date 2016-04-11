@@ -1,0 +1,7 @@
+<DataSource ID="ExampleFolder" inheritsFrom="TreeNode">
+    <fields>
+        <field name="children" type="Object" multiple="true"/>
+        <field name="isOpen" type="boolean"/>
+        <field name="external" type="boolean"/>
+    </fields>
+</DataSource>

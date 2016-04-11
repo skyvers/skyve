@@ -1,0 +1,60 @@
+<DataSource	ID="DetailViewer" inheritsFrom="Canvas" Constructor="DetailViewer">
+	<fields>
+		<field name="data"				type="DetailViewRecord"	 multiple="true" />
+		<field name="fields"			type="DetailViewerField"  multiple="true" rebuildOnChange="true"/>
+		<field name="fieldIdProperty"	type="string" />
+		<field name="recordsPerBlock"	type="positiveInteger" basic="true"/>
+		<field name="blockSeparator"	type="HTMLString" />
+		<field name="cellPadding"		type="positiveInteger" visibility="internal"/>
+		<field name="showBorder"		type="boolean" visibility="internal" />
+		<field name="emptyCellValue"	type="HTMLString" />
+		<field name="labelPrefix"		type="HTMLString" />
+		<field name="labelSuffix"		type="HTMLString" />
+		<field name="wrapLabel"			type="boolean" />
+		<field name="labelStyle"		type="cssStyle" />
+		<field name="cellStyle"			type="cssStyle" />
+		<field name="headerStyle"		type="cssStyle" />
+		<field name="separatorStyle"	type="cssStyle" />
+		<field name="showEmptyMessage"	type="boolean" />
+		<field name="emptyMessage"		type="HTMLString" />
+		<field name="emptyMessageStyle"	type="cssStyle"/>
+		<field name="loadingMessage"	type="HTMLString" />
+		<field name="loadingMessageStyle"	type="cssStyle"/>
+		<field name="showEmptyField"	type="boolean" />
+
+        <field name="dateFormatter" type="string"/>
+
+        <!-- hilite icons -->
+        <field name="hiliteIcons" type="string" multiple="true" />
+        <field name="hiliteIconSize" type="number"/>
+        <field name="hiliteIconWidth" type="number"/>
+        <field name="hiliteIconHeight" type="number"/>
+        <field name="hiliteIconLeftPadding" type="number"/>
+        <field name="hiliteIconRightPadding" type="number"/>
+        <field name="hiliteIconPosition" type="enum">
+            <valueMap>
+                <value>before</value>
+                <value>after</value>
+                <value>replace</value>
+            </valueMap>
+        </field> 
+
+        <!-- visualBuilder: enable databinding on this component -->
+		<field name="dataSource"		type="DataSource" hidden="false" idAllowed="true"/>
+        <field name="initialCriteria"   type="AdvancedCriteria" basic="true"/>
+
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+        
+        <field name="wrapLabel" type="boolean" basic="true"/>
+        <field name="wrapValues" type="boolean" basic="true"/>
+		<field name="overflow" xmlAttribute="true" type="overflowEnum" basic="true"/>	
+    </fields>
+
+    <methods>
+        <method title="View Selected Data" name="viewSelectedData" action="true"
+                icon="[SKINIMG]/actions/view.png"/>
+    </methods>
+</DataSource>
+        

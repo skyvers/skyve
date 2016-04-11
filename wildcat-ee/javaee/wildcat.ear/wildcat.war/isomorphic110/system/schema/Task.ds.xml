@@ -1,0 +1,9 @@
+<DataSource ID="Task" inheritsFrom="ProcessElement" Constructor="Process">
+	<fields>
+        <field name="inputField" type="string" />
+        <field name="inputFieldList" type="string" multiple="true" />
+        <field name="outputField" type="string" />
+        <field name="outputFieldList" type="string" multiple="true" />
+	</fields>
+</DataSource>
+

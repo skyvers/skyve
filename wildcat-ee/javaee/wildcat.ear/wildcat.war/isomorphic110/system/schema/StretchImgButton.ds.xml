@@ -1,0 +1,14 @@
+<DataSource	ID="StretchImgButton" inheritsFrom="StretchImg" Constructor="StretchImgButton">
+	<fields>
+        <field name="labelHPad" type="integer"/>
+        <field name="labelVPad" type="integer"/>
+        <field name="labelLengthPad" type="integer"/>
+        <field name="labelBreadthPad" type="integer"/>
+        <field name="wrap" type="boolean"/>
+        <field name="hiliteAccessKey"   type="boolean" />
+        <field name="action" type="Action" editorType="ActionMenuItem"/>        
+	</fields>
+    <methods>
+        <method action="event" title="Click" name="click" basic="true" />
+    </methods>
+</DataSource>

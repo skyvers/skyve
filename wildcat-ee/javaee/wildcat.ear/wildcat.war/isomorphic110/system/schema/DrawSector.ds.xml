@@ -1,0 +1,8 @@
+<DataSource	ID="DrawSector" inheritsFrom="DrawItem" Constructor="DrawSector" >
+    <fields>
+        <field name="centerPoint" type="Point" title="Center Point"/>
+        <field name="startAngle" type="float" title="Start Angle" defaultValue="0.0"/>
+        <field name="endAngle" type="float" title="End Angle" defaultValue="20.0"/>
+        <field name="radius" type="integer" title="Radius" defaultValue="100"/>
+    </fields>
+</DataSource>

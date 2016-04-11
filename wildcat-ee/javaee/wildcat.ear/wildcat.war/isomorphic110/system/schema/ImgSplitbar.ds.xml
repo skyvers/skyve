@@ -1,0 +1,7 @@
+<DataSource	ID="ImgSplitbar"	Constructor="ImgSplitbar" inheritsFrom="StretchImg">
+	<fields>
+		<field name="canCollapse" type="boolean"/>
+        <field name="canDrag" type="boolean"/>
+        <field name="src" type="string"/>
+	</fields>
+</DataSource>

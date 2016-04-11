@@ -1,0 +1,32 @@
+<DataSource ID="TileGrid"	inheritsFrom="TileLayout"	Constructor="TileGrid">
+	<fields>
+        <field name="initialCriteria" type="AdvancedCriteria" basic="true"/>
+        <!-- visualBuilder: enable databinding on this component -->
+		<field name="dataSource"		type="DataSource" hidden="false" idAllowed="true"/>
+		<field name="data" multiple="true" type="TileRecord"/>
+		<field name="fields" type="TileGridField" multiple="true" rebuildOnChange="true"/>
+        <field name="selectionType" type="enum">
+			<valueMap>
+				<value>none</value>
+				<value>single</value>
+				<value>multiple</value>
+				<value>simple</value>
+			</valueMap>
+		</field>
+        <field name="showAllRecords" type="boolean" basic="true" />
+        <field name="animateTileChange" type="boolean"/>
+        <field name="showDetailFields" type="boolean" basic="true"/>
+	</fields>
+    <groups>
+        <group>basics</group>
+        <group>appearance</group>
+        <group>selection</group>
+       
+    </groups>
+
+    <methods>
+        <method title="Fetch Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+        <method name="recordClick" basic="true" />
+    </methods>
+</DataSource>

@@ -1,0 +1,7 @@
+<DataSource ID="RadioItem" inheritsFrom="CheckboxItem" Constructor="RadioItem">
+	<fields>
+		<field name="value" defaultValue="true" visibility="internal"/>
+		<field name="unselectedValue" visibility="internal"/>
+	</fields>
+</DataSource>
+

@@ -1,0 +1,14 @@
+<DataSource ID="IDAUserType">
+	<fields>
+		<field name="ID" type="string"/>
+		<field name="requirements" type="Requirement" multiple="true"/>
+	</fields>
+	<types>
+		<type ID="Requirement">
+            <fields>
+			    <field name="type" type="string"/>
+			    <field name="value" type="string"/>
+            </fields>
+        </type>
+	</types>
+</DataSource>

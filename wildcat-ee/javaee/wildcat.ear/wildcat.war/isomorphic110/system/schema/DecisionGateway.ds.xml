@@ -1,0 +1,7 @@
+<DataSource ID="DecisionGateway" inheritsFrom="ProcessElement" Constructor="DecisionGateway">
+	<fields>
+        <criteriaMap type="Object" />
+        <defaultElement type="string" />
+	</fields>
+</DataSource>
+

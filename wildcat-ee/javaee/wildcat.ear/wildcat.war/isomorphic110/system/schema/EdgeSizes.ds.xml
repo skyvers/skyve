@@ -1,0 +1,9 @@
+<DataSource ID="EdgeSizes">
+    <fields>
+        <field name="defaultSize" type="integer"/>
+        <field name="top" type="integer"/>
+        <field name="bottom" type="integer"/>
+        <field name="left" type="integer" />
+        <field name="right" type="integer" />
+    </fields>
+</DataSource>

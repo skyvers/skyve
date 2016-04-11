@@ -1,0 +1,34 @@
+<DataSource ID="CompoundEditor"   inheritsFrom="HLayout"  Constructor="CompoundEditor">
+	<fields>
+        <field name="initialCriteria" type="Object"/>
+		<field name="data" multiple="true" type="ListGridRecord"/>
+        <field name="dataProperties" type="ResultSet"/>
+		<field name="dataPageSize" type="positiveInteger"/>
+		<field name="fields" type="ListGridField" multiple="true"/>
+        
+       
+        <field name="dataSource" type="DataSource" inapplicable="false" hidden="false"/>
+
+    </fields>
+    <methods>
+        <method title="Fetch Related Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png">
+            <params>
+                <param type="ListGridRecord"/>
+            </params>
+        </method>
+        
+         <method title="Fetch Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+        <method title="Filter Data" name="filterData" action="true"
+                icon="[SKINIMG]/actions/filter.png"/>
+        <method title="Fetch Related Data" name="fetchRelatedData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+        <method title="Remove Selected Data" name="removeSelectedData" action="true"
+                icon="[SKINIMG]/actions/remove.png"/>
+        <method title="Start Editing" name="startEditing" action="true"
+                icon="[SKINIMG]/actions/edit.png"/>
+        <method title="Start Editing New" name="startEditingNew" action="true"
+                icon="[SKINIMG]/actions/add.png"/>
+    </methods>
+</DataSource>

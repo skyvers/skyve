@@ -1,0 +1,219 @@
+<Object ID="DataSourceField" __autoConstruct="DataSource" addGlobalId="false">
+	<fields>
+	    <name type="string" title="Name" required="true" xmlAttribute="true" primaryKey="true" basic="true" />
+	    <type type="string" title="Type" xmlAttribute="true" basic="true" />
+        <disabled type="boolean" title="Disabled"/>
+
+        <!-- means that an identifier is allowed instead of a live instance -->
+	    <idAllowed type="boolean" title="ID Allowed" xmlAttribute="true" />
+
+        <!-- value constraints type -->
+	    <required type="boolean" title="Required" xmlAttribute="true"/>
+	    <valueMap type="ValueMap"/>
+	    <validators type="Validator" multiple="true" propertiesOnly="true"/>
+	    <length type="integer" title="Length" xmlAttribute="true"/>
+	    <!-- decimal pad and precision - only applies to float fields -->
+	    <decimalPad type="integer" title="Decimal Pad" xmlAttribute="true"/>
+	    <decimalPrecision type="integer" title="Decimal Precision" xmlAttribute="true"/>
+
+        <!-- XML Schema notion of required: element must be present, but value is unconstrained
+             (can by empty) -->
+        <xmlRequired type="boolean" visibility="internal"/>
+        <!-- string because "unbounded" is a legal value -->
+        <xmlMaxOccurs type="string" visibility="internal"/>
+        <xmlMinOccurs type="integer" visibility="internal"/>
+        <!-- whether XML Schema restrictions exist that indicate value must be non-empty -->
+        <xmlNonEmpty type="boolean" visibility="internal"/>
+        
+        <xsElementRef type="boolean" visibility="internal"/>
+
+        <canHide type="boolean" title="User can hide"/>
+
+        <!-- whether this field is represented as an attribute in XML -->
+        <xmlAttribute type="boolean" visibility="internal"/>
+        <!-- whether elements generated from this field must be qualified with the
+             schemaNamespace -->
+        <mustQualify type="boolean" visibility="internal"/>
+        <!-- whether this field (and children) shoud include explicit xsi type in XML -->
+        <xmlExplicitTypes type="boolean" visibility="internal"/>
+
+        <!-- XML binding -->
+        <valueXPath type="XPath" title="Value XPath" xmlAttribute="true"/>
+        <!-- for tree XML binding -->
+        <childrenProperty type="boolean"/>
+
+		<!-- DataBinding -->
+	    <title type="string" title="Title" xmlAttribute="true"/>
+        <!-- prompt is not actually documented as a dsField property but it's convenient to set
+	         centrally in the DataSource, and adding it to the schema allows DataSource i18n to
+	         be used -->
+		<prompt type="string" xmlAttribute="true"/>
+		<!-- whether this field is a detail field, ie should probably be omitted in a summary
+		     view.  If absent, assumed false. -->
+	    <detail type="boolean" title="Detail" xmlAttribute="true"/>
+        <canEdit type="boolean" title="Can Edit" xmlAttribute="true"/>
+        <canSave type="boolean" title="Can Save" xmlAttribute="true"/>
+        <canView type="boolean" title="Can View" xmlAttribute="true"/>
+
+        <!-- field is inherited, and should be considered inapplicable to the current class -->
+	    <inapplicable type="boolean" title="Inapplicable" inapplicable="true"/>
+        <!-- subcomponents provided as the field's value should not be auto-created -->
+        <!--  -->
+        <!--
+	    <propertiesOnly type="boolean" title="Properties Only" inapplicable="true"/>
+        -->
+        <!-- field is advanced (generally set in JSDoc) -->
+	    <advanced type="boolean" title="Advanced" inapplicable="true"/>
+        <!-- field visibility -->
+	    <visibility type="string" title="Visibility" inapplicable="true"/>
+		<!-- generic hidden flag - typically for applications or for visualBuilder -->
+	    <hidden type="boolean" title="Hidden" inapplicable="true" xmlAttribute="true"/>
+
+        <!-- applied to AdvancedCriteria fields to enable createRuleCriteria mode on FilterBuilder -->
+        <isRuleCriteria type="boolean" xmlAttribute="true" />
+
+        <!-- unique constraints / relations -->
+		<primaryKey type="boolean" title="Is Primary Key" xmlAttribute="true"/>
+	    <foreignKey type="string" title="Foreign Key" xmlAttribute="true"/>
+        <joinType type="string" xmlAttribute="true">
+            <valueMap inner="A regular inner join" 
+                      outer="An outer join"/>
+        </joinType>
+        <!-- for tree relations -->
+	    <rootValue type="string" title="Tree Root Value" xmlAttribute="true"/> 
+        <!-- included from a related DataSource -->
+        <includeFrom type="string" title="Include From" xmlAttribute="true"/>
+        <includeVia type="string" title="Include Via" xmlAttribute="true"/>
+		<relatedTableAlias type="string" title="Related Table Alias" xmlAttribute="true"/>
+
+        <!-- binary fields -->
+		<showFileInline type="boolean" xmlAttribute="true"/>
+
+		<escapeHTML type="boolean" xmlAttribute="true"/>
+        
+		
+		<!-- image type fields - these fields can also be references to size fields -->
+		<imageWidth type="integerOrIdentifier" xmlAttribute="true"/>
+		<imageHeight type="integerOrIdentifier" xmlAttribute="true"/>
+		
+        <!-- 
+        nativeName specifies the name of the corresponding column for this field in the database
+        table; if omitted it is assumed to be the value of the name property.
+        fieldName is the equivalent of nativeName and is deprecated; nativeName takes precedence
+        if both are specified.
+        -->
+        <!-- hiding from visualBuilder because this is for sql prototyping -->
+        <nativeName type="string" title="Native Name" hidden="true"/>
+        <nativeFK type="string" title="Native Foreign Key" xmlAttribute="true" hidden="true"/>
+        <autoDeriveFKs type="boolean" xmlAttribute="true" hidden="true"/>
+        <fieldName type="string" title="Field Name" hidden="true"/>
+        <!-- HACK: DataSourceField is used as the type of the DataSource.types field,
+             which currently can contain either a simple or DataSource type definition, 
+             so by adding DataSourceField.fields, we allow DataSource.types.fields -->
+	    <fields type="DataSourceField" multiple="true" propertiesOnly="true" 
+                childTagName="field" uniqueProperty="name" hidden="true"/>
+
+        <multiple type="boolean" xmlAttribute="true" />
+        <validateEachItem type="boolean" xmlAttribute="true" />
+
+        <pickListFields type="Object" multiple="true"/>
+        <multipleStorage type="string" xmlAttribute="true">
+            <valueMap simpleString="Delimeter-separated string" 
+                      json="JSON serialisation"
+                      none="No transformation is applied to values"/>
+        </multipleStorage>
+
+        <canFilter type="boolean" xmlAttribute="true" />
+        <ignore type="boolean"/>
+
+        <!-- marker left by DataSource generators -->
+        <unknownType type="boolean" xmlAttribute="true"/>
+
+        <canSortClientOnly type="boolean" xmlAttribute="true" />
+        <childTagName type="string" xmlAttribute="true" />
+        
+        <!-- For Visual Builder - indicates if property should appear in Basic Mode -->
+        <basic type="boolean"/>
+        
+        <maxFileSize type="integer" />
+        
+        <frozen type="boolean" title="Frozen" xmlAttribute="true"/>
+
+        <canExport type="boolean" xmlAttribute="true" />
+        <exportTitle type="string" xmlAttribute="true" />
+
+        <sqlStorageStrategy type="string" xmlAttribute="true" />
+
+        <encodeInResponse type="boolean" xmlAttribute="true" />
+
+        <mimeType type="string" xmlAttribute="true"/>
+
+        <ignoreTextMatchStyle type="boolean" xmlAttribute="true" />
+
+		<!-- deprecated -->
+        <lenientXPath type="boolean" xmlAttribute="true" />
+        
+        <summaryFunction type="string" xmlAttribute="true"/>
+        <includeSummaryFunction type="string" xmlAttribute="true"/>
+        <!-- concatenation config for summaryFunction "concat" -->
+        <joinString type="string" xmlAttribute="true"/>
+        <joinPrefix type="string" xmlAttribute="true"/>
+        <joinSuffix type="string" xmlAttribute="true"/>
+        
+        <allowClientRequestedSummaries type="boolean" />
+        <defaultValue type="string" xmlAttribute="true"/>
+        <group type="string" xmlAttribute="true"/>
+        <!-- for types -->
+        <ID type="string" xmlAttribute="true"/>
+        <inheritsFrom type="string" xmlAttribute="true"/>
+
+        <javaClass type="string" xmlAttribute="true"/>
+        <javaCollectionClass type="string" xmlAttribute="true"/>
+        <javaKeyClass type="string" xmlAttribute="true"/>
+
+        <storeWithHash type="string" xmlAttribute="true">
+            <valueMap MD5="Message Digest algorithm 5" 
+                      SHA="Secure Hashing Algorithm (SHA-1)"/>
+        </storeWithHash>
+        <sqlDateFormat type="string" />
+
+        <storeMilliseconds type="boolean" />
+
+        <initRequiresAuthentication type="boolean" />
+        <viewRequiresAuthentication type="boolean" />
+        <editRequiresAuthentication type="boolean" />
+        <updateRequiresAuthentication type="boolean" />
+        <initRequiresRole type="string" />
+        <viewRequiresRole type="string" />
+        <editRequiresRole type="string" />
+        <updateRequiresRole type="string" />
+        <initRequires type="string" />
+        <viewRequires type="string" />
+        <editRequires type="string" />
+        <updateRequires type="string" />
+
+        <customSelectExpression type="string" />
+        <customCriteriaExpression type="string" />
+        <customInsertExpression type="string" />
+        <customUpdateExpression type="string" />
+        <customSQL type="boolean" />
+        <autoQuoteCustomExpressions type="boolean" />
+        <creatorOverrides type="boolean" />
+        <valueWriteXPath type="string" />
+        <useJoin type="boolean" />
+        <tableName type="string" />
+        <multipleStorageSeparator type="string" />
+        <defineSQLColumnAsNotNull type="boolean" />
+        <valueMapEnum type="string" />
+        <sqlFalseValue type="string" />
+        <sqlTrueValue type="string" />
+        <sortByField type="string" />
+        <columnCode type="string" xmlAttribute="true"/>
+        <stringInBrowser type="boolean" xmlAttribute="true" />
+        <nillable type="boolean" />
+        <validOperators type="string" />
+        <fieldTypeProperty type="string" />
+        <moveTo type="string" />
+
+	</fields>
+</Object>

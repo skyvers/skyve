@@ -1,0 +1,6 @@
+<DataSource ID="Point" serverConstructor="com.isomorphic.datasource.PointType" >
+    <fields>
+        <field name="x" title="X" type="float" />
+        <field name="y" title="Y" type="float" />
+    </fields>
+</DataSource>

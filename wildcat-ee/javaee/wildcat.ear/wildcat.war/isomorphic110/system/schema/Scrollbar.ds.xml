@@ -1,0 +1,18 @@
+<DataSource ID="Scrollbar" inheritsFrom="StretchImg" Constructor="Scrollbar">
+	<fields>
+		<field	name="btnSize"	type="positiveInteger" />
+		<field	name="state"	type="string" visibility="internal"/>
+		<field 	name="autoEnable"	type="boolean"	/>
+		<field 	name="showCorner"	type="boolean"	/>
+		<field 	name="allowThumbDownState"	type="boolean"	/>
+		<field 	name="thumbResizeThreshold"	type="float"	/>
+		<field 	name="thumbMinSize"	type="positiveInteger"	/>
+		<field 	name="thumbOverlap"	type="number" />
+		<field 	name="scrollTarget"	type="Canvas"	/>
+        
+        <!-- skinning properties that shouldn't be set in the Visual Builder property sheet-->
+        <field name="trackEndWidth" type="number" advanced="true"/>
+        <field name="trackEndHeight" type="number" advanced="true"/>
+        <field name="cornerSize" type="number" advanced="true"/>
+	</fields>
+</DataSource>

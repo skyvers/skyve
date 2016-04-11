@@ -1,0 +1,5 @@
+<DataSource ID="MockupContainer" inheritsFrom="Canvas" Constructor="MockupContainer">
+    <!-- Note: propertiesOnly is required to avoid generating JS with nested create() calls -->
+    <field name="dataSources" type="DataSource" multiple="true" propertiesOnly="true"/>
+    <field name="components"  type="Canvas"     multiple="true" propertiesOnly="true"/>
+</DataSource>

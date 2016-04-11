@@ -1,0 +1,28 @@
+<DataSource ID="DetailViewerField" autoIdField="name">
+	<fields>
+		<field name="name"			type="string"  xmlAttribute="true" basic="true"/>
+		<field name="type"			type="string"  xmlAttribute="true" basic="true"/>
+		<field name="title"			type="HTMLString"  xmlAttribute="true" basic="true"/>
+		<field name="valueMap"		type="ValueMap" />
+		<field name="showIf"		type="expression" />
+		<field name="asHTML"		type="boolean" visibility="internal"/>
+		<field name="value"			type="HTMLString" />
+		<field name="width"			type="positiveInteger" visibility="internal"/>
+		<field name="height"		type="positiveInteger" />
+        <field name="imageSize"     type="number"/>
+        <field name="imageWidth"    type="number"/>
+        <field name="imageHeight"   type="number"/>
+        <field name="hiliteIconSize" type="number"/>
+        <field name="hiliteIconWidth" type="number"/>
+        <field name="hiliteIconHeight" type="number"/>
+        <field name="hiliteIconLeftPadding" type="number"/>
+        <field name="hiliteIconRightPadding" type="number"/>
+        <field name="hiliteIconPosition" type="enum">
+            <valueMap>
+                <value>before</value>
+                <value>after</value>
+                <value>replace</value>
+            </valueMap>
+        </field> 
+	</fields>
+</DataSource>

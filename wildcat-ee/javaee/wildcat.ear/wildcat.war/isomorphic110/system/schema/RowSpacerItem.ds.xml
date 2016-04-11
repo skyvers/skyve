@@ -1,0 +1,11 @@
+<DataSource	ID="RowSpacerItem" inheritsFrom="SpacerItem" Constructor="RowSpacerItem">
+    <fields>
+		<field name="colSpan" 			type="measure" title="Column Span" inapplicable="true"/>
+		<field name="startRow" 			type="boolean" title="Start Row" inapplicable="true"
+            prompt="Check to position this item on a new row"/>
+		<field name="endRow" 			type="boolean" title="End Row" inapplicable="true"
+            prompt="Check to start a new row after this item"/>
+        
+    </fields>
+</DataSource>
+

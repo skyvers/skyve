@@ -1,0 +1,169 @@
+<!-- 
+This file defines the special set of built-in types in the DataSource system.  This file is
+processed by schemaless XML transform, and in fact, can't even rely on the existance of the basic
+types (since it defines them!)
+-->
+<simpleTypes>
+    <!-- the most basic type, means either a simple or complete type is allowed -->
+    <any uberType="true"/>
+
+    <boolean validators="isBoolean"/>
+    <!-- actually creates a Long in Java -->
+    <integer validators="isInteger"/>
+    <!-- actually creates a Double in Java -->
+    <float validators="isFloat"/>
+    <date validators="isDate"/>
+    <time validators="isTime"/>
+
+    <!-- synonyms of basic types 
+         note: synonyms should inheritFrom the canonical name for the type, even if the base type
+         definition is trivial, so that the equivalent of "instanceof" checks will detect them as
+         being of the same base type
+    -->
+    <text validators="isString"/>
+    <string inheritsFrom="text"/>
+    <link inheritsFrom="text"/>
+    <int inheritsFrom="integer"/>
+    <long inheritsFrom="integer"/>
+    <number inheritsFrom="integer"/>
+    <decimal inheritsFrom="float"/>
+    <double inheritsFrom="float"/>
+    <dateTime inheritsFrom="datetime"/>
+    <datetime inheritsFrom="date"/>
+
+    <!-- Integer variants -->
+    <!--===================================================================================-->
+    <positiveInteger inheritsFrom="integer">
+        <validators>
+            <type>integerRange</type>
+            <min>0</min>
+        </validators>
+    </positiveInteger>
+
+    <integerPercent inheritsFrom="integer">
+        <validators>
+            <type>integerRange</type>
+            <min>0</min>
+            <max>100</max>
+        </validators>
+    </integerPercent>
+    <!-- synonym -->
+    <percent inheritsFrom="integerPercent"/>
+
+    <!-- database sequence.  Has special semantics for SQL DataSources. -->
+    <sequence inheritsFrom="integer"/>
+    
+    <!-- Other types -->
+    <!--===================================================================================-->
+    <!--  -->
+    <enum inheritsFrom="any"/>
+    <intEnum inheritsFrom="integer">
+    </intEnum>
+
+
+    <char inheritsFrom="text"/>
+
+    <!-- "ntext" fields are text fields that are treated specially in generated SQL when the
+         database is MS SQL Server, because that product has some issues with double-byte
+         character sets that need to be worked around -->
+    <ntext inheritsFrom="text" sqlStorageStrategy="ntext" />
+
+    <password inheritsFrom="text" />
+
+    <localeInt inheritsFrom="integer" />
+    <localeFloat inheritsFrom="float" />
+    <localeCurrency inheritsFrom="decimal" />
+    <phoneNumber inheritsFrom="text" />
+
+    <!-- regexp is a string which must be a valid regular expression -->
+    <regexp inheritsFrom="text" validators="isRegexp"/>
+
+    <identifier inheritsFrom="text" validators="isIdentifier"/>
+
+    <!-- We have a URL validator ("isURL"), but it currently accepts only absolute URLs (must have
+         protocol!)  -->
+    <URL inheritsFrom="text"/>
+    <url inheritsFrom="text"/>
+
+    <!-- XPath is a string.  Note, no actual validator yet -->
+    <XPath inheritsFrom="text"/>
+
+    <HTMLString inheritsFrom="text"/>
+    <!-- synonyms -->
+    <HTML inheritsFrom="text"/>
+    <html inheritsFrom="HTML"/>
+
+    <!-- HTML/JS specific -->
+    <!-- These types should really only be present when doing XML -> JS translation.  At the 
+         moment all types are in one flat namespace; these should be global types in a 
+         namespace specific to HTML/JS translation -->
+    <!--===================================================================================-->
+
+    <!-- an HTML size value: integer, integer percent, integer + "*", or "auto" -->
+    <measure validators="isMeasure"/>
+
+    <!-- an integer, or the value "auto" -->
+    <integerOrAuto validators="integerOrAuto"/>
+
+    <!-- an integer or an identifier -->
+    <integerOrIdentifier validators="integerOrIdentifier"/>
+
+    <!-- at the moment these types are just "markers" for documentation purposes, or to indicate
+         special handling on the client.  No special processing on the server. -->
+    <!-- responds to some event (eg cellOver) -->
+    <handler inheritsFrom="text"/>
+    <!-- override point to provide some customized value (eg getCellValue) -->
+    <callback inheritsFrom="text"/>
+    <!-- sets a property, usually with side effects (eg setFacetTitleAlign) -->
+    <action inheritsFrom="text"/>
+    <!-- sets a property, usually with side effects (eg setFacetTitleAlign) -->
+    <setter inheritsFrom="text"/>
+    <!-- gets state (eg getRowFacetLayout) -->
+    <getter inheritsFrom="text"/>
+    <!-- tests state (eg cellIsSelected) -->
+    <tester inheritsFrom="text"/>
+    <!-- generic term for a method when none of the above apply -->
+    <method inheritsFrom="text"/>
+    <!-- synonym for method -->
+    <function inheritsFrom="text"/>
+    <!-- could indicate a stringMethod when none of the above apply -->
+    <expression inheritsFrom="text"/>
+    <!-- indicates a name of a class -->
+    <className inheritsFrom="text"/>
+
+    <valignEnum inheritsFrom="enum">
+        <valueMap top="top" center="center" bottom="bottom"/>
+    </valignEnum>
+    <alignEnum inheritsFrom="enum">
+        <valueMap left="left" center="center" right="right"/>
+    </alignEnum>
+    <sideEnum inheritsFrom="enum">
+        <valueMap left="left" right="right" top="top" bottom="bottom"/>
+    </sideEnum>
+
+    <!-- a CSS color value or color name -->
+    <color inheritsFrom="string">
+        <validators>
+            <type>isColor</type>
+            <clientOnly>true</clientOnly>
+        </validators>
+    </color>
+
+    <!-- a CSS color value or color name -->
+    <cssClass inheritsFrom="string"/>
+    
+    <modifier inheritsFrom="text" hidden="true" canEdit="false"/>
+    <modifierTimestamp inheritsFrom="datetime" hidden="true" canEdit="false"/>
+    <creator inheritsFrom="text" hidden="true" canEdit="false"/>
+    <creatorTimestamp inheritsFrom="datetime" hidden="true" canEdit="false"/>
+    
+    <!-- These are actually synonyms for the same type -->
+    <binary inheritsFrom="any" />
+    <imageFile inheritsFrom="binary" />
+    <blob inheritsFrom="binary" />
+
+    <clob inheritsFrom="text" />
+	
+	<image inheritsFrom="text"/>
+    
+</simpleTypes>

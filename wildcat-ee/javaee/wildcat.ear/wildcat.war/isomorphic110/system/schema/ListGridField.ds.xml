@@ -1,0 +1,161 @@
+<DataSource ID="ListGridField" autoIdField="name">
+	<fields>
+        <field name="thumbNailSize"     type="number"/>
+        <field name="thumbNailWidth"    type="number"/>
+        <field name="thumbNailHeight"   type="number"/>
+        <field name="type"              type="ListGridFieldType" rebuildOnChange="true"/>
+		<field name="name"				type="string" basic="true" xmlAttribute="true"/>
+		<field name="title" 			type="string" basic="true" xmlAttribute="true"/>
+		<field name="summaryTitle" 	type="string"/>
+        <field name="width" 			type="measure" xmlAttribute="true"/>
+		<field name="align" 			type="alignEnum" xmlAttribute="true" basic="true" />
+        <field name="cellAlign"         type="alignEnum"/>
+        <field name="baseStyle"         type="cssClass"/>
+        <field name="headerBaseStyle"         type="cssClass"/>
+        <field name="headerTitleStyle"         type="cssClass"/>
+        <field name="hidden"            type="boolean" title="Hide Initially" xmlAttribute="true"/>
+        <!-- showIf is hidden in VB because "hidden" property above makes more sense -->
+        <field name="showIf"            type="string" editorType="checkbox" hidden="true" />
+        <field name="showHover"         type="boolean" basic="true" />
+		<field name="valueMap" 			type="ValueMap"/>
+        <field name="icon"  type="string"/>
+        <field name="iconSize"  type="number"/>
+        <field name="iconWidth"  type="number"/>
+        <field name="iconHeight"  type="number"/>
+        <field name="editorIconHeight" type="number"/>
+        <field name="editorIconWidth" type="number"/>
+        <field name="iconOrientation"  type="string"/>
+        <field name="iconSpacing"  type="number"/>
+        <field name="showDisabledIcon"  type="boolean"/>
+        <field name="showRollOverIcon"  type="boolean"/>
+        <field name="showFocusedIcon" type="boolean"/>
+        <field name="showFocusedAsOver" type="boolean"/>
+        <field name="showDownIcon"  type="boolean"/>
+        <field name="showSelectedIcon"  type="boolean"/>
+        <field name="valueIcons"        type="ValueMap"/>
+        
+        <field name="editorImageURLPrefix" type="URL"/>
+        <field name="editorImageURLSuffix" type="URL"/>   
+        <field name="icons" type="FormItemIcon" multiple="true"/>
+        <field name="defaultValue" fieldTypeProperty="type"      type="any"/>
+        <field name="iconVAlign" type="alignEnum"/>
+        <field name="defaultIconSrc" type="URL"/>
+        
+        <field name="imageSize" type="number"/>
+        <field name="imageHeight" type="number"/>
+        <field name="imageWidth" type="number"/>
+        <field name="valueIconWidth" type="number"/>
+        <field name="valueIconHeight" type="number"/>
+        <field name="valueIconSize" type="number"/>
+        <field name="valueIconLeftPadding" type="number"/>
+        <field name="valueIconRightPadding" type="number"/>
+        <field name="valueIconOrientation" type="enum">
+            <valueMap>
+                <value>left</value>
+                <value>right</value>
+            </valueMap>
+        </field>
+        <field name="editorValueIcons"        type="ValueMap"/>
+        <field name="editorValueIconWidth" type="number"/>
+        <field name="editorValueIconHeight" type="number"/>
+        <field name="editorValueIconSize" type="number"/>
+        <field name="editorValueIconLeftPadding" type="number" />
+        <field name="editorValueIconRightPadding" type="number"/>
+        <field name="canToggle" type="boolean"/>
+        <field name="imageURLPrefix" type="string"/>
+        <field name="imageURLSuffix" type="string"/>
+        <field name="showValueIconOnly" type="boolean"/>
+        <field name="suppressValueIcon" type="boolean"/>
+        <field name="hiliteIconSize" type="number"/>
+        <field name="hiliteIconWidth" type="number"/>
+        <field name="hiliteIconHeight" type="number"/>
+        <field name="hiliteIconLeftPadding" type="number"/>
+        <field name="hiliteIconRightPadding" type="number"/>
+        <field name="hiliteIconPosition" type="enum">
+            <valueMap>
+                <value>before</value>
+                <value>after</value>
+                <value>replace</value>
+            </valueMap>
+        </field> 
+        
+        <field name="optionDataSource"  type="string" basic="true" />
+        <field name="valueField"        type="string"/>
+        <field name="displayField"      type="string"/>
+
+        <field name="displayFormat"     type="string"/>
+        <field name="inputFormat"       type="string"/>
+        <field name="initialValue" fieldTypeProperty="type"      type="any"/>
+
+        <field name="editorValueMap"    type="ValueMap"/>
+		<field name="canSort" 			type="boolean" basic="true"/>
+		<field name="emptyCellValue" 	type="HTMLString"/>
+		<field name="sortDirection" 	type="sortEnum"/>
+		<field name="canEdit" 			type="boolean" basic="true"/>
+        <field name="canToggle"           type="boolean" basic="true" />
+        <field name="validateOnChange"  type="boolean" />
+		<field name="required" 			type="boolean"/>
+		<field name="validators"		type="Validator"	multiple="true"	title="Validators"/>
+		<field name="detail" 			type="boolean"/>
+        <field name="nextTabColNum"     type="boolean" visibility="advancedInlineEdit"/>
+        <field name="previousTabColNum" type="boolean" visibility="advancedInlineEdit"/>
+        <field name="enterKeyEditAction" type="enum">
+            <valueMap>
+				<value>done</value>
+				<value>nextCell</value>
+				<value>nextRow</value>
+				<value>nextRowStart</value>
+			</valueMap>
+		</field>	
+		<field name="escapeKeyEditAction" type="enum">
+            <valueMap>
+                <value>cancel</value>
+                <value>done</value>
+            </valueMap>
+        </field>
+        <field name="editorType"        type="className" />
+        <field name="editorProperties"  type="FormItem" propertiesOnly="true"/>
+        <field name="modalEditing"      type="boolean"/>
+        <field name="linkText"          type="text"/>
+        <field name="canFilter"         type="boolean" basic = "true" />
+        <field name="frozen"            type="boolean" basic="true" />
+
+        <field name="defaultFilterValue" fieldTypeProperty="type" type="any"/>
+        <field name="filterOnKeypress"  type="boolean"/>
+        <field name="filterEditorValueMap" type="object" />
+        <field name="filterEditorType"  type="className" />
+        <field name="filterEditorProperties" type="ListGrid"/>
+        
+        <field name="canEditFormula" type="boolean"/>
+        <field name="canEditSummary" type="boolean"/>
+        <field name="canGroupBy" type="boolean"/>
+        <field name="groupPrecision" type="number"/>
+        <field name="groupGranularity" type="number"/>
+        <field name="canSortClientOnly" type="boolean"/>
+        <field name="autoFetchDisplayMap" type="boolean"/>
+
+        <field name="editorFormula" type="UserFormula" useRuleScope="true"/>
+        <field name="editorTextFormula" type="UserSummary" useRuleScope="true"/>
+ 
+        <field name="canExport" type="boolean" basic="true" />
+ 
+	</fields>
+    
+    <types>
+        <type ID="ListGridFieldType" inheritsFrom="enum">
+            <valueMap>
+                <value>text</value>
+                <value>boolean</value>
+                <value>integer</value>
+                <value>float</value>
+                <value>date</value>
+                <value>time</value>
+                <value>sequence</value>
+                <value>link</value>
+                <value>image</value>
+                <value>binary</value>
+                <value>imageFile</value>
+            </valueMap>
+        </type>
+    </types>
+</DataSource>

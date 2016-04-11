@@ -1,0 +1,40 @@
+<DataSource	ID="PortalLayout"	inheritsFrom="Layout" Constructor="PortalLayout" >
+    <fields>
+        <field name="portalColumns" type="PortalColumn" multiple="true" propertiesOnly="true" />
+        
+        <field name="showColumnMenus" type="boolean" group="portal" basic="true" />
+        <field name="columnBorder" type="string" group="portal" basic="true" />
+        <field name="canResizeColumns" type="boolean" group="portal" basic="true" />
+        <field name="canResizePortlets" type="boolean" group="portal" basic="true" />
+
+		<field name="portletDropTypes" type="string" multiple="true"/>		
+
+        <field name="overflow" basic="true" />
+        <field name="columnOverflow" xmlAttribute="true" group="sizing" type="overflowEnum" basic="true">
+            <valueMap>
+                <value>auto</value>
+                <value>visible</value>
+                <value>hidden</value>
+                <value>scroll</value>
+            </valueMap>
+        </field>
+        
+        <field name="preventUnderflow" group="sizing" type="boolean" basic="true" />
+        <field name="preventColumnUnderflow" group="sizing" type="boolean" basic="true" />
+        <field name="preventRowUnderflow" group="sizing" type="boolean" basic="true" />
+
+        <field name="canStretchColumnWidths" group="sizing" type="boolean" basic="true" />
+        <field name="canShrinkColumnWidths"  group="sizing" type="boolean" basic="true" />
+
+        <!-- 2007.07.11 canResizeRows is deprecated in favor of canResizePortlets -->
+        <field name="canResizeRows" type="boolean" />
+
+        <!-- We don't expose numColumns here, because we'll actually record the columns
+             as components. -->
+        
+        <!-- mark superclass fields as not relevant -->
+        <field name="children" inapplicable="true"/>
+        <field name="peers" inapplicable="true"/>
+        <field name="members" inapplicable="true"/>
+    </fields>
+</DataSource>

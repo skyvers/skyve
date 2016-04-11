@@ -1,0 +1,10 @@
+<DataSource	ID="ImgProperties">
+	<fields>
+		<field name="src"           type="url"/>
+		<field name="width"         type="number"/>
+		<field name="height"        type="number"/>
+		<field name="name"          type="string"/>
+        <field name="extraStuff"    type="string"/>
+        <field name="imgDir"        type="url"/>
+	</fields>
+</DataSource>

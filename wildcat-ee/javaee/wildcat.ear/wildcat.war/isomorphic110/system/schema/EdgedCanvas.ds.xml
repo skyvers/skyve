@@ -1,0 +1,16 @@
+<DataSource	ID="EdgedCanvas" inheritsFrom="Canvas" Constructor="EdgedCanvas">
+    <fields>
+        <field name="edgeColor" type="color"/>
+        <field name="showCenter" type="boolean"/>
+        <field name="edgeLeft" type="integer"/>
+        <field name="edgeRight" type="integer"/>
+        <field name="edgeTop" type="integer"/>
+        <field name="edgeBottom" type="integer"/>
+        <field name="edgeOffset" type="integer" visibility="roundCorners"/>
+        <field name="edgeOffsetTop" type="integer" visibility="roundCorners"/>
+        <field name="edgeOffsetBottom" type="integer" visibility="roundCorners"/>
+        <field name="edgeOffsetLeft" type="integer" visibility="roundCorners"/>
+        <field name="edgeOffsetRight" type="integer" visibility="roundCorners"/>
+        <field name="centerBackgroundColor" type="color"/>
+    </fields>
+</DataSource>

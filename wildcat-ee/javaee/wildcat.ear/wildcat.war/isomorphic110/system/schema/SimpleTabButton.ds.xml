@@ -1,0 +1,7 @@
+<DataSource	ID="SimpleTabButton" inheritsFrom="Button" Constructor="SimpleTabButton">
+	<fields>
+        <!-- semi-hack: this allows the ImgTab to know it accepts a pane in
+             the context of a TabSet -->
+		<field name="pane"	type="Canvas"/>
+	</fields>
+</DataSource>

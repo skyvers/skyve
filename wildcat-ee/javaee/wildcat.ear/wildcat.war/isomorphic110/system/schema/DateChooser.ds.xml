@@ -1,0 +1,29 @@
+<DataSource	ID="DateChooser" inheritsFrom="Canvas" Constructor="DateChooser">
+    <fields>
+        <field name="showTodayButton" type="boolean" />
+        <field name="showCancelButton" type="boolean" />
+        <field name="todayButtonTitle" type="string" />
+        <field name="cancelButtonTitle" type="string" />
+        <field name="firstDayOfWeek" type="int" />
+        <field name="baseButtonStyle" type="string" />
+        <field name="baseWeekdayStyle" type="string" />
+        <field name="baseWeekendStyle" type="string" />
+        <field name="headerStyle" type="string" />
+        <field name="showDoubleYearIcon" type="boolean"/>
+        <field name="disableWeekends" type="boolean"/>
+        <field name="showWeekends" type="boolean"/>
+        
+        <!-- skinning properties that shouldn't be set in the Visual Builder property sheet-->
+        <field name="prevYearIconWidth" type="number" advanced="true"/>
+        <field name="prevYearIconHeight" type="number" advanced="true"/>
+        <field name="prevMonthIconWidth" type="number" advanced="true"/>
+        <field name="prevMonthIconHeight" type="number" advanced="true"/>
+        <field name="nextYearIconWidth" type="number" advanced="true"/>
+        <field name="nextYearIconHeight" type="number" advanced="true"/>
+        <field name="nextMonthIconHeight" type="number" advanced="true"/>
+        <field name="nextMonthIconWidth" type="number" advanced="true"/>
+        <field name="todayButtonHeight" type="number" advanced="true"/>
+        <field name="headerHeight" type="number" advanced="true"/>
+    </fields>
+</DataSource>
+

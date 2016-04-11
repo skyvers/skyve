@@ -1,0 +1,6 @@
+<DataSource ID="ScreenTree" inheritsFrom="Tree">
+    <fields>
+        <!-- Redefine for the more specific type -->
+        <field name="root" type="ScreenNode" />
+    </fields>
+</DataSource>

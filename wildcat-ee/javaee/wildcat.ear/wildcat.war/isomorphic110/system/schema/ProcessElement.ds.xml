@@ -1,0 +1,7 @@
+<DataSource ID="ProcessElement" Constructor="ProcessElement">
+	<fields>
+       <field name="ID" type="string" />
+       <field name="nextElement" type="string" />
+	</fields>
+</DataSource>
+

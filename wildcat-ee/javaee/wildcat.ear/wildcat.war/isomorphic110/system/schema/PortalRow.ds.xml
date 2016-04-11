@@ -1,0 +1,10 @@
+<DataSource ID="PortalRow" Constructor="PortalRow">
+    <fields>
+       	<field name="height"    type="measure"         title="Height"     xmlAttribute="true" basic="true" /> 
+        <field name="minHeight" type="positiveInteger" title="Min Height" xmlAttribute="true"/>	
+        <field name="maxHeight" type="positiveInteger" title="Max Height" xmlAttribute="true"/>	
+        
+        <!-- Note that type is "Canvas" because we will automatically generate the portlet if needed -->
+        <field name="portlets" type="Canvas" multiple="true" />
+    </fields>
+</DataSource>

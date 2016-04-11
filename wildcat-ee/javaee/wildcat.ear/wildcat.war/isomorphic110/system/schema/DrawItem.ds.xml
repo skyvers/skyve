@@ -1,0 +1,84 @@
+<DataSource ID="DrawItem" Constructor="DrawItem">
+    <fields>
+		<field name="cursor" type="cursorEnum" title="Cursor"/>	
+        <field name="canHover" type="boolean" title="Can Hover"/>	
+        <field name="showHover" type="boolean" title="Show Hover" defaultValue="true"/>
+        <field name="prompt" type="HTMLString" title="Prompt"/>
+        <field name="drawPane" type="DrawPane" title="Draw Pane"/>
+        <field name="drawGroup" type="DrawGroup" title="Draw Group"/>
+        <field name="lineWidth" type="int" title="Line Width" defaultValue="3"/>
+        <field name="lineColor" type="color" title="Line Color" defaultValue="#808080"/>
+        <field name="lineOpacity" type="float" title="Line Opacity" defaultValue="1.0"/>
+        <field name="linePattern" type="LinePattern" title="Line Pattern" defaultValue="solid"/>
+        <field name="lineCap" type="LineCap" title="Line Cap" defaultValue="round"/>
+        <field name="fillColor" type="color" title="Fill Color"/>
+        <field name="fillGradient" title="Fill Gradient" type="Gradient"/>
+        <field name="fillOpacity" type="float"  title="Fill Opacity" defaultValue="1.0"/>
+        <field name="shadow" type="Shadow" title="Shadow"/>
+
+        <!-- transform: set EITHER the shapeData opaque object OR the rotation, scale, etc. -->
+        <field name="shapeData"   type="object" title="Shape Data"/>
+        <field name="rotation"     type="float" title="Rotation"       defaultValue="0.0"/>
+        <field name="xShearFactor" type="float" title="x Shear Factor" defaultValue="0.0"/>
+        <field name="yShearFactor" type="float" title="y Shear Factor" defaultValue="0.0"/>
+        <field name="scale"        type="float" title="Scale"     multiple="true"/>
+        <field name="translate"    type="float" title="Translate" multiple="true"/>
+
+        <field name="svgFilter" type="string" title="SVG Filter" />
+        <field name="startArrow" type="ArrowStyle" title="Start Arrow"/>
+        <field name="endArrow" type="ArrowStyle" title="End Arrow"/>
+        <field name="knobs" type="KnobType" title="Knobs" multiple="true"/>
+        <!-- nillable="true" ensures that xsi:nil="true" is added to the <title/> element in
+             the XML serialization of the DrawItem if the DrawItem's title is null. Without this,
+             a null title is serialized as `<title></title>', which deserializes as title:"". -->
+        <field name="title" type="text" title="Title" nillable="true"/>
+        <field name="keepInParentRect" type="boolean" title="Keep In Parent Rect"/>
+        <field name="dragStartDistance" type="number" title="Drag Start Distance" defaultValue="5"/>
+        <field name="canDrag" type="boolean" title="Can Drag" defaultValue="false"/>
+        <field name="contextMenu" type="Menu" title="Context Menu"/>
+        <field name="moveKnobPoint" type="string" title="Move Knob Point" defaultValue="TL"/>
+        <field name="moveKnobOffset" type="integer" title="Move Knob Offset" multiple="true"/>
+        <field name="resizeKnobPoints" type="string" title="Resize Knob Points" multiple="true"/>
+        <field name="destroyed" type="boolean" title="Destroyed"/>
+        <field name="destroying" type="boolean" title="Destroying"/>
+    </fields>
+    <types>
+        <type ID="LinePattern" inheritsFrom="enum">
+             <valueMap>
+                <value>solid</value>
+                <value>dot</value>
+                <value>dash</value>
+                <value>shortdot</value>
+                <value>shortdash</value>
+                <value>longdash</value>
+            </valueMap>
+        </type>
+        <type ID="LineCap" inheritsFrom="enum">
+            <valueMap>
+                <value>round</value>
+                <value>square</value>
+                <value>butt</value>
+            </valueMap>
+        </type>
+        <type ID="ArrowStyle" inheritsFrom="enum">
+            <valueMap>
+                <value>block</value>
+                <value>open</value>
+                <value>classic</value>
+                <value>open</value>
+                <value>oval</value>
+                <value>diamond</value>
+            </valueMap>
+        </type>
+        <type ID="KnobType" inheritsFrom="enum">
+            <valueMap>
+                <value>resize</value>
+                <value>move</value>
+                <value>startPoint</value>
+                <value>endPoint</value>
+                <value>controlPoint1</value>
+                <value>controlPoint2</value>
+            </valueMap>
+        </type>
+    </types>
+</DataSource>

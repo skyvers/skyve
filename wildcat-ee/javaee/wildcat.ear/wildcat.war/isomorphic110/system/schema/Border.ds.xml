@@ -1,0 +1,19 @@
+<DataSource ID="Border" inheritsFrom="Canvas" Constructor="Border">
+	<fields>
+		<field name="borderWidth" type=""/>
+		<field name="state" type="borderStateEnum"/>
+		<field name="lightColor" type="color"/>
+		<field name="darkColor" type="color"/>
+		<field name="align" type="alignEnum"/>
+		<field name="valign" type="valignEnum"/>
+	</fields>
+	<types>
+		<type ID="borderStateEnum" inheritsFrom="enum">
+			<valueMap>
+				<value>up</value>
+				<value>down</value>
+				<value>flat</value>
+			</valueMap>
+		</type>
+	</types>
+</DataSource>

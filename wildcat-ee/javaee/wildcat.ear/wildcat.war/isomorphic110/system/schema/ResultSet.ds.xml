@@ -1,0 +1,18 @@
+<DataSource ID="ResultSet" inheritsFrom="List">
+    <fields>
+        <field name="dataSource" type="string" idAllowed="true"/>
+        <field name="dropCacheOnUpdate" type="boolean"/>
+        <field name="fetchDelay" type="integer"/>
+        <field name="fetchMode" type="enum">
+            <valueMap>
+                <value>paged</value>
+                <value>basic</value>
+                <value>local</value>
+            </valueMap>
+        </field>
+        <field name="fetchOperation" type="string"/>
+        <field name="resultSize" type="integer"/>
+        <field name="useClientFiltering" type="boolean"/>
+        <field name="useClientSorting" type="boolean"/>
+    </fields>
+</DataSource>

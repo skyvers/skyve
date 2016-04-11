@@ -1,0 +1,32 @@
+<DataSource ID="MultiView"	inheritsFrom="Canvas"	Constructor="MultiView">
+	<fields>
+        <field name="dataSource" type="DataSource" idAllowed="true" />
+        <field name="views" />
+	</fields>
+
+    <groups>
+        <group>editMode</group>
+        <group>cellStyling</group>
+        <group>emptyMessage</group>
+        <group>sizing</group>
+        <group>selection</group>
+        <group>sorting</group>
+        <group>editing</group>
+    </groups>
+
+    <methods>
+        <method title="Fetch Data" name="fetchData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+        <method title="Filter Data" name="filterData" action="true"
+                icon="[SKINIMG]/actions/filter.png"/>
+        <method title="Fetch Related Data" name="fetchRelatedData" action="true"
+                icon="[SKINIMG]/actions/search.png"/>
+        <method title="Remove Selected Data" name="removeSelectedData" action="true"
+                icon="[SKINIMG]/actions/remove.png"/>
+        <method title="Start Editing" name="startEditing" action="true"
+                icon="[SKINIMG]/actions/edit.png"/>
+        <method title="Start Editing New" name="startEditingNew" action="true"
+                icon="[SKINIMG]/actions/add.png"/>
+        <method name="recordClick" basic="true" />
+    </methods>
+</DataSource>
