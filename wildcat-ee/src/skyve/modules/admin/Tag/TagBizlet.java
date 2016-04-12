@@ -101,7 +101,7 @@ public class TagBizlet extends Bizlet<Tag> {
 				Document document = module.getDocument(customer, bean.getActionDocumentName());
 				for (String act : document.getConditionNames()) {
 					Condition condition = document.getCondition(act);
-					result.add(new DomainValue(act, (condition.getDescription()==null?act:condition.getDescription())));
+					result.add(new DomainValue(act, (condition.getDescription() == null ? act : condition.getDescription())));
 				}
 			}
 		}
@@ -259,11 +259,13 @@ public class TagBizlet extends Bizlet<Tag> {
 		Document document = module.getDocument(customer, documentName);
 
 		List<Bean> beans = new ArrayList<>();
-		for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
-			if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
-				// need to check that this is only done for documents of the
-				// selected type
-				beans.add(bean);
+		if (tag != null) {
+			for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
+				if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
+					// need to check that this is only done for documents of the
+					// selected type
+					beans.add(bean);
+				}
 			}
 		}
 
