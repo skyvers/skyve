@@ -72,6 +72,7 @@
 		</property>
 		<property name="system" />
 		<property name="unsubscribeUrl" length="500" />
+		<property name="url" length="500" />
 		<property name="includeCalendar" />
 		<property name="calendarTitleExpression" length="200" />
 		<property name="calendarStartTime" type="DateTime" />

@@ -116,8 +116,12 @@
 			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
 		</boolean>
-		<text name="unsubscribeUrl">
+		<text name="unsubscribeUrl" trackChanges="false">
 			<displayName>UnsubscribeUrl</displayName>
+			<length>500</length>
+		</text>
+		<text name="url" trackChanges="false">
+			<displayName>Url</displayName>
 			<length>500</length>
 		</text>
 		<boolean name="includeCalendar">

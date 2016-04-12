@@ -33,25 +33,22 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	private static final long serialVersionUID = -7404508611264793559L;
 
 	@Override
-	public Communication newInstance(Communication bean) throws Exception {
+	public Communication newInstance(Communication communication) throws Exception {
 
 		// set defaults
+		Communication bean = communication;
 		bean.setFormatType(FormatType.email);
+		bean = setLinks(bean);
 
 		return super.newInstance(bean);
 	}
 
 	@Override
-	public Communication preExecute(ImplicitActionName actionName, Communication bean, Bean parentBean, WebContext webContext) throws Exception {
-		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
-			// construct unsubscribeUrl
-			StringBuilder url = new StringBuilder(256);
-			url.append(Util.getWildcatContextUrl());
-			url.append("/");
-			url.append("unsubscribe.xhtml?c=").append(bean.getBizCustomer());
-			url.append("&i=").append(bean.getBizId());
-			url.append("&r=").append(bean.getSendTo());
-			bean.setUnsubscribeUrl(url.toString());
+	public Communication preExecute(ImplicitActionName actionName, Communication communication, Bean parentBean, WebContext webContext) throws Exception {
+		Communication bean=  communication;
+		
+		if (ImplicitActionName.Edit.equals(actionName)) {
+			bean = setLinks(bean);
 		}
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
@@ -185,6 +182,26 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 			// do nothing, return false
 		}
 		return result;
+	}
+
+	public static Communication setLinks(Communication communication) {
+		Communication bean = communication;
+
+		// construct url
+		StringBuilder url = new StringBuilder(256);
+		url.append(Util.getDocumentUrl(bean));
+		bean.setUrl(url.toString());
+
+		//construct UnsubscribeUrl
+		url = new StringBuilder(256);
+		url.append(Util.getWildcatContextUrl());
+		url.append("/");
+		url.append("unsubscribe.xhtml?c=").append(bean.getBizCustomer());
+		url.append("&i=").append(bean.getBizId());
+		url.append("&r=").append(bean.getSendTo());
+		bean.setUnsubscribeUrl(url.toString());
+
+		return bean;
 	}
 
 }
