@@ -2,7 +2,10 @@ package modules.admin.Communication;
 
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 
 import modules.admin.Communication.actions.GetResults;
@@ -14,6 +17,8 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -188,6 +193,7 @@ public class CommunicationUtil {
 
 	/**
 	 * Sends the communication, but overrides the communication sendTo attribute
+	 * and allows the inclusion of additional Mail attachments
 	 * 
 	 * @param communication
 	 * @param runMode
@@ -196,7 +202,7 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	public static void sendOverrideTo(Communication communication, RunMode runMode, ResponseMode responseMode, String[] sendTo, Bean... beans) throws Exception {
+	public static void sendOverrideWithAdditionalAttachmentsTo(Communication communication, RunMode runMode, ResponseMode responseMode, String[] sendTo, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -225,11 +231,26 @@ public class CommunicationUtil {
 
 		try (ContentManager cm = EXT.newContentManager()) {
 
-			MailAttachment[] attachments = getAttachments(cm, communication, calendarItem);
+			MailAttachment[] definedAttachments = getAttachments(cm, communication, calendarItem);
 
+			// attempt the send
 			try {
 				if (RunMode.ACTION.equals(runMode)) {
-					EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+
+					// concatenate defined attachments with additional
+					// attachments first
+					int totalLen = definedAttachments.length;
+					if (additionalAttachments != null) {
+						totalLen += additionalAttachments.length;
+					}
+					List<MailAttachment> both = new ArrayList<>(totalLen);
+					if (additionalAttachments != null) {
+						Collections.addAll(both, additionalAttachments);
+					}
+					Collections.addAll(both, definedAttachments);
+					MailAttachment[] allAttachments = both.toArray(new MailAttachment[both.size()]);
+
+					EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody.toString(), MimeType.html, allAttachments);
 				}
 			} catch (Exception e) {
 				if (ResponseMode.SILENT.equals(responseMode)) {
@@ -239,6 +260,21 @@ public class CommunicationUtil {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Sends the communication, but overrides the communication sendTo attribute
+	 * Simple override for no additional attachments
+	 * 
+	 * @param communication
+	 * @param runMode
+	 * @param responseMode
+	 * @param sendTo
+	 * @param beans
+	 * @throws Exception
+	 */
+	public static void sendOverrideTo(Communication communication, RunMode runMode, ResponseMode responseMode, String[] sendTo, Bean... beans) throws Exception {
+		sendOverrideWithAdditionalAttachmentsTo(communication, runMode, responseMode, sendTo, null, beans);
 	}
 
 	/**
@@ -336,8 +372,11 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendSystemCommunicationByDescription(String description, ResponseMode responseMode, Bean bean) throws Exception {
+	public static void sendSystemCommunicationByDescription(String description, ResponseMode responseMode, Bean... bean) throws Exception {
 		Communication c = getSystemCommunicationByDescription(description);
+		if(c==null){
+			throw new ValidationException(new Message("The communication for '" + description + "' was not found."));
+		} 
 		send(c, RunMode.ACTION, responseMode, bean);
 	}
 
