@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <view title="Change Your Password" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" percentageWidth="50">
-		<column percentageWidth="20" />
+	<form border="true" percentageWidth="60">
+		<column percentageWidth="50" />
 		<column />
 		<row>
 			<item>
@@ -19,7 +19,7 @@
 				<spacer />
 			</item>
 			<item>
-				<button actionName="MakePasswordChange" pixelWidth="200" />
+				<button actionName="MakePasswordChange" pixelWidth="150" />
 			</item>
 		</row>
 		<row>
