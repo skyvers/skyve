@@ -66,6 +66,17 @@ public class TimeUtil {
 		date.setTime(calendar.getTime().getTime());
 	}
 
+	public static final void setTime(Date date, TimeOnly time) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(time);
+		int hours = calendar.get(Calendar.HOUR_OF_DAY);
+		int minutes= calendar.get(Calendar.MINUTE);
+		int seconds=  calendar.get(Calendar.SECOND);
+		//int millis = calendar.get(Calendar.MILLISECOND);
+		
+		setTime(date, hours, minutes, seconds);
+	}
+	
 	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
