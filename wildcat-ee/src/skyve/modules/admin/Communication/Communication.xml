@@ -120,10 +120,6 @@
 			<displayName>UnsubscribeUrl</displayName>
 			<length>500</length>
 		</text>
-		<text name="url" trackChanges="false">
-			<displayName>Url</displayName>
-			<length>500</length>
-		</text>
 		<boolean name="includeCalendar">
 			<displayName>Include Calendar Item</displayName>
 			<description>

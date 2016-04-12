@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
+import modules.ModulesUtil;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.domain.Communication;
 import modules.admin.domain.Communication.FormatType;
@@ -28,7 +29,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
-import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.content.AttachmentContent;
 import org.skyve.wildcat.content.ContentManager;
 import org.skyve.wildcat.util.FileUtil;
@@ -38,6 +38,8 @@ import org.skyve.wildcat.util.UtilImpl;
 
 public class CommunicationUtil {
 
+	public static final String SPECIAL_BEAN_URL = "{this.url}";
+	
 	/**
 	 * Whether to throw or log an exception if one occurs.
 	 * 
@@ -74,7 +76,7 @@ public class CommunicationUtil {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 
-		String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
+		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
 		String[] sendOverride = new String[] { sendTo };
 
 		sendOverrideTo(communication, runMode, responseMode, sendOverride, beans);
@@ -99,7 +101,7 @@ public class CommunicationUtil {
 		Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
 		Document subDoc = module.getDocument(customer, Subscription.DOCUMENT_NAME);
 
-		String sendTo = Binder.formatMessage(customer, communication.getSendTo(), beans);
+		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
 		FormatType format = communication.getFormatType();
 
 		// check for Subscription
@@ -136,9 +138,9 @@ public class CommunicationUtil {
 			sendFrom = UtilImpl.SMTP_SENDER;
 		}
 
-		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
 		String emailBodyMain = communication.getBody();
-		emailBodyMain = Binder.formatMessage(customer, emailBodyMain, beans);
+		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
 
 		// calendar items
 		StringBuilder emailBody = new StringBuilder(emailBodyMain);
@@ -214,9 +216,9 @@ public class CommunicationUtil {
 			sendFrom = UtilImpl.SMTP_SENDER;
 		}
 
-		String emailSubject = Binder.formatMessage(customer, communication.getSubject(), beans);
+		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
 		String emailBodyMain = communication.getBody();
-		emailBodyMain = Binder.formatMessage(customer, emailBodyMain, beans);
+		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
 
 		// calendar items
 		StringBuilder emailBody = new StringBuilder(emailBodyMain);
@@ -372,12 +374,13 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendSystemCommunicationByDescription(String description, ResponseMode responseMode, Bean... bean) throws Exception {
+	public static void sendSystemCommunicationByDescription(String description, ResponseMode responseMode, Bean bean) throws Exception {
 		Communication c = getSystemCommunicationByDescription(description);
-		if(c==null){
+		if (c == null) {
 			throw new ValidationException(new Message("The communication for '" + description + "' was not found."));
-		} 
-		send(c, RunMode.ACTION, responseMode, bean);
+		}
+		modules.admin.domain.User user = ModulesUtil.currentAdminUser();
+		send(c, RunMode.ACTION, responseMode, bean, user, c);
 	}
 
 	/**
@@ -431,8 +434,8 @@ public class CommunicationUtil {
 		// set Title
 		StringBuilder sb = new StringBuilder(512);
 		// sb.append(row[1]).append(" - ").append(row[2]);
-		String eventTitle = BindUtil.formatMessage(customer, communication.getCalendarTitleExpression(), beans);
-		String eventDescription = BindUtil.formatMessage(customer, communication.getCalendarDescriptionExpression(), beans);
+		String eventTitle = formatCommunicationMessage(customer, communication.getCalendarTitleExpression(), beans);
+		String eventDescription = formatCommunicationMessage(customer, communication.getCalendarDescriptionExpression(), beans);
 
 		String start = TimeUtil.formatISODate(communication.getCalendarStartTime(), true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
 		String end = TimeUtil.formatISODate(communication.getCalendarEndTime(), true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
@@ -534,5 +537,26 @@ public class CommunicationUtil {
 		MailAttachment[] attachments = { ma1, ma2, ma3, ma4, ma5 };
 
 		return attachments;
+	}
+
+	/**
+	 * formatCommunicationMessage
+	 * 
+	 * Special case handling of Binder.formatMessage for communications
+	 * @param customer
+	 * @param expression
+	 * @param beans
+	 * @return
+	 * @throws Exception
+	 */
+	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
+		String result = expression;
+		
+		//default url binding to first bean
+		if(beans!=null && beans.length>0){
+			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+		}
+		result = Binder.formatMessage(customer, result, beans);
+		return result;
 	}
 }

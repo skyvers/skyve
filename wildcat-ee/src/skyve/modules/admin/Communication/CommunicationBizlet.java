@@ -187,13 +187,8 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 	public static Communication setLinks(Communication communication) {
 		Communication bean = communication;
 
-		// construct url
-		StringBuilder url = new StringBuilder(256);
-		url.append(Util.getDocumentUrl(bean));
-		bean.setUrl(url.toString());
-
 		//construct UnsubscribeUrl
-		url = new StringBuilder(256);
+		StringBuilder url = new StringBuilder(256);
 		url.append(Util.getWildcatContextUrl());
 		url.append("/");
 		url.append("unsubscribe.xhtml?c=").append(bean.getBizCustomer());

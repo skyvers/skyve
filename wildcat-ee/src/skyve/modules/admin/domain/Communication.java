@@ -83,8 +83,6 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String unsubscribeUrlPropertyName = "unsubscribeUrl";
 	/** @hidden */
-	public static final String urlPropertyName = "url";
-	/** @hidden */
 	public static final String includeCalendarPropertyName = "includeCalendar";
 	/** @hidden */
 	public static final String calendarTitleExpressionPropertyName = "calendarTitleExpression";
@@ -295,7 +293,6 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private Boolean system;
 	private String unsubscribeUrl;
-	private String url;
 	/**
 	 * <b>Include Calendar Item</b>:
 				<br/>
@@ -746,23 +743,6 @@ public class Communication extends AbstractPersistentBean {
 	@XmlElement
 	public void setUnsubscribeUrl(String unsubscribeUrl) {
 		this.unsubscribeUrl = unsubscribeUrl;
-	}
-
-	/**
-	 * {@link #url} accessor.
-	 **/
-	public String getUrl() {
-		return url;
-	}
-
-	/**
-	 * {@link #url} mutator.
-	 * 
-	 * @param url	The new value to set.
-	 **/
-	@XmlElement
-	public void setUrl(String url) {
-		this.url = url;
 	}
 
 	/**
