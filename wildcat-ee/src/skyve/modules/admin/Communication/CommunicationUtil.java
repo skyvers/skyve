@@ -38,8 +38,9 @@ import org.skyve.wildcat.util.UtilImpl;
 
 public class CommunicationUtil {
 
-	public static final String SPECIAL_BEAN_URL = "{this.url}";
-	
+	public static final String SPECIAL_BEAN_URL = "{#url}";
+	public static final String SPECIAL_SYSTEM_FROM_EMAIL = "{#from}";
+
 	/**
 	 * Whether to throw or log an exception if one occurs.
 	 * 
@@ -379,6 +380,10 @@ public class CommunicationUtil {
 		if (c == null) {
 			throw new ValidationException(new Message("The communication for '" + description + "' was not found."));
 		}
+		sendSystemCommunication(c, responseMode, bean);
+	}
+	
+	public static void sendSystemCommunication(Communication c, ResponseMode responseMode, Bean bean) throws Exception {
 		modules.admin.domain.User user = ModulesUtil.currentAdminUser();
 		send(c, RunMode.ACTION, responseMode, bean, user, c);
 	}
@@ -543,6 +548,7 @@ public class CommunicationUtil {
 	 * formatCommunicationMessage
 	 * 
 	 * Special case handling of Binder.formatMessage for communications
+	 * 
 	 * @param customer
 	 * @param expression
 	 * @param beans
@@ -551,12 +557,41 @@ public class CommunicationUtil {
 	 */
 	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
 		String result = expression;
-		
-		//default url binding to first bean
-		if(beans!=null && beans.length>0){
+
+		// default url binding to first bean
+		if (beans != null && beans.length > 0) {
 			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+			result = expression.replace(SPECIAL_SYSTEM_FROM_EMAIL, UtilImpl.SMTP_SENDER);
 		}
 		result = Binder.formatMessage(customer, result, beans);
+		return result;
+	}
+
+	/**
+	 * Creates the required system communication if it does not exist
+	 * 
+	 * @return
+	 */
+	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+
+		// create a default communication
+		String sendTo = "{contact.email1}";
+		Communication result = getSystemCommunicationByDescription(description);
+		if (result == null) {
+			//create a basic default system email
+			result = Communication.newInstance();
+			result.setDescription(description);
+			result.setFormatType(FormatType.email);
+			result.setSystem(Boolean.TRUE);
+			result.setSendFrom(SPECIAL_SYSTEM_FROM_EMAIL);
+			result.setSendTo(sendTo);
+			result.setSubject(defaultSubject);
+			result.setBody(defaultBody);
+			
+			Persistence pers=  CORE.getPersistence();
+			result = pers.save(result);
+		}
+
 		return result;
 	}
 }

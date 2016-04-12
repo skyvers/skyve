@@ -29,6 +29,8 @@ import org.skyve.wildcat.util.TagUtil;
 public class TagBizlet extends Bizlet<Tag> {
 
 	private static final long serialVersionUID = -927602139528710862L;
+	
+	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
 
 	@Override
 	public List<DomainValue> getDynamicDomainValues(String attributeName, Tag bean) throws Exception {

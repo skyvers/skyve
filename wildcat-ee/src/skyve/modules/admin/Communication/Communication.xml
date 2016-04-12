@@ -110,8 +110,8 @@
 			<displayName>Refresh Batches</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
-		
-		
+
+
 		<boolean name="system">
 			<displayName>Used for System communications</displayName>
 			<description>System communications can not be deleted unless the system flag is cleared first.</description>
@@ -157,7 +157,7 @@
 		<content name="mailImage" persistent="false">
 			<displayName>Image</displayName>
 		</content>
-		
+
 		<inverse name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>
@@ -165,7 +165,7 @@
 		</inverse>
 	</attributes>
 	<conditions>
-		<condition name="saveAction" >
+		<condition name="saveAction">
 			<description>Save for Bulk Send</description>
 			<expression>
 				<![CDATA[ActionType.saveForBulkSend.equals(this.getActionType())]]>
@@ -196,7 +196,7 @@
 					selectedBatchTimestampFolderName != null
 				]]>
 			</expression>
-		</condition>		
+		</condition>
 		<condition name="batchesRefreshRequired">
 			<description>Refresh Batches</description>
 			<expression>

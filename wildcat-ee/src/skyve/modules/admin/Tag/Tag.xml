@@ -106,11 +106,6 @@
 		<boolean name="notification">
 			<displayName>Notify when job is complete</displayName>
 		</boolean>
-		<association type="aggregation" name="communication">
-			<displayName>Communication</displayName>
-			<documentName>Communication</documentName>
-			<queryName>qTagCommunications</queryName>
-		</association>
 		<integer name="filterColumn">
 			<displayName>Column</displayName>
 		</integer>

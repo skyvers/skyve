@@ -101,14 +101,14 @@
 							</onChangedHandlers>
 						</combo>
 					</item>
+					<item>
+						<button actionName="TestSend" pixelWidth="200" />
+					</item>
 				</row>
 				<row>
 					<item>
 						<textField binding="sendFrom" invisible="notEmailType" />
-					</item>
-					<item>
-						<button actionName="TestSend" pixelWidth="200" />
-					</item>
+					</item>				
 				</row>
 				<row>
 					<item>

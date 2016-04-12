@@ -4,12 +4,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import modules.ModulesUtil;
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
-import modules.admin.Communication.CommunicationUtil.RunMode;
 import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.FormatType;
 import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
@@ -141,22 +138,16 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 
 		if (Boolean.TRUE.equals(tag.getNotification())) {
 			// send email notification for completion of Job
-			Communication communication = tag.getCommunication();
-			if (communication == null) {
-				// create a default communication
-				String sendTo = ModulesUtil.getCurrentUserContact().getEmail1();
-				String subject = "Perform Document Action for Tag - Complete";
-				StringBuilder sb = new StringBuilder(128);
-				sb.append("The document action for Tag job for Tag ").append(tag.getName());
-				sb.append(" has completed.");
-				sb.append("<br/>");
-				sb.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
-				sb.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
-				CommunicationUtil.sendSimpleBeanCommunication(sendTo, subject, sb.toString(), tag, ResponseMode.SILENT, FormatType.email);
-			} else {
-				// send the communication
-				CommunicationUtil.send(communication, RunMode.ACTION, ResponseMode.SILENT, tag);
-			}
+			
+			StringBuilder defaultBody = new StringBuilder(128);
+			defaultBody.append("The document action for Tag job for Tag ").append(tag.getName());
+			defaultBody.append(" has completed.");
+			defaultBody.append("<br/>");
+			defaultBody.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
+			defaultBody.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
+
+			Communication communication = CommunicationUtil.initialiseSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, "Perform Document Action for Tag - Complete", defaultBody.toString());
+			CommunicationUtil.sendSystemCommunication(communication, ResponseMode.SILENT, tag);
 		}
 
 		setPercentComplete(100);

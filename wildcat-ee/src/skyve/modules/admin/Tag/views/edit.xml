@@ -271,11 +271,6 @@
 						<checkBox binding="notification" triState="false" />
 					</item>
 				</row>
-				<row>
-					<item>
-						<default binding="communication" />
-					</item>
-				</row>
 			</form>
 			<form border="true" borderTitle="Perform">
 				<column percentageWidth="20" />

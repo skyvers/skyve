@@ -19,7 +19,6 @@ import org.skyve.wildcat.domain.AbstractPersistentBean;
  * @depend - - - FilterOperator
  * @depend - - - FilterAction
  * @navhas n actionTag 0..1 Tag
- * @navhas n communication 0..1 Communication
  * @navhas n copyToUser 0..1 User
  * @stereotype "persistent"
  */
@@ -79,8 +78,6 @@ public class Tag extends AbstractPersistentBean {
 	public static final String unTagSuccessfulPropertyName = "unTagSuccessful";
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
-	/** @hidden */
-	public static final String communicationPropertyName = "communication";
 	/** @hidden */
 	public static final String filterColumnPropertyName = "filterColumn";
 	/** @hidden */
@@ -334,7 +331,6 @@ public class Tag extends AbstractPersistentBean {
 	private String actionDocumentName;
 	private Boolean unTagSuccessful;
 	private Boolean notification;
-	private Communication communication = null;
 	private Integer filterColumn;
 	/**
 	 * The other tag to use for the action to be performed on this tag.
@@ -752,24 +748,6 @@ public class Tag extends AbstractPersistentBean {
 	public void setNotification(Boolean notification) {
 		preset(notificationPropertyName, notification);
 		this.notification = notification;
-	}
-
-	/**
-	 * {@link #communication} accessor.
-	 **/
-	public Communication getCommunication() {
-		return communication;
-	}
-
-	/**
-	 * {@link #communication} mutator.
-	 * 
-	 * @param communication	The new value to set.
-	 **/
-	@XmlElement
-	public void setCommunication(Communication communication) {
-		preset(communicationPropertyName, communication);
-		this.communication = communication;
 	}
 
 	/**

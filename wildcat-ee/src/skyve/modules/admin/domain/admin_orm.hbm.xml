@@ -336,7 +336,6 @@
 		<property name="actionDocumentName" length="500" />
 		<property name="unTagSuccessful" />
 		<property name="notification" />
-		<many-to-one name="communication" entity-name="adminCommunication" column="communication_id" cascade="persist,save-update,refresh,merge" />
 		<property name="filterColumn" />
 		<property name="documentCondition" length="1000" />
 		<property name="documentAction" length="1000" />
