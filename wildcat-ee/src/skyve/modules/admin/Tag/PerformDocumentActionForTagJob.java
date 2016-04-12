@@ -6,7 +6,6 @@ import java.util.List;
 
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
-import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
 
 import org.skyve.CORE;
@@ -28,6 +27,7 @@ import org.skyve.wildcat.metadata.customer.CustomerImpl;
 
 public class PerformDocumentActionForTagJob extends WildcatJob {
 	private static final long serialVersionUID = 6282346785863992703L;
+	private static final String PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT = "Perform Document Action for Tag - Complete";
 
 	@Override
 	public String cancel() {
@@ -146,8 +146,7 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 			defaultBody.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
 			defaultBody.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
 
-			Communication communication = CommunicationUtil.initialiseSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, "Perform Document Action for Tag - Complete", defaultBody.toString());
-			CommunicationUtil.sendSystemCommunication(communication, ResponseMode.SILENT, tag);
+			CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT, defaultBody.toString(), ResponseMode.SILENT, tag);
 		}
 
 		setPercentComplete(100);

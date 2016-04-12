@@ -206,4 +206,12 @@
 			</expression>
 		</condition>
 	</conditions>
+	<uniqueConstraints>
+		<constraint scope="customer" description="Ensure no duplication of communication templates" name="UniqueSystemCommunication">
+			<message>A communication for {description} already exists.</message>
+			<fieldReferences>
+				<ref>description</ref>
+			</fieldReferences>
+		</constraint>
+	</uniqueConstraints>
 </document>

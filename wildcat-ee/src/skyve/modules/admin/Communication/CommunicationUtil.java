@@ -39,7 +39,7 @@ import org.skyve.wildcat.util.UtilImpl;
 public class CommunicationUtil {
 
 	public static final String SPECIAL_BEAN_URL = "{#url}";
-	public static final String SPECIAL_SYSTEM_FROM_EMAIL = "{#from}";
+	public static final String DEFAULT_SENDER = "default.sender@skyve.org";
 
 	/**
 	 * Whether to throw or log an exception if one occurs.
@@ -561,7 +561,6 @@ public class CommunicationUtil {
 		// default url binding to first bean
 		if (beans != null && beans.length > 0) {
 			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
-			result = expression.replace(SPECIAL_SYSTEM_FROM_EMAIL, UtilImpl.SMTP_SENDER);
 		}
 		result = Binder.formatMessage(customer, result, beans);
 		return result;
@@ -575,7 +574,7 @@ public class CommunicationUtil {
 	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
 
 		// create a default communication
-		String sendTo = "{contact.email1}";
+		String sendTo = "{contact.email1}"; //user contact email address
 		Communication result = getSystemCommunicationByDescription(description);
 		if (result == null) {
 			//create a basic default system email
@@ -583,7 +582,7 @@ public class CommunicationUtil {
 			result.setDescription(description);
 			result.setFormatType(FormatType.email);
 			result.setSystem(Boolean.TRUE);
-			result.setSendFrom(SPECIAL_SYSTEM_FROM_EMAIL);
+			result.setSendFrom(DEFAULT_SENDER);
 			result.setSendTo(sendTo);
 			result.setSubject(defaultSubject);
 			result.setBody(defaultBody);
@@ -593,5 +592,20 @@ public class CommunicationUtil {
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Initialise system communication if it doesn't exist and then send it.
+	 * 
+	 * @param description
+	 * @param defaultSubject
+	 * @param defaultBody
+	 * @param responseMode
+	 * @param bean
+	 * @throws Exception
+	 */
+	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, Bean bean) throws Exception {
+		Communication c = initialiseSystemCommunication(description, defaultSubject, defaultBody);
+		sendSystemCommunication(c, responseMode, bean);
 	}
 }
