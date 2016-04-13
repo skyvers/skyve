@@ -51,6 +51,8 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String sendToPropertyName = "sendTo";
 	/** @hidden */
+	public static final String sendToOverridePropertyName = "sendToOverride";
+	/** @hidden */
 	public static final String sendFromPropertyName = "sendFrom";
 	/** @hidden */
 	public static final String subjectPropertyName = "subject";
@@ -251,6 +253,10 @@ public class Communication extends AbstractPersistentBean {
 	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendTo;
+	/**
+	 * The address to send to. Bindings are allowed relative to the above module document.
+	 **/
+	private String sendToOverride;
 	/**
 	 * The address to send from.
 	 **/
@@ -459,6 +465,23 @@ public class Communication extends AbstractPersistentBean {
 	public void setSendTo(String sendTo) {
 		preset(sendToPropertyName, sendTo);
 		this.sendTo = sendTo;
+	}
+
+	/**
+	 * {@link #sendToOverride} accessor.
+	 **/
+	public String getSendToOverride() {
+		return sendToOverride;
+	}
+
+	/**
+	 * {@link #sendToOverride} mutator.
+	 * 
+	 * @param sendToOverride	The new value to set.
+	 **/
+	@XmlElement
+	public void setSendToOverride(String sendToOverride) {
+		this.sendToOverride = sendToOverride;
 	}
 
 	/**

@@ -39,6 +39,11 @@
 			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
+		<text name="sendToOverride" persistent="false" trackChanges="false">
+			<displayName>To (expression)</displayName>
+			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
+			<length>250</length>
+		</text>
 		<text name="sendFrom">
 			<displayName>From (expression)</displayName>
 			<description>The address to send from.</description>

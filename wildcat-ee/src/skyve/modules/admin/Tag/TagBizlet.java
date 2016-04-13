@@ -29,7 +29,7 @@ import org.skyve.wildcat.util.TagUtil;
 public class TagBizlet extends Bizlet<Tag> {
 
 	private static final long serialVersionUID = -927602139528710862L;
-	
+
 	public static final String SYSTEM_TAG_ACTION_NOTIFICATION = "SYSTEM Tag Action Notification";
 
 	@Override
@@ -254,19 +254,22 @@ public class TagBizlet extends Bizlet<Tag> {
 	 * @throws Exception
 	 */
 	public static List<Bean> getTaggedItemsForDocument(Tag tag, String moduleName, String documentName) throws Exception {
-		Persistence pers = CORE.getPersistence();
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(moduleName);
-		Document document = module.getDocument(customer, documentName);
-
 		List<Bean> beans = new ArrayList<>();
-		if (tag != null) {
-			for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
-				if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
-					// need to check that this is only done for documents of the
-					// selected type
-					beans.add(bean);
+		if (moduleName != null && documentName != null) {
+			Persistence pers = CORE.getPersistence();
+			User user = pers.getUser();
+			Customer customer = user.getCustomer();
+			Module module = customer.getModule(moduleName);
+			Document document = module.getDocument(customer, documentName);
+
+			if (tag != null) {
+				for (Bean bean : EXT.iterateTagged(tag.getBizId())) {
+					if (bean != null && bean.getBizModule().equals(module.getName()) && bean.getBizDocument().equals(document.getName())) {
+						// need to check that this is only done for documents of
+						// the
+						// selected type
+						beans.add(bean);
+					}
 				}
 			}
 		}

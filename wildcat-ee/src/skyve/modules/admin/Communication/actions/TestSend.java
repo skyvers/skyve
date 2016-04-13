@@ -6,7 +6,6 @@ import modules.ModulesUtil;
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Tag.TagBizlet;
 import modules.admin.domain.Communication;
-import modules.admin.domain.User;
 import modules.admin.domain.Communication.ActionType;
 import modules.admin.domain.Contact;
 
@@ -31,20 +30,19 @@ public class TestSend implements ServerSideAction<Communication> {
 
 		communication.setActionType(ActionType.sendImmediately);
 
-		//set send to our own address
+		// set send to our own address
 		Contact me = ModulesUtil.currentAdminUser().getContact();
-		String[] myAddress = new String[] {me.getEmail1()};
-		User user = ModulesUtil.currentAdminUser();
-		
-		//Get First tagged item to test
+
+		// Get First tagged item to test
 		List<Bean> beans = TagBizlet.getTaggedItemsForDocument(communication.getTag(), communication.getModuleName(), communication.getDocumentName());
-		
-		if(beans.isEmpty()){
+
+		if (beans.isEmpty()) {
 			throw new ValidationException(new Message("There are no tagged items - tag at least 1 (one) item to test this communication."));
 		}
-		
-		CommunicationUtil.sendOverrideTo(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, myAddress, beans.get(0),user, communication);
-		
+
+		communication.setSendToOverride(me.getEmail1());
+		CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
+
 		return new ServerSideActionResult(communication);
 	}
 }
