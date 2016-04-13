@@ -134,19 +134,21 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 
 				log.add(sb.toString());
 			}
-		}
 
-		if (Boolean.TRUE.equals(tag.getNotification())) {
-			// send email notification for completion of Job
-			
-			StringBuilder defaultBody = new StringBuilder(128);
-			defaultBody.append("The document action for Tag job for Tag ").append(tag.getName());
-			defaultBody.append(" has completed.");
-			defaultBody.append("<br/>");
-			defaultBody.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
-			defaultBody.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
+			if (Boolean.TRUE.equals(tag.getNotification())) {
+				// send email notification for completion of Job
+				
+				StringBuilder defaultBody = new StringBuilder(128);
+				Module tagModule = customer.getModule(Tag.MODULE_NAME);
+				Document tagDocument = tagModule.getDocument(customer, Tag.DOCUMENT_NAME);
+				defaultBody.append("The action job for ").append(tagDocument.getDescription()).append(" ").append(tag.getName());
+				defaultBody.append(" has completed.");
+				defaultBody.append("<br/>");
+				defaultBody.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
+				defaultBody.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
 
-			CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT, defaultBody.toString(), ResponseMode.SILENT, tag);
+				CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT, defaultBody.toString(), ResponseMode.SILENT, null, tag);
+			}
 		}
 
 		setPercentComplete(100);

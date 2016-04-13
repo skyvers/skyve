@@ -18,8 +18,6 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -62,30 +60,12 @@ public class CommunicationUtil {
 		ACTION, TEST;
 	}
 
-	/**
-	 * Sends a communication, binding sendTo, subject and body from the beans
-	 * 
-	 * @param communication
-	 * @param runMode
-	 * @param responseMode
-	 * @param beans
-	 * @throws Exception
-	 */
-	public static void send(Communication communication, RunMode runMode, ResponseMode responseMode, Bean... beans) throws Exception {
-
-		Persistence pers = CORE.getPersistence();
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-
-		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
-		String[] sendOverride = new String[] { sendTo };
-
-		sendOverrideTo(communication, runMode, responseMode, sendOverride, beans);
+	public static enum ActionType {
+		FILE, SMTP;
 	}
 
 	/**
-	 * Generates a file corresponding to the communication, e.g. creating .eml
-	 * files on the filesystem
+	 * actionCommunicationRequest
 	 * 
 	 * @param communication
 	 * @param runMode
@@ -93,7 +73,7 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	public static void generate(Communication communication, RunMode runMode, ResponseMode responseMode, Bean... beans) throws Exception {
+	private static void actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -102,48 +82,69 @@ public class CommunicationUtil {
 		Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
 		Document subDoc = module.getDocument(customer, Subscription.DOCUMENT_NAME);
 
-		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
-		FormatType format = communication.getFormatType();
-
-		// check for Subscription
-		DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
-		q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, sendTo);
-		Subscription subscription = q.beanResult();
-
-		if (subscription != null) {
-			// check for declined
-			if (Boolean.TRUE.equals(subscription.getDeclined())) {
-				StringBuilder msg = new StringBuilder(128);
-				if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
-					msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
-					msg.append(sendTo).append(" has a ").append(subDoc.getSingularAlias());
-					msg.append(" set ").append(Subscription.declinedPropertyName);
-					if (subscription.getFormatType() != null) {
-						msg.append(" for ").append(subscription.getFormatType().toDescription());
-					}
-
-					// block the communication
-					Util.LOGGER.info(msg.toString());
-					throw new Exception(msg.toString());
-				}
-			} else {
-				format = subscription.getFormatType();
-				sendTo = subscription.getPreferredReceiverIdentifier();
-				Util.LOGGER.info(document.getSingularAlias() + " redirected to " + format.toDescription() + ' ' + sendTo);
-			}
+		// augment communication specific beans to always include the
+		// communication itself, and the current admin user
+		modules.admin.domain.User adminUser = ModulesUtil.currentAdminUser();
+		List<Bean> beanList = new ArrayList<>();
+		if (specificBeans!=null && specificBeans.length > 0) {
+			Collections.addAll(beanList, specificBeans);
+		}
+		Collections.addAll(beanList, communication, adminUser);
+		Bean[] beans = beanList.toArray(new Bean[beanList.size()]);
+		
+		String sendFrom = communication.getSendFrom();
+		if(communication.getSendFrom()==null){
+			sendFrom = DEFAULT_SENDER;
 		}
 
-		String sendFrom = communication.getSendFrom();
-		if (sendFrom == null && Boolean.TRUE.equals(communication.getSystem())) {
-			// use the SMTP Sender property
-			sendFrom = UtilImpl.SMTP_SENDER;
+		FormatType format = communication.getFormatType();
+
+		// handle addressee with optional override
+		String sendTo = formatCommunicationMessage(customer, communication.getSendTo(), beans);
+		if (communication.getSendToOverride() != null) {
+			sendTo = formatCommunicationMessage(customer, communication.getSendToOverride(), beans);
+		} else {
+			// handle Subscriptions
+			DocumentQuery q = pers.newDocumentQuery(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
+			q.getFilter().addEquals(Subscription.receiverIdentifierPropertyName, sendTo);
+			Subscription subscription = q.beanResult();
+
+			if (subscription != null) {
+				// check for declined
+				if (Boolean.TRUE.equals(subscription.getDeclined())) {
+					StringBuilder msg = new StringBuilder(128);
+					if (subscription.getFormatType() == null || communication.getFormatType().equals(subscription.getFormatType())) {
+						msg.append(document.getSingularAlias()).append(" prevented because the recipient ");
+						msg.append(sendTo).append(" has a ").append(subDoc.getSingularAlias());
+						msg.append(" set ").append(Subscription.declinedPropertyName);
+						if (subscription.getFormatType() != null) {
+							msg.append(" for ").append(subscription.getFormatType().toDescription());
+						}
+
+						// block the communication if explicit mode
+						if (ResponseMode.EXPLICIT.equals(responseMode)) {
+							throw new Exception(msg.toString());
+						}
+					}
+				} else {
+					format = subscription.getFormatType();
+					sendTo = subscription.getPreferredReceiverIdentifier();
+				}
+			}
 		}
 
 		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
 		String emailBodyMain = communication.getBody();
 		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
 
-		// calendar items
+		// prioritise additional attachments first, then the usual
+		List<MailAttachment> attachmentList = new ArrayList<>();
+		if (additionalAttachments!=null && additionalAttachments.length > 0) {
+			Collections.addAll(attachmentList, additionalAttachments);
+		}
+		Collections.addAll(attachmentList, getDefinedAttachments(communication));
+
+		// add calendar items
 		StringBuilder emailBody = new StringBuilder(emailBodyMain);
 		CommunicationCalendarItem calendarItem = null;
 		if (Boolean.TRUE.equals(communication.getIncludeCalendar())) {
@@ -153,24 +154,31 @@ public class CommunicationUtil {
 				emailBody.append("\n").append(calendarItem.getYahooCalendarLink());
 			}
 		}
+		// Attachment calendar Items
+		if (calendarItem != null) {
+			MailAttachment outlook = new MailAttachment("OutlookCalendarEvent.ics", calendarItem.getIcsFileAttachment(), MimeType.tex);
+			MailAttachment iCal = new MailAttachment("iCalCalendarEvent.ics", calendarItem.getIcsFileAttachment(), MimeType.tex);
+			Collections.addAll(attachmentList, outlook, iCal);
+		}
 
-		// Generate file name - Communication_Description_To
-		StringBuilder subFolder = new StringBuilder();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-		subFolder.append(sdf.format(new Date()));
+		// compile the array for sending or saving
+		MailAttachment[] attachments = attachmentList.toArray(new MailAttachment[attachmentList.size()]);
 
-		String customerName = CORE.getUser().getCustomerName();
-		String batchDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
+		switch (actionType) {
+		case FILE:
+			// Generate file name - Communication_Description_To
+			StringBuilder subFolder = new StringBuilder();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			subFolder.append(sdf.format(new Date()));
 
-		String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
+			String customerName = CORE.getUser().getCustomerName();
+			String batchDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
 
-		try (FileOutputStream fos = new FileOutputStream(filePath)) {
+			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
 
-			// add attachments
+			try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
-			try (ContentManager cm = EXT.newContentManager()) {
-
-				MailAttachment[] attachments = getAttachments(cm, communication, calendarItem);
+				// add attachments
 
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
@@ -181,80 +189,8 @@ public class CommunicationUtil {
 						break;
 					}
 				}
-			}
 
-			fos.flush();
-		} catch (Exception e) {
-			if (ResponseMode.SILENT.equals(responseMode)) {
-				Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
-			} else {
-				throw e;
-			}
-		}
-
-	}
-
-	/**
-	 * Sends the communication, but overrides the communication sendTo attribute
-	 * and allows the inclusion of additional Mail attachments
-	 * 
-	 * @param communication
-	 * @param runMode
-	 * @param responseMode
-	 * @param sendTo
-	 * @param beans
-	 * @throws Exception
-	 */
-	public static void sendOverrideWithAdditionalAttachmentsTo(Communication communication, RunMode runMode, ResponseMode responseMode, String[] sendTo, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
-
-		Persistence pers = CORE.getPersistence();
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-
-		String sendFrom = communication.getSendFrom();
-		if (sendFrom == null && Boolean.TRUE.equals(communication.getSystem())) {
-			// use the SMTP Sender property
-			sendFrom = UtilImpl.SMTP_SENDER;
-		}
-
-		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
-		String emailBodyMain = communication.getBody();
-		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
-
-		// calendar items
-		StringBuilder emailBody = new StringBuilder(emailBodyMain);
-		CommunicationCalendarItem calendarItem = null;
-		if (Boolean.TRUE.equals(communication.getIncludeCalendar())) {
-			calendarItem = generateCalendarAttachments(customer, communication, beans);
-			if (calendarItem != null) {
-				emailBody.append("\n").append(calendarItem.getGoogleCalendarLink());
-				emailBody.append("\n").append(calendarItem.getYahooCalendarLink());
-			}
-		}
-
-		try (ContentManager cm = EXT.newContentManager()) {
-
-			MailAttachment[] definedAttachments = getAttachments(cm, communication, calendarItem);
-
-			// attempt the send
-			try {
-				if (RunMode.ACTION.equals(runMode)) {
-
-					// concatenate defined attachments with additional
-					// attachments first
-					int totalLen = definedAttachments.length;
-					if (additionalAttachments != null) {
-						totalLen += additionalAttachments.length;
-					}
-					List<MailAttachment> both = new ArrayList<>(totalLen);
-					if (additionalAttachments != null) {
-						Collections.addAll(both, additionalAttachments);
-					}
-					Collections.addAll(both, definedAttachments);
-					MailAttachment[] allAttachments = both.toArray(new MailAttachment[both.size()]);
-
-					EXT.sendMail(sendTo, null, sendFrom, emailSubject, emailBody.toString(), MimeType.html, allAttachments);
-				}
+				fos.flush();
 			} catch (Exception e) {
 				if (ResponseMode.SILENT.equals(responseMode)) {
 					Util.LOGGER.log(Level.WARNING, e.getStackTrace().toString());
@@ -262,61 +198,47 @@ public class CommunicationUtil {
 					throw e;
 				}
 			}
+			break;
+		default:
+			if (RunMode.ACTION.equals(runMode)) {
+				switch (format) {
+				case email:
+					EXT.sendMail(new String[] { sendTo }, null, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					break;
+				default:
+					break;
+				}
+			}
+			break;
 		}
 	}
 
 	/**
-	 * Sends the communication, but overrides the communication sendTo attribute
-	 * Simple override for no additional attachments
+	 * Wrapper specific for sending
 	 * 
 	 * @param communication
 	 * @param runMode
 	 * @param responseMode
-	 * @param sendTo
-	 * @param beans
+	 * @param additionalAttachments
+	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void sendOverrideTo(Communication communication, RunMode runMode, ResponseMode responseMode, String[] sendTo, Bean... beans) throws Exception {
-		sendOverrideWithAdditionalAttachmentsTo(communication, runMode, responseMode, sendTo, null, beans);
+	public static void send(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
 	/**
-	 * Sends the communication, but overrides the communication sendTo attribute
-	 * with a string array formed from the sendTo parameter
+	 * Wrapper specific for generating to file
 	 * 
 	 * @param communication
 	 * @param runMode
 	 * @param responseMode
-	 * @param sendTo
-	 * @param beans
+	 * @param additionalAttachments
+	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void sendOverrideTo(Communication communication, RunMode runMode, ResponseMode responseMode, String sendTo, Bean... beans) throws Exception {
-		String[] sendToArray = new String[] { sendTo };
-		sendOverrideTo(communication, runMode, responseMode, sendToArray, beans);
-	}
-
-	/**
-	 * Returns a safe filename from the unsafeName
-	 * 
-	 * @param unsafeName
-	 * @return
-	 */
-	public static String fileNameSafe(String unsafeName) {
-
-		return unsafeName.replace(',', '_').replace('&', '_').replace('/', '_').replace('\\', '_').replace(" ", "");
-	}
-
-	/**
-	 * Returns a String with wrapped with <html><body> tags
-	 * 
-	 * @param html
-	 * @return
-	 */
-	public static String htmlEnclose(String html) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<html><body>").append(html).append("</body></html>");
-		return sb.toString();
+	public static void generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+		actionCommunicationRequest(ActionType.FILE, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
 	/**
@@ -352,40 +274,60 @@ public class CommunicationUtil {
 	 * @param formatType
 	 * @throws Exception
 	 */
-	public static void sendSimpleBeanCommunication(String sendTo, String subject, String body, Bean bean, ResponseMode responseMode, FormatType formatType) throws Exception {
+	public static void sendSimpleBeanCommunication(String sendTo, String subject, String body, ResponseMode responseMode, FormatType formatType, Bean... beans) throws Exception {
 		Communication c = Communication.newInstance();
 
 		c.setDescription("Simple Bean Communication");
 		c.setSendTo(sendTo);
-		c.setModuleName(bean.getBizModule());
-		c.setDocumentName(bean.getBizDocument());
 		c.setSubject(subject);
 		c.setBody(body);
 		c.setFormatType(formatType);
 		c.setSystem(Boolean.TRUE);
 
-		send(c, RunMode.ACTION, responseMode, bean);
+		send(c, RunMode.ACTION, responseMode, null, beans);
 	}
 
 	/**
-	 * wraps retrieving the communication by description and sends it
+	 * Creates the required system communication if it does not exist
+	 * 
+	 * @return
+	 */
+	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+
+		// create a default communication
+		String sendTo = "{contact.email1}"; // user contact email address
+		Communication result = getSystemCommunicationByDescription(description);
+		if (result == null) {
+			// create a basic default system email
+			result = Communication.newInstance();
+			result.setDescription(description);
+			result.setFormatType(FormatType.email);
+			result.setSystem(Boolean.TRUE);
+			result.setSendFrom(DEFAULT_SENDER);
+			result.setSendTo(sendTo);
+			result.setSubject(defaultSubject);
+			result.setBody(defaultBody);
+
+			Persistence pers = CORE.getPersistence();
+			result = pers.save(result);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Initialise system communication if it doesn't exist and then send it.
 	 * 
 	 * @param description
+	 * @param defaultSubject
+	 * @param defaultBody
 	 * @param responseMode
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendSystemCommunicationByDescription(String description, ResponseMode responseMode, Bean bean) throws Exception {
-		Communication c = getSystemCommunicationByDescription(description);
-		if (c == null) {
-			throw new ValidationException(new Message("The communication for '" + description + "' was not found."));
-		}
-		sendSystemCommunication(c, responseMode, bean);
-	}
-	
-	public static void sendSystemCommunication(Communication c, ResponseMode responseMode, Bean bean) throws Exception {
-		modules.admin.domain.User user = ModulesUtil.currentAdminUser();
-		send(c, RunMode.ACTION, responseMode, bean, user, c);
+	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+		Communication c = initialiseSystemCommunication(description, defaultSubject, defaultBody);
+		actionCommunicationRequest(ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
 
 	/**
@@ -430,7 +372,7 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	public static CommunicationCalendarItem generateCalendarAttachments(Customer customer, Communication communication, Bean... beans) throws Exception {
+	private static CommunicationCalendarItem generateCalendarAttachments(Customer customer, Communication communication, Bean... beans) throws Exception {
 		CommunicationCalendarItem result = new CommunicationCalendarItem();
 
 		String google = null;
@@ -500,46 +442,41 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static MailAttachment[] getAttachments(ContentManager cm, Communication communication, CommunicationCalendarItem calendarItem) throws Exception {
+	private static MailAttachment[] getDefinedAttachments(Communication communication) throws Exception {
 
 		MailAttachment ma1 = null;
 		MailAttachment ma2 = null;
 		MailAttachment ma3 = null;
-		MailAttachment ma4 = null;
-		MailAttachment ma5 = null;
 
-		// Attachment 1
-		if (communication.getAttachmentFileName1() != null && communication.getAttachment1() != null) {
-			AttachmentContent content1 = cm.get(communication.getAttachment1());
-			byte[] fileBytes1 = content1.getContentBytes();
-			String attachmentName1 = (communication.getAttachmentFileName1() == null ? "attachment" : communication.getAttachmentFileName1());
-			ma1 = new MailAttachment(attachmentName1, fileBytes1, content1.getMimeType());
-		}
+		try (ContentManager cm = EXT.newContentManager()) {
 
-		// Attachment 2
-		if (communication.getAttachmentFileName2() != null && communication.getAttachment2() != null) {
-			AttachmentContent content2 = cm.get(communication.getAttachment2());
-			byte[] fileBytes2 = content2.getContentBytes();
-			String attachmentName2 = (communication.getAttachmentFileName2() == null ? "attachment" : communication.getAttachmentFileName2());
-			ma2 = new MailAttachment(attachmentName2, fileBytes2, content2.getMimeType());
-		}
+			// Attachment 1
+			if (communication.getAttachmentFileName1() != null && communication.getAttachment1() != null) {
+				AttachmentContent content1 = cm.get(communication.getAttachment1());
+				byte[] fileBytes1 = content1.getContentBytes();
+				String attachmentName1 = (communication.getAttachmentFileName1() == null ? "attachment" : communication.getAttachmentFileName1());
+				ma1 = new MailAttachment(attachmentName1, fileBytes1, content1.getMimeType());
+			}
 
-		// Attachment 3
-		if (communication.getAttachmentFileName3() != null && communication.getAttachment3() != null) {
-			AttachmentContent content3 = cm.get(communication.getAttachment3());
-			byte[] fileBytes3 = content3.getContentBytes();
-			String attachmentName3 = (communication.getAttachmentFileName3() == null ? "attachment" : communication.getAttachmentFileName3());
-			ma3 = new MailAttachment(attachmentName3, fileBytes3, content3.getMimeType());
-		}
+			// Attachment 2
+			if (communication.getAttachmentFileName2() != null && communication.getAttachment2() != null) {
+				AttachmentContent content2 = cm.get(communication.getAttachment2());
+				byte[] fileBytes2 = content2.getContentBytes();
+				String attachmentName2 = (communication.getAttachmentFileName2() == null ? "attachment" : communication.getAttachmentFileName2());
+				ma2 = new MailAttachment(attachmentName2, fileBytes2, content2.getMimeType());
+			}
 
-		// Attachment calendar Items
-		if (calendarItem != null) {
-			ma4 = new MailAttachment("OutlookCalendarEvent.ics", calendarItem.getIcsFileAttachment(), MimeType.tex);
-			ma5 = new MailAttachment("iCalCalendarEvent.ics", calendarItem.getIcsFileAttachment(), MimeType.tex);
+			// Attachment 3
+			if (communication.getAttachmentFileName3() != null && communication.getAttachment3() != null) {
+				AttachmentContent content3 = cm.get(communication.getAttachment3());
+				byte[] fileBytes3 = content3.getContentBytes();
+				String attachmentName3 = (communication.getAttachmentFileName3() == null ? "attachment" : communication.getAttachmentFileName3());
+				ma3 = new MailAttachment(attachmentName3, fileBytes3, content3.getMimeType());
+			}
 		}
 
 		// construct array
-		MailAttachment[] attachments = { ma1, ma2, ma3, ma4, ma5 };
+		MailAttachment[] attachments = { ma1, ma2, ma3 };
 
 		return attachments;
 	}
@@ -555,7 +492,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
+	private static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
 		String result = expression;
 
 		// default url binding to first bean
@@ -567,45 +504,14 @@ public class CommunicationUtil {
 	}
 
 	/**
-	 * Creates the required system communication if it does not exist
+	 * Returns a String with wrapped with <html><body> tags
 	 * 
+	 * @param html
 	 * @return
 	 */
-	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
-
-		// create a default communication
-		String sendTo = "{contact.email1}"; //user contact email address
-		Communication result = getSystemCommunicationByDescription(description);
-		if (result == null) {
-			//create a basic default system email
-			result = Communication.newInstance();
-			result.setDescription(description);
-			result.setFormatType(FormatType.email);
-			result.setSystem(Boolean.TRUE);
-			result.setSendFrom(DEFAULT_SENDER);
-			result.setSendTo(sendTo);
-			result.setSubject(defaultSubject);
-			result.setBody(defaultBody);
-			
-			Persistence pers=  CORE.getPersistence();
-			result = pers.save(result);
-		}
-
-		return result;
-	}
-	
-	/**
-	 * Initialise system communication if it doesn't exist and then send it.
-	 * 
-	 * @param description
-	 * @param defaultSubject
-	 * @param defaultBody
-	 * @param responseMode
-	 * @param bean
-	 * @throws Exception
-	 */
-	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, Bean bean) throws Exception {
-		Communication c = initialiseSystemCommunication(description, defaultSubject, defaultBody);
-		sendSystemCommunication(c, responseMode, bean);
+	private static String htmlEnclose(String html) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><body>").append(html).append("</body></html>");
+		return sb.toString();
 	}
 }

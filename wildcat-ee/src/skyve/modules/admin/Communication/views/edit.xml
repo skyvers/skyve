@@ -263,7 +263,8 @@
 		<action className="UpdateDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 		
 		<action className="BatchSelected" displayName="BatchSelected" inActionPanel="false" />
-		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?" />
+		<action className="DeleteBatch" displayName="Delete" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to delete this batch folder from the server filesystem?" 
+		relativeIconFileName="shared/icons/Trash.gif"/>
 		<download className="ZipBatch" displayName="Download Zip" inActionPanel="false" disabled="notBatchSelected" confirm="Are you sure you want to download a zip of this batch folder from the server filesystem?" />
 		
 	</actions>
