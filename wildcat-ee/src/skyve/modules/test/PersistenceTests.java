@@ -2,13 +2,20 @@ package modules.test;
 
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
+import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
+import java.util.Date;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.types.OptimisticLock;
+import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
 
@@ -407,5 +414,30 @@ public class PersistenceTests extends AbstractH2Test {
 		test = p.save(test);
 		
 		p.delete(test.getComposedCollection().get(0));
+	}
+	
+	@Test(expected = OptimisticLockException.class)
+	public void testOptimisticLockException() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s", 
+											aapd.getPersistent().getPersistentIdentifier(), 
+											PersistentBean.LOCK_NAME, 
+											PersistentBean.LOCK_NAME, 
+											PersistentBean.VERSION_NAME, 
+											PersistentBean.VERSION_NAME));
+		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()).toString(), false);
+		sql.putParameter(PersistentBean.VERSION_NAME, Integer.valueOf(2));
+		sql.execute();
+
+		test.setText("optimistic lock test");
+		p.save(test);
+	}
+	
+	@Test(expected = OptimisticLockException.class)
+	public void testStaleObjectStateExceptionOptimisticLock() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(test);
+		p.save(test);
 	}
 }
