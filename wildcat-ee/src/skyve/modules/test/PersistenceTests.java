@@ -13,6 +13,7 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.persistence.SQL;
@@ -435,9 +436,60 @@ public class PersistenceTests extends AbstractH2Test {
 	}
 	
 	@Test(expected = OptimisticLockException.class)
-	public void testStaleObjectStateExceptionOptimisticLock() throws Exception {
+	public void testTransientStaleObjectStateExceptionOptimisticLock() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		p.save(test); // NB not returned
 		p.save(test);
+	}
+
+	@Test(expected = OptimisticLockException.class)
+	public void testDetachedStaleObjectStateExceptionOptimisticLock() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		
+		p.evictCached(test);
+		
+		test.setText("optimistic lock test");
+		p.save(test); // NB not returned
+
+		test.setText("optimistic lock test take 2");
 		p.save(test);
+	}
+
+	@Test(expected = OptimisticLockException.class)
+	public void testClonedStaleObjectStateExceptionOptimisticLock() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		
+		test = Util.cloneToTransientBySerialization(test);
+		
+		test.setText("optimistic lock test");
+		p.save(test); // NB not returned
+		
+		test.setText("optimistic lock test take 2");
+		p.save(test);
+	}
+	
+	@Test
+	public void testRefresh() throws Exception{
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		test.setText("optimistic lock test");
+		p.refresh(test);
+		Assert.assertNotEquals("optimistic lock test", test.getText());
+	}
+
+	@Test
+	public void testRefreshTransient() throws Exception{
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		p.refresh(test);
+	}
+	
+	@Test(expected = DomainException.class)
+	public void testRefreshDetached() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		test = p.save(test);
+		p.evictCached(test);
+		p.refresh(test);
 	}
 }

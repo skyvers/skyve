@@ -36,6 +36,7 @@ import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
+import org.hibernate.MappingException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
@@ -553,11 +554,27 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	throws DomainException, MetaDataException {
 t.printStackTrace();
 		if (t instanceof javax.persistence.OptimisticLockException) {
-			session.refresh(bean);
+			if (bean.isPersisted()) {
+				try {
+					session.refresh(bean);
+				}
+				catch (MappingException e) {
+					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
+					// So do nothing, we're about to throw Optimistic Lock anyway
+				}
+			}
 			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
 		}
 		else if (t instanceof StaleObjectStateException) {
-			session.refresh(bean);
+			if (bean.isPersisted()) {
+				try {
+					session.refresh(bean);
+				}
+				catch (MappingException e) {
+					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
+					// So do nothing, we're about to throw Optimistic Lock anyway
+				}
+			}
 			throw new OptimisticLockException(user.getCustomer(), operationType, bean.getBizLock());
 		}
 		else if (t instanceof EntityNotFoundException) {
@@ -788,8 +805,17 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void refresh(Bean bean) {
-		session.refresh(bean);
+	public void refresh(Bean bean) throws DomainException {
+		if (bean.isPersisted()) {
+			try {
+				session.refresh(bean);
+			}
+			catch (MappingException e) {
+				// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
+				// So do nothing, we're about to throw Optimistic Lock anyway
+				throw new DomainException("Bean " + bean.toString() + " is transient or detached", e);
+			}
+		}
 	}
 
 	// populate all implicit mandatory fields required

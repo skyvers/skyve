@@ -58,7 +58,7 @@ public interface Persistence extends Serializable {
 	/**
 	 * Refresh the bean's state from the database.
 	 */
-	public void refresh(Bean bean);
+	public void refresh(Bean bean) throws DomainException;
 	
 	/**
 	 * 
