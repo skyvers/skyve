@@ -109,6 +109,9 @@
 					<item>
 						<textField binding="sendFrom" invisible="notEmailType" />
 					</item>				
+					<item>
+						<checkBox binding="monitorBcc" invisible="notEmailType" triState="false"/>
+					</item>				
 				</row>
 				<row>
 					<item>

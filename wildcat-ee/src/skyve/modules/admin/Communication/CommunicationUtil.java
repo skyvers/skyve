@@ -133,6 +133,12 @@ public class CommunicationUtil {
 			}
 		}
 
+		//add myself to bcc if monitoring outgoing email
+		String[] bcc = null;
+		if(Boolean.TRUE.equals(communication.getMonitorBcc())){
+			bcc = new String[] {adminUser.getContact().getEmail1()};
+		}
+
 		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
 		String emailBodyMain = communication.getBody();
 		emailBodyMain = htmlEnclose(formatCommunicationMessage(customer, emailBodyMain, beans));
@@ -183,7 +189,7 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
 					case email:
-						EXT.writeMail(new String[] { sendTo }, null, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
+						EXT.writeMail(new String[] { sendTo }, null, bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
 						break;
 					default:
 						break;
@@ -203,7 +209,7 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					EXT.sendMail(new String[] { sendTo }, null, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					EXT.sendMail(new String[] { sendTo }, null, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
 					break;
 				default:
 					break;

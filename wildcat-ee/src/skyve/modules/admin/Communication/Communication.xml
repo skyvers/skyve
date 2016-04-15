@@ -50,6 +50,10 @@
 			<length>250</length>
 			<validator type="email" />
 		</text>
+		<boolean name="monitorBcc">
+			<displayName>BCC Me</displayName>
+			<description>Monitor outgoing emails by including me in the Bcc</description>
+		</boolean>
 		<text name="subject">
 			<displayName>Subject (expression)</displayName>
 			<description>The subject of the communication. Bindings are allowed relative to the above module document.</description>
