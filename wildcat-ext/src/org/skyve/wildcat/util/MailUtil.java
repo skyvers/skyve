@@ -30,6 +30,7 @@ public class MailUtil {
 
 	public static final void writeMail(String[] recipientEmailAddresses,
 											String[] ccEmailAddresses,
+											String[] bccEmailAddresses,
 											String senderEmailAddress,
 											String subject,
 											String body,
@@ -40,6 +41,7 @@ public class MailUtil {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
 												ccEmailAddresses,
+												bccEmailAddresses,
 												senderEmailAddress,
 												subject,
 												body,
@@ -59,6 +61,7 @@ public class MailUtil {
 
 	public static final void sendMail(String[] recipientEmailAddresses,
 										String[] ccEmailAddresses,
+										String[] bccEmailAddresses,
 										String senderEmailAddress,
 										String subject,
 										String body,
@@ -68,6 +71,7 @@ public class MailUtil {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
 												ccEmailAddresses,
+												bccEmailAddresses,
 												senderEmailAddress,
 												subject,
 												body,
@@ -87,6 +91,7 @@ public class MailUtil {
 	
 	private static final MimeMessage createMail(String[] recipientEmailAddresses,
 													String[] ccEmailAddresses,
+													String[] bccEmailAddresses,
 													String senderEmailAddress,
 													String subject,
 													String body,
@@ -115,6 +120,16 @@ public class MailUtil {
 				}
 			}
 		}
+		UtilImpl.LOGGER.info("BCC:");
+		if (UtilImpl.SMTP_TEST_RECIPIENT == null) {
+			UtilImpl.LOGGER.info("    " + UtilImpl.SMTP_TEST_RECIPIENT);
+			if (bccEmailAddresses != null) {
+				for (String bcc : bccEmailAddresses) {
+					UtilImpl.LOGGER.info("    " + bcc);
+				}
+			}
+		}
+
 		UtilImpl.LOGGER.info("SENDER: " + senderEmailAddress);
 		UtilImpl.LOGGER.info("SUBJECT " + subject);
 		UtilImpl.LOGGER.info("BODY " + body);
@@ -151,6 +166,7 @@ public class MailUtil {
 			addAddresses(message, new String[] {UtilImpl.SMTP_TEST_RECIPIENT}, Message.RecipientType.TO);
 		}
 		else {
+			addAddresses(message, bccEmailAddresses, Message.RecipientType.BCC);
 			addAddresses(message, ccEmailAddresses, Message.RecipientType.CC);
 			addAddresses(message, recipientEmailAddresses, Message.RecipientType.TO);
 		}		

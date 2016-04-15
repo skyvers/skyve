@@ -143,8 +143,8 @@ public class EXT {
 	 *            The mime type of the email body.
 	 * @param attachmentFileName
 	 */
-	public static void writeMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, OutputStream out, MailAttachment... attachments) throws ValidationException {
-		MailUtil.writeMail(recipientEmailAddresses, ccEmailAddresses, senderEmailAddress, subject, body, contentType, out, attachments);
+	public static void writeMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, OutputStream out, MailAttachment... attachments) throws ValidationException {
+		MailUtil.writeMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, out, attachments);
 	}
 
 	/**
@@ -160,9 +160,9 @@ public class EXT {
 	 * @param attachmentType
 	 * @throws ValidationException
 	 */
-	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) throws ValidationException {
+	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) throws ValidationException {
 
-		MailUtil.sendMail(recipientEmailAddresses, ccEmailAddresses, senderEmailAddress, subject, body, contentType, attachments);
+		MailUtil.sendMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, attachments);
 	}
 
 	/**
