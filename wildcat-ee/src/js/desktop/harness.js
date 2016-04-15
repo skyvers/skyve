@@ -31,7 +31,8 @@ BizUtil.addClassProperties({
 						// Logo image
 						isc.Img.create({
 						    imageType: "center",
-						    src: logoSrc
+						    src: logoSrc,
+						    overflow: 'clip-h'
 						}),
 						// accordion pane of menus
 						isc.SectionStack.create({
