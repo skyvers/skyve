@@ -22,12 +22,10 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.Util;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 
 public class PerformDocumentActionForTagJob extends WildcatJob {
 	private static final long serialVersionUID = 6282346785863992703L;
-	private static final String PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT = "Perform Document Action for Tag - Complete";
 
 	@Override
 	public String cancel() {
@@ -136,18 +134,9 @@ public class PerformDocumentActionForTagJob extends WildcatJob {
 			}
 
 			if (Boolean.TRUE.equals(tag.getNotification())) {
-				// send email notification for completion of Job
 				
-				StringBuilder defaultBody = new StringBuilder(128);
-				Module tagModule = customer.getModule(Tag.MODULE_NAME);
-				Document tagDocument = tagModule.getDocument(customer, Tag.DOCUMENT_NAME);
-				defaultBody.append("The action job for ").append(tagDocument.getDescription()).append(" ").append(tag.getName());
-				defaultBody.append(" has completed.");
-				defaultBody.append("<br/>");
-				defaultBody.append("Check the job for results <a href=\"").append(Util.getWildcatContextUrl()).append("\">here</a>.");
-				defaultBody.append("Check the Tag <a href=\"").append(Util.getDocumentUrl(tag)).append("\">here</a>.");
-
-				CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, PERFORM_DOCUMENT_ACTION_DEFAULT_SUBJECT, defaultBody.toString(), ResponseMode.SILENT, null, tag);
+				// send email notification for completion of Job
+				CommunicationUtil.sendFailSafeSystemCommunication(TagBizlet.SYSTEM_TAG_ACTION_NOTIFICATION, TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_SUBJECT, TagBizlet.SYSTEM_TAG_ACTION_DEFAULT_BODY, ResponseMode.SILENT, null, tag);
 			}
 		}
 
