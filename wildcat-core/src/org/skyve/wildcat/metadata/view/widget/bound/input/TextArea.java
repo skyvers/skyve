@@ -6,21 +6,20 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.view.Editable;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
+import org.skyve.wildcat.metadata.view.MinimumHeight;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
-			propOrder = {"wordWrap", "editable", "pixelWidth", "pixelHeight"})
-public class TextArea extends ChangeableInputWidget implements Editable, AbsoluteSize {
-	/**
-	 * For Serialization
-	 */
+			propOrder = {"wordWrap", "editable", "pixelWidth", "pixelHeight", "minPixelHeight"})
+public class TextArea extends ChangeableInputWidget implements Editable, AbsoluteSize, MinimumHeight {
 	private static final long serialVersionUID = 7376326511023184723L;
 
 	private Boolean wordWrap;
 	private Boolean editable;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
+	private Integer minPixelHeight;
 
 	public Boolean getWordWrap() {
 		return wordWrap;
@@ -62,5 +61,16 @@ public class TextArea extends ChangeableInputWidget implements Editable, Absolut
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
 	}
 }

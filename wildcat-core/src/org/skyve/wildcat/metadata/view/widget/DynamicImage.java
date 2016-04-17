@@ -26,15 +26,16 @@ import org.skyve.wildcat.util.XMLUtil;
 							"imageInitialPixelHeight",
 							"pixelWidth", 
 							"percentageWidth",
+							"minPixelWidth", 
+							"maxPixelWidth", 
 							"pixelHeight", 
 							"percentageHeight",
+							"minPixelHeight", 
+							"maxPixelHeight", 
 							"invisibleConditionName",
 							"visibleConditionName",
 							"parameters"})
 public class DynamicImage implements MetaData, RelativeSize, Invisible, Parameterizable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String name;
@@ -44,8 +45,13 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	
 	private Integer pixelWidth;
 	private Integer percentageWidth;
+	private Integer minPixelWidth;
+	private Integer maxPixelWidth;
+
 	private Integer pixelHeight;
 	private Integer percentageHeight;
+	private Integer minPixelHeight;
+	private Integer maxPixelHeight;
 	
 	private String invisibleConditionName;
 	
@@ -101,6 +107,28 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	}
 
 	@Override
+	public Integer getMinPixelWidth() {
+		return minPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelWidth(Integer minPixelWidth) {
+		this.minPixelWidth = minPixelWidth;
+	}
+
+	@Override
+	public Integer getMaxPixelWidth() {
+		return maxPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelWidth(Integer maxPixelWidth) {
+		this.maxPixelWidth = maxPixelWidth;
+	}
+
+	@Override
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
@@ -147,5 +175,27 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 					required = false)
 	public List<Parameter> getParameters() {
 		return parameters;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
+	}
+
+	@Override
+	public Integer getMaxPixelHeight() {
+		return maxPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelHeight(Integer maxPixelHeight) {
+		this.maxPixelHeight = maxPixelHeight;
 	}
 }

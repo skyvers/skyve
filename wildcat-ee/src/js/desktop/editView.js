@@ -1551,6 +1551,7 @@ BizListMembership.addMethods({
 		this._candidateList = isc.ListGrid.create({
 			width: "100%", 
 			height: "100%",
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1572,6 +1573,7 @@ BizListMembership.addMethods({
 		this._memberList = isc.ListGrid.create({
 			width: "100%",
 			height: "100%",
+			minHeight: 100,
 			canDragRecordsOut: true,
 			canAcceptDroppedRecords: true,
 			dragDataAction: "move",
@@ -1607,7 +1609,7 @@ BizListMembership.addMethods({
 			isc.VLayout.create({
 				layoutAlign: "center",
 				membersMargin: 10,
-				height: 100,
+				height: 75,
 				members: [
 					isc.IButton.create({
 						icon: "icons/memberAssign.png",
@@ -1856,6 +1858,7 @@ BizComparison.addMethods({
 
 			fields.add({title: "...",
 	    		 type: "button",
+//	    		 click: "isc.Window.create({'items':[isc.HTMLPane.create({contents:form.titleHoverHTML(form.getField('" + name + "'))})],title:'Diff',autoCenter:true,minWidth:'20%',minHeight:'20%',maxWidth:'90%',maxHeight:'90%',overflow:'auto'}).show()",
 	    		 click: "isc.say(form.titleHoverHTML(form.getField('" + name + "')),null,{title:'Diff'})",
 	    		 align: 'center',
 	    		 startRow: false,

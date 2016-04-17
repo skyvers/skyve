@@ -57,6 +57,7 @@
 		<property name="toBinding" length="500" />
 		<property name="sendTo" length="250" />
 		<property name="sendFrom" length="250" />
+		<property name="monitorBcc" />
 		<property name="subject" length="250" />
 		<property name="body" type="text" />
 		<property name="attachment1" length="36" />

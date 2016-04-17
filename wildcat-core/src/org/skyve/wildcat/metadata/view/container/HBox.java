@@ -18,9 +18,6 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE, name = "HBox")
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "hbox")
 public class HBox extends Container implements Box, Identifiable, Invisible, Bordered {
-	/**
-	 * For Serialization.
-	 */
 	private static final long serialVersionUID = 5014102577585857713L;
 
 	private String widgetId;
@@ -30,8 +27,13 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	
 	private Integer pixelWidth;
 	private Integer percentageWidth;
+	private Integer minPixelWidth;
+	private Integer maxPixelWidth;
+
 	private Integer pixelHeight;
 	private Integer percentageHeight;
+	private Integer minPixelHeight;
+	private Integer maxPixelHeight;
 	
 	private VerticalAlignment verticalAlignment;
 	private HorizontalAlignment horizontalAlignment;
@@ -108,6 +110,28 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	}
 
 	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
+	}
+
+	@Override
+	public Integer getMaxPixelHeight() {
+		return maxPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelHeight(Integer maxPixelHeight) {
+		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;
 	}
@@ -116,6 +140,28 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(name = "pixelWidth", required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getMinPixelWidth() {
+		return minPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelWidth(Integer minPixelWidth) {
+		this.minPixelWidth = minPixelWidth;
+	}
+
+	@Override
+	public Integer getMaxPixelWidth() {
+		return maxPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelWidth(Integer maxPixelWidth) {
+		this.maxPixelWidth = maxPixelWidth;
 	}
 
 	@Override

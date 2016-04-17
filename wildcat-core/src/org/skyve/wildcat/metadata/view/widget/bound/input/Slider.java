@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
+import org.skyve.wildcat.metadata.view.ConstrainableHeight;
 import org.skyve.wildcat.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "slider")
@@ -15,11 +16,10 @@ import org.skyve.wildcat.util.XMLUtil;
 							"roundingPrecision", 
 							"vertical", 
 							"pixelWidth", 
-							"pixelHeight"})
-public class Slider extends ChangeableInputWidget implements AbsoluteSize {
-	/**
-	 * For Serialization.
-	 */
+							"pixelHeight",
+							"minPixelHeight",
+							"maxPixelHeight"})
+public class Slider extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight {
 	private static final long serialVersionUID = -1215719151652616337L;
 
 	private Double min;
@@ -29,6 +29,8 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize {
 	private Boolean vertical;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
+	private Integer minPixelHeight;
+	private Integer maxPixelHeight;
 	
 	public Double getMin() {
 		return min;
@@ -88,5 +90,25 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize {
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
+	}
+
+	@Override
+	public Integer getMaxPixelHeight() {
+		return maxPixelHeight;
+	}
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelHeight(Integer maxPixelHeight) {
+		this.maxPixelHeight = maxPixelHeight;
 	}
 }

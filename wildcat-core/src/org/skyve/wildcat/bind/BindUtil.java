@@ -327,7 +327,7 @@ public final class BindUtil {
 
 	/**
 	 * This method is synchronized as {@link Converter#fromDisplayValue(Object)} requires synchronization. 
-	 * Explicit type coersion using the <code>converter</code> if supplied, or by java language coersion.
+	 * Explicit type coercion using the <code>converter</code> if supplied, or by java language coercion.
 	 * 
 	 * @param attribute Used for type conversion. Can be <code>null</code>.
 	 * @param type

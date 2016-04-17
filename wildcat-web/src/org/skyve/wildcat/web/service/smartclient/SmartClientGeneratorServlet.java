@@ -47,9 +47,12 @@ import org.skyve.wildcat.metadata.view.AbsoluteSize;
 import org.skyve.wildcat.metadata.view.AbsoluteWidth;
 import org.skyve.wildcat.metadata.view.ActionImpl;
 import org.skyve.wildcat.metadata.view.Bordered;
+import org.skyve.wildcat.metadata.view.ConstrainableHeight;
+import org.skyve.wildcat.metadata.view.ConstrainableSize;
 import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.metadata.view.HorizontalAlignment;
 import org.skyve.wildcat.metadata.view.Inject;
+import org.skyve.wildcat.metadata.view.MinimumHeight;
 import org.skyve.wildcat.metadata.view.RelativeSize;
 import org.skyve.wildcat.metadata.view.ShrinkWrap;
 import org.skyve.wildcat.metadata.view.ShrinkWrapper;
@@ -119,7 +122,6 @@ import org.skyve.wildcat.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.wildcat.persistence.AbstractPersistence;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.web.AbstractWebContext;
-import org.skyve.wildcat.web.ServletConstants;
 import org.skyve.wildcat.web.WebUtil;
 
 /**
@@ -131,6 +133,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final String UX_UI = "desktop";
 	
 	private static class SmartClientViewVisitor extends ViewVisitor {
+		private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(100);
+		
 		private User user;
 		private Locale locale;
 		private boolean noCreateView;
@@ -192,7 +196,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			tabNumbers.push(Integer.valueOf(0));
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizTabPane.create({");
-			size(tabPane, code);
+			size(tabPane, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(tabPane.getDisabledConditionName(), code);
 			invisible(tabPane.getInvisibleConditionName(), code);
 			code.append("_view:view});\n");
@@ -251,7 +255,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		throws MetaDataException {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizVBox.create({");
-			size(vbox, code);
+			size(vbox, null, code);
 			bordered(vbox, vbox.getPixelPadding(), code);
 			box(vbox);
 			VerticalAlignment v = vbox.getVerticalAlignment();
@@ -301,7 +305,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		throws MetaDataException {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=BizHBox.create({");
-			size(hbox, code);
+			size(hbox, null, code);
 			HorizontalAlignment h = hbox.getHorizontalAlignment();
 			if (h != null) {
 				switch (h) {
@@ -408,7 +412,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 //code.append("cellBorder:1,");
 			
 			if (! Boolean.TRUE.equals(border)) { // false or null
-				size(form, code);
+				size(form, null, code);
 				invisible(form.getInvisibleConditionName(), code);
 			}
 			
@@ -661,7 +665,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			}
 
 			preProcessFormItem(geometry, "geometry");
-			size(geometry, code);
+			size(geometry, null, code);
 			disabled(geometry.getDisabledConditionName(), code);
 			invisible(geometry.getInvisibleConditionName(), code);
 			
@@ -750,7 +754,7 @@ code.append("_view:view})");
 			code.append(document.getName()).append("',format:'");
 			ImageFormat format = document.getDynamicImage(customer, image.getName()).getFormat();
 			code.append((format != null) ? format : ImageFormat.png).append("',");
-			size(image, code);
+			size(image, null, code);
 			invisible(image.getInvisibleConditionName(), code);
 			Integer initialWidth = image.getImageInitialPixelWidth();
 			if (initialWidth != null) {
@@ -790,7 +794,7 @@ code.append("_view:view})");
 		private void addStaticImage(StaticImage image) {
 			code.append("BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
 			code.append("',file:'").append(image.getRelativeFile()).append("',");
-			size(image, code);
+			size(image, null, code);
 			removeTrailingComma(code);
 			code.append("})");
 		}
@@ -802,7 +806,7 @@ code.append("_view:view})");
 				code.append("var ").append(variable).append("=LayoutSpacer.create(");
 		        if ((spacer.getPixelWidth() != null) || spacer.getPixelHeight() != null) {
 		        	code.append('{');
-		        	size(spacer, code);
+		        	size(spacer, null, code);
 		        	code.setLength(code.length() - 1); // remove trailing comma
 		        	code.append('}');
 		        }
@@ -811,7 +815,7 @@ code.append("_view:view})");
 			}
 			else {
 				code.append("type:'spacer',");
-				size(spacer, code);
+				size(spacer, null, code);
 			}
 		}
 
@@ -838,7 +842,7 @@ code.append("_view:view})");
 				code.append("title:'").append(label).append("',");
 				code.append("type:'blurb',name:'_");
 				code.append(formatCounter++).append("',"); // _1, _2 and so on
-				size(link, code);
+				size(link, null, code);
 				invisible(link.getInvisibleConditionName(), code);
 			}
 		}
@@ -905,7 +909,7 @@ code.append("_view:view})");
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append("=BizLabel.create({");
 
-				size(label, code);
+				size(label, null, code);
 				if (label.getPixelWidth() == null) { // default to whole width
 					code.append("width:'100%',");
 				}
@@ -950,7 +954,7 @@ code.append("_view:view})");
 				if (alignment != null) {
 					code.append("textAlign:'").append(alignment.toAlignmentString()).append("',");
 				}
-				size(label, code);
+				size(label, null, code);
 				invisible(label.getInvisibleConditionName(), code);
 			}
 		}
@@ -1055,7 +1059,7 @@ code.append("_view:view})");
 			if (selectedIdBinding != null) {
 				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
 			}
-			size(grid, code);
+			size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			editable(grid.getEditable(), code);
@@ -1252,6 +1256,7 @@ code.append("_view:view})");
 			if (selectedIdBinding != null) {
 				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
 			}
+			size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(grid.getDisabledConditionName(), code);
 			invisible(grid.getInvisibleConditionName(), code);
 			disableCRUD(grid, code);
@@ -1351,7 +1356,7 @@ code.append("_view:view})");
 			}
 			
 			preProcessFormItem(checkBox, "checkbox");
-			size(checkBox, code);
+			size(checkBox, null, code);
 			if (! Boolean.FALSE.equals(checkBox.getTriState())) {
 				code.append("allowEmptyValue:true,");
 			}
@@ -1403,7 +1408,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(colour, "color");
-			size(colour, code);
+			size(colour, null, code);
 			disabled(colour.getDisabledConditionName(), code);
 			invisible(colour.getInvisibleConditionName(), code);
 		}
@@ -1431,7 +1436,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(combo, "select");
-			size(combo, code);
+			size(combo, null, code);
 			disabled(combo.getDisabledConditionName(), code);
 			invisible(combo.getInvisibleConditionName(), code);
 		}
@@ -1460,7 +1465,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(image, "bizContentImage");
-			size(image, code);
+			size(image, null, code);
 			disabled(image.getDisabledConditionName(), code);
 			invisible(image.getInvisibleConditionName(), code);
 			editable(image.getEditable(), code);
@@ -1505,7 +1510,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(text, "richText");
-			size(text, code);
+			size(text, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(text.getDisabledConditionName(), code);
 			invisible(text.getInvisibleConditionName(), code);
 		}
@@ -1533,7 +1538,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(html, "bizHTML");
-			size(html, code);
+			size(html, null, code);
 			disabled(html.getDisabledConditionName(), code);
 			invisible(html.getInvisibleConditionName(), code);
 		}
@@ -1606,7 +1611,7 @@ code.append("_view:view})");
 			editable(comparison.getEditable(), code);
 			disabled(comparison.getDisabledConditionName(), code);
 			invisible(comparison.getInvisibleConditionName(), code);
-			size(comparison, code);
+			size(comparison, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			removeTrailingComma(code);
 			code.append("});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1627,7 +1632,7 @@ code.append("_view:view})");
 			}
 
 			SmartClientFieldDefinition def = preProcessFormItem(lookup, "bizLookupDescription");
-			size(lookup, code);
+			size(lookup, null, code);
 			disabled(lookup.getDisabledConditionName(), code);
 			invisible(lookup.getInvisibleConditionName(), code);
 			editable(lookup.getEditable(), code);
@@ -1704,7 +1709,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(password, "password");
-			size(password, code);
+			size(password, null, code);
 			disabled(password.getDisabledConditionName(), code);
 			invisible(password.getInvisibleConditionName(), code);
 		}
@@ -1732,7 +1737,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(radio, "radioGroup");
-			size(radio, code);
+			size(radio, null, code);
 			if (Boolean.FALSE.equals(radio.getVertical())) {
 				code.append("vertical:false,");
 			}
@@ -1782,7 +1787,7 @@ code.append("_view:view})");
 			if (Boolean.TRUE.equals(slider.getVertical())) {
 				code.append("vertical:true,");
 			}
-			size(slider, code);
+			size(slider, null, code);
 			disabled(slider.getDisabledConditionName(), code);
 			invisible(slider.getInvisibleConditionName(), code);
 		}
@@ -1822,7 +1827,7 @@ code.append("_view:view})");
 			if (step != null) {
 				code.append("step:").append(step).append(',');
 			}
-			size(spinner, code);
+			size(spinner, null, code);
 			disabled(spinner.getDisabledConditionName(), code);
 			invisible(spinner.getInvisibleConditionName(), code);
 		}
@@ -1850,7 +1855,7 @@ code.append("_view:view})");
 			}
 
 			preProcessFormItem(text, "textArea");
-			size(text, code);
+			size(text, null, code);
 			disabled(text.getDisabledConditionName(), code);
 			invisible(text.getInvisibleConditionName(), code);
 
@@ -1915,7 +1920,7 @@ pickListFields:[{name:'value'}],
 				preProcessFormItem(text, null);
 			}
 
-			size(text, code);
+			size(text, null, code);
 			disabled(text.getDisabledConditionName(), code);
 			invisible(text.getInvisibleConditionName(), code);
 			
@@ -2251,7 +2256,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("focus:function(form,item){var view=form._view;");
+			code.append("editorEnter:function(form,item,value){if(item.validate()){var view=form._view;");
 		}
 
 		@Override
@@ -2259,7 +2264,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("},");
+			code.append("}},");
 		}
 
 		@Override
@@ -2267,7 +2272,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("blur:function(form,item){var view=form._view;");
+			code.append("editorExit:function(form,item,value){if(item.validate()){var view=form._view;");
 		}
 
 		@Override
@@ -2275,7 +2280,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled)
 		throws MetaDataException {
-			code.append("},");
+			code.append("}},");
 		}
 
 		// Used to sort out server-side events into the bizEditedForServer() method.
@@ -2508,13 +2513,18 @@ pickListFields:[{name:'value'}],
 			return result.toString();
 		}
 		
-		private void size(AbsoluteWidth sizable, StringBuilder builder) {
+		private void size(AbsoluteWidth sizable, 
+							Integer defaultMinHeightInPixels,
+							StringBuilder builder) {
 			ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper) ? 
 										((ShrinkWrapper) sizable).getShrinkWrap() :
 										null;
-
+			boolean widthShrinkWrapped = false;
+			boolean heightShrinkWrapped = false;
+										
 			if (ShrinkWrap.width.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 				builder.append("width:1,");
+				widthShrinkWrapped = true;
 			}
 			else {
 				Integer width = sizable.getPixelWidth();
@@ -2542,6 +2552,7 @@ pickListFields:[{name:'value'}],
 			if (sizable instanceof AbsoluteSize) {
 				if (ShrinkWrap.height.equals(shrinkWrap) || ShrinkWrap.both.equals(shrinkWrap)) {
 					builder.append("height:1,");
+					heightShrinkWrapped = true;
 				}
 				else {
 					// NB Don't use height:'*' if there is no specified height because blurbs won't 
@@ -2556,6 +2567,40 @@ pickListFields:[{name:'value'}],
 							height = ((RelativeSize) sizable).getPercentageHeight();
 							if (height != null) {
 								builder.append("height:'").append(height).append("%',");
+							}
+						}
+					}
+				}
+			}
+			
+			// process size constraints
+			if (sizable instanceof MinimumHeight) {
+				if (! heightShrinkWrapped) {
+					Integer minHeight = ((MinimumHeight) sizable).getMinPixelHeight();
+					if (minHeight == null) {
+						minHeight = defaultMinHeightInPixels;
+					}
+					if (minHeight != null) {
+						builder.append("minHeight:").append(minHeight).append(',');
+					}
+				}
+				if (sizable instanceof ConstrainableHeight) {
+					if (! heightShrinkWrapped) {
+						Integer maxHeight = ((ConstrainableHeight) sizable).getMaxPixelHeight();
+						if (maxHeight != null) {
+							builder.append("maxHeight:").append(maxHeight).append(',');
+						}
+					}
+					if (! widthShrinkWrapped) {
+						if (sizable instanceof ConstrainableSize) {
+							ConstrainableSize constrainable = (ConstrainableSize) sizable;
+							Integer minWidth = constrainable.getMinPixelWidth();
+							if (minWidth != null) {
+								builder.append("minWidth:").append(minWidth).append(',');
+							}
+							Integer maxWidth = constrainable.getMaxPixelWidth();
+							if (maxWidth != null) {
+								builder.append("maxWidth:").append(maxWidth).append(',');
 							}
 						}
 					}
@@ -2850,7 +2895,7 @@ pickListFields:[{name:'value'}],
 				result.append("&_n=").append(revisedRelativeIconFileName).append("',");
 			}
 			if (button != null) {
-				size(button, result);
+				size(button, null, result);
 			}
 			disabled(disabledConditionName, result);
 			invisible(invisibleConditionName, result);

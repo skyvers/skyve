@@ -55,6 +55,8 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String sendFromPropertyName = "sendFrom";
 	/** @hidden */
+	public static final String monitorBccPropertyName = "monitorBcc";
+	/** @hidden */
 	public static final String subjectPropertyName = "subject";
 	/** @hidden */
 	public static final String bodyPropertyName = "body";
@@ -261,6 +263,10 @@ public class Communication extends AbstractPersistentBean {
 	 * The address to send from.
 	 **/
 	private String sendFrom;
+	/**
+	 * Monitor outgoing emails by including me in the Bcc
+	 **/
+	private Boolean monitorBcc;
 	/**
 	 * The subject of the communication. Bindings are allowed relative to the above module document.
 	 **/
@@ -500,6 +506,24 @@ public class Communication extends AbstractPersistentBean {
 	public void setSendFrom(String sendFrom) {
 		preset(sendFromPropertyName, sendFrom);
 		this.sendFrom = sendFrom;
+	}
+
+	/**
+	 * {@link #monitorBcc} accessor.
+	 **/
+	public Boolean getMonitorBcc() {
+		return monitorBcc;
+	}
+
+	/**
+	 * {@link #monitorBcc} mutator.
+	 * 
+	 * @param monitorBcc	The new value to set.
+	 **/
+	@XmlElement
+	public void setMonitorBcc(Boolean monitorBcc) {
+		preset(monitorBccPropertyName, monitorBcc);
+		this.monitorBcc = monitorBcc;
 	}
 
 	/**

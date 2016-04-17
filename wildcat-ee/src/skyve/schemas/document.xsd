@@ -566,16 +566,16 @@
 
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="joined"/>
-      <xs:enumeration value="single"/>
       <xs:enumeration value="mapped"/>
+      <xs:enumeration value="single"/>
+      <xs:enumeration value="joined"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="lower"/>
       <xs:enumeration value="capital"/>
+      <xs:enumeration value="lower"/>
       <xs:enumeration value="upper"/>
     </xs:restriction>
   </xs:simpleType>
@@ -583,34 +583,34 @@
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="isinCheckDigit"/>
-      <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="internetDomain"/>
       <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="url"/>
-      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="ibanCheckDigit"/>
       <xs:enumeration value="isbnCheckDigit"/>
-      <xs:enumeration value="email"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
       <xs:enumeration value="dynamic"/>
-      <xs:enumeration value="variant"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="indexType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="both"/>
-      <xs:enumeration value="none"/>
       <xs:enumeration value="database"/>
       <xs:enumeration value="textual"/>
+      <xs:enumeration value="both"/>
+      <xs:enumeration value="none"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -638,10 +638,10 @@
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="dataGroup"/>
-      <xs:enumeration value="global"/>
-      <xs:enumeration value="user"/>
       <xs:enumeration value="customer"/>
+      <xs:enumeration value="global"/>
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="user"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

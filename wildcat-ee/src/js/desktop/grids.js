@@ -960,6 +960,7 @@ BizListGrid.addMethods({
 			// to set data straight away instead of waiting for it to paint
 			autoDraw: true, 
 			height: '*',
+			minHeight: me.minHeight,
 			leaveScrollbarGap: true,
 			// width: '100%', - causes scrollbars under firefox
 			autoFetchData: false,
@@ -1710,6 +1711,7 @@ BizDataGrid.addMethods({
 		
 		me.grid = isc.ListGrid.create({
 			height: "*",
+			minHeight: me.minHeight,
 			autoFetchData: false,
 			headerHeight: 30,
 			showFilterEditor: false,

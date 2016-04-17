@@ -16,22 +16,28 @@ import org.skyve.wildcat.util.XMLUtil;
 			propOrder = {"title", 
 							"pixelWidth",
 							"percentageWidth",
+							"minPixelWidth", 
+							"maxPixelWidth", 
 							"pixelHeight",
 							"percentageHeight",
+							"minPixelHeight", 
+							"maxPixelHeight", 
 							"invisibleConditionName",
 							"visibleConditionName"})
 public abstract class TabularWidget extends AbstractBound implements RelativeSize, Invisible {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 8143928198512212919L;
 
 	private String title;
 	
 	private Integer pixelWidth;
 	private Integer percentageWidth;
+	private Integer minPixelWidth;
+	private Integer maxPixelWidth;
+
 	private Integer pixelHeight;
 	private Integer percentageHeight;
+	private Integer minPixelHeight;
+	private Integer maxPixelHeight;
 	
 	private String invisibleConditionName;
 
@@ -69,6 +75,28 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	}
 
 	@Override
+	public Integer getMinPixelWidth() {
+		return minPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelWidth(Integer minPixelWidth) {
+		this.minPixelWidth = minPixelWidth;
+	}
+
+	@Override
+	public Integer getMaxPixelWidth() {
+		return maxPixelWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelWidth(Integer maxPixelWidth) {
+		this.maxPixelWidth = maxPixelWidth;
+	}
+
+	@Override
 	public Integer getPixelHeight() {
 		return pixelHeight;
 	}
@@ -88,6 +116,28 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	@XmlAttribute(required = false)
 	public void setPercentageHeight(Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
+	}
+
+	@Override
+	public Integer getMaxPixelHeight() {
+		return maxPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelHeight(Integer maxPixelHeight) {
+		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	@Override

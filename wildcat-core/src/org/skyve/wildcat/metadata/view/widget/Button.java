@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.MetaData;
 import org.skyve.wildcat.metadata.view.AbsoluteSize;
+import org.skyve.wildcat.metadata.view.ConstrainableHeight;
 import org.skyve.wildcat.metadata.view.ContentSpecifiedWidth;
 import org.skyve.wildcat.util.UtilImpl;
 import org.skyve.wildcat.util.XMLUtil;
@@ -19,16 +20,17 @@ import org.skyve.wildcat.util.XMLUtil;
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
 			propOrder = {"actionName", 
 							"pixelWidth", 
-							"pixelHeight"})
-public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth {
-	/**
-	 * For Serialization
-	 */
+							"pixelHeight",
+							"minPixelHeight",
+							"maxPixelHeight"})
+public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight {
 	private static final long serialVersionUID = -2344473519207771461L;
 
 	private String actionName;
 	private Integer pixelWidth;
 	private Integer pixelHeight;
+	private Integer minPixelHeight;
+	private Integer maxPixelHeight;
 
 	public String getActionName() {
 		return actionName;
@@ -59,5 +61,27 @@ public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth {
 	@XmlAttribute(required = false)
 	public void setPixelHeight(Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
+	}
+
+	@Override
+	public Integer getMinPixelHeight() {
+		return minPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMinPixelHeight(Integer minPixelHeight) {
+		this.minPixelHeight = minPixelHeight;
+	}
+
+	@Override
+	public Integer getMaxPixelHeight() {
+		return maxPixelHeight;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setMaxPixelHeight(Integer maxPixelHeight) {
+		this.maxPixelHeight = maxPixelHeight;
 	}
 }
