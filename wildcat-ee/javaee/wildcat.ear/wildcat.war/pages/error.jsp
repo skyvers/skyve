@@ -7,8 +7,7 @@
 <%@page import="org.skyve.wildcat.web.UserAgent"%>
 <%@page import="org.skyve.wildcat.web.WebUtil"%>
 <%
-	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
-						request.getServerPort() + request.getContextPath() + "/";
+	String basePath = Util.getWildcatContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);

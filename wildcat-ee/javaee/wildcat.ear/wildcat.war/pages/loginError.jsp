@@ -4,8 +4,7 @@
 <%@page import="org.skyve.util.Util"%>
 <%@page import="org.skyve.wildcat.web.UserAgent"%>
 <%
-	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
-						request.getServerPort() + request.getContextPath() + "/";
+	String basePath = Util.getWildcatContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
 	Locale locale = request.getLocale();

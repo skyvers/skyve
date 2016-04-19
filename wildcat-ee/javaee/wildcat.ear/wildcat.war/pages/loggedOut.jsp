@@ -6,7 +6,7 @@
 <%@page import="org.skyve.wildcat.web.UserAgent"%>
 <%@page import="org.skyve.wildcat.web.WebUtil"%>
 <%
-	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
+	String basePath = Util.getWildcatContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
 	Principal p = request.getUserPrincipal();

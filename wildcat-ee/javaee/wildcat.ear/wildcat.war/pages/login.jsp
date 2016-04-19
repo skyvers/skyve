@@ -6,8 +6,7 @@
 <%@ page import="org.skyve.wildcat.web.WebUtil"%>
 <%@ page import="org.skyve.wildcat.web.UserAgent"%>
 <%
-	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
-						request.getServerPort() + request.getContextPath() + "/";
+	String basePath = Util.getWildcatContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 
 	// Determine the locale
