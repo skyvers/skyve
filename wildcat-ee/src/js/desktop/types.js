@@ -1299,8 +1299,21 @@ BizLookupDescriptionItem.addMethods({
 				if (config.params) {
 					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
-
+				
 				return result;
+			},
+			// This method isn't part of the external API, but is the only place
+			// to intercept the dropdown event.
+			// pickerIconClick is fired after the dropdown query is requested.
+			showPicker: function() {
+				var optionDataSource = this.getOptionDataSource();
+				if (optionDataSource) {
+					if (optionDataSource.compareCriteria) {
+						optionDataSource._drop = true;
+					}
+				}
+				
+				this.Super('showPicker');
 			},
 			// ensure that the canvasItem value is changed when the combo box value is
 			changed: function(form, item, value) {
@@ -1416,7 +1429,7 @@ BizLookupDescriptionItem.addMethods({
 			}
 		}
 
-		return this.Super("setValue", [newValue]);
+		this.Super("setValue", [newValue]);
 	},
 	
 	// bizhub events
@@ -1441,17 +1454,6 @@ BizLookupDescriptionItem.addMethods({
 	},
 	bizCleared: function(form, item, value) {
 		// do nothing - overridden in serverside generated definition if required
-	},
-
-	// Called from edit view scatter
-	invalidateCache: function() {
-		// optionDataSource could still be just the ID string and not actually set up
-		var optionDataSource = this._form.getItem('_combo').optionDataSource;
-		if (optionDataSource) {
-			if (optionDataSource.invalidateCache) {
-				optionDataSource.invalidateCache();
-			}
-		}
 	},
 
 	// set the value map from a fetch from the server

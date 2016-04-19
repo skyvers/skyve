@@ -1020,7 +1020,6 @@ isc.EditView.addMethods({
 					if (! this._showHide(item, contained, values, false)) { // visible
 						if (item.type == 'bizLookupDescription') {
 							item.setValueMapFromEditView(values);
-							item.invalidateCache();
 						}
 						else if ((item.type == 'select') || 
 								(item.type == 'enum') ||
