@@ -22,14 +22,15 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
@@ -282,6 +283,9 @@ public class ListGrid extends HtmlPanelGroup {
 							else {
 								displayName = DocumentImpl.getBizKeyAttribute().getDisplayName();
 							}
+						}
+						else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+							displayName = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 						}
 						else if (bindingAttribute != null) {
 							displayName = bindingAttribute.getDisplayName();

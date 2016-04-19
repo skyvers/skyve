@@ -1279,7 +1279,10 @@ BizLookupDescriptionItem.addMethods({
 			height: 22,
 			selectOnFocus: true,
 			fetchMissingValues: false,
+//			addUnknownValues: false, This triggers a fetch on blur
 			autoFetchData: false,
+			useClientSideFiltering: false,
+			cachePickListResults: false,
 			allowEmptyValue: config.allowEmptyValue,
 			optionDataSource: config.optionDataSource,
 			valueField: config.valueField,
@@ -1315,7 +1318,11 @@ BizLookupDescriptionItem.addMethods({
 			// when we lose focus, ensure that the combo box description is blanked if we have no bizId stored in the editor
 			blur: function(form, item) {
 				if (me.getValue() == null) { // value stored in lookup desc canvas item
-					item.setValue(''); // blank the combobox
+					var itemValue = item.getValue();
+					// only set it when itemValue is not empty as it'll cause a server hit on optionDataSource
+					if (itemValue && (itemValue != '')) {
+						item.setValue(''); // blank the combobox
+					}
 				}
 			},
 			valueMap: {}
@@ -1436,6 +1443,7 @@ BizLookupDescriptionItem.addMethods({
 		// do nothing - overridden in serverside generated definition if required
 	},
 
+	// Called from edit view scatter
 	invalidateCache: function() {
 		// optionDataSource could still be just the ID string and not actually set up
 		var optionDataSource = this._form.getItem('_combo').optionDataSource;
@@ -1461,6 +1469,7 @@ BizLookupDescriptionItem.addMethods({
 			var valueMap = {};
 			valueMap[bizId] = display ? display : '<unknown>';
 			this._form.getItem('_combo').setValueMap(valueMap);
+			this.setValueMap(valueMap);
 		}
 	},
  	

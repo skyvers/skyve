@@ -1728,6 +1728,9 @@ BizDataGrid.addMethods({
 			wrapCells: me.wordWrap ? true : false,
 		    fixedRecordHeights: me.wordWrap ? false : true,
 			canReorderFields: false,
+			// can't sort or group by columns if this is reorderable
+			canSort: (config._ordinal ? false : true),
+			canGroupBy: (config._ordinal ? false : true),
 			canReorderRecords: (config._ordinal ? ((config.canUpdate && me.canEdit) ? true : false) : false),
 			// reorder the ordinal field
 			recordsDropped: function(dropRecords, index, destWidget, sourceWidget) {

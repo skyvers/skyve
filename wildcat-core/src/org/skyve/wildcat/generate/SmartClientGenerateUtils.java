@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -44,8 +45,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.wildcat.bind.BindUtil;
 import org.skyve.wildcat.metadata.customer.CustomerImpl;
 import org.skyve.wildcat.metadata.model.document.DocumentImpl;
@@ -256,6 +257,9 @@ public class SmartClientGenerateUtils {
 				else {
 					title = DocumentImpl.getBizKeyAttribute().getDisplayName();
 				}
+			}
+			else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+				title = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 			}
 			if ((bindingDocument != null) && (bindingAttribute != null)) {
 				title = bindingAttribute.getDisplayName();
@@ -1428,8 +1432,9 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append("',icon:'").append(drivingDocument.getIcon32x32RelativeFileName());
 		if (! config) {
 			// ensure all filtering is server-side
-			// this enables the summary row to always stay in sync
-			toAppendTo.append("',criteriaPolicy:'dropOnChange");
+			// this enables the summary row to always stay in sync and
+			// lookups to drop down with the same criteria but load from the server
+			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){return -1;},criteriaPolicy:'dropOnChange");
 		}
 		toAppendTo.append("',canCreate:").append(user.canCreateDocument(drivingDocument));
 		toAppendTo.append(",canUpdate:").append(user.canUpdateDocument(drivingDocument));

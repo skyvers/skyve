@@ -3,6 +3,7 @@ package org.skyve.wildcat.metadata.view;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
@@ -685,6 +686,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 		
 						if (fullyQualifiedColumnBinding.endsWith(Bean.BIZ_KEY)) {
 							inputWidget = DocumentImpl.getBizKeyAttribute().getDefaultInputWidget();
+						}
+						else if (fullyQualifiedColumnBinding.endsWith(ChildBean.ORDINAL_KEY)) {
+							inputWidget = DocumentImpl.getBizOrdinalAttribute().getDefaultInputWidget();
 						}
 						else {
 							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 

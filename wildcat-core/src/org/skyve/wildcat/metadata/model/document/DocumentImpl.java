@@ -14,6 +14,7 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -473,7 +474,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			bizKeyField.setAttributeType(AttributeType.text);
 			bizKeyField.setDisplayName("Business Key");
-			bizKeyField.setName("bizKey");
+			bizKeyField.setName(Bean.BIZ_KEY);
 			bizKeyField.setPersistent(false);
 			bizKeyField.setRequired(false);
 			bizKeyField.setDescription(null);
@@ -482,5 +483,22 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		}
 		
 		return bizKeyField;
+	}
+	
+	private static org.skyve.wildcat.metadata.model.document.field.Integer bizOrdinalField;
+	public static org.skyve.wildcat.metadata.model.document.field.Integer getBizOrdinalAttribute() {
+		if (bizOrdinalField == null) {
+			bizOrdinalField = new org.skyve.wildcat.metadata.model.document.field.Integer();
+			
+			bizOrdinalField.setAttributeType(AttributeType.integer);
+			bizOrdinalField.setDisplayName("Order");
+			bizOrdinalField.setName(ChildBean.ORDINAL_KEY);
+			bizOrdinalField.setPersistent(true);
+			bizOrdinalField.setRequired(false);
+			bizOrdinalField.setDescription(null);
+			bizOrdinalField.setDomainType(null);
+		}
+		
+		return bizOrdinalField;
 	}
 }
