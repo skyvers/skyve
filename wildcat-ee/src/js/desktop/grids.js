@@ -1286,36 +1286,33 @@ BizListGrid.addMethods({
 	// Refresh the list view, used by the refresh menu item
 	// Used by the server-side, by rerender() below and by editViews to refresh listgrids.
 	refresh: function() {
-//		var me = this;
 //		var selectedBizId = this._eventRecord ? this._eventRecord.bizId : null;
+
+		// NB this doesn't work when called from within the filterData callback method
+		// so it has to be made here.
+		var rowNum = this._eventRowNum;
 		this.grid.deselectAllRecords();
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
 
 		this.grid.invalidateCache();
+/*
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
 									this.grid.getFilterEditorCriteria(true));
-/*
+*/
+		var me = this;
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
 									this.grid.getFilterEditorCriteria(true),
 								function(dsResponse, data, dsRequest) {
 									if (dsResponse.status >= 0) { // success
-										var selectedIndex = data.findIndex('bizId', selectedBizId);
-										if (selectedIndex >= 0) {
-											me._eventRowNum = selectedIndex;
-											me._eventColumnNum = 1; // not the flag column
-											me._eventRecord = data.get(selectedIndex);
-											me.grid.selectSingleRecord(selectedIndex);
-alert('select record ' + selectedIndex + ' ' + me._eventRecord.bizId + " = " + selectedBizId);
-											// this method will load data pages but there is no callback method to do the selection after
-//											me.grid.scrollRecordIntoView(selectedIndex); // use scrollToRow() in smartclient 8
-										}
+										// this method will load data pages but there is no callback method to do the row selection after
+										me.grid.scrollToRow(rowNum);
+//										me.grid.selectSingleRecord(me._eventRownNum);
 									}
 								});
-*/
 	},
 	
 	// Called when a new record is added to a pick list view 
