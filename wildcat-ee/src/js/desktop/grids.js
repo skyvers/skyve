@@ -1296,16 +1296,17 @@ getRange : function (start, end, ignoreCache, fetchNow) {
 	refresh: function() {
 //		var selectedBizId = this._eventRecord ? this._eventRecord.bizId : null;
 
-		// NB this doesn't work when called from within the filterData callback method
-		// so it has to be made here.
-//		var rowNum = this._eventRowNum;
-//		this.grid.deselectAllRecords();
-//		this._eventRowNum = null;
-//		this._eventColumnNum = null;
-//		this._eventRecord = null;
+		var rowNum = this._eventRowNum;
+		this.grid.deselectAllRecords();
+		this._eventRowNum = null;
+		this._eventColumnNum = null;
+		this._eventRecord = null;
 
+		this.grid.setCriteria(this._advancedFilter.toggleButton.selected ?
+								this._advancedFilter.getCriteria() :
+								this.grid.getFilterEditorCriteria(true));
 		this.grid.invalidateCache();
-		this.grid.scrollToRow(this._eventRowNum);
+		this.grid.scrollToRow(rowNum);
 /*
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
