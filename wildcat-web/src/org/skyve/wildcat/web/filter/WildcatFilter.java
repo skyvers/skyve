@@ -80,6 +80,7 @@ public class WildcatFilter implements Filter {
 		finally {
 			// pass the request/response on
 			chain.doFilter(request, response);
+			if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("**************************************************************");
 		}
 	}
 

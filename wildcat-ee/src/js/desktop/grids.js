@@ -1290,18 +1290,19 @@ BizListGrid.addMethods({
 
 		// NB this doesn't work when called from within the filterData callback method
 		// so it has to be made here.
-		var rowNum = this._eventRowNum;
-		this.grid.deselectAllRecords();
-		this._eventRowNum = null;
-		this._eventColumnNum = null;
-		this._eventRecord = null;
+//		var rowNum = this._eventRowNum;
+//		this.grid.deselectAllRecords();
+//		this._eventRowNum = null;
+//		this._eventColumnNum = null;
+//		this._eventRecord = null;
 
 		this.grid.invalidateCache();
+		this.grid.scrollToRow(this._eventRowNum);
 /*
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
 									this.grid.getFilterEditorCriteria(true));
-*/
+
 		var me = this;
 		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 									this._advancedFilter.getCriteria() :
@@ -1313,6 +1314,7 @@ BizListGrid.addMethods({
 //										me.grid.selectSingleRecord(me._eventRownNum);
 									}
 								});
+*/
 	},
 	
 	// Called when a new record is added to a pick list view 

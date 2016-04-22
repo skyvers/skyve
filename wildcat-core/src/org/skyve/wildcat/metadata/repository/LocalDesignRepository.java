@@ -1114,50 +1114,78 @@ public class LocalDesignRepository extends AbstractRepository {
 		}
 		
 		// Check the bizKey expression bindings, if defined
+		Module module = getModule(customer, document.getOwningModuleName());
 		String bizKeyExpression = ((DocumentImpl) document).getBizKeyExpression();
 		if (bizKeyExpression != null) {
-			Module module = getModule(customer, document.getOwningModuleName());
 			if (! BindUtil.messageBindingsAreValid(customer, module, document, bizKeyExpression)) {
 				throw new MetaDataException("The biz key [expression] defined contains malformed binding expressions in document " + documentIdentifier);
 			}
 		}
 		
-		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
-/*		
-		Persistent persistent = document.getPersistent();
-		if (persistent != null) {
-			String persistentName = persistent.getName();
-			ExtensionStrategy strategy = persistent.getStrategy();
-			if ((strategy != null) && (persistentName == null)) {
-				throw new MetaDataException("Document " + documentIdentifier + " employs extension strategy " + strategy + " but has no persistent name.");
-			}
+
+		// If document has a parentDocument defined, ensure that it exists in the document's module.
+		try {
+			document.getParentDocument(customer);
 		}
-*/		
-		// TODO if document has no persistentName, ensure each field has persistent = false
-		// TODO if document has a parentDocument defined, ensure that it exists in the document's module.
+		catch (MetaDataException e) {
+			throw new MetaDataException("The document " + documentIdentifier + 
+											" has a parent document of " +
+											document.getParentDocumentName() + " that does not exist in this module.");
+		}
+		
+		// NOTE - Persistent etc is checked when generating documents as it is dependent on the hierarchy and persistence strategy etc
 
 		// Check attributes
 		for (Attribute attribute : document.getAttributes()) {
 			// TODO for all fields that hasDomain is true, ensure that a bizlet exists and it returns domain values (collection length not zero)
-			// TODO for all references ensure that the documentName document exists for the module.
 			// TODO for all composition collections (ie reference a document that has a parentDocument = to this one) - no queryName is defined on the collection.
 			// TODO for all aggregation collections (ie reference a document that has does not have a parentDocument = to this one {or parentDocument is not defined}) - a queryName must be defined on the collection.
-			// TODO for all references with a query, ensure that the query's document is the same as the reference's document.
 
-			if (attribute instanceof Inverse) {
+			if (attribute instanceof Reference) {
+				Reference reference = (Reference) attribute;
+				// Check the document points to a document that exists within this module
+				String targetDocumentName = reference.getDocumentName();
+				DocumentRef targetDocumentRef = module.getDocumentRefs().get(targetDocumentName);
+				if (targetDocumentRef == null) {
+					throw new MetaDataException("The target [documentName] of " + 
+													targetDocumentName + " in Reference " +
+													reference.getName() + " in document " + 
+													documentIdentifier + " is not a valid document reference in this module.");
+				}
+				
+				// Check the query (if defined) points to a query of the required document type
+				String queryName = reference.getQueryName();
+				if (queryName != null) {
+					DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+					if (query == null) {
+						throw new MetaDataException("The target [queryName] of " + 
+														queryName + " in Reference " +
+														reference.getName() + " in document " + 
+														documentIdentifier + " is not a valid document query in this module.");
+					}
+					
+					String queryDocumentName = query.getDocumentName();
+					if (! targetDocumentName.equals(queryDocumentName)) {
+						throw new MetaDataException("The target [queryName] of " + 
+														queryName + " in Reference " +
+														reference.getName() + " in document " + 
+														documentIdentifier + " references a document query for document " + 
+														queryDocumentName + ", not document " + targetDocumentName);
+					}
+				}
+			}
+			else if (attribute instanceof Inverse) {
 				// Check that the document name and reference name point to a reference
 				Inverse inverse = (Inverse) attribute;
 				String targetDocumentName = inverse.getDocumentName();
-				Module owningModule = getModule(customer, document.getOwningModuleName());
-				DocumentRef inverseDocumentRef = owningModule.getDocumentRefs().get(targetDocumentName);
+				DocumentRef inverseDocumentRef = module.getDocumentRefs().get(targetDocumentName);
 				if (inverseDocumentRef == null) {
 					throw new MetaDataException("The target [documentName] of " + 
 													targetDocumentName + " in Inverse " +
 													inverse.getName() + " in document " + 
 													documentIdentifier + " is not a valid document reference in this module.");
-					
 				}
-				Module targetModule = owningModule;
+				Module targetModule = module;
 				String targetModuleName = inverseDocumentRef.getReferencedModuleName();
 				if (targetModuleName != null) {
 					targetModule = getModule(customer, targetModuleName);
