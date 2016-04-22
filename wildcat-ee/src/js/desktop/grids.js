@@ -1109,7 +1109,6 @@ BizListGrid.addMethods({
 				if (config && config.params) {
 					result = BizUtil.completeFilterCriteria(editorCriteria, config.params, me._view);
 				}
-
 				this.Super("filterData", [result, callback, requestProperties]);
 
 				// set the grid criteria to the old version of the criteria, if it is displayed
@@ -1119,6 +1118,15 @@ BizListGrid.addMethods({
 			},
 	
 			dataProperties: {
+				fetchDelay: 100, // need to delay and queue up fetches when using the scroll bar handle
+// THIS IS A HACK!!!!
+// dragging the scrollbar thumb on a listgrid requests excessive pages from the server.
+// I tried to use the fetchDelay setting on dataProperties (as above) but by this getRange() call
+// fetchDelay is 1 (in SmartClient_v110p_2016-04-21_LGPL), so I force it here for the time being
+getRange : function (start, end, ignoreCache, fetchNow) {
+	this.fetchDelay = 100;
+	return this.Super('getRange', arguments);
+},
 				transformData: function(newData, dsResponse) {
 					// only process this if we are doing a fetch/filter operation
 					// (by checking for "requestIndex" in the clientContext
