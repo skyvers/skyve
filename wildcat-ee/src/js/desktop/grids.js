@@ -1296,34 +1296,25 @@ getRange : function (start, end, ignoreCache, fetchNow) {
 	refresh: function() {
 //		var selectedBizId = this._eventRecord ? this._eventRecord.bizId : null;
 
-		var rowNum = this._eventRowNum;
+		var topRowNum = this.grid.getVisibleRows()[0];
+		
 		this.grid.deselectAllRecords();
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
 
-		this.grid.setCriteria(this._advancedFilter.toggleButton.selected ?
+		// NB If we don't invalidateCache, nothing happens
+		this.grid.invalidateCache();
+		// NB need to call filter data to ensure that extra filterCriteria are added.
+		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
 								this._advancedFilter.getCriteria() :
 								this.grid.getFilterEditorCriteria(true));
-		this.grid.invalidateCache();
-		this.grid.scrollToRow(rowNum);
-/*
-		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
-									this._advancedFilter.getCriteria() :
-									this.grid.getFilterEditorCriteria(true));
-
-		var me = this;
-		this.grid.filterData(this._advancedFilter.toggleButton.selected ?
-									this._advancedFilter.getCriteria() :
-									this.grid.getFilterEditorCriteria(true),
-								function(dsResponse, data, dsRequest) {
-									if (dsResponse.status >= 0) { // success
-										// this method will load data pages but there is no callback method to do the row selection after
-										me.grid.scrollToRow(rowNum);
-//										me.grid.selectSingleRecord(me._eventRownNum);
-									}
-								});
-*/
+		// NB move to the top row (approx)
+		//    this method will load data pages but there is no callback method to do the row selection after
+		// NBB The scrollToRow call below is not required in a callback as we want it to happen as fast as possible
+		//     and its not reliant on the previous calls.
+		this.grid.scrollToRow(topRowNum, 'top');
+//this.grid.selectSingleRecord(me._eventRownNum); // NB no callback in scrollToRow so can't do it afterwards
 	},
 	
 	// Called when a new record is added to a pick list view 

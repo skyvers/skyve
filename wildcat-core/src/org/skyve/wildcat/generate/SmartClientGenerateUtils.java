@@ -1437,10 +1437,10 @@ public class SmartClientGenerateUtils {
 		toAppendTo.append(drivingDocumentName);
 		toAppendTo.append("',icon:'").append(drivingDocument.getIcon32x32RelativeFileName());
 		if (! config) {
-		// ensure all filtering is server-side
-		// this enables the summary row to always stay in sync and
-		// lookups to drop down with the same criteria but load from the server
-		// NB _drop is set to true in bizLookupDescription.showPicker() JS.
+			// ensure all filtering is server-side
+			// this enables the summary row to always stay in sync and
+			// lookups to drop down with the same criteria but load from the server
+			// NB _drop is set to true in bizLookupDescription.showPicker() JS.
 			toAppendTo.append("',compareCriteria:function(newCriteria,oldCriteria,requestProperties,policy){if(this._drop){return -1;}else{return this.Super('compareCriteria',arguments)}}");
 			toAppendTo.append(",_drop:false");
 			toAppendTo.append(",transformResponse:function(dsResponse,dsRequest,data){this._drop=false;return this.Super('transformResponse',arguments)}");
