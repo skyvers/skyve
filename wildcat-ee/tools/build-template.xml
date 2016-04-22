@@ -91,7 +91,7 @@
 		<delete dir="${war-path}/css" includes="*-min.css" />
 		<delete dir="${war-path}/desktop" includes="**" />
 		<delete dir="${war-path}/images" includes="**" />
-		<delete dir="${war-path}/isomorphic101" includes="**" />
+		<delete dir="${war-path}/isomorphic110" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
 		<delete dir="${war-path}/phone" includes="**" />
 		<delete dir="${war-path}/public" includes="**" />
@@ -131,8 +131,8 @@
 		<copy todir="${war-path}/images" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/images" includes="**" />
 		</copy>
-		<copy todir="${war-path}/isomorphic101" overwrite="${assemble.overwrite}">
-			<fileset dir="${wildcat-war-path}/isomorphic101" includes="**" />
+		<copy todir="${war-path}/isomorphic110" overwrite="${assemble.overwrite}">
+			<fileset dir="${wildcat-war-path}/isomorphic110" includes="**" />
 		</copy>
 		<copy todir="${war-path}/pages" overwrite="${assemble.overwrite}">
 			<fileset dir="${wildcat-war-path}/pages" includes="**" />
