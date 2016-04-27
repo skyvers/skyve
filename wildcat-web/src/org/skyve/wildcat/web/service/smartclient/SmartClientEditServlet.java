@@ -21,6 +21,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.SessionEndedException;
@@ -494,6 +495,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	    		// We're at the top level, so just let the process bean be the contextBean
 	    		if (processBean == null) { // not persisted
 	    			processBean = contextBean;
+	    		}
+	    		// We got nothing! Either the bean has been deleted, or the user doesn't have read access on this
+	    		if (processBean == null) {
+	    			throw new NoResultsException();
 	    		}
 	    		if (persistentDocument) {
 		    		if (! user.canReadBean(processBean.getBizId(), 
