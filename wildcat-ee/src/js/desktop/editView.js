@@ -814,7 +814,12 @@ isc.EditView.addMethods({
 					if (grid.isVisible()) { // only refresh component if it is visible
 						if (grid._map) { // this is a map
 							grid.resume();
-							grid.rerender();
+							if (forcePostRefresh || 
+									// refresh only if the grids wants to be
+									(grid.postRefreshConditionName === undefined) ||
+									this._evaluateConditionName(grid.postRefreshConditionName, values)) {
+								grid.rerender();
+							}
 							this._refreshedGrids[gridID] = true;
 						}
 						else if (grid.rootIdBinding) { // tree grid with root binding
