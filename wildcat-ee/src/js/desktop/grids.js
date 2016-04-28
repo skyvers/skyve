@@ -913,7 +913,7 @@ BizListGrid.addMethods({
 				this.selectRecord(0, false);
 				return false;
 			},
-			height: 20,
+			height: 26,
 			leaveScrollbarGap: true,
 			autoFetchData: false,
 			autoFitData: null,
