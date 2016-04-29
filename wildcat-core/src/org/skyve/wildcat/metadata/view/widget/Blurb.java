@@ -90,6 +90,12 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {

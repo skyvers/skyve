@@ -217,6 +217,12 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 		this.disabledConditionName = disabledConditionName;
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
@@ -232,6 +238,12 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
 	}
 
 	@Override

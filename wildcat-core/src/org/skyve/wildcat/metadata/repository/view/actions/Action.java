@@ -89,6 +89,12 @@ public abstract class Action {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
@@ -103,6 +109,12 @@ public abstract class Action {
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 	
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
 		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));

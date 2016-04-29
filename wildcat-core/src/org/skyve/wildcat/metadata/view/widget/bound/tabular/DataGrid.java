@@ -152,6 +152,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 	
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {

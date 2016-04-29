@@ -112,6 +112,11 @@ public class GeoLocator implements MetaData, Disableable, Invisible {
 		this.disabledConditionName = disabledConditionName;
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
@@ -126,6 +131,12 @@ public class GeoLocator implements MetaData, Disableable, Invisible {
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
 	}
 
 	@Override

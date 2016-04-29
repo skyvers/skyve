@@ -149,6 +149,12 @@ public class StaticImage implements MetaData, RelativeSize, Invisible {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {

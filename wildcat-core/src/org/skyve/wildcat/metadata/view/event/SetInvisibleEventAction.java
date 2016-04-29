@@ -31,6 +31,12 @@ public class SetInvisibleEventAction extends AbstractBound implements EventActio
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "visible")
 	public void setVisibleConditionName(String visibleConditionName) {

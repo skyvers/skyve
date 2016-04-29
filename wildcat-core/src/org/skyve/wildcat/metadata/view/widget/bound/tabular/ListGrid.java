@@ -280,6 +280,12 @@ public class ListGrid implements MetaData,
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
@@ -297,6 +303,12 @@ public class ListGrid implements MetaData,
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
 	}
 	
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {

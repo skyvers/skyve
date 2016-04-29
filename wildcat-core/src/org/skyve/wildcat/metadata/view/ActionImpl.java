@@ -172,6 +172,12 @@ public class ActionImpl implements Action {
 		this.invisibleConditionName = invisibleConditionName;
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(visibleConditionName);
@@ -187,11 +193,16 @@ public class ActionImpl implements Action {
 		this.disabledConditionName = disabledConditionName;
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	public void setEnabledConditionName(String enabledConditionName) {
 		this.disabledConditionName = BindUtil.negateCondition(enabledConditionName);
 	}
-
 
 	public org.skyve.wildcat.metadata.repository.view.actions.Action toRepositoryAction() {
 		org.skyve.wildcat.metadata.repository.view.actions.Action result = null;

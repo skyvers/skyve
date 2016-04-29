@@ -225,6 +225,12 @@ public class HBox extends Container implements Box, Identifiable, Invisible, Bor
 		this.invisibleConditionName = invisibleConditionName;
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {

@@ -31,6 +31,12 @@ public class SetDisabledEventAction extends AbstractBound implements EventAction
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enabled")
 	public void setEnabledConditionName(String enabledConditionName) {

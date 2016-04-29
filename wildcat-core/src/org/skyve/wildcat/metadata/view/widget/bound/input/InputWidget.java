@@ -32,6 +32,12 @@ public abstract class InputWidget extends AbstractBound implements Disableable, 
 		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnabledConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
@@ -47,6 +53,12 @@ public abstract class InputWidget extends AbstractBound implements Disableable, 
 	@XmlAttribute(name = "invisible", required = false)
 	public void setInvisibleConditionName(String invisibleConditionName) {
 		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getVisibleConditionName() {
+		return null;
 	}
 
 	@Override
