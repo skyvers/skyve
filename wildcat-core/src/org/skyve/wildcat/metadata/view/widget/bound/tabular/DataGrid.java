@@ -175,6 +175,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disableAddConditionName = UtilImpl.processStringValue(disableAddConditionName);
 	}
 	
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableAddConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enableAdd", required = false)
 	public void setEnableAddConditionName(String enableAddConditionName) {
@@ -190,6 +196,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	@XmlAttribute(name = "disableZoom", required = false)
 	public void setDisableZoomConditionName(String disableZoomConditionName) {
 		this.disableZoomConditionName = UtilImpl.processStringValue(disableZoomConditionName);
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableZoomConditionName() {
+		return null;
 	}
 
 	@Override
@@ -209,6 +221,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disableEditConditionName = UtilImpl.processStringValue(disableEditConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableEditConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enableEdit", required = false)
 	public void setEnableEditConditionName(String enableEditConditionName) {
@@ -226,6 +244,12 @@ public class DataGrid extends TabularWidget implements Identifiable,
 		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
 	}
 	
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableRemoveConditionName() {
+		return null;
+	}
+
 	@Override
 	@XmlAttribute(name = "enableRemove", required = false)
 	public void setEnableRemoveConditionName(String enableRemoveConditionName) {

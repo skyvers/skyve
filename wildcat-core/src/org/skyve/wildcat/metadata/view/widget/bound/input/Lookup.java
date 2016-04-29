@@ -80,6 +80,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 		this.disableEditConditionName = UtilImpl.processStringValue(disableEditConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableEditConditionName() {
+		return null;
+	}
+
 	@XmlAttribute(name = "enableEdit", required = false)
 	public void setEnableEditConditionName(String enableEditConditionName) {
 		this.disableEditConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableEditConditionName));
@@ -92,6 +98,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	@XmlAttribute(name = "disableAdd", required = false)
 	public void setDisableAddConditionName(String disableAddConditionName) {
 		this.disableAddConditionName = Util.processStringValue(disableAddConditionName);
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableAddConditionName() {
+		return null;
 	}
 
 	@XmlAttribute(name = "enableAdd", required = false)
@@ -108,6 +120,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 		this.disableClearConditionName = Util.processStringValue(disableClearConditionName);
 	}
 
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnableClearConditionName() {
+		return null;
+	}
+
 	@XmlAttribute(name = "enableClear", required = false)
 	public void setEnableClearConditionName(String enableClearConditionName) {
 		this.disableClearConditionName = BindUtil.negateCondition(Util.processStringValue(enableClearConditionName));
@@ -120,6 +138,12 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	@XmlAttribute(name = "disablePick", required = false)
 	public void setDisablePickConditionName(String disablePickConditionName) {
 		this.disablePickConditionName = Util.processStringValue(disablePickConditionName);
+	}
+
+	// to enable JAXB XML marshaling
+	@SuppressWarnings("static-method")
+	String getEnablePickConditionName() {
+		return null;
 	}
 
 	@XmlAttribute(name = "enablePick", required = false)
