@@ -45,14 +45,14 @@
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 		<% } %>
 
-		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png" />
+		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
 	</head>
 	<body>
 		<table class="logo" align="center">
 			<tr height="150px">
 				<td>
-					<img src="images/WILDCAT_rev.png" alt="WILDCAT" />
+					<img src="images/skyve_inv.png" alt="Skyve" />
 				</td>
 			</tr>
 		</table>

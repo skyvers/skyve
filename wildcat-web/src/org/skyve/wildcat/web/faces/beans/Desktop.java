@@ -119,11 +119,11 @@ public class Desktop extends Harness {
 		result.append("<div id=\"formHeader\">");
 		result.append("<div>");
     	result.append("<table style=\"");
-		result.append("width:100%;background:url(images/WILDCAT_body.png) repeat-x 0 0;");
+		result.append("width:100%;background:url(images/skyve_bar.png) repeat-x 0 0;");
     	result.append("\"><tr height=\"46px\"><td width=\"1%\"><img style=\"width:32px;height:32px\" src=\"resources?_doc={modoc}&_n={icon}&v=").append(getJavascriptFileVersion());
     	result.append("\"/></td><td><div class=\"titleBar\">{title}</div></td>");
     	result.append("<td width=\"10%\" align=\"right\">");
-    	result.append("<img src=\"images/WILDCAT_soft_transparent.png\" alt=\"WILDCAT\"/></td>");
+    	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"wildcatDocumentLink\">{link}</div></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
     	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");

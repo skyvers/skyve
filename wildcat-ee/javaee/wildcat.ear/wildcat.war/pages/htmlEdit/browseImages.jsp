@@ -18,7 +18,7 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<meta http-equiv="Content-Type" CONTENT="text/html; CHARSET=utf-8">
-		<link rel="icon" type="image/png" href="images/window/WILDCAT_fav.png">
+		<link rel="icon" type="image/png" href="images/window/skyve_fav.png">
 		<title><%=Util.i18n("page.htmlEdit.browsImages.title", locale)%></title>
 		<link rel="stylesheet" type="text/css" href="../../css/basic.css"/>
 	</head>
@@ -33,8 +33,8 @@
 		<script type=text/javascript>
 			data = [
 			    {
-			        image: "WILDCAT_soft.png", 
-			        name: "WILDCAT Logo"
+			        image: "skyve_inv.png", 
+			        name: "Skyve Logo"
 			    }
 			];
 			imageURLPrefix = '../../../images/';

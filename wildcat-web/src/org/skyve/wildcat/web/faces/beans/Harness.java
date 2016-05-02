@@ -68,7 +68,7 @@ public abstract class Harness extends Localisable {
 	@SuppressWarnings("static-method")
 	public final String getWildcatVersionComment() {
 		StringBuilder result = new StringBuilder(64);
-		result.append("<!-- WILDCAT FRAMEWORK version is ").append(UtilImpl.WILDCAT_VERSION).append(" -->");
+		result.append("<!-- SKYVE FRAMEWORK version is ").append(UtilImpl.WILDCAT_VERSION).append(" -->");
 		return result.toString();
 	}
 	
