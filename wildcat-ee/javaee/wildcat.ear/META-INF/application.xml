@@ -7,7 +7,7 @@
 	<module>
 		<web>
 			<web-uri>wildcat.war</web-uri>
-			<context-root>wildcat</context-root>
+			<context-root>skyve</context-root>
 		</web>
 	</module>
 	<module>
