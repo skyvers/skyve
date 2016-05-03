@@ -4,9 +4,9 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.util.XMLUtil;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.user.DocumentPermissionScope;
-import org.skyve.wildcat.util.XMLUtil;
 
 /**
  * This class is used for collection unique constraints and for document unique constraints.

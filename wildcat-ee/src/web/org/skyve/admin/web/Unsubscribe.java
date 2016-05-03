@@ -8,11 +8,11 @@ import modules.admin.Communication.CommunicationBizlet;
 import modules.admin.Subscription.SubscriptionBizlet;
 
 import org.skyve.CORE;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.beans.Harness;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.Persistence;
-import org.skyve.wildcat.metadata.user.UserImpl;
-import org.skyve.wildcat.web.faces.FacesAction;
-import org.skyve.wildcat.web.faces.beans.Harness;
 
 @ManagedBean
 @ViewScoped

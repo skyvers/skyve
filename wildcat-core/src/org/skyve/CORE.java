@@ -4,18 +4,18 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.SortedMap;
 
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.wildcat.metadata.model.document.CollectionImpl;
-import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.util.ThreadSafeFactory;
 
 /**
- * The central factory for creating all objects required in the wildcat core API.
- * See {@link org.skyve.EXT} for creating objects implemented in wildcat ext.
+ * The central factory for creating all objects required in the skyve core API.
+ * See {@link org.skyve.EXT} for creating objects implemented in skyve ext.
  */
 public class CORE {
 	/**
@@ -67,14 +67,14 @@ public class CORE {
 	
 	/**
 	 * Get the repository for this thread of execution.
-	 * This is used to access all wildcat's metadata programmatically.
+	 * This is used to access all skyve's metadata programmatically.
 	 * Most metadata is available from {@link org.skyve.metadata.customer.Customer}
 	 * through <code>CORE.getUser().getCustomer()<code> or <code>persistence.getUser().getCustomer()</code>.
 	 * 
 	 * @return The repository.
 	 */
 	public static Repository getRepository() {
-		return org.skyve.wildcat.metadata.repository.AbstractRepository.get();
+		return org.skyve.impl.metadata.repository.AbstractRepository.get();
 	}
 	
 	/**

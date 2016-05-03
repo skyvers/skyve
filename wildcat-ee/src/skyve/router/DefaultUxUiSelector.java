@@ -2,8 +2,8 @@ package router;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.skyve.wildcat.web.UserAgent;
-import org.skyve.wildcat.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.metadata.router.UxUiSelector;
 
 public class DefaultUxUiSelector implements UxUiSelector {

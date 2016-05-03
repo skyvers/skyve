@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.Group;
 import org.skyve.CORE;
 import org.skyve.domain.ChildBean;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * GroupRole

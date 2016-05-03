@@ -9,9 +9,9 @@ import modules.admin.domain.Communication;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.job.WildcatJob;
+import org.skyve.job.SkyveJob;
 
-public class ProcessCommunicationForTagJob extends WildcatJob {
+public class ProcessCommunicationForTagJob extends SkyveJob {
 	private static final long serialVersionUID = 6282346785863992703L;
 
 	@Override

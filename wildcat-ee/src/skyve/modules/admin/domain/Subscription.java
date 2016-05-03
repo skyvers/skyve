@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.Communication.FormatType;
 import org.skyve.CORE;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * A subscription Preference models the receiver's preference about how they wish to receive the communication type (or not).

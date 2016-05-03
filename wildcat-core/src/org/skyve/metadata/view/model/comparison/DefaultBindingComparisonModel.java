@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.util.BeanVisitor;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
-import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.util.BeanVisitor;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
 	/**

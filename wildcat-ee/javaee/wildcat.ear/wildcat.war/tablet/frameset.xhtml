@@ -3,10 +3,10 @@
 		xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:h="http://java.sun.com/jsf/html"
         xmlns:f="http://java.sun.com/jsf/core"
-        dir="#{wildcat.dir}">
+        dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{wildcat.preRender}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
 		<h:head>
 	        <f:facet name="first">
@@ -20,8 +20,8 @@
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 
-			<base href="#{wildcat.baseHref}" />
-			<title>#{wildcat.i18n['page.tablet.frameset.title']}</title>
+			<base href="#{skyve.baseHref}" />
+			<title>#{skyve.i18n['page.tablet.frameset.title']}</title>
 	
 			<style>
 				* {margin: 0; padding: 0}

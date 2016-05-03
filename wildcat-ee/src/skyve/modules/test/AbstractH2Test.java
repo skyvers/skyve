@@ -22,18 +22,18 @@ import org.junit.Before;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
 import org.skyve.CORE;
+import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.user.SuperUser;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateNoContentPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.metadata.repository.LocalDesignRepository;
-import org.skyve.wildcat.metadata.user.SuperUser;
-import org.skyve.wildcat.persistence.AbstractPersistence;
-import org.skyve.wildcat.persistence.hibernate.HibernateNoContentPersistence;
-import org.skyve.wildcat.util.UtilImpl;
 
 /**
  * Invoke the JUnit test with PowerMockRunner. 
@@ -48,7 +48,7 @@ public abstract class AbstractH2Test {
 	protected static final String USER = "TestUser";
 	protected static final String CUSTOMER = "bizhub";
 
-	private static final String DB_DIALECT = "org.skyve.wildcat.persistence.hibernate.dialect.H2SpatialDialect";
+	private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
 	private static final String DB_DRIVER = "org.h2.Driver";
 	private static final String DB_URL = "jdbc:h2:mem:test";
 	//private static final String DB_URL = "jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE";

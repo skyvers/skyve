@@ -4,13 +4,13 @@
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
-		dir="#{_wildcatUpload.dir}">
-    <f:view contentType="text/html" encoding="#{_wildcatUpload.encoding}">
+		dir="#{_skyveUpload.dir}">
+    <f:view contentType="text/html" encoding="#{_skyveUpload.encoding}">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{_wildcatUpload.preRender}" />
+			<f:event type="preRenderView" listener="#{_skyveUpload.preRender}" />
 		</f:metadata>
 		<h:head>
-			<title>#{_wildcatUpload.i18n['page.fileUpload.title']}</title>
+			<title>#{_skyveUpload.i18n['page.fileUpload.title']}</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -27,10 +27,10 @@
 		</h:head>
 		<h:body>
 			<h:form enctype="multipart/form-data" prependId="false">
-				<h:inputHidden id="_c" value="#{_wildcatUpload.context}" />
-				<h:inputHidden id="_b" value="#{_wildcatUpload.binding}" />
-				<h:inputHidden id="_a" value="#{_wildcatUpload.action}" />
-				<p:fileUpload fileUploadListener="#{_wildcatUpload.handleFileUpload}" 
+				<h:inputHidden id="_c" value="#{_skyveUpload.context}" />
+				<h:inputHidden id="_b" value="#{_skyveUpload.binding}" />
+				<h:inputHidden id="_a" value="#{_skyveUpload.action}" />
+				<p:fileUpload fileUploadListener="#{_skyveUpload.handleFileUpload}" 
 								update="messages" 
 								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
 			    <p:growl id="messages" showDetail="true" />

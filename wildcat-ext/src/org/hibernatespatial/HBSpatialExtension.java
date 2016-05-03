@@ -39,7 +39,7 @@ import org.hibernatespatial.cfg.HSConfiguration;
 import org.hibernatespatial.helper.PropertyFileReader;
 import org.hibernatespatial.mgeom.MGeometryFactory;
 import org.hibernatespatial.spi.SpatialDialectProvider;
-import org.skyve.wildcat.persistence.hibernate.spatial.WildcatDialectProvider;
+import org.skyve.impl.persistence.hibernate.spatial.SkyveDialectProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,7 @@ public class HBSpatialExtension {
         }
 */
 /* START - THIS NEW BIT IS DA BOMB */
-        providers.add(new WildcatDialectProvider());
+        providers.add(new SkyveDialectProvider());
 /* END - THIS NEW BIT IS DA BOMB */
 		
         // configuration - check if there is a system property

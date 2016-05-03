@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.util.XMLUtil;
+import org.skyve.impl.util.XMLUtil;
 
 /**
  * 

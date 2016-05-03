@@ -12,9 +12,9 @@ import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.wildcat.metadata.view.widget.bound.input.InputWidget;
 
 import com.vividsolutions.jts.geom.Geometry;
 

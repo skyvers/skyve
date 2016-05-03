@@ -410,6 +410,6 @@ var eventData = [
 				url = 'http://www.bizhub.com.au/help/list.html';
 			}
 		}
-		BizUtil.popupFrame(url, "WILDCAT Help", 1024, 768);
+		BizUtil.popupFrame(url, "Skyve Help", 1024, 768);
 	}
 });

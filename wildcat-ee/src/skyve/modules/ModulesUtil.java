@@ -24,6 +24,8 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
+import org.skyve.impl.bizport.StandardGenerator;
+import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -36,13 +38,11 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
-import org.skyve.wildcat.bizport.StandardGenerator;
-import org.skyve.wildcat.bizport.StandardLoader;
 
 /**
  * Utility methods applicable across application modules.
  * <p>
- * This class is provided as part of WILDCAT
+ * This class is provided as part of Skyve
  * 
  * @author robert.brown
  * 

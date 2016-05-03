@@ -4,9 +4,9 @@ import java.util.Date;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.Decimal;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
-import org.skyve.wildcat.util.UtilImpl;
 
 import com.vividsolutions.jts.geom.Geometry;
 

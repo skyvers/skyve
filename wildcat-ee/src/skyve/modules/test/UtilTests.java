@@ -6,8 +6,8 @@ import modules.test.domain.AllAttributesPersistent;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.impl.util.JSONUtil;
 import org.skyve.util.Util;
-import org.skyve.wildcat.util.JSONUtil;
 
 public class UtilTests extends AbstractH2Test {
 	@Test

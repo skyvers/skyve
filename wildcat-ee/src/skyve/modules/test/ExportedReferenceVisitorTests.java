@@ -2,8 +2,8 @@ package modules.test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.impl.util.ExportedReferenceVisitor.Dereferencer;
 import org.skyve.util.Util;
-import org.skyve.wildcat.util.ExportedReferenceVisitor.Dereferencer;
 
 import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedExtensionSingleStrategy;

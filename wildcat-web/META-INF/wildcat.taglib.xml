@@ -7,7 +7,7 @@
 	<tag>
 		<tag-name>conversation</tag-name>
 		<component>
-			<component-type>org.skyve.wildcat.web.faces.components.Conversation</component-type>
+			<component-type>org.skyve.impl.web.faces.components.Conversation</component-type>
 			<renderer-type>javax.faces.Group</renderer-type>
 		</component>
 		<attribute>
@@ -31,7 +31,7 @@
 	<tag>
 		<tag-name>view</tag-name>
 		<component>
-			<component-type>org.skyve.wildcat.web.faces.components.View</component-type>
+			<component-type>org.skyve.impl.web.faces.components.View</component-type>
 			<renderer-type>javax.faces.Group</renderer-type>
 		</component>
 		<attribute>
@@ -64,7 +64,7 @@
 		<attribute>
 			<name>type</name>
 			<required>true</required>
-			<type>org.skyve.wildcat.web.UserAgent.UserAgentType</type>
+			<type>org.skyve.impl.web.UserAgent.UserAgentType</type>
 		</attribute>
 		<attribute>
 			<name>widgetId</name>
@@ -87,7 +87,7 @@
 	<tag>
 		<tag-name>phoneMenu</tag-name>
 		<component>
-			<component-type>org.skyve.wildcat.web.faces.components.PhoneMenu</component-type>
+			<component-type>org.skyve.impl.web.faces.components.PhoneMenu</component-type>
 			<renderer-type>javax.faces.Group</renderer-type>
 		</component>
 		<attribute>
@@ -106,7 +106,7 @@
 	<tag>
 		<tag-name>listGrid</tag-name>
 		<component>
-			<component-type>org.skyve.wildcat.web.faces.components.ListGrid</component-type>
+			<component-type>org.skyve.impl.web.faces.components.ListGrid</component-type>
 			<renderer-type>javax.faces.Group</renderer-type>
 		</component>
 		<attribute>
@@ -139,7 +139,7 @@
 		<attribute>
 			<name>type</name>
 			<required>true</required>
-			<type>org.skyve.wildcat.web.UserAgent.UserAgentType</type>
+			<type>org.skyve.impl.web.UserAgent.UserAgentType</type>
 		</attribute>
 		<attribute>
 			<description>Indicates whether this grid should allow creation of a new document bean (New Button).</description>

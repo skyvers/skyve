@@ -37,7 +37,7 @@ WindowStack.addClassProperties({
 		}
 		else {
 			result = isc.Window.create({
-				headerIconDefaults: {src: "../images/window/WILDCAT_fav.png", width: 16, height: 16},
+				headerIconDefaults: {src: "../images/window/skyve_fav.png", width: 16, height: 16},
 				autoCenter: true,
 				isModal: true,
 				showModalMask: true,

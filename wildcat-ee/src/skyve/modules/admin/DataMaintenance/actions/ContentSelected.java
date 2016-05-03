@@ -3,12 +3,12 @@ package modules.admin.DataMaintenance.actions;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.EXT;
+import org.skyve.impl.content.AttachmentContent;
+import org.skyve.impl.content.ContentManager;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
-import org.skyve.wildcat.content.AttachmentContent;
-import org.skyve.wildcat.content.ContentManager;
 
 public class ContentSelected implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 8136709192590507528L;
@@ -31,7 +31,7 @@ public class ContentSelected implements ServerSideAction<DataMaintenance> {
 				else {
 					bean.setContentLink(String.format("<a href=\"%s/content?_n=%s&_doc=%s.%s&_b=%s" + 
 														"\" target=\"_content\">%s (%s)</a>",
-														Util.getWildcatContextUrl(),
+														Util.getSkyveContextUrl(),
 														bean.getSelectedContentId(),
 														ac.getBizModule(),
 														ac.getBizDocument(),

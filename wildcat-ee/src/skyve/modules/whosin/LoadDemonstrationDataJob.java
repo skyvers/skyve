@@ -14,11 +14,11 @@ import modules.whosin.domain.Staff.Status;
 
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
-import org.skyve.job.WildcatJob;
+import org.skyve.impl.util.TimeUtil;
+import org.skyve.job.SkyveJob;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.wildcat.util.TimeUtil;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -29,7 +29,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * 
  * @author rob
  */
-public class LoadDemonstrationDataJob extends WildcatJob {
+public class LoadDemonstrationDataJob extends SkyveJob {
 	/**
 	 * For Serialization
 	 */

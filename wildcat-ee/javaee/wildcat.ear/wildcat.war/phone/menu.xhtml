@@ -8,15 +8,15 @@
 		xmlns:w="http://bizhub.com.au/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-		dir="#{wildcat.dir}">
+		dir="#{skyve.dir}">
     <f:view renderKitId="PRIMEFACES_MOBILE" encoding="UTF-8">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{wildcat.preRender}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
 		<ui:composition template="./template.xhtml">
-			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
-			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
-			<ui:param name="javascriptFileVersion" value="#{wildcat.javascriptFileVersion}" />
+			<ui:param name="baseHref" value="#{skyve.baseHref}" />
+			<ui:param name="skyveVersionComment" value="#{skyve.skyveVersionComment}" />
+			<ui:param name="javascriptFileVersion" value="#{skyve.javascriptFileVersion}" />
 			<ui:define name="pages">
 				<w:phoneMenu />
 			</ui:define>

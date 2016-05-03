@@ -8,6 +8,9 @@ import java.util.TreeSet;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.AbstractDocumentQuery;
+import org.skyve.impl.web.SortParameter;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -22,9 +25,6 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.persistence.AbstractDocumentQuery;
-import org.skyve.wildcat.web.SortParameter;
 
 public class DocumentQueryListModel extends ListModel<Bean> {
 	private static final long serialVersionUID = 8905939302545321358L;

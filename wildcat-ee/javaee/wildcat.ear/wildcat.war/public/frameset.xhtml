@@ -3,10 +3,10 @@
 		xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:h="http://java.sun.com/jsf/html"
         xmlns:f="http://java.sun.com/jsf/core"
-        dir="#{wildcat.dir}">
+        dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{wildcat.preRender}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}" />
 		</f:metadata>
 		<h:head>
 	        <f:facet name="first">
@@ -16,7 +16,7 @@
 			<META HTTP-EQUIV="Pragma" CONTENT="no-cache" />
 			<META HTTP-EQUIV="Cache-Control" CONTENT="no-cache" />
 			<META HTTP-EQUIV="Expires" CONTENT="0" />
-			<base href="#{wildcat.baseHref}" />
+			<base href="#{skyve.baseHref}" />
 			<title>RevNet</title>
 	
 			<style>

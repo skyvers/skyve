@@ -9,9 +9,9 @@ import modules.admin.ThemeCharter;
 import modules.admin.domain.SystemDashboard;
 
 import org.jfree.chart.plot.PlotOrientation;
+import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
-import org.skyve.wildcat.util.TimeUtil;
 
 public class Activity implements DynamicImage<SystemDashboard> {
 	/**

@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.skyve.domain.messages.DomainException;
-import org.skyve.wildcat.util.ThreadSafeFactory;
+import org.skyve.impl.util.ThreadSafeFactory;
 
 /**
  * 

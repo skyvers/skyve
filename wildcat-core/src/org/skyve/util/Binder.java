@@ -6,6 +6,7 @@ import java.util.SortedMap;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -14,7 +15,6 @@ import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.wildcat.bind.BindUtil;
 
 /**
  * 

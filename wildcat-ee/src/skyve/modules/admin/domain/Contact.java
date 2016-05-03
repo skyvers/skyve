@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
 
 /**
  * Contact

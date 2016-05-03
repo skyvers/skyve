@@ -4,10 +4,10 @@
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
-<%@page import="org.skyve.wildcat.web.UserAgent"%>
-<%@page import="org.skyve.wildcat.web.WebUtil"%>
+<%@page import="org.skyve.impl.web.UserAgent"%>
+<%@page import="org.skyve.impl.web.WebUtil"%>
 <%
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);

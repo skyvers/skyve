@@ -14,7 +14,7 @@ public class Reindex implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		bean.setRefreshContent(Boolean.TRUE);
 
-		org.skyve.wildcat.backup.Reindex.reindex();
+		org.skyve.impl.backup.Reindex.reindex();
 		return new ServerSideActionResult(bean);
 	}
 }

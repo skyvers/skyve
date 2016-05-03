@@ -2,7 +2,7 @@ package org.skyve.web;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.util.XMLUtil;
+import org.skyve.impl.util.XMLUtil;
 
 @XmlType(namespace = XMLUtil.COMMON_NAMESPACE)
 public enum WebAction {

@@ -8,8 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
 import org.skyve.domain.types.Timestamp;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 
 /**
  * Job

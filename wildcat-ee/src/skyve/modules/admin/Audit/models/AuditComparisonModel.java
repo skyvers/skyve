@@ -9,6 +9,11 @@ import modules.admin.domain.Audit.Operation;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.util.JSONUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -23,11 +28,6 @@ import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.metadata.model.document.field.Enumeration;
-import org.skyve.wildcat.metadata.repository.AbstractRepository;
-import org.skyve.wildcat.metadata.view.widget.bound.input.TextField;
-import org.skyve.wildcat.util.JSONUtil;
 
 public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 	private static final long serialVersionUID = 5964879680504956032L;

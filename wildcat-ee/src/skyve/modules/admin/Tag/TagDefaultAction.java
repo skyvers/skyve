@@ -6,7 +6,7 @@ import java.util.List;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 public enum TagDefaultAction {
-	tagUpsert("WILDCATUpsert", "Upsert (Save Top Level Only) Documents"), tagResave("WILDCATResave", "Save Documents"), tagDelete("WILDCATDelete", "Delete Documents"), tagValidate("WILDCATValidate", "Validate Documents");
+	tagUpsert("SkyveUpsert", "Upsert (Save Top Level Only) Documents"), tagResave("SkyveResave", "Save Documents"), tagDelete("SkyveDelete", "Delete Documents"), tagValidate("SkyveValidate", "Validate Documents");
 
 	private String code;
 	private String description;

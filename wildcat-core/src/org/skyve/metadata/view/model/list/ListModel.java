@@ -5,12 +5,12 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.web.SortParameter;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.wildcat.web.SortParameter;
 
 public abstract class ListModel<T extends Bean> implements MetaData {
 	private static final long serialVersionUID = -5786617076399299709L;

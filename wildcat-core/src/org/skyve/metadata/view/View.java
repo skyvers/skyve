@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.util.XMLUtil;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.wildcat.util.XMLUtil;
 
 /**
  * 

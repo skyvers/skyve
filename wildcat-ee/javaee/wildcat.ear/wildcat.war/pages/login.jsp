@@ -3,10 +3,10 @@
 <%@page import="org.skyve.CORE"%>
 <%@page import="org.skyve.metadata.customer.Customer"%>
 <%@ page import="org.skyve.util.Util"%>
-<%@ page import="org.skyve.wildcat.web.WebUtil"%>
-<%@ page import="org.skyve.wildcat.web.UserAgent"%>
+<%@ page import="org.skyve.impl.web.WebUtil"%>
+<%@ page import="org.skyve.impl.web.UserAgent"%>
 <%
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
 
 	// Determine the locale

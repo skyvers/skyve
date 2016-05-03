@@ -8,34 +8,34 @@
 		xmlns:w="http://bizhub.com.au/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-		dir="#{wildcat.dir}">
+		dir="#{skyve.dir}">
     <f:view renderKitId="PRIMEFACES_MOBILE" encoding="UTF-8">
 		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
-			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />
-			<f:viewParam name="m" value="#{wildcat.bizModuleParameter}" />
-			<f:viewParam name="d" value="#{wildcat.bizDocumentParameter}" />
-			<f:viewParam name="q" value="#{wildcat.queryNameParameter}" />
-			<f:viewParam name="i" value="#{wildcat.bizIdParameter}" />
-			<f:event type="preRenderView" listener="#{wildcat.preRender}"/>
+			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyve.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyve.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="wildcat" />
+		<w:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
-			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
-			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
-			<ui:param name="javascriptFileVersion" value="#{wildcat.javascriptFileVersion}" />
+			<ui:param name="baseHref" value="#{skyve.baseHref}" />
+			<ui:param name="skyveVersionComment" value="#{skyve.skyveVersionComment}" />
+			<ui:param name="javascriptFileVersion" value="#{skyve.javascriptFileVersion}" />
 			<ui:define name="pages">
 				<pm:page id="edit">
-					<pm:header title="#{wildcat.title}" fixed="true">
-						<p:button value="#{wildcat.i18n['page.phone.home']}" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
-						<p:button value="#{wildcat.i18n['page.phone.logout']}" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
+					<pm:header title="#{skyve.title}" fixed="true">
+						<p:button value="#{skyve.i18n['page.phone.home']}" styleClass="ui-btn-left ui-btn-inline" icon="ui-icon-home" href="/" />
+						<p:button value="#{skyve.i18n['page.phone.logout']}" styleClass="ui-btn-right ui-btn-inline" icon="ui-icon-gear" href="/loggedOut" />
 					</pm:header>
 					<pm:content>
 						<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
 						<h:form>
-							<w:view module="#{wildcat.bizModuleParameter}"
-										document="#{wildcat.bizDocumentParameter}"
-										managedBean="wildcat"
+							<w:view module="#{skyve.bizModuleParameter}"
+										document="#{skyve.bizDocumentParameter}"
+										managedBean="skyve"
 										type="phone" />
 						</h:form>
 					</pm:content>

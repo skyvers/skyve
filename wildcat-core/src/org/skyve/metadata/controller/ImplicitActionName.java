@@ -2,10 +2,10 @@ package org.skyve.metadata.controller;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.util.XMLUtil;
+import org.skyve.impl.util.XMLUtil;
 
 /**
- * Actions implicit to WILDCAT.
+ * Actions implicit to skyve.
  */
 @XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
 public enum ImplicitActionName {

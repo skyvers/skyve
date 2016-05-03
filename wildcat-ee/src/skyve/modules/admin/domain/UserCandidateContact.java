@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.User;
 import org.skyve.CORE;
 import org.skyve.domain.ChildBean;
-import org.skyve.wildcat.domain.AbstractTransientBean;
+import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
  * User Candidate Contact is a transient child of User, and holds the potential matching contacts

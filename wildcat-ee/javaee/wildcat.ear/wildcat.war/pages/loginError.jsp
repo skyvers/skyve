@@ -2,9 +2,9 @@
 <%@page isErrorPage="true"%>
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.util.Util"%>
-<%@page import="org.skyve.wildcat.web.UserAgent"%>
+<%@page import="org.skyve.impl.web.UserAgent"%>
 <%
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
 	Locale locale = request.getLocale();

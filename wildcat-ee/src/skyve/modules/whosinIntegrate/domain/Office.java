@@ -7,8 +7,8 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 
 /**
  * An official location where staff operate.

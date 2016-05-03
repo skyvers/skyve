@@ -4,12 +4,12 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.ValidationUtil;
 import org.skyve.domain.messages.Message;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.wildcat.util.ValidationUtil;
 
 /**
  * 

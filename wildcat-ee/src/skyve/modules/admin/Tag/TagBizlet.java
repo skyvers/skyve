@@ -11,6 +11,7 @@ import modules.admin.domain.Tagged;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.TagUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -24,7 +25,6 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.web.WebContext;
-import org.skyve.wildcat.util.TagUtil;
 
 public class TagBizlet extends Bizlet<Tag> {
 

@@ -3,11 +3,11 @@
 <%@page import="java.util.Locale"%>
 <%@page import="org.skyve.metadata.user.User"%>
 <%@page import="org.skyve.util.Util"%>
-<%@page import="org.skyve.wildcat.util.UtilImpl"%>
-<%@page import="org.skyve.wildcat.web.UserAgent"%>
-<%@page import="org.skyve.wildcat.web.WebUtil"%>
+<%@page import="org.skyve.impl.util.UtilImpl"%>
+<%@page import="org.skyve.impl.web.UserAgent"%>
+<%@page import="org.skyve.impl.web.WebUtil"%>
 <%
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	Principal p = request.getUserPrincipal();
 	User user = WebUtil.processUserPrincipalForRequest(request, (p == null) ? null : p.getName(), true);
@@ -29,7 +29,7 @@
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_DataBinding.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Calendar.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_RichTextEditor.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/wildcat/load_skin.js"></script>
+		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/skyve/load_skin.js"></script>
 		<script type=text/javascript>
 			data = [
 			    {

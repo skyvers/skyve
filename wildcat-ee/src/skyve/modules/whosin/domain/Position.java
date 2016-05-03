@@ -9,10 +9,10 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
 
 /**
  * Staff position.

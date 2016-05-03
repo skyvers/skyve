@@ -9,11 +9,11 @@ import java.util.logging.Logger;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.wildcat.util.UtilImpl;
 
 /**
  *
@@ -188,25 +188,25 @@ public class Util {
 		return UtilImpl.SERVER_URL;
 	}
 	
-	public static String getWildcatContext() {
-		return UtilImpl.WILDCAT_CONTEXT;
+	public static String getSkyveContext() {
+		return UtilImpl.SKYVE_CONTEXT;
 	}
 	
-	public static String getWildcatContextRealPath() {
-		return UtilImpl.WILDCAT_CONTEXT_REAL_PATH;
+	public static String getSkyveContextRealPath() {
+		return UtilImpl.SKYVE_CONTEXT_REAL_PATH;
 	}
 	
 	public static String getHomeUri() {
 		return UtilImpl.HOME_URI;
 	}
 	
-	public static String getWildcatContextUrl() {
-		return UtilImpl.SERVER_URL + UtilImpl.WILDCAT_CONTEXT;
+	public static String getSkyveContextUrl() {
+		return UtilImpl.SERVER_URL + UtilImpl.SKYVE_CONTEXT;
 	}
 	
 	public static String getHomeUrl() {
 		StringBuilder result = new StringBuilder(128);
-		result.append(UtilImpl.SERVER_URL).append(UtilImpl.WILDCAT_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
 		return result.toString();
 	}
 	
@@ -217,7 +217,7 @@ public class Util {
 	public static String getDocumentUrl(String bizModule, String bizDocument, String bizId) {
 		StringBuilder result = new StringBuilder(128);
 
-		result.append(UtilImpl.SERVER_URL).append(UtilImpl.WILDCAT_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
 		result.append("?a=e&m=").append(bizModule).append("&d=").append(bizDocument);
 		if (bizId != null) {
 			result.append("&i=").append(bizId);
@@ -233,7 +233,7 @@ public class Util {
 	public static String getGridUrl(String bizModule, String queryName) {
 		StringBuilder result = new StringBuilder(128);
 
-		result.append(UtilImpl.SERVER_URL).append(UtilImpl.WILDCAT_CONTEXT).append(UtilImpl.HOME_URI);
+		result.append(UtilImpl.SERVER_URL).append(UtilImpl.SKYVE_CONTEXT).append(UtilImpl.HOME_URI);
 		result.append("?a=g&m=").append(bizModule).append("&q=").append(queryName);
 
 		return result.toString();

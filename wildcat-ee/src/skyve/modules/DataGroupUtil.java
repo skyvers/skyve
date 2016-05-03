@@ -7,6 +7,7 @@ import modules.admin.domain.DataGroup;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.util.BeanVisitor;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -16,7 +17,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.wildcat.util.BeanVisitor;
 
 public class DataGroupUtil {
 	

@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.util.XMLUtil;
 import org.skyve.metadata.SortDirection;
-import org.skyve.wildcat.util.XMLUtil;
 
 /**
  * 

@@ -1,9 +1,9 @@
 package org.skyve.metadata.view.model.comparison;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.metadata.model.Attribute;
-import org.skyve.wildcat.bind.BindUtil;
-import org.skyve.wildcat.metadata.view.widget.bound.input.InputWidget;
 
 public final class ComparisonProperty {
 	private String name;

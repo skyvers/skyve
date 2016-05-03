@@ -2,13 +2,13 @@ package org.skyve.metadata.view;
 
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.util.XMLUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.wildcat.util.XMLUtil;
 
 /**
  * 

@@ -18,6 +18,12 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.impl.content.AttachmentContent;
+import org.skyve.impl.content.ContentManager;
+import org.skyve.impl.util.FileUtil;
+import org.skyve.impl.util.MailAttachment;
+import org.skyve.impl.util.TimeUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -27,12 +33,6 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
-import org.skyve.wildcat.content.AttachmentContent;
-import org.skyve.wildcat.content.ContentManager;
-import org.skyve.wildcat.util.FileUtil;
-import org.skyve.wildcat.util.MailAttachment;
-import org.skyve.wildcat.util.TimeUtil;
-import org.skyve.wildcat.util.UtilImpl;
 
 public class CommunicationUtil {
 

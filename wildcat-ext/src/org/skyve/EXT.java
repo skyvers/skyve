@@ -21,6 +21,19 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.bizport.POISheet;
+import org.skyve.impl.bizport.POIWorkbook;
+import org.skyve.impl.bizport.StandardGenerator;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.AttachmentContent;
+import org.skyve.impl.content.ContentManager;
+import org.skyve.impl.job.JobDescription;
+import org.skyve.impl.job.JobScheduler;
+import org.skyve.impl.util.MailAttachment;
+import org.skyve.impl.util.MailUtil;
+import org.skyve.impl.util.ReportUtil;
+import org.skyve.impl.util.TagUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -29,24 +42,10 @@ import org.skyve.metadata.module.Job;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
-import org.skyve.wildcat.bizport.POISheet;
-import org.skyve.wildcat.bizport.POIWorkbook;
-import org.skyve.wildcat.bizport.StandardGenerator;
-import org.skyve.wildcat.content.AbstractContentManager;
-import org.skyve.wildcat.content.AttachmentContent;
-import org.skyve.wildcat.content.ContentManager;
-import org.skyve.wildcat.job.JobDescription;
-import org.skyve.wildcat.job.JobScheduler;
-import org.skyve.wildcat.util.MailAttachment;
-import org.skyve.wildcat.util.MailUtil;
-import org.skyve.wildcat.util.ReportUtil;
-import org.skyve.wildcat.util.TagUtil;
-import org.skyve.wildcat.util.UtilImpl;
 
 /**
- * The central factory for creating all objects required in wildcat ext. See
- * {@link org.skyve.CORE} for creating objects implemented in the wildcat core
- * API.
+ * The central factory for creating all objects required in skyve ext.
+ * See {@link org.skyve.CORE} for creating objects implemented in the skyve core API.
  */
 public class EXT {
 	/**
@@ -121,12 +120,12 @@ public class EXT {
 	 * format with multiple attachments.
 	 * 
 	 * Outlook can load this format. Note - "on behalf of"... If the sender
-	 * email address differs from the wildcat configured email credentials then,
+	 * email address differs from the skyve configured email credentials then,
 	 * depending on the email client receiving the email at the destination, the
 	 * email sending address may display with an indication that it wasn't
 	 * actually sent from the email account the email says it was. For example,
 	 * outlook displays a from addresses something like
-	 * "mailer@wildcat.com (on behalf of sender@foo.com)".
+	 * "mailer@skyve.com (on behalf of sender@foo.com)".
 	 * 
 	 * @param recipientEmailAddresses
 	 *            An array of email addresses to send to.
@@ -297,7 +296,7 @@ public class EXT {
 	 * @param tagName
 	 *            The name of the tag.
 	 * @param visible
-	 *            Whether the tag should be shown throughout the wildcat UI.
+	 *            Whether the tag should be shown throughout the skyve UI.
 	 * @return The tagId of the created tag.
 	 * @throws Exception
 	 */
@@ -446,10 +445,10 @@ public class EXT {
 	}
 
 	/**
-	 * Get a JDBC connection from the wildcat connection pool. Wildcat uses a
+	 * Get a JDBC connection from the skyve connection pool. Skyve uses a
 	 * container provided JNDI data source for connections. All servlet and Java
 	 * EE App stacks can provision this service. The connection pool used by
-	 * wildcat is configured in each web app as a context parameter in web.xml.
+	 * skyve is configured in each web app as a context parameter in web.xml.
 	 * This method should be used sparingly. For SQL queries,
 	 * {@link org.skyve.persistence.Persistence} can be used in conjunction with
 	 * {@link org.skyve.persistence.SQL}.

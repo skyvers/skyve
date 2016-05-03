@@ -19,16 +19,16 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
+import org.skyve.impl.domain.types.jaxb.Decimal10Mapper;
+import org.skyve.impl.domain.types.jaxb.Decimal2Mapper;
+import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
+import org.skyve.impl.domain.types.jaxb.GeometryMapper;
+import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
+import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.types.jaxb.DateOnlyMapper;
-import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
-import org.skyve.wildcat.domain.types.jaxb.Decimal10Mapper;
-import org.skyve.wildcat.domain.types.jaxb.Decimal2Mapper;
-import org.skyve.wildcat.domain.types.jaxb.Decimal5Mapper;
-import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
-import org.skyve.wildcat.domain.types.jaxb.TimeOnlyMapper;
-import org.skyve.wildcat.domain.types.jaxb.TimestampMapper;
 
 /**
  * All persistent attributes.

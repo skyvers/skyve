@@ -3,7 +3,7 @@ package org.skyve.domain.types;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.skyve.wildcat.util.TimeUtil;
+import org.skyve.impl.util.TimeUtil;
 
 /**
  * Date and time (usually without seconds).

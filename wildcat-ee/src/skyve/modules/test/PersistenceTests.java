@@ -16,9 +16,9 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
-import org.skyve.wildcat.domain.messages.ReferentialConstraintViolationException;
 
 public class PersistenceTests extends AbstractH2Test {
 	@Test

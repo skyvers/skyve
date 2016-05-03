@@ -10,8 +10,8 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateTime;
-import org.skyve.wildcat.domain.AbstractTransientBean;
-import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
+import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
  * UserDashboard

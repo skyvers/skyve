@@ -38,7 +38,7 @@
 	<roles>
 		<role name="BasicUser">
 			<description>
-				Enough privileges and permissions to login and operate WILDCAT with access to the admin module only.
+				Enough privileges and permissions to login and operate Skyve with access to the admin module only.
 			</description>
 			<privileges>
 				<document name="Audit" permission="_R__C">

@@ -4,10 +4,10 @@
 <%@page import="org.skyve.CORE"%>
 <%@page import="org.skyve.metadata.customer.Customer"%>
 <%@page import="org.skyve.util.Util"%>
-<%@page import="org.skyve.wildcat.web.UserAgent"%>
-<%@page import="org.skyve.wildcat.web.WebUtil"%>
+<%@page import="org.skyve.impl.web.UserAgent"%>
+<%@page import="org.skyve.impl.web.WebUtil"%>
 <%
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String basePath = Util.getSkyveContextUrl() + "/";
 	boolean mobile = UserAgent.getType(request).isMobile();
 	String referer = request.getHeader("Referer");
 	

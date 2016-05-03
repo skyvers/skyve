@@ -70,9 +70,9 @@
 	</servlet-mapping>
 
     <filter>
-        <display-name>WildcatFacesFilter</display-name>
-        <filter-name>WildcatFacesFilter</filter-name>
-        <filter-class>org.skyve.wildcat.web.faces.WildcatFacesFilter</filter-class>
+        <display-name>SkyveFacesFilter</display-name>
+        <filter-name>SkyveFacesFilter</filter-name>
+        <filter-class>org.skyve.impl.web.faces.SkyveFacesFilter</filter-class>
         <init-param>
         	<param-name>forward</param-name>
         	<param-value>/home.jsp</param-value>
@@ -96,83 +96,83 @@
         </init-param>
     </filter>
     <filter-mapping>
-        <filter-name>WildcatFacesFilter</filter-name>
+        <filter-name>SkyveFacesFilter</filter-name>
 		<servlet-name>FacesServlet</servlet-name>
     </filter-mapping>
     <!-- JSPs can server-side forward to faces pages -->
     <filter-mapping>
-        <filter-name>WildcatFacesFilter</filter-name>
+        <filter-name>SkyveFacesFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
     </filter-mapping>
 
 	<listener>
-		<listener-class>org.skyve.wildcat.web.WildcatContextListener</listener-class>
+		<listener-class>org.skyve.impl.web.SkyveContextListener</listener-class>
 	</listener>
 
 	<filter>
-		<filter-name>WildcatFilter</filter-name>
-		<filter-class>org.skyve.wildcat.web.filter.WildcatFilter</filter-class>
+		<filter-name>SkyveFilter</filter-name>
+		<filter-class>org.skyve.impl.web.filter.SkyveFilter</filter-class>
 	</filter>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<url-pattern>*.xhtml</url-pattern>  <!-- just filter xhtml resources, not other resources served by faces servlet -->
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<url-pattern>*.jsp</url-pattern>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>DynamicImageServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>ReportServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientListServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientTagServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientPrevServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>SmartClientEditServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>MapServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>TextSearchServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>BizportExportServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
-		<filter-name>WildcatFilter</filter-name>
+		<filter-name>SkyveFilter</filter-name>
 		<servlet-name>TrackmateServlet</servlet-name>
 	</filter-mapping>
 
 	<filter>
 		<filter-name>NeverExpiresFilter</filter-name>
-		<filter-class>org.skyve.wildcat.web.filter.ResponseHeaderFilter</filter-class>
+		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<!-- Expires in 1 year -->
 		<init-param>
 			<param-name>Cache-Control</param-name>
@@ -196,7 +196,7 @@
 	<!-- Firefox requires public to cache resources to disk when using SSL -->
 	<filter>
 		<filter-name>PublicCacheControlFilter</filter-name>
-		<filter-class>org.skyve.wildcat.web.filter.ResponseHeaderFilter</filter-class>
+		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Cache-Control</param-name>
 			<param-value>public</param-value>
@@ -226,7 +226,7 @@
 	<!-- Frame-busting/Anti Click-jacking defence -->
 	<filter>
 		<filter-name>FrameBustingAntiClickJackingFilter</filter-name>
-		<filter-class>org.skyve.wildcat.web.filter.ResponseHeaderFilter</filter-class>
+		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
 		<init-param>
 			<param-name>Content-Security-Policy</param-name>
 			<param-value>frame-ancestors 'self'</param-value>
@@ -252,7 +252,7 @@
 
 	<servlet>
 		<servlet-name>HomeServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.HomeServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.HomeServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>HomeServlet</servlet-name>
@@ -261,7 +261,7 @@
 
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.LoginServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.LoginServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>LoginServlet</servlet-name>
@@ -282,7 +282,7 @@
 
 	<servlet>
 		<servlet-name>DynamicImageServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.DynamicImageServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.DynamicImageServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DynamicImageServlet</servlet-name>
@@ -299,7 +299,7 @@
 
 	<servlet>
 		<servlet-name>ReportServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.ReportServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.ReportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReportServlet</servlet-name>
@@ -312,7 +312,7 @@
 
 	<servlet>
 		<servlet-name>BizportExportServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.BizportExportServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.BizportExportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BizportExportServlet</servlet-name>
@@ -325,7 +325,7 @@
 
 	<servlet>
 		<servlet-name>DownloadServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.DownloadServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.DownloadServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>DownloadServlet</servlet-name>
@@ -343,7 +343,7 @@
 
 	<servlet>
 		<servlet-name>TextSearchServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.TextSearchServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.TextSearchServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TextSearchServlet</servlet-name>
@@ -352,7 +352,7 @@
 
 	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.CustomerResourceServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>CustomerResourceServlet</servlet-name>
@@ -370,7 +370,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientListServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientListServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientListServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientListServlet</servlet-name>
@@ -379,7 +379,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientSnapServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientSnapServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientSnapServlet</servlet-name>
@@ -388,7 +388,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientTagServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientTagServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTagServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientTagServlet</servlet-name>
@@ -397,7 +397,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientPrevServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientPrevServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientPrevServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientPrevServlet</servlet-name>
@@ -406,7 +406,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientEditServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientEditServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientEditServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientEditServlet</servlet-name>
@@ -415,7 +415,7 @@
 
 	<servlet>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
@@ -424,7 +424,7 @@
 
 	<servlet>
 		<servlet-name>MapServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.MapServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.MapServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>MapServlet</servlet-name>
@@ -432,7 +432,7 @@
 	</servlet-mapping>
 	<servlet>
 		<servlet-name>TrackmateServlet</servlet-name>
-		<servlet-class>org.skyve.wildcat.web.service.TrackmateServlet</servlet-class>
+		<servlet-class>org.skyve.impl.web.service.TrackmateServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>TrackmateServlet</servlet-name>

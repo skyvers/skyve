@@ -4,10 +4,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.skyve.CORE;
-import org.skyve.job.WildcatJob;
-import org.skyve.wildcat.backup.Backup;
+import org.skyve.impl.backup.Backup;
+import org.skyve.job.SkyveJob;
 
-public class BackupJob extends WildcatJob {
+public class BackupJob extends SkyveJob {
 	private static final long serialVersionUID = 5924130498320912107L;
 
 	@Override

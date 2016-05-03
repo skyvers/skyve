@@ -4,9 +4,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.wildcat.metadata.repository.NamedMetaData;
-import org.skyve.wildcat.util.UtilImpl;
-import org.skyve.wildcat.util.XMLUtil;
+import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLUtil;
 
 @XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 

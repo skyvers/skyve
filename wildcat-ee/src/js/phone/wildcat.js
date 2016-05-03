@@ -1,4 +1,4 @@
-WILDCAT = function() {
+SKYVE = function() {
 	// set some JQuery mobile settings up front
 	$.mobile.defaultPageTransition = 'none';
 	$.mobile.defaultDialogTransition = 'none';

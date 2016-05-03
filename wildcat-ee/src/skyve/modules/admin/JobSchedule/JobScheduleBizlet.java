@@ -8,10 +8,9 @@ import java.util.Set;
 import modules.admin.domain.JobSchedule;
 
 import org.quartz.CronExpression;
-
-import org.skyve.wildcat.job.JobScheduler;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.job.JobScheduler;
 import org.skyve.domain.messages.Message;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;

@@ -9,11 +9,11 @@ import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.User;
 import modules.admin.domain.UserCandidateContact;
 
-import org.skyve.wildcat.content.ContentManager;
-import org.skyve.wildcat.content.SearchResult;
-import org.skyve.wildcat.content.SearchResults;
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.impl.content.ContentManager;
+import org.skyve.impl.content.SearchResult;
+import org.skyve.impl.content.SearchResults;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;

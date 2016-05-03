@@ -15,16 +15,16 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.impl.content.AttachmentContent;
+import org.skyve.impl.content.ContentManager;
+import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
-import org.skyve.wildcat.content.AttachmentContent;
-import org.skyve.wildcat.content.ContentManager;
-import org.skyve.wildcat.web.faces.FacesAction;
-import org.skyve.wildcat.web.faces.beans.FacesView;
 
 @ViewScoped
 @ManagedBean

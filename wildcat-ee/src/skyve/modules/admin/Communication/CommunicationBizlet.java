@@ -189,7 +189,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 
 		//construct UnsubscribeUrl
 		StringBuilder url = new StringBuilder(256);
-		url.append(Util.getWildcatContextUrl());
+		url.append(Util.getSkyveContextUrl());
 		url.append("/");
 		url.append("unsubscribe.xhtml?c=").append(bean.getBizCustomer());
 		url.append("&i=").append(bean.getBizId());

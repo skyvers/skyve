@@ -15,11 +15,11 @@ import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.DateOnlyMapper;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
+import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.types.jaxb.DateOnlyMapper;
-import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
-import org.skyve.wildcat.domain.types.jaxb.GeometryMapper;
 
 /**
  * Someone who works for this organisation

@@ -4,7 +4,7 @@ parent-domain="Ignored"
 top-level-classloader="true"
 -->
 <classloading xmlns="urn:jboss:classloading:1.0"
-				domain="WILDCATApp"
+				domain="SkyveApp"
 				parent-first="false"
 				export-all="NON_EMPTY"
 				import-all="true">

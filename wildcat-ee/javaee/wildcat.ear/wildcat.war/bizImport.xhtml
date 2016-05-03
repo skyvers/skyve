@@ -4,13 +4,13 @@
 		xmlns:h="http://java.sun.com/jsf/html" 
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
-		dir="#{_wildcatBizImport.dir}">
-    <f:view contentType="text/html" encoding="#{_wildcatBizImport.encoding}">
+		dir="#{_skyveBizImport.dir}">
+    <f:view contentType="text/html" encoding="#{_skyveBizImport.encoding}">
 		<f:metadata>
-			<f:event type="preRenderView" listener="#{_wildcatBizImport.preRender}" />
+			<f:event type="preRenderView" listener="#{_skyveBizImport.preRender}" />
 		</f:metadata>
 		<h:head>
-			<title>#{_wildcatBizImport.i18n['page.bizImport.title']}</title>
+			<title>#{_skyveBizImport.i18n['page.bizImport.title']}</title>
 			<style>
 				.ui-widget {
 				    font-size: 12px !important;
@@ -27,24 +27,24 @@
 		</h:head>
 		<h:body>
 			<h:form enctype="multipart/form-data" prependId="false">
-				<h:inputHidden id="_c" value="#{_wildcatBizImport.context}" />
-				<h:inputHidden id="_b" value="#{_wildcatBizImport.binding}" />
-				<h:inputHidden id="_a" value="#{_wildcatBizImport.action}" />
-				<p:fileUpload fileUploadListener="#{_wildcatBizImport.handleFileUpload}" 
+				<h:inputHidden id="_c" value="#{_skyveBizImport.context}" />
+				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
+				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
+				<p:fileUpload fileUploadListener="#{_skyveBizImport.handleFileUpload}" 
 								update="messages problems" 
 								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
-			    <p:dataTable id="problems" value="#{_wildcatBizImport.problems}" var="problem">
-					<f:facet name="header">#{_wildcatBizImport.i18n['page.bizImport.problems']}</f:facet>
+			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">
+					<f:facet name="header">#{_skyveBizImport.i18n['page.bizImport.problems']}</f:facet>
 					<p:column width="40" style="text-align:center">
 						<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
 						<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
 					</p:column>
-					<p:column headerText="#{_wildcatBizImport.i18n['page.bizImport.where']}">
+					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.where']}">
 						<span style="font-weight: bold;">#{problem.where}</span>
 					</p:column>
-					<p:column headerText="#{_wildcatBizImport.i18n['page.bizImport.what']}">
+					<p:column headerText="#{_skyveBizImport.i18n['page.bizImport.what']}">
 						#{problem.what}
 					</p:column>
 				</p:dataTable>

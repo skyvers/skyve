@@ -17,9 +17,9 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.impl.domain.MapBean;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.view.model.list.Page;
-import org.skyve.wildcat.domain.MapBean;
 
 public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 

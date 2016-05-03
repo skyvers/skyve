@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
  * Group

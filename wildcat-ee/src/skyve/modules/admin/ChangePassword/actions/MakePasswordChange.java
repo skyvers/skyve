@@ -11,6 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -20,7 +21,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 import org.skyve.web.WebContext;
-import org.skyve.wildcat.util.UtilImpl;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	/**

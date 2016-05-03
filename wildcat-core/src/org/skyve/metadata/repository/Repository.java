@@ -3,6 +3,7 @@ package org.skyve.metadata.repository;
 import java.io.File;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -18,7 +19,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
-import org.skyve.wildcat.metadata.repository.router.Router;
 
 /**
  * 

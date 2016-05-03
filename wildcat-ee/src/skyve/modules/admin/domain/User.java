@@ -12,9 +12,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
-import org.skyve.wildcat.domain.AbstractPersistentBean;
-import org.skyve.wildcat.domain.types.jaxb.DateTimeMapper;
 
 /**
  * User

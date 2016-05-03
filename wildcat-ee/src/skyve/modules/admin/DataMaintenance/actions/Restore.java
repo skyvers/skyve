@@ -14,9 +14,9 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		bean.setRefreshContent(Boolean.TRUE);
 
-		org.skyve.wildcat.backup.Truncate.truncate(bean.getSchemaName());
-		org.skyve.wildcat.backup.Restore.restore(bean.getSelectedBackupTimestampFolderName());
-		org.skyve.wildcat.backup.Reindex.reindex();
+		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName());
+		org.skyve.impl.backup.Restore.restore(bean.getSelectedBackupTimestampFolderName());
+		org.skyve.impl.backup.Reindex.reindex();
 
 		return new ServerSideActionResult(bean);
 	}

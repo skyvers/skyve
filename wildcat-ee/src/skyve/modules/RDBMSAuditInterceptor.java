@@ -9,6 +9,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.metadata.controller.Interceptor;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -16,7 +17,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
-import org.skyve.wildcat.persistence.hibernate.AbstractHibernatePersistence;
 
 public class RDBMSAuditInterceptor extends Interceptor {
 	private static final long serialVersionUID = 8133933539853560711L;

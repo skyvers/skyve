@@ -5,7 +5,7 @@ import java.util.Date;
 
 import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.wildcat.util.TimeUtil;
+import org.skyve.impl.util.TimeUtil;
 
 /**
  * 

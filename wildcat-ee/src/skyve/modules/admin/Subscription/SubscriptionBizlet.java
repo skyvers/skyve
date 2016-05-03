@@ -27,9 +27,9 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 	private static final long serialVersionUID = -8006732196635189574L;
 
-	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "WILDCATSubscriptionUser";
+	private static final String SUBSCRIPTION_PUBLIC_USERNAME = "SkyveSubscriptionUser";
 
-	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "WILDCATSubscriptionUser";
+	private static final String SUBSCRIPTION_PUBLIC_USER_ID = "SkyveSubscriptionUser";
 
 	/**
 	 * Validation for Subscription

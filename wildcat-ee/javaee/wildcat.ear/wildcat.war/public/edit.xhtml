@@ -6,30 +6,30 @@
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:w="http://bizhub.com.au/ui"
-		dir="#{wildcat.dir}">
+		dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
 		<f:metadata>
-			<f:viewParam name="a" value="#{wildcat.webActionParameter}" />
-			<f:viewParam name="m" value="#{wildcat.bizModuleParameter}" />
-			<f:viewParam name="d" value="#{wildcat.bizDocumentParameter}" />
-			<f:viewParam name="q" value="#{wildcat.queryNameParameter}" />
-			<f:viewParam name="i" value="#{wildcat.bizIdParameter}" />
-			<f:event type="preRenderView" listener="#{wildcat.preRender}"/>
+			<f:viewParam name="a" value="#{skyve.webActionParameter}" />
+			<f:viewParam name="m" value="#{skyve.bizModuleParameter}" />
+			<f:viewParam name="d" value="#{skyve.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{skyve.queryNameParameter}" />
+			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
+			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="wildcat" />
+		<w:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
-			<ui:param name="title" value="#{wildcat.title}" />
-			<ui:param name="baseHref" value="#{wildcat.baseHref}" />
-			<ui:param name="javascriptFileVersion" value="#{wildcat.javascriptFileVersion}" />
-			<ui:param name="wildcatVersionComment" value="#{wildcat.wildcatVersionComment}" />
+			<ui:param name="title" value="#{skyve.title}" />
+			<ui:param name="baseHref" value="#{skyve.baseHref}" />
+			<ui:param name="javascriptFileVersion" value="#{skyve.javascriptFileVersion}" />
+			<ui:param name="skyveVersionComment" value="#{skyve.skyveVersionComment}" />
 			<ui:define name="head">
 			</ui:define>
 			<ui:define name="body">
 				<h:form>
-					<w:view module="#{wildcat.bizModuleParameter}"
-								document="#{wildcat.bizDocumentParameter}"
-								managedBean="wildcat"
+					<w:view module="#{skyve.bizModuleParameter}"
+								document="#{skyve.bizDocumentParameter}"
+								managedBean="skyve"
 								type="desktop" />
 				</h:form>
 			</ui:define>

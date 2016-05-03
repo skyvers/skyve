@@ -1,0 +1,773 @@
+package org.skyve.impl.metadata.repository.module;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+import org.skyve.impl.metadata.module.Job;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
+import org.skyve.impl.metadata.module.menu.MenuGroup;
+import org.skyve.impl.metadata.module.query.BizQLDefinitionImpl;
+import org.skyve.impl.metadata.module.query.DocumentQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.QueryColumnImpl;
+import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.SQLDefinitionImpl;
+import org.skyve.impl.metadata.repository.NamedMetaData;
+import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.XMLUtil;
+import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.user.DocumentPermission;
+import org.skyve.metadata.view.View.ViewType;
+
+@XmlRootElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "module")
+@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+			name = "module",
+			propOrder = {"documentation", 
+							"title",
+							"homeRef",
+							"homeDocument",
+							"jobs",
+							"documents",
+							"roles",
+							"menu",
+							"queries"})
+public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<org.skyve.metadata.module.Module> {
+	private String title;
+	private ViewType homeRef;
+	private String homeDocument;
+	private List<Job> jobs = new ArrayList<>();
+	private List<ModuleDocument> documents = new ArrayList<>();
+	private List<QueryMetaData> queries = new ArrayList<>();
+	private List<Role> roles = new ArrayList<>();
+	private Menu menu;
+	private String documentation;
+
+	public String getTitle() {
+		return title;
+	}
+
+	@XmlAttribute(required = true)
+	public void setTitle(String title) {
+		this.title = UtilImpl.processStringValue(title);
+	}
+
+	public String getHomeDocument() {
+		return homeDocument;
+	}
+
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
+	public void setHomeDocument(String homeDocument) {
+		this.homeDocument = UtilImpl.processStringValue(homeDocument);
+	}
+
+	public ViewType getHomeRef() {
+		return homeRef;
+	}
+
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	public void setHomeRef(ViewType homeRef) {
+		this.homeRef = homeRef;
+	}
+
+	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "jobs")
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "job", required = true)
+	public List<Job> getJobs() {
+		return jobs;
+	}
+
+	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "documents")
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "document", required = true)
+	public List<ModuleDocument> getDocuments() {
+		return documents;
+	}
+
+	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "queries")
+	@XmlElementRefs({@XmlElementRef(type = DocumentQueryMetaData.class),
+						@XmlElementRef(type = BizQLMetaData.class),
+						@XmlElementRef(type = SQLMetaData.class)})
+	public List<QueryMetaData> getQueries() {
+		return queries;
+	}
+
+	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "roles")
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "role", required = true)
+	public List<Role> getRoles() {
+		return roles;
+	}
+
+	public Menu getMenu() {
+		return menu;
+	}
+
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
+	public void setMenu(Menu menu) {
+		this.menu = menu;
+	}
+
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	public void setDocumentation(String documentation) {
+		this.documentation = UtilImpl.processStringValue(documentation);
+	}
+
+	@Override
+	public Module convert(String metaDataName) throws MetaDataException {
+		ModuleImpl result = new ModuleImpl();
+
+		String value = getName();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The module [name] is required");
+		}
+		result.setName(value);
+
+		value = getTitle();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The module [title] is required");
+		}
+		result.setTitle(value);
+
+		value = getHomeDocument();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The module [homeDocument] is required");
+		}
+		result.setHomeDocumentName(value);
+		if (getHomeRef() != null) {
+			result.setHomeRef(getHomeRef());
+		}
+		else {
+			result.setHomeRef(ViewType.list);
+		}
+
+		// Populate document refs
+
+		List<ModuleDocument> repositoryDocuments = getDocuments();
+		Set<String> documentNames = new TreeSet<>();
+		if (repositoryDocuments != null) {
+			for (ModuleDocument document : repositoryDocuments) {
+				DocumentRef documentRef = new DocumentRef();
+				documentRef.setDefaultQueryName(document.getDefaultQueryName());
+				value = document.getRef();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The module document [ref] is required");
+				}
+				if (! documentNames.add(value)) {
+					throw new MetaDataException(metaDataName + " : Duplicate document reference named " + value);
+				}
+
+				String referencedModuleName = document.getModuleRef();
+				if (referencedModuleName != null) {
+					documentRef.setReferencedModuleName(referencedModuleName);
+					documentRef.setOwningModuleName(referencedModuleName);
+				}
+				else {
+					documentRef.setOwningModuleName(getName());
+				}
+
+				// TODO expand on document ref when add further modules documentRef.setRelatedTo();
+				result.getDocumentRefs().put(document.getRef(), documentRef);
+			}
+		}
+		if (! documentNames.contains(result.getHomeDocumentName())) {
+			throw new MetaDataException(metaDataName + " : The module [homeDocument] " + 
+											result.getHomeDocumentName() + " is not a module document");
+		}
+
+		// Populate Jobs
+		List<Job> repositoryJobs = getJobs();
+		if (repositoryJobs != null) {
+			Set<String> jobNames = new TreeSet<>();
+			for (Job job : repositoryJobs) {
+				value = job.getName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a job is required");
+				}
+				if (! jobNames.add(value)) {
+					throw new MetaDataException(metaDataName + " : Duplicate job named " + value);
+				}
+				if (documentNames.contains(value)) {
+					throw new MetaDataException(metaDataName + " : The job named " + value + " is a module document name.");
+				}
+
+				value = job.getDisplayName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + " is required");
+				}
+				job.setOwningModuleName(result.getName());
+				result.putJob(job);
+			}
+		}
+		
+		// Populate queries
+
+		List<QueryMetaData> repositoryQueries = getQueries();
+		if (repositoryQueries != null) {
+			Set<String> queryNames = new TreeSet<>();
+			for (QueryMetaData queryMetaData : repositoryQueries) {
+				if (queryMetaData instanceof SQLMetaData) {
+					SQLMetaData sqlMetaData = (SQLMetaData) queryMetaData;
+					SQLDefinitionImpl sqlImpl = new SQLDefinitionImpl();
+					populateQueryProperties(queryMetaData, 
+												sqlImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
+					sqlImpl.setQuery(sqlMetaData.getQuery());
+				}
+				else if (queryMetaData instanceof BizQLMetaData) {
+					BizQLMetaData bizQLMetaData = (BizQLMetaData) queryMetaData;
+					BizQLDefinitionImpl bizQLImpl = new BizQLDefinitionImpl();
+					populateQueryProperties(queryMetaData,
+												bizQLImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
+					bizQLImpl.setQuery(bizQLMetaData.getQuery());
+				}
+				else if (queryMetaData instanceof DocumentQueryMetaData) {
+					DocumentQueryMetaData documentQueryMetaData = (DocumentQueryMetaData) queryMetaData;
+					DocumentQueryDefinitionImpl documentQueryImpl = new DocumentQueryDefinitionImpl();
+					populateQueryProperties(queryMetaData,
+												documentQueryImpl,
+												metaDataName,
+												result,
+												queryNames,
+												documentNames);
+
+					value = documentQueryMetaData.getDocumentName();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The [documentName] for query " + 
+														documentQueryImpl.getName() + " is required");
+					}
+					if (! documentNames.contains(value)) {
+						throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
+														documentQueryImpl.getName() + " is not a module document");
+					}
+					documentQueryImpl.setDocumentName(value);
+					documentQueryImpl.setFromClause(documentQueryMetaData.getFrom());
+					documentQueryImpl.setFilterClause(documentQueryMetaData.getFilter());
+
+					List<Column> repositoryQueryColumns = documentQueryMetaData.getColumns();
+					if (repositoryQueryColumns != null) {
+						for (Column column : repositoryQueryColumns) {
+							QueryColumnImpl queryColumn = new QueryColumnImpl();
+							queryColumn.setName(column.getName());
+							String binding = column.getBinding();
+							String expression = column.getExpression();
+							if ((binding == null) && (expression == null)) {
+								throw new MetaDataException(metaDataName + 
+																" : The [binding] and [expression] for a query column is missing in query " + 
+																documentQueryImpl.getName());
+							}
+							if ((binding != null) && (expression != null)) {
+								throw new MetaDataException(metaDataName + 
+																" : Both the [binding] and [expression] for a query column are entered in query " + 
+																documentQueryImpl.getName());
+							}
+							if ((expression != null) && (column.getName() == null)) {
+								throw new MetaDataException(metaDataName + 
+																" : An [expression] query column requires the [name] to be entered in query " + 
+																documentQueryImpl.getName());
+							}
+							queryColumn.setBinding(binding);
+							queryColumn.setExpression(expression);
+							queryColumn.setDisplayName(column.getDisplayName());
+							FilterOperator filterOperator = column.getFilterOperator();
+							String filterExpression = column.getFilterExpression();
+							if ((filterOperator != null) && 
+									(! filterOperator.equals(FilterOperator.isNull)) &&
+									(! filterOperator.equals(FilterOperator.notNull)) && 
+									(filterExpression == null)) {
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
+																" in column " + column.getBinding() + 
+																" in query " + documentQueryImpl.getName() + 
+																" requires an [expression].");
+							}
+							if (((filterOperator == null) || 
+									filterOperator.equals(FilterOperator.isNull) || 
+									filterOperator.equals(FilterOperator.notNull)) &&
+									(filterExpression != null)) {
+								throw new MetaDataException(metaDataName + " : Operator " + filterOperator + 
+																" in column " + column.getBinding() + 
+																" in query " + documentQueryImpl.getName() +
+																" does not require an [expression].");
+							}
+							queryColumn.setFilterOperator(filterOperator);
+							queryColumn.setFilterExpression(filterExpression);
+							queryColumn.setSortOrder(column.getSortOrder());
+							Boolean projected = column.getProjected();
+							if (projected != null) {
+								queryColumn.setSelected(projected.booleanValue());
+							}
+							Boolean hidden = column.getHidden();
+							if (hidden != null) {
+								queryColumn.setHidden(hidden.booleanValue());
+							}
+							Boolean sortable = column.getSortable();
+							if (sortable != null) {
+								queryColumn.setSortable(sortable.booleanValue());
+							}
+							Boolean filterable = column.getFilterable();
+							if (filterable != null) {
+								queryColumn.setFilterable(filterable.booleanValue());
+							}
+							Boolean editable = column.getEditable();
+							if (editable != null) {
+								queryColumn.setEditable(editable.booleanValue());
+							}
+	
+							documentQueryImpl.getColumns().add(queryColumn);
+						}
+					}
+
+					// TODO querylet processing query.setQuerylet();
+				}
+			}
+		}
+
+		// Populate Roles
+		Set<String> roleNames = new TreeSet<>();
+		List<Role> repositoryRoles = getRoles();
+		if (repositoryRoles != null) {
+			for (Role roleMetaData : repositoryRoles) {
+				RoleImpl role = new RoleImpl();
+				value = roleMetaData.getName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
+				}
+				if (! roleNames.add(value)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role named " + value);
+				}
+				if (documentNames.contains(value)) {
+					throw new MetaDataException(metaDataName + " : The role named " + value + " is a module document name.");
+				}
+				role.setName(value);
+				role.setDescription(roleMetaData.getDescription());
+				role.setDocumentation(roleMetaData.getDocumentation());
+				
+				Set<String> docPrivNames = new TreeSet<>();
+				List<DocumentPrivilege> repositoryDocPrivileges = roleMetaData.getPrivileges();
+				if (repositoryDocPrivileges != null) {
+					for (DocumentPrivilege documentPrivilegeMetaData : repositoryDocPrivileges) {
+						org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
+						value = documentPrivilegeMetaData.getDocumentName();
+						if (value == null) {
+							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + 
+															role.getName());
+						}
+						if ( !docPrivNames.add(value)) {
+							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value +
+															" in role " + role.getName());
+						}
+						if ( !documentNames.contains(value)) {
+							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
+															" in role " + role.getName() + " is not a module document");
+						}
+						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
+							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
+															" in role " + role.getName() +
+															" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
+						}
+
+						documentPrivilege.setName(value);
+						DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
+						if (docPermission == null) {
+							throw new MetaDataException(metaDataName + " : Document permission is required for document " +
+															documentPrivilege.getName() + " in role " + role.getName());
+						}
+						documentPrivilege.setPermission(docPermission);
+
+						role.getPrivileges().add(documentPrivilege);
+
+						// Add the action privileges also
+						List<ActionPrivilege> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
+						if (repositoryActionPrivileges != null) {
+							for (ActionPrivilege actionPrivilegeMetaData : repositoryActionPrivileges) {
+								org.skyve.impl.metadata.user.ActionPrivilege actionPrivilege = new org.skyve.impl.metadata.user.ActionPrivilege();
+								value = actionPrivilegeMetaData.getActionName();
+								if (value == null) {
+									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
+																	documentPrivilege.getName() + " in role " + role.getName());
+								}
+								actionPrivilege.setName(value);
+								actionPrivilege.setDocumentName(documentPrivilege.getName());
+
+								role.getPrivileges().add(actionPrivilege);
+							}
+						}
+
+						// Add the content restrictions
+						List<ContentRestriction> contentRestrictions = documentPrivilegeMetaData.getContentRestrictions();
+						if (contentRestrictions != null) {
+							for (ContentRestriction contentRestriction : contentRestrictions) {
+								value = contentRestriction.getAttributeName();
+								if (value == null) {
+									throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
+																	documentPrivilege.getName() + " in role " + role.getName());
+								}
+								contentRestriction.setDocumentName(documentPrivilege.getName());
+
+								role.getContentRestrictions().add(contentRestriction);
+							}
+						}
+
+						// Add the content permissions
+						List<ContentPermission> contentPermissions = documentPrivilegeMetaData.getContentPermissions();
+						if (contentPermissions != null) {
+							for (ContentPermission contentPermission : contentPermissions) {
+								value = contentPermission.getAttributeName();
+								if (value == null) {
+									throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
+																	documentPrivilege.getName() + " in role " + role.getName());
+								}
+								contentPermission.setDocumentName(documentPrivilege.getName());
+
+								role.getContentPermissions().add(contentPermission);
+							}
+						}
+					}
+				}
+
+				result.putRole(role);
+			}
+		}
+
+		// Populate the menu
+
+		org.skyve.impl.metadata.module.menu.Menu resultMenu = new org.skyve.impl.metadata.module.menu.Menu();
+		List<MenuItem> items = resultMenu.getItems();
+
+		populateModuleMenu(metaDataName, items, getMenu().getActions(), roleNames);
+		result.setMenu(resultMenu);
+
+		result.setDocumentation(documentation);
+		
+		return result;
+	}
+
+	private void populateModuleMenu(String metaDataName, 
+										List<MenuItem> items, 
+										List<Action> actions, 
+										Set<String> validRoleNames)
+	throws MetaDataException {
+		for (Action action : actions) {
+			if (action instanceof Group) {
+				String value = action.getName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a menu group is required");
+				}
+				Group group = (Group) action;
+				MenuGroup menuGroup = new MenuGroup();
+				menuGroup.setName(value);
+				populateUxuis(metaDataName, value, group.getUxuis(), menuGroup.getUxUis());
+				populateModuleMenu(metaDataName, menuGroup.getItems(), group.getActions(), validRoleNames);
+				
+				items.add(menuGroup);
+			}
+			else if (action instanceof CalendarItem) {
+				CalendarItem item = (CalendarItem) action;
+				org.skyve.impl.metadata.module.menu.CalendarItem result = new org.skyve.impl.metadata.module.menu.CalendarItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+
+				String documentName = item.getDocumentName();
+				String queryName = item.getQueryName();
+				String modelName = item.getModelName();
+				String startBinding = item.getStartBinding();
+				String endBinding = item.getEndBinding();
+				
+				if (documentName != null) {
+					if ((queryName != null) ||
+							(startBinding == null) || 
+							(endBinding == null)) {
+						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
+														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
+					}
+				}
+				else if (queryName != null) {
+					if ((modelName != null) ||
+							(startBinding == null) || 
+							(endBinding == null)) {
+						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
+					}
+				}
+				else if (modelName != null) {
+					if ((startBinding != null) || (endBinding != null)) {
+						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " + 
+														"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
+					}
+				}
+				else {
+					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
+													"is required for menu item " + item.getName());
+				}
+				
+				result.setDocumentName(documentName);
+				result.setModelName(modelName);
+				result.setQueryName(queryName);
+				result.setStartBinding(startBinding);
+				result.setEndBinding(endBinding);
+				
+				items.add(result);
+			}
+			else if (action instanceof LinkItem) {
+				LinkItem item = (LinkItem) action;
+				org.skyve.impl.metadata.module.menu.LinkItem result = new org.skyve.impl.metadata.module.menu.LinkItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+				
+				String href = item.getHref();
+				if (href == null) {
+					throw new MetaDataException(metaDataName + " : [href] is required for menu item " + item.getName());
+				}
+				result.setHref(href);
+				
+				items.add(result);
+			}
+			else if (action instanceof EditItem) {
+				EditItem item = (EditItem) action;
+				org.skyve.impl.metadata.module.menu.EditItem result = new org.skyve.impl.metadata.module.menu.EditItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+				
+				String documentName = item.getDocumentName();
+				if (documentName == null) {
+					throw new MetaDataException(metaDataName + " : [document] is required for menu item " + item.getName());
+				}
+				result.setDocumentName(documentName);
+				
+				items.add(result);
+			}
+			else if (action instanceof ListItem) {
+				ListItem item = (ListItem) action;
+				org.skyve.impl.metadata.module.menu.ListItem result = new org.skyve.impl.metadata.module.menu.ListItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+
+				String documentName = item.getDocumentName();
+				String queryName = item.getQueryName();
+				String modelName = item.getModelName();
+
+				if (documentName != null) {
+					if (queryName != null) {
+						throw new MetaDataException(metaDataName + 
+														" : If [document] is present, then [query] should be absent " + 
+														"for menu item " + item.getName());
+					}
+				}
+				else if (queryName != null) {
+					if (modelName != null) {
+						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+														"for menu item " + item.getName());
+					}
+				}
+				else if (modelName != null) {
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
+				}
+				else {
+					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
+													"is required for menu item " + item.getName());
+				}
+
+				result.setDocumentName(documentName);
+				result.setQueryName(queryName);
+				result.setModelName(modelName);
+				
+				items.add(result);
+			}
+			else if (action instanceof MapItem) {
+				MapItem item = (MapItem) action;
+				org.skyve.impl.metadata.module.menu.MapItem result = new org.skyve.impl.metadata.module.menu.MapItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+
+				String documentName = item.getDocumentName();
+				String queryName = item.getQueryName();
+				String modelName = item.getModelName();
+				String geometryBinding = item.getGeometryBinding();
+				Integer refreshTimeInSeconds = item.getRefreshTimeInSeconds();
+				
+				if (documentName != null) {
+					if ((queryName != null) ||
+							(geometryBinding == null)) {
+						throw new MetaDataException(metaDataName + " : If [document] is present, then [query] should be absent " + 
+														"and [geometryBinding] is required for menu item " + item.getName());
+					}
+				}
+				else if (queryName != null) {
+					if ((modelName != null) ||
+							(geometryBinding == null)) {
+						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+														"and [geometryBinding] is required for menu item " + item.getName());
+					}
+				}
+				else if (modelName != null) {
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
+				}
+				else {
+					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
+													"is required for menu item " + item.getName());
+				}
+				if ((refreshTimeInSeconds != null) && refreshTimeInSeconds.intValue() < 5) {
+					throw new MetaDataException(metaDataName + " : [refreshTimeInSeconds] must be at least 5");
+				}
+				
+				result.setDocumentName(documentName);
+				result.setModelName(modelName);
+				result.setQueryName(queryName);
+				result.setGeometryBinding(geometryBinding);
+				result.setShowRefreshControls(item.getShowRefreshControls());
+				result.setRefreshTimeInSeconds(refreshTimeInSeconds);
+				
+				items.add(result);
+			}
+			else if (action instanceof TreeItem) {
+				TreeItem item = (TreeItem) action;
+				org.skyve.impl.metadata.module.menu.TreeItem result = new org.skyve.impl.metadata.module.menu.TreeItem();
+				populateItem(metaDataName, validRoleNames, result, item);
+
+				String documentName = item.getDocumentName();
+				String queryName = item.getQueryName();
+				String modelName = item.getModelName();
+				
+				if (documentName != null) {
+					if (queryName != null) {
+						throw new MetaDataException(metaDataName + " : If [document] is present, " +
+														"then [query] should be absent for menu item " + 
+														item.getName());
+					}
+				}
+				else if (queryName != null) {
+					if (modelName != null) {
+						throw new MetaDataException(metaDataName + " : If [query] is present, then [model] and [document] should be absent " + 
+														"for menu item " + item.getName());
+					}
+				}
+				else if (modelName != null) {
+					throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required " + 
+													"for menu item " + item.getName());
+				}
+				else {
+					throw new MetaDataException(metaDataName + " : One of [document], [query] or [model] " + 
+													"is required for menu item " + item.getName());
+				}
+				
+				result.setDocumentName(documentName);
+				result.setModelName(modelName);
+				result.setQueryName(queryName);
+				
+				items.add(result);
+			}
+			else {
+				throw new MetaDataException("Item " + action.getClass() + " is not supported");
+			}
+		}
+	}
+	
+	private void populateItem(String metaDataName,
+								Set<String> validRoleNames,
+								AbstractMenuItem result,
+								Item metadata) 
+	throws MetaDataException {
+		String value = metadata.getName();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");
+		}
+		result.setName(value);
+		
+		Set<String> grantNames = new TreeSet<>();
+		List<GrantedTo> grants = metadata.getRoles();
+		if (grants.isEmpty()) {
+			throw new MetaDataException(metaDataName + " : At least one role is required for menu item " + result.getName());
+		}
+		for (GrantedTo grant : grants) {
+			value = grant.getRoleName();
+			if (value == null) {
+				throw new MetaDataException(metaDataName + " : The [roleName] is required for a grant for menu item " +
+												result.getName());
+			}
+			if (! grantNames.add(value)) {
+				throw new MetaDataException(metaDataName + " : Duplicate grant for role " + 
+												value + " in menu item " + result.getName());
+			}
+			if (! validRoleNames.contains(value)) {
+				// allow implicit data administrator role through
+				if (! UserImpl.DATA_ADMINISTRATOR_ROLE.equals(getName() + '.' + value)) {
+					throw new MetaDataException(metaDataName + " : The role " + value + " granted in menu item " +
+													result.getName() + " is not defined in this module");
+				}
+			}
+			result.getRoleNames().add(value);
+		}
+		populateUxuis(metaDataName, result.getName(), metadata.getUxuis(), result.getUxUis());
+	}
+	
+	private static void populateQueryProperties(QueryMetaData queryMetaData, 
+													QueryDefinitionImpl query, 
+													String metaDataName,
+													ModuleImpl owningModule,
+													Set<String> queryNames,
+													Set<String> documentNames)
+	throws MetaDataException {
+		String value = queryMetaData.getName();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [name] for a query is required");
+		}
+		if (! queryNames.add(value)) {
+			throw new MetaDataException(metaDataName + " : Duplicate query named " + value);
+		}
+		if (documentNames.contains(value)) {
+			throw new MetaDataException(metaDataName + " : The query named " + value + " is a module document name.");
+		}
+		query.setName(value);
+
+		value = queryMetaData.getDescription();
+		if (value == null) {
+			throw new MetaDataException(metaDataName + " : The [description] for query " + query.getName() + " is required");
+		}
+		query.setDescription(value);
+		query.setDocumentation(queryMetaData.getDocumentation());
+
+		query.setOwningModule(owningModule);
+		owningModule.putQuery(query);
+	}
+
+	private static void populateUxuis(String metaDataName, 
+										String itemName, 
+										List<ApplicableTo> uxuis, 
+										Set<String> uxuisToAddTo)
+	throws MetaDataException {
+		Set<String> applicableUxuis = new TreeSet<>();
+		for (ApplicableTo uxui : uxuis) {
+			String value = uxui.getUxUi();
+			if (value == null) {
+				throw new MetaDataException(metaDataName + " : The [name] is required for a uxui for menu item " +
+												itemName);
+			}
+			if (! applicableUxuis.add(value)) {
+				throw new MetaDataException(metaDataName + " : Duplicate uxui " + 
+												value + " in menu item " + itemName);
+			}
+			uxuisToAddTo.add(value);
+		}
+	}
+}

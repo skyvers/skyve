@@ -18,6 +18,12 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.ContentManager;
+import org.skyve.impl.content.SearchResult;
+import org.skyve.impl.content.ContentIterable.ContentIterator;
+import org.skyve.impl.domain.MapBean;
+import org.skyve.impl.metadata.module.query.QueryColumnImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -26,12 +32,6 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.Util;
-import org.skyve.wildcat.content.AbstractContentManager;
-import org.skyve.wildcat.content.ContentIterable.ContentIterator;
-import org.skyve.wildcat.content.ContentManager;
-import org.skyve.wildcat.content.SearchResult;
-import org.skyve.wildcat.domain.MapBean;
-import org.skyve.wildcat.metadata.module.query.QueryColumnImpl;
 
 public class ContentModel extends ListModel<DataMaintenance> {
 	private static final long serialVersionUID = -5285830669475992183L;

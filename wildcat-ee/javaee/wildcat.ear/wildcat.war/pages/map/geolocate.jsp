@@ -1,10 +1,10 @@
 <%@ page language="java"%>
-<%@ page import="org.skyve.wildcat.util.UtilImpl" %>
+<%@ page import="org.skyve.impl.util.UtilImpl" %>
 <%@ page import="org.skyve.util.Util" %>
 
 <% 
-	String path = Util.getWildcatContext();
-	String basePath = Util.getWildcatContextUrl() + "/";
+	String path = Util.getSkyveContext();
+	String basePath = Util.getSkyveContextUrl() + "/";
 
 	StringBuilder onload = new StringBuilder(128);
 	String latitudeBinding = request.getParameter("_latitude");

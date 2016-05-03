@@ -14,7 +14,7 @@ public class Backup implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		bean.setRefreshBackups(Boolean.TRUE);
 		
-		org.skyve.wildcat.backup.Backup.backup();
+		org.skyve.impl.backup.Backup.backup();
 		return new ServerSideActionResult(bean);
 	}
 }

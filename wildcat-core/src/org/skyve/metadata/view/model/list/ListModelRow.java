@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.domain.MapBean;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.wildcat.domain.MapBean;
 
 public class ListModelRow extends MapBean {
 	private static final long serialVersionUID = 477773812246146903L;
