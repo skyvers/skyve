@@ -1,0 +1,27 @@
+CLASSPATH=../lib/javaee-api-7.0.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/jcr-1.0.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/jackrabbit-jcr-commons-1.4.2.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/jackrabbit-text-extractors-1.4.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/hibernate3.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/hibernate-entitymanager.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/hibernate-commons-annotations.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/hibernate-annotations.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/jts-1.13.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/dom4j-1.6.1.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/cglib-2.2.2.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/asm-3.2.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/slf4j-api-1.5.0.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/slf4j-simple-1.5.0.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/commons-logging-1.1.1.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/commons-codec-1.3.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/commons-collections-3.2.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/skyve-core.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/skyve-ext.jar
+CLASSPATH=$CLASSPATH:lib/skyve-tools.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/apps.jar/
+CLASSPATH=$CLASSPATH:../lib/h2-1.3.173.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/geodb-0.7.jar
+CLASSPATH=$CLASSPATH:../javaee/skyve.ear/lib/geodb_hatbox-1.0.b7.jar
+CLASSPATH=$CLASSPATH:../lib/mariadb-java-client-1.1.7.jar
+CLASSPATH=$CLASSPATH:../lib/sqljdbc4.jar
+java -cp $CLASSPATH org.skyve.impl.tools.kickstart.KickStart

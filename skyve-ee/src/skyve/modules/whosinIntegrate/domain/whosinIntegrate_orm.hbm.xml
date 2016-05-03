@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<typedef name="OptimisticLock" class="org.skyve.impl.domain.types.OptimisticLockUserType" />
+	<typedef name="Decimal2" class="org.skyve.impl.domain.types.Decimal2UserType" />
+	<typedef name="Decimal5" class="org.skyve.impl.domain.types.Decimal5UserType" />
+	<typedef name="Decimal10" class="org.skyve.impl.domain.types.Decimal10UserType" />
+	<typedef name="DateOnly" class="org.skyve.impl.domain.types.DateOnlyUserType" />
+	<typedef name="DateTime" class="org.skyve.impl.domain.types.DateTimeUserType" />
+	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
+	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
+	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
+	<typedef name="Geometry" class="org.hibernatespatial.GeometryUserType" />
+
+	<class name="modules.whosinIntegrate.domain.Office" table="WHO_Office" entity-name="whosinIntegrateOffice">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="levelUnit" length="200" />
+		<property name="buildingName" length="200" />
+		<property name="streetAddress" length="200" />
+		<property name="suburb" length="200" />
+		<property name="postCode" length="4" />
+		<property name="phone" length="14" />
+		<property name="boundary" type="Geometry" />
+		<filter name="whosinIntegrateOfficeNoneFilter" condition="1=0"/>
+		<filter name="whosinIntegrateOfficeCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="whosinIntegrateOfficeDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="whosinIntegrateOfficeUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.whosinIntegrate.domain.Staff" table="WHO_Staff" entity-name="whosinIntegrateStaff">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" />
+		<property name="staffCode" length="50" />
+		<property name="dateOfBirth" type="DateOnly" />
+		<property name="roleTitle" length="200" />
+		<many-to-one name="baseOffice" entity-name="whosinIntegrateOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" />
+		<property name="location" type="Geometry" />
+		<property name="status" length="9">
+			<type name="Enum">
+				<param name="enumClass">modules.whosinIntegrate.domain.Staff$Status</param>
+			</type>
+		</property>
+		<property name="dueBack" type="DateTime" />
+		<filter name="whosinIntegrateStaffNoneFilter" condition="1=0"/>
+		<filter name="whosinIntegrateStaffCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="whosinIntegrateStaffDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="whosinIntegrateStaffUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<filter-def name="whosinIntegrateOfficeNoneFilter" />
+	<filter-def name="whosinIntegrateOfficeCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinIntegrateOfficeDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinIntegrateOfficeUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinIntegrateStaffNoneFilter" />
+	<filter-def name="whosinIntegrateStaffCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinIntegrateStaffDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="whosinIntegrateStaffUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+</hibernate-mapping>

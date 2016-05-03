@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-beanutils.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/ehcache-core-2.0.1.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/quartz-1.6.0.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/hibernate3.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/jts-1.13.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/jasperreports-javaflow-4.7.0.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/thumbnailator-0.4.8.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/skyve-ee/lib/javaee-api-7.0.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/poi-3.10.1.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-5.3.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-extensions-4.0.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

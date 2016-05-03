@@ -1,0 +1,13 @@
+/content
+/javaee/skyve.ear/apps.jar
+/javaee/skyve.ear/lib
+/javaee/skyve.ear/skyve.war/WEB-INF/lib
+/javaee/skyve.ear/skyve.war/WEB-INF/classes
+/javaee/skyve.ear.deployed
+/javaee/skyve-ds.xml.deployed
+/lib
+/src/js/desktop/skyve.js
+/tools/lib
+/demo
+/demo.zip
+/libs.zip
