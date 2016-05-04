@@ -3,8 +3,8 @@ package modules.admin.Communication.actions;
 import modules.admin.domain.Communication;
 
 import org.apache.commons.codec.binary.Base64;
-import org.skyve.impl.util.FileUtil;
 import org.skyve.metadata.controller.UploadAction;
+import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;
 
 public class AddImage extends UploadAction<Communication> {

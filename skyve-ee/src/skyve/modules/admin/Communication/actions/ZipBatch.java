@@ -5,9 +5,9 @@ import java.io.File;
 import modules.admin.domain.Communication;
 
 import org.skyve.CORE;
-import org.skyve.impl.util.FileUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.DownloadAction;
+import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;
 
 public class ZipBatch extends DownloadAction<Communication> {

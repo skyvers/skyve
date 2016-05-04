@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.util;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -17,9 +17,9 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.DownloadAction.Download;
+import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
-import org.skyve.impl.util.FileUtil;
 
 /**
  * Basic file utilities

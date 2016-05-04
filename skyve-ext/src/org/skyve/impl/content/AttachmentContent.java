@@ -6,8 +6,8 @@ import java.io.InputStream;
 import java.util.Date;
 
 import org.skyve.content.MimeType;
-import org.skyve.impl.util.FileUtil;
 import org.skyve.impl.content.Content;
+import org.skyve.util.FileUtil;
 
 public class AttachmentContent extends Content {
 	private static final long serialVersionUID = 5929667528318345993L;
