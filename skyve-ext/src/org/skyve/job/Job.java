@@ -2,7 +2,7 @@ package org.skyve.job;
 
 import org.skyve.impl.job.AbstractSkyveJob;
 
-public abstract class SkyveJob extends AbstractSkyveJob {
+public abstract class Job extends AbstractSkyveJob {
 	private static final long serialVersionUID = 1333768405570850256L;
 
 	/**

@@ -15,7 +15,7 @@ import modules.whosin.domain.Staff.Status;
 import org.skyve.CORE;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.impl.util.TimeUtil;
-import org.skyve.job.SkyveJob;
+import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
@@ -29,7 +29,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * 
  * @author rob
  */
-public class LoadDemonstrationDataJob extends SkyveJob {
+public class LoadDemonstrationDataJob extends Job {
 	/**
 	 * For Serialization
 	 */

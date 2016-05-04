@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.impl.backup.Backup;
-import org.skyve.job.SkyveJob;
+import org.skyve.job.Job;
 
-public class BackupJob extends SkyveJob {
+public class BackupJob extends Job {
 	private static final long serialVersionUID = 5924130498320912107L;
 
 	@Override

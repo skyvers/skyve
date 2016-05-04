@@ -13,7 +13,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.job.SkyveJob;
+import org.skyve.job.Job;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -24,7 +24,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
 
-public class PerformDocumentActionForTagJob extends SkyveJob {
+public class PerformDocumentActionForTagJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
 
 	@Override
