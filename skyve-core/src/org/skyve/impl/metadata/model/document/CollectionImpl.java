@@ -11,19 +11,19 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "collection")
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "collection")
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
 			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints"})
 public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "ordering", propOrder = {"sort", "by"})
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering", propOrder = {"sort", "by"})
 	public static final class OrderingImpl implements Ordering {
 		private String by;
 		private SortDirection sort;
@@ -105,7 +105,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 		return maxCardinality;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setMaxCardinality(Integer maxCardinality) {
 		this.maxCardinality = maxCardinality;
 	}
@@ -115,20 +115,20 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 		return minCardinality;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setMinCardinality(Integer minCardinality) {
 		this.minCardinality = minCardinality;
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "ordering")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "order", type = OrderingImpl.class, required = false)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "order", type = OrderingImpl.class, required = false)
 	public List<org.skyve.metadata.model.document.Collection.Ordering> getOrdering() {
 		return ordering;
 	}
 
 	@Override
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 					name = "unique",
 					type = UniqueConstraintImpl.class,
 					required = false)

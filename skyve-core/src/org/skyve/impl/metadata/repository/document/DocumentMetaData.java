@@ -53,7 +53,7 @@ import org.skyve.impl.metadata.model.document.field.validator.TextValidator.Vali
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
@@ -66,8 +66,8 @@ import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "document")
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "document",
 			propOrder = {"documentation",
 							"extends",
@@ -106,7 +106,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return inherits;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
 	}
@@ -115,7 +115,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return persistent;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = false)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
 	public void setPersistent(Persistent persistent) {
 		this.persistent = persistent;
 	}
@@ -124,7 +124,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return singularAlias;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setSingularAlias(String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
@@ -133,7 +133,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return pluralAlias;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setPluralAlias(String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
@@ -142,7 +142,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return icon16x16RelativeFilePath;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
@@ -151,7 +151,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return icon32x32RelativeFilePath;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
@@ -160,7 +160,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return audited;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setAudited(java.lang.Boolean audited) {
 		this.audited = audited;
 	}
@@ -169,7 +169,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return description;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -178,7 +178,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return parentDocument;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setParentDocument(String parentDocument) {
 		this.parentDocument = UtilImpl.processStringValue(parentDocument);
 	}
@@ -187,12 +187,12 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return bizKey;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setBizKey(BizKey bizKey) {
 		this.bizKey = bizKey;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "attributes", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "attributes", required = true)
 	@XmlElementRefs({@XmlElementRef(type = Text.class),
 						@XmlElementRef(type = Date.class),
 						@XmlElementRef(type = Time.class),
@@ -218,14 +218,14 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return attributes;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "conditions")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "condition", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "conditions")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "condition", required = true)
 	public List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "constraint", required = false)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "constraint", required = false)
 	public List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
@@ -234,7 +234,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		return documentation;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}

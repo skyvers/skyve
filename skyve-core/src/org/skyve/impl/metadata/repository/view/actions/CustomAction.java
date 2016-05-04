@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "action")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "action")
 public class CustomAction extends ClassAction {
 	private Boolean clientValidation;
 

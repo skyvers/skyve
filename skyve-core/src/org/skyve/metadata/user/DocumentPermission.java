@@ -2,12 +2,12 @@ package org.skyve.metadata.user;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * 
  */
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public enum DocumentPermission {
 	_____(false, false, false, false, DocumentPermissionScope.none), 
 	

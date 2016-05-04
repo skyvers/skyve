@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(name = "map", namespace = XMLUtil.MODULE_NAMESPACE)
-@XmlRootElement(name  = "map", namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(name = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
+@XmlRootElement(name  = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class MapItem extends Item {
 	private String documentName;
 	private String queryName;

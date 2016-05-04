@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * This reference can specify a module and document and optionally a binding to a bizId
@@ -14,8 +14,8 @@ import org.skyve.impl.util.XMLUtil;
  * 
  * @author mike
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class EditViewReference extends AbstractBound implements Reference {
 	/**
 	 * For Serialization

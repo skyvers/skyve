@@ -5,12 +5,12 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.impl.metadata.model.document.field.ConstrainableField;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class ConvertableField extends ConstrainableField {
 	/**
 	 * For Serialization
@@ -24,7 +24,7 @@ public class ConvertableField extends ConstrainableField {
 		return converterName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setConverterName(ConverterName converterName) {
 		this.converterName = converterName;
 	}

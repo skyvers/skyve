@@ -8,10 +8,10 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "format")
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "format")
 public class TextFormat {
 	private Format<String> format;
 	

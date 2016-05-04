@@ -7,11 +7,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.ROUTER_NAMESPACE)
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class UxUi extends NamedMetaData {
-	@XmlElement(namespace = XMLUtil.ROUTER_NAMESPACE, name = "route", required = true)
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "route", required = true)
 	private List<Route> routes = new ArrayList<>();
 
 	public List<Route> getRoutes() {

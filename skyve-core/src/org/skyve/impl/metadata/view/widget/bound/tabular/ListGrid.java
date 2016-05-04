@@ -24,7 +24,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Filterable;
@@ -32,8 +32,8 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"pixelWidth",
 							"percentageWidth",
@@ -165,7 +165,7 @@ public class ListGrid implements MetaData,
 	}
 
 	@Override
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, 
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, 
 					name = "filterParameter",
 					type = FilterParameterImpl.class,
 					required = false)
@@ -510,7 +510,7 @@ public class ListGrid implements MetaData,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onEditedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onEditedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -520,7 +520,7 @@ public class ListGrid implements MetaData,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onDeletedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onDeletedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -530,7 +530,7 @@ public class ListGrid implements MetaData,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onSelectedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onSelectedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

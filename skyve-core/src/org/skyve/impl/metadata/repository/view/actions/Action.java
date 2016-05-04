@@ -6,10 +6,10 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			name = "abstractAction",
 			propOrder = {"name", 
 							"displayName",

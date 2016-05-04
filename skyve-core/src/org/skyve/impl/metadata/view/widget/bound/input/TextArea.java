@@ -6,12 +6,12 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.MinimumHeight;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"wordWrap", "editable", "pixelWidth", "pixelHeight", "minPixelHeight"})
 public class TextArea extends ChangeableInputWidget implements Editable, AbsoluteSize, MinimumHeight {
 	private static final long serialVersionUID = 7376326511023184723L;

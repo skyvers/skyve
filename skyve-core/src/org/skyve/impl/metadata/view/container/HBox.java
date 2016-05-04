@@ -12,12 +12,12 @@ import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.impl.metadata.view.container.Box;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, name = "HBox")
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "hbox")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, name = "HBox")
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "hbox")
 public class HBox extends Container implements Box, Identifiable, Invisible, Bordered {
 	private static final long serialVersionUID = 5014102577585857713L;
 

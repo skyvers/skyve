@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.impl.metadata.view.event.EventAction;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "setInvisible")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setInvisible")
 public class SetInvisibleEventAction extends AbstractBound implements EventAction, Invisible {
 	/**
 	 * For Serialization

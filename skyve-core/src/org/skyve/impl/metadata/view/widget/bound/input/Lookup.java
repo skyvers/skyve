@@ -21,14 +21,14 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Util;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"query",
 							"disableEditConditionName",
 							"enableEditConditionName",
@@ -153,7 +153,7 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	}
 
 	@Override
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,
 					name = "filterParameter",
 					type = FilterParameterImpl.class,
 					required = false)
@@ -161,7 +161,7 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 		return parameters;
 	}
 	
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onPickedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onPickedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -170,7 +170,7 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 		return pickedActions;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onClearedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onClearedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -180,7 +180,7 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onEditedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onEditedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -190,7 +190,7 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onAddedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onAddedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

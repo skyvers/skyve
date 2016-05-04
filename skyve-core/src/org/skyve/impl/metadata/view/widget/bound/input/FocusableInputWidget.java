@@ -15,10 +15,10 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"focusActions", "blurActions"})
 public abstract class FocusableInputWidget extends InputWidget implements Focusable {
 	/**
@@ -30,7 +30,7 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 	private List<EventAction> blurActions = new ArrayList<>();
 	
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onFocusHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onFocusHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -41,7 +41,7 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onBlurHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onBlurHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

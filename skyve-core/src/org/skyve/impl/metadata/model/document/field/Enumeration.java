@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -22,8 +22,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "enum")
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "enum")
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"xmlTypeName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
 public class Enumeration extends Field {
 	/**
@@ -31,7 +31,7 @@ public class Enumeration extends Field {
 	 */
 	private static final long serialVersionUID = -8699424041011741395L;
 
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, propOrder = {"name", "code", "description"})
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, propOrder = {"name", "code", "description"})
 	public static class EnumeratedValue {
 		private String name;
 		private String code;
@@ -137,8 +137,8 @@ public class Enumeration extends Field {
 		this.attributeRef = UtilImpl.processStringValue(attributeRef);
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "values")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "value")
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "values")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "value")
 	public List<EnumeratedValue> getXmlValues() {
 		return values;
 	}

@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.Association;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "association")
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "association")
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "association", 
 			propOrder = {"requiredBool", "type"})
 public class AssociationImpl extends ReferenceImpl implements Association {

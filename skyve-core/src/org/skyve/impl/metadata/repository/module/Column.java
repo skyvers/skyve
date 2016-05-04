@@ -5,11 +5,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"binding", 
 							"displayName",
 							"sortOrder", 
@@ -63,7 +63,7 @@ public class Column {
 		return name;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setName(String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
@@ -81,7 +81,7 @@ public class Column {
 		return expression;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setExpression(String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
@@ -99,7 +99,7 @@ public class Column {
 		return filterOperator;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setFilterOperator(FilterOperator filterOperator) {
 		this.filterOperator = filterOperator;
 	}
@@ -108,7 +108,7 @@ public class Column {
 		return filterExpression;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setFilterExpression(String filterExpression) {
 		this.filterExpression = UtilImpl.processStringValue(filterExpression);
 	}
@@ -126,7 +126,7 @@ public class Column {
 		return projected;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setProjected(Boolean projected) {
 		this.projected = projected;
 	}

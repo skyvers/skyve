@@ -14,7 +14,7 @@ import org.skyve.impl.metadata.repository.module.DocumentQueryMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
@@ -91,7 +91,7 @@ public class QueryGenerator {
 				newModule.getQueries().add(bizQLMetaData);
 			}
 		}
-		return XMLUtil.marshalModule(newModule, false);
+		return XMLMetaData.marshalModule(newModule, false);
 	}
 	
 	public static void main(String[] args) throws Exception {

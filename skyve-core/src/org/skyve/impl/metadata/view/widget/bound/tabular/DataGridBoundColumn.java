@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "boundColumn")
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"binding", "editable", "inputWidget"})
 public class DataGridBoundColumn extends DataGridColumn implements Bound {
 	private static final long serialVersionUID = -26924109323814766L;
@@ -46,7 +46,7 @@ public class DataGridBoundColumn extends DataGridColumn implements Bound {
 		return inputWidget;
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "input")
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "input")
 	public void setInputWidget(WidgetReference inputWidget) {
 		this.inputWidget = inputWidget;
 	}

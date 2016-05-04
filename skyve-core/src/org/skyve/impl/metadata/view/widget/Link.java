@@ -21,15 +21,15 @@ import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 /**
  * The link can be used to link to a web page.
  */
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"reference", 
 							"target",
 							"value",
@@ -70,7 +70,7 @@ public class Link implements MetaData, Invisible, AbsoluteWidth {
 		return target;
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public void setTarget(ReferenceTarget target) {
 		this.target = target;
 	}

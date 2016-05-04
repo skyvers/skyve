@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
@@ -21,8 +21,8 @@ import org.skyve.report.ReportFormat;
  * 
  * @author mike
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ReportReference implements Reference, Parameterizable {
 	/**
 	 * For Serialzation
@@ -72,8 +72,8 @@ public class ReportReference implements Reference, Parameterizable {
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "parameters")
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "parameters")
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)

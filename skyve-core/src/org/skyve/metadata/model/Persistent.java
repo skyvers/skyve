@@ -6,13 +6,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"schema", "catalog", "strategy", "discriminator"}) 
 public class Persistent extends NamedMetaData {
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ExtensionStrategy {
 		single,
 		joined,

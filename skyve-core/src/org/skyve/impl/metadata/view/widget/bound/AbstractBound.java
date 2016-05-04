@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, propOrder = {"binding"})
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"binding"})
 public abstract class AbstractBound implements Bound {
 	/**
 	 * For Serialization

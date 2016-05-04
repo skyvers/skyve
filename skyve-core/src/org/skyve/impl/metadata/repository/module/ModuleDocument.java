@@ -4,9 +4,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "document",
 			propOrder = {"ref", "defaultQueryName", "moduleRef"})
 public class ModuleDocument {

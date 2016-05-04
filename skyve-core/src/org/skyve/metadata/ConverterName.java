@@ -30,9 +30,9 @@ import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
 import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.COMMON_NAMESPACE)
+@XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum ConverterName {
 	DD_MM_YYYY(new DD_MM_YYYY()),
 	DD_MMM_YYYY(new DD_MMM_YYYY()),

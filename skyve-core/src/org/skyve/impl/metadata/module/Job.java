@@ -6,9 +6,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE,
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
 			propOrder = {"displayName", "className", "description"})
 public class Job extends NamedMetaData implements org.skyve.metadata.module.Job {
 	/**

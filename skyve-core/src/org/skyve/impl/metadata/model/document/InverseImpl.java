@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"cardinality", "domainType", "documentName", "referenceName"})
 public class InverseImpl extends AbstractAttribute implements Inverse {
 	private static final long serialVersionUID = -2180342709365556857L;
@@ -35,7 +35,7 @@ public class InverseImpl extends AbstractAttribute implements Inverse {
 		return domainType;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "domain", required = false)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "domain", required = false)
 	public void setDomainType(DomainType domainType) {
 		this.domainType = domainType;
 	}
@@ -45,7 +45,7 @@ public class InverseImpl extends AbstractAttribute implements Inverse {
 		return documentName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
@@ -55,7 +55,7 @@ public class InverseImpl extends AbstractAttribute implements Inverse {
 		return referenceName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setReferenceName(String referenceName) {
 		this.referenceName = UtilImpl.processStringValue(referenceName);
 	}

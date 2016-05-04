@@ -9,11 +9,11 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"pixelWidth",
 							"percentageWidth",

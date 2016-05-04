@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SortDirection;
 
 /**
@@ -15,7 +15,7 @@ public interface Collection extends Reference {
 	/**
 	 * 
 	 */
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public enum CollectionType implements ReferenceType {
 		/**
 		 * Composition relationship to a child document - child points back to parent.
