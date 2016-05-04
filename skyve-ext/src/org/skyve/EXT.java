@@ -28,7 +28,6 @@ import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.util.MailAttachment;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.TagUtil;
@@ -43,6 +42,7 @@ import org.skyve.metadata.module.Job;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.MailAttachment;
 
 /**
  * The central factory for creating all objects required in skyve ext.

@@ -20,7 +20,6 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.MailAttachment;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
@@ -32,6 +31,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
+import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 
 public class CommunicationUtil {
