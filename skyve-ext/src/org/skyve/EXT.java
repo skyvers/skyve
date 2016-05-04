@@ -21,6 +21,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
+import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
@@ -28,6 +29,7 @@ import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.TagUtil;
@@ -527,5 +529,17 @@ public class EXT {
 		result.setAttachmentMimeType(MimeType.pdf);
 
 		return result;
+	}
+	
+	public static SQLDataAccess newSQLDataAccess() {
+		return new SQLDataAccessImpl();
+	}
+	
+	public static SQLDataAccess newSQLDataAccess(String dataSourceName) {
+		return new SQLDataAccessImpl(dataSourceName);
+	}
+	
+	public static SQLDataAccess newSQLDataAccess(String dataSourceName, String dialectClassName) {
+		return new SQLDataAccessImpl(dataSourceName, dialectClassName);
 	}
 }
