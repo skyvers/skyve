@@ -20,6 +20,7 @@ import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
@@ -488,7 +489,7 @@ public class EXT {
 			if (beanContent != null) {
 				AttachmentContent content = cm.get(beanContent);
 				if (content == null) {
-					throw new Exception("The content for the attachment can't be retrieved - re-attach the content and try again.");
+					throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
 				}
 				byte[] fileBytes = content.getContentBytes();
 
@@ -510,16 +511,15 @@ public class EXT {
 	 * @param parameters
 	 */
 	public static MailAttachment getMailAttachmentFromReport(String reportModuleName, String reportDocumentName, String reportName, Map<String, Object> parameters) throws Exception {
-
 		MailAttachment result = new MailAttachment();
 
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Document invoiceDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+		Document document = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		JasperPrint jp = EXT.runSQLReport(user, invoiceDocument, reportName, parameters, ReportFormat.pdf, out);
+		EXT.runSQLReport(user, document, reportName, parameters, ReportFormat.pdf, out);
 		byte[] reportBytes = out.toByteArray();
 
 		result.setAttachmentFileName(reportName);
@@ -528,5 +528,4 @@ public class EXT {
 
 		return result;
 	}
-
 }
