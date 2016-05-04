@@ -19,7 +19,6 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
@@ -27,6 +26,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 /**
@@ -129,7 +129,7 @@ public class SmartClientPrevServlet extends HttpServlet {
 			        message.append(",data:");
 			        Set<String> propertyNames = new TreeSet<>();
 			        propertyNames.add("value");
-			        message.append(JSONUtil.marshall(customer, values, propertyNames));
+			        message.append(JSON.marshall(customer, values, propertyNames));
 			        message.append("}}");
 			        pw.append(message);
 				}

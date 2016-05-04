@@ -13,7 +13,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -27,6 +26,7 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
@@ -56,7 +56,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		
 		// Visit the source audit record
 		@SuppressWarnings("unchecked")
-		Map<String, Object> source = (Map<String, Object>) JSONUtil.unmarshall(u, sourceVersion.getAudit());
+		Map<String, Object> source = (Map<String, Object>) JSON.unmarshall(u, sourceVersion.getAudit());
 		for (String binding : source.keySet()) {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> sourceValues = (Map<String, Object>) source.get(binding);
@@ -84,7 +84,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		// Visit the comparison audit record, if there is one
 		if (comparisonVersion != null) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> compare = (Map<String, Object>) JSONUtil.unmarshall(u, comparisonVersion.getAudit());
+			Map<String, Object> compare = (Map<String, Object>) JSON.unmarshall(u, comparisonVersion.getAudit());
 			for (String binding : compare.keySet()) {
 				ComparisonComposite node = bindingToNodes.get(binding);
 				@SuppressWarnings("unchecked")

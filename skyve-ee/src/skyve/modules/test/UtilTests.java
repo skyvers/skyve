@@ -6,7 +6,7 @@ import modules.test.domain.AllAttributesPersistent;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.skyve.impl.util.JSONUtil;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 public class UtilTests extends AbstractH2Test {
@@ -23,7 +23,7 @@ public class UtilTests extends AbstractH2Test {
 
 		Util.populateFully(test);
 		
-		System.out.println("PF = " + JSONUtil.marshall(c, test, null));
+		System.out.println("PF = " + JSON.marshall(c, test, null));
 
 		test = p.save(test);
 	}

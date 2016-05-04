@@ -20,12 +20,12 @@ import org.skyve.impl.content.ContentManager;
 import org.skyve.impl.content.SearchResult;
 import org.skyve.impl.content.SearchResults;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
@@ -106,7 +106,7 @@ public class TextSearchServlet extends HttpServlet {
 			                    url.append("&_b=").append(attributeName);
 					            row.put("content", url.toString());
 				            }
-				            message.append(JSONUtil.marshall(customer, row, null)).append(',');
+				            message.append(JSON.marshall(customer, row, null)).append(',');
 						}
 						catch (Exception e) { // don't allow anything that goes wrong to stop us returning the searches
 							e.printStackTrace();

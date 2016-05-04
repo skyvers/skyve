@@ -35,7 +35,6 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -57,6 +56,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
@@ -380,7 +380,7 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(",totalRows:");
 		message.append(totalRows);
 		message.append(",data:");
-		message.append(JSONUtil.marshall(customer, beans, projections));
+		message.append(JSON.marshall(customer, beans, projections));
 		message.append("}}");
 		pw.append(message);
 	}
@@ -409,7 +409,7 @@ public class SmartClientListServlet extends HttpServlet {
         		for (String jsonCriteria : criteria) {
     				// Get each criterium name, operator and operands
 					@SuppressWarnings("unchecked")
-					Map<String, Object> criterium = (Map<String, Object>) JSONUtil.unmarshall(user, jsonCriteria);
+					Map<String, Object> criterium = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
     				advancedCriteria.add(criterium);
         		}
     		}
@@ -593,7 +593,7 @@ public class SmartClientListServlet extends HttpServlet {
 		if (criteria != null) {
 			boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
 			for (Map<String, Object> criterium : criteria) {
-				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSONUtil.marshall(null, criterium, null));
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSON.marshall(null, criterium, null));
 				String binding = ((String) criterium.get("fieldName"));
 				if (binding != null) {
 					binding = binding.replace('_', '.');
@@ -1432,7 +1432,7 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append("{response:{status:0,data:");
 
 		// reinstate whether the record is tagged or not.
-		String json = JSONUtil.marshall(customer, bean, model.getProjections());
+		String json = JSON.marshall(customer, bean, model.getProjections());
 		if (rowIstagged) {
 			json = json.replace(PersistentBean.TAGGED_NAME + "\":null", PersistentBean.TAGGED_NAME + "\":true");
 		}
@@ -1460,7 +1460,7 @@ public class SmartClientListServlet extends HttpServlet {
 			properties.put(projection, parameters.get(projection));
 		}
 
-		message.append(JSONUtil.marshall(customer,
+		message.append(JSON.marshall(customer,
 											new MapBean(module.getName(),
 															model.getDrivingDocument().getName(),
 															properties),

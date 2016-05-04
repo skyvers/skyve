@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.util;
 
 import java.util.Set;
 
@@ -7,7 +7,7 @@ import org.skyve.impl.util.json.JSONWriter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 
-public class JSONUtil {
+public class JSON {
 	/**
 	 * Create JSON.
 	 * 
