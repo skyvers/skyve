@@ -13,12 +13,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.EXT;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
+import org.skyve.content.SearchResult;
+import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.content.ContentManager;
-import org.skyve.impl.content.SearchResult;
-import org.skyve.impl.content.SearchResults;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;

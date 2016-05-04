@@ -1,9 +1,4 @@
-package org.skyve.impl.content;
-
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.BeanContent;
-import org.skyve.impl.content.ContentIterable;
-import org.skyve.impl.content.SearchResults;
+package org.skyve.content;
 
 public interface ContentManager extends AutoCloseable {
 	public void put(BeanContent content) throws Exception;

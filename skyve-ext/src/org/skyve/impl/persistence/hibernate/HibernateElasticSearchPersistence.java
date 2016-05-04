@@ -1,9 +1,9 @@
 package org.skyve.impl.persistence.hibernate;
 
 import org.skyve.EXT;
+import org.skyve.content.BeanContent;
+import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.content.BeanContent;
-import org.skyve.impl.content.ContentManager;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 
 public class HibernateElasticSearchPersistence extends AbstractHibernatePersistence {

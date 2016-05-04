@@ -1,4 +1,4 @@
-package org.skyve.impl.content;
+package org.skyve.content;
 
 import java.io.Serializable;
 

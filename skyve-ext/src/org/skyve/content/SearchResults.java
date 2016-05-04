@@ -1,9 +1,7 @@
-package org.skyve.impl.content;
+package org.skyve.content;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.skyve.impl.content.SearchResult;
 
 public final class SearchResults {
 	private String searchTimeInSecs;

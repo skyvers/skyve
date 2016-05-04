@@ -10,8 +10,8 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
-import org.skyve.impl.content.ContentIterable;
-import org.skyve.impl.content.SearchResult;
+import org.skyve.content.ContentIterable;
+import org.skyve.content.SearchResult;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 

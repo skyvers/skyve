@@ -1,4 +1,4 @@
-package org.skyve.impl.content;
+package org.skyve.content;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Date;
 
 import org.skyve.content.MimeType;
-import org.skyve.impl.content.Content;
 import org.skyve.util.FileUtil;
 
 public class AttachmentContent extends Content {

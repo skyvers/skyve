@@ -1,8 +1,6 @@
-package org.skyve.impl.content;
+package org.skyve.content;
 
 import java.util.Iterator;
-
-import org.skyve.impl.content.SearchResult;
 
 public interface ContentIterable extends Iterable<SearchResult> {
 	public interface ContentIterator extends Iterator<SearchResult> {

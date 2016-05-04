@@ -1,7 +1,7 @@
 package org.skyve.impl.persistence.hibernate;
 
+import org.skyve.content.BeanContent;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.content.BeanContent;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 
 public class HibernateNoContentPersistence extends AbstractHibernatePersistence {

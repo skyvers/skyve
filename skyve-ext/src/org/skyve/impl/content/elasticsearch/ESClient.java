@@ -39,21 +39,16 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacet.Entry;
 import org.elasticsearch.search.highlight.HighlightField;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.BeanContent;
+import org.skyve.content.ContentIterable;
 import org.skyve.content.MimeType;
+import org.skyve.content.SearchResult;
+import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.BeanContent;
-import org.skyve.impl.content.ContentIterable;
-import org.skyve.impl.content.SearchResult;
-import org.skyve.impl.content.SearchResults;
-import org.skyve.impl.metadata.user.SuperUser;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.user.User;
 
 public class ESClient extends AbstractContentManager {
 	private static final String FILE_STORE_NAME = "SKYVE_STORE";

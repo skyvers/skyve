@@ -9,10 +9,10 @@ import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;

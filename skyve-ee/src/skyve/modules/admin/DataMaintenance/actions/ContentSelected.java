@@ -3,8 +3,8 @@ package modules.admin.DataMaintenance.actions;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.EXT;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.util.Util;

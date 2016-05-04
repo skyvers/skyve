@@ -1,5 +1,6 @@
 package org.skyve.impl.content;
 
+import org.skyve.content.ContentManager;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -7,7 +8,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.ContentManager;
 
 public abstract class AbstractContentManager implements ContentManager {
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
