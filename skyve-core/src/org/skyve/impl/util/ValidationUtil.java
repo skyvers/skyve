@@ -43,7 +43,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
-import org.skyve.impl.util.BeanVisitor;
+import org.skyve.util.BeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 
 public class ValidationUtil {

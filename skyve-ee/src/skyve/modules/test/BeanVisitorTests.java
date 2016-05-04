@@ -9,9 +9,9 @@ import modules.test.domain.AllAttributesPersistent;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.Bean;
-import org.skyve.impl.util.BeanVisitor;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 

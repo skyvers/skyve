@@ -5,13 +5,13 @@ import java.util.Map;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.BeanVisitor;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
+import org.skyve.util.BeanVisitor;
+import org.skyve.util.Binder;
 
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
 	/**
@@ -145,7 +145,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		boolean nodeDirty = false;
 
 		for (ComparisonProperty property : node.getProperties()) {
-			Object oldValue = BindUtil.get(bean, property.getName());
+			Object oldValue = Binder.get(bean, property.getName());
 			property.setOldValue(oldValue);
 
 			if ((! nodeDirty) && property.isDirty()) {
@@ -178,7 +178,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 				property.setTitle(attribute.getDisplayName());
 				property.setWidget(attribute.getDefaultInputWidget());
 
-				Object value = BindUtil.get(bean, name);
+				Object value = Binder.get(bean, name);
 				property.setNewValue(newEntry ? value : null);
 				property.setOldValue(newEntry ? null : value);
 

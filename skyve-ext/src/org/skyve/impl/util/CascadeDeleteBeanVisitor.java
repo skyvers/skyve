@@ -3,7 +3,6 @@ package org.skyve.impl.util;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.impl.util.BeanVisitor;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -11,6 +10,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.util.BeanVisitor;
 
 public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;

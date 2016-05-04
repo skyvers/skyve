@@ -29,7 +29,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.impl.util.BeanVisitor;
+import org.skyve.util.BeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 
 import com.vividsolutions.jts.geom.Coordinate;

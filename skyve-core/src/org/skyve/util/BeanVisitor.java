@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.util;
 
 import java.util.HashSet;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.Set;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -136,7 +135,7 @@ public abstract class BeanVisitor {
 						if ((childRelation instanceof Association) ||
 								((childRelation instanceof Inverse) && 
 									InverseCardinality.one.equals(((Inverse) childRelation).getCardinality()))) {
-							Bean child = (bean == null) ? null : (Bean) BindUtil.get(bean, relationName);
+							Bean child = (bean == null) ? null : (Bean) Binder.get(bean, relationName);
 							if ((child != null) || visitNulls) {
 								sb.setLength(0);
 								if (binding.length() != 0) {
@@ -154,7 +153,7 @@ public abstract class BeanVisitor {
 						}
 						else { // collection or many-sided inverse
 							@SuppressWarnings("unchecked")
-							List<Bean> children = (bean == null) ? null : (List<Bean>) BindUtil.get(bean, relationName);
+							List<Bean> children = (bean == null) ? null : (List<Bean>) Binder.get(bean, relationName);
 							if (children != null) {
 								int i = 0;
 								for (Bean child : children) {
@@ -211,7 +210,7 @@ public abstract class BeanVisitor {
 				if ((parentDocument != null) && 
 						// child document, not a hierarchical document
 						(! document.getName().equals(parentDocument.getName()))) {
-					Bean parent = (bean == null) ? null : (Bean) BindUtil.get(bean, ChildBean.PARENT_NAME);
+					Bean parent = (bean == null) ? null : (Bean) Binder.get(bean, ChildBean.PARENT_NAME);
 					if ((parent != null) || visitNulls) {
 						sb.setLength(0);
 						if (binding.length() != 0) {
