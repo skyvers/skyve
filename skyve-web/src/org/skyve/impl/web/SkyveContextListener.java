@@ -13,12 +13,12 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elasticsearch.ESClient;
-import org.skyve.impl.job.JobScheduler;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.JobScheduler;
 import org.skyve.persistence.Persistence;
 
 public class SkyveContextListener implements ServletContextListener {

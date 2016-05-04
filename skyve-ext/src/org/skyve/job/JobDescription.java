@@ -1,7 +1,6 @@
-package org.skyve.impl.job;
+package org.skyve.job;
 
 import org.skyve.domain.types.Timestamp;
-import org.skyve.job.JobStatus;
 
 public class JobDescription {
 	private Timestamp startTime;

@@ -1,4 +1,4 @@
-package org.skyve.impl.job;
+package org.skyve.job;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -33,7 +33,6 @@ import org.skyve.util.Util;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.job.ContentGarbageCollectionJob;
 import org.skyve.impl.job.ContentInitJob;
-import org.skyve.impl.job.JobDescription;
 import org.skyve.impl.job.SkyveTriggerListener;
 
 public class JobScheduler {
