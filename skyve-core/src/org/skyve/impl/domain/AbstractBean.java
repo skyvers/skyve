@@ -249,7 +249,7 @@ public abstract class AbstractBean implements Bean {
 	/**
 	 * Compare 2 beans by bizId.
 	 */
-	static int compareTo(Bean thisOne, Bean otherOne) {
+	public static int compareTo(Bean thisOne, Bean otherOne) {
 		if ((thisOne == null) && (otherOne == null)) {
 			return 0;
 		}
