@@ -20,7 +20,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
 			name = "collection",
 			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints"})
-public class CollectionImpl extends Reference implements Collection {
+public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
 	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "ordering", propOrder = {"sort", "by"})

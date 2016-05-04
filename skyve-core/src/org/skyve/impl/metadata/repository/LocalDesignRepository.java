@@ -13,9 +13,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.Inverse;
-import org.skyve.impl.metadata.model.document.Inverse.InverseCardinality;
-import org.skyve.impl.metadata.model.document.Inverse.InverseRelationship;
+import org.skyve.impl.metadata.model.document.InverseImpl;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -50,6 +48,8 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
+import org.skyve.metadata.model.document.Inverse.InverseCardinality;
+import org.skyve.metadata.model.document.Inverse.InverseRelationship;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
@@ -68,8 +68,6 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.metadata.repository.ViewValidator;
 
 /**
  * Do not instantiate directly, use the RepositoryFactory.
@@ -1176,9 +1174,9 @@ public class LocalDesignRepository extends AbstractRepository {
 					}
 				}
 			}
-			else if (attribute instanceof Inverse) {
+			else if (attribute instanceof InverseImpl) {
 				// Check that the document name and reference name point to a reference
-				Inverse inverse = (Inverse) attribute;
+				InverseImpl inverse = (InverseImpl) attribute;
 				String targetDocumentName = inverse.getDocumentName();
 				DocumentRef inverseDocumentRef = module.getDocumentRefs().get(targetDocumentName);
 				if (inverseDocumentRef == null) {

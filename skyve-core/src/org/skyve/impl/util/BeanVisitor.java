@@ -8,13 +8,13 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.Inverse;
-import org.skyve.impl.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Inverse.InverseCardinality;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 

@@ -19,7 +19,7 @@ import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.Inverse;
+import org.skyve.impl.metadata.model.document.InverseImpl;
 import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.impl.metadata.model.document.field.Boolean;
 import org.skyve.impl.metadata.model.document.field.Colour;
@@ -211,7 +211,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						@XmlElementRef(type = Content.class),
 						@XmlElementRef(type = AssociationImpl.class),
 						@XmlElementRef(type = CollectionImpl.class),
-						@XmlElementRef(type = Inverse.class),
+						@XmlElementRef(type = InverseImpl.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = Id.class)})
 	public List<Attribute> getAttributes() {

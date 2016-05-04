@@ -12,7 +12,7 @@ import org.skyve.metadata.model.document.DomainType;
 
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
 			propOrder = {"persistentBool", "domainType", "documentName", "queryName"})
-public abstract class Reference extends AbstractAttribute implements org.skyve.metadata.model.document.Reference {
+public abstract class ReferenceImpl extends AbstractAttribute implements org.skyve.metadata.model.document.Reference {
 	/**
 	 * For Serialization
 	 */

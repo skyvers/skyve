@@ -17,13 +17,12 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.Inverse;
-import org.skyve.impl.metadata.model.document.Inverse.InverseRelationship;
+import org.skyve.impl.metadata.model.document.InverseImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.model.document.field.Field;
-import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
@@ -41,6 +40,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Inverse.InverseRelationship;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
@@ -1033,8 +1033,8 @@ joined tables
 				fw.append(indentation).append("\t\t\t</type>\n");
 				fw.append(indentation).append("\t\t</property>\n");
 			}
-			else if (attribute instanceof Inverse) {
-				Inverse inverse = (Inverse) attribute;
+			else if (attribute instanceof InverseImpl) {
+				InverseImpl inverse = (InverseImpl) attribute;
 
 				// determine the inverse target metadata
 				String inverseDocumentName = inverse.getDocumentName();
@@ -1636,7 +1636,7 @@ joined tables
 		}
 	}
 	
-	private void addInverse(Inverse inverse,
+	private void addInverse(InverseImpl inverse,
 								boolean overriddenInverse,
 								Customer customer,
 								Module module,
@@ -1856,8 +1856,8 @@ joined tables
 									methods);
 					continue;
 				}
-				else if (attribute instanceof Inverse) {
-					addInverse((Inverse) attribute,
+				else if (attribute instanceof InverseImpl) {
+					addInverse((InverseImpl) attribute,
 								(overridden && // this is an extension class
 										// the reference is defined in the base class
 										(documentClass != null) && 

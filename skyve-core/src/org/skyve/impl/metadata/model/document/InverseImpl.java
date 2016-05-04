@@ -10,28 +10,13 @@ import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLUtil;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.model.document.Inverse;
 
 @XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
 			propOrder = {"cardinality", "domainType", "documentName", "referenceName"})
-public class Inverse extends AbstractAttribute implements Relation {
-	/**
-	 * For Serialization
-	 */
+public class InverseImpl extends AbstractAttribute implements Inverse {
 	private static final long serialVersionUID = -2180342709365556857L;
-
-	@XmlTransient
-	public static enum InverseRelationship {
-		oneToOne,
-		oneToMany,
-		manyToMany
-	}
-	
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-	public static enum InverseCardinality {
-		one, many;
-	}
 
 	private String documentName;
 	private String referenceName;
@@ -41,7 +26,7 @@ public class Inverse extends AbstractAttribute implements Relation {
 	private InverseRelationship relationship;
 	private InverseCardinality cardinality;
 	
-	public Inverse() {
+	public InverseImpl() {
 		setAttributeType(AttributeType.inverse);
 	}
 
@@ -65,6 +50,7 @@ public class Inverse extends AbstractAttribute implements Relation {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
+	@Override
 	public String getReferenceName() {
 		return referenceName;
 	}
@@ -89,6 +75,7 @@ public class Inverse extends AbstractAttribute implements Relation {
 		this.relationship = relationship;
 	}
 
+	@Override
 	public InverseCardinality getCardinality() {
 		return cardinality;
 	}

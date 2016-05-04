@@ -12,7 +12,7 @@ import org.skyve.metadata.model.document.Association;
 @XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
 			name = "association", 
 			propOrder = {"requiredBool", "type"})
-public class AssociationImpl extends Reference implements Association {
+public class AssociationImpl extends ReferenceImpl implements Association {
 	private static final long serialVersionUID = -2839713495173145591L;
 
 	private boolean required;
