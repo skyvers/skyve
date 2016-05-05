@@ -5,7 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<pe:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />  
@@ -17,7 +17,7 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="skyve" />
+		<s:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="title" value="#{skyve.title}" />
 			<ui:param name="baseHref" value="#{skyve.baseHref}" />
@@ -27,7 +27,7 @@
 			</ui:define>
 			<ui:define name="body">
 				<h:form>
-					<w:view module="#{skyve.bizModuleParameter}"
+					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}"
 								managedBean="skyve"
 								type="tablet" />

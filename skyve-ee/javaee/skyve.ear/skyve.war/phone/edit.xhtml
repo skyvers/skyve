@@ -5,7 +5,7 @@
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pm="http://primefaces.org/mobile"
-		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 		dir="#{skyve.dir}">
@@ -19,7 +19,7 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="skyve" />
+		<s:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="baseHref" value="#{skyve.baseHref}" />
 			<ui:param name="skyveVersionComment" value="#{skyve.skyveVersionComment}" />
@@ -33,7 +33,7 @@
 					<pm:content>
 						<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
 						<h:form>
-							<w:view module="#{skyve.bizModuleParameter}"
+							<s:view module="#{skyve.bizModuleParameter}"
 										document="#{skyve.bizDocumentParameter}"
 										managedBean="skyve"
 										type="phone" />
