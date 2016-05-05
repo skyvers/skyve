@@ -12,7 +12,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
 
-@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlRootElement(name = "inverse", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"cardinality", "domainType", "documentName", "referenceName"})
 public class InverseImpl extends AbstractAttribute implements Inverse {
