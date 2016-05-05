@@ -2,9 +2,9 @@ package org.skyve.web;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.COMMON_NAMESPACE)
+@XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum WebAction {
 	g, // grid
 	c, // calendar

@@ -18,7 +18,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -26,8 +26,8 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Util;
 
 // TODO Populate defaultActions property in customer returned by convert
-@XmlRootElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "customer")
-@XmlType(namespace = XMLUtil.CUSTOMER_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "customer")
+@XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, 
 			name = "customer",
 			propOrder = {"language",
 							"uiResources",
@@ -67,7 +67,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return uiResources;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setUiResources(UIResources uiResources) {
 		this.uiResources = uiResources;
 	}
@@ -76,7 +76,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return htmlResources;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setHtmlResources(HTMLResources htmlResources) {
 		this.htmlResources = htmlResources;
 	}
@@ -85,7 +85,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return loginResources;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	public void setLoginResources(LoginResourcesMetaData loginResources) {
 		this.loginResources = loginResources;
 	}
@@ -94,7 +94,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return defaultDateConverter;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultDateConverter(ConverterName defaultDateConverter) {
 		this.defaultDateConverter = defaultDateConverter;
 	}
@@ -103,7 +103,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return defaultDateTimeConverter;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultDateTimeConverter(ConverterName defaultDateTimeConverter) {
 		this.defaultDateTimeConverter = defaultDateTimeConverter;
 	}
@@ -112,7 +112,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return defaultTimeConverter;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultTimeConverter(ConverterName defaultTimeConverter) {
 		this.defaultTimeConverter = defaultTimeConverter;
 	}
@@ -121,19 +121,19 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return defaultTimestampConverter;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setDefaultTimestampConverter(ConverterName defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "modules")
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "module", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "modules")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "module", required = true)
 	public List<CustomerModuleMetaData> getModules() {
 		return modules;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "interceptors")
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
 	public List<InterceptorMetaDataImpl> getInterceptors() {
 		return interceptors;
 	}
@@ -142,7 +142,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 		return homeModule;
 	}
 
-	@XmlElement(namespace = XMLUtil.CUSTOMER_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	public void setHomeModule(String homeModule) {
 		this.homeModule = UtilImpl.processStringValue(homeModule);
 	}

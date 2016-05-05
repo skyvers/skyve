@@ -5,9 +5,9 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public abstract class RangeValidator<T> extends FieldValidator<T> {
 	private String xmlMin;
 	private String xmlMax;

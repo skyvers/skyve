@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.Bean;
-import org.skyve.impl.domain.MapBean;
+import org.skyve.domain.MapBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
 public class InMemoryFilterTest extends AbstractH2Test {

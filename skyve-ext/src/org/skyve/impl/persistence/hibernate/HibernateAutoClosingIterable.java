@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.hibernate.ScrollableResults;
+import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.domain.MapBean;
 import org.skyve.persistence.AutoClosingIterable;
 
 public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {

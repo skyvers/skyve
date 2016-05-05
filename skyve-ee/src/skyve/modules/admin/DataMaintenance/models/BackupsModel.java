@@ -14,7 +14,6 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.module.query.QueryColumnImpl;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -22,6 +21,7 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.Util;
 
 public class BackupsModel extends ListModel<DataMaintenance> {
 	private static final long serialVersionUID = -7192916420761744760L;
@@ -82,7 +82,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	@Override
 	public Page fetch() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		String backupDirPrefix = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName;
+		String backupDirPrefix = Util.getContentDirectory() + "backup_" + customerName;
 		
 		return DownloadFolderBizlet.fetch(backupDirPrefix, getStartRow(), getEndRow());
 	}

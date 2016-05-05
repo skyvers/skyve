@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * Content Restrictions are specified in user roles.
@@ -16,7 +16,7 @@ import org.skyve.impl.util.XMLUtil;
  * 
  * @author Mike
  */
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class ContentRestriction {
 	private String attributeName;
 	private String documentName;

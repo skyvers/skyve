@@ -15,10 +15,10 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.FocusableInputWidget;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions"})
 public abstract class ChangeableInputWidget extends FocusableInputWidget implements Changeable {
 	/**
@@ -29,7 +29,7 @@ public abstract class ChangeableInputWidget extends FocusableInputWidget impleme
 	private List<EventAction> changedActions = new ArrayList<>();
 	
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onChangedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onChangedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

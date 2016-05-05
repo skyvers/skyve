@@ -2,12 +2,12 @@ package org.skyve.metadata;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * 
  */
-@XmlType(namespace = XMLUtil.COMMON_NAMESPACE)
+@XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
 public enum SortDirection {
 	ascending, descending;
 

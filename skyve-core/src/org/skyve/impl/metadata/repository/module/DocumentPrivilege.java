@@ -8,10 +8,10 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			propOrder = {"documentName", 
 							"permission", 
 							"actions",
@@ -42,17 +42,17 @@ public class DocumentPrivilege {
 		this.permission = permission;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "action", required = false)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "action", required = false)
 	public List<ActionPrivilege> getActions() {
 		return actions;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "contentRestriction", required = false)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "contentRestriction", required = false)
 	public List<ContentRestriction> getContentRestrictions() {
 		return contentRestrictions;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "contentPermission", required = false)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "contentPermission", required = false)
 	public List<ContentPermission> getContentPermissions() {
 		return contentPermissions;
 	}

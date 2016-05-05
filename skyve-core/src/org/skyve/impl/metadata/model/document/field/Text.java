@@ -5,13 +5,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"length", "format", "validator"})
 public class Text extends ConvertableField implements LengthField {
 	/**
@@ -33,7 +33,7 @@ public class Text extends ConvertableField implements LengthField {
 	}
 
 	@Override
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setLength(int length) {
 		this.length = length;
 	}
@@ -42,7 +42,7 @@ public class Text extends ConvertableField implements LengthField {
 		return format;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setFormat(TextFormat format) {
 		this.format = format;
 	}
@@ -51,7 +51,7 @@ public class Text extends ConvertableField implements LengthField {
 		return validator;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setValidator(TextValidator validator) {
 		this.validator = validator;
 	}

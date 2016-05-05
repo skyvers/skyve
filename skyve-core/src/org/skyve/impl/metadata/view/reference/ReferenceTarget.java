@@ -5,16 +5,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * Specifies the modal window or frame target behaviour for opening a reference.
  * 
  * @author mike
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ReferenceTarget {
-	@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public enum ReferenceTargetType {
 		self,
 		blankFrame,
@@ -38,7 +38,7 @@ public class ReferenceTarget {
 	public String getName() {
 		return name;
 	}
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public void setName(String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}

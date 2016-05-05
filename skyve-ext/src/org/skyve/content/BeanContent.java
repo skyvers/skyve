@@ -1,10 +1,9 @@
-package org.skyve.impl.content;
+package org.skyve.content;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.content.Content;
 
 public class BeanContent extends Content {
 	private static final long serialVersionUID = 8279368686334430859L;

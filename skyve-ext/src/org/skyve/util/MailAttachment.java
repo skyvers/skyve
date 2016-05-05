@@ -1,4 +1,4 @@
-package org.skyve.impl.util;
+package org.skyve.util;
 
 import org.skyve.content.MimeType;
 

@@ -11,9 +11,9 @@ import modules.admin.domain.UserCandidateContact;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.impl.content.ContentManager;
-import org.skyve.impl.content.SearchResult;
-import org.skyve.impl.content.SearchResults;
+import org.skyve.content.ContentManager;
+import org.skyve.content.SearchResult;
+import org.skyve.content.SearchResults;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;

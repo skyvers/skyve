@@ -10,14 +10,14 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
 /**
  * This class is used for collection unique constraints and for document unique constraints.
  * Document Unique Constraints are converted from repository.documentUniqueConstraint
  */
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "CollectionUniqueConstraint", 
 			propOrder = {"name", "description", "message", "fieldNames"})
 public class UniqueConstraintImpl implements UniqueConstraint {
@@ -79,7 +79,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	/**
 	 * @param message The message to set.
 	 */
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "message", required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "message", required = true)
 	public void setMessage(String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
@@ -88,8 +88,8 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @return Returns the fieldNames.
 	 */
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "fieldReferences")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "ref", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "fieldReferences")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ref", required = true)
 	public List<String> getFieldNames() {
 		return fieldNames;
 	}

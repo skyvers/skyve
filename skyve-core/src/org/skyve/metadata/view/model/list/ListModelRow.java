@@ -3,8 +3,8 @@ package org.skyve.metadata.view.model.list;
 import java.util.Map;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.impl.domain.MapBean;
 import org.skyve.persistence.DocumentQuery;
 
 public class ListModelRow extends MapBean {

@@ -96,7 +96,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -124,6 +123,7 @@ import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Binder.TargetMetaData;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
@@ -325,7 +325,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			result.put(binding, comparisons.get(binding));
 		}
 		
-		return JSONUtil.marshall(user.getCustomer(), result, null);
+		return JSON.marshall(user.getCustomer(), result, null);
 	}
 	
 	private void constructJSONObjectFromBinding(ViewBindings bindings,
@@ -413,7 +413,7 @@ class ViewJSONManipulator extends ViewVisitor {
 */	
 	void applyJSON(String json, AbstractPersistence persistence) throws Exception {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> values = (Map<String, Object>) JSONUtil.unmarshall(user, json);
+		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, json);
 
 //		displayViewBindings(bindingTree);
 		applyJSON(bindingTree, document, values, bean, persistence);

@@ -5,9 +5,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "query",
 			propOrder = {"documentation", "description"})
 public abstract class QueryMetaData extends NamedMetaData {
@@ -18,7 +18,7 @@ public abstract class QueryMetaData extends NamedMetaData {
 		return documentation;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
@@ -27,7 +27,7 @@ public abstract class QueryMetaData extends NamedMetaData {
 		return description;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}

@@ -19,7 +19,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.query.BizQLDefinition;
@@ -45,7 +45,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	/**
 	 * The list of jobs for ths module in the order they are
 	 */
-	private List<Job> jobs = new ArrayList<>();
+	private List<JobMetaData> jobs = new ArrayList<>();
 	
 	/**
 	 * The list of queries for this module in the order they are added.
@@ -209,17 +209,17 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 	
 	@Override
-	public org.skyve.metadata.module.Job getJob(String jobName) {
-		return (org.skyve.metadata.module.Job) getMetaData(jobName);
+	public JobMetaData getJob(String jobName) {
+		return (JobMetaData) getMetaData(jobName);
 	}
 
-	public void putJob(Job job) {
+	public void putJob(JobMetaData job) {
 		putMetaData(job.getName(), job);
 		jobs.add(job);
 	}
 	
 	@Override
-	public List<Job> getJobs() {
+	public List<JobMetaData> getJobs() {
 		return Collections.unmodifiableList(jobs);
 	}
 	

@@ -21,7 +21,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
@@ -30,8 +30,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"inline", 
 							"editable",
@@ -318,7 +318,7 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onAddedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onAddedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -328,7 +328,7 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onEditedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onEditedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -338,7 +338,7 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onRemovedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onRemovedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
@@ -348,7 +348,7 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	}
 	
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onSelectedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onSelectedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

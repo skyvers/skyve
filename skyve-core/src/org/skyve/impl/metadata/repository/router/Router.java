@@ -12,19 +12,19 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.PersistentMetaData;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 
-@XmlRootElement(namespace = XMLUtil.ROUTER_NAMESPACE)
-@XmlType(namespace = XMLUtil.ROUTER_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class Router implements MetaData, PersistentMetaData<Router> {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private String uxuiSelectorClassName;
 	private TaggingUxUiSelector uxuiSelector;
 	
-	@XmlElement(namespace = XMLUtil.ROUTER_NAMESPACE, name = "uxui", required = true)
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "uxui", required = true)
 	private List<UxUi> uxuis = new ArrayList<>();
 
 	@XmlTransient

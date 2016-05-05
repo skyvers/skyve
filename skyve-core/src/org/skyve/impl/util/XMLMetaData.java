@@ -26,7 +26,7 @@ import org.skyve.util.Util;
 import org.skyve.impl.util.UtilImpl;
 import org.xml.sax.SAXException;
 
-public class XMLUtil {
+public class XMLMetaData {
 	public static final String COMMON_NAMESPACE = "http://www.skyve.org/xml/common";
 	public static final String ROUTER_NAMESPACE = "http://www.skyve.org/xml/router";
 	public static final String CUSTOMER_NAMESPACE = "http://www.skyve.org/xml/customer";
@@ -71,7 +71,7 @@ public class XMLUtil {
 		}
 	}
 
-	private XMLUtil() {
+	private XMLMetaData() {
 		// prevent construction
 	}
 

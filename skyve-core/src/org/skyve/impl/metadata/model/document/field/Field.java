@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"persistentBool", "requiredBool", "defaultValue", "index"})
 public abstract class Field extends AbstractAttribute {
 	/**
@@ -19,7 +19,7 @@ public abstract class Field extends AbstractAttribute {
 	 */
 	private static final long serialVersionUID = -638312757619721424L;
 
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum IndexType {
 		database, textual, both, none;
 	}
@@ -41,7 +41,7 @@ public abstract class Field extends AbstractAttribute {
 		return index;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIndex(IndexType index) {
 		this.index = index;
 	}
@@ -50,7 +50,7 @@ public abstract class Field extends AbstractAttribute {
 		return defaultValue;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDefaultValue(String defaultValue) {
 		this.defaultValue = UtilImpl.processStringValue(defaultValue);
 	}

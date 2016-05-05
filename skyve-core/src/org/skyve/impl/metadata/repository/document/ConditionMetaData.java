@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.Condition;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "condition",
 			propOrder = {"documentation", "description", "expression"})
 public class ConditionMetaData extends NamedMetaData implements Condition {
@@ -21,7 +21,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 		return documentation;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
@@ -31,7 +31,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 		return description;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -41,7 +41,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 		return expression;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setExpression(String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}

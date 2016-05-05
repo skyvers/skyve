@@ -20,10 +20,10 @@ import javax.servlet.http.HttpServletResponse;
 import net.coobird.thumbnailator.Thumbnails;
 
 import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.DownloadAreaType;

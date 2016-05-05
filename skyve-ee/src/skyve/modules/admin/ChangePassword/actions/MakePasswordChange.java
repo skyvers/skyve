@@ -11,7 +11,6 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -20,6 +19,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
@@ -65,7 +65,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
 		modules.admin.domain.User userBean = persistence.retrieve(userDocument, user.getId(), true);
 
-		MessageDigest md = MessageDigest.getInstance(UtilImpl.PASSWORD_HASHING_ALGORITHM);
+		MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
 		Base64 base64Codec = new Base64();
 		String hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
 

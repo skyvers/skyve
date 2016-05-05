@@ -15,16 +15,16 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.ProjectedQuery;
 
 class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
-	private SQLDataAccess dataAccess;
+	private SQLDataAccessImpl dataAccess;
 	private Document document;
 	
-	SQLDataAccessSQL(Document document, String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(Document document, String query, SQLDataAccessImpl dataAccess) {
 		super(document, query);
 		this.document = document;
 		this.dataAccess = dataAccess;
 	}
 
-	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccess dataAccess)
+	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccessImpl dataAccess)
 	throws MetaDataException {
 		super(moduleName, documentName, query);
 		Customer customer = CORE.getUser().getCustomer();
@@ -32,7 +32,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 		this.dataAccess = dataAccess;
 	}
 
-	SQLDataAccessSQL(String query, SQLDataAccess dataAccess) {
+	SQLDataAccessSQL(String query, SQLDataAccessImpl dataAccess) {
 		super(query);
 		this.dataAccess = dataAccess;
 	}

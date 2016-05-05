@@ -4,9 +4,9 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class PositionableAction extends Action {
 	private Boolean inActionPanel;
 

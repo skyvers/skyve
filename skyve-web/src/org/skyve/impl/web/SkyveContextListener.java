@@ -13,12 +13,12 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elasticsearch.ESClient;
-import org.skyve.impl.job.JobScheduler;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.JobScheduler;
 import org.skyve.persistence.Persistence;
 
 public class SkyveContextListener implements ServletContextListener {
@@ -131,7 +131,7 @@ public class SkyveContextListener implements ServletContextListener {
 				AbstractRepository.set(new LocalSecureRepository());
 			}
 			else {
-				UtilImpl.LOGGER.info("SET TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
+				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO " + UtilImpl.SKYVE_REPOSITORY_CLASS);
 				try {
 					AbstractRepository.set((AbstractRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).newInstance());
 				}
@@ -144,9 +144,11 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SKYVE_PERSISTENCE_CLASS = UtilImpl.processStringValue(properties.getProperty("SKYVE_PERSISTENCE_CLASS"));
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
+				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT");
 				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 			}
 			else {
+				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				try {
 					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}

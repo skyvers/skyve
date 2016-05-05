@@ -10,10 +10,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE, 
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "DocumentUniqueConstraint", 
 			propOrder = {"scope", "description", "message", "fieldReferences"})
 public class UniqueConstraint extends NamedMetaData {
@@ -44,13 +44,13 @@ public class UniqueConstraint extends NamedMetaData {
 		return message;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setMessage(String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "fieldReferences")
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "ref", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "fieldReferences")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ref", required = true)
 	public List<FieldReference> getFieldReferences() {
 		return fieldReferences;
 	}

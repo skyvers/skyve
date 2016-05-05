@@ -5,7 +5,7 @@
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pm="http://primefaces.org/mobile"
-		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
 		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
 		dir="#{inOutView.dir}">
@@ -14,7 +14,7 @@
 			<f:viewParam name="i" value="#{inOutView.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{inOutView.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="inOutView" />
+		<s:conversation managedBean="inOutView" />
 		<ui:composition template="../phone/template.xhtml">
 			<ui:param name="baseHref" value="#{inOutView.baseHref}" />
 			<ui:param name="skyveVersionComment" value="#{inOutView.skyveVersionComment}" />
@@ -38,7 +38,7 @@
 					<pm:content>
 						<h:form id="inoutForm">
 							<h2 style="text-align:center">#{inOutView.currentBean['bizKey']}</h2>
-							<w:view module="whosinIntegrate"
+							<s:view module="whosinIntegrate"
 										document="Office"
 										managedBean="inOutView"
 										type="phone" 

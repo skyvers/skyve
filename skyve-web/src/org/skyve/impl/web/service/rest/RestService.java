@@ -19,10 +19,10 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 @Path("/")
@@ -171,7 +171,7 @@ public class RestService {
 		    	Set<String> projection = null; // new TreeSet<>();
 //		    	projection.add("dateOfBirth");
 //		    	projection.add("dueBack");
-		    	result = JSONUtil.marshall(user.getCustomer(), beans, projection);
+		    	result = JSON.marshall(user.getCustomer(), beans, projection);
 			}
 			catch (InvocationTargetException e) {
 				throw e.getTargetException();

@@ -29,7 +29,7 @@
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_DataBinding.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_Calendar.js"></script>
 		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/system/modules/ISC_RichTextEditor.js"></script>
-		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/skyve/load_skin.js"></script>
+		<script type="text/javascript" src="../../<%=UtilImpl.SMART_CLIENT_DIR%>/skins/Enterprise/load_skin.js"></script>
 		<script type=text/javascript>
 			data = [
 			    {

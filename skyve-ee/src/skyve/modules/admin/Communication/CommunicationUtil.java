@@ -16,22 +16,21 @@ import modules.admin.domain.Subscription;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
-import org.skyve.impl.util.FileUtil;
-import org.skyve.impl.util.MailAttachment;
 import org.skyve.impl.util.TimeUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.FileUtil;
+import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 
 public class CommunicationUtil {
@@ -178,7 +177,7 @@ public class CommunicationUtil {
 			subFolder.append(sdf.format(new Date()));
 
 			String customerName = CORE.getUser().getCustomerName();
-			String batchDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
+			String batchDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
 
 			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
 
@@ -355,7 +354,7 @@ public class CommunicationUtil {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(Communication.MODULE_NAME);
-		Job job = module.getJob("jProcessCommunicationsForTag");
+		JobMetaData job = module.getJob("jProcessCommunicationsForTag");
 
 		EXT.runOneShotJob(job, communication, user);
 

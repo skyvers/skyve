@@ -2,12 +2,12 @@ package org.skyve.metadata.controller;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * Actions implicit to skyve.
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public enum ImplicitActionName {
 	/**
 	 * Produce default button for the view type

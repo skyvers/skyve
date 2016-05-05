@@ -4,9 +4,9 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class FieldReference {
 	private String ref;
 

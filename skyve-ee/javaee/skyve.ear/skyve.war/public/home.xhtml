@@ -5,7 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:w="http://bizhub.com.au/ui"
+		xmlns:s="http://skyve.org/xml/ui"
 		dir="#{skyve.dir}">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<f:metadata>
@@ -16,7 +16,7 @@
 			<f:viewParam name="i" value="#{skyve.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{skyve.preRender}"/>
 		</f:metadata>
-		<w:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
+		<s:conversation managedBean="skyve" rendered="#{'e' eq skyve.webActionParameter}" />
 		<ui:composition template="./template.xhtml">
 			<ui:param name="title" value="#{skyve.title}" />
 			<ui:param name="baseHref" value="#{skyve.baseHref}" />
@@ -26,12 +26,12 @@
 			</ui:define>
 			<ui:define name="body">
 				<h:form>
-					<w:view module="#{skyve.bizModuleParameter}"
+					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}"
 								managedBean="skyve"
 								type="desktop"
 								rendered="#{'e' eq skyve.webActionParameter}" />
-					<w:listGrid module="#{skyve.bizModuleParameter}"
+					<s:listGrid module="#{skyve.bizModuleParameter}"
 									query="#{skyve.queryNameParameter}"
 									managedBean="skyve"
 									type="desktop"

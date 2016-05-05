@@ -2,7 +2,7 @@ package org.skyve.metadata.view;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -17,7 +17,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	/**
 	 * 
 	 */
-	@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public enum RenderHint {
 		/**
 		 * 

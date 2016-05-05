@@ -2,12 +2,12 @@ package org.skyve.metadata.model.document;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * Describes the type of domain values possible on a field
  */
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public enum DomainType {
 	/**
 	 * Constant bunch of values (able to be cached for each customer, or fat client)

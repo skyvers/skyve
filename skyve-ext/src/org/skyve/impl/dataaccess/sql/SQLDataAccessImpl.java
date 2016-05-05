@@ -8,28 +8,29 @@ import javax.sql.DataSource;
 import org.hibernatespatial.AbstractDBGeometryType;
 import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
+import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.SQL;
 
-public class SQLDataAccess implements AutoCloseable {
+public class SQLDataAccessImpl implements SQLDataAccess {
 	private String dataSourceName; // to get a connection from
 	private String dialectClassName; // to construct SQL from
 	private AbstractDBGeometryType geometryUserType = null; // this is only created when we come across a geometry
 
 	private Connection connection;
 	
-	public SQLDataAccess() {
+	public SQLDataAccessImpl() {
 		this(UtilImpl.DATASOURCE);
 	}
 	
-	public SQLDataAccess(String dataSourceName) {
+	public SQLDataAccessImpl(String dataSourceName) {
 		this(dataSourceName, UtilImpl.DIALECT);
 	}
 	
-	public SQLDataAccess(String dataSourceName, String dialectClassName) {
+	public SQLDataAccessImpl(String dataSourceName, String dialectClassName) {
 		this.dataSourceName = dataSourceName;
 		this.dialectClassName = dialectClassName;
 	}
@@ -60,31 +61,37 @@ public class SQLDataAccess implements AutoCloseable {
 		}
 	}
 	
+	@Override
 	public SQL newSQL(String moduleName, String documentName, String query)
 	throws MetaDataException {
 		return new SQLDataAccessSQL(moduleName, documentName, query, this);
 	}
 	
+	@Override
 	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
 		return new SQLDataAccessSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
 	}
 	
+	@Override
 	public SQL newSQL(Document document, String query) {
 		return new SQLDataAccessSQL(document, query, this);
 	}
 
+	@Override
 	public SQL newNamedSQL(Document document, String queryName) 
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
 		return new SQLDataAccessSQL(document, module.getSQL(queryName).getQuery(), this);
 	}
 
+	@Override
 	public SQL newSQL(String query) {
 		return new SQLDataAccessSQL(query, this);
 	}
 
+	@Override
 	public SQL newNamedSQL(String moduleName, String queryName)
 	throws MetaDataException {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);

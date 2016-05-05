@@ -10,12 +10,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteWidth;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class LookupDescription extends Lookup implements Editable, AbsoluteWidth {
 	/**
 	 * For Serialization
@@ -58,8 +58,8 @@ public class LookupDescription extends Lookup implements Editable, AbsoluteWidth
 		this.pixelWidth = pixelWidth;
 	}
 	
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "dropDown")
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "column", required = false)
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "dropDown")
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = false)
 	public Set<String> getDropDownColumns() {
 		return dropDownColumns;
 	}

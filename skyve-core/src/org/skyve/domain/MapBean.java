@@ -1,11 +1,10 @@
-package org.skyve.impl.domain;
+package org.skyve.domain;
 
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
-import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;

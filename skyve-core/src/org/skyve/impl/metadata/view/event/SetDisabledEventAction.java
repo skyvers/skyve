@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.impl.metadata.view.event.EventAction;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "setDisabled")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setDisabled")
 public class SetDisabledEventAction extends AbstractBound implements EventAction, Disableable {
 	/**
 	 * For Serialization

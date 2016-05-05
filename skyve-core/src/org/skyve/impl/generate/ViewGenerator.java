@@ -32,7 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -446,7 +446,7 @@ public class ViewGenerator {
 			repositoryView.getActions().add(((ActionImpl) action).toRepositoryAction());
 		}
 
-		return XMLUtil.marshalView(repositoryView, customerOverridden, uxuiOverridden);
+		return XMLMetaData.marshalView(repositoryView, customerOverridden, uxuiOverridden);
 	}
 	
 	public static void main(String[] args) throws Exception {

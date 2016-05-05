@@ -8,13 +8,13 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableSize;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
 // TODO Implement the rendering of this
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", 
 							"minPixelWidth",
 							"maxPixelWidth",

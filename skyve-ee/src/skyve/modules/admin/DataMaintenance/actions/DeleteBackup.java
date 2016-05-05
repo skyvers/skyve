@@ -5,10 +5,10 @@ import java.io.File;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.CORE;
-import org.skyve.impl.util.FileUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.util.FileUtil;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class DeleteBackup implements ServerSideAction<DataMaintenance> {
@@ -18,7 +18,7 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
-		File backupDir = new File(UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + bean.getSelectedBackupTimestampFolderName());
+		File backupDir = new File(Util.getContentDirectory() + "backup_" + customerName + File.separator + bean.getSelectedBackupTimestampFolderName());
 		if (backupDir.exists() && backupDir.isDirectory()) {
 			FileUtil.delete(backupDir);
 		}

@@ -18,30 +18,33 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
+import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
-import org.skyve.impl.job.JobDescription;
-import org.skyve.impl.job.JobScheduler;
-import org.skyve.impl.util.MailAttachment;
+import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.JobDescription;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.MailAttachment;
 
 /**
  * The central factory for creating all objects required in skyve ext.
@@ -179,7 +182,7 @@ public class EXT {
 	 * @throws Exception
 	 *             Anything.
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user) throws Exception {
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user) throws Exception {
 		JobScheduler.runOneShotJob(job, parameter, user);
 	}
 
@@ -197,7 +200,7 @@ public class EXT {
 	 *            Set this 5 secs higher than the polling time of the UI
 	 * @throws Exception
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user, int sleepAtEndInSeconds) throws Exception {
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) throws Exception {
 		JobScheduler.runOneShotJob(job, parameter, user, sleepAtEndInSeconds);
 	}
 
@@ -488,7 +491,7 @@ public class EXT {
 			if (beanContent != null) {
 				AttachmentContent content = cm.get(beanContent);
 				if (content == null) {
-					throw new Exception("The content for the attachment can't be retrieved - re-attach the content and try again.");
+					throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
 				}
 				byte[] fileBytes = content.getContentBytes();
 
@@ -510,16 +513,15 @@ public class EXT {
 	 * @param parameters
 	 */
 	public static MailAttachment getMailAttachmentFromReport(String reportModuleName, String reportDocumentName, String reportName, Map<String, Object> parameters) throws Exception {
-
 		MailAttachment result = new MailAttachment();
 
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Document invoiceDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
+		Document document = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		JasperPrint jp = EXT.runSQLReport(user, invoiceDocument, reportName, parameters, ReportFormat.pdf, out);
+		EXT.runSQLReport(user, document, reportName, parameters, ReportFormat.pdf, out);
 		byte[] reportBytes = out.toByteArray();
 
 		result.setAttachmentFileName(reportName);
@@ -528,5 +530,16 @@ public class EXT {
 
 		return result;
 	}
-
+	
+	public static SQLDataAccess newSQLDataAccess() {
+		return new SQLDataAccessImpl();
+	}
+	
+	public static SQLDataAccess newSQLDataAccess(String dataSourceName) {
+		return new SQLDataAccessImpl(dataSourceName);
+	}
+	
+	public static SQLDataAccess newSQLDataAccess(String dataSourceName, String dialectClassName) {
+		return new SQLDataAccessImpl(dataSourceName, dialectClassName);
+	}
 }

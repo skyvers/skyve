@@ -5,7 +5,7 @@ import org.skyve.metadata.NamedMetaData;
 /**
  * 
  */
-public interface Job extends NamedMetaData {
+public interface JobMetaData extends NamedMetaData {
 	/**
 	 * 
 	 * @return

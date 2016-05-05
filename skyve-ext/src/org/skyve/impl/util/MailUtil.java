@@ -23,7 +23,7 @@ import javax.mail.util.ByteArrayDataSource;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.MailAttachment;
+import org.skyve.util.MailAttachment;
 
 public class MailUtil {
 	private MailUtil() {

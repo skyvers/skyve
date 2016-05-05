@@ -4,10 +4,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.LoginResources;
 
-@XmlType(namespace = XMLUtil.CUSTOMER_NAMESPACE, name = "LoginResources")
+@XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "LoginResources")
 public class LoginResourcesMetaData implements LoginResources {
 	private String loginPageURL;
 	private String loginErrorPageURL;

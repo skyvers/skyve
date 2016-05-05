@@ -9,7 +9,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
@@ -32,7 +32,7 @@ public class BulkDocumentAction implements ServerSideAction<Tag> {
 		User user = pers.getUser();
 		Customer customer= user.getCustomer();
 		Module module = customer.getModule(Tag.MODULE_NAME);
-		Job job = module.getJob("jPerformDocumentActionForTag");
+		JobMetaData job = module.getJob("jPerformDocumentActionForTag");
 
 		EXT.runOneShotJob(job, tag, user);
 		

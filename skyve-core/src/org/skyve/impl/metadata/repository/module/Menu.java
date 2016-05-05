@@ -7,9 +7,9 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class Menu {
 	private List<Action> actions = new ArrayList<>();
 

@@ -32,7 +32,7 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Parameterizable;
@@ -40,8 +40,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "view")
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "view",
 			propOrder = {"documentation",
 							"actions", 
@@ -95,7 +95,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		this.icon32x32RelativeFileName = UtilImpl.processStringValue(icon32x32RelativeFileName);
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "actions")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
 	@XmlElementRefs({@XmlElementRef(type = AddAction.class),
 						@XmlElementRef(type = BizExportAction.class),
 						@XmlElementRef(type = BizImportAction.class),
@@ -146,8 +146,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	 * These represent parameters that are allowed to be populated when creating a new record.
 	 */
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "newParameters")
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE,
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "newParameters")
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
@@ -159,7 +159,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		return documentation;
 	}
 	
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}

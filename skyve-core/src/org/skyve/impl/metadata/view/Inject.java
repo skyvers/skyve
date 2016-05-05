@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.impl.metadata.view.InjectBinding;
 
@@ -17,8 +17,8 @@ import org.skyve.impl.metadata.view.InjectBinding;
  * 
  * @author mike
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE, propOrder = {"script", "bindings"})
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"script", "bindings"})
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class Inject implements MetaData {
 	private static final long serialVersionUID = -4721559398509481425L;
 
@@ -29,12 +29,12 @@ public class Inject implements MetaData {
 		return script;
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = true)
 	public void setScript(String script) {
 		this.script = UtilImpl.processStringValue(script);
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "accept")
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "accept")
 	public List<InjectBinding> getBindings() {
 		return bindings;
 	}

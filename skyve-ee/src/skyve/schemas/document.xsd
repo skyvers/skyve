@@ -45,7 +45,7 @@
 
   <xs:element name="integerValidator" type="tns:integerValidator"/>
 
-  <xs:element name="inverse" type="tns:inverse"/>
+  <xs:element name="inverse" type="tns:inverseImpl"/>
 
   <xs:element name="longInteger" type="tns:longInteger"/>
 
@@ -449,7 +449,7 @@
 
   <xs:complexType name="association">
     <xs:complexContent>
-      <xs:extension base="tns:reference">
+      <xs:extension base="tns:referenceImpl">
         <xs:sequence/>
         <xs:attribute name="required" type="xs:boolean"/>
         <xs:attribute name="type" type="tns:associationType" use="required"/>
@@ -457,7 +457,7 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="reference" abstract="true">
+  <xs:complexType name="referenceImpl" abstract="true">
     <xs:complexContent>
       <xs:extension base="tns:abstractAttribute">
         <xs:sequence>
@@ -472,7 +472,7 @@
 
   <xs:complexType name="collection">
     <xs:complexContent>
-      <xs:extension base="tns:reference">
+      <xs:extension base="tns:referenceImpl">
         <xs:sequence>
           <xs:element name="minCardinality" type="xs:int" form="qualified"/>
           <xs:element name="maxCardinality" type="xs:int" form="qualified" minOccurs="0"/>
@@ -512,7 +512,7 @@
     <xs:attribute name="description" type="xs:string"/>
   </xs:complexType>
 
-  <xs:complexType name="inverse">
+  <xs:complexType name="inverseImpl">
     <xs:complexContent>
       <xs:extension base="tns:abstractAttribute">
         <xs:sequence>
@@ -567,15 +567,15 @@
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
       <xs:enumeration value="mapped"/>
-      <xs:enumeration value="single"/>
       <xs:enumeration value="joined"/>
+      <xs:enumeration value="single"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="capital"/>
       <xs:enumeration value="lower"/>
+      <xs:enumeration value="capital"/>
       <xs:enumeration value="upper"/>
     </xs:restriction>
   </xs:simpleType>
@@ -584,64 +584,64 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="isinCheckDigit"/>
       <xs:enumeration value="email"/>
-      <xs:enumeration value="url"/>
       <xs:enumeration value="verhoeffCheckDigit"/>
-      <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="isbnCheckDigit"/>
       <xs:enumeration value="ipAddress"/>
       <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="isbnCheckDigit"/>
-      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="url"/>
       <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="creditCard"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
       <xs:enumeration value="dynamic"/>
+      <xs:enumeration value="variant"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="indexType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="database"/>
-      <xs:enumeration value="textual"/>
       <xs:enumeration value="both"/>
       <xs:enumeration value="none"/>
+      <xs:enumeration value="textual"/>
+      <xs:enumeration value="database"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="composition"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="composition"/>
       <xs:enumeration value="child"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="inverseCardinality">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="one"/>
       <xs:enumeration value="many"/>
+      <xs:enumeration value="one"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="customer"/>
       <xs:enumeration value="global"/>
-      <xs:enumeration value="dataGroup"/>
       <xs:enumeration value="user"/>
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="customer"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

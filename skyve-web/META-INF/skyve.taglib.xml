@@ -3,7 +3,7 @@
 				    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
 				    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facelettaglibrary_2_2.xsd">
-	<namespace>http://bizhub.com.au/ui</namespace>
+	<namespace>http://skyve.org/xml/ui</namespace>
 	<tag>
 		<tag-name>conversation</tag-name>
 		<component>

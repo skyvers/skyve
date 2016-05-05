@@ -6,10 +6,10 @@ import javax.swing.text.MaskFormatter;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang3.StringUtils;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 public class Format<T> {
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum TextCase {
 		upper, lower, capital;
 	}

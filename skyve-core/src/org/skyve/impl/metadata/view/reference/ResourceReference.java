@@ -4,15 +4,15 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * This reference generates a href to the customer resource based on the relative file name.
  * @author mike
  *
  */
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ResourceReference implements Reference {
 	/**
 	 * For Serialization

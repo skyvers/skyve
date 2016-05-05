@@ -18,7 +18,6 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
@@ -31,6 +30,7 @@ import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
+import org.skyve.util.JSON;
 
 public class SmartClientTagServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
@@ -239,7 +239,7 @@ public class SmartClientTagServlet extends HttpServlet {
 		
 		// add filter criteria
 		@SuppressWarnings("unchecked")
-		Map<String, Object> criteria = (Map<String, Object>) JSONUtil.unmarshall(user, criteriaJSON);
+		Map<String, Object> criteria = (Map<String, Object>) JSON.unmarshall(user, criteriaJSON);
 		if (criteria != null) {
 			String operator = (String) criteria.get("operator");
 			if (operator != null) { // advanced criteria

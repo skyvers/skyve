@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.metadata.module.Job;
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
 import org.skyve.impl.metadata.module.menu.MenuGroup;
@@ -27,7 +27,7 @@ import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
@@ -36,8 +36,8 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 
-@XmlRootElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "module")
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "module")
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "module",
 			propOrder = {"documentation", 
 							"title",
@@ -52,7 +52,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private String title;
 	private ViewType homeRef;
 	private String homeDocument;
-	private List<Job> jobs = new ArrayList<>();
+	private List<JobMetaDataImpl> jobs = new ArrayList<>();
 	private List<ModuleDocument> documents = new ArrayList<>();
 	private List<QueryMetaData> queries = new ArrayList<>();
 	private List<Role> roles = new ArrayList<>();
@@ -72,7 +72,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return homeDocument;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	public void setHomeDocument(String homeDocument) {
 		this.homeDocument = UtilImpl.processStringValue(homeDocument);
 	}
@@ -81,24 +81,24 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return homeRef;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setHomeRef(ViewType homeRef) {
 		this.homeRef = homeRef;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "jobs")
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "job", required = true)
-	public List<Job> getJobs() {
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "jobs")
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "job", required = true)
+	public List<JobMetaDataImpl> getJobs() {
 		return jobs;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "documents")
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "document", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documents")
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
 	public List<ModuleDocument> getDocuments() {
 		return documents;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "queries")
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "queries")
 	@XmlElementRefs({@XmlElementRef(type = DocumentQueryMetaData.class),
 						@XmlElementRef(type = BizQLMetaData.class),
 						@XmlElementRef(type = SQLMetaData.class)})
@@ -106,8 +106,8 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return queries;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "roles")
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "role", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "roles")
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
 	public List<Role> getRoles() {
 		return roles;
 	}
@@ -116,7 +116,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return menu;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	public void setMenu(Menu menu) {
 		this.menu = menu;
 	}
@@ -125,7 +125,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		return documentation;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
@@ -193,10 +193,10 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 
 		// Populate Jobs
-		List<Job> repositoryJobs = getJobs();
+		List<JobMetaDataImpl> repositoryJobs = getJobs();
 		if (repositoryJobs != null) {
 			Set<String> jobNames = new TreeSet<>();
-			for (Job job : repositoryJobs) {
+			for (JobMetaDataImpl job : repositoryJobs) {
 				value = job.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a job is required");

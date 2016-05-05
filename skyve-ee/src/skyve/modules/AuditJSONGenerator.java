@@ -6,12 +6,12 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.JSON;
 
 public class AuditJSONGenerator extends BeanVisitor {
 	private Map<String, Object> audit = new TreeMap<>();
@@ -23,7 +23,7 @@ public class AuditJSONGenerator extends BeanVisitor {
 	}
 	
 	public String toJSON() throws Exception {
-		return JSONUtil.marshall(customer, audit, null);
+		return JSON.marshall(customer, audit, null);
 	}
 
 	@Override

@@ -10,11 +10,11 @@ import modules.admin.domain.JobSchedule;
 import org.quartz.CronExpression;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.job.JobScheduler;
+import org.skyve.job.JobScheduler;
 import org.skyve.domain.messages.Message;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
@@ -31,7 +31,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 			int dotIndex = jobName.indexOf('.');
 			Customer customer = CORE.getUser().getCustomer();
 			Module module = customer.getModule(jobName.substring(0, dotIndex));
-			Job job = module.getJob(jobName.substring(dotIndex + 1));
+			JobMetaData job = module.getJob(jobName.substring(dotIndex + 1));
 	
 			return module.getName() + " - " + job.getDisplayName();
 		}
@@ -123,7 +123,7 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 			Customer customer = CORE.getUser().getCustomer();
 			
 			for (Module module : customer.getModules()) {
-				for (Job job : module.getJobs()) {
+				for (JobMetaData job : module.getJobs()) {
 					StringBuilder sb = new StringBuilder(128);
 					StringBuilder sbDisplay = new StringBuilder(128);
 					sb.append(module.getName()).append('.').append(job.getName());

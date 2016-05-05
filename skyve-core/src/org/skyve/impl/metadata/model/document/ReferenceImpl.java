@@ -7,10 +7,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"persistentBool", "domainType", "documentName", "queryName"})
 public abstract class ReferenceImpl extends AbstractAttribute implements org.skyve.metadata.model.document.Reference {
 	/**
@@ -27,7 +27,7 @@ public abstract class ReferenceImpl extends AbstractAttribute implements org.sky
 		return domainType;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name = "domain", required = false)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "domain", required = false)
 	public void setDomainType(DomainType domainType) {
 		this.domainType = domainType;
 	}
@@ -37,7 +37,7 @@ public abstract class ReferenceImpl extends AbstractAttribute implements org.sky
 		return documentName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
@@ -47,7 +47,7 @@ public abstract class ReferenceImpl extends AbstractAttribute implements org.sky
 		return queryName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setQueryName(String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}

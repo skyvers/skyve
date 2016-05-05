@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -21,8 +21,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 /**
  * value is optional - defaults to "Content" or "Empty".
  */
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"value", "pixelWidth", "parameters"})
 public class ContentLink extends InputWidget implements Editable, Parameterizable, AbsoluteWidth {
 	/**
@@ -67,7 +67,7 @@ public class ContentLink extends InputWidget implements Editable, Parameterizabl
 	}
 
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "parameters")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "parameters")
 	@XmlElement(name = "parameter", type = ParameterImpl.class, required = false)
 	public List<Parameter> getParameters() {
 		return parameters;

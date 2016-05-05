@@ -8,16 +8,16 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ParameterizableAction extends PositionableAction implements Parameterizable {
 	private List<Parameter> parameters = new ArrayList<>();
 
 	@Override
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, 
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, 
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)

@@ -7,14 +7,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 public abstract class Item extends Action {
 	private List<GrantedTo> roles = new ArrayList<>();
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "role", required = true)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
 	public List<GrantedTo> getRoles() {
 		return roles;
 	}

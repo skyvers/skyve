@@ -23,12 +23,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 class SQLIterable<T> implements AutoClosingIterable<T> {
 	private Document document;
-	private SQLDataAccess dataAccess;
+	private SQLDataAccessImpl dataAccess;
 	private Class<?> scalarType;
 	private NamedParameterPreparedStatement ps = null;
 	private ResultSet rs = null;
 	
-	SQLIterable(Document document, SQLDataAccess dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) throws DomainException {
+	SQLIterable(Document document, SQLDataAccessImpl dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) throws DomainException {
 		this.document = document;
 		this.dataAccess = dataAccess;
 		this.scalarType = scalarType;

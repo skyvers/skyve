@@ -8,13 +8,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "report")
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "report")
 public class ReportAction extends ParameterizableAction {
 	public ReportAction() {
 		implicitName = ImplicitActionName.Report;

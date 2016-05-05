@@ -31,7 +31,7 @@ import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
@@ -129,7 +129,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						StringBuilder sb = new StringBuilder(256);
 						sb.append(UtilImpl.getAbsoluteBasePath());
 						sb.append(ROUTER_NAMESPACE).append(ROUTER_NAME).append(".xml");
-						result = XMLUtil.unmarshalRouter(sb.toString());
+						result = XMLMetaData.unmarshalRouter(sb.toString());
 						result = result.convert(ROUTER_NAME);
 						if (! UtilImpl.DEV_MODE) {
 							put(routerKey, result);
@@ -159,7 +159,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						sb.append(UtilImpl.getAbsoluteBasePath());
 						sb.append(CUSTOMERS_NAMESPACE);
 						sb.append(customerName).append('/').append(customerName).append(".xml");
-						CustomerMetaData customer = XMLUtil.unmarshalCustomer(sb.toString());
+						CustomerMetaData customer = XMLMetaData.unmarshalCustomer(sb.toString());
 						if (! customerName.equals(customer.getName())) {
 							throw new MetaDataException("Customer is defined with file name of " + sb.toString() + 
 															" but the name attribute is " + customer.getName());
@@ -491,7 +491,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						sb.append(UtilImpl.getAbsoluteBasePath());
 						sb.append(moduleLocation).append('/');
 						sb.append(moduleName).append(".xml");
-						ModuleMetaData module = XMLUtil.unmarshalModule(sb.toString());
+						ModuleMetaData module = XMLMetaData.unmarshalModule(sb.toString());
 						if (! moduleName.equals(module.getName())) {
 							throw new MetaDataException("Module is defined with file name of " + sb.toString() + 
 															" but the name attribute is " + module.getName());
@@ -550,7 +550,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						sb.append(UtilImpl.getAbsoluteBasePath());
 						sb.append(documentLocation).append('/');
 						sb.append(documentName).append(".xml");
-						DocumentMetaData document = XMLUtil.unmarshalDocument(sb.toString());
+						DocumentMetaData document = XMLMetaData.unmarshalDocument(sb.toString());
 						if (! documentName.equals(document.getName())) {
 							throw new MetaDataException("Document is defined with file name of " + sb.toString() + 
 															" but the name attribute is " + document.getName());
@@ -680,7 +680,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.setLength(0);
 							sb.append(UtilImpl.getAbsoluteBasePath());
 							sb.append(viewLocation).append(".xml");
-							ViewMetaData view = XMLUtil.unmarshalView(sb.toString());
+							ViewMetaData view = XMLMetaData.unmarshalView(sb.toString());
 							if (! viewType.equals(view.getType())) {
 								throw new MetaDataException("View is defined with file name of " + sb.toString() + 
 																" but the type attribute is " + view.getType());

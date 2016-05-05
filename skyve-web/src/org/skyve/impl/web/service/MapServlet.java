@@ -14,7 +14,6 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.customer.Customer;
@@ -26,6 +25,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.map.DefaultCollectionMapModel;
 import org.skyve.metadata.view.model.map.DefaultQueryMapModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -130,7 +130,7 @@ public class MapServlet extends HttpServlet {
 		DefaultQueryMapModel<Bean> model = new DefaultQueryMapModel<>(query);
 		model.setGeometryBinding(geometryBinding);
 		// TODO get the envelope from the map
-		return JSONUtil.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
 	}
 	
 	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
@@ -144,7 +144,7 @@ public class MapServlet extends HttpServlet {
 		model.setGeometryBinding(geometryBinding);
 		model.setBean(bean);
 		// TODO get the envelope from the map
-		return JSONUtil.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
 	}
 
 	private static String processModel(HttpServletRequest request, HttpServletResponse response)
@@ -158,6 +158,6 @@ public class MapServlet extends HttpServlet {
 		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME));
 		model.setBean(bean);
 		// TODO get the envelope from the map
-		return JSONUtil.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
+		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
 	}
 }

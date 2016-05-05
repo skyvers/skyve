@@ -28,10 +28,10 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	 */
 	private static final long serialVersionUID = -1272267642792331001L;
 
-	static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
-	static final String BEAN_JOB_PARAMETER_KEY = "bean";
-	static final String USER_JOB_PARAMETER_KEY = "user";
-	static final String SLEEP_JOB_PARAMETER_KEY = "sleep";
+	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";
+	public static final String BEAN_JOB_PARAMETER_KEY = "bean";
+	public static final String USER_JOB_PARAMETER_KEY = "user";
+	public static final String SLEEP_JOB_PARAMETER_KEY = "sleep";
 
 	private String displayName;
 	private Timestamp startTime = new Timestamp();

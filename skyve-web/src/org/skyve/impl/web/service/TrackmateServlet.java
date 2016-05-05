@@ -22,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -30,11 +32,8 @@ import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Timestamp;
-import org.skyve.impl.content.AttachmentContent;
-import org.skyve.impl.content.ContentManager;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
@@ -46,6 +45,7 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -252,7 +252,7 @@ public class TrackmateServlet extends HttpServlet {
 					//and return
 					Map<String, Object> result = new TreeMap<>();
 					result.put("data", userPositions);
-					String jsonString = JSONUtil.marshall(persistence.getUser().getCustomer(), result, null);
+					String jsonString = JSON.marshall(persistence.getUser().getCustomer(), result, null);
 					System.out.println(jsonString);
 					pw.append(jsonString);
 				}
@@ -347,7 +347,7 @@ public class TrackmateServlet extends HttpServlet {
 
 		String result = request.getParameter("result");
 		@SuppressWarnings("unchecked")
-		Map<String, Object> values = (Map<String, Object>) JSONUtil.unmarshall(user, result);
+		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, result);
 
 		Module trackModule = customer.getModule(TRACK_MODULE_NAME);
 		Document trackDoc = trackModule.getDocument(customer, TRACK_DOCUMENT_NAME);

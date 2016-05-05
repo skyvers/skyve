@@ -7,8 +7,8 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.domain.Bean;
+import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.impl.domain.MapBean;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;

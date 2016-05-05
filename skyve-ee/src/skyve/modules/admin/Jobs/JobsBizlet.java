@@ -5,8 +5,8 @@ import java.util.List;
 import modules.admin.domain.Job;
 import modules.admin.domain.Jobs;
 
-import org.skyve.impl.job.JobDescription;
-import org.skyve.impl.job.JobScheduler;
+import org.skyve.job.JobDescription;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.model.document.Bizlet;
 
 public class JobsBizlet extends Bizlet<Jobs> {

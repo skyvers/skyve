@@ -18,11 +18,11 @@ import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.DomainType;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE,
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"documentation",
 							"displayName", 
 							"description", 
@@ -51,7 +51,7 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		return displayName;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, required = true)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setDisplayName(String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
@@ -61,7 +61,7 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		return description;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDescription(String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
@@ -128,7 +128,7 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		this.defaultInputWidget = defaultInputWidget;
 	}
 	
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE, name="defaultWidget")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name="defaultWidget")
 	public void setDefaultWidgetReference(WidgetReference widgetRef) {
 		if (widgetRef != null) {
 			defaultInputWidget = widgetRef.getWidget();
@@ -186,7 +186,7 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		return documentation;
 	}
 
-	@XmlElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDocumentation(String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}

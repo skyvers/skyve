@@ -17,12 +17,12 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.MembershipWidget;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"changedActions", "membersHeading", "candidatesHeading", "listWidthInPixels"})
 public class ListMembership extends InputWidget implements MembershipWidget {
 	/**
@@ -36,7 +36,7 @@ public class ListMembership extends InputWidget implements MembershipWidget {
 	private List<EventAction> changedActions = new ArrayList<>();
 	
 	@Override
-	@XmlElementWrapper(namespace = XMLUtil.VIEW_NAMESPACE, name = "onChangedHandlers")
+	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onChangedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),

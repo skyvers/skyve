@@ -8,10 +8,10 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class Group extends Action {
 	private List<Action> actions = new ArrayList<>();
 

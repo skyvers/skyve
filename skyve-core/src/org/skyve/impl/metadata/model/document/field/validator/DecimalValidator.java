@@ -8,10 +8,10 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+@XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 public class DecimalValidator extends RangeValidator<Decimal> {
 	private Integer precision;
 

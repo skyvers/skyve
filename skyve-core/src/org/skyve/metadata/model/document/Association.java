@@ -2,7 +2,7 @@ package org.skyve.metadata.model.document;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
 /**
  * 
@@ -11,7 +11,7 @@ public interface Association extends Reference {
 	/**
 	 * 
 	 */
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public enum AssociationType implements ReferenceType {
 		/**
 		 * 

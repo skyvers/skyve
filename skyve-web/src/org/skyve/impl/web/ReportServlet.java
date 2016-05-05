@@ -51,7 +51,6 @@ import org.skyve.impl.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ReportStyle;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.JSONUtil;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -68,6 +67,7 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 public class ReportServlet extends HttpServlet {
@@ -360,7 +360,7 @@ public class ReportServlet extends HttpServlet {
 				}
 	
 				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) JSONUtil.unmarshall(user, valuesParam);
+				Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, valuesParam);
 				String module_QueryOrModel = (String) values.get("ds");
 				int _Index = module_QueryOrModel.indexOf('_');
 				Module module = customer.getModule(module_QueryOrModel.substring(0, _Index));

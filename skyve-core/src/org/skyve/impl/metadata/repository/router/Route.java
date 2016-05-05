@@ -8,16 +8,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 
-@XmlType(namespace = XMLUtil.ROUTER_NAMESPACE)
+@XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class Route implements MetaData {
 	private static final long serialVersionUID = 2672586575464268486L;
 
 	private String outcomeUrl;
 
-	@XmlElement(namespace = XMLUtil.ROUTER_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 	private List<RouteCriteria> criteria = new ArrayList<>();
 	
 	public String getOutcomeUrl() {

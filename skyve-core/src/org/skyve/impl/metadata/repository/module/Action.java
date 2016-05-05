@@ -7,13 +7,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class Action extends NamedMetaData {
 	private List<ApplicableTo> uxuis = new ArrayList<>();
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "uxui", required = false)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "uxui", required = false)
 	public List<ApplicableTo> getUxuis() {
 		return uxuis;
 	}

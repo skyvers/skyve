@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(name = "list", namespace = XMLUtil.MODULE_NAMESPACE)
-@XmlRootElement(name = "list", namespace = XMLUtil.MODULE_NAMESPACE)
+@XmlType(name = "list", namespace = XMLMetaData.MODULE_NAMESPACE)
+@XmlRootElement(name = "list", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class ListItem extends Item {
 	private String documentName;
 	private String queryName;

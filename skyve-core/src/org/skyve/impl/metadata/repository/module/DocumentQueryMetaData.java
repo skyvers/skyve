@@ -10,10 +10,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 
-@XmlRootElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "documentQuery")
-@XmlType(namespace = XMLUtil.MODULE_NAMESPACE, 
+@XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documentQuery")
+@XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "documentQuery",
 			propOrder = {"documentName", "from", "filter", "columns"})
 public class DocumentQueryMetaData extends QueryMetaData {
@@ -35,7 +35,7 @@ public class DocumentQueryMetaData extends QueryMetaData {
 		return from;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setFrom(String from) {
 		this.from =  UtilImpl.processStringValue(from);
 	}
@@ -44,13 +44,13 @@ public class DocumentQueryMetaData extends QueryMetaData {
 		return filter;
 	}
 
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE)
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	public void setFilter(String filter) {
 		this.filter =  UtilImpl.processStringValue(filter);
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.MODULE_NAMESPACE, name = "columns")
-	@XmlElement(namespace = XMLUtil.MODULE_NAMESPACE, name = "column", required = true)
+	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "columns")
+	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "column", required = true)
 	public List<Column> getColumns() {
 		return columns;
 	}

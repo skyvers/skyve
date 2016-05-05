@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
@@ -16,7 +16,7 @@ public interface View extends MetaData, Parameterizable {
 	/**
 	 * 
 	 */
-	@XmlType(namespace = XMLUtil.VIEW_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 	public static enum ViewType {
 		/**
 		 * 

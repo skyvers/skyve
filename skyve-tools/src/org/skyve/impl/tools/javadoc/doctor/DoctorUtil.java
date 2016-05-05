@@ -23,7 +23,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -171,7 +171,7 @@ public class DoctorUtil {
 			table.setTitle("Jobs");
 			table.getHtmlContent().add("The module " + module.getName() + " has the following off-line jobs defined.");
 			table.setHeaderValues("Job", "Class");
-			for (Job j : module.getJobs()) {
+			for (JobMetaData j : module.getJobs()) {
 				table.setRowValues(j.getDisplayName(), j.getClassName());
 			}
 			out.println(table.toHTML(true));

@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.user.DocumentPermissionScope;
 
@@ -16,7 +16,7 @@ public interface UniqueConstraint extends NamedMetaData {
 	/**
 	 * 
 	 */
-	@XmlType(namespace = XMLUtil.DOCUMENT_NAMESPACE)
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum DocumentScope {
 		/**
 		 * 

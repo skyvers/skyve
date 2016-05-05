@@ -14,15 +14,15 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.util.XMLUtil;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 
-@XmlRootElement(namespace = XMLUtil.VIEW_NAMESPACE)
-@XmlType(namespace = XMLUtil.VIEW_NAMESPACE,
+@XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"pixelWidth", 
 							"percentageWidth", 
@@ -67,12 +67,12 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 	private List<FormColumn> columns = new ArrayList<>();
 	private List<FormRow> rows = new ArrayList<>();
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "column", required = true)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = true)
 	public List<FormColumn> getColumns() {
 		return columns;
 	}
 
-	@XmlElement(namespace = XMLUtil.VIEW_NAMESPACE, name = "row", required = true)
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "row", required = true)
 	public List<FormRow> getRows() {
 		return rows;
 	}
