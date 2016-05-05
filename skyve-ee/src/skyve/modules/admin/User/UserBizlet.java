@@ -20,7 +20,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -30,6 +29,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 
 public class UserBizlet extends Bizlet<User> {
 	/**
@@ -204,7 +204,7 @@ public class UserBizlet extends Bizlet<User> {
 							e.getMessages().add(message);
 						}
 
-						MessageDigest md = MessageDigest.getInstance(UtilImpl.PASSWORD_HASHING_ALGORITHM);
+						MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
 						Base64 base64Codec = new Base64();
 						hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
 						user.setPassword(hashedPassword);

@@ -5,9 +5,9 @@ import java.io.File;
 import modules.admin.domain.DataMaintenance;
 
 import org.skyve.CORE;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.FileUtil;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ZipBackup extends DownloadAction<DataMaintenance> {
@@ -19,7 +19,7 @@ public class ZipBackup extends DownloadAction<DataMaintenance> {
 		
 		
 		String customerName = CORE.getUser().getCustomerName();
-		String batchPath = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + bean.getSelectedBackupTimestampFolderName();
+		String batchPath = Util.getContentDirectory() + "backup_" + customerName + File.separator + bean.getSelectedBackupTimestampFolderName();
 		String zipName = String.format("backup_%s_%s.zip", customerName, bean.getSelectedBackupTimestampFolderName());
 		
 		return FileUtil.prepareZipDownload(batchPath, zipName, webContext);

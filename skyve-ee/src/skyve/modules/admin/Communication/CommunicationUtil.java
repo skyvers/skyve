@@ -21,7 +21,6 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.TimeUtil;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Job;
@@ -178,7 +177,7 @@ public class CommunicationUtil {
 			subFolder.append(sdf.format(new Date()));
 
 			String customerName = CORE.getUser().getCustomerName();
-			String batchDirPrefix = UtilImpl.CONTENT_DIRECTORY + "batch_" + customerName;
+			String batchDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
 
 			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
 

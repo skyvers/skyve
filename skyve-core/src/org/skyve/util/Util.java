@@ -184,6 +184,14 @@ public class Util {
 		return UtilImpl.constructRandomInstance(user, module, document, depth);
 	}
 	
+	public static String getContentDirectory() {
+		return UtilImpl.CONTENT_DIRECTORY;
+	}
+
+	public static String getPasswordHashingAlgorithm() {
+		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
+	}
+
 	public static String getServerUrl() {
 		return UtilImpl.SERVER_URL;
 	}
