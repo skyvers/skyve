@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.metadata.module.Job;
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.AbstractMenuItem;
 import org.skyve.impl.metadata.module.menu.MenuGroup;
@@ -52,7 +52,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private String title;
 	private ViewType homeRef;
 	private String homeDocument;
-	private List<Job> jobs = new ArrayList<>();
+	private List<JobMetaDataImpl> jobs = new ArrayList<>();
 	private List<ModuleDocument> documents = new ArrayList<>();
 	private List<QueryMetaData> queries = new ArrayList<>();
 	private List<Role> roles = new ArrayList<>();
@@ -88,7 +88,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "jobs")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "job", required = true)
-	public List<Job> getJobs() {
+	public List<JobMetaDataImpl> getJobs() {
 		return jobs;
 	}
 
@@ -193,10 +193,10 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 		}
 
 		// Populate Jobs
-		List<Job> repositoryJobs = getJobs();
+		List<JobMetaDataImpl> repositoryJobs = getJobs();
 		if (repositoryJobs != null) {
 			Set<String> jobNames = new TreeSet<>();
-			for (Job job : repositoryJobs) {
+			for (JobMetaDataImpl job : repositoryJobs) {
 				value = job.getName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [name] for a job is required");

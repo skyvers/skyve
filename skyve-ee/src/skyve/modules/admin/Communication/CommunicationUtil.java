@@ -23,7 +23,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -354,7 +354,7 @@ public class CommunicationUtil {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(Communication.MODULE_NAME);
-		Job job = module.getJob("jProcessCommunicationsForTag");
+		JobMetaData job = module.getJob("jProcessCommunicationsForTag");
 
 		EXT.runOneShotJob(job, communication, user);
 

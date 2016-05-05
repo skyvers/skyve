@@ -136,13 +136,13 @@ public interface Module extends NamedMetaData {
 	 * @param jobName
 	 * @return
 	 */
-	public Job getJob(String jobName);
+	public JobMetaData getJob(String jobName);
 	
 	/**
 	 * Unmodifiable list
 	 * @return
 	 */
-	public List<Job> getJobs();
+	public List<JobMetaData> getJobs();
 	
 	/**
 	 * 

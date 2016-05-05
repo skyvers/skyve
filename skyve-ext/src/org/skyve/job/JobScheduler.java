@@ -26,7 +26,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
@@ -82,7 +82,7 @@ public class JobScheduler {
 
 	private static void addJobs(Module module) 
 	throws Exception {
-		for (Job job : module.getJobs()) {
+		for (JobMetaData job : module.getJobs()) {
 			Class<?> jobClass = Thread.currentThread().getContextClassLoader().loadClass(job.getClassName());
 			JobDetail detail = new JobDetail(job.getName(), module.getName(), jobClass);
 			detail.setDurability(true); // remain in store even when no triggers are using it
@@ -134,7 +134,7 @@ public class JobScheduler {
 	 * 
 	 * @throws Exception Anything.
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user)
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user)
 	throws Exception {
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
 		trigger.setGroup(user.getCustomer().getName());
@@ -153,7 +153,7 @@ public class JobScheduler {
 	 * @param sleepAtEndInSeconds Set this 5 secs higher than the polling time of the UI
 	 * @throws Exception
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user, int sleepAtEndInSeconds)
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds)
 	throws Exception {
 		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
 		trigger.setGroup(user.getCustomer().getName());
@@ -175,7 +175,7 @@ public class JobScheduler {
 
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
-		Job job = module.getJob(jobName);
+		JobMetaData job = module.getJob(jobName);
 		
 		Date sqlStartTime = (Date) BindUtil.get(jobSchedule, "startTime");
 		DateTime startTime = (sqlStartTime == null) ? null : new DateTime(sqlStartTime.getTime());
@@ -200,7 +200,7 @@ public class JobScheduler {
 		scheduleJob(job, null, user, trigger, null);
 	}
 	
-	private static void scheduleJob(Job job, 
+	private static void scheduleJob(JobMetaData job, 
 										Bean parameter, 
 										User user, 
 										Trigger trigger, 

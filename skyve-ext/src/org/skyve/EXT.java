@@ -40,7 +40,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Job;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
@@ -182,7 +182,7 @@ public class EXT {
 	 * @throws Exception
 	 *             Anything.
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user) throws Exception {
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user) throws Exception {
 		JobScheduler.runOneShotJob(job, parameter, user);
 	}
 
@@ -200,7 +200,7 @@ public class EXT {
 	 *            Set this 5 secs higher than the polling time of the UI
 	 * @throws Exception
 	 */
-	public static void runOneShotJob(Job job, Bean parameter, User user, int sleepAtEndInSeconds) throws Exception {
+	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) throws Exception {
 		JobScheduler.runOneShotJob(job, parameter, user, sleepAtEndInSeconds);
 	}
 
