@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/skyve"/>
+	<classpathentry kind="src" output="javaee/skyve.ear/apps.jar" path="src/skyve"/>
 	<classpathentry kind="src" output="javaee/skyve.ear/skyve.war/WEB-INF/classes" path="src/web"/>
+	<classpathentry kind="src" path="src/test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
@@ -27,5 +28,5 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-5.3.jar"/>
-	<classpathentry kind="output" path="javaee/skyve.ear/apps.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
