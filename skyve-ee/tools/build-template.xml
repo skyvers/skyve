@@ -113,7 +113,7 @@
 			<fileset dir="${skyve-ee-path}/lib" includes="skyve*.jar" />
 		</copy>
 		<copy todir="${ear-path}/lib" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-ear-path}/lib" includes="**" excludes="geodb*.jar" />
+			<fileset dir="${skyve-ear-path}/lib" includes="**" excludes="geodb*.jar,h2*.jar" />
 		</copy>
 		<copy todir="${ear-path}/META-INF" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ear-path}/META-INF" includes="**" excludes="application.xml" />

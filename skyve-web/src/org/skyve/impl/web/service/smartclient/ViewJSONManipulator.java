@@ -1080,13 +1080,21 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append('>').append(blurb.getMarkup()).append("</div>");
 		}
 		else {
-			if (parentVisible && visible(blurb)) {
-				if ((! forApply) || 
-						(forApply && parentEnabled)) {
-					String markup = blurb.getMarkup();
-					if (BindUtil.messageIsBound(markup)) { // has a binding expression
-						addFormat(markup);
+			String markup = blurb.getMarkup();
+			if (BindUtil.messageIsBound(markup)) { // has a binding expression
+				if (parentVisible && visible(blurb)) {
+					if ((! forApply) || 
+							(forApply && parentEnabled)) {
+							addFormat(markup);
 					}
+					else {
+						// ensure the format counter is incremented to stay in sync with the generated edit view
+						formatCounter++;
+					}
+				}
+				else {
+					// ensure the format counter is incremented to stay in sync with the generated edit view
+					formatCounter++;
 				}
 			}
 			addCondition(blurb.getInvisibleConditionName());
@@ -1124,14 +1132,22 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append("</span>");
 		}
 		else {
-			if (parentVisible && visible(label)) {
-				if ((! forApply) || 
-						(forApply && parentEnabled)) {
-					addBinding(label.getBinding(), false);
-					String value = label.getValue();
-					if ((value != null) && BindUtil.messageIsBound(value)) { // has a binding expression
+			String value = label.getValue();
+			if ((value != null) && BindUtil.messageIsBound(value)) { // has a binding expression
+				if (parentVisible && visible(label)) {
+					if ((! forApply) || 
+							(forApply && parentEnabled)) {
+						addBinding(label.getBinding(), false);
 						addFormat(value);
 					}
+					else {
+						// ensure the format counter is incremented to stay in sync with the generated edit view
+						formatCounter++;
+					}
+				}
+				else {
+					// ensure the format counter is incremented to stay in sync with the generated edit view
+					formatCounter++;
 				}
 			}
 			addCondition(label.getInvisibleConditionName());
