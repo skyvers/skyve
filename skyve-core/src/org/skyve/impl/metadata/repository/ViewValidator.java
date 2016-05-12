@@ -99,7 +99,6 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 
 // TODO check suggestion attributes on text fields etc
 class ViewValidator extends ViewVisitor {
@@ -852,7 +851,7 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							membershipIdentifier,
-							AttributeType.collection);
+							null);
 		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
 		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
 	}
