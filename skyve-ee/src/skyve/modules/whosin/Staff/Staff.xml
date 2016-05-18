@@ -2,9 +2,7 @@
 <document name="Staff" xmlns="http://www.skyve.org/xml/document" xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
-		<![CDATA[
-			Someone who works for this organisation
-		]]>
+		<![CDATA[ Someone who works for this organisation ]]>
 	</documentation>
 	<persistent name="WHO_Staff" />
 	<singularAlias>Staff</singularAlias>
@@ -57,6 +55,7 @@
 		<association type="aggregation" name="reportsTo" persistent="false">
 			<displayName>Reports To</displayName>
 			<documentName>Position</documentName>
+			<queryName>qPositions</queryName>
 		</association>
 		<inverse cardinality="one" name="position">
 			<displayName>Position</displayName>
