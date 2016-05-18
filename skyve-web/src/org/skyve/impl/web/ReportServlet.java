@@ -45,15 +45,14 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.jasperreports.ReportDesignParameters;
-import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ReportColumn;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ReportStyle;
+import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
@@ -193,9 +192,12 @@ public class ReportServlet extends HttpServlet {
 		try (OutputStream out = response.getOutputStream()) {
 			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
 			if (documentName == null) {
-				throw new ServletException("No document name in the URL");
+				throw new ServletException("No module.document in the URL");
 			}
 			int dotIndex = documentName.indexOf('.');
+			if (dotIndex < 0 ) {
+				throw new ServletException(AbstractWebContext.DOCUMENT_NAME + " request parameter should be of the format <moduleName>.<documentName> - value is " + documentName);
+			}
 			String moduleName = documentName.substring(0, dotIndex);
 			documentName = documentName.substring(dotIndex + 1);
 

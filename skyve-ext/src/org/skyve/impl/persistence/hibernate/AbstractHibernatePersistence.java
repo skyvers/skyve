@@ -125,12 +125,6 @@ import org.skyve.persistence.SQL;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.HibernateBizQL;
-import org.skyve.impl.persistence.hibernate.HibernateDocumentQuery;
-import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateListener;
-import org.skyve.impl.persistence.hibernate.HibernateSQL;
 import org.skyve.util.Util;
 
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
@@ -1796,6 +1790,15 @@ t.printStackTrace();
 				}
 				else if (attribute instanceof Association) {
 					query.append(',').append(attributeName).append("_id=:").append(attributeName).append("_id");
+
+					// If this is an arc, add the type column to the insert
+					Association association = (Association) attribute;
+					String referencedDocumentName = association.getDocumentName();
+					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+					Persistent referencedPersistent = referencedDocument.getPersistent();
+					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						query.append(',').append(attributeName).append("_type=:").append(attributeName).append("_type");
+					}
 				}
 				else if (attribute instanceof Field) {
 					query.append(',').append(attributeName).append("=:").append(attributeName);
@@ -1853,6 +1856,16 @@ t.printStackTrace();
 				else if (attribute instanceof Association) {
 					columns.append(',').append(attributeName).append("_id");
 					values.append(",:").append(attributeName).append("_id");
+
+					// If this is an arc, add the type column to the insert
+					Association association = (Association) attribute;
+					String referencedDocumentName = association.getDocumentName();
+					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+					Persistent referencedPersistent = referencedDocument.getPersistent();
+					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						columns.append(',').append(attributeName).append("_type");
+						values.append(",:").append(attributeName).append("_type");
+					}
 				}
 				else if (attribute instanceof Field) {
 					columns.append(',').append(attributeName);
@@ -1908,6 +1921,21 @@ t.printStackTrace();
 					String columnName = new StringBuilder(64).append(attributeName).append("_id").toString();
 					String binding = new StringBuilder(64).append(attributeName).append('.').append(Bean.DOCUMENT_ID).toString();
 					sql.putParameter(columnName, (String) BindUtil.get(bean, binding), false);
+
+					// If this is an arc, add the type column to the insert
+					Association association = (Association) attribute;
+					String referencedDocumentName = association.getDocumentName();
+					Document referencedDocument = module.getDocument(customer, referencedDocumentName);
+					Persistent referencedPersistent = referencedDocument.getPersistent();
+					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+						columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
+						Bean referencedBean = (Bean) BindUtil.get(bean, binding);
+						String value = null;
+						if (referencedBean != null) {
+							value = new StringBuilder(64).append(referencedBean.getBizModule()).append('.').append(referencedBean.getBizDocument()).toString();
+						}
+						sql.putParameter(columnName, value, false);
+					}
 				}
 				else if (attribute instanceof Enumeration) {
 					org.skyve.domain.types.Enumeration value = (org.skyve.domain.types.Enumeration) BindUtil.get(bean, attributeName);

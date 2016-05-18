@@ -103,7 +103,10 @@ class ESIterable implements ContentIterable {
 			hit.setBizUserId(bizUserId);
 			hit.setBizId(bizId);
 
-			hit.setExcerpt((String) searchHit.field(ESClient.CONTENT).value()); 
+			field = searchHit.field(ESClient.CONTENT);
+			if (field != null) {
+				hit.setExcerpt((String) field.value());
+			}
 
 			field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
 			if (field != null) {

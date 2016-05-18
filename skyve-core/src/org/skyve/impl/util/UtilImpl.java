@@ -30,7 +30,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanVisitor;
-import org.skyve.impl.util.UtilImpl;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -126,8 +125,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20160505";
-	public static final String SKYVE_VERSION = "20160505";
+	public static final String JAVASCRIPT_FILE_VERSION = "20160512";
+	public static final String SKYVE_VERSION = "20160512";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 	
 	private static String absoluteBasePath;
