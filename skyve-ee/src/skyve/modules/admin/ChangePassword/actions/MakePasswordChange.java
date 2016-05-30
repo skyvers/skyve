@@ -11,6 +11,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
+import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -84,6 +85,9 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		bean.setResponse("Your password has been changed.");
 
+		// Ensure the user doesn't need to change their password any more.
+		((UserImpl) user).setPasswordChangeRequired(false);
+		
 		return new ServerSideActionResult(bean); // stay on the same form
 	}
 }

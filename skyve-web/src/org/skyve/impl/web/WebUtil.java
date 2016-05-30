@@ -13,6 +13,8 @@ import net.sf.ehcache.Element;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -21,6 +23,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.StateUtil;
 import org.skyve.web.WebContext;
@@ -194,5 +199,51 @@ public class WebUtil {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Called from the changePassword.jsp.
+	 * 
+	 * @param user
+	 * @param newPassword
+	 * @return
+	 * @throws Exception
+	 */
+	public static String makePasswordChange(User user, String newPassword) 
+	throws Exception {
+		String errorMessage = null;
+		
+		Customer c = user.getCustomer();
+		Module admin = c.getModule("admin");
+		Document changePassword = admin.getDocument(c, "ChangePassword");
+		Bean bean = changePassword.newInstance(user);
+		BindUtil.set(bean, "newPassword", newPassword);
+		BindUtil.set(bean, "confirmPassword", newPassword);
+		AbstractRepository r = AbstractRepository.get();
+
+		AbstractPersistence persistence = AbstractPersistence.get();
+		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
+		persistence.begin();
+		try {
+			r.getAction(c, changePassword, "MakePasswordChange").execute(bean, null);
+		}
+		catch (ValidationException e) {
+			persistence.rollback();
+			List<Message> messages = e.getMessages();
+			if (messages.isEmpty()) {
+				errorMessage = e.getLocalizedMessage();
+			}
+			else {
+				errorMessage = messages.get(0).getErrorMessage();
+			}
+		}
+		catch (Exception e) {
+			persistence.rollback();
+		}
+		finally {
+			persistence.commit(true);
+		}
+		
+		return errorMessage;
 	}
 }

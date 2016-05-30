@@ -71,6 +71,10 @@
 			}
 		}
 
+		if ((user != null) && user.isPasswordChangeRequired()) {
+			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/changePassword.jsp"));
+		}
+		
 		// Set the UX/UI
 		Router router = CORE.getRepository().getRouter();
 		String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);

@@ -48,6 +48,7 @@ public class UserImpl implements User {
 	private String id;
 	private String name;
 	private String languageTag;
+	private boolean passwordChangeRequired;
 	private String contactId;
 	private String contactName;
 	private String customerName;
@@ -148,6 +149,15 @@ public class UserImpl implements User {
 		}
 	}
 	
+	@Override
+	public boolean isPasswordChangeRequired() {
+		return passwordChangeRequired;
+	}
+
+	public void setPasswordChangeRequired(boolean passwordChangeRequired) {
+		this.passwordChangeRequired = passwordChangeRequired;
+	}
+
 	@Override
 	public String getContactId() {
 		return contactId;

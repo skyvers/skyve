@@ -34,6 +34,14 @@ public interface User extends NamedMetaData {
 	public Locale getLocale();
 	
 	/**
+	 * Does the password need to be changed before accessing the system.
+	 * 
+	 * @return <code>true</code> if a change of password is required, 
+	 * 			otherwise <code>false</code>.
+	 */
+	public boolean isPasswordChangeRequired();
+	
+	/**
 	 * 
 	 * @return
 	 */
