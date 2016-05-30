@@ -1085,7 +1085,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-							addFormat(markup);
+						addFormat(markup);
 					}
 					else {
 						// ensure the format counter is incremented to stay in sync with the generated edit view
@@ -1133,11 +1133,11 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 		else {
 			String value = label.getValue();
-			if ((value != null) && BindUtil.messageIsBound(value)) { // has a binding expression
+			boolean boundValue = (value != null) && BindUtil.messageIsBound(value);
+			if (boundValue) { // has a binding expression
 				if (parentVisible && visible(label)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
-						addBinding(label.getBinding(), false);
 						addFormat(value);
 					}
 					else {
@@ -1148,6 +1148,14 @@ class ViewJSONManipulator extends ViewVisitor {
 				else {
 					// ensure the format counter is incremented to stay in sync with the generated edit view
 					formatCounter++;
+				}
+			}
+			else {
+				if (parentVisible && visible(label)) {
+					if ((! forApply) || 
+							(forApply && parentEnabled)) {
+						addBinding(label.getBinding(), false);
+					}
 				}
 			}
 			addCondition(label.getInvisibleConditionName());

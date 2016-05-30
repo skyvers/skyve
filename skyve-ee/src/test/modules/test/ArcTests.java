@@ -1,13 +1,13 @@
 package modules.test;
-import org.junit.Assert;
-import org.junit.Test;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.util.Util;
-
 import modules.test.domain.AnyDerived1;
 import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.util.Util;
 
 /**
  * The arc tests fail as the class attributes of the any and many-to-any tags don't map correctly to 
@@ -92,5 +92,36 @@ public class ArcTests extends AbstractH2Test {
 		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
 		test.setArc((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
 		test = p.save(test);
+	}
+	
+	@Test
+	public void testOneToOneUpsertInsert() throws Exception {
+		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
+		test.setArc(p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0)));
+		
+		p.upsertBeanTuple(test);
+
+		p.evictAllCached();
+		
+		test = p.retrieve(ao2o, test.getBizId(), false);
+		Assert.assertNotNull(test.getArc());
+	}
+
+	@Test
+	public void testOneToOneUpsertUpdate() throws Exception {
+		ArcOneToOne test = Util.constructRandomInstance(u, m, ao2o, 0);
+		AnyDerived1 arc1 = p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
+		AnyDerived1 arc2 = p.save((AnyDerived1) Util.constructRandomInstance(u, m, ad1, 0));
+		test.setArc(arc1);
+		test = p.save(test);
+
+		test.setArc(arc2);
+		p.upsertBeanTuple(test);
+
+		p.evictAllCached();
+		
+		test = p.retrieve(ao2o, test.getBizId(), false);
+		Assert.assertNotNull(test.getArc());
+		Assert.assertEquals(arc2.getBizId(), test.getArc().getBizId());
 	}
 }

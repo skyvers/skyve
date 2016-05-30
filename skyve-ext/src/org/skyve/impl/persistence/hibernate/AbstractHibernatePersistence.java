@@ -1929,7 +1929,7 @@ t.printStackTrace();
 					Persistent referencedPersistent = referencedDocument.getPersistent();
 					if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
 						columnName = new StringBuilder(64).append(attributeName).append("_type").toString();
-						Bean referencedBean = (Bean) BindUtil.get(bean, binding);
+						Bean referencedBean = (Bean) BindUtil.get(bean, attributeName);
 						String value = null;
 						if (referencedBean != null) {
 							value = new StringBuilder(64).append(referencedBean.getBizModule()).append('.').append(referencedBean.getBizDocument()).toString();
