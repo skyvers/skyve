@@ -24,6 +24,8 @@ import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
@@ -36,8 +38,6 @@ import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.WebUtil;
-import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -950,7 +950,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			throw new SecurityException("delete this data", user.getName());
 		}
 		
-		persistence.evictCached(beanToDelete);
+		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
+		persistence.evictAllCached();
 		PersistentBean persistentBeanToDelete = persistence.retrieve(processDocument, 
 																		beanToDelete.getBizId(), 
 																		false);

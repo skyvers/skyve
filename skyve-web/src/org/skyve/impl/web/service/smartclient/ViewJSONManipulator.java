@@ -53,9 +53,9 @@ import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.QueryListViewReference;
 import org.skyve.impl.metadata.view.reference.ReferenceProcessor;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
+import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
-import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
@@ -102,12 +102,14 @@ import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -123,8 +125,8 @@ import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
-import org.skyve.util.JSON;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.JSON;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
@@ -439,7 +441,8 @@ class ViewJSONManipulator extends ViewVisitor {
 																	childBindingPrefix);
 			Relation relation = (Relation) target.getAttribute();
 			Document relatedDocument = module.getDocument(customer, relation.getDocumentName());
-			if (List.class.equals(relation.getAttributeType().getImplementingType())) {
+			AttributeType relationType = relation.getAttributeType();
+			if (List.class.equals(relationType.getImplementingType())) { // relation is a collection (or many to many inverse)
 				// We get the JSON list and apply all elements to the existing elements
 				// in the persisted list.
 				//*Any persisted elements that are not present in the JSON list are removed
@@ -508,12 +511,33 @@ class ViewJSONManipulator extends ViewVisitor {
 											persistence);
 							}
 	
-							// Determine if we should link the bean in as the parent
+							// Determine whether link the bean in as the parent
 							String parentDocumentName = relatedDocument.getParentDocumentName();
 							if ((parentDocumentName != null) && // is a child document
 									parentDocumentName.equals(appliedToDoc.getName())) { // and bean is a compatible parent
 								((ChildBean<Bean>) thisBean).setParent(appliedTo);
 							}
+							// Determine whether to set the other side of an inverse
+							if (AttributeType.inverseMany.equals(relationType)) {
+								Inverse inverse = (Inverse) relation;
+								if (Boolean.TRUE.equals(inverse.getCascade())) {
+									String referenceName = inverse.getReferenceName();
+									// Get the reference target metadata - NB could be inherited
+									target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
+									Attribute reference = target.getAttribute();
+									AttributeType referenceType = reference.getAttributeType();
+									if (AttributeType.association.equals(referenceType)) { // association
+										BindUtil.set(thisBean, referenceName, appliedTo);
+									}
+									else { // collection
+										List<Bean> referenceList = (List<Bean>) BindUtil.get(thisBean, referenceName);
+										if (! referenceList.contains(thisBean)) {
+											referenceList.add(appliedTo);
+										}
+									}
+								}
+							}
+							
 							beanList.add(newIndex, thisBean);
 						}
 						else { // found
@@ -538,7 +562,28 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 					// delete any left over beans in the list as these were not present in the requestList
 					while (beanList.size() > newIndex) {
-						beanList.remove(newIndex);
+						Bean removed = beanList.remove(newIndex);
+
+						// Determine whether to null the other side of an inverse
+						if (AttributeType.inverseMany.equals(relationType)) {
+							Inverse inverse = (Inverse) relation;
+							if (Boolean.TRUE.equals(inverse.getCascade())) {
+								String referenceName = inverse.getReferenceName();
+								// Get the reference target metadata - NB could be inherited
+								target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
+								Attribute reference = target.getAttribute();
+								AttributeType referenceType = reference.getAttributeType();
+								if (AttributeType.association.equals(referenceType)) { // association
+									BindUtil.set(removed, referenceName, null);
+								}
+								else { // collection
+									List<Bean> referenceList = (List<Bean>) BindUtil.get(removed, referenceName);
+									while (referenceList.contains(removed)) {
+										referenceList.remove(appliedTo);
+									}
+								}
+							}
+						}
 					}
 					
 					if (relation instanceof Collection) { // NB it could be an inverse
@@ -546,13 +591,34 @@ class ViewJSONManipulator extends ViewVisitor {
 					}
 				}
 			}
-			else { // relation is an association
+			else { // relation is an association (or one to one / one to many inverse)
 				// Get the existing bean referenced
 				Bean referencedBean = (Bean) BindUtil.get(appliedTo, childBindingPrefix);
 				Object requestObject = BindUtil.get(values, childBindingPrefix.replace('_', '.'));
 				if (requestObject == null) {
 					if (referencedBean != null) {
 						BindUtil.set(appliedTo, childBindingPrefix, null);
+						
+						// Determine whether to null the other side of an inverse
+						if (AttributeType.inverseOne.equals(relationType)) {
+							Inverse inverse = (Inverse) relation;
+							if (Boolean.TRUE.equals(inverse.getCascade())) {
+								String referenceName = inverse.getReferenceName();
+								// Get the reference target metadata - NB could be inherited
+								target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
+								Attribute reference = target.getAttribute();
+								AttributeType referenceType = reference.getAttributeType();
+								if (AttributeType.association.equals(referenceType)) { // association
+									BindUtil.set(referencedBean, referenceName, null);
+								}
+								else { // collection
+									List<Bean> referenceList = (List<Bean>) BindUtil.get(referencedBean, referenceName);
+									while (referenceList.contains(appliedTo)) {
+										referenceList.remove(appliedTo);
+									}
+								}
+							}
+						}
 					}
 				}
 				else {
@@ -560,8 +626,42 @@ class ViewJSONManipulator extends ViewVisitor {
 						String requestBizId = (String) requestObject;
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
+							Bean oldReferencedBean = referencedBean;
 							referencedBean = findReferencedBean(relatedDocument, requestBizId, persistence);
 							BindUtil.set(appliedTo, childBindingPrefix, referencedBean);
+
+							// Determine whether to set the other side of an inverse
+							if (AttributeType.inverseOne.equals(relationType)) {
+								Inverse inverse = (Inverse) relation;
+								if (Boolean.TRUE.equals(inverse.getCascade())) {
+									String referenceName = inverse.getReferenceName();
+									// Get the reference target metadata - NB could be inherited
+									target = BindUtil.getMetaDataForBinding(customer, module, relatedDocument, referenceName);
+									Attribute reference = target.getAttribute();
+									AttributeType referenceType = reference.getAttributeType();
+									if (AttributeType.association.equals(referenceType)) { // association
+										// Null out the other side of the inverse for the old inverse value
+										if (oldReferencedBean != null) {
+											BindUtil.set(oldReferencedBean, referenceName, null);
+										}
+										// Set the other side of the inverse for the new inverse value
+										BindUtil.set(referencedBean, referenceName, appliedTo);
+									}
+									else { // collection
+										// Remove elements that contain the other side of the inverse for the old inverse value
+										if (oldReferencedBean != null) {
+											List<Bean> referenceList = (List<Bean>) BindUtil.get(oldReferencedBean, referenceName);
+											while (referenceList.contains(appliedTo)) {
+												referenceList.remove(appliedTo);
+											}
+										}
+										List<Bean> referenceList = (List<Bean>) BindUtil.get(referencedBean, referenceName);
+										if (! referenceList.contains(appliedTo)) {
+											referenceList.add(appliedTo);
+										}
+									}
+								}
+							}
 						}
 					}
 					else { // a JSON object

@@ -167,11 +167,11 @@
 			<displayName>Image</displayName>
 		</content>
 
-		<inverse name="subscriptions">
+		<inverseMany name="subscriptions">
 			<displayName>Subscriptions</displayName>
 			<documentName>Subscription</documentName>
 			<referenceName>communication</referenceName>
-		</inverse>
+		</inverseMany>
 	</attributes>
 	<conditions>
 		<condition name="saveAction">

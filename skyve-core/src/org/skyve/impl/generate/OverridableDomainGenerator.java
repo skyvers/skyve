@@ -15,9 +15,10 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
+import org.skyve.impl.metadata.model.document.AbstractInverse;
+import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.InverseImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -40,7 +41,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Inverse.InverseRelationship;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
@@ -1033,8 +1034,8 @@ joined tables
 				fw.append(indentation).append("\t\t\t</type>\n");
 				fw.append(indentation).append("\t\t</property>\n");
 			}
-			else if (attribute instanceof InverseImpl) {
-				InverseImpl inverse = (InverseImpl) attribute;
+			else if (attribute instanceof Inverse) {
+				AbstractInverse inverse = (AbstractInverse) attribute;
 
 				// determine the inverse target metadata
 				String inverseDocumentName = inverse.getDocumentName();
@@ -1043,6 +1044,7 @@ joined tables
 				String inverseReferenceName = inverse.getReferenceName();
 				String inverseModuleName = inverseDocument.getOwningModuleName();
 				InverseRelationship inverseRelationship = inverse.getRelationship();
+				Boolean cascade = inverse.getCascade();
 				
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
 					fw.append("\t\t<one-to-one name=\"").append(inverse.getName());
@@ -1054,7 +1056,13 @@ joined tables
 					}
 					fw.append(inverseModuleName).append(inverseDocumentName);
 					
-					fw.append("\" property-ref=\"").append(inverseReferenceName).append("\" />\n");
+					fw.append("\" property-ref=\"").append(inverseReferenceName);
+					
+					if (Boolean.TRUE.equals(cascade)) {
+						fw.append("\" cascade=\"all");
+					}
+					
+					fw.append("\" />\n");
 				}
 				else {
 					fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
@@ -1069,6 +1077,11 @@ joined tables
 						}
 						fw.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
 					}
+					
+					if (Boolean.TRUE.equals(cascade)) {
+						fw.append("\" cascade=\"all");
+					}
+
 					fw.append("\" inverse=\"true\">\n");
 	
 					fw.append(indentation).append("\t\t\t<key column=\"");
@@ -1636,7 +1649,7 @@ joined tables
 		}
 	}
 	
-	private void addInverse(InverseImpl inverse,
+	private void addInverse(AbstractInverse inverse,
 								boolean overriddenInverse,
 								Customer customer,
 								Module module,
@@ -1856,8 +1869,8 @@ joined tables
 									methods);
 					continue;
 				}
-				else if (attribute instanceof InverseImpl) {
-					addInverse((InverseImpl) attribute,
+				else if (attribute instanceof Inverse) {
+					addInverse((AbstractInverse) attribute,
 								(overridden && // this is an extension class
 										// the reference is defined in the base class
 										(documentClass != null) && 

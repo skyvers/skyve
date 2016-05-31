@@ -18,7 +18,6 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.impl.backup.Table;
 
 class Table {
 	String name;
@@ -94,7 +93,9 @@ class Table {
 					
 					fields.put(attribute.getName() + "_id", attribute.getAttributeType());
 				}
-				else if ((attributeType != AttributeType.collection) && (attributeType != AttributeType.inverse)) {
+				else if ((! AttributeType.collection.equals(attributeType)) && 
+							(! AttributeType.inverseOne.equals(attributeType)) &&
+							(! AttributeType.inverseMany.equals(attributeType))) {
 					fields.put(attribute.getName(), attributeType);
 				}
 			}

@@ -31,11 +31,11 @@
 			<!-- This can't be required since it is recursive -->
 			<minCardinality>0</minCardinality>
 		</collection>
-		<inverse name="inverseAggregatedAssociation">
+		<inverseMany name="inverseAggregatedAssociation">
 			<displayName>Inverse</displayName>
 			<documentName>MappedExtensionSingleStrategy</documentName>
 			<referenceName>aggregatedAssociation</referenceName>
-		</inverse>
+		</inverseMany>
 		<integer name="derivedInteger" persistent="false" trackChanges="false">
 			<displayName>Derived Integer</displayName>
 		</integer>

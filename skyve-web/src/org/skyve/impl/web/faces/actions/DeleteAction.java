@@ -4,8 +4,10 @@ import java.util.logging.Level;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -13,8 +15,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
-import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.messages.Message;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -45,7 +45,8 @@ public class DeleteAction extends FacesAction<Void> {
 			throw new SecurityException("delete this data", user.getName());
 		}
 		
-		persistence.evictCached(beanToDelete);
+		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
+		persistence.evictAllCached();
 		PersistentBean persistentBeanToDelete = persistence.retrieve(document, 
 																		beanToDelete.getBizId(), 
 																		false);
