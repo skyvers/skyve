@@ -1059,7 +1059,7 @@ joined tables
 					fw.append("\" property-ref=\"").append(inverseReferenceName);
 					
 					if (Boolean.TRUE.equals(cascade)) {
-						fw.append("\" cascade=\"all");
+						fw.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 					
 					fw.append("\" />\n");
@@ -1079,7 +1079,7 @@ joined tables
 					}
 					
 					if (Boolean.TRUE.equals(cascade)) {
-						fw.append("\" cascade=\"all");
+						fw.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 
 					fw.append("\" inverse=\"true\">\n");
