@@ -2,7 +2,6 @@ package org.skyve.impl.metadata.model.document;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
@@ -12,23 +11,25 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
 
-@XmlRootElement(name = "inverse", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
-			propOrder = {"cardinality", "domainType", "documentName", "referenceName"})
-public class InverseImpl extends AbstractAttribute implements Inverse {
-	private static final long serialVersionUID = -2180342709365556857L;
+			propOrder = {"domainType", "documentName", "referenceName"})
+public abstract class AbstractInverse extends AbstractAttribute implements Inverse {
+	private static final long serialVersionUID = 6617399816835649143L;
 
+	@XmlTransient
+	public static enum InverseRelationship {
+		oneToOne,
+		oneToMany,
+		manyToMany
+	}
+	
 	private String documentName;
 	private String referenceName;
 	/**
 	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
 	 */
 	private InverseRelationship relationship;
-	private InverseCardinality cardinality;
-	
-	public InverseImpl() {
-		setAttributeType(AttributeType.inverse);
-	}
+	private Boolean cascade;
 
 	@Override
 	public DomainType getDomainType() {
@@ -76,13 +77,16 @@ public class InverseImpl extends AbstractAttribute implements Inverse {
 	}
 
 	@Override
-	public InverseCardinality getCardinality() {
-		return cardinality;
+	public Boolean getCascade() {
+		return cascade;
 	}
 
+	/**
+	 * If this inverse is cascading, trackChanges will be used, unless it's explicitly set off
+	 */
 	@XmlAttribute
-	public void setCardinality(InverseCardinality cardinality) {
-		this.cardinality = cardinality;
+	public void setCascade(Boolean cascade) {
+		this.cascade = cascade;
 	}
 
 	@Override

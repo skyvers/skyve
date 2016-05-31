@@ -515,6 +515,7 @@
 			<!-- Do not Secure trackmate servlet - it handles authentication itself -->
 			<!-- secure the systems JSPs and HTMLs -->
 			<url-pattern>/home.jsp</url-pattern>
+			<url-pattern>/pages/changePassword.jsp</url-pattern>
 			<url-pattern>/pages/htmlEdit/browseImages.jsp</url-pattern>
 			<url-pattern>/pages/map/geolocate.jsp</url-pattern>
 		</web-resource-collection>

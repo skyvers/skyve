@@ -12,8 +12,9 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewGenerator;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.AbstractInverse;
+import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.InverseImpl;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
@@ -48,8 +49,8 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Inverse.InverseCardinality;
-import org.skyve.metadata.model.document.Inverse.InverseRelationship;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
@@ -1174,9 +1175,9 @@ public class LocalDesignRepository extends AbstractRepository {
 					}
 				}
 			}
-			else if (attribute instanceof InverseImpl) {
+			else if (attribute instanceof Inverse) {
 				// Check that the document name and reference name point to a reference
-				InverseImpl inverse = (InverseImpl) attribute;
+				AbstractInverse inverse = (AbstractInverse) attribute;
 				String targetDocumentName = inverse.getDocumentName();
 				DocumentRef inverseDocumentRef = module.getDocumentRefs().get(targetDocumentName);
 				if (inverseDocumentRef == null) {

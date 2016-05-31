@@ -60,11 +60,11 @@
 		<integer name="integer">
 			<displayName>Integer</displayName>
 		</integer>
-		<inverse name="inverseAggregatedAssociation">
+		<inverseMany name="inverseAggregatedAssociation">
 			<displayName>Inverse</displayName>
 			<documentName>AllAttributesPersistent</documentName>
 			<referenceName>aggregatedAssociation</referenceName>
-		</inverse>
+		</inverseMany>
 		<longInteger name="longInteger">
 			<displayName>Long Integer</displayName>
 		</longInteger>

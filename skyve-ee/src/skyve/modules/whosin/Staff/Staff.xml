@@ -57,10 +57,10 @@
 			<documentName>Position</documentName>
 			<queryName>qPositions</queryName>
 		</association>
-		<inverse cardinality="one" name="position">
+		<inverseOne name="position">
 			<displayName>Position</displayName>
 			<documentName>Position</documentName>
 			<referenceName>staff</referenceName>
-		</inverse>
+		</inverseOne>
 	</attributes>
 </document>

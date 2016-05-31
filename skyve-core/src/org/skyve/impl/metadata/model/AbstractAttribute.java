@@ -42,7 +42,7 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
 	private boolean deprecated;
-	private boolean trackChanges = true;
+	private Boolean trackChanges;
 	private boolean audited = true;
 	private String documentation;
 	
@@ -153,17 +153,25 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 	
 	@Override
 	public boolean isTrackChanges() {
-		return trackChanges;
+		if (trackChanges != null) {
+			return trackChanges.booleanValue();
+		}
+
+		return ((! AttributeType.inverseOne.equals(attributeType)) && (! AttributeType.inverseMany.equals(attributeType)));
 	}
 
 	@XmlTransient
 	public void setTrackChanges(boolean trackChanges) {
-		this.trackChanges = trackChanges;
+		this.trackChanges = Boolean.valueOf(trackChanges);
 	}
 
+	public Boolean getTrackChangesBool() {
+		return trackChanges;
+	}
+	
 	@XmlAttribute(name="trackChanges", required = false)
 	public void setTrackChangesBool(Boolean trackChanges) {
-		this.trackChanges = trackChanges.booleanValue();
+		this.trackChanges = trackChanges;
 	}
 
 	@Override

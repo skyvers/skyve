@@ -17,7 +17,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
-import org.skyve.impl.util.SQLUtil;
 
 public class SQLMetaDataUtil {
 	/**
@@ -42,6 +41,7 @@ public class SQLMetaDataUtil {
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +
+						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"u.dataGroup_id as dataGroupId, " +
@@ -57,6 +57,7 @@ public class SQLMetaDataUtil {
 			sql.append("and u.bizCustomer = '").append(customer.getName()).append("' ");
 			sql.append("union " +
 						"select u.bizId, " +
+						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"u.dataGroup_id as dataGroupId, " +
@@ -79,6 +80,8 @@ public class SQLMetaDataUtil {
 			for (DynaBean userRoleRow : SQLUtil.retrieveListForSQL(null, null, sql.toString(), null, false, false)) {
 				if (firstRow) {
 					internalUser.setId((String) userRoleRow.get("bizid"));
+					Boolean passwordChangeRequired = (Boolean) userRoleRow.get("passwordexpired");
+					internalUser.setPasswordChangeRequired(Boolean.TRUE.equals(passwordChangeRequired));
 					internalUser.setContactId((String) userRoleRow.get("contactid"));
 					internalUser.setContactName((String) userRoleRow.get("contactname"));
 					internalUser.setDataGroupId((String) userRoleRow.get("datagroupid"));

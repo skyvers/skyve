@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
@@ -44,7 +45,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
-import org.skyve.impl.util.UtilImpl;
 
 public class ValidationUtil {
 	private ValidationUtil() {
@@ -69,7 +69,10 @@ public class ValidationUtil {
 	throws ValidationException, MetaDataException {
 		ValidationException e = new ValidationException();
 		for (Attribute attribute : document.getAttributes()) {
-			if (! attribute.getName().equals(Bean.BIZ_KEY)) {
+			AttributeType type = attribute.getAttributeType();
+			if ((! AttributeType.inverseOne.equals(type)) && 
+					(! AttributeType.inverseMany.equals(type)) &&
+					(! attribute.getName().equals(Bean.BIZ_KEY))) {
 				validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 			}
 		}
@@ -80,7 +83,10 @@ public class ValidationUtil {
 			Module baseModule = customer.getModule(baseDocument.getOwningModuleName());
 			baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
 			for (Attribute attribute : baseDocument.getAttributes()) {
-				if (! attribute.getName().equals(Bean.BIZ_KEY)) {
+				AttributeType type = attribute.getAttributeType();
+				if ((! AttributeType.inverseOne.equals(type)) && 
+						(! AttributeType.inverseMany.equals(type)) &&
+						(! attribute.getName().equals(Bean.BIZ_KEY))) {
 					validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 				}
 			}

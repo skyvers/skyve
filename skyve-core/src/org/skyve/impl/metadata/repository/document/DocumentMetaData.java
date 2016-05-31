@@ -19,7 +19,8 @@ import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.InverseImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.impl.metadata.model.document.field.Boolean;
 import org.skyve.impl.metadata.model.document.field.Colour;
@@ -31,7 +32,9 @@ import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Decimal2;
 import org.skyve.impl.metadata.model.document.field.Decimal5;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Geometry;
 import org.skyve.impl.metadata.model.document.field.Id;
 import org.skyve.impl.metadata.model.document.field.Integer;
@@ -42,8 +45,6 @@ import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.Time;
 import org.skyve.impl.metadata.model.document.field.Timestamp;
-import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
@@ -211,7 +212,8 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 						@XmlElementRef(type = Content.class),
 						@XmlElementRef(type = AssociationImpl.class),
 						@XmlElementRef(type = CollectionImpl.class),
-						@XmlElementRef(type = InverseImpl.class),
+						@XmlElementRef(type = InverseOne.class),
+						@XmlElementRef(type = InverseMany.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = Id.class)})
 	public List<Attribute> getAttributes() {

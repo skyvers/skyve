@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.util.Util;
 
