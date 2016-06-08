@@ -25,7 +25,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.faces.ComponentRenderer;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.QueryDataModel;
 import org.skyve.metadata.MetaDataException;
@@ -37,6 +39,7 @@ import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
@@ -82,6 +85,8 @@ public class ListGrid extends HtmlPanelGroup {
 				}
 			}.execute();
 		}
+
+		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
 
 		super.encodeBegin(context);
 	}
@@ -187,6 +192,12 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 		
         StringBuilder value = new StringBuilder(128);
+
+// TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
+        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
+        value.append(query.getName()).append("', null)}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
+/* Temporarily commented out but should be reinstated when we use the list model.
         if (UserAgentType.phone.equals(type)) {
             value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
             value.append(query.getName()).append("', null)}");
@@ -197,7 +208,7 @@ public class ListGrid extends HtmlPanelGroup {
 	        value.append(query.getName()).append("')}");
 	        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), QueryDataModel.class));
         }
-
+*/
         addHeader(result, a, query, moduleName, documentName, canCreate, UserAgentType.phone.equals(type));
         List<UIComponent> children = result.getChildren();
         addBoundColumns(customer, moduleName, documentName, query, children, a, ef, elc, type);

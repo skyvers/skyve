@@ -326,12 +326,22 @@ isc.EditView.addMethods({
 
 					// ensure that zoom out of a child view refreshes the parent view
 					if (action == 'ZoomOut') {
+						// NB:- setting apply true should not affect whether the form is dirty or not
+						var changes = me._vm.valuesHaveChanged();
 						me._vm.setValue('_apply', true);
+						if (changes) {} else {
+							me._vm.rememberValues();
+						}
 					}
 					else {
 						// ensure that zooming in to a new document makes this (the parent) document dirty
 						if (bizId) {} else {
+							// NB:- setting apply true should not affect whether the form is dirty or not
+							var changes = me._vm.valuesHaveChanged();
 							me._vm.setValue('_apply', true);
+							if (changes) {} else {
+								me._vm.rememberValues();
+							}
 						}
 					}
 
