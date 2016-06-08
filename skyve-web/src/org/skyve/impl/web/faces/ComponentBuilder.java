@@ -201,6 +201,7 @@ public class ComponentBuilder {
 								HorizontalAlignment textAlignment,
 								Integer pixelWidth,
 								Integer pixelHeight,
+								String invisible,
 								boolean escape) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE); 
 		setId(result);
@@ -224,7 +225,8 @@ public class ComponentBuilder {
 		}
 		
 		addSize(result, style, pixelWidth, null, pixelHeight, null, null);
-		
+    	addInvisible(result, invisible, null);
+
 		return result;
 	}
 	

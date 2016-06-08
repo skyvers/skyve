@@ -545,7 +545,7 @@ public class ComponentRenderer {
 		indentation += INDENT;
 		renderComponent(facet);
 		indentation = indentation.substring(1);
-		out.append(indentation).append("</f:facet/>\n");
+		out.append(indentation).append("</f:facet>\n");
 	}
 	
 	private void renderAttribute(String name, Object value) {

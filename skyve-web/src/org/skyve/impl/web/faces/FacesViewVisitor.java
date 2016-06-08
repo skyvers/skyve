@@ -782,8 +782,9 @@ public class FacesViewVisitor extends ViewVisitor {
 								blurb.getTextAlignment(), 
 								blurb.getPixelWidth(), 
 								blurb.getPixelHeight(), 
+								blurb.getInvisibleConditionName(),
 								false);
-		addComponent(null, false, blurb.getInvisibleConditionName(), c, blurb.getPixelWidth(), null);
+		addComponent(null, false, null, c, blurb.getPixelWidth(), null);
 	}
 
 	@Override
