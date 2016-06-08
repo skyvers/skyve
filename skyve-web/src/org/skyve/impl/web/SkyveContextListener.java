@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -86,6 +87,17 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		if (! contentDirectory.isDirectory()) {
 			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
+		}
+		// Check the content directory is writable
+		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
+		try {
+			testFile.createNewFile();
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
+		}
+		finally {
+			testFile.delete();
 		}
 		UtilImpl.CONTENT_GC_CRON = UtilImpl.processStringValue(properties.getProperty("CONTENT_GC_CRON"));
 		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_FILE_STORAGE"));
