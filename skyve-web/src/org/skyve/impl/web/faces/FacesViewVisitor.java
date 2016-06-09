@@ -12,6 +12,7 @@ import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.component.html.HtmlSelectOneMenu;
 
+import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
@@ -1853,6 +1854,10 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentEnabled)
 	throws MetaDataException {
 		addAjaxBehavior("change", changeable.getChangedActions());
+		// Add this special event for date selection on calendar as "changed" doesn't fire on select
+		if (eventSource instanceof Calendar) {
+			addAjaxBehavior("dateSelect", changeable.getChangedActions());
+		}
 	}
 
 	@Override
