@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -80,10 +81,28 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.APPS_JAR_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("APPS_JAR_DIRECTORY"));
 		UtilImpl.CONTENT_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("CONTENT_DIRECTORY"));
+		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
+		if (! contentDirectory.exists()) {
+			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
+		}
+		if (! contentDirectory.isDirectory()) {
+			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
+		}
+		// Check the content directory is writable
+		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
+		try {
+			testFile.createNewFile();
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
+		}
+		finally {
+			testFile.delete();
+		}
 		UtilImpl.CONTENT_GC_CRON = UtilImpl.processStringValue(properties.getProperty("CONTENT_GC_CRON"));
 		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_FILE_STORAGE"));
 		UtilImpl.CONTENT_FILE_STORAGE = (value != null) && Boolean.parseBoolean(value);
-		
+
 		value = UtilImpl.processStringValue(properties.getProperty("DEV_MODE"));
 		UtilImpl.DEV_MODE = (value != null) && Boolean.parseBoolean(value);
 

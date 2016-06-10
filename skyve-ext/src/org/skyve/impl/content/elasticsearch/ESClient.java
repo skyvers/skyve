@@ -17,6 +17,7 @@ import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -320,18 +321,34 @@ public class ESClient extends AbstractContentManager {
 	@Override
 	@SuppressWarnings("resource")
 	public AttachmentContent get(String contentId) throws Exception {
-		GetResponse response = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId)
-									.setFields(ATTACHMENT, 
-												FILE_FILENAME,
-												FILE_CONTENT_TYPE, 
-												FILE_LAST_MODIFIED,
-												BEAN_CUSTOMER_NAME,
-												BEAN_MODULE_KEY,
-												BEAN_DOCUMENT_KEY,
-												BEAN_DATA_GROUP_ID,
-												BEAN_USER_ID,
-												BEAN_DOCUMENT_ID,
-												BEAN_ATTRIBUTE_NAME).get();
+		GetRequestBuilder builder = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId);
+		// Add attachment field if we have inlined content
+		if (UtilImpl.CONTENT_FILE_STORAGE) {
+			builder.setFields(FILE_FILENAME,
+								FILE_CONTENT_TYPE, 
+								FILE_LAST_MODIFIED,
+								BEAN_CUSTOMER_NAME,
+								BEAN_MODULE_KEY,
+								BEAN_DOCUMENT_KEY,
+								BEAN_DATA_GROUP_ID,
+								BEAN_USER_ID,
+								BEAN_DOCUMENT_ID,
+								BEAN_ATTRIBUTE_NAME);
+		}
+		else {
+			builder.setFields(ATTACHMENT, 
+								FILE_FILENAME,
+								FILE_CONTENT_TYPE, 
+								FILE_LAST_MODIFIED,
+								BEAN_CUSTOMER_NAME,
+								BEAN_MODULE_KEY,
+								BEAN_DOCUMENT_KEY,
+								BEAN_DATA_GROUP_ID,
+								BEAN_USER_ID,
+								BEAN_DOCUMENT_ID,
+								BEAN_ATTRIBUTE_NAME);
+		}
+		GetResponse response = builder.get();
 		if (! response.isExists()) {
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.get(" + contentId + "): DNE");
 			return null;
