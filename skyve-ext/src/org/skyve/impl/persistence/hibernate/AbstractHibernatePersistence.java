@@ -1224,6 +1224,14 @@ t.printStackTrace();
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 				boolean vetoed = internalCustomer.interceptBeforeDelete(document, newBean);
 				if (! vetoed) {
+					Set<String> documentsVisited = new TreeSet<>();
+					// Check composed collections here in case we are deleting a composed collection element directly using p.delete().
+					checkReferentialIntegrityOnDelete(document,
+														bean,
+														documentsVisited,
+														beansToDelete,
+														true);
+
 					// need to merge before validation to ensure that the FK constraints
 					// can check for members of collections etc - need the persistent version for this
 					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
@@ -1249,7 +1257,8 @@ t.printStackTrace();
 	private void checkReferentialIntegrityOnDelete(Document document, 
 													PersistentBean beanToDelete, 
 													Set<String> documentsVisited,
-													Map<String, Set<Bean>> beansToBeCascaded)
+													Map<String, Set<Bean>> beansToBeCascaded,
+													boolean checkComposedCollection)
 	throws DomainException, MetaDataException {
 		Customer customer = user.getCustomer();
 		List<ExportedReference> refs = ((CustomerImpl) customer).getExportedReferences(document);
@@ -1260,18 +1269,24 @@ t.printStackTrace();
 				// Need to check collection joining table element_id FKs
 				// but do NOT need to check child collection parent_ids as they point back
 				if (! CollectionType.child.equals(type)) {
-					String moduleName = ref.getModuleName();
-					String documentName = ref.getDocumentName();
-					String entityName = getDocumentEntityName(moduleName, documentName);
-					Module referenceModule = customer.getModule(moduleName);
-					Document referenceDocument = referenceModule.getDocument(customer, documentName);
-					Persistent persistent = document.getPersistent();
-					if (persistent != null) {
-						if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
-							checkMappedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
-						}
-						else {
-							checkTypedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
+					// Check composed collections if we are deleting a composed collection element
+					// directly using p.delete(), otherwise,
+					// if preRemove() is being fired, we should NOT check composed collections
+					// as they are going to be deleted by hibernate as a collection.remove() was performed.
+					if (checkComposedCollection || (! CollectionType.composition.equals(type))) {
+						String moduleName = ref.getModuleName();
+						String documentName = ref.getDocumentName();
+						String entityName = getDocumentEntityName(moduleName, documentName);
+						Module referenceModule = customer.getModule(moduleName);
+						Document referenceDocument = referenceModule.getDocument(customer, documentName);
+						Persistent persistent = document.getPersistent();
+						if (persistent != null) {
+							if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+								checkMappedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
+							}
+							else {
+								checkTypedReference(beanToDelete, beansToBeCascaded, document, ref, entityName, referenceDocument);
+							}
 						}
 					}
 				}
@@ -1286,7 +1301,7 @@ t.printStackTrace();
 			int dotIndex = baseDocumentName.indexOf('.');
 			Module baseModule = customer.getModule(baseDocumentName.substring(0, dotIndex));
 			Document baseDocument = baseModule.getDocument(customer, baseDocumentName.substring(dotIndex + 1));
-			checkReferentialIntegrityOnDelete(baseDocument, beanToDelete, documentsVisited, beansToBeCascaded);
+			checkReferentialIntegrityOnDelete(baseDocument, beanToDelete, documentsVisited, beansToBeCascaded, checkComposedCollection);
 		}
 
 		// Process derived documents if present
@@ -1295,7 +1310,7 @@ t.printStackTrace();
 				int dotIndex = derivedDocumentName.indexOf('.');
 				Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
 				Document derivedDocument = derivedModule.getDocument(customer, derivedDocumentName.substring(dotIndex + 1));
-				checkReferentialIntegrityOnDelete(derivedDocument, beanToDelete, documentsVisited, beansToBeCascaded);
+				checkReferentialIntegrityOnDelete(derivedDocument, beanToDelete, documentsVisited, beansToBeCascaded, checkComposedCollection);
 			}
 		}
 	}
@@ -1320,7 +1335,7 @@ t.printStackTrace();
 			try {
 				StringBuilder queryString = new StringBuilder(64);
 				queryString.append("select bean from ");
-				// NB Don't ever change this to the entityName parameter as this method can be called recusrively above.
+				// NB Don't ever change this to the entityName parameter as this method can be called recursively above.
 				//    The entityName is used to find cascaded beans to exclude from the integrity test
 				queryString.append(getDocumentEntityName(referenceDocument.getOwningModuleName(), referenceDocument.getName()));
 				queryString.append(" as bean");
@@ -1707,10 +1722,12 @@ t.printStackTrace();
 			}
 
 			Set<String> documentsVisited = new TreeSet<>();
+			// We should NOT check composed collections here as they are going to be deleted by hibernate as a collection.remove() was performed.
 			checkReferentialIntegrityOnDelete(document,
 												beanToDelete,
 												documentsVisited,
-												beansToDelete);
+												beansToDelete,
+												false);
 			((PersistentBean) beanToDelete).setBizLock(new OptimisticLock(user.getName(), new Date()));
 		}
 		catch (ValidationException e) {
