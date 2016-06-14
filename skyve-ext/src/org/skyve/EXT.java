@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -163,7 +164,6 @@ public class EXT {
 	 * @throws ValidationException
 	 */
 	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) throws ValidationException {
-
 		MailUtil.sendMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, attachments);
 	}
 
@@ -205,23 +205,20 @@ public class EXT {
 	}
 
 	/**
+	 * Run a job once at a certain date and time. 
+	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
+	 * User must look in admin to see if job was successful.
 	 * 
-	 * @param jobSchedule
-	 * @param user
-	 * @throws Exception
-	 */
-	public static void scheduleJob(Bean jobSchedule, User user) throws Exception {
-		JobScheduler.scheduleJob(jobSchedule, user);
-	}
-
-	/**
+	 * @param job The job to run
+	 * @param parameter 	The job parameter - can be null.
+	 * @param user	The user to run the job as.
+	 * @param when	The date/time to run the job at.
 	 * 
-	 * @param jobSchedule
-	 * @param customer
-	 * @throws Exception
+	 * @throws Exception Anything.
 	 */
-	public static void unscheduleJob(Bean jobSchedule, Customer customer) throws Exception {
-		JobScheduler.unscheduleJob(jobSchedule, customer);
+	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
+	throws Exception {
+		JobScheduler.scheduleOneShotJob(job, parameter, user, when);
 	}
 
 	/**
