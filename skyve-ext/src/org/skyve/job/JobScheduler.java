@@ -21,6 +21,10 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.job.AbstractSkyveJob;
+import org.skyve.impl.job.ContentGarbageCollectionJob;
+import org.skyve.impl.job.ContentInitJob;
+import org.skyve.impl.job.SkyveTriggerListener;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
@@ -30,10 +34,6 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
-import org.skyve.impl.job.AbstractSkyveJob;
-import org.skyve.impl.job.ContentGarbageCollectionJob;
-import org.skyve.impl.job.ContentInitJob;
-import org.skyve.impl.job.SkyveTriggerListener;
 
 public class JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
@@ -129,7 +129,7 @@ public class JobScheduler {
 	 * User must look in admin to see if job was successful.
 	 * 
 	 * @param job The job to run
-	 * @param bean 	The job parameter - can be null.
+	 * @param parameter 	The job parameter - can be null.
 	 * @param user	The user to run the job as.
 	 * 
 	 * @throws Exception Anything.
@@ -148,7 +148,7 @@ public class JobScheduler {
 	 * Extra parameter gives polling UIs the chance to display the results of the job.
 	 * 
 	 * @param job The job to run
-	 * @param bean 	The job parameter - can be null.
+	 * @param parameter 	The job parameter - can be null.
 	 * @param user	The user to run the job as.
 	 * @param sleepAtEndInSeconds Set this 5 secs higher than the polling time of the UI
 	 * @throws Exception
@@ -163,8 +163,28 @@ public class JobScheduler {
 		scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
 	}
 	
-	public static void scheduleJob(Bean jobSchedule,
-									User user)
+	/**
+	 * Run a job once at a certain date and time. 
+	 * The job disappears from the Scheduler once it is run and a record of the run in placed in admin.Job. 
+	 * User must look in admin to see if job was successful.
+	 * 
+	 * @param job The job to run
+	 * @param parameter 	The job parameter - can be null.
+	 * @param user	The user to run the job as.
+	 * @param when	The date/time to run the job at.
+	 * 
+	 * @throws Exception Anything.
+	 */
+	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
+	throws Exception {
+		SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
+		trigger.setJobGroup(job.getOwningModuleName());
+		trigger.setJobName(job.getName());
+
+		scheduleJob(job, parameter, user, trigger, null);
+	}
+	
+	public static void scheduleJob(Bean jobSchedule, User user)
 	throws Exception {
 		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
 		String jobName = (String) BindUtil.get(jobSchedule, "jobName");

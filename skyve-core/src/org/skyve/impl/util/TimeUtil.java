@@ -100,6 +100,13 @@ public class TimeUtil {
 		return calendar.get(Calendar.MONTH) + 1;
 	}
 
+	public static final int getMonthStartingFrom0(Date date) {
+		Calendar calendar = new GregorianCalendar();
+		calendar.setTime(date);
+
+		return calendar.get(Calendar.MONTH);
+	}
+
 	public static final int getDay(Date date) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
