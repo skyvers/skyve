@@ -1273,7 +1273,8 @@ t.printStackTrace();
 					// directly using p.delete(), otherwise,
 					// if preRemove() is being fired, we should NOT check composed collections
 					// as they are going to be deleted by hibernate as a collection.remove() was performed.
-					if (checkComposedCollection || (! CollectionType.composition.equals(type))) {
+					if (((! checkComposedCollection) && (! CollectionType.composition.equals(type))) || 
+							(checkComposedCollection && CollectionType.composition.equals(type))) {
 						String moduleName = ref.getModuleName();
 						String documentName = ref.getDocumentName();
 						String entityName = getDocumentEntityName(moduleName, documentName);
