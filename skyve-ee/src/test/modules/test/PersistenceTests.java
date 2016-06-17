@@ -385,6 +385,26 @@ public class PersistenceTests extends AbstractH2Test {
 		p.delete(test.getComposedCollection().get(0));
 	}
 
+	@Test
+	public void testComposedCollectionRemoveMemberSingleStrategy() throws Exception {
+		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
+		test = p.save(test);
+		
+		Assert.assertEquals(7, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+
+		test.getComposedCollection().remove(0);
+		
+		test = p.save(test);
+		
+		// Check the composed collection element got cascaded with no referential integrity troubles
+		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		
+	}
+
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
@@ -416,7 +436,29 @@ public class PersistenceTests extends AbstractH2Test {
 		
 		p.delete(test.getComposedCollection().get(0));
 	}
-	
+
+	@Test
+	public void testComposedCollectionRemoveMemberJoinedStrategy() throws Exception {
+		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
+		test = p.save(test);
+		
+		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		
+		test.getComposedCollection().remove(0);
+		
+		test = p.save(test);
+		
+		// Check the composed collection element got cascaded with no referential integrity troubles
+		Assert.assertEquals(5, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		
+	}
+
 	@Test(expected = OptimisticLockException.class)
 	public void testOptimisticLockException() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
@@ -471,7 +513,7 @@ public class PersistenceTests extends AbstractH2Test {
 	}
 	
 	@Test
-	public void testRefresh() throws Exception{
+	public void testRefresh() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
 		test.setText("optimistic lock test");
@@ -480,7 +522,7 @@ public class PersistenceTests extends AbstractH2Test {
 	}
 
 	@Test
-	public void testRefreshTransient() throws Exception{
+	public void testRefreshTransient() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		p.refresh(test);
 	}

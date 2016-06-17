@@ -84,6 +84,15 @@ public class Time {
 	 * @param date
 	 * @return
 	 */
+	public static final int getMonthStartingFrom0(Date date) {
+		return TimeUtil.getMonthStartingFrom0(date);
+	}
+
+	/**
+	 * 
+	 * @param date
+	 * @return
+	 */
 	public static final int getDay(Date date) {
 		return TimeUtil.getDay(date);
 	}
