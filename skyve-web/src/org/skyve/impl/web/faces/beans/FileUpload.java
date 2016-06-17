@@ -1,6 +1,8 @@
 package org.skyve.impl.web.faces.beans;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
@@ -14,6 +16,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
+import org.skyve.bizport.BizPortException;
+import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -85,6 +89,12 @@ public class FileUpload extends Localisable {
 		this.action = UtilImpl.processStringValue(action);
 	}
 
+	private List<Problem> problems = new ArrayList<>();
+	public List<Problem> getProblems() {
+		return problems;
+	}
+
+	
 	/**
 	 * Process the file upload
 	 * 
@@ -139,6 +149,7 @@ public class FileUpload extends Localisable {
 			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
 																			document, 
 																			action);
+			BizPortException exception = new BizPortException();
 			MimeType mimeType = null;
 			try {
 				MimeType.valueOf(file.getContentType());
@@ -146,40 +157,82 @@ public class FileUpload extends Localisable {
 			catch (Exception e) {
 				// do nothing
 			}
-			UploadAction.UploadedFile bizFile = 
-					new UploadAction.UploadedFile(file.getFileName(),
-													file.getInputstream(),
-													mimeType);
-			boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
-			if (! vetoed) {
-				bean = uploadAction.upload(bean, bizFile, webContext);
-				if (binding == null) {
-					webContext.setCurrentBean(bean);
+			try{
+				UploadAction.UploadedFile bizFile = 
+						new UploadAction.UploadedFile(file.getFileName(),
+														file.getInputstream(),
+														mimeType);
+				boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);
+				if (! vetoed) {
+					bean = uploadAction.upload(bean, bizFile, exception, webContext);
+					if (binding == null) {
+						webContext.setCurrentBean(bean);
+					}
+					else {
+						BindUtil.set(currentBean, binding, bean);
+					}
+					
+					customer.interceptAfterUploadAction(document, action, bean, bizFile, webContext);
+					
+					// throw if we have errors found, to ensure rollback
+					if (exception.hasErrors()) {
+						throw exception;
+					}
 				}
-				else {
-					BindUtil.set(currentBean, binding, bean);
-				}
-				
-				customer.interceptAfterUploadAction(document, action, bean, bizFile, webContext);
+			}
+			catch(BizPortException e){
+				e.printStackTrace();
+				persistence.rollback();
+				exception = e;
 			}
 			
 			// only put conversation in cache if we have been successful in executing
 			WebUtil.putConversationInCache(webContext);
-
-			long size = file.getSize();
-	        StringBuilder message = new StringBuilder(128);
-	        message.append(file.getFileName()).append(" is uploaded. File Size is ");
-
-			DecimalFormat format = ThreadSafeFactory.getDecimalFormat("###,##0.00");
-			if (size > 1048576) {
-	            message.append(format.format(size / 1048576.0)).append(" MB");
-	        }
-	        else {
-	            message.append(format.format(size / 1024.0)).append(" KB");
-	        }
-
-	        FacesMessage msg = new FacesMessage("Successful", message.toString());
-	        FacesContext.getCurrentInstance().addMessage(null, msg);
+			
+			if (exception.hasProblems()) {
+				for (Problem error : exception.getErrors()) {
+					problems.add(error);
+				}
+				for (Problem warning : exception.getWarnings()) {
+					problems.add(warning);
+				}
+				
+				if (exception.hasErrors()) {
+					String message = "The import did <b>NOT</b> complete successfully.<br/>" +
+										"No data has changed as a result of this import.<br/>" +
+										"Please review the errors and warnings displayed before closing this window.<br/>" + 
+										"The above list includes only the first 50 errors and warnings, there may be more.<br/>" + 
+										"If the nature of the problem is not clear from the message, it may be because it is caused by another issue being compounded.<br/>" + 
+										"In this case, you may find that fixing one or two problems you can easily identify, may resolve a number of related issues.";
+			        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Unsuccessful", message);
+			        fc.addMessage(null, msg);
+				}
+				else {
+					String message = "The import completed successfully with warnings.<br/>" +
+										"Please review the warnings displayed before closing this window.<br/>" + 
+										"The above list includes only the first 50 errors and warnings, there may be more.<br/>" + 
+										"If the nature of the problem is not clear from the message, it may be because it is caused by another issue being compounded.<br/>" + 
+										"In this case, you may find that fixing one or two problems you can easily identify, may resolve a number of related issues.";
+			        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_WARN, "Successful", message);
+			        fc.addMessage(null, msg);
+				}
+			}
+			else {
+				long size = file.getSize();
+		        StringBuilder message = new StringBuilder(128);
+		        message.append(file.getFileName()).append(" is uploaded. File Size is ");
+	
+				DecimalFormat format = ThreadSafeFactory.getDecimalFormat("###,##0.00");
+				if (size > 1048576) {
+		            message.append(format.format(size / 1048576.0)).append(" MB");
+		        }
+		        else {
+		            message.append(format.format(size / 1024.0)).append(" KB");
+		        }
+	
+		        FacesMessage msg = new FacesMessage("Successful", message.toString());
+		        FacesContext.getCurrentInstance().addMessage(null, msg);
+			}
 		}
 		catch (Exception e) {
 			persistence.rollback();
