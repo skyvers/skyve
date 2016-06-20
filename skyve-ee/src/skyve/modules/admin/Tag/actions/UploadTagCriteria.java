@@ -13,8 +13,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 import org.skyve.CORE;
+import org.skyve.bizport.BizPortException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -40,7 +40,8 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 	
 	@Override
 	public Tag upload(Tag tag,
-						UploadedFile file,
+						UploadedFile file, 
+						BizPortException exeption,
 						WebContext webContext)
 	throws Exception {
 		Persistence persistence = CORE.getPersistence();
