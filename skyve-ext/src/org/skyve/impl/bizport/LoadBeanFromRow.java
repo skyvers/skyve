@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortException.Problem;
@@ -38,6 +40,19 @@ public class LoadBeanFromRow {
 	 */
 	public static class ColumnLoadDefinition {
 		private String binding;
+		private boolean required = false;
+		private ValueLookupType loadAction = ValueLookupType.LOOKUP_EXACT;
+		
+		//treat numeric as 0
+		private boolean treatEmptyNumericAsZero = false;
+
+		public boolean isTreatEmptyNumericAsZero() {
+			return treatEmptyNumericAsZero;
+		}
+
+		public void setTreatEmptyNumericAsZero(boolean treatEmptyNumericAsZero) {
+			this.treatEmptyNumericAsZero = treatEmptyNumericAsZero;
+		}
 
 		public String getBinding() {
 			return binding;
@@ -51,9 +66,6 @@ public class LoadBeanFromRow {
 			return required;
 		}
 
-		ValueLookupType loadAction = ValueLookupType.LOOKUP_EXACT;
-		private boolean required = false;
-
 		public ColumnLoadDefinition(String binding, ValueLookupType loadAction, boolean required) {
 			this.binding = binding;
 			this.loadAction = loadAction;
@@ -63,6 +75,7 @@ public class LoadBeanFromRow {
 		public ColumnLoadDefinition(String binding) {
 			this.binding = binding;
 		}
+
 	}
 
 
@@ -80,7 +93,7 @@ public class LoadBeanFromRow {
 	 * @throws Exception
 	 */
 	public static Bean loadRowDataToBean(Row row, Persistence pers, Module module, Document document,
-			boolean createMissingAssociations, int rowIndex, BizPortException exception, String... bindings)
+			boolean createMissingAssociations, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, String... bindings)
 			throws Exception {
 
 		List<ColumnLoadDefinition> loadDefinitions = new ArrayList<>();
@@ -90,7 +103,7 @@ public class LoadBeanFromRow {
 		}
 		ColumnLoadDefinition[] cols = loadDefinitions.toArray(new ColumnLoadDefinition[loadDefinitions.size()]);
 
-		return loadRowDataToBean(row, pers, module, document, createMissingAssociations, rowIndex, exception, cols);
+		return loadRowDataToBean(row, pers, module, document, createMissingAssociations, treatEmptyNumericAsZero, rowIndex, exception, cols);
 	}
 
 	/**
@@ -106,13 +119,15 @@ public class LoadBeanFromRow {
 	 * @param pers
 	 * @param user
 	 * @param document
+	 * @param createMissingAssociations
+	 * @param treatEmptyNumericAsZero
 	 * @param rowIndex
 	 * @param bindings
 	 * @return
 	 * @throws Exception
 	 */
 	public static Bean loadRowDataToBean(Row row, Persistence pers, Module module, Document document,
-			boolean createMissingAssociations, int rowIndex, BizPortException exception, ColumnLoadDefinition[] cols)
+			boolean createMissingAssociations, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, ColumnLoadDefinition[] cols)
 			throws Exception {
 
 		// assume no values loaded
@@ -175,19 +190,19 @@ public class LoadBeanFromRow {
 						}
 						break;
 					case decimal10:
-						operand = getNumericValueFromCell(row, colIndex);
+						operand = getNumericValueFromCell(row, colIndex, treatEmptyNumericAsZero || col.treatEmptyNumericAsZero);
 						if (operand != null) {
 							loadValue = new Decimal10(((Double) operand).doubleValue());
 						}
 						break;
 					case decimal2:
-						operand = getNumericValueFromCell(row, colIndex);
+						operand = getNumericValueFromCell(row, colIndex, treatEmptyNumericAsZero || col.treatEmptyNumericAsZero);
 						if (operand != null) {
 							loadValue = new Decimal2(((Double) operand).doubleValue());
 						}
 						break;
 					case decimal5:
-						operand = getNumericValueFromCell(row, colIndex);
+						operand = getNumericValueFromCell(row, colIndex, treatEmptyNumericAsZero || col.treatEmptyNumericAsZero);
 						if (operand != null) {
 							loadValue = new Decimal5(((Double) operand).doubleValue());
 						}
@@ -205,7 +220,7 @@ public class LoadBeanFromRow {
 						}
 						break;
 					case integer:
-						operand = getNumericValueFromCell(row, colIndex);
+						operand = getNumericValueFromCell(row, colIndex, treatEmptyNumericAsZero || col.treatEmptyNumericAsZero);
 						if (operand != null) {
 							loadValue = new Integer(((Double) operand).intValue());
 						}
@@ -215,7 +230,7 @@ public class LoadBeanFromRow {
 						// not supported
 						break;
 					case longInteger:
-						operand = getNumericValueFromCell(row, colIndex);
+						operand = getNumericValueFromCell(row, colIndex, treatEmptyNumericAsZero || col.treatEmptyNumericAsZero);
 						if (operand != null) {
 							loadValue = new Long(((Double) operand).longValue());
 						}
@@ -384,12 +399,14 @@ public class LoadBeanFromRow {
 	 * @return the numeric value
 	 */
 	// TODO is there a use in returning 0 if there is no value?
-	public static Double getNumericValueFromCell(Row row, int col) throws Exception {
+	public static Double getNumericValueFromCell(Row row, int col, boolean treatEmptyNumericAsZero) throws Exception {
 		Double result = Double.valueOf(0);
 
 		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
 		if (cell != null) {
 			result = Double.valueOf(cell.getNumericCellValue());
+		} else if(treatEmptyNumericAsZero){
+			result = Double.valueOf(0);
 		} else {
 			throw new Exception("The cell is empty or not a valid number.");
 		}
@@ -409,8 +426,36 @@ public class LoadBeanFromRow {
 		String result = null;
 
 		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
+		DataFormatter df = new DataFormatter();
+		
 		if (cell != null) {
-			result = cell.getStringCellValue().trim();
+			//try to interpret whatever we find as a String
+			//TODO - need to review how this works in all circumstances
+			switch(cell.getCellType()){
+			case Cell.CELL_TYPE_BOOLEAN:
+			case Cell.CELL_TYPE_NUMERIC:
+			case Cell.CELL_TYPE_BLANK:
+			case Cell.CELL_TYPE_ERROR:
+				result = df.formatCellValue(cell);
+				break;
+			case Cell.CELL_TYPE_FORMULA:
+				switch(cell.getCachedFormulaResultType()){
+				case Cell.CELL_TYPE_STRING:	
+					result = cell.getRichStringCellValue().toString().trim();
+					break;
+				case Cell.CELL_TYPE_NUMERIC:
+					if(DateUtil.isCellDateFormatted(cell)){
+						result = cell.getDateCellValue().toString();
+					} else {
+						result = df.formatCellValue(cell);
+					}
+					break;
+				}
+				break;
+			case Cell.CELL_TYPE_STRING:
+				result = cell.getStringCellValue().trim();
+				break;
+			}
 		}
 		if (result == null) {
 			if (!blankAsNull) {
