@@ -6,6 +6,7 @@
 	<jobs>
 		<job name="jPerformDocumentActionForTag" displayName="Perform a document action for tagged items" className="modules.admin.Tag.PerformDocumentActionForTagJob" />
 		<job name="jProcessCommunicationsForTag" displayName="Process the communication for Tagged items" className="modules.admin.Communication.ProcessCommunicationForTagJob" />
+		<job name="jTruncateAuditLog" displayName="Truncate Audit Log" className="modules.admin.DataMaintenance.TruncateAuditLogJob" />
 	</jobs>
 	<documents>
 		<document ref="Audit" defaultQueryName="qAudits" />
@@ -265,6 +266,18 @@
 				<document name="Communication" permission="_R__G"/>
 				<document name="Subscription" permission="CRUDG"/>
 			</privileges>
+		</role>
+		<role name="AuditManager">
+			<description>
+				Ability to truncate the audit log.
+			</description>
+			<privileges>
+				<document name="Audit" permission="_R_DC"/>
+				<document name="DataMaintenance" permission="CRUDC">
+					<action name="CheckAuditMatches"/>
+					<action name="TruncateAuditLog"/>
+				</document>
+		</privileges>
 		</role>
 	</roles>
 	<menu>

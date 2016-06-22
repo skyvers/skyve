@@ -50,7 +50,11 @@ public class RDBMSAuditInterceptor extends Interceptor {
 
 	@Override
 	public void afterDelete(Document document, PersistentBean bean) throws Exception {
-		audit(bean, Operation.delete, false);
+		if(bean instanceof Audit){
+			//do not audit removal of audits
+		} else {
+			audit(bean, Operation.delete, false);
+		}
 	}
 	
 	// Ensure an insert audit either exists already or is inserted
