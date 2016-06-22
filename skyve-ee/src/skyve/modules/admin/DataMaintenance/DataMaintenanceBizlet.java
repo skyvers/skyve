@@ -27,7 +27,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			result = bean;
 		}
 
-		return bean;
+		return result;
 	}
 
 	@Override
