@@ -443,7 +443,12 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) {
+		if (UserAgentType.phone.equals(userAgentType)) {
+			HtmlPanelGroup g = b.panelGroup(false, false, true, form.getInvisibleConditionName());
+			addToContainer(g, null, null);
+			current = g;
+		}
+		else {
 			Panel fs = null;
 			if (Boolean.TRUE.equals(form.getBorder())) {
 				fs = b.panel(form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
@@ -574,6 +579,13 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 			else { // a form item
 				UIComponent columnOrField = null;
+
+				// Don't add spcers to the phone UI as they just leave a space and a line which sux
+				if (UserAgentType.phone.equals(userAgentType) &&
+						(component instanceof org.primefaces.component.spacer.Spacer)) {
+					return;
+				}
+				
 				// The label
 				if (! Boolean.FALSE.equals(currentFormItem.getShowLabel())) {
 					String label = currentFormItem.getLabel();
@@ -586,7 +598,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						}
 						
 						if (UserAgentType.phone.equals(userAgentType)) {
-							columnOrField = b.field(null);
+							columnOrField = b.field(widgetInvisible);
 							HtmlOutputLabel l = b.label(null, null, label, null);
 							columnOrField.getChildren().add(l);
 //							Message m = b.message(component.getId());
@@ -1663,17 +1675,18 @@ public class FacesViewVisitor extends ViewVisitor {
                             text.getDisabledConditionName(),
                             convertConverter(converter));
         }
-        else if (format != null) {
+        // p:inputMask doesn't work for mobile rendering
+        else if ((format != null) && (! UserAgentType.phone.equals(userAgentType))) {
             c = b.maskField(listBinding,
-					text.getBinding(),
-                    def.getTitle(),
-                    def.isRequired(),
-                    text.getDisabledConditionName(),
-                    def.getLength(),
-                    format,
-                    convertConverter(converter),
-                    text.getPixelWidth(),
-                    ! UserAgentType.phone.equals(userAgentType));
+								text.getBinding(),
+			                    def.getTitle(),
+			                    def.isRequired(),
+			                    text.getDisabledConditionName(),
+			                    def.getLength(),
+			                    format,
+			                    convertConverter(converter),
+			                    text.getPixelWidth(),
+			                    true);
         }
         else {
             c = b.textField(listBinding,
