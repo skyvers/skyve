@@ -22,6 +22,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercent
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.domain.types.converters.integer.SimplePercentage;
+import org.skyve.domain.types.converters.integer.IntegerSeparator;
 import org.skyve.domain.types.converters.time.HH24_MI;
 import org.skyve.domain.types.converters.time.HH24_MI_SS;
 import org.skyve.domain.types.converters.time.HH_MI;
@@ -53,6 +54,7 @@ public enum ConverterName {
 	Decimal5TwoDecimalPlaces(new Decimal5TwoDecimalPlaces()),
 	Decimal5TwoDecimalPlacesPercentage(new Decimal5TwoDecimalPlacesPercentage()),
 	SimplePercentage(new SimplePercentage()),
+	IntegerSeparator(new IntegerSeparator()),
 	HH_MI(new HH_MI()),
 	HH24_MI(new HH24_MI()),
 	HH_MI_SS(new HH_MI_SS()),

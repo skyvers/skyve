@@ -31,9 +31,25 @@
 				<h:inputHidden id="_b" value="#{_skyveUpload.binding}" />
 				<h:inputHidden id="_a" value="#{_skyveUpload.action}" />
 				<p:fileUpload fileUploadListener="#{_skyveUpload.handleFileUpload}" 
-								update="messages" 
+								update="problems" 
 								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
-			    <p:growl id="messages" showDetail="true" />
+			    <p:growl id="messages" showDetail="true" escape="false" autoUpdate="true"/>
+			    <p/>
+			    <h:panelGroup id="problems" >
+				    <p:dataTable value="#{_skyveUpload.problems}" var="problem" rendered="#{not empty _skyveUpload.problems}">
+						<f:facet name="header">#{_skyveUpload.i18n['page.fileUpload.problems']}</f:facet>
+						<p:column width="40" style="text-align:center">
+							<p:graphicImage value="/images/icons/error.png" rendered="#{problem.error}" />
+							<p:graphicImage value="/images/icons/warning.png" rendered="#{not problem.error}" />
+						</p:column>
+						<p:column headerText="#{_skyveUpload.i18n['page.fileUpload.where']}">
+							<span style="font-weight: bold;">#{problem.where}</span>
+						</p:column>
+						<p:column headerText="#{_skyveUpload.i18n['page.fileUpload.what']}">
+							#{problem.what}
+						</p:column>
+					</p:dataTable>
+				</h:panelGroup>
 			</h:form>
 		</h:body>
 	</f:view>

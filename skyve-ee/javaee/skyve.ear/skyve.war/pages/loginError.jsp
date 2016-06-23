@@ -32,7 +32,7 @@
 		<table class="logo" align="center">
 			<tr height="150px">
 				<td>
-					<img src="images/skyve_inv.png" alt="Skyve" />
+					<img src="images/skyve.png" alt="Skyve" />
 				</td>
 			</tr>
 		</table>

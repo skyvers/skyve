@@ -870,6 +870,180 @@ isc.SimpleType.create({
 	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
 });
 
+
+isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "TextItem");
+BizIntegerSeparatorItem.addClassMethods({
+	parseInput: function(value) { // value is not only a string, returns a float
+		if (isc.isA.Number(value)) {
+			return value;
+		}
+		
+		if (value) {
+			value = value.toString().replace(',','').replace(',','').replace(',','').replace(',','').replace(',','').replace(',','').trim(' ');
+			if (isNaN(value)) {
+				return null;
+			}
+			else {
+				var result = Math.round(parseFloat(value)) ;
+				if (result >= 1000000000000000000.0) {
+					result = null;
+				}
+				return result;
+			}
+		}
+		else {
+			return null;
+		}
+	},
+	format: function(value) { // value is not only a float, returns a String (if value is a float)
+		if (! isc.isA.Number(value)) {
+			return value;
+		}
+
+		return (value).toLocalizedString(0, '.', ',', '-');
+	}
+});
+BizIntegerSeparatorItem.addProperties({
+	changeOnBlur: true, // perform validation on field blur
+    changeOnKeypress: false, // dont perform validation on key press
+    width: 100,
+    showHint: true,
+    showHintInField: true,
+   	hint: '(+/-)99,999,999',
+   	selectOnFocus: true
+});
+BizIntegerSeparatorItem.addMethods({
+	mapValueToDisplay: function(value) {
+		if (value == null) {
+			return isc.emptyString;
+		}
+		if (! isc.isA.Number(value)) {
+			value = BizIntegerSeparatorItem.parseInput(value);
+		}
+		return BizIntegerSeparatorItem.format(value);
+	},
+	mapDisplayToValue: function(value) {
+		if (isc.isAn.emptyString(value)) {
+			value = null;
+		}
+		else {
+			value = BizIntegerSeparatorItem.parseInput(value);
+		}
+		
+		return value;
+	},
+	// Override - ensure the value displayed in the element matches the saved value, and is formatted correctly
+	updateValue: function() {
+		// this will map the value to a valid float
+        this.Super("updateValue", arguments);
+        // this will update the displayed string so its formatted correctly
+        this.setElementValue(this.mapValueToDisplay(this.getValue()));
+	},
+	// Override - if passed a string, map it to the appropriate float before saving
+    // (this is required since the string passed in won't go through 'mapDisplayToValue')
+    setValue : function (newValue) {
+        if (isc.isA.String(newValue)) {
+        	newValue = BizIntegerSeparatorItem.parseInput(newValue);
+        }
+        return this.Super("setValue", [newValue]);
+    }
+});
+isc.SimpleType.create({
+	name: "bizIntegerSeparator",
+	inheritsFrom: "integer",
+	editorType: "BizIntegerSeparatorItem",
+	editFormatter: function(internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+	normalDisplayFormatter: function(internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+	shortDisplayFormatter: function(internalValue, field, component, record) {
+		return BizIntegerSeparatorItem.format(internalValue);
+	},
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+});
+
+
+isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "BizIntegerSeparatorItem");
+BizIntegerSeparatorItem.addClassMethods({
+	parseInput: function(value) { // value is not only a string, returns a float
+		if (isc.isA.Number(value)) {
+			return value;
+		}
+		
+		if (value) {
+			value = value.toString().replace(',','').replace(',','').replace(',','').replace(',','').replace(',','').replace(',','').trim(' ');
+			if (isNaN(value)) {
+				return null;
+			}
+			else {
+				var result = Math.round(parseFloat(value));
+				if (result >= 1000000000000000000.0) {
+					result = null;
+				}
+				return result;
+			}
+		}
+		else {
+			return null;
+		}
+	},
+	format: function(value) { // value is not only a float, returns a String (if value is a float)
+		if (! isc.isA.Number(value)) {
+			return value;
+		}
+
+		return value.toLocalizedString(0, '.', ',', '-');
+	}
+});
+BizIntegerSeparatorItem.addMethods({
+	mapValueToDisplay: function(value) {
+		if (value == null) {
+			return isc.emptyString;
+		}
+		if (! isc.isA.Number(value)) {
+			value = BizIntegerSeparatorItem.parseInput(value);
+		}
+		return BizIntegerSeparatorItem.format(value);
+	},
+	mapDisplayToValue: function(value) {
+		if (isc.isAn.emptyString(value)) {
+			value = null;
+		}
+		else {
+			value = BizIntegerSeparatorItem.parseInput(value);
+		}
+		
+		return value;
+	},
+	// No need to override update value as we have extended BizIntegerSeparatorItem
+
+	// Override - if passed a string, map it to the appropriate float before saving
+    // (this is required since the string passed in won't go through 'mapDisplayToValue')
+    setValue : function (newValue) {
+        if (isc.isA.String(newValue)) {
+        	newValue = BizIntegerSeparatorItem.parseInput(newValue);
+        }
+        return this.Super("setValue", [newValue]);
+    }
+});
+isc.SimpleType.create({
+	name: "bizIntegerSeparator",
+	inheritsFrom: "float",
+	editorType: "BizIntegerSeparatorItem",
+	editFormatter: function(internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+	normalDisplayFormatter: function(internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+	shortDisplayFormatter: function(internalValue, field, component, record) {
+		return BizIntegerSeparatorItem.format(internalValue);
+	},
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+});
+
 isc.ClassFactory.defineClass("BizTwoDecimalPlacesPercentageItem", "BizIntegerPercentageItem");
 BizTwoDecimalPlacesPercentageItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float

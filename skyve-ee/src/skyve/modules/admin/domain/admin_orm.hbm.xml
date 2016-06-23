@@ -118,6 +118,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="name" length="200" />
+		<property name="test" />
 		<property name="contactType" length="12">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Contact$ContactType</param>
@@ -161,6 +162,16 @@
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="modDocName" length="100" />
 		<property name="schemaName" length="1024" />
+		<property name="auditModuleName" length="128" />
+		<property name="auditDocumentName" length="128" />
+		<property name="auditOperation" length="1">
+			<type name="Enum">
+				<param name="enumClass">modules.admin.domain.Audit$Operation</param>
+			</type>
+		</property>
+		<property name="auditTimestampStart" type="Timestamp" />
+		<property name="auditTimestampEnd" type="Timestamp" />
+		<property name="auditUserName" length="254" />
 		<filter name="adminDataMaintenanceNoneFilter" condition="1=0"/>
 		<filter name="adminDataMaintenanceCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDataMaintenanceDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

@@ -1,26 +1,20 @@
 package modules.admin.Tag.actions;
 
-import java.util.Date;
 import java.util.List;
 
-import modules.admin.domain.Tag;
-import modules.admin.domain.Tag.FilterAction;
-import modules.admin.domain.Tag.FilterOperator;
-import modules.admin.domain.Tagged;
-
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 import org.skyve.CORE;
+import org.skyve.bizport.BizPortException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
+import org.skyve.impl.bizport.LoadBeanFromRow;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -32,6 +26,11 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.Tag;
+import modules.admin.domain.Tag.FilterAction;
+import modules.admin.domain.Tag.FilterOperator;
+import modules.admin.domain.Tagged;
+
 public class UploadTagCriteria extends UploadAction<Tag> {
 	/**
 	 * For Serialization
@@ -40,7 +39,8 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 	
 	@Override
 	public Tag upload(Tag tag,
-						UploadedFile file,
+						UploadedFile file, 
+						BizPortException exeption,
 						WebContext webContext)
 	throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -79,30 +79,30 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 			// general try - if value is not of the expected type or empty, throw an exception
 			Object operand = null;
 			boolean isText = false;
+			boolean treatEmptyNumericAsZero = false;
 			try {
 				if(AttributeType.memo.equals( attrFilter.getAttributeType())
 						|| AttributeType.text.equals(attrFilter.getAttributeType())){
-					operand = getStringValueFromCell(row, col, true);
+					operand = LoadBeanFromRow.getStringValueFromCell(row, col, true);
 					isText = true;
 				} else if (AttributeType.date.equals(attrFilter.getAttributeType())){
-					operand= new DateOnly(getDateValueFromCell(row, col));
+					operand= new DateOnly(LoadBeanFromRow.getDateValueFromCell(row, col));
 				} else if (AttributeType.dateTime.equals(attrFilter.getAttributeType())){
-					operand= new DateTime(getDateValueFromCell(row, col));
+					operand= new DateTime(LoadBeanFromRow.getDateValueFromCell(row, col));
 				} else if (AttributeType.decimal10.equals(attrFilter.getAttributeType())){
-					operand = new Decimal10(getNumericValueFromCell(row, col).doubleValue());
+					operand = new Decimal10(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if (AttributeType.decimal2.equals(attrFilter.getAttributeType())){
-					operand = new Decimal2(getNumericValueFromCell(row, col).doubleValue());
+					operand = new Decimal2(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if (AttributeType.decimal5.equals(attrFilter.getAttributeType())){
-					operand = new Decimal5(getNumericValueFromCell(row, col).doubleValue());
+					operand = new Decimal5(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if ( AttributeType.longInteger.equals(attrFilter.getAttributeType())){
-					operand = new Long(getNumericValueFromCell(row, col).longValue());
+					operand = new Long(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).longValue());
 				}else if (AttributeType.integer.equals(attrFilter.getAttributeType())){
-					operand = new Integer(getNumericValueFromCell(row, col).intValue());
+					operand = new Integer(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).intValue());
 				}
 			} catch (Exception e){
 				throw new Exception("Problem loading values at row " + rowIndex+1 + " column " + col+1 + ". The value may be the wrong type or invalid.");
 			}				
-
 			
 			//inc number loaded
 			numberLoaded++;
@@ -157,73 +157,4 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 
 		return tag;
 	}
-	
-
-	/**
-	 * Wrapper to get a numeric value from the spreadsheet cell.
-	 * 
-	 * @param row
-	 * @param col
-	 * @return the numeric value
-	 */
-	// TODO is there a use in returning 0 if there is no value?
-	private static Double getNumericValueFromCell (Row row, int col) throws Exception {
-		Double result = Double.valueOf(0);
-
-
-		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
-		if (cell != null) {
-			result = Double.valueOf(cell.getNumericCellValue());
-		} else {
-			throw new Exception ("The cell is empty or not a valid number.");
-		}
-
-		return result;
-	}
-
-	/**
-	 * Wrapper to get a string value from the spreadsheet cell.
-	 * 
-	 * @param row
-	 * @param col
-	 * @return The String Value of the cell
-	 */
-	// TODO is there any use in return "" if the cell is empty?
-	private static String getStringValueFromCell (Row row, int col, boolean blankAsNull)throws Exception {
-		String result = null;
-
-		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
-		if (cell != null) {
-			result = cell.getStringCellValue().trim();
-		}
-		if (result == null) {
-			if (!blankAsNull) {
-				result = "";
-			}
-		}
-
-		return result;
-	}
-
-
-	/**
-	 * Wrapper to get a date value from the spreadsheet cell.
-	 * 
-	 * @param row
-	 * @param col
-	 * @return The Date Value of the cell
-	 */
-	private static Date getDateValueFromCell (Row row, int col) throws Exception{
-		Date result = null;
-
-		Cell cell = row.getCell(col, Row.RETURN_BLANK_AS_NULL);
-		if (cell != null) {
-			result = cell.getDateCellValue();
-		} else {
-			throw new Exception ("The value in the cell is not a valid date.");
-		}
-
-		return result;
-	}
-
 }

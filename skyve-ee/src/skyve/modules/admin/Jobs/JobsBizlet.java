@@ -10,11 +10,18 @@ import org.skyve.job.JobScheduler;
 import org.skyve.metadata.model.document.Bizlet;
 
 public class JobsBizlet extends Bizlet<Jobs> {
+	
+	public static final String SYSTEM_JOB_NOTIFICATION = "SYSTEM Job Notification";
+	public static final String SYSTEM_JOB_NOTIFICATION_DEFAULT_SUBJECT = "Job - Complete";
+	public static final String SYSTEM_JOB_NOTICATION_DEFAULT_BODY = "The Job is complete.";
+
 	/**
 	 * For Serialization
 	 */
 	private static final long serialVersionUID = 2374495221430654562L;
 
+	
+	
 	@Override
 	public Jobs newInstance(Jobs jobs) throws Exception {
 		refresh(jobs);

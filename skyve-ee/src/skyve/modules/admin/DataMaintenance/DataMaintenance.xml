@@ -8,7 +8,7 @@
 	<pluralAlias>Data Maintenance</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/maintenance16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/maintenance32.png</icon32x32RelativeFilePath>
-	<bizKey expression="Data Maintenance"/>
+	<bizKey expression="Data Maintenance{modDocName}"/>
 	<attributes>
 		<text name="modDocName">
 			<displayName>Module.Document</displayName>
@@ -35,6 +35,35 @@
 		</boolean>
 		<memo name="contentLink" persistent="false" trackChanges="false">
 			<displayName>Content Link</displayName>
+		</memo>
+		
+		<!-- transient for Audit Management Truncation Filtering -->
+		<text name="auditModuleName">
+			<displayName>Module</displayName>
+			<length>128</length>
+		</text>
+		<text name="auditDocumentName">
+			<displayName>Document</displayName>
+			<length>128</length>
+		</text>
+		<enum name="auditOperation" documentRef="Audit" attributeRef="operation">
+			<displayName>Operation</displayName>
+		</enum>
+		<timestamp name="auditTimestampStart">
+			<displayName>From</displayName>
+		</timestamp>
+		<timestamp name="auditTimestampEnd">
+			<displayName>To</displayName>
+		</timestamp>
+		<text name="auditUserName">
+			<displayName>User</displayName>
+			<length>254</length>
+		</text>
+		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
+			<displayName>Found</displayName>
+		</integer>
+		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
+			<displayName>Status</displayName>
 		</memo>
 	</attributes>
 	<conditions>
@@ -75,6 +104,22 @@
 			<expression>
 				<![CDATA[
 					contentLink != null
+				]]>
+			</expression>
+		</condition>
+		<condition name="auditManager">
+			<description>Current user is in the role "Audit Manager"</description>
+			<expression>
+				<![CDATA[
+				isUserInRole("admin","AuditManager")
+				]]>
+			</expression>
+		</condition>
+		<condition name="jobCommenced">
+			<description>Truncation Job has commenced.</description>
+			<expression>
+				<![CDATA[
+				auditResponse!=null
 				]]>
 			</expression>
 		</condition>

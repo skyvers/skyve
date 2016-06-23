@@ -103,6 +103,74 @@
 				<button actionName="Reindex" />
 			</hbox>
 		</tab>
+		<tab title="Manage Audits" visible="auditManager">
+			<form border="true" percentageWidth="60" borderTitle="Filter">
+				<column percentageWidth="20"/>
+				<column/>
+				<column/>
+				<row>
+					<item colspan="2">
+							<textField binding="auditModuleName"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+							<textField binding="auditDocumentName"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+							<combo binding="auditOperation"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+							<textField binding="auditTimestampStart"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+							<textField binding="auditTimestampEnd"/>
+					</item>
+				</row>
+				<row>
+					<item colspan="2">
+							<textField binding="auditUserName"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="auditMatchCount" disabled="true"/>
+					</item>
+					<item>
+						<button actionName="CheckAuditMatches" pixelWidth="150"/>
+					</item>					
+				</row>
+			</form>
+			<form border="true" percentageWidth="60" borderTitle="Truncate">
+				<column percentageWidth="20"/>
+				<column/>			
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<button actionName="TruncateAuditLog" pixelWidth="150"/>
+					</item>
+				</row>
+				<row>
+					<item>
+						<spacer/>
+					</item>
+					<item>
+						<blurb>
+							<![CDATA[<i>{auditResponse}</i>]]>
+						</blurb>
+					</item>
+				</row>
+			</form>
+			
+		</tab>
 	</tabPane>
 	<actions>
 		<defaults />
@@ -115,6 +183,12 @@
 		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
 		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
+		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false" confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)"
+			relativeIconFileName="shared/icons/Clear.gif" disabled="jobCommenced"
+		/>
+		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false"
+			relativeIconFileName="shared/icons/Search.gif" 
+		/>
 		<download className="ZipBackup" displayName="Download Zip" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
 	</actions>
 </view>

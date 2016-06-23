@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -1506,66 +1506,66 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="pick"/>
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="edit"/>
       <xs:enumeration value="create"/>
       <xs:enumeration value="params"/>
-      <xs:enumeration value="edit"/>
-      <xs:enumeration value="list"/>
+      <xs:enumeration value="pick"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
       <xs:enumeration value="left"/>
-      <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+      <xs:enumeration value="centre"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
       <xs:enumeration value="height"/>
-      <xs:enumeration value="width"/>
       <xs:enumeration value="both"/>
+      <xs:enumeration value="width"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="verticalAlignment">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="top"/>
       <xs:enumeration value="bottom"/>
       <xs:enumeration value="middle"/>
-      <xs:enumeration value="top"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Delete"/>
       <xs:enumeration value="Upload"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="OK"/>
+      <xs:enumeration value="Remove"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="Edit"/>
       <xs:enumeration value="Save"/>
       <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="Download"/>
+      <xs:enumeration value="DEFAULTS"/>
       <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Download"/>
+      <xs:enumeration value="OK"/>
       <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="Report"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="modalWindow"/>
-      <xs:enumeration value="blankFrame"/>
-      <xs:enumeration value="self"/>
       <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
+      <xs:enumeration value="self"/>
+      <xs:enumeration value="blankFrame"/>
+      <xs:enumeration value="modalWindow"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

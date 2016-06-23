@@ -350,7 +350,12 @@ public final class BindUtil {
 			result = stringValue;
 		}
 		else if (type.equals(Integer.class)) {
-			result = new Integer(stringValue);
+			if(converter!=null){
+				result = converter.fromDisplayValue(stringValue);
+			}
+			else {
+				result = new Integer(stringValue);
+			}
 		}
 		else if (type.equals(Long.class)) {
 			result = new Long(stringValue);

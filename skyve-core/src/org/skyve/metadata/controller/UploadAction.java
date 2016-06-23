@@ -2,6 +2,7 @@ package org.skyve.metadata.controller;
 
 import java.io.InputStream;
 
+import org.skyve.bizport.BizPortException;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.MetaData;
@@ -85,14 +86,15 @@ public abstract class UploadAction<T extends Bean> implements MetaData {
 			this.mimeType = mimeType;
 		}
 	}
-	
+
 	/**
 	 * 
-	 * @param bean	The bean to execute on.
-	 * @param file	The file to process.
-	 * @param webContext	The context to manipulate.
-	 * @return	The bean param or a replaced bean instance.
+	 * @param bean
+	 * @param file
+	 * @param exception
+	 * @param webContext
+	 * @return
 	 * @throws Exception
 	 */
-	public abstract T upload(T bean, UploadedFile file, WebContext webContext) throws Exception;
+	public abstract T upload(T bean, UploadedFile file, BizPortException exception, WebContext webContext) throws Exception;
 }

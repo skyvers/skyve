@@ -33,7 +33,7 @@
 		<script type=text/javascript>
 			data = [
 			    {
-			        image: "skyve_inv.png", 
+			        image: "skyve.png", 
 			        name: "Skyve Logo"
 			    }
 			];
