@@ -26,6 +26,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercent
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.domain.types.converters.integer.SimplePercentage;
+import org.skyve.domain.types.converters.integer.IntegerSeparator;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -503,6 +504,9 @@ public class SmartClientGenerateUtils {
 					type = "integer";
 					if (converter instanceof SimplePercentage) {
 						type = "bizIntegerPercentage";
+					}
+					else if(converter instanceof IntegerSeparator){
+						type = "bizIntegerSeparator";
 					}
 					break;
 				case date:
