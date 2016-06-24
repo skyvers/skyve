@@ -14,7 +14,7 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
-import org.skyve.impl.bizport.LoadBeanFromRow;
+import org.skyve.impl.bizport.FileUploadUtil;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -83,22 +83,22 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 			try {
 				if(AttributeType.memo.equals( attrFilter.getAttributeType())
 						|| AttributeType.text.equals(attrFilter.getAttributeType())){
-					operand = LoadBeanFromRow.getStringValueFromCell(row, col, true);
+					operand = FileUploadUtil.getStringValueFromCell(row, col, true);
 					isText = true;
 				} else if (AttributeType.date.equals(attrFilter.getAttributeType())){
-					operand= new DateOnly(LoadBeanFromRow.getDateValueFromCell(row, col));
+					operand= new DateOnly(FileUploadUtil.getDateValueFromCell(row, col));
 				} else if (AttributeType.dateTime.equals(attrFilter.getAttributeType())){
-					operand= new DateTime(LoadBeanFromRow.getDateValueFromCell(row, col));
+					operand= new DateTime(FileUploadUtil.getDateValueFromCell(row, col));
 				} else if (AttributeType.decimal10.equals(attrFilter.getAttributeType())){
-					operand = new Decimal10(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
+					operand = new Decimal10(FileUploadUtil.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if (AttributeType.decimal2.equals(attrFilter.getAttributeType())){
-					operand = new Decimal2(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
+					operand = new Decimal2(FileUploadUtil.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if (AttributeType.decimal5.equals(attrFilter.getAttributeType())){
-					operand = new Decimal5(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
+					operand = new Decimal5(FileUploadUtil.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).doubleValue());
 				}else if ( AttributeType.longInteger.equals(attrFilter.getAttributeType())){
-					operand = new Long(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).longValue());
+					operand = new Long(FileUploadUtil.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).longValue());
 				}else if (AttributeType.integer.equals(attrFilter.getAttributeType())){
-					operand = new Integer(LoadBeanFromRow.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).intValue());
+					operand = new Integer(FileUploadUtil.getNumericValueFromCell(row, col, treatEmptyNumericAsZero).intValue());
 				}
 			} catch (Exception e){
 				throw new Exception("Problem loading values at row " + rowIndex+1 + " column " + col+1 + ". The value may be the wrong type or invalid.");

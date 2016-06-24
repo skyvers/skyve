@@ -31,7 +31,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
-public class LoadBeanFromRow {
+public class FileUploadUtil {
 
 	public static enum ValueLookupType {
 		LOOKUP_EXACT, LOOKUP_LIKE, LOOKUP_CONTAINS, CONFIRM_MATCH
