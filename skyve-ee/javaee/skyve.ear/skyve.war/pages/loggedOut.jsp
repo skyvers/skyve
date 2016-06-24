@@ -39,8 +39,14 @@
 			</tr>
 		</table>
 		<%
-			request.getSession().invalidate();
 			request.logout();
+
+			// NB invalidate the session after logging out otherwise WebLogic 12c NPEs
+			HttpSession s = request.getSession(false);
+			if (s != null) {
+				s.invalidate();
+			}
+
 			// remove all cookies too
 			Cookie[] cookies = request.getCookies();
 			if (cookies != null && cookies.length > 0) {
