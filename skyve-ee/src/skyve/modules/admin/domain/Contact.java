@@ -35,8 +35,6 @@ public class Contact extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String namePropertyName = "name";
 	/** @hidden */
-	public static final String testPropertyName = "test";
-	/** @hidden */
 	public static final String contactTypePropertyName = "contactType";
 	/** @hidden */
 	public static final String email1PropertyName = "email1";
@@ -116,7 +114,6 @@ public class Contact extends AbstractPersistentBean {
 	}
 
 	private String name;
-	private Integer test;
 	/**
 	 * Whether this contact is a person or an organisation.
 	 **/
@@ -170,24 +167,6 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 	public void setName(String name) {
 		preset(namePropertyName, name);
 		this.name = name;
-	}
-
-	/**
-	 * {@link #test} accessor.
-	 **/
-	public Integer getTest() {
-		return test;
-	}
-
-	/**
-	 * {@link #test} mutator.
-	 * 
-	 * @param test	The new value to set.
-	 **/
-	@XmlElement
-	public void setTest(Integer test) {
-		preset(testPropertyName, test);
-		this.test = test;
 	}
 
 	/**

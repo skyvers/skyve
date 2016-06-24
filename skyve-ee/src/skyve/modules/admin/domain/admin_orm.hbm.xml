@@ -118,7 +118,6 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="name" length="200" />
-		<property name="test" />
 		<property name="contactType" length="12">
 			<type name="Enum">
 				<param name="enumClass">modules.admin.domain.Contact$ContactType</param>
