@@ -3,6 +3,8 @@ package org.skyve.impl.bizport;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -87,13 +89,14 @@ public class LoadBeanFromRow {
 	 * @param module
 	 * @param document
 	 * @param createMissingAssociations
+	 * @param createdBeans - a cache of created referenced beans (so that created references can be reused)
 	 * @param rowIndex
 	 * @param bindings
 	 * @return
 	 * @throws Exception
 	 */
 	public static Bean loadRowDataToBean(Row row, Persistence pers, Module module, Document document,
-			boolean createMissingAssociations, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, String... bindings)
+			boolean createMissingAssociations, Map<String, Bean> createdBeans, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, String... bindings)
 			throws Exception {
 
 		List<ColumnLoadDefinition> loadDefinitions = new ArrayList<>();
@@ -103,7 +106,7 @@ public class LoadBeanFromRow {
 		}
 		ColumnLoadDefinition[] cols = loadDefinitions.toArray(new ColumnLoadDefinition[loadDefinitions.size()]);
 
-		return loadRowDataToBean(row, pers, module, document, createMissingAssociations, treatEmptyNumericAsZero, rowIndex, exception, cols);
+		return loadRowDataToBean(row, pers, module, document, createMissingAssociations, createdBeans, treatEmptyNumericAsZero, rowIndex, exception, cols);
 	}
 
 	/**
@@ -120,6 +123,7 @@ public class LoadBeanFromRow {
 	 * @param user
 	 * @param document
 	 * @param createMissingAssociations
+	 * @param createdBeans - a cache of created referenced beans (so that created references can be reused)
 	 * @param treatEmptyNumericAsZero
 	 * @param rowIndex
 	 * @param bindings
@@ -127,7 +131,7 @@ public class LoadBeanFromRow {
 	 * @throws Exception
 	 */
 	public static Bean loadRowDataToBean(Row row, Persistence pers, Module module, Document document,
-			boolean createMissingAssociations, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, ColumnLoadDefinition[] cols)
+			boolean createMissingAssociations, Map<String, Bean> createdBeans, boolean treatEmptyNumericAsZero, int rowIndex, BizPortException exception, ColumnLoadDefinition[] cols)
 			throws Exception {
 
 		// assume no values loaded
@@ -340,8 +344,32 @@ public class LoadBeanFromRow {
 								}
 								Binder.set(result, searchBinding, foundBean);
 							} else if (createMissingAssociations) {
+								//first check the creationCache to establish if this bean has already been created
+								StringBuilder mapReference = new StringBuilder(128);
+								mapReference.append(binding).append(',').append((String) loadValue);
+
+								//check cache
+								boolean foundInCache = false;
+								if(createdBeans!=null){
+									if(createdBeans.containsKey(mapReference.toString())){
+										Bean previouslyCreatedBean = createdBeans.get(mapReference.toString());
+										if(previouslyCreatedBean!=null){
+											
+											//reuse the same bean
+											Binder.set(result, searchBinding, previouslyCreatedBean);
+											foundInCache= true;
+										}
+									} 
+								} 
+								
 								// Binder populateProperty creates intermediate beans as required
-								Binder.populateProperty(user, result, binding, loadValue, false);
+								if(!foundInCache){
+									Binder.populateProperty(user, result, binding, loadValue, false);
+									if(createdBeans==null){
+										createdBeans = new TreeMap<>();
+									}
+									createdBeans.put(mapReference.toString(), (Bean) Binder.get(result,searchBinding));
+								}
 							} else {
 								// throw an error
 								StringBuilder sb = new StringBuilder();
