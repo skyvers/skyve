@@ -392,6 +392,7 @@ public class ComponentBuilder {
 	        result.setShowButtonPanel(true);
         }
         
+        result.setYearRange("c-100:c+10");
         String converterName = converter.getClass().getSimpleName();
         if ("DD_MM_YYYY".equals(converterName)) {
             result.setPattern("dd/MM/yyyy");
