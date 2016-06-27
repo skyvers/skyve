@@ -29,6 +29,7 @@ import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -86,7 +87,7 @@ public final class ReportUtil {
 		UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
 			@SuppressWarnings("resource")
-			Connection connection = SQLUtil.getAPooledConnection();
+			Connection connection = EXT.getDataStoreConnection();
 			try {
 				UtilImpl.LOGGER.info("FILL REPORT");
 				result = JasperFillManager.fillReport(jasperReport, 

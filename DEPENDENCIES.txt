@@ -228,10 +228,6 @@ WILDCAT depends upon the following libraries:
 		http://www.smartclient.com/product/smartclient.jsp
 		https://www.smartclient.com/product/licensingFAQ.jsp
 		
-	* LABjs
-		http://labjs.com/
-		See http://labjs.com/ (MIT licence)
-		
 	* Wicket
 		https://github.com/arthur-e/Wicket
 		See https://github.com/arthur-e/Wicket#license

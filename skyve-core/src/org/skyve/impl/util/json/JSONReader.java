@@ -60,7 +60,7 @@ public class JSONReader {
 
 	public JSONReader(User user) throws MetaDataException {
 		this.user = user;
-		this.customer = user.getCustomer();
+		this.customer = (user == null) ? null : user.getCustomer();
 	}
 
 	private char next() {

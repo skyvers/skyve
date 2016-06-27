@@ -1,11 +1,9 @@
 package org.skyve.impl.web;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -23,7 +21,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.JSON;
 
 public class SkyveContextListener implements ServletContextListener {
 
@@ -48,26 +45,17 @@ public class SkyveContextListener implements ServletContextListener {
 			File ear = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH).getParentFile();
 			String earName = ear.getName();
 			earName = earName.substring(0, earName.length() - 4);
-			propertiesFilePath = ear.getParent() + '/' + earName + ".properties";
+			propertiesFilePath = ear.getParent() + '/' + earName + ".json";
 		}
 
 		Map<String, Object> properties = null;
-		try {
-			String json = null;
-			try (Scanner scanner = new Scanner(new File(propertiesFilePath))) {
-				json = scanner.useDelimiter("\\Z").next();
-			}
-			// Remove any C-style comments
-			String commentsPattern = "(?s)\\/\\*(?:(\\*(?!\\/))|(?:[^\\*]))*\\*\\/|[^:]\\/\\/[^\\n\\r]*(?=[\\n\\r])";
-			final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
-			final Matcher m = pattern.matcher(json);
-			json = m.replaceAll("");
-			
-			properties = (Map<String, Object>) JSON.unmarshall(null, json);
+		try (FileInputStream fis = new FileInputStream(propertiesFilePath)) {
+			properties = UtilImpl.readJSONConfig(fis);
 		}
 		catch (Exception e) {
-			throw new IllegalStateException("Cannot open or read " + propertiesFilePath);
+			throw new IllegalStateException("Cannot open or read " + propertiesFilePath, e);
 		}
+		UtilImpl.CONFIGURATION = properties;
 		
 		Map<String, Object> trace = getObject(null, "trace", properties);
 		UtilImpl.XML_TRACE = getBoolean("trace", "xml", trace);
@@ -193,16 +181,15 @@ public class SkyveContextListener implements ServletContextListener {
 				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
 			}
 		}
-
 		
 		Map<String, Object> smtp = getObject(null, "smtp", properties);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
-		UtilImpl.SMTP_PORT = getString("smtp", "port", smtp, false);
+		UtilImpl.SMTP_PORT = Integer.toString(getInt("smtp", "port", smtp));
 		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
 		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
 		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
 		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
-		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", properties);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);
 		if (UtilImpl.SMTP_TEST_BOGUS_SEND && (UtilImpl.SMTP_TEST_RECIPIENT == null)) {
 			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
 		}

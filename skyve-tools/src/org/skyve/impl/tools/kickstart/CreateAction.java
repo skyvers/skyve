@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.persistence.DataStore;
 
 class CreateAction extends AbstractAction {
 	private static final long serialVersionUID = -7217121655136714836L;
@@ -46,11 +47,11 @@ class CreateAction extends AbstractAction {
 
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 //			UtilImpl.CONTENT_DIRECTORY = contentDirectory;
-			UtilImpl.DIALECT = panel.getDBDialect();
-			UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = panel.getDBDriver();
-			UtilImpl.STANDALONE_DATABASE_CONNECTION_URL = panel.getDBUrl();
-			UtilImpl.STANDALONE_DATABASE_USERNAME = panel.getDBUserName();
-			UtilImpl.STANDALONE_DATABASE_PASSWORD = panel.getDBPassword();
+			UtilImpl.DATA_STORE = new DataStore(panel.getDBDriver(),
+													panel.getDBUrl(),
+													panel.getDBUserName(),
+													panel.getDBPassword(),
+													panel.getDBDialect());
 			UtilImpl.DDL_SYNC = true;
 //			UtilImpl.APPS_JAR_DIRECTORY = "/C:/_/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
 			
@@ -67,7 +68,7 @@ class CreateAction extends AbstractAction {
 				// Don't close this connection
 				connection = persistence.getConnection();
 				try (Statement statement = connection.createStatement()) {
-					if ("org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect".equals(UtilImpl.DIALECT)) {
+					if ("org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect".equals(UtilImpl.DATA_STORE.getDialectClassName())) {
 						GeoDB.InitGeoDB(connection);
 					}
 System.out.println(createSql());

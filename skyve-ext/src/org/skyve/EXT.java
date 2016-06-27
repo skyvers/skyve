@@ -555,7 +555,7 @@ public class EXT {
 	}
 	
 	public static SQLDataAccess newSQLDataAccess() {
-		return new SQLDataAccessImpl();
+		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
 	}
 	
 	public static SQLDataAccess newSQLDataAccess(DataStore dataStore) {

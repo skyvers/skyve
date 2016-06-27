@@ -18,11 +18,11 @@ public class SkyveDialectProvider implements SpatialDialectProvider {
 
 	@Override
 	public SpatialDialect getDefaultDialect() {
-		return createSpatialDialect(UtilImpl.DIALECT);
+		return createSpatialDialect(UtilImpl.DATA_STORE.getDialectClassName());
 	}
 
 	@Override
 	public String[] getSupportedDialects() {
-		return new String[] {UtilImpl.DIALECT};
+		return new String[] {UtilImpl.DATA_STORE.getDialectClassName()};
 	}
 }
