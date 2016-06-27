@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -29,6 +31,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -102,12 +105,8 @@ public class UtilImpl {
 	public static int CONVERSATION_EVICTION_TIME_MINUTES = 60;
 
 	// For database
-	public static String DATASOURCE = null;
-	public static String STANDALONE_DATABASE_JDBC_DRIVER = null;
-	public static String STANDALONE_DATABASE_CONNECTION_URL = null;
-	public static String STANDALONE_DATABASE_USERNAME = null;
-	public static String STANDALONE_DATABASE_PASSWORD = null;
-	public static String DIALECT = "MySQL5InnoDBDialect";
+	public static Map<String, DataStore> DATA_STORES = new TreeMap<>();
+	public static DataStore DATA_STORE = null;
 	public static boolean DDL_SYNC = true;
 	
 	// For E-Mail

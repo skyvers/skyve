@@ -21,9 +21,6 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.impl.backup.BackupUtil;
-import org.skyve.impl.backup.JoinTable;
-import org.skyve.impl.backup.Table;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
@@ -45,7 +42,7 @@ public class Restore {
 
 		Collection<Table> tables = BackupUtil.getTables();
 
-		try (Connection connection = EXT.getPooledJDBCConnection()) {
+		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
 			restoreData(backupDirectory, tables, connection, false);
@@ -155,7 +152,7 @@ public class Restore {
 									else if (attributeType == AttributeType.geometry) {
 										Geometry geometry = new WKTReader().read(stringValue);
 										if (geometryUserType == null) {
-											SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+											SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
 											geometryUserType = dialect.getGeometryUserType();
 										}
 										geometryUserType.nullSafeSet(statement, geometry, index++);

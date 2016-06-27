@@ -107,7 +107,7 @@ public class ThemeCharter {
 	public BufferedImage getBarChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, ChartAspect aspect, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
-			connection = EXT.getPooledJDBCConnection();
+			connection = EXT.getDataStoreConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, this.sql);
 
 			JFreeChart chart;
@@ -182,7 +182,7 @@ public class ThemeCharter {
 	public BufferedImage getLineChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
-			connection = EXT.getPooledJDBCConnection();
+			connection = EXT.getDataStoreConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, this.sql);
 			JFreeChart chart = ChartFactory.createLineChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
@@ -245,7 +245,7 @@ public class ThemeCharter {
 	public BufferedImage getAreaChartImage(String domainTitle, String rangeTitle, Integer labelColumn, PlotOrientation orientation, int width, int height, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
-			connection = EXT.getPooledJDBCConnection();
+			connection = EXT.getDataStoreConnection();
 			JDBCCategoryDataset data = new JDBCCategoryDataset(connection, this.sql);
 			JFreeChart chart = ChartFactory.createAreaChart(EMPTY_STRING, domainTitle, rangeTitle, data, orientation, true, false, false);
 
@@ -309,7 +309,7 @@ public class ThemeCharter {
 		Connection connection = null;
 		try {
 
-			connection = EXT.getPooledJDBCConnection();
+			connection = EXT.getDataStoreConnection();
 			JDBCPieDataset data = new JDBCPieDataset(connection, this.sql);
 			JFreeChart chart;
 			if (ChartAspect.THREE_D.equals(aspect)) {

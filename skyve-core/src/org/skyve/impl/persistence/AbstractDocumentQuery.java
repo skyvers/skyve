@@ -16,10 +16,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
-import org.skyve.impl.persistence.AbstractBizQL;
-import org.skyve.impl.persistence.AbstractDocumentQuery;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.AbstractQuery;
 
 public abstract class AbstractDocumentQuery extends AbstractQuery implements DocumentQuery {
 	/**
@@ -160,7 +156,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		// Handle SQLServer which will not automatically cast to a broader type of number and just breaks
 		if ((AggregateFunction.Avg.equals(function) || 
 					AggregateFunction.Sum.equals(function)) && 
-				UtilImpl.DIALECT.contains("SQLServer")) {
+				UtilImpl.DATA_STORE.getDialectClassName().contains("SQLServer")) {
 			projectionClause.append("cast(").append(THIS_ALIAS).append('.').append(binding).append(" as big_decimal)");
 		}
 		else {

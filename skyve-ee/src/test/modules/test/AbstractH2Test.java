@@ -33,6 +33,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
 
 /**
@@ -81,11 +82,8 @@ public abstract class AbstractH2Test {
 	@Before
 	public void beforeBase() throws MetaDataException {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateNoContentPersistence.class;
-		UtilImpl.DIALECT = DB_DIALECT;
-		UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = DB_DRIVER;
-		UtilImpl.STANDALONE_DATABASE_CONNECTION_URL = DB_URL;
-		UtilImpl.STANDALONE_DATABASE_USERNAME = DB_UNAME;
-		UtilImpl.STANDALONE_DATABASE_PASSWORD = DB_PWD;
+		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
+		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;

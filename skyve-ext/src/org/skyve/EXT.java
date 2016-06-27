@@ -3,10 +3,12 @@ package org.skyve;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -43,6 +45,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.MailAttachment;
@@ -445,30 +448,53 @@ public class EXT {
 	}
 
 	/**
-	 * Get a JDBC connection from the skyve connection pool. Skyve uses a
-	 * container provided JNDI data source for connections. All servlet and Java
-	 * EE App stacks can provision this service. The connection pool used by
-	 * skyve is configured in each web app as a context parameter in web.xml.
+	 * Get a JDBC connection from the skyve data store definition. 
+	 * Skyve uses a container provided JNDI data source or driver/url/user/pass combinationfor connections. 
+	 * All servlet and Java EE App stacks can provision this service. 
+	 * The connection pool used by skyve is configured in each web app in the json config.
 	 * This method should be used sparingly. For SQL queries,
 	 * {@link org.skyve.persistence.Persistence} can be used in conjunction with
 	 * {@link org.skyve.persistence.SQL}.
 	 * 
 	 * @return a database connection from the container supplied pool.
 	 */
-	public static Connection getPooledJDBCConnection() throws IllegalStateException {
+	@SuppressWarnings("resource")
+	public static Connection getDataStoreConnection(DataStore dataStore) throws IllegalStateException {
 		Connection result = null;
 		try {
-			InitialContext ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup(UtilImpl.DATASOURCE);
-			result = ds.getConnection();
-			result.setAutoCommit(false);
-		} catch (SQLException e) {
+			String jndiDataSourceName = dataStore.getJndiDataSourceName();
+			if (jndiDataSourceName == null) {
+				Class.forName(dataStore.getJdbcDriverClassName());
+				Properties connectionProps = new Properties();
+				connectionProps.put("user", dataStore.getUserName());
+				connectionProps.put("password", dataStore.getPassword());
+				result = DriverManager.getConnection(dataStore.getJdbcUrl(), connectionProps);
+			}
+			else {
+				InitialContext ctx = new InitialContext();
+				DataSource ds = (DataSource) ctx.lookup(jndiDataSourceName);
+				result = ds.getConnection();
+			}
+
+			if (result != null) {
+				result.setAutoCommit(false);
+			}
+		}
+		catch (SQLException e) {
 			throw new IllegalStateException("Could not get a database connection", e);
-		} catch (NamingException e) {
+		}
+		catch (NamingException e) {
 			throw new IllegalStateException("Could not find the JDBC connection pool", e);
+		} 
+		catch (ReflectiveOperationException e) {
+			throw new IllegalStateException("Could not instantiate the JDBC driver", e);
 		}
 
 		return result;
+	}
+	
+	public static Connection getDataStoreConnection() {
+		return getDataStoreConnection(UtilImpl.DATA_STORE);
 	}
 
 	public static ContentManager newContentManager() {
@@ -532,11 +558,7 @@ public class EXT {
 		return new SQLDataAccessImpl();
 	}
 	
-	public static SQLDataAccess newSQLDataAccess(String dataSourceName) {
-		return new SQLDataAccessImpl(dataSourceName);
-	}
-	
-	public static SQLDataAccess newSQLDataAccess(String dataSourceName, String dialectClassName) {
-		return new SQLDataAccessImpl(dataSourceName, dialectClassName);
+	public static SQLDataAccess newSQLDataAccess(DataStore dataStore) {
+		return new SQLDataAccessImpl(dataStore);
 	}
 }

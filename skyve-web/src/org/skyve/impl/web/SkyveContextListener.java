@@ -1,10 +1,11 @@
 package org.skyve.impl.web;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -20,7 +21,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobScheduler;
+import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.JSON;
 
 public class SkyveContextListener implements ServletContextListener {
 
@@ -48,45 +51,44 @@ public class SkyveContextListener implements ServletContextListener {
 			propertiesFilePath = ear.getParent() + '/' + earName + ".properties";
 		}
 
-		Properties properties = new Properties();
-		try (InputStream is = new FileInputStream(propertiesFilePath)) {
-			properties.load(is);
+		Map<String, Object> properties = null;
+		try {
+			String json = null;
+			try (Scanner scanner = new Scanner(new File(propertiesFilePath))) {
+				json = scanner.useDelimiter("\\Z").next();
+			}
+			// Remove any C-style comments
+			String commentsPattern = "(?s)\\/\\*(?:(\\*(?!\\/))|(?:[^\\*]))*\\*\\/|[^:]\\/\\/[^\\n\\r]*(?=[\\n\\r])";
+			final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
+			final Matcher m = pattern.matcher(json);
+			json = m.replaceAll("");
+			
+			properties = (Map<String, Object>) JSON.unmarshall(null, json);
 		}
 		catch (Exception e) {
-			throw new IllegalStateException("Could not find app properties file " + propertiesFilePath, e);
+			throw new IllegalStateException("Cannot open or read " + propertiesFilePath);
 		}
+		
+		Map<String, Object> trace = getObject(null, "trace", properties);
+		UtilImpl.XML_TRACE = getBoolean("trace", "xml", trace);
+		UtilImpl.HTTP_TRACE = getBoolean("trace", "http", trace);
+		UtilImpl.COMMAND_TRACE = getBoolean("trace", "command", trace);
+		UtilImpl.FACES_TRACE = getBoolean("trace", "faces", trace);
+		UtilImpl.QUERY_TRACE = getBoolean("trace", "query", trace);
+		UtilImpl.SQL_TRACE = getBoolean("trace", "sql", trace);
+		UtilImpl.CONTENT_TRACE = getBoolean("trace", "content", trace);
+		UtilImpl.SECURITY_TRACE = getBoolean("trace", "security", trace);
+		UtilImpl.BIZLET_TRACE = getBoolean("trace", "bizlet", trace);
+		UtilImpl.DIRTY_TRACE = getBoolean("trace", "dirty", trace);
 
-		String value = UtilImpl.processStringValue(properties.getProperty("XML_TRACE"));
-		UtilImpl.XML_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("HTTP_TRACE"));
-		UtilImpl.HTTP_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("COMMAND_TRACE"));
-		UtilImpl.COMMAND_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("FACES_TRACE"));
-		UtilImpl.FACES_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("QUERY_TRACE"));
-		UtilImpl.QUERY_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("SQL_TRACE"));
-		UtilImpl.SQL_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_TRACE"));
-		UtilImpl.CONTENT_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("SECURITY_TRACE"));
-		UtilImpl.SECURITY_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("BIZLET_TRACE"));
-		UtilImpl.BIZLET_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("DIRTY_TRACE"));
-		UtilImpl.DIRTY_TRACE = (value != null) && Boolean.parseBoolean(value);
-		value = UtilImpl.processStringValue(properties.getProperty("PRETTY_SQL_OUTPUT"));
-		UtilImpl.PRETTY_SQL_OUTPUT = (value != null) && Boolean.parseBoolean(value);
-
-		UtilImpl.APPS_JAR_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("APPS_JAR_DIRECTORY"));
-		UtilImpl.CONTENT_DIRECTORY = UtilImpl.processStringValue(properties.getProperty("CONTENT_DIRECTORY"));
+		Map<String, Object> content = getObject(null, "content", properties);
+		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
 		if (! contentDirectory.exists()) {
-			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
+			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
 		}
 		if (! contentDirectory.isDirectory()) {
-			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
+			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
 		}
 		// Check the content directory is writable
 		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
@@ -94,56 +96,58 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.createNewFile();
 		}
 		catch (Exception e) {
-			throw new IllegalStateException("CONTENT_DIRECTORY " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
+			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
 		}
 		finally {
 			testFile.delete();
 		}
-		UtilImpl.CONTENT_GC_CRON = UtilImpl.processStringValue(properties.getProperty("CONTENT_GC_CRON"));
-		value = UtilImpl.processStringValue(properties.getProperty("CONTENT_FILE_STORAGE"));
-		UtilImpl.CONTENT_FILE_STORAGE = (value != null) && Boolean.parseBoolean(value);
-
-		value = UtilImpl.processStringValue(properties.getProperty("DEV_MODE"));
-		UtilImpl.DEV_MODE = (value != null) && Boolean.parseBoolean(value);
+		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
+		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
 		// There are container specific ways but we don't want that.
-		UtilImpl.SERVER_URL = UtilImpl.processStringValue(properties.getProperty("SERVER_URL"));
-		UtilImpl.SKYVE_CONTEXT = UtilImpl.processStringValue(properties.getProperty("SKYVE_CONTEXT"));
-		UtilImpl.HOME_URI = UtilImpl.processStringValue(properties.getProperty("HOME_URI"));
+		Map<String, Object> url = getObject(null, "url", properties);
+		UtilImpl.SERVER_URL = getString("url", "server", url, true);
+		UtilImpl.SKYVE_CONTEXT = getString("url", "context", url, true);
+		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
-		value = UtilImpl.processStringValue(properties.getProperty("MAX_CONVERSATIONS_IN_MEMORY"));
-		if (value != null) {
-			UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = Integer.parseInt(value);
+		Map<String, Object> conversations = getObject(null, "conversations", properties);
+		UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = getInt("conversations", "maxInMemory", conversations);
+		UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = getInt("conversations", "evictionTimeMinutes", conversations);
+
+		Map<String, Object> dataStores = getObject(null, "dataStores", properties);
+		// for each datastore defined
+		for (String dataStoreName : dataStores.keySet()) {
+			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores);
+			String prefix = String.format("dataStores.%s", dataStoreName);
+			String dialect = getString(prefix, "dialect", dataStore, true);
+			
+			String jndi = getString(prefix, "jndi", dataStore, false);
+			if (jndi == null) {
+				UtilImpl.DATA_STORES.put(dataStoreName, 
+											new DataStore(getString(prefix, "driver", dataStore, true), 
+															getString(prefix, "url", dataStore, true), 
+															getString(prefix, "user", dataStore, false),
+															getString(prefix, "password", dataStore, false), 
+															dialect));
+			}
+			else {
+				UtilImpl.DATA_STORES.put(dataStoreName, new DataStore(jndi, dialect));
+			}
 		}
-		value = UtilImpl.processStringValue(properties.getProperty("CONVERSATION_EVICTION_TIME_MINUTES"));
-		if (value != null) {
-			UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = Integer.parseInt(value);
+
+		Map<String, Object> hibernate = getObject(null, "hibernate", properties);
+		UtilImpl.DATA_STORE = UtilImpl.DATA_STORES.get(getString("hibernate", "dataStore", hibernate, true));
+		if (UtilImpl.DATA_STORE == null) {
+			throw new IllegalStateException("hibernate.dataStore " + UtilImpl.DATA_STORE + " is not defined in dataStores");
 		}
-		UtilImpl.DATASOURCE = UtilImpl.processStringValue(properties.getProperty("DATASOURCE"));
-		UtilImpl.DIALECT = UtilImpl.processStringValue(properties.getProperty("DIALECT"));
-		value = UtilImpl.processStringValue(properties.getProperty("DDL_SYNC"));
-		if (value != null) {
-			UtilImpl.DDL_SYNC = Boolean.parseBoolean(value);
-		}
-		UtilImpl.SMTP = UtilImpl.processStringValue(properties.getProperty("SMTP"));
-		UtilImpl.SMTP_PORT = UtilImpl.processStringValue(properties.getProperty("SMTP_PORT"));
-		UtilImpl.SMTP_UID = UtilImpl.processStringValue(properties.getProperty("SMTP_UID"));
-		UtilImpl.SMTP_PWD = UtilImpl.processStringValue(properties.getProperty("SMTP_PWD"));
-		UtilImpl.SMTP_SENDER = UtilImpl.processStringValue(properties.getProperty("SMTP_SENDER"));
-		UtilImpl.SMTP_TEST_RECIPIENT = UtilImpl.processStringValue(properties.getProperty("SMTP_TEST_RECIPIENT"));
-		value = UtilImpl.processStringValue(properties.getProperty("SMTP_TEST_BOGUS_SEND"));
-		if (value != null) {
-			UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.parseBoolean(value);
-		}
-		UtilImpl.CUSTOMER = UtilImpl.processStringValue(properties.getProperty("CUSTOMER"));
-		value = UtilImpl.processStringValue(properties.getProperty("PASSWORD_HASHING_ALGORITHM"));
-		if (value != null) {
-			UtilImpl.PASSWORD_HASHING_ALGORITHM = value;
-		}
-		
+		UtilImpl.DDL_SYNC = getBoolean("hibernate", "ddlSync", hibernate);
+		UtilImpl.PRETTY_SQL_OUTPUT = getBoolean("hibernate", "prettySql", hibernate);
+
+		Map<String, Object> factories = getObject(null, "factories", properties);
+
 		// NB Need the repository set before setting persistence
-		UtilImpl.SKYVE_REPOSITORY_CLASS = UtilImpl.processStringValue(properties.getProperty("SKYVE_REPOSITORY_CLASS"));
+		UtilImpl.SKYVE_REPOSITORY_CLASS = getString("factories", "repositoryClass", factories, false);
 		if (AbstractRepository.get() == null) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
 				UtilImpl.LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
@@ -155,12 +159,12 @@ public class SkyveContextListener implements ServletContextListener {
 					AbstractRepository.set((AbstractRepository) Thread.currentThread().getContextClassLoader().loadClass(UtilImpl.SKYVE_REPOSITORY_CLASS).newInstance());
 				}
 				catch (Exception e) {
-					throw new IllegalStateException("Could not create SKYVE_REPOSITORY_CLASS " + UtilImpl.SKYVE_REPOSITORY_CLASS, e);
+					throw new IllegalStateException("Could not create factories.repositoryClass " + UtilImpl.SKYVE_REPOSITORY_CLASS, e);
 				}
 			}
 		}
 
-		UtilImpl.SKYVE_PERSISTENCE_CLASS = UtilImpl.processStringValue(properties.getProperty("SKYVE_PERSISTENCE_CLASS"));
+		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString("factories", "persistenceClass", factories, false);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
 				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT");
@@ -172,12 +176,12 @@ public class SkyveContextListener implements ServletContextListener {
 					AbstractPersistence.IMPLEMENTATION_CLASS = (Class<? extends AbstractPersistence>) Class.forName(UtilImpl.SKYVE_PERSISTENCE_CLASS);
 				}
 				catch (ClassNotFoundException e) {
-					throw new IllegalStateException("Could not find SKYVE_PERSISTENCE_CLASS " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
+					throw new IllegalStateException("Could not find factories.persistenceClass " + UtilImpl.SKYVE_PERSISTENCE_CLASS, e);
 				}
 			}
 		}
 
-		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = UtilImpl.processStringValue(properties.getProperty("SKYVE_CONTENT_MANAGER_CLASS"));
+		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString("factories", "contentManagerClass", factories, false);
 		if (UtilImpl.SKYVE_CONTENT_MANAGER_CLASS == null) {
 			AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
 		}
@@ -186,9 +190,27 @@ public class SkyveContextListener implements ServletContextListener {
 				AbstractContentManager.IMPLEMENTATION_CLASS = (Class<? extends AbstractContentManager>) Class.forName(UtilImpl.SKYVE_CONTENT_MANAGER_CLASS);
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Could not find SKYVE_CONTENT_MANAGER_CLASS " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
+				throw new IllegalStateException("Could not find factories.contentManagerClass " + UtilImpl.SKYVE_CONTENT_MANAGER_CLASS, e);
 			}
 		}
+
+		
+		Map<String, Object> smtp = getObject(null, "smtp", properties);
+		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
+		UtilImpl.SMTP_PORT = getString("smtp", "port", smtp, false);
+		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
+		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
+		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
+		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
+		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", properties);
+		if (UtilImpl.SMTP_TEST_BOGUS_SEND && (UtilImpl.SMTP_TEST_RECIPIENT == null)) {
+			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
+		}
+
+		UtilImpl.DEV_MODE = getBoolean(null, "devMode", properties);
+		UtilImpl.CUSTOMER = getString(null, "customer", properties, false);
+		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString(null, "passwordHashingAlgorithm", properties, true);
+		UtilImpl.APPS_JAR_DIRECTORY = getString(null, "appsJarDirectory", properties, false);
 
 		// ensure that the schema is created before trying to init the job scheduler
 		Persistence p = null;
@@ -205,6 +227,36 @@ public class SkyveContextListener implements ServletContextListener {
 		WebUtil.initConversationsCache();
 	}
 
+	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
+		Object result = properties.get(key);
+		if (required && (result == null)) {
+			if (prefix != null) {
+				throw new IllegalStateException(String.format("Property %s.%s does not exist in the JSON configuration.", prefix, key));
+			}
+			throw new IllegalStateException(String.format("Property %s does not exist in the JSON configuration.", key));
+		}
+		return result;
+	}
+
+	private static boolean getBoolean(String prefix, String key, Map<String, Object> properties) {
+		Boolean result = (Boolean) get(prefix, key, properties, true);
+		return result.booleanValue();
+	}
+	
+	private static int getInt(String prefix, String key, Map<String, Object> properties) {
+		Number result = (Number) get(prefix, key, properties, true);
+		return result.intValue();
+	}
+
+	private static String getString(String prefix, String key, Map<String, Object> properties, boolean required) {
+		return (String) get(prefix, key, properties, required);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties) {
+		return (Map<String, Object>) get(prefix, key, properties, true);
+	}
+	
 	@Override
 	public void contextDestroyed(ServletContextEvent evt) {
 		JobScheduler.dispose();
