@@ -442,6 +442,9 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 					if (dateValidator != null) {
 						String xmlMin = dateValidator.getXmlMin();
 						String xmlMax = dateValidator.getXmlMax();
+						if ((xmlMin == null) && (xmlMax == null)) {
+							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+						}
 						if (xmlMin != null) {
 							try {
 								dateValidator.setMin((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
@@ -452,7 +455,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
 							}
 						}
-						else if (xmlMax != null) {
+						if (xmlMax != null) {
 							try {
 								dateValidator.setMax((java.util.Date) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							} 
@@ -462,13 +465,13 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 																".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - date based types should be expressed as a standard XML date format - YYYY-MM-DD or YYYY-MM-DDTHH24:MM:SS");
 							}
 						}
-						else {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
-						}
 					}
 					if (decimalValidator != null) {
 						String xmlMin = decimalValidator.getXmlMin();
 						String xmlMax = decimalValidator.getXmlMax();
+						if ((xmlMin == null) && (xmlMax == null)) {
+							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+						}
 						if (xmlMin != null) {
 							try {
 								decimalValidator.setMin((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
@@ -478,22 +481,22 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
 						}
-						else if (xmlMax != null) {
+						if (xmlMax != null) {
 							try {
 								decimalValidator.setMax((Decimal) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
 							catch (Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMin + " for validator on field " + field.getName() + 
+								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - decimal based types should be expressed as floating point expressions ie 1.1");
 							}
-						}
-						else {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
 						}
 					}
 					if (integerValidator != null) {
 						String xmlMin = integerValidator.getXmlMin();
 						String xmlMax = integerValidator.getXmlMax();
+						if ((xmlMin == null) && (xmlMax == null)) {
+							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+						}
 						if (xmlMin != null) {
 							try {
 								integerValidator.setMin((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
@@ -503,22 +506,22 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
 						}
-						else if (xmlMax != null) {
+						if (xmlMax != null) {
 							try {
 								integerValidator.setMax((java.lang.Integer) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
 							catch (Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMin + " for validator on field " + field.getName() + 
+								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - integer based types should be expressed as integer expressions ie 1");
 							}
-						}
-						else {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
 						}
 					}
 					if (longValidator != null) {
 						String xmlMin = longValidator.getXmlMin();
 						String xmlMax = longValidator.getXmlMax();
+						if ((xmlMin == null) && (xmlMax == null)) {
+							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
+						}
 						if (xmlMin != null) {
 							try {
 								longValidator.setMin((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMin, true));
@@ -528,17 +531,14 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 																" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}
 						}
-						else if (xmlMax != null) {
+						if (xmlMax != null) {
 							try {
 								longValidator.setMax((java.lang.Long) BindUtil.fromString(null, converter, implementingType, xmlMax, true));
 							}
 							catch (Exception e) {
-								throw new MetaDataException(metaDataName + " : The max value of " + xmlMin + " for validator on field " + field.getName() + 
+								throw new MetaDataException(metaDataName + " : The max value of " + xmlMax + " for validator on field " + field.getName() + 
 										" is not coercible to type " + type + ".  Values should be specified in the format of the field converter (if defined) or generic formats otherwise - long based types should be expressed as long expressions ie 1");
 							}
-						}
-						else {
-							throw new MetaDataException(metaDataName + " : The validator on field " + attribute.getName() + " must define either a min or max.");
 						}
 					}
 
