@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
@@ -20,14 +19,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
-import javax.sql.DataSource;
 
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
@@ -71,6 +67,7 @@ import org.hibernate.type.Type;
 import org.hibernate.util.ArrayHelper;
 import org.hibernatespatial.AbstractDBGeometryType;
 import org.hibernatespatial.SpatialDialect;
+import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -130,7 +127,6 @@ import org.skyve.util.Util;
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
-	private static final String DIALECT_PACKAGE = "org.hibernate.dialect.";
 	private static EntityManagerFactory emf = null;
 	private static AbstractDBGeometryType geometryUserType = null;
 
@@ -186,23 +182,24 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	throws MetaDataException {
 		Ejb3Configuration cfg = new Ejb3Configuration();
 
-		if (UtilImpl.DATASOURCE == null) {
-			cfg.setProperty("hibernate.connection.driver_class", UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER);
-			cfg.setProperty("hibernate.connection.url", UtilImpl.STANDALONE_DATABASE_CONNECTION_URL);
-			cfg.setProperty("hibernate.connection.username", UtilImpl.STANDALONE_DATABASE_USERNAME);
-			cfg.setProperty("hibernate.connection.password", UtilImpl.STANDALONE_DATABASE_PASSWORD);
+		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
+		if (dataSource == null) {
+			cfg.setProperty("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
+			cfg.setProperty("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
+			String value = UtilImpl.DATA_STORE.getUserName();
+			if (value != null) {
+				cfg.setProperty("hibernate.connection.username", value);
+			}
+			value = UtilImpl.DATA_STORE.getPassword();
+			if (value != null) {
+				cfg.setProperty("hibernate.connection.password", value);
+			}
 			cfg.setProperty("hibernate.connection.autocommit", "false");
 		}
 		else {
-			cfg.setProperty("hibernate.connection.datasource", UtilImpl.DATASOURCE);
+			cfg.setProperty("hibernate.connection.datasource", dataSource);
 		}
-
-		if (UtilImpl.DIALECT.indexOf('.') < 0) {
-			cfg.setProperty("hibernate.dialect", DIALECT_PACKAGE + UtilImpl.DIALECT);
-		}
-		else {
-			cfg.setProperty("hibernate.dialect", UtilImpl.DIALECT);
-		}
+		cfg.setProperty("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
 		cfg.setProperty("hibernate.cache.use_query_cache", "false");
@@ -303,7 +300,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	static AbstractDBGeometryType getGeometryUserType() throws Exception {
 		if (geometryUserType == null) {
-			SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+			SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
 			geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
 		}
 		
@@ -312,24 +309,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	
 	@SuppressWarnings("resource")
 	private static String[] generateExtraSchemaUpdates(Configuration cfg, boolean doUpdate)
-	throws SQLException, NamingException, ClassNotFoundException {
+	throws SQLException {
 		UtilImpl.LOGGER.info("Apply skyve extra schema updates");
         ArrayList<String> result = new ArrayList<>(50);
 
-        Connection connection = null;
-		if (UtilImpl.DATASOURCE == null) {
-			Class.forName(UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER);
-			Properties connectionProps = new Properties();
-			connectionProps.put("user", UtilImpl.STANDALONE_DATABASE_USERNAME);
-			connectionProps.put("password", UtilImpl.STANDALONE_DATABASE_PASSWORD);
-			connection = DriverManager.getConnection(UtilImpl.STANDALONE_DATABASE_CONNECTION_URL,
-														connectionProps);
-		}
-		else {
-	        DataSource dataSource = (DataSource) new InitialContext().lookup(UtilImpl.DATASOURCE);
-			connection = dataSource.getConnection();
-		}
-
+        Connection connection = EXT.getDataStoreConnection();
 		if (connection == null) {
 			throw new IllegalStateException("Connection is null");
 		}
@@ -483,9 +467,25 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	public final String generateDDL()
 	throws DomainException, MetaDataException {
 		Properties properties = new Properties();
-		properties.put("hibernate.connection.datasource", UtilImpl.DATASOURCE);
-		properties.put("hibernate.dialect", DIALECT_PACKAGE + UtilImpl.DIALECT);
-
+		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
+		if (dataSource == null) {
+			properties.put("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
+			properties.put("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
+			String value = UtilImpl.DATA_STORE.getUserName();
+			if (value != null) {
+				properties.put("hibernate.connection.username", value);
+			}
+			value = UtilImpl.DATA_STORE.getPassword();
+			if (value != null) {
+				properties.put("hibernate.connection.password", value);
+			}
+			properties.put("hibernate.connection.autocommit", "false");
+		}
+		else {
+			properties.put("hibernate.connection.datasource", dataSource);
+		}
+		properties.put("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
+		
 		Configuration cfg = new Configuration();
 		cfg.setProperties(properties);
 

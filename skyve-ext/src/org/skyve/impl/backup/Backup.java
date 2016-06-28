@@ -27,8 +27,6 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.impl.backup.BackupUtil;
-import org.skyve.impl.backup.Table;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -64,7 +62,7 @@ public class Backup {
 
 		UserType geometryUserType = null; // this is only created when we come across a geometry
 		
-		try (Connection connection = EXT.getPooledJDBCConnection()) {
+		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
 			try (ContentManager cm = EXT.newContentManager()) {
@@ -135,7 +133,7 @@ public class Backup {
 											}
 											else if (attributeType == AttributeType.geometry) {
 												if (geometryUserType == null) {
-													SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DIALECT).newInstance();
+													SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
 													geometryUserType = dialect.getGeometryUserType();
 												}
 												Geometry geometry = (Geometry) geometryUserType.nullSafeGet(resultSet, new String[] {name}, null);

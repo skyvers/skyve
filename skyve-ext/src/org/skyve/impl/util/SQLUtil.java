@@ -7,24 +7,18 @@ import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
 import org.apache.commons.beanutils.DynaBean;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.impl.util.ThreadSafeFactory;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.impl.util.SQLRowSetDynaClass;
 
 public class SQLUtil {
 	public static final String SQL_DATE_ONLY_FORMAT = "yyyy-MM-dd";
@@ -35,7 +29,7 @@ public class SQLUtil {
 	public static final ThreadLocal<Connection> threadLocalConnection = new ThreadLocal<Connection>() {
 		@Override
 		protected synchronized Connection initialValue() throws IllegalStateException {
-			Connection connection = getAPooledConnection();
+			Connection connection = EXT.getDataStoreConnection();
 			set(connection);
 			return connection;
 		}
@@ -43,25 +37,6 @@ public class SQLUtil {
 
 	private SQLUtil() {
 		// no implementation
-	}
-
-	public static Connection getAPooledConnection()
-	throws IllegalStateException {
-		Connection result = null;
-		try {
-			InitialContext ctx = new InitialContext();
-			DataSource ds = (DataSource) ctx.lookup(UtilImpl.DATASOURCE);
-			result = ds.getConnection();
-			result.setAutoCommit(false);
-		}
-		catch (SQLException e) {
-			throw new IllegalStateException("Could not get a database connection", e);
-		}
-		catch (NamingException e) {
-			throw new IllegalStateException("Could not find the JDBC connection pool", e);
-		}
-
-		return result;
 	}
 
 	/**

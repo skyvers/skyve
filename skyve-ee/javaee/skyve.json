@@ -1,0 +1,91 @@
+{
+	// Trace settings
+	trace: {
+		// XML metadata parsing
+		xml: false, 
+		// HTTP request attributes and parameters
+		http: true,
+		// queries performed
+		query: false, 
+		// MVC command debug
+		command: false,
+		// JSF inner workings
+		faces: false, 
+		// generated SQL statements
+		sql: false, 
+		// content manipulation
+		content: true, 
+		// application security denials
+		security: true, 
+		// bizlet callbacks
+		bizlet: false, 
+		// mutations in domain objects
+		dirty: false},
+	// Content settings
+	content: {
+		// directory path
+		directory: "/Users/mike/_/skyve/skyve-ee/content/", 
+		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
+		gcCron: "0 7 0/1 1/1 * ? *", 
+		// Attachments stored on file system or inline
+		fileStorage: true},
+	// URL settings - various SKYVE URL/URI fragments - useful for linking and mailing
+	url: {
+		// server URL
+		server: "http://localhost:8080", 
+		// web context path
+		context: "/skyve", 
+		// home path
+		home: "/"},
+	// Conversation cache settings
+	conversations: {
+		// Max conversations allowed in memory before being spooled to disk
+		maxInMemory: 1000, 
+		// Number of seconds to wait until evicting a conversation from the cache
+		evictionTimeMinutes: 60},
+	// Datastore definitions
+	dataStores: {
+		// Managed Data data store
+		"skyve": {
+			// JNDI name
+			jndi: "java:/H2Demo", 
+			// Dialect
+			dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect"}},
+	// Hibernate settings
+	hibernate: {
+		// Datastore hibernate uses
+		dataStore: "skyve", 
+		// Issue DDL on startup to synchronise the database schema
+		ddlSync: true, 
+		// Format the SQL statements when logged
+		prettySql: false},
+	// Factory settings
+	factories: {
+		// Skyve persistence class
+		persistenceClass: null, 
+		// Skyve repository class
+		repositoryClass: null,
+		// Skyve content manager class
+		contentManagerClass: null},
+	// SMTP Settings
+	smtp: {
+		// Mail Server URL
+		server: "localhost", 
+		// Mail Server Port
+		port: 25, 
+		// Mail Server User Name
+		uid: null, 
+		// Mail server password
+		pwd: null, 
+		// Sender header value
+		sender: "mailer@skyve.org", 
+		// Set true so emails are never sent, they are logged
+		testBogusSend: false, 
+		// Test Recipient (all emails only sent to this email address)
+		testRecipient: "mike.sands@bizhub.com.au"},
+	// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
+	devMode: true,
+	// Customer Default
+	customer: null,
+	// Password hashing algorithm - usually MD5 (obsolete) or SHA1 etc
+	passwordHashingAlgorithm: "SHA1"}

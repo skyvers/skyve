@@ -26,8 +26,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
-import org.skyve.impl.backup.JoinTable;
-import org.skyve.impl.backup.Table;
+import org.skyve.persistence.DataStore;
 
 final class BackupUtil {
 	private BackupUtil() {
@@ -47,11 +46,11 @@ final class BackupUtil {
 		AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);
-		UtilImpl.DIALECT = databaseDialect;
-		UtilImpl.STANDALONE_DATABASE_JDBC_DRIVER = databaseJdbcDriver;
-		UtilImpl.STANDALONE_DATABASE_CONNECTION_URL = databaseConnectionUrl;
-		UtilImpl.STANDALONE_DATABASE_USERNAME = databaseUsername;
-		UtilImpl.STANDALONE_DATABASE_PASSWORD = databasePassword;
+		UtilImpl.DATA_STORE = new DataStore(databaseJdbcDriver, 
+												databaseConnectionUrl, 
+												databaseUsername, 
+												databasePassword, 
+												databaseDialect);
 		UtilImpl.DDL_SYNC = false;
 		
 		AbstractRepository.set(new LocalDesignRepository());

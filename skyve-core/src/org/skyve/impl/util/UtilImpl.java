@@ -1,11 +1,17 @@
 package org.skyve.impl.util;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.util.SerializationHelper;
@@ -29,7 +35,9 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.JSON;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -42,6 +50,11 @@ public class UtilImpl {
 		// no-op
 	}
 
+	/**
+	 * The raw configuration data from reading the JSON.
+	 */
+	public static Map<String, Object> CONFIGURATION = null;
+	
 	public static boolean XML_TRACE = true;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
@@ -102,12 +115,8 @@ public class UtilImpl {
 	public static int CONVERSATION_EVICTION_TIME_MINUTES = 60;
 
 	// For database
-	public static String DATASOURCE = null;
-	public static String STANDALONE_DATABASE_JDBC_DRIVER = null;
-	public static String STANDALONE_DATABASE_CONNECTION_URL = null;
-	public static String STANDALONE_DATABASE_USERNAME = null;
-	public static String STANDALONE_DATABASE_PASSWORD = null;
-	public static String DIALECT = "MySQL5InnoDBDialect";
+	public static Map<String, DataStore> DATA_STORES = new TreeMap<>();
+	public static DataStore DATA_STORE = null;
 	public static boolean DDL_SYNC = true;
 	
 	// For E-Mail
@@ -146,6 +155,21 @@ public class UtilImpl {
 		return absoluteBasePath;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> readJSONConfig(InputStream inputStream) throws Exception {
+		String json = null;
+		try (Scanner scanner = new Scanner(inputStream)) {
+			json = scanner.useDelimiter("\\Z").next();
+		}
+		// Remove any C-style comments
+		String commentsPattern = "(?s)\\/\\*(?:(\\*(?!\\/))|(?:[^\\*]))*\\*\\/|[^:]\\/\\/[^\\n\\r]*(?=[\\n\\r])";
+		final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
+		final Matcher m = pattern.matcher(json);
+		json = m.replaceAll("");
+		
+		return (Map<String, Object>) JSON.unmarshall(null, json);
+	}
+
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
 		return (T) SerializationHelper.clone(object);
