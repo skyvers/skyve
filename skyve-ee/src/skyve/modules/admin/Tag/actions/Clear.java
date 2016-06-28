@@ -31,6 +31,9 @@ public class Clear implements ServerSideAction<Tag> {
 		persistence.newSQL(deleteSQL.toString()).execute();
 		
 		bean.setNumberTagged(new Integer(0));
+		bean.setNumberLoaded(new Integer(0));
+		bean.setNumberMatched(new Integer(0));
+
 		
 		return new ServerSideActionResult(bean);
 	}

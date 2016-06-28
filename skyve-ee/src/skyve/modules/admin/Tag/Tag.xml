@@ -107,7 +107,7 @@
 			<displayName>Notify when job is complete</displayName>
 		</boolean>
 		<integer name="filterColumn">
-			<displayName>Column</displayName>
+			<displayName>Column (first column is 1))</displayName>
 		</integer>
 		<association type="aggregation" name="actionTag" persistent="false" trackChanges="false">
 			<displayName>Other Tag</displayName>
