@@ -186,8 +186,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		if (dataSource == null) {
 			cfg.setProperty("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
 			cfg.setProperty("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
-			cfg.setProperty("hibernate.connection.username", UtilImpl.DATA_STORE.getUserName());
-			cfg.setProperty("hibernate.connection.password", UtilImpl.DATA_STORE.getPassword());
+			String value = UtilImpl.DATA_STORE.getUserName();
+			if (value != null) {
+				cfg.setProperty("hibernate.connection.username", value);
+			}
+			value = UtilImpl.DATA_STORE.getPassword();
+			if (value != null) {
+				cfg.setProperty("hibernate.connection.password", value);
+			}
 			cfg.setProperty("hibernate.connection.autocommit", "false");
 		}
 		else {
@@ -465,8 +471,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		if (dataSource == null) {
 			properties.put("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
 			properties.put("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
-			properties.put("hibernate.connection.username", UtilImpl.DATA_STORE.getUserName());
-			properties.put("hibernate.connection.password", UtilImpl.DATA_STORE.getPassword());
+			String value = UtilImpl.DATA_STORE.getUserName();
+			if (value != null) {
+				properties.put("hibernate.connection.username", value);
+			}
+			value = UtilImpl.DATA_STORE.getPassword();
+			if (value != null) {
+				properties.put("hibernate.connection.password", value);
+			}
 			properties.put("hibernate.connection.autocommit", "false");
 		}
 		else {

@@ -466,8 +466,14 @@ public class EXT {
 			if (jndiDataSourceName == null) {
 				Class.forName(dataStore.getJdbcDriverClassName());
 				Properties connectionProps = new Properties();
-				connectionProps.put("user", dataStore.getUserName());
-				connectionProps.put("password", dataStore.getPassword());
+				String value = dataStore.getUserName();
+				if (value != null) {
+					connectionProps.put("user", value);
+				}
+				value = dataStore.getPassword();
+				if (value != null) {
+					connectionProps.put("password", value);
+				}
 				result = DriverManager.getConnection(dataStore.getJdbcUrl(), connectionProps);
 			}
 			else {
