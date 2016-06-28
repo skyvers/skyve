@@ -275,8 +275,9 @@ public class POISheetLoader implements DataFileLoader {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Bean beanResult() throws Exception {
+	public <T extends Bean> T  beanResult() throws Exception {
 
 		// assume no values loaded
 		if (document == null) {
@@ -506,19 +507,19 @@ public class POISheetLoader implements DataFileLoader {
 			result = qFind.beanResult();
 		}
 
-		return result;
+		return (T) result;
 	}
 
 	/**
 	 * Returns all the beans loaded from the file
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<Bean> beanResults() throws Exception {
+	public <T extends Bean> List<T>  beanResults() throws Exception {
 
 		while (hasNextData() && !isNoData()) {
 			nextData();
 
-			Util.LOGGER.info(debugData());
 			Bean result = beanResult();
 			if (result != null) {
 				PersistentBean pb = (PersistentBean) result;
@@ -534,7 +535,7 @@ public class POISheetLoader implements DataFileLoader {
 			exception.addWarning(prob);
 		}
 
-		return results;
+		return (List<T>) results;
 	}
 
 	@Override

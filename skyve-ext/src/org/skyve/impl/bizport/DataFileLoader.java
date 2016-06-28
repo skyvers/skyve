@@ -59,7 +59,7 @@ public interface DataFileLoader {
 	 * 
 	 * @return
 	 */
-	public Bean beanResult() throws Exception;
+	public <T extends Bean> T  beanResult() throws Exception;
 
 	/**
 	 * Returns the beans created as a result of the load
@@ -67,7 +67,7 @@ public interface DataFileLoader {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Bean>  beanResults() throws Exception;
+	public <T extends Bean> List<T>  beanResults() throws Exception;
 	
 	/**
 	 * Returns the BizPortException which contains the warnings and exceptions encountered
