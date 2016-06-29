@@ -18,7 +18,6 @@ import org.skyve.CORE;
 import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -36,8 +35,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 
 public class POISheetLoader implements DataFileLoader {
 
@@ -102,6 +101,7 @@ public class POISheetLoader implements DataFileLoader {
 
 		workbook = WorkbookFactory.create(fileInputStream);
 		sheet = workbook.getSheetAt(sheetIndex);
+		what = new StringBuilder();
 
 		// set values
 		this.pers = CORE.getPersistence();
@@ -277,7 +277,7 @@ public class POISheetLoader implements DataFileLoader {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Bean> T  beanResult() throws Exception {
+	public <T extends Bean> T beanResult() throws Exception {
 
 		// assume no values loaded
 		if (document == null) {
@@ -289,7 +289,7 @@ public class POISheetLoader implements DataFileLoader {
 
 		Object operand = null;
 		Bean result = null;
-		if(LoaderActivityType.CREATE_FIND.equals(activityType)){
+		if (LoaderActivityType.CREATE_FIND.equals(activityType)) {
 			result = document.newInstance(user);
 		}
 
@@ -475,27 +475,33 @@ public class POISheetLoader implements DataFileLoader {
 					// show raw string value
 					String operandRawValue = getStringValueFromCell(colIndex, true);
 					if (operandRawValue == null) {
-						what.append(" A value was expected for '");
-						what.append(attr.getDisplayName());
-						what.append("' but no value was found.");
+						what.append(" A value was expected for ");
+						if (attr != null) {
+							what.append("'").append(attr.getDisplayName()).append("'");
+						} else {
+							what.append("the column");
+						}
+						what.append(" but no value was found.");
+						Problem problem = new Problem(what.toString(), getWhere(colIndex).toString());
+						exception.addWarning(problem);
 					} else {
 						// last remaining option - if no previous issue has been identified
 						// the default is bad type
-						if(attr == null){
+						if (attr == null) {
 							what.append(" The value '");
 							what.append(operandRawValue);
 							what.append("' is invalid or the wrong type.");
-							
-						} else if (what.length() == 0 ) {
+
+						} else if (what.length() == 0) {
 							what.append(" The value '");
 							what.append(operandRawValue);
 							what.append("' found for '");
 							what.append(attr.getDisplayName());
 							what.append("' is invalid or the wrong type.");
 						}
+						Problem problem = new Problem(what.toString(), getWhere(colIndex).toString());
+						exception.addError(problem);
 					}
-					Problem problem = new Problem(what.toString(), getWhere(colIndex).toString());
-					exception.addError(problem);
 				}
 			}
 
@@ -515,17 +521,18 @@ public class POISheetLoader implements DataFileLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T extends Bean> List<T>  beanResults() throws Exception {
+	public <T extends Bean> List<T> beanResults() throws Exception {
 
-		while (hasNextData() && !isNoData()) {
+		while (hasNextData()) {
 			nextData();
-
+			if (isNoData()) {
+				break;
+			}
 			Bean result = beanResult();
 			if (result != null) {
-				PersistentBean pb = (PersistentBean) result;
-				Util.LOGGER.info("RESULT " + pb.getBizKey());
 				results.add(result);
 			}
+
 		}
 
 		// add a warning if nothing was found
@@ -576,7 +583,19 @@ public class POISheetLoader implements DataFileLoader {
 
 	@Override
 	public boolean isNoData() throws Exception {
-		return row == null;
+		if (row == null) {
+			return true;
+		}
+		boolean foundNonEmpty = false;
+		for(DataFileField field: fields){
+			String val = getStringFieldValue(field.getIndex(), true);
+			if (val != null && val.trim().length() > 0) {
+				foundNonEmpty = true;
+				break;
+			}
+		}
+
+		return !foundNonEmpty;
 	}
 
 	@Override
