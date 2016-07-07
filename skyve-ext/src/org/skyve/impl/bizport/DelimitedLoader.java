@@ -8,6 +8,7 @@ import java.util.logging.Level;
 
 import org.skyve.bizport.BizPortException;
 import org.skyve.util.Util;
+import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.ICsvMapReader;
@@ -34,7 +35,11 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		mapReader = new CsvMapReader(new InputStreamReader(fileInputStream), preference);
 
 		header = mapReader.getHeader(true);
-		processors = new CellProcessor[0];
+		processors = new CellProcessor[bindings.length];
+		for(int cntr = 0; cntr < bindings.length; ++cntr) {
+			processors[cntr] = new Optional();
+		}
+		
 		setDataIndex(0);
 		this.dateFormat = dateFormat;
 	}
@@ -55,7 +60,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		String hdr = header[fieldIndex];
 		if(getValueMap().containsKey(hdr)) {
 			String value = (String) getValueMap().get(hdr);
-			if(blankAsNull && "".equals(value.trim())) {
+			if(blankAsNull && null != value && "".equals(value.trim())) {
 				return null;
 			} 
 			

@@ -57,7 +57,7 @@ public abstract class AbstractDataFileLoader implements DataFileLoader {
 			String moduleName, String documentName) throws Exception {
 		this.activityType = activityType;
 		this.exception = exception;
-
+		
 		// set values
 		this.pers = CORE.getPersistence();
 		this.user = pers.getUser();
@@ -69,7 +69,7 @@ public abstract class AbstractDataFileLoader implements DataFileLoader {
 	public void setFieldIndex(int fieldIndex) {
 		colIndex = fieldIndex;
 	}
-
+	
 	@Override
 	public int getDataIndex() {
 		return rowIndex;
@@ -83,11 +83,11 @@ public abstract class AbstractDataFileLoader implements DataFileLoader {
 	protected void setValueMap(Map<String, Object> valueMap) {
 		this.valueMap = valueMap;
 	}
-
+	
 	protected Map<String, Object> getValueMap() {
 		return valueMap;
 	}
-
+	
 	@Override
 	public void setCreateMissingAssocations(boolean create) {
 		this.createMissingAssociations = create;
@@ -257,10 +257,10 @@ public abstract class AbstractDataFileLoader implements DataFileLoader {
 	public <T extends Bean> T beanResult() throws Exception {
 		nextData();
 
-		if (null == valueMap) {
+		if(null == valueMap) {
 			return null;
 		}
-
+		
 		// assume no values loaded
 		if (document == null) {
 			throw new Exception("The loader has not been initialised correctly - check that you set the document context for the loader.");
@@ -275,7 +275,7 @@ public abstract class AbstractDataFileLoader implements DataFileLoader {
 			result = document.newInstance(user);
 		}
 		StringBuilder what = null;
-
+		
 		for (DataFileField field : fields) {
 
 			colIndex = field.getIndex();

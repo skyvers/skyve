@@ -308,7 +308,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 						default:
 							// check for compound binding
 							if (binding.indexOf('.') > 0) {
-								super.lookupBean(result, field, loadValue, what);
+								lookupBean(result, field, loadValue, what);
 								break;
 							} else if (LoadAction.SET_VALUE.equals(field.getLoadAction())) {
 								Binder.set(result, binding, loadValue);
