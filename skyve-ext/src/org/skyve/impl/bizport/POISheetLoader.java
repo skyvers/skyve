@@ -4,7 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -26,51 +25,21 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
 
-public class POISheetLoader implements DataFileLoader {
+public class POISheetLoader extends AbstractDataFileLoader {
 
-	private LoaderActivityType activityType;
-	private boolean createMissingAssociations;
-	private boolean treatAllEmptyNumericAsZero;
-	private int rowIndex;
-	private BizPortException exception;
 	private StringBuilder what;
-	private Map<String, Bean> createdBeans;
 
 	private Workbook workbook;
 	private Sheet sheet;
-
-	private Persistence pers;
-	private User user;
-	private Customer customer;
-	private String moduleName;
-	private String documentName;
-	private Module module;
-	private Document document;
-
-	private List<DataFileField> fields; // maintain order
-
 	private Row row;
-	private int colIndex;
-	private List<Bean> results;
 
 	private boolean rowLoaded = false;
-
-	// generic constructor
-	public POISheetLoader() {
-
-	}
 
 	@Override
 	public int getDataIndex() {
@@ -94,8 +63,9 @@ public class POISheetLoader implements DataFileLoader {
 	public POISheetLoader(InputStream fileInputStream, int sheetIndex, String moduleName, String documentName, BizPortException exception)
 			throws Exception {
 
+		super(LoaderActivityType.CREATE_FIND, exception, moduleName, documentName);
+		
 		// initialise
-		this.activityType = LoaderActivityType.CREATE_FIND;
 		this.exception = exception;
 		this.createdBeans = new TreeMap<>();
 
@@ -150,128 +120,6 @@ public class POISheetLoader implements DataFileLoader {
 			}
 			df.setIndex(col++);
 			fields.add(df);
-		}
-	}
-
-	@Override
-	public void setCreateMissingAssocations(boolean create) {
-		this.createMissingAssociations = create;
-	}
-
-	@Override
-	public void setEmptyAsZero(boolean emptyAsZero) {
-		this.treatAllEmptyNumericAsZero = emptyAsZero;
-	}
-
-	@Override
-	public void setException(BizPortException exception) {
-		this.setException(exception);
-	}
-
-	/**
-	 * Sets references in the bean if the binding is a reference type attribute
-	 * 
-	 * @param contextBean
-	 * @param field
-	 * @param loadValue
-	 * @return
-	 * @throws Exception
-	 */
-	private void lookupBean(Bean contextBean, DataFileField field, Object loadValue) throws Exception {
-
-		if (loadValue != null) {
-
-			// default action - look for equals value if attribute document is different to starting
-			// document if a compound binding is supplied, we need to
-			// find if there is any top-level association which matches
-			// e.g. if customer.company.contact.name is supplied,
-			// we need to find if there is a customer with company.contact.name that matches
-			String binding = field.getBinding();
-
-			// the rest - e.g company.contact.name
-			String restBinding = binding;
-			String searchBinding = binding;
-			if (binding.indexOf('.') > 0) {
-				restBinding = binding.substring(binding.indexOf('.') + 1);
-
-				// the bit to search - e.g. we are searching company
-				searchBinding = binding.substring(0, binding.indexOf('.'));
-			}
-
-			// if restBinding has more than 1 dot, get up to the second dot
-			// e.g. - want the binding for customer.company
-			String firstLevelBinding = binding;
-			if (restBinding.lastIndexOf('.') > restBinding.indexOf('.')) {
-				firstLevelBinding = binding.substring(0, binding.indexOf('.', searchBinding.length() + 1));
-			}
-
-			// e.g. document
-			TargetMetaData drivingMD = Binder.getMetaDataForBinding(customer, module, document, firstLevelBinding);
-			Document drivingDoc = drivingMD.getDocument();
-			DocumentQuery lookup = pers.newDocumentQuery(drivingDoc.getOwningModuleName(), drivingDoc.getName());
-			switch (field.getLoadAction()) {
-			case LOOKUP_EQUALS:
-			case CONFIRM_VALUE:
-				lookup.getFilter().addEquals(restBinding, loadValue);
-				break;
-			case LOOKUP_LIKE:
-				lookup.getFilter().addLike(restBinding, (String) loadValue);
-				break;
-			case LOOKUP_CONTAINS:
-				lookup.getFilter().addLike(restBinding, "%" + (String) loadValue + "%");
-				break;
-			default:
-				break;
-			}
-
-			Bean foundBean = lookup.beanResult();
-			if (foundBean != null) {
-				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
-					// check if the found bean matches the bean we have already found
-					Object resultValue = Binder.get(contextBean, searchBinding);
-					if (!foundBean.equals(resultValue)) {
-						// throw an error
-						what.append("The value '").append(loadValue).append("'");
-						what.append(" doesn't match the existing value of '").append(resultValue).append("'.");
-
-						throw new Exception(what.toString());
-					}
-				}
-			} else if (LoaderActivityType.CREATE_ALL.equals(activityType) || createMissingAssociations) {
-				// first check the creationCache to establish if this bean has already been created
-				StringBuilder mapReference = new StringBuilder(128);
-				mapReference.append(binding).append(',').append((String) loadValue);
-
-				// check cache
-				boolean foundInCache = false;
-				if (createdBeans != null) {
-					if (createdBeans.containsKey(mapReference.toString())) {
-						Bean previouslyCreatedBean = createdBeans.get(mapReference.toString());
-						if (previouslyCreatedBean != null) {
-
-							// reuse the same bean
-							Binder.set(contextBean, searchBinding, previouslyCreatedBean);
-							foundInCache = true;
-						}
-					}
-				}
-
-				// Binder populateProperty creates intermediate beans as required
-				if (!foundInCache) {
-					Binder.populateProperty(user, contextBean, binding, loadValue, false);
-					if (createdBeans == null) {
-						createdBeans = new TreeMap<>();
-					}
-					createdBeans.put(mapReference.toString(), (Bean) Binder.get(contextBean, searchBinding));
-				}
-			} else {
-				// throw an error
-				what.append("The ").append(drivingDoc.getSingularAlias());
-				what.append(" '").append(loadValue.toString()).append("'");
-				what.append(" doesn't match any existing ").append(drivingDoc.getPluralAlias()).append(".");
-
-				throw new Exception(what.toString());
-			}
 		}
 	}
 
@@ -460,7 +308,7 @@ public class POISheetLoader implements DataFileLoader {
 						default:
 							// check for compound binding
 							if (binding.indexOf('.') > 0) {
-								lookupBean(result, field, loadValue);
+								super.lookupBean(result, field, loadValue, what);
 								break;
 							} else if (LoadAction.SET_VALUE.equals(field.getLoadAction())) {
 								Binder.set(result, binding, loadValue);
@@ -546,11 +394,6 @@ public class POISheetLoader implements DataFileLoader {
 	}
 
 	@Override
-	public BizPortException getException() {
-		return exception;
-	}
-
-	@Override
 	public String getStringFieldValue(int fieldIndex, boolean blankAsNull) throws Exception {
 		return getStringValueFromCell(fieldIndex, blankAsNull);
 	}
@@ -596,11 +439,6 @@ public class POISheetLoader implements DataFileLoader {
 		}
 
 		return !foundNonEmpty;
-	}
-
-	@Override
-	public void setFieldIndex(int fieldIndex) {
-		colIndex = fieldIndex;
 	}
 
 	@Override
@@ -739,24 +577,4 @@ public class POISheetLoader implements DataFileLoader {
 		}
 		return sb.reverse().toString();
 	}
-
-	@Override
-	public void addField(DataFileField dff) throws Exception {
-		fields.add(dff);
-	}
-
-	@Override
-	public void setDocumentContext(String moduleName, String documentName) throws Exception {
-		this.moduleName = moduleName;
-		module = customer.getModule(moduleName);
-		this.documentName = documentName;
-		document = module.getDocument(customer, documentName);
-	}
-
-	@Override
-	public void setActivityType(LoaderActivityType activityType) {
-		this.activityType = activityType;
-
-	}
-
 }

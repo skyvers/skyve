@@ -125,6 +125,14 @@ public interface DataFileLoader {
 	 * @throws Exception
 	 */
 	public void addField(DataFileField dff) throws Exception;
+	
+	/**
+	 * Add a field definitions to the loader, based on the bindings provided
+	 * 
+	 * @param dff
+	 * @throws Exception
+	 */
+	public void addFields(String... bindings) throws Exception;
 
 	/**
 	 * Returns the current dataIndex
