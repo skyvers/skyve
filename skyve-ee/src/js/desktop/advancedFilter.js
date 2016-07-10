@@ -82,7 +82,7 @@ isc.AdvancedFilter.addMethods({
 		if (this.toggleButton.selected) {
 			// copy simple criteria to the advanced criteria object
 // CRITERIA CONVERSION DOESN'T WORK TERRIBLY WELL - it leaves the filter builder in an inconsistent state
-//			var newCriteria = DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria(true));
+//			var newCriteria = isc.DataSource.convertCriteria(this.filterableComponent.grid.getFilterEditorCriteria(true));
 //			this._filterBuilder.setCriteria(newCriteria);
 
 			this.filterableComponent.grid.setShowFilterEditor(false);

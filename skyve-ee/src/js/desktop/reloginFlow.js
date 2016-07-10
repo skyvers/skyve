@@ -23,7 +23,7 @@ isc.RPCManager.addClassMethods({
 					colSpan: 2,
 					visible: false}
             ];
-	    	if (! BizUtil.customer) {
+	    	if (! isc.BizUtil.customer) {
 	    		fields.add({name: "customer", 
 			                	title: "Customer", 
 			                	titleOrientation: "left",
@@ -98,7 +98,7 @@ isc.RPCManager.addClassMethods({
 	    // it such that background RPCs occurring during our login attempt don't clear out the form
 	   if (! (this.loginWindow.isVisible() && this.loginWindow.isDrawn())) {
 	        this.loginForm.clearValues(); 
-        	this.loginForm.delayCall("focusInItem", BizUtil.customer ? ["username"] : ["customer"]);
+        	this.loginForm.delayCall("focusInItem", isc.BizUtil.customer ? ["username"] : ["customer"]);
 	    }
 	
 	    this.loginWindow.show();
@@ -126,7 +126,7 @@ isc.defineClass("LoginWindow", "Window").addProperties({
 	
 		        // the actual credentials, from the form
 		        params : {
-		            j_username: (BizUtil.customer ? BizUtil.customer : this.loginForm.getValue("customer")) + 
+		            j_username: (isc.BizUtil.customer ? isc.BizUtil.customer : this.loginForm.getValue("customer")) + 
 	    	        				"/" + this.loginForm.getValue("username"),
 					j_password: this.loginForm.getValue("password")
 	        	},
@@ -153,6 +153,6 @@ isc.defineClass("LoginWindow", "Window").addProperties({
 	    } else if (status == isc.RPCResponse.STATUS_MAX_LOGIN_ATTEMPTS_EXCEEDED) {
 	        isc.warn("Max login attempts exceeded.");
 	    }
-	    this.loginForm.focusInItem(BizUtil.customer ? "username" : "customer");
+	    this.loginForm.focusInItem(isc.BizUtil.customer ? "username" : "customer");
 	}
 });

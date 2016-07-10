@@ -1,5 +1,5 @@
 isc.ClassFactory.defineClass("BizGrid", "VLayout");
-BizGrid.addProperties({
+isc.BizGrid.addProperties({
 	// the title
 	title: null,
 
@@ -38,7 +38,7 @@ BizGrid.addProperties({
 	canRemove: true
 });
 
-BizGrid.addMethods({
+isc.BizGrid.addMethods({
 	initWidget : function () {
         this.Super("initWidget", arguments);
 		var me = this;
@@ -87,10 +87,10 @@ BizGrid.addMethods({
 			}
 		};
 
-		me.deleteSelectionButton = BizUtil.createImageButton(me.deleteSelectionItem.icon, 
-																true,
-																"<b>Delete/Remove</b> selected.",
-																me.deleteSelectionItem.click);
+		me.deleteSelectionButton = isc.BizUtil.createImageButton(me.deleteSelectionItem.icon, 
+																	true,
+																	"<b>Delete/Remove</b> selected.",
+																	me.deleteSelectionItem.click);
 		me.deleteSelectionButton.setDisabled(true);
 		
 		me.clearSelectionItem = {
@@ -111,7 +111,7 @@ BizGrid.addMethods({
 });
 
 isc.ClassFactory.defineClass("BizListGrid", "BizGrid");
-BizListGrid.addProperties({
+isc.BizListGrid.addProperties({
 	// the type of aggregate function selected
 	summaryType: '',
 	
@@ -172,7 +172,7 @@ BizListGrid.addProperties({
 // OR
 //
 // For ListGrid functionality
-// "params" - an array of binding names, operators and string expressions to evaluate with "EditView.toDisplay()" when a view is populated.
+// "params" - an array of binding names, operators and string expressions to evaluate with "isc.EditView.toDisplay()" when a view is populated.
 //                These parameter evaluations are sent down as filter criteria to the server
 // AND
 // "_view" - the view that owns this BizListGrid
@@ -180,7 +180,7 @@ BizListGrid.addProperties({
 // "contConv" - true = use the owning view's conversation for updates, false = start a new conversation when editing
 // AND optionally
 // bizAdded, bizEdited, bizRemoved event callback functions
-BizListGrid.addMethods({
+isc.BizListGrid.addMethods({
 	initWidget: function(config) { // has 4 properties - see above
 		this.Super("initWidget", arguments);
 		var me = this;
@@ -266,7 +266,7 @@ BizListGrid.addMethods({
 			// if params are defined, ensure they are added to the filter criteria
 			// NB only listgrid's have config.params (and thus me._view is defined)
 			if (config && config.params) {
-				result = BizUtil.completeFilterCriteria(result, config.params, me._view);
+				result = isc.BizUtil.completeFilterCriteria(result, config.params, me._view);
 			}
 			
 			return result;
@@ -301,9 +301,9 @@ BizListGrid.addMethods({
 
 					var newParams = {};
 					if (config.params) {
-						BizUtil.addFilterRequestParams(newParams, 
-														config.params,
-														me._view);
+						isc.BizUtil.addFilterRequestParams(newParams, 
+															config.params,
+															me._view);
 					}
 					me.zoom(true, contConv, newParams);
 				}
@@ -393,24 +393,24 @@ BizListGrid.addMethods({
 		};
 
 		// toolbar buttons
-		me._newButton = BizUtil.createImageButton(newItem.icon, 
-													true, 
-													"<b>New</b> record.",
-													newItem.click);
-		me._zoomButton = BizUtil.createImageButton(me._zoomItem.icon, 
-													true, 
-													"<b>Zoom</b> into record.",
-													me._zoomItem.click);
+		me._newButton = isc.BizUtil.createImageButton(newItem.icon, 
+														true, 
+														"<b>New</b> record.",
+														newItem.click);
+		me._zoomButton = isc.BizUtil.createImageButton(me._zoomItem.icon, 
+														true, 
+														"<b>Zoom</b> into record.",
+														me._zoomItem.click);
 		me._zoomButton.setDisabled(true);
-		me._editButton = BizUtil.createImageButton(editItem.icon, 
-													true,
-													"<b>Edit</b> a record inline.",
-													editItem.click);
+		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
+														true,
+														"<b>Edit</b> a record inline.",
+														editItem.click);
 		me._editButton.setDisabled(true);
-		me._pickButton = BizUtil.createImageButton(pickItem.icon, 
-													true,
-													"<b>Pick</b> this record.",
-													pickItem.click);
+		me._pickButton = isc.BizUtil.createImageButton(pickItem.icon, 
+														true,
+														"<b>Pick</b> this record.",
+														pickItem.click);
 		me._pickButton.setDisabled(true);
 
 		var clearFilterItem = {
@@ -448,17 +448,17 @@ BizListGrid.addMethods({
 												(fieldState[i].visible == null) ||
 												(fieldState[i].visible))) {
 											selectedFields.add({name: fieldName,
-																		title: field.title,
-																		line: 1,
-																		width: fieldState[i].width,
-																		align: align});
+																	title: field.title,
+																	line: 1,
+																	width: fieldState[i].width,
+																	align: align});
 										}
 										else {
 											unselectedFields.add({name: fieldName,
-																		title: field.title,
-																		line: 1,
-																		width: 100,
-																		align: align});
+																	title: field.title,
+																	line: 1,
+																	width: 100,
+																	align: align});
 										}
 									}
 								}
@@ -466,11 +466,11 @@ BizListGrid.addMethods({
 								// Put the filter parameters into this call also
 								var allCriteria = getAllCriteria();
 
-								ReportDialog.popupExport(me._dataSource.ID,
-															me._view ? me._view.gather(false)._c : null,
-															allCriteria,
-															unselectedFields, 
-															selectedFields);
+								isc.ReportDialog.popupExport(me._dataSource.ID,
+																me._view ? me._view.gather(false)._c : null,
+																allCriteria,
+																unselectedFields, 
+																selectedFields);
 							}
         };
 /*
@@ -478,7 +478,7 @@ BizListGrid.addMethods({
         	//enabled: false, 
         	icon: "../images/icons/print.png",
         	click: function() {
-				isc.Canvas.showPrintPreview(ListView.contents)
+				isc.Canvas.showPrintPreview(isc.ListView.contents)
         	}
         };
 */
@@ -540,13 +540,13 @@ BizListGrid.addMethods({
 		    	if (me.snapId) {
 		    		params.i = me.snapId;
 		    	} 
-		    	RPCManager.sendRequest({
+		    	isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
 					useSimpleHttp: true,
 					httpMethod: 'POST',
 					params: params,
-					actionURL: BizUtil.URL_PREFIX + 'smartsnap',
+					actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
 					callback: function(rpcResponse, data, rpcRequest) {
 						snapMenu.setData(data);
 					}
@@ -561,7 +561,7 @@ BizListGrid.addMethods({
 				'Enter the new snapshot name', 
 				function(value) {
 					if (value) {
-						RPCManager.sendRequest({
+						isc.RPCManager.sendRequest({
 							showPrompt: true,
 							evalResult: true,
 							useSimpleHttp: true,
@@ -577,7 +577,7 @@ BizListGrid.addMethods({
 												sortState: me.grid.getSortState(),
 												groupState: me.grid.getGroupState(),
 												summaryType: me.summaryType}},
-							actionURL: BizUtil.URL_PREFIX + 'smartsnap',
+							actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
 							callback: function(rpcResponse, data, rpcRequest) {
 								me.snapId = data.bizId;
 								snapMenuButton.setTitle(value);
@@ -630,7 +630,7 @@ BizListGrid.addMethods({
 		
 		// called from server
 		snapMenuButton.updateSnap = function(snapId) {
-			RPCManager.sendRequest({
+			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
 				useSimpleHttp: true,
@@ -645,7 +645,7 @@ BizListGrid.addMethods({
 									sortState: me.grid.getSortState(),
 									groupState: me.grid.getGroupState(),
 									summaryType: me.summaryType}},
-				actionURL: BizUtil.URL_PREFIX + 'smartsnap'
+				actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap'
 			});
 		};
 
@@ -654,13 +654,13 @@ BizListGrid.addMethods({
 			isc.ask('Do you want to delete this snapshot?',
 						function(value) {
 							if (value) {
-								RPCManager.sendRequest({
+								isc.RPCManager.sendRequest({
 									showPrompt: true,
 									evalResult: true,
 									useSimpleHttp: true,
 									httpMethod: 'POST',
 									params: {a: 'D', i: snapId},
-									actionURL: BizUtil.URL_PREFIX + 'smartsnap',
+									actionURL: isc.BizUtil.URL_PREFIX + 'smartsnap',
 									callback: function(rpcResponse, data, rpcRequest) {
 										snapMenuButton.setSnap(null, 'No Snapshot', null);
 									}
@@ -692,13 +692,13 @@ BizListGrid.addMethods({
 		    	if (me.tagId) {
 		    		params.t = me.tagId;
 		    	} 
-		    	RPCManager.sendRequest({
+		    	isc.RPCManager.sendRequest({
 					showPrompt: false,
 					evalResult: true,
 					useSimpleHttp: true,
 					httpMethod: 'POST',
 					params: params,
-					actionURL: BizUtil.URL_PREFIX + 'smarttag',
+					actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
 					callback: function(rpcResponse, data, rpcRequest) {
 						tagsMenu.setData(data);
 					}
@@ -712,13 +712,13 @@ BizListGrid.addMethods({
 				'Enter the new tag name', 
 				function(value) {
 					if (value) {
-						RPCManager.sendRequest({
+						isc.RPCManager.sendRequest({
 							showPrompt: true,
 							evalResult: true,
 							useSimpleHttp: true,
 							httpMethod: 'POST',
 							params: {a: 'N', n: value, ID: tagsMenuButton.ID},
-							actionURL: BizUtil.URL_PREFIX + 'smarttag',
+							actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
 							callback: function(rpcResponse, data, rpcRequest) {
 								me.tagId = data.bizId;
 								tagsMenuButton.setTitle(value);
@@ -802,13 +802,13 @@ BizListGrid.addMethods({
 					params._c = me._view.gather(false)._c;
 				}
 			}
-			RPCManager.sendRequest({
+			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
 				useSimpleHttp: true,
 				httpMethod: 'POST',
 				params: params,
-				actionURL: BizUtil.URL_PREFIX + 'smarttag',
+				actionURL: isc.BizUtil.URL_PREFIX + 'smarttag',
 				callback: function(rpcResponse, data, rpcRequest) {
 					if (action == 'D') {
 						tagsMenuButton.setTag(null, 'No Tag');
@@ -835,21 +835,21 @@ BizListGrid.addMethods({
 			toolStripMembers.add("separator");
 		}
 		if (me.showDeselect) {
-			toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
-															false,
-															"<b>Deselect</b> all.",
-															me.clearSelectionItem.click));
+			toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																false,
+																"<b>Deselect</b> all.",
+																me.clearSelectionItem.click));
 		}
 		if (me.showFilter) {
-			toolStripMembers.add(BizUtil.createImageButton(clearFilterItem.icon,
-															false,
-															"<b>Clear filter</b> criteria.",
-															clearFilterItem.click));
+			toolStripMembers.add(isc.BizUtil.createImageButton(clearFilterItem.icon,
+																false,
+																"<b>Clear filter</b> criteria.",
+																clearFilterItem.click));
 		}
-		toolStripMembers.add(BizUtil.createImageButton(refreshItem.icon,
-														false,
-														"<b>Refresh</b> table data.",
-														refreshItem.click));
+		toolStripMembers.add(isc.BizUtil.createImageButton(refreshItem.icon,
+															false,
+															"<b>Refresh</b> table data.",
+															refreshItem.click));
 		if (me.showFilter) {
 			toolStripMembers.addList([
       			"separator",
@@ -860,10 +860,10 @@ BizListGrid.addMethods({
 			if (me.showExport) {
 				toolStripMembers.addList([
 	                "separator",
-	                BizUtil.createImageButton(exportItem.icon,
-												false,
-												"<b>Export</b> table data.",
-												exportItem.click)
+	                isc.BizUtil.createImageButton(exportItem.icon,
+													false,
+													"<b>Export</b> table data.",
+													exportItem.click)
 				]);
 			}
 			if (me.showSnap) {
@@ -1107,7 +1107,7 @@ BizListGrid.addMethods({
 				// NB config.params is only defined for listgrid's so me._view is defined in this case
 				// NB result could be an advanced criteria after this call whereas criteria could be a simple criteria still
 				if (config && config.params) {
-					result = BizUtil.completeFilterCriteria(editorCriteria, config.params, me._view);
+					result = isc.BizUtil.completeFilterCriteria(editorCriteria, config.params, me._view);
 				}
 				this.Super("filterData", [result, callback, requestProperties]);
 
@@ -1324,7 +1324,7 @@ BizListGrid.addMethods({
 		// switch off any snapshot selected before
 		me._clearSnap();
 
-		me._dataSource = DataSource.get(ID);
+		me._dataSource = isc.DataSource.get(ID);
 
 		me.canCreate = me._dataSource.canCreate;
 		me.canUpdate = me._dataSource.canUpdate;
@@ -1520,7 +1520,7 @@ BizListGrid.addMethods({
 		}
 		
 		var gridRect = me.grid.body.getPageRect();
-		BizUtil.getEditView(module, 
+		isc.BizUtil.getEditView(module, 
 								document,
 								function(view) { // the view
 									if (me._view) { // data grid or embedded list grid
@@ -1559,7 +1559,7 @@ BizListGrid.addMethods({
 	
 	_zoom: function(zoomToNew, view, newParams, bizId, _c, gridRect) {
 		if (zoomToNew) {
-			WindowStack.popup(gridRect, "New", true, [view]);
+			isc.WindowStack.popup(gridRect, "New", true, [view]);
 			view.newInstance(newParams, null, _c);
 		}
 		else {
@@ -1567,7 +1567,7 @@ BizListGrid.addMethods({
 	                		this.grid.body.getRowPageTop(this._eventRowNum),
 	                		gridRect[2],
 	                		this.grid.body.getRowSize(this._eventRowNum)];
-			WindowStack.popup(rowRect, "Edit", true, [view]);
+			isc.WindowStack.popup(rowRect, "Edit", true, [view]);
 			view.editInstance(bizId, null, _c);
 		}
 	},
@@ -1582,7 +1582,7 @@ BizListGrid.addMethods({
 											this._eventRecord.bizId);
 		}
 		
-		WindowStack.popoff(false); // remove the pick popup - no rerender of the parent edit view
+		isc.WindowStack.popoff(false); // remove the pick popup - no rerender of the parent edit view
 		
 		if (this._eventRecord) {
 			// only call changed for server if it is defined
@@ -1595,7 +1595,7 @@ BizListGrid.addMethods({
 });
 
 isc.ClassFactory.defineClass("BizDataGrid", "BizGrid");
-BizDataGrid.addProperties({
+isc.BizDataGrid.addProperties({
 	// Buttons that are enabled disabled on grid row selection
 	_newButton: null,
 	_zoomButton: null,
@@ -1617,7 +1617,7 @@ BizDataGrid.addProperties({
 /*
  * inline: true to add and edit records inline, false to add and edit records in edit view.
  */
-BizDataGrid.addMethods({
+isc.BizDataGrid.addMethods({
 	initWidget : function (config) {
         this.Super("initWidget", arguments);
 		var me = this;
@@ -1660,19 +1660,19 @@ BizDataGrid.addMethods({
 			}
 		};
 
-		me._newButton = BizUtil.createImageButton(newItem.icon, 
-													true, 
-													"<b>New</b> record.",
-													newItem.click);
-		me._zoomButton = BizUtil.createImageButton(zoomItem.icon, 
-													true, 
-													"<b>Zoom</b> into record.",
-													zoomItem.click);
+		me._newButton = isc.BizUtil.createImageButton(newItem.icon, 
+														true, 
+														"<b>New</b> record.",
+														newItem.click);
+		me._zoomButton = isc.BizUtil.createImageButton(zoomItem.icon, 
+														true, 
+														"<b>Zoom</b> into record.",
+														zoomItem.click);
 		me._zoomButton.setDisabled(true);
-		me._editButton = BizUtil.createImageButton(editItem.icon, 
-													true,
-													"<b>Edit</b> a record inline.",
-													editItem.click);
+		me._editButton = isc.BizUtil.createImageButton(editItem.icon, 
+														true,
+														"<b>Edit</b> a record inline.",
+														editItem.click);
 		me._editButton.setDisabled(true);
 
 		// the context menu of the BizDataGrid
@@ -1881,10 +1881,10 @@ BizDataGrid.addMethods({
 				if (toolStripMembers.length > 0) {
 					toolStripMembers.add("separator");
 				}
-				toolStripMembers.add(BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																false,
-																"<b>Deselect</b> all.",
-																me.clearSelectionItem.click));
+				toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																	false,
+																	"<b>Deselect</b> all.",
+																	me.clearSelectionItem.click));
 			}
 			if (toolStripMembers.length > 0) {
 				me.addMember(isc.ToolStrip.create({
@@ -1910,7 +1910,7 @@ BizDataGrid.addMethods({
 		var me = this;
 		var mod = (this._eventRecord ? this._eventRecord.bizModule : this._mod);
 		var doc = (this._eventRecord ? this._eventRecord.bizDocument : this._doc);
-		BizUtil.getEditView(mod, 
+		isc.BizUtil.getEditView(mod, 
 								doc,
 								function(view) { // the view
 									// determine the view binding
@@ -1957,14 +1957,14 @@ BizDataGrid.addMethods({
 	
 	_zoom: function(zoomToNew, zoomToBizId, viewBinding, view, _c, gridRect, rowTop, rowHeight) {
 		if (zoomToNew) {
-			WindowStack.popup(gridRect, "New", false, [view]);
+			isc.WindowStack.popup(gridRect, "New", false, [view]);
 		}
 		else {
 			var rowRect = [gridRect[0],
 	                		rowTop,
 	                		gridRect[2],
 	                		rowHeight];
-			WindowStack.popup(rowRect, "Edit", false, [view]);
+			isc.WindowStack.popup(rowRect, "Edit", false, [view]);
 		}
 
 		// apply changes on child form
@@ -1980,13 +1980,13 @@ BizDataGrid.addMethods({
 //		}
 
 //		var me = this;
-//		RPCManager.sendRequest({
+//		isc.RPCManager.sendRequest({
 //			showPrompt: true,
 //			evalResult: true,
 //			useSimpleHttp: true,
 //			httpMethod: 'POST',
 //			params: {_mod: moduleName, _doc: documentName},
-//			actionURL: BizUtil.URL_PREFIX + "smartedit",
+//			actionURL: isc.BizUtil.URL_PREFIX + "smartedit",
 //			callback: function(rpcResponse, data, rpcRequest) {
 //				this.grid.startEditingNew(data);
 //			}

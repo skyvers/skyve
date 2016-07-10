@@ -86,19 +86,19 @@ public class Desktop extends Harness {
 					constructMenu(customer, user, bizModule, uxui, result);
 					listDataSources(customer, user, result);
 	
-					result.append("BizUtil.customer='").append(customer.getName()).append("';");
-					result.append("BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
+					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
+					result.append("isc.BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
 					if (ViewType.list.equals(getViewType())) { // we have a home ref that is a list view
-						result.append("details.showMember(ListView.contents);");
+						result.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
 						Module homeModule = customer.getModule(bizModule);
 						QueryDefinition query = homeModule.getDocumentDefaultQuery(customer, bizDocument);
-						result.append("ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+						result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 					} 
 					else {
-						result.append("BizUtil.getEditView('").append(bizModule).append("','");
+						result.append("isc.BizUtil.getEditView('").append(bizModule).append("','");
 						result.append(bizDocument).append("',function(view){");
-						result.append("details.addMember(view);BizUtil._currentView=view;");
+						result.append("details.addMember(view);isc.BizUtil._currentView=view;");
 						if (bizId == null) {
 						    result.append("view.newInstance();});");
 						}
@@ -125,9 +125,9 @@ public class Desktop extends Harness {
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");
-    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/menu_home.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.popupSearch();\" class=\"dhtmlPageButton\" title=\"Search\"><img src=\"images/menu_search.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showHelp();\" class=\"dhtmlPageButton\" title=\"Help\"><img src=\"images/menu_help.png\"/></a></td>");
+    	result.append("<td width=\"1%\" align=\"right\"><a href=\"javascript:isc.BizUtil.showPortal();\" class=\"dhtmlPageButton\" title=\"Dashboard\"><img src=\"images/menu_home.png\"/></a></td>");
 		result.append("<td width=\"1%\" align=\"right\"><a href=\"loggedOut\" class=\"dhtmlPageButton\" title=\"Sign-out\"><img src=\"images/menu_logout.png\"/></a></td>");
     	result.append("</tr></table>");
     	result.append("</div>");
@@ -278,7 +278,7 @@ public class Desktop extends Harness {
 								String uxui,
 								StringBuilder result)
 	throws IOException, MetaDataException {
-		result.append("BizUtil.init('").append(getHeaderTemplate());
+		result.append("isc.BizUtil.init('").append(getHeaderTemplate());
 		result.append("','../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
 

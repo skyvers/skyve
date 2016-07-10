@@ -96,7 +96,7 @@
 		<script language="javascript" type="text/javascript" src="<%=path%>/desktop/geolocate-min.js?v=<%=UtilImpl.JAVASCRIPT_FILE_VERSION%>"></script>
 		<script type="text/javascript">
 			Map.pick = function() {
-				var opener = window.parent.WindowStack.getOpener();
+				var opener = window.parent.isc.WindowStack.getOpener();
 				<% if (latitudeBinding != null) { %>
 					opener._vm.setValue('<%=latitudeBinding%>', Map.lat);
 				<% } %>
@@ -122,7 +122,7 @@
 					opener._vm.setValue('<%=countryBinding%>', Map.country);
 				<% } %>
 		
-				window.parent.WindowStack.popoff(false);
+				window.parent.isc.WindowStack.popoff(false);
 			};
 		</script>
 	</head>

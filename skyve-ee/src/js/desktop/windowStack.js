@@ -1,6 +1,6 @@
 // Ever decreasing (in size) stack of reuseable modal windows for the application
-ClassFactory.defineClass("WindowStack");
-WindowStack.addClassProperties({
+isc.ClassFactory.defineClass("WindowStack");
+isc.WindowStack.addClassProperties({
 	// the amount to size the window in by
 	_margin: 0,
 	
@@ -17,12 +17,12 @@ WindowStack.addClassProperties({
 						height, // height of window - can specify without width
 						width, // width of window - can specify null as height to only set width
 						closeButtonRefreshes) { // true to refresh opener on close button, or false otherwise
-		WindowStack._margin += 50;
-		var result = WindowStack._unused.pop();
+		isc.WindowStack._margin += 50;
+		var result = isc.WindowStack._unused.pop();
 
 		var sizeSet = width || height;
-		var windowWidth = width? width : (Page.getWidth() - WindowStack._margin);
-		var windowHeight = height? height : (Page.getHeight() - WindowStack._margin);
+		var windowWidth = width ? width : (isc.Page.getWidth() - isc.WindowStack._margin);
+		var windowHeight = height ? height : (isc.Page.getHeight() - isc.WindowStack._margin);
 		if (result) {
 			result.setTitle(title);
 			result.sizeSet = sizeSet;
@@ -32,7 +32,7 @@ WindowStack.addClassProperties({
 			result.setWidth(windowWidth);
 			result.setHeight(windowHeight);
 			result.closeClick = function() {
-				WindowStack.popoff(closeButtonRefreshes ? true : false);
+				isc.WindowStack.popoff(closeButtonRefreshes ? true : false);
 			}
 		}
 		else {
@@ -54,24 +54,24 @@ WindowStack.addClassProperties({
 				height: windowHeight,
 				sizeSet: sizeSet,
 				closeClick: function() {
-					WindowStack.popoff(closeButtonRefreshes ? true : false);
+					isc.WindowStack.popoff(closeButtonRefreshes ? true : false);
 				}
 			});
 		}
 
 		result.setShowCloseButton(showCloseButton);
-		result._fromRect = fromRect; // ? fromRect : [Page.getWidth() / 2 - 5, Page.getHeight() / 2 - 5, 10, 10];
-		WindowStack._stack.push(result);
+		result._fromRect = fromRect; // ? fromRect : [isc.Page.getWidth() / 2 - 5, isc.Page.getHeight() / 2 - 5, 10, 10];
+		isc.WindowStack._stack.push(result);
 		result.show();
-//		WindowStack._animateOpen(result, [(Page.getWidth() - windowWidth) / 2, (Page.getHeight() - windowHeight) / 2, windowWidth, windowHeight]);
+//		isc.WindowStack._animateOpen(result, [(isc.Page.getWidth() - windowWidth) / 2, (isc.Page.getHeight() - windowHeight) / 2, windowWidth, windowHeight]);
 	},
 	
 	popoff: function(rerenderOpener) { // whether to call rerender() on the opener view or no
-		var opener = WindowStack.getOpener();
+		var opener = isc.WindowStack.getOpener();
 
-		var result = WindowStack._stack.pop();
+		var result = isc.WindowStack._stack.pop();
 		if (result) {
-			WindowStack._animateClose(result);
+			isc.WindowStack._animateClose(result);
 			var items = result.items;
 			if (items) {
 				if (CKEDITOR && CKEDITOR.instances._CKEditor) {
@@ -82,18 +82,18 @@ WindowStack.addClassProperties({
 					for (var i = 0, l = items.length; i < l; i++) {
 						var item = items[i];
 						if (item._vm) { // has a values manager - must be an edit view
-							BizUtil.relinquishEditView(item);
+							isc.BizUtil.relinquishEditView(item);
 						}
-						else if (isA.BizListGrid(item)) { // pickList
-							BizUtil.relinquishPickList(item);
+						else if (isc.isA.BizListGrid(item)) { // pickList
+							isc.BizUtil.relinquishPickList(item);
 						}
 					}
 				}
 				result.removeItems(items);
 			}
 	
-			WindowStack._unused.push(result);
-			WindowStack._margin -= 50;
+			isc.WindowStack._unused.push(result);
+			isc.WindowStack._margin -= 50;
 			
 			if (opener) {
 				if (opener.resume) {
@@ -108,18 +108,18 @@ WindowStack.addClassProperties({
 	
 	// get the view in the window that opened the current window
 	getOpener: function() {
-		if (WindowStack._stack.length <= 1) { // opener is harness current view
-			return BizUtil.getCurrentView();
+		if (isc.WindowStack._stack.length <= 1) { // opener is harness current view
+			return isc.BizUtil.getCurrentView();
 		}
-		return WindowStack._stack[WindowStack._stack.length - 2].items[0];
+		return isc.WindowStack._stack[isc.WindowStack._stack.length - 2].items[0];
 	},
 	
 	// called by the browser resize handler - from util2.js
 	resize: function() {
-		var windowWidth = Page.getWidth() - 50;
-		var windowHeight = Page.getHeight() - 50;
-		for (var i = 0; i < WindowStack._stack.length; i++) {
-			var window = WindowStack._stack[i];
+		var windowWidth = isc.Page.getWidth() - 50;
+		var windowHeight = isc.Page.getHeight() - 50;
+		for (var i = 0; i < isc.WindowStack._stack.length; i++) {
+			var window = isc.WindowStack._stack[i];
 			if (window.sizeSet) {} else {
 				window.setWidth(windowWidth);
 				window.setHeight(windowHeight);
@@ -144,18 +144,18 @@ WindowStack.addClassProperties({
 	_animateOpen: function (window, toRect) {
 		if (window._fromRect) {
 			// initialize the wireframe at fromRect
-		    WindowStack._wireframe.setRect(window._fromRect);
-		    WindowStack._wireframe.show();
-		    WindowStack._wireframe.bringToFront();
+		    isc.WindowStack._wireframe.setRect(window._fromRect);
+		    isc.WindowStack._wireframe.show();
+		    isc.WindowStack._wireframe.bringToFront();
 		    // animate the wireframe to the final position/size of the window
-		    WindowStack._wireframe.animateRect(
+		    isc.WindowStack._wireframe.animateRect(
 	    		toRect[0], toRect[1], toRect[2], toRect[3],
 		        // then hide wireframe and show window
 		        function () {
-		        	WindowStack._wireframe.hide(); 
+		        	isc.WindowStack._wireframe.hide(); 
 		            window.show();
 		        },
-		        WindowStack._animateOpenDuration
+		        isc.WindowStack._animateOpenDuration
 		    );
 		}
 		else {
@@ -172,19 +172,19 @@ WindowStack.addClassProperties({
 	        toHeight = window.getVisibleHeight();
 
 	        // initialize the wireframe to the current window rect
-			WindowStack._wireframe.setRect([toLeft, toTop, toWidth, toHeight]);
-			WindowStack._wireframe.show();
-			WindowStack._wireframe.bringToFront();
+			isc.WindowStack._wireframe.setRect([toLeft, toTop, toWidth, toHeight]);
+			isc.WindowStack._wireframe.show();
+			isc.WindowStack._wireframe.bringToFront();
 		}
 		
 		window.hide();
 		
 		if (window._fromRect) {
 			// animate the wireframe to the specified rect
-			WindowStack._wireframe.animateRect(
+			isc.WindowStack._wireframe.animateRect(
 				window._fromRect[0], window._fromRect[1], window._fromRect[2], window._fromRect[3],
-		        "WindowStack._wireframe.hide();",
-		        WindowStack._animateClosedDuration
+		        "isc.WindowStack._wireframe.hide();",
+		        isc.WindowStack._animateClosedDuration
 		    );
 		}
 	}

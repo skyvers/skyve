@@ -32,7 +32,7 @@
 				<h:inputHidden id="_a" value="#{_skyveUpload.action}" />
 				<p:fileUpload fileUploadListener="#{_skyveUpload.handleFileUpload}" 
 								update="problems" 
-								oncomplete="top.WindowStack.getOpener().saveInstance('_PUSH');" />
+								oncomplete="top.isc.WindowStack.getOpener().saveInstance('_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" autoUpdate="true"/>
 			    <p/>
 			    <h:panelGroup id="problems" >

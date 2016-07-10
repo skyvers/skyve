@@ -58,7 +58,7 @@ isc.DateTimeItem.addProperties({
 // Define our type editors here
 
 isc.ClassFactory.defineClass("BizDateItem", "DateItem");
-BizDateItem.addClassMethods({
+isc.BizDateItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Date(value)) {
 			return value;
@@ -146,7 +146,7 @@ BizDateItem.addClassMethods({
 		return eval("value." + format + "()");
 	}
 });
-BizDateItem.addProperties({
+isc.BizDateItem.addProperties({
 	enforceDate: true,
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // don't perform validation on key press
@@ -158,26 +158,26 @@ BizDateItem.addProperties({
    	textFieldProperties: {selectOnFocus: true},
    	showPickerTimeItem: false,
 	inputFormat: function(value) {
-		return BizDateItem.parseInput(value);
+		return isc.BizDateItem.parseInput(value);
 	},
 	displayFormat: 'toDD_MM_YYYY'
 });
-BizDateItem.addMethods({
+isc.BizDateItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Date(value)) {
-			value = BizDateItem.parseInput(value);
+			value = isc.BizDateItem.parseInput(value);
 		}
-		return BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.displayFormat);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizDateItem.parseInput(value);
+			value = isc.BizDateItem.parseInput(value);
 		}
 		
 		return value;
@@ -193,7 +193,7 @@ BizDateItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizDateItem.parseInput(newValue);
+        	newValue = isc.BizDateItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -209,9 +209,9 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MM_YYYY');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY');
 	}//,
-//	validators: [{type: 'custom', errorMessage: "Please enter a date", clientOnly: true, condition: '(value == null) || isA.Date(value)'}]
+//	validators: [{type: 'custom', errorMessage: "Please enter a date", clientOnly: true, condition: '(value == null) || isc.isA.Date(value)'}]
 });
 isc.SimpleType.create({
 	name: "DD_MM_YYYY",
@@ -219,7 +219,7 @@ isc.SimpleType.create({
 });
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_Item", "BizDateItem");
-DD_MMM_YYYY_Item.addProperties({
+isc.DD_MMM_YYYY_Item.addProperties({
 	displayFormat: 'toDD_MMM_YYYY'
 });
 isc.SimpleType.create({
@@ -227,12 +227,12 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDate",
 	editorType: 'DD_MMM_YYYY_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MMM_YYYY');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY');
 	}
 });
 
 isc.ClassFactory.defineClass("BizDateTimeItem", "DateTimeItem");
-BizDateTimeItem.addProperties({
+isc.BizDateTimeItem.addProperties({
 	enforceDate: true,
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // don't perform validation on key press
@@ -245,26 +245,26 @@ BizDateTimeItem.addProperties({
 	showPickerTimeItem: true,
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false},
 	inputFormat: function(value) {
-		return BizDateItem.parseInput(value);
+		return isc.BizDateItem.parseInput(value);
 	},
 	displayFormat: 'toDD_MM_YYYY_HH_MI'
 });
-BizDateTimeItem.addMethods({
+isc.BizDateTimeItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Date(value)) {
-			value = BizDateItem.parseInput(value);
+			value = isc.BizDateItem.parseInput(value);
 		}
-		return BizDateItem.format(value, this.displayFormat);
+		return isc.BizDateItem.format(value, this.displayFormat);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizDateItem.parseInput(value);
+			value = isc.BizDateItem.parseInput(value);
 		}
 		
 		return value;
@@ -280,7 +280,7 @@ BizDateTimeItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizDateItem.parseInput(newValue);
+        	newValue = isc.BizDateItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -296,16 +296,16 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI');
 	}//,
-//	validators: [{type: 'custom', errorMessage: "Please enter a date", clientOnly: true, condition: '(value == null) || isA.Date(value)'}]
+//	validators: [{type: 'custom', errorMessage: "Please enter a date", clientOnly: true, condition: '(value == null) || isc.isA.Date(value)'}]
 });
 isc.SimpleType.create({
 	name: "DD_MM_YYYY_HH_MI",
 	inheritsFrom: "bizDateTime"
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_Item", "BizDateTimeItem");
-DD_MM_YYYY_HH24_MI_Item.addProperties({
+isc.DD_MM_YYYY_HH24_MI_Item.addProperties({
 	displayFormat: 'toDD_MM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -314,12 +314,12 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MM_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI');
 	}
 });
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_Item", "BizDateTimeItem");
-DD_MMM_YYYY_HH_MI_Item.addProperties({
+isc.DD_MMM_YYYY_HH_MI_Item.addProperties({
 	displayFormat: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: false}
 });
@@ -328,11 +328,11 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI');
 	}
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_Item", "BizDateTimeItem");
-DD_MMM_YYYY_HH24_MI_Item.addProperties({
+isc.DD_MMM_YYYY_HH24_MI_Item.addProperties({
 	displayFormat: 'toDD_MMM_YYYY_HH_MI',
 	pickerTimeItemProperties: {showSecondItem: false, use24HourTime: true}
 });
@@ -341,12 +341,12 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI');
 	}
 });
 
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
-DD_MM_YYYY_HH_MI_SS_Item.addProperties({
+isc.DD_MM_YYYY_HH_MI_SS_Item.addProperties({
 	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
@@ -356,11 +356,11 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MM_YYYY_HH_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI_SS');
 	}
 });
 isc.ClassFactory.defineClass("DD_MM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
-DD_MM_YYYY_HH24_MI_SS_Item.addProperties({
+isc.DD_MM_YYYY_HH24_MI_SS_Item.addProperties({
 	displayFormat: 'toDD_MM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
@@ -370,12 +370,12 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MM_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MM_YYYY_HH_MI_SS');
 	}
 });
 
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH_MI_SS_Item", "BizDateTimeItem");
-DD_MMM_YYYY_HH_MI_SS_Item.addProperties({
+isc.DD_MMM_YYYY_HH_MI_SS_Item.addProperties({
 	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: false}
@@ -385,11 +385,11 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI_SS');
 	}
 });
 isc.ClassFactory.defineClass("DD_MMM_YYYY_HH24_MI_SS_Item", "BizDateTimeItem");
-DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
+isc.DD_MMM_YYYY_HH24_MI_SS_Item.addProperties({
 	displayFormat: 'toDD_MMM_YYYY_HH_MI_SS',
    	hint: 'DD MM(M) YY(YY) HH(24):MI(:SS)',
 	pickerTimeItemProperties: {showSecondItem: true, use24HourTime: true}
@@ -399,14 +399,14 @@ isc.SimpleType.create({
 	inheritsFrom: "bizDateTime",
 	editorType: 'DD_MMM_YYYY_HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI_SS');
+		return isc.BizDateItem.format(internalValue, 'toDD_MMM_YYYY_HH_MI_SS');
 	}
 });
 
 /* Override the init method so it does NOT set the time formatter.
  * It seems that the time formatter cannot be set to something else after construction of the time item.
  */
-TimeItem.addMethods({
+isc.TimeItem.addMethods({
 	init: function() {
 //	    if (!this.use24HourTime) {
 //	        this.timeFormatter = "toShortTime"
@@ -416,7 +416,7 @@ TimeItem.addMethods({
 });
 
 isc.ClassFactory.defineClass("BizTimeItem", "TimeItem");
-BizTimeItem.addProperties({
+isc.BizTimeItem.addProperties({
 	useTextField: true,
 	use24HourTime: false,
 	showHint: true,
@@ -426,10 +426,10 @@ BizTimeItem.addProperties({
    	displayFormat: 'toShortTime',
    	timeFormatter: 'toShortTime'
 });
-BizTimeItem.addMethods({
+isc.BizTimeItem.addMethods({
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = Time.parseInput(newValue);
+        	newValue = isc.Time.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     },
@@ -449,7 +449,7 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return Time.toShortTime(internalValue, 'toShortTime', true);
+		return isc.Time.toShortTime(internalValue, 'toShortTime', true);
 	}
 });
 isc.SimpleType.create({
@@ -457,7 +457,7 @@ isc.SimpleType.create({
 	inheritsFrom: "bizTime"
 });
 isc.ClassFactory.defineClass("HH_MI_SS_Item", "BizTimeItem");
-HH_MI_SS_Item.addProperties({
+isc.HH_MI_SS_Item.addProperties({
 	use24HourTime: false,
 	hint: 'HH:MI:SS am/pm',
    	displayFormat: 'toTime',
@@ -468,11 +468,11 @@ isc.SimpleType.create({
 	inheritsFrom: "bizTime",
 	editorType: 'HH_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return Time.toTime(internalValue, 'toTime', true);
+		return isc.Time.toTime(internalValue, 'toTime', true);
 	}
 });
 isc.ClassFactory.defineClass("HH24_MI_Item", "BizTimeItem");
-HH24_MI_Item.addProperties({
+isc.HH24_MI_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI',
    	displayFormat: 'toShortPadded24HourTime',
@@ -483,11 +483,11 @@ isc.SimpleType.create({
 	inheritsFrom: "bizTime",
 	editorType: 'HH24_MI_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return Time.toShortTime(internalValue, 'toShortPadded24HourTime', true);
+		return isc.Time.toShortTime(internalValue, 'toShortPadded24HourTime', true);
 	}
 });
 isc.ClassFactory.defineClass("HH24_MI_SS_Item", "BizTimeItem");
-HH24_MI_SS_Item.addProperties({
+isc.HH24_MI_SS_Item.addProperties({
 	use24HourTime: true,
 	hint: 'HH24:MI:SS',
    	displayFormat: 'toPadded24HourTime',
@@ -498,12 +498,12 @@ isc.SimpleType.create({
 	inheritsFrom: "bizTime",
 	editorType: 'HH24_MI_SS_Item',
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return Time.toTime(internalValue, 'toPadded24HourTime', true);
+		return isc.Time.toTime(internalValue, 'toPadded24HourTime', true);
 	}
 });
 
 isc.ClassFactory.defineClass("BizDecimal2Item", "TextItem");
-BizDecimal2Item.addClassMethods({
+isc.BizDecimal2Item.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -536,7 +536,7 @@ BizDecimal2Item.addClassMethods({
 		return value.toLocalizedString(decimalPlaces, '.', ',', '-');
 	}
 });
-BizDecimal2Item.addProperties({
+isc.BizDecimal2Item.addProperties({
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // dont perform validation on key press
     width: 100,
@@ -544,22 +544,22 @@ BizDecimal2Item.addProperties({
     selectOnFocus: true,
     decimalPlaces: 2
 });
-BizDecimal2Item.addMethods({
+isc.BizDecimal2Item.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizDecimal2Item.parseInput(value);
+			value = isc.BizDecimal2Item.parseInput(value);
 		}
-		return BizDecimal2Item.format(value, this.decimalPlaces);
+		return isc.BizDecimal2Item.format(value, this.decimalPlaces);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizDecimal2Item.parseInput(value);
+			value = isc.BizDecimal2Item.parseInput(value);
 		}
 		
 		return value;
@@ -575,7 +575,7 @@ BizDecimal2Item.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizDecimal2Item.parseInput(newValue);
+        	newValue = isc.BizDecimal2Item.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -591,13 +591,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDecimal2Item.format(internalValue, 2);
+		return isc.BizDecimal2Item.format(internalValue, 2);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizDecimal5Item", "BizDecimal2Item");
-BizDecimal5Item.addProperties({
+isc.BizDecimal5Item.addProperties({
     decimalPlaces: 5
 });
 isc.SimpleType.create({
@@ -611,13 +611,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDecimal2Item.format(internalValue, 5);
+		return isc.BizDecimal2Item.format(internalValue, 5);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizDecimal10Item", "BizDecimal2Item");
-BizDecimal10Item.addProperties({
+isc.BizDecimal10Item.addProperties({
     decimalPlaces: 10
 });
 isc.SimpleType.create({
@@ -631,13 +631,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDecimal2Item.format(internalValue, 10);
+		return isc.BizDecimal2Item.format(internalValue, 10);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizDecimal0Item", "BizDecimal2Item");
-BizDecimal0Item.addProperties({
+isc.BizDecimal0Item.addProperties({
     decimalPlaces: 0
 });
 isc.SimpleType.create({
@@ -651,13 +651,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDecimal2Item.format(internalValue, 0);
+		return isc.BizDecimal2Item.format(internalValue, 0);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizDecimal1Item", "BizDecimal2Item");
-BizDecimal1Item.addProperties({
+isc.BizDecimal1Item.addProperties({
     decimalPlaces: 1
 });
 isc.SimpleType.create({
@@ -671,13 +671,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDecimal2Item.format(internalValue, 1);
+		return isc.BizDecimal2Item.format(internalValue, 1);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizDollarsAndCentsItem", "BizDecimal2Item");
-BizDollarsAndCentsItem.addProperties({
+isc.BizDollarsAndCentsItem.addProperties({
     showHint: true,
     showHintInField: true,
    	hint: '(+/-)$$$$$.cc'
@@ -693,13 +693,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizDollarsAndCentsItem.format(internalValue, 2);
+		return isc.BizDollarsAndCentsItem.format(internalValue, 2);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizIntegerPercentageItem", "TextItem");
-BizIntegerPercentageItem.addClassMethods({
+isc.BizIntegerPercentageItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -730,7 +730,7 @@ BizIntegerPercentageItem.addClassMethods({
 		return (value * 100).toLocalizedString(0, '.', ',', '-') + '%';
 	}
 });
-BizIntegerPercentageItem.addProperties({
+isc.BizIntegerPercentageItem.addProperties({
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // dont perform validation on key press
     width: 100,
@@ -739,22 +739,22 @@ BizIntegerPercentageItem.addProperties({
    	hint: '(+/-)99999',
    	selectOnFocus: true
 });
-BizIntegerPercentageItem.addMethods({
+isc.BizIntegerPercentageItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizIntegerPercentageItem.parseInput(value);
+			value = isc.BizIntegerPercentageItem.parseInput(value);
 		}
-		return BizIntegerPercentageItem.format(value);
+		return isc.BizIntegerPercentageItem.format(value);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizIntegerPercentageItem.parseInput(value);
+			value = isc.BizIntegerPercentageItem.parseInput(value);
 		}
 		
 		return value;
@@ -770,7 +770,7 @@ BizIntegerPercentageItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizIntegerPercentageItem.parseInput(newValue);
+        	newValue = isc.BizIntegerPercentageItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -786,13 +786,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizIntegerPercentageItem.format(internalValue);
+		return isc.BizIntegerPercentageItem.format(internalValue);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizSimplePercentageItem", "BizIntegerPercentageItem");
-BizSimplePercentageItem.addClassMethods({
+isc.BizSimplePercentageItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -823,22 +823,22 @@ BizSimplePercentageItem.addClassMethods({
 		return value.toLocalizedString(0, '.', ',', '-') + '%';
 	}
 });
-BizSimplePercentageItem.addMethods({
+isc.BizSimplePercentageItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizSimplePercentageItem.parseInput(value);
+			value = isc.BizSimplePercentageItem.parseInput(value);
 		}
-		return BizSimplePercentageItem.format(value);
+		return isc.BizSimplePercentageItem.format(value);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizSimplePercentageItem.parseInput(value);
+			value = isc.BizSimplePercentageItem.parseInput(value);
 		}
 		
 		return value;
@@ -849,7 +849,7 @@ BizSimplePercentageItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizSimplePercentageItem.parseInput(newValue);
+        	newValue = isc.BizSimplePercentageItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -865,14 +865,14 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizSimplePercentageItem.format(internalValue);
+		return isc.BizSimplePercentageItem.format(internalValue);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 
 isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "TextItem");
-BizIntegerSeparatorItem.addClassMethods({
+isc.BizIntegerSeparatorItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -903,7 +903,7 @@ BizIntegerSeparatorItem.addClassMethods({
 		return (value).toLocalizedString(0, '.', ',', '-');
 	}
 });
-BizIntegerSeparatorItem.addProperties({
+isc.BizIntegerSeparatorItem.addProperties({
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // dont perform validation on key press
     width: 100,
@@ -912,22 +912,22 @@ BizIntegerSeparatorItem.addProperties({
    	hint: '(+/-)99,999,999',
    	selectOnFocus: true
 });
-BizIntegerSeparatorItem.addMethods({
+isc.BizIntegerSeparatorItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizIntegerSeparatorItem.parseInput(value);
+			value = isc.BizIntegerSeparatorItem.parseInput(value);
 		}
-		return BizIntegerSeparatorItem.format(value);
+		return isc.BizIntegerSeparatorItem.format(value);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizIntegerSeparatorItem.parseInput(value);
+			value = isc.BizIntegerSeparatorItem.parseInput(value);
 		}
 		
 		return value;
@@ -943,7 +943,7 @@ BizIntegerSeparatorItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizIntegerSeparatorItem.parseInput(newValue);
+        	newValue = isc.BizIntegerSeparatorItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -959,14 +959,14 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizIntegerSeparatorItem.format(internalValue);
+		return isc.BizIntegerSeparatorItem.format(internalValue);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 
 isc.ClassFactory.defineClass("BizTwoDecimalPlacesPercentageItem", "BizIntegerPercentageItem");
-BizTwoDecimalPlacesPercentageItem.addClassMethods({
+isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -997,25 +997,25 @@ BizTwoDecimalPlacesPercentageItem.addClassMethods({
 		return (value * 100).toLocalizedString(2, '.', ',', '-') + '%';
 	}
 });
-BizTwoDecimalPlacesPercentageItem.addProperties({
+isc.BizTwoDecimalPlacesPercentageItem.addProperties({
    	hint: '(+/-)99999.99'
 });
-BizTwoDecimalPlacesPercentageItem.addMethods({
+isc.BizTwoDecimalPlacesPercentageItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizTwoDecimalPlacesPercentageItem.parseInput(value);
+			value = isc.BizTwoDecimalPlacesPercentageItem.parseInput(value);
 		}
-		return BizTwoDecimalPlacesPercentageItem.format(value);
+		return isc.BizTwoDecimalPlacesPercentageItem.format(value);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizTwoDecimalPlacesPercentageItem.parseInput(value);
+			value = isc.BizTwoDecimalPlacesPercentageItem.parseInput(value);
 		}
 		
 		return value;
@@ -1026,7 +1026,7 @@ BizTwoDecimalPlacesPercentageItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizTwoDecimalPlacesPercentageItem.parseInput(newValue);
+        	newValue = isc.BizTwoDecimalPlacesPercentageItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -1042,13 +1042,13 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizTwoDecimalPlacesPercentageItem.format(internalValue);
+		return isc.BizTwoDecimalPlacesPercentageItem.format(internalValue);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
 isc.ClassFactory.defineClass("BizTimeDurationItem", "TextItem");
-BizTimeDurationItem.addClassMethods({
+isc.BizTimeDurationItem.addClassMethods({
 	parseInput: function(value) { // value is not only a string, returns a float
 		if (isc.isA.Number(value)) {
 			return value;
@@ -1105,7 +1105,7 @@ BizTimeDurationItem.addClassMethods({
 		return hours + ':' + stringMinutes;
 	}
 });
-BizTimeDurationItem.addProperties({
+isc.BizTimeDurationItem.addProperties({
 	changeOnBlur: true, // perform validation on field blur
     changeOnKeypress: false, // dont perform validation on key press
     width: 100,
@@ -1114,22 +1114,22 @@ BizTimeDurationItem.addProperties({
    	hint: '(+/-)HHH:MM',
    	selectOnFocus: true
 });
-BizTimeDurationItem.addMethods({
+isc.BizTimeDurationItem.addMethods({
 	mapValueToDisplay: function(value) {
 		if (value == null) {
 			return isc.emptyString;
 		}
 		if (! isc.isA.Number(value)) {
-			value = BizTimeDurationItem.parseInput(value);
+			value = isc.BizTimeDurationItem.parseInput(value);
 		}
-		return BizTimeDurationItem.format(value);
+		return isc.BizTimeDurationItem.format(value);
 	},
 	mapDisplayToValue: function(value) {
 		if (isc.isAn.emptyString(value)) {
 			value = null;
 		}
 		else {
-			value = BizTimeDurationItem.parseInput(value);
+			value = isc.BizTimeDurationItem.parseInput(value);
 		}
 		
 		return value;
@@ -1145,7 +1145,7 @@ BizTimeDurationItem.addMethods({
     // (this is required since the string passed in won't go through 'mapDisplayToValue')
     setValue : function (newValue) {
         if (isc.isA.String(newValue)) {
-        	newValue = BizTimeDurationItem.parseInput(newValue);
+        	newValue = isc.BizTimeDurationItem.parseInput(newValue);
         }
         return this.Super("setValue", [newValue]);
     }
@@ -1161,14 +1161,14 @@ isc.SimpleType.create({
 		return this.shortDisplayFormatter(internalValue, field, component, record);
 	},
 	shortDisplayFormatter: function(internalValue, field, component, record) {
-		return BizTimeDurationItem.format(internalValue);
+		return isc.BizTimeDurationItem.format(internalValue);
 	},
-	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isA.Number(value)'}]
+	validators: [{type: 'custom', clientOnly: true, condition: '(value == null) || isc.isA.Number(value)'}]
 });
 
-ClassFactory.defineClass("BizContentLinkItem", CanvasItem);
+isc.ClassFactory.defineClass("BizContentLinkItem", isc.CanvasItem);
 //instance properties and methods
-BizContentLinkItem.addProperties({
+isc.BizContentLinkItem.addProperties({
 	height: 25, 
 	width: '*',
 	rowSpan: "*", 
@@ -1187,9 +1187,9 @@ BizContentLinkItem.addProperties({
 //icons
 // editable
 // value - the content link value (not the href)
-BizContentLinkItem.addMethods({
+isc.BizContentLinkItem.addMethods({
 	init: function(config) {
-		this._link = HTMLFlow.create({
+		this._link = isc.HTMLFlow.create({
 		    contents: "Empty",
 		    	width: '100%'
 		});
@@ -1197,7 +1197,7 @@ BizContentLinkItem.addMethods({
 		if (config.editable) {
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._link, LayoutSpacer.create({width:3}), BizUtil.createUploadButton(this)]
+				members: [this._link, isc.LayoutSpacer.create({width:3}), isc.BizUtil.createUploadButton(this)]
 			});
 		}
 		else {
@@ -1214,7 +1214,7 @@ BizContentLinkItem.addMethods({
 	setValue: function(newValue) {
 		if ((this.canvas != null) && (! this.userSetValue)) {
 			if (newValue) {
-				var url = BizUtil.URL_PREFIX + 
+				var url = isc.BizUtil.URL_PREFIX + 
 				"content?_n=" + newValue +
 				"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 				"&_b=" + this.name.replaceAll('_', '.') +
@@ -1237,9 +1237,9 @@ isc.SimpleType.create({
 	editorType: "BizContentLinkItem"
 });
 
-ClassFactory.defineClass("BizContentImageItem", CanvasItem);
+isc.ClassFactory.defineClass("BizContentImageItem", isc.CanvasItem);
 //instance properties and methods
-BizContentImageItem.addProperties({
+isc.BizContentImageItem.addProperties({
 //	height: 20, 
 	width: '*',
 	rowSpan: "*", 
@@ -1258,9 +1258,9 @@ BizContentImageItem.addProperties({
 //name
 //title
 //icons
-BizContentImageItem.addMethods({
+isc.BizContentImageItem.addMethods({
 	init: function(config) {
-		this._img = Img.create({
+		this._img = isc.Img.create({
 			width: (config.width ? config.width : '100%'),
 			height: (config.height ? config.height : '100%'),
 			imageType: 'center',
@@ -1274,11 +1274,11 @@ BizContentImageItem.addMethods({
 				width: 1, // make minimum width of button
 				height: (config.height ? config.height : '100%'),
 				defaultLayoutAlign: 'center', 
-				members: [BizUtil.createUploadButton(this)]
+				members: [isc.BizUtil.createUploadButton(this)]
 			});
 			this.canvas = isc.HLayout.create({
 				defaultLayoutAlign: 'center',
-				members: [this._img, LayoutSpacer.create({width:5}), centredUploadButton]
+				members: [this._img, isc.LayoutSpacer.create({width:5}), centredUploadButton]
 			});
 		}
 		else {
@@ -1295,7 +1295,7 @@ BizContentImageItem.addMethods({
 	setValue: function(newValue) {
 		if ((this.canvas != null) && (! this.userSetValue)) {
 			if (newValue) {
-				var url = BizUtil.URL_PREFIX + 
+				var url = isc.BizUtil.URL_PREFIX + 
 							"content?_n=" + newValue +
 							"&_doc=" + this.form._view._mod + '.' + this.form._view._doc +
 							"&_b=" + this.name.replaceAll('_', '.') +
@@ -1319,9 +1319,9 @@ isc.SimpleType.create({
 	editorType: "BizContentImageItem"
 });
 
-ClassFactory.defineClass("BizLookupDescriptionItem", CanvasItem);
+isc.ClassFactory.defineClass("BizLookupDescriptionItem", isc.CanvasItem);
 //instance properties and methods
-BizLookupDescriptionItem.addProperties({
+isc.BizLookupDescriptionItem.addProperties({
 	height: 20, 
 	width: '*',
 	rowSpan: "*", 
@@ -1360,9 +1360,9 @@ BizLookupDescriptionItem.addProperties({
 // valueField
 // displayField
 // pickListFields - fields defined for drop down
-// params - an associative array of binding name to string expressions to evaluate with "EditView.toDisplay()" when a view is populated.
+// params - an associative array of binding name to string expressions to evaluate with "isc.EditView.toDisplay()" when a view is populated.
 //				These parameter evaluations are sent down as filter criteria to the server.
-BizLookupDescriptionItem.addMethods({
+isc.BizLookupDescriptionItem.addMethods({
 	init: function(config) {
 		var me = this;
 		
@@ -1392,7 +1392,7 @@ BizLookupDescriptionItem.addMethods({
 			getPickListFilterCriteria: function() {
 				var result = this.Super("getPickListFilterCriteria", arguments);
 				if (config.params) {
-					result = BizUtil.completeFilterCriteria(result, config.params, me._view);
+					result = isc.BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
 				
 				return result;
@@ -1445,15 +1445,15 @@ BizLookupDescriptionItem.addMethods({
 				cellPadding: 0
 			});
 
-			this._splitButton =	BizUtil.createSplitButton(
+			this._splitButton =	isc.BizUtil.createSplitButton(
 				'Pick', 
 				null, 
 				false, 
 				'Pick a record', 
 				function() {
-					var pickList = BizUtil.getPickList(me, config.params, me._view);
+					var pickList = isc.BizUtil.getPickList(me, config.params, me._view);
 					pickList.setDataSource(config.optionDataSource);
-					WindowStack.popup(me.getPageRect(), 'Pick', true, [pickList]);
+					isc.WindowStack.popup(me.getPageRect(), 'Pick', true, [pickList]);
 				},
 				'Other Options', 
 				this._form,
@@ -1470,9 +1470,9 @@ BizLookupDescriptionItem.addMethods({
 					click: function(event) {
 						if (config && config.params) {
 							var newParams = {};
-							BizUtil.addFilterRequestParams(newParams, 
-															config.params,
-															me._view);
+							isc.BizUtil.addFilterRequestParams(newParams, 
+																config.params,
+																me._view);
 							me.zoom(true, newParams);
 						}
 						else {
@@ -1581,12 +1581,12 @@ BizLookupDescriptionItem.addMethods({
 	zoom: function(zoomToNew, // boolean - do we want a new record or an existing one
 					newParams) { // a map of parameter names to expressions to evaluate - can be null or undefined
 		var me = this;
-		var mod = DataSource.get(this.optionDataSource).modoc;
+		var mod = isc.DataSource.get(this.optionDataSource).modoc;
 		var dotIndex = mod.indexOf('.');
 		var doc = mod.substring(dotIndex + 1);
 		mod = mod.substring(0, dotIndex);
 
-		BizUtil.getEditView(mod, 
+		isc.BizUtil.getEditView(mod, 
 								doc,
 								function(view) { // the view
 									// determine the view binding
@@ -1609,13 +1609,13 @@ BizLookupDescriptionItem.addMethods({
 											// apply changes to current form before zoom in
 											me._view.saveInstance(null, function() {
 												me.setRequired(required); // reset form item's required-ness
-												WindowStack.popup(fromRect, "New", false, [view]);
+												isc.WindowStack.popup(fromRect, "New", false, [view]);
 												view.newInstance(newParams, viewBinding, instance._c, false);
 											});
 										}
 										else {
 											me.setRequired(required); // reset form item's required-ness
-											WindowStack.popup(fromRect, "New", false, [view]);
+											isc.WindowStack.popup(fromRect, "New", false, [view]);
 											view.newInstance(newParams, viewBinding, instance._c, false);
 										}
 									}
@@ -1630,7 +1630,7 @@ BizLookupDescriptionItem.addMethods({
 											delete instance._apply;
 											// apply changes to current form before zoom in
 											me._view.saveInstance(null, function() {
-												WindowStack.popup(fromRect, "Edit", false, [view]);
+												isc.WindowStack.popup(fromRect, "Edit", false, [view]);
 												view.editInstance(me.getValue(),
 																	viewBinding,
 																	instance._c,
@@ -1638,7 +1638,7 @@ BizLookupDescriptionItem.addMethods({
 											});
 										}
 										else {
-											WindowStack.popup(fromRect, "Edit", false, [view]);
+											isc.WindowStack.popup(fromRect, "Edit", false, [view]);
 											view.editInstance(me.getValue(),
 																viewBinding,
 																instance._c,
@@ -1651,17 +1651,17 @@ BizLookupDescriptionItem.addMethods({
 
 //register the editor
 isc.SimpleType.create({
-inheritsFrom: "comboBox",
-name: "bizLookupDescription",
-editorType: "BizLookupDescriptionItem"
+	inheritsFrom: "comboBox",
+	name: "bizLookupDescription",
+	editorType: "BizLookupDescriptionItem"
 });
 
 // CKEditor is loaded by Ajile when required
 var CKEDITOR = null;
 
-ClassFactory.defineClass("BizHTMLItem", CanvasItem);
+isc.ClassFactory.defineClass("BizHTMLItem", isc.CanvasItem);
 //instance properties and methods
-BizHTMLItem.addProperties({
+isc.BizHTMLItem.addProperties({
 	width: '*',
 	height: '200px',
 	rowSpan: "*", 
@@ -1678,9 +1678,9 @@ BizHTMLItem.addProperties({
 //name
 //title
 //icons
-BizHTMLItem.addMethods({
+isc.BizHTMLItem.addMethods({
 	init: function(config) {
-		this._pane = HTMLPane.create({
+		this._pane = isc.HTMLPane.create({
 			width: config.width,
 			height: config.height,
 			showEdges: true,
@@ -1699,7 +1699,7 @@ BizHTMLItem.addMethods({
 					this._show();
 				}
 				else {
-					BizUtil.loadJS('ckeditor456/ckeditor.js', function() {
+					isc.BizUtil.loadJS('ckeditor456/ckeditor.js', function() {
 						me._editButton._show();
 					});
 				}
@@ -1708,7 +1708,7 @@ BizHTMLItem.addMethods({
 				var owningView = me.form._view;
 				var formValues = owningView.gather(false);
 				
-				var holder = Canvas.create({width:'100%', height:'100%'});
+				var holder = isc.Canvas.create({width:'100%', height:'100%'});
 				holder.setContents('<div style="width:100%;height:100%" id="_CKEditor"></div>');
 				holder.draw = function() {
 					this.Super('draw');
@@ -1739,42 +1739,42 @@ BizHTMLItem.addMethods({
 					return this;
 				};
 
-				WindowStack.popup(null,
-									'Edit HTML', 
-									true,
-									[holder,
-										isc.HLayout.create({
-											membersMargin: 5,
-											margin: 10,
-											align: "right",
-											members: [
-												isc.IButton.create({
-													height: 22, 
-													width: 60, 
-													title: 'Apply',
-													click: function(applyEvent) {
-														me.setValue(me._editor.getData());
-														WindowStack.popoff(false);
-													}
-												}),
-												isc.IButton.create({
-													height: 22, 
-													width: 60, 
-													title: 'Cancel',
-													click: function(applyEvent) {
-														WindowStack.popoff(false);
-													}
-												})
-											]
-										})
-									],
-									405);
+				isc.WindowStack.popup(null,
+										'Edit HTML', 
+										true,
+										[holder,
+											isc.HLayout.create({
+												membersMargin: 5,
+												margin: 10,
+												align: "right",
+												members: [
+													isc.IButton.create({
+														height: 22, 
+														width: 60, 
+														title: 'Apply',
+														click: function(applyEvent) {
+															me.setValue(me._editor.getData());
+															isc.WindowStack.popoff(false);
+														}
+													}),
+													isc.IButton.create({
+														height: 22, 
+														width: 60, 
+														title: 'Cancel',
+														click: function(applyEvent) {
+															isc.WindowStack.popoff(false);
+														}
+													})
+												]
+											})
+										],
+										405);
 			}
 		});
 		
 		this.canvas = isc.HLayout.create({
 			defaultLayoutAlign: 'center',
-			members: [this._pane, LayoutSpacer.create({width:3}), this._editButton]
+			members: [this._pane, isc.LayoutSpacer.create({width:3}), this._editButton]
 		});
 
 		this.Super("init", arguments);
@@ -1825,10 +1825,10 @@ isc.BizMapPicker.addMethods({
 		else {
 			isc.BizMapPicker.id = this.ID;
 
-			BizUtil.loadJS('wicket/wicket.js?v=' + BizUtil.version, function() {
-				BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + BizUtil.version, function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&' +
-            						'callback=isc.BizMapPicker.initialise');
+			isc.BizUtil.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
+				isc.BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
+					isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&' +
+            							'callback=isc.BizMapPicker.initialise');
 				});
 			});
 		}
@@ -1963,10 +1963,10 @@ isc.BizMapPicker.addMethods({
 });
 
 isc.ClassFactory.defineClass("GeometryItem", "TextItem");
-GeometryItem.addClassProperties({
+isc.GeometryItem.addClassProperties({
 	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals']
 });
-GeometryItem.addClassMethods({
+isc.GeometryItem.addClassMethods({
 	format: function(value) {
 		if (value) {
 			if (value.startsWith('POINT')) {
@@ -1983,21 +1983,21 @@ GeometryItem.addClassMethods({
 		return '';
 	}
 });
-GeometryItem.addProperties({
+isc.GeometryItem.addProperties({
 //    canEdit: false,
 //    disableIconsOnReadOnly: false,
     width: 100,
     operator: 'gWithin',
-	validOperators: GeometryItem.validOperators,
+	validOperators: isc.GeometryItem.validOperators,
 	selectOnFocus: true
 });
-GeometryItem.addMethods({
+isc.GeometryItem.addMethods({
 	init: function(config) {
 		this.icons = [{
 	        src: 'icons/map.png',
 	        prompt: 'Click to set or see the geometry on a map',
 	        click: function(form, item, icon) {
-	    		WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
+	    		isc.WindowStack.popup(item.getPageRect(), 'Map', true, [isc.BizMapPicker.create({field:item})]);
 	        }
 	    }];
 		if (config.icons) {
@@ -2011,5 +2011,5 @@ isc.SimpleType.create({
     name: "geometry",
     inheritsFrom: "text",
 	editorType: "GeometryItem",
-	validOperators: GeometryItem.validOperators
+	validOperators: isc.GeometryItem.validOperators
 });
