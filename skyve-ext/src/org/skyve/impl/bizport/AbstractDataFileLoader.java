@@ -132,7 +132,6 @@ public abstract class AbstractDataFileLoader {
 	protected Module module;
 	protected Document document;
 
-	protected Map<String, Object> valueMap;
 	protected Map<String, Bean> createdBeans;
 
 	protected int dataIndex;
@@ -146,7 +145,7 @@ public abstract class AbstractDataFileLoader {
 			String moduleName, String documentName) throws Exception {
 		this.activityType = activityType;
 		this.exception = exception;
-
+		
 		// set values
 		this.pers = CORE.getPersistence();
 		this.user = pers.getUser();
@@ -154,6 +153,7 @@ public abstract class AbstractDataFileLoader {
 		setDocumentContext(moduleName, documentName);
 		
 		this.fields = new ArrayList<>();
+		this.results = new ArrayList<>();
 	}
 
 	/**
@@ -181,14 +181,6 @@ public abstract class AbstractDataFileLoader {
 	 */
 	public void setDataIndex(int dataIndex) {
 		this.dataIndex = dataIndex;
-	}
-
-	public void setValueMap(Map<String, Object> valueMap) {
-		this.valueMap = valueMap;
-	}
-
-	public Map<String, Object> getValueMap() {
-		return valueMap;
 	}
 
 	public void setCreateMissingAssocations(boolean create) {
@@ -537,7 +529,7 @@ public abstract class AbstractDataFileLoader {
 			result = document.newInstance(user);
 		}
 		StringBuilder what = null;
-
+		
 		for (DataFileField field : fields) {
 
 			fieldIndex = field.getIndex();
