@@ -85,7 +85,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public String getStringFieldValue(int index, boolean blankAsNull) throws Exception {
 		String hdr = header[index];
-		if(getValueMap().containsKey(hdr)) {
+		if(getValueMap()!=null && getValueMap().containsKey(hdr)) {
 			String value = (String) getValueMap().get(hdr);
 			if(blankAsNull && null != value && "".equals(value.trim())) {
 				return null;
@@ -125,11 +125,9 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 			return;
 		}
 		
-		int offset = 0;
-		
 		Map<String, Object> values = new HashMap<>();
 		for(int cntr = 0; cntr < header.length; ++cntr) {
-			values.put(header[offset], fieldValues[offset]);
+			values.put(header[cntr], fieldValues[cntr]);
 		}
 		setValueMap(values);
 	}
@@ -142,14 +140,14 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 
 	@Override
 	public boolean isNoData() throws Exception {
-		return false;
+		return (valueMap==null);
 	}
 
 	@Override
 	public String getWhere(int index) throws Exception {
 		StringBuilder where = new StringBuilder(128);
-		where.append("Row ").append((getDataIndex() + 1));
-		where.append(" column ").append(header[index]);
+		where.append("Line ").append((getDataIndex() + 1));
+		where.append(" ").append(header[index]);
 		where.append(".");
 		return where.toString();
 	}
@@ -157,7 +155,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public String debugData() throws Exception {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Row ").append(getDataIndex());
+		sb.append("Line ").append(getDataIndex());
 		
 		if (valueMap != null) {
 			for(String key : getValueMap().keySet()) {

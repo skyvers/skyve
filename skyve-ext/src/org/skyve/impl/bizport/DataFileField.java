@@ -19,7 +19,7 @@ public class DataFileField {
 	}
 	
 	// the index of this field (e.g. the column number)
-	private int index;
+	private Integer index;
 	
 	//the binding to load to
 	private String binding;
@@ -71,12 +71,16 @@ public class DataFileField {
 		return required;
 	}
 	
-	public int getIndex() {
+	public Integer getIndex() {
 		return index;
 	}
 
-	public void setIndex(int index) {
+	public void setIndex(Integer index) {
 		this.index = index;
+	}
+
+	public void setIndex(int index) {
+		this.index = new Integer(index);
 	}
 
 	public void setRequired(boolean required) {

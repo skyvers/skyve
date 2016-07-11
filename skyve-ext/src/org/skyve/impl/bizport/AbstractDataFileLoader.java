@@ -19,6 +19,7 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
+import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -28,6 +29,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
 
 /**
@@ -131,6 +133,7 @@ public abstract class AbstractDataFileLoader {
 	protected String documentName;
 	protected Module module;
 	protected Document document;
+	protected boolean debugMode;
 
 	protected Map<String, Bean> createdBeans;
 
@@ -154,6 +157,24 @@ public abstract class AbstractDataFileLoader {
 		
 		this.fields = new ArrayList<>();
 		this.results = new ArrayList<>();
+	}
+
+	/**
+	 * DebugMode Logs debugData for all rows encountered by beanResults()
+	 * 
+	 * @return
+	 */
+	public boolean isDebugMode() {
+		return debugMode;
+	}
+
+	/**
+	 * DebugMode Logs debugData for all rows encountered by beanResults()
+	 * 
+	 * @return
+	 */
+	public void setDebugMode(boolean debugMode) {
+		this.debugMode = debugMode;
 	}
 
 	/**
@@ -224,7 +245,9 @@ public abstract class AbstractDataFileLoader {
 	 * @throws Exception
 	 */
 	public void addField(DataFileField field) {
-		field.setIndex(fields.size());
+		if(field.getIndex()==null){
+			field.setIndex(fields.size());
+		}
 		fields.add(field);
 	}
 
@@ -389,7 +412,7 @@ public abstract class AbstractDataFileLoader {
 				sb.append(getStringFieldValue(index, true));
 			}
 		} else {
-			sb.append(" Null");
+			sb.append(" has no data.");
 		}
 		return sb.toString();
 	}
@@ -514,6 +537,10 @@ public abstract class AbstractDataFileLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Bean> T beanResult() throws Exception {
+		
+		if(debugMode){
+			Util.LOGGER.info(debugData());
+		}
 
 		// assume no values loaded
 		if (document == null) {
@@ -528,25 +555,49 @@ public abstract class AbstractDataFileLoader {
 		if (LoaderActivityType.CREATE_ALL.equals(activityType) || LoaderActivityType.CREATE_FIND.equals(activityType)) {
 			result = document.newInstance(user);
 		}
-		StringBuilder what = null;
+		StringBuilder what = new StringBuilder(64);
+		StringBuilder debugFilter =  new StringBuilder(64);
 		
+		if(fields.isEmpty()){
+			what.append("No fields were provided - no data will be loaded.");
+			Problem prob = new Problem(what.toString(), getWhere());
+			exception.addError(prob);
+		}
 		for (DataFileField field : fields) {
 
-			fieldIndex = field.getIndex();
-			what = new StringBuilder();
+			Converter<T> converter = null;
+			if(field.getIndex()==null){
+				fieldIndex++;
+			} else {
+				fieldIndex = field.getIndex().intValue();
+			}
+			what = new StringBuilder(64);
+			debugFilter =  new StringBuilder(64);
 
 			// general try - if value is not of the expected type or empty,
 			// throw an exception skip null attributes
 			String binding = field.getBinding();
-			if (binding != null) {
+			if (binding == null) {
+				if(debugMode){
+					Util.LOGGER.info("No binding provided for field " + field.getIndex());
+				}
+			} else {
 
 				boolean treatEmptyNumericAsZero = treatAllEmptyNumericAsZero || field.isTreatEmptyNumericAsZero();
 
+				//TODO - this should be set when the field is added so that the same attribute and converter can be reused
 				TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, binding);
 				Attribute attr = tm.getAttribute();
+				if (field.getConverter() != null) {
+					converter = field.getConverter();
+				} else if (attr instanceof ConvertableField){
+					ConvertableField fld = (ConvertableField) attr;
+					converter = (Converter<T>) fld.getConverter();
+				}
 
 				// special case attribute is an association - go to bizkey
 				if (AttributeType.association.equals(attr.getAttributeType())) {
+					
 					tm = Binder.getMetaDataForBinding(customer, module, document, Binder.createCompoundBinding(binding, Bean.BIZ_KEY));
 					attr = tm.getAttribute();
 				}
@@ -557,10 +608,9 @@ public abstract class AbstractDataFileLoader {
 					Problem prob = new Problem("An invalid binding was provided.", "Column " + (fieldIndex + 1));
 					exception.addError(prob);
 				} else {
-					if (field.getConverter() != null) {
+					if (converter != null) {
 						try {
-							// use converter rather than POI types
-							Converter<T> converter = field.getConverter();
+							// use Skyve converter
 							operand = getStringFieldValue(fieldIndex, true);
 							String displayValue = (String) operand;
 							if (displayValue != null && displayValue.trim().length() > 0) {
@@ -569,7 +619,8 @@ public abstract class AbstractDataFileLoader {
 						} catch (Exception e) {
 							what.append(" The value ");
 							what.append("'").append(attr.getDisplayName()).append("'");
-							what.append(" is invalid.");
+							what.append(" is invalid");
+							what.append(" (using Converter " + converter.getClass().getSimpleName()).append(").");
 							if (e.getMessage() != null) {
 								what.append(" ").append(e.getMessage());
 							}
@@ -578,6 +629,7 @@ public abstract class AbstractDataFileLoader {
 						}
 					} else {
 						try {
+							//simplistic conversion making assumptions based on the attribute type
 							switch (attr.getAttributeType()) {
 							case association:
 								// Not required - handled by use of BizKey above
@@ -724,7 +776,11 @@ public abstract class AbstractDataFileLoader {
 
 					try {
 						// DOES NOT SUPPORT HIERARCHICHAL UPLOAD
-						if (loadValue != null) {
+						if (loadValue == null) {
+							if(debugMode){
+								Util.LOGGER.info(getWhere(fieldIndex) + " No load value found.");
+							}
+						} else {
 
 							switch (activityType) {
 							case CREATE_ALL:
@@ -735,16 +791,20 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
+								debugFilter.append(attr.getDisplayName());
 								// compile the query filter and run at the end
 								switch (field.getLoadAction()) {
 								case LOOKUP_EQUALS:
 									qFind.getFilter().addEquals(binding, loadValue);
+									debugFilter.append(" = '").append(loadValue).append("'");
 									break;
 								case LOOKUP_LIKE:
 									qFind.getFilter().addLike(binding, (String) loadValue);
+									debugFilter.append(" like '").append(loadValue).append("'");
 									break;
 								case LOOKUP_CONTAINS:
 									qFind.getFilter().addLike(binding, "%" + (String) loadValue + "%");
+									debugFilter.append(" like '%").append(loadValue).append("%'");
 									break;
 								default:
 									break;
@@ -777,8 +837,15 @@ public abstract class AbstractDataFileLoader {
 		}
 
 		// now perform the query
-		if (LoaderActivityType.FIND.equals(activityType) && !qFind.getFilter().isEmpty()) {
-			result = qFind.beanResult();
+		if (LoaderActivityType.FIND.equals(activityType) ) {
+			if(qFind.getFilter().isEmpty() && debugMode){
+				Util.LOGGER.info(getWhere() + " No filter set for Find operation.");
+			} else {
+				result = qFind.beanResult();
+				if(result==null && debugMode){
+					Util.LOGGER.info("No result found for filter " + debugFilter.toString());
+				}
+			}
 		}
 
 		return (T) result;
@@ -795,10 +862,32 @@ public abstract class AbstractDataFileLoader {
 
 		while (hasNextData()) {
 			nextData();
-
-			Bean bean = beanResult();
-			results.add(bean);
+			if(isNoData()){
+				if(debugMode){
+					Util.LOGGER.info(getWhere() + " No data found");
+				}
+				break;
+			}
+			
+			Bean result = beanResult();
+			if (result == null) {
+				if(debugMode){
+					Util.LOGGER.info(getWhere() + " Null bean result after load. " );
+				}
+			} else {
+				results.add(result);
+			}
 		}
+		
+		// add a warning if nothing was found
+		if (results.isEmpty()) {
+			StringBuilder noResults = new StringBuilder();
+			noResults.append("No data has been loaded");
+			Problem prob = new Problem(noResults.toString(), getWhere());
+			exception.addWarning(prob);
+		}
+
+		
 		return (List<T>) results;
 	}
 }

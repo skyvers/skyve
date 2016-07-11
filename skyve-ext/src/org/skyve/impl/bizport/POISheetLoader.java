@@ -3,7 +3,6 @@ package org.skyve.impl.bizport;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,8 +14,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.skyve.CORE;
 import org.skyve.bizport.BizPortException;
-import org.skyve.bizport.BizPortException.Problem;
-import org.skyve.domain.Bean;
+import org.skyve.domain.types.DateTime;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.util.Util;
 
 public class POISheetLoader extends AbstractDataFileLoader {
 
@@ -89,34 +89,6 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		addFields(bindings);
 	}
 
-	/**
-	 * Returns all the beans loaded from the file
-	 */
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T extends Bean> List<T> beanResults() throws Exception {
-
-		while (hasNextData()) {
-			nextData();
-			if (isNoData()) {
-				break;
-			}
-			Bean result = beanResult();
-			if (result != null) {
-				results.add(result);
-			}
-
-		}
-
-		// add a warning if nothing was found
-		if (results.isEmpty()) {
-			what.append("No data has been loaded");
-			Problem prob = new Problem(what.toString(), "Sheet " + sheet.getSheetName());
-			exception.addWarning(prob);
-		}
-
-		return (List<T>) results;
-	}
 
 	@Override
 	public String getStringFieldValue(int index, boolean blankAsNull) throws Exception {
@@ -161,16 +133,19 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			if (val != null && val.trim().length() > 0) {
 				foundNonEmpty = true;
 				break;
+			} else if(debugMode){
+				Util.LOGGER.info(getWhere(field.getIndex()) + " No value was found at this location.");
 			}
 		}
-
+		
 		return !foundNonEmpty;
 	}
 
 	@Override
 	public String getWhere(int index) throws Exception {
 		StringBuilder where = new StringBuilder(128);
-		where.append("Row ").append((dataIndex + 1));
+		where.append("Sheet ").append(sheet.getSheetName());
+		where.append(" Row ").append((dataIndex + 1));
 		where.append(" column ").append(getPOIWorksheetColumnName(index));
 		where.append(".");
 		return where.toString();
@@ -288,14 +263,22 @@ public class POISheetLoader extends AbstractDataFileLoader {
 				result = cell.getDateCellValue();
 			}
 		} catch (Exception de) {
+			StringBuilder problem = new StringBuilder(128);
+			Converter<DateTime> converter = CORE.getPersistence().getUser().getCustomer().getDefaultDateTimeConverter();
 			// get a debug value
 			String raw = "";
 			try {
+				//try again using the default converter
 				raw = getStringFieldValue(col, true);
+				result = converter.fromDisplayValue(raw);
 			} catch (Exception e) {
 				// do nothing
+				problem.append("The value '").append(raw).append("' is not a valid date");
+				if(converter!=null){
+					problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
+				}
+				throw new Exception(problem.toString());
 			}
-			throw new Exception("The " + getPOICellTypeDescription(cell) + " value '" + raw + "' is not a valid date.");
 		}
 
 		return result;
