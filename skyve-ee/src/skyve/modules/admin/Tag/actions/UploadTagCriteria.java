@@ -5,9 +5,9 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.bizport.BizPortException;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.DataFileField;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
-import org.skyve.impl.bizport.DataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.POISheetLoader;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
@@ -44,10 +44,11 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 		POISheetLoader loader = new POISheetLoader( file.getInputStream(), 0, tag.getUploadModuleName(), tag.getUploadDocumentName(), exception);
 		loader.setActivityType(LoaderActivityType.FIND);
 		if(Boolean.TRUE.equals(tag.getFileHasHeaders())){
+			//skip headers
 			loader.setDataIndex(1);
 		}
 
-		DataFileField searchField = new DataFileField(tag.getAttributeName());
+		DataFileField searchField = new DataFileField(tag.getAttributeName(),0);
 		switch(tag.getFilterOperator()){
 		case equals:
 			searchField.setLoadAction(LoadAction.LOOKUP_EQUALS);
