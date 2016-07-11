@@ -130,6 +130,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 			values.put(header[cntr], fieldValues[cntr]);
 		}
 		setValueMap(values);
+		dataIndex++;
 	}
 
 	@Override
@@ -146,7 +147,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public String getWhere(int index) throws Exception {
 		StringBuilder where = new StringBuilder(128);
-		where.append("Line ").append((getDataIndex() + 1));
+		where.append("Line ").append((getDataIndex()));
 		where.append(" ").append(header[index]);
 		where.append(".");
 		return where.toString();
