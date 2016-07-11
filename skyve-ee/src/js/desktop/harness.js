@@ -1,10 +1,10 @@
-BizUtil.addClassProperties({
+isc.BizUtil.addClassProperties({
 	headerTemplate: null,
 	init: function(headerTemplate, // template HTML for view headers
 					logoSrc, // src for logo image - most cases this is a url to the CustomerResourceServlet
 					menuConfig, // a bunch of menu configurations
 					dataSourceConfig) { // a bunch of datasource configurations
-		BizUtil.headerTemplate = headerTemplate;
+		isc.BizUtil.headerTemplate = headerTemplate;
 
 		// this is the body HLayout - Menu on the left, Details on the right
 		isc.HLayout.create({
@@ -87,49 +87,49 @@ BizUtil.addClassProperties({
 					}
 					else if (leaf.ref == 'edit') {
 						// remove the old view
-						if (BizUtil._currentView == ListView.contents) {
-							details.hideMember(ListView.contents);
+						if (isc.BizUtil._currentView == isc.ListView.contents) {
+							details.hideMember(isc.ListView.contents);
 						}
 						else {
-							if (BizUtil._currentView) {
-								if (details.hasMember(BizUtil._currentView)) {
-									details.hideMember(BizUtil._currentView);
+							if (isc.BizUtil._currentView) {
+								if (details.hasMember(isc.BizUtil._currentView)) {
+									details.hideMember(isc.BizUtil._currentView);
 								}
-								BizUtil.relinquishEditView(BizUtil._currentView);
+								isc.BizUtil.relinquishEditView(isc.BizUtil._currentView);
 							}
 						}
 
 						// get the new view and edit a new record
-						BizUtil.getEditView(viewer.data.root.name, 
-												leaf.name,
-												function(view) { // the view
-													details.addMember(view);
-													BizUtil._currentView = view;
-													view.newInstance();
-												});
+						isc.BizUtil.getEditView(viewer.data.root.name, 
+													leaf.name,
+													function(view) { // the view
+														details.addMember(view);
+														isc.BizUtil._currentView = view;
+														view.newInstance();
+													});
 					}
 					else {
-						if (BizUtil._currentView != ListView.contents) {
-							if (BizUtil._currentView) {
-								if (details.hasMember(BizUtil._currentView)) {
-									details.hideMember(BizUtil._currentView);
+						if (isc.BizUtil._currentView != isc.ListView.contents) {
+							if (isc.BizUtil._currentView) {
+								if (details.hasMember(isc.BizUtil._currentView)) {
+									details.hideMember(isc.BizUtil._currentView);
 								}
-								BizUtil.relinquishEditView(BizUtil._currentView);
+								isc.BizUtil.relinquishEditView(isc.BizUtil._currentView);
 							}
-							BizUtil._currentView = ListView.contents;
-							details.showMember(ListView.contents);
+							isc.BizUtil._currentView = isc.ListView.contents;
+							details.showMember(isc.ListView.contents);
 						}
 						if (leaf.ref == 'grid') {
-							ListView.setGridDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setGridDataSource(viewer.data.root.name + "_" + leaf.name);
 						}
 						else if (leaf.ref == 'cal') {
-							ListView.setCalendarDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setCalendarDataSource(viewer.data.root.name + "_" + leaf.name);
 						}
 						else if (leaf.ref == 'tree') {
-							ListView.setTreeDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setTreeDataSource(viewer.data.root.name + "_" + leaf.name);
 						}
 						else if (leaf.ref == 'map') {
-							ListView.setMapDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setMapDataSource(viewer.data.root.name + "_" + leaf.name);
 						}
 						else {
 							alert('Menu ref of ' + leaf.ref + 'is unknown');
@@ -185,9 +185,9 @@ BizUtil.addClassProperties({
 		}
 		
 		// add the listview to the details
-		BizUtil._currentView = ListView.contents;
-		details.addMember(ListView.contents);
-		details.hideMember(ListView.contents);
+		isc.BizUtil._currentView = isc.ListView.contents;
+		details.addMember(isc.ListView.contents);
+		details.hideMember(isc.ListView.contents);
 /*
 // Calendar bullshit
 var _today = new Date;
@@ -381,35 +381,35 @@ var eventData = [
 	},
 	
 	popupSearch: function() {
-		WindowStack.popup(null, 'Text Search', true, [textSearchForm, textSearchResults]);
+		isc.WindowStack.popup(null, 'Text Search', true, [textSearchForm, textSearchResults]);
 		textSearchForm.focusInItem('query');
 		textSearchForm.clearValues();
 	},
 	
 	showPortal: function() {
-		if (BizUtil._currentView != ListView.contents) {
-			if (BizUtil._currentView) {
-				if (details.hasMember(BizUtil._currentView)) {
-					details.hideMember(BizUtil._currentView);
+		if (isc.BizUtil._currentView != isc.ListView.contents) {
+			if (isc.BizUtil._currentView) {
+				if (details.hasMember(isc.BizUtil._currentView)) {
+					details.hideMember(isc.BizUtil._currentView);
 				}
-				BizUtil.relinquishEditView(BizUtil._currentView);
+				isc.BizUtil.relinquishEditView(isc.BizUtil._currentView);
 			}
-			BizUtil._currentView = ListView.contents;
-			details.showMember(ListView.contents);
+			isc.BizUtil._currentView = isc.ListView.contents;
+			details.showMember(isc.ListView.contents);
 		}
 
-		ListView.showPortal();
+		isc.ListView.showPortal();
 	},
 	
 	showHelp: function(url) {
 		if (url) {} else {
-			if (BizUtil._currentView == ListView.contents) {
+			if (isc.BizUtil._currentView == isc.ListView.contents) {
 				url = 'http://www.bizhub.com.au/help/list.html';
 			}
 			else {
 				url = 'http://www.bizhub.com.au/help/list.html';
 			}
 		}
-		BizUtil.popupFrame(url, "Skyve Help", 1024, 768);
+		isc.BizUtil.popupFrame(url, "Skyve Help", 1024, 768);
 	}
 });

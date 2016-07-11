@@ -173,13 +173,13 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				containerVariables.push("view");
 			}
 			else if (ViewType.edit.equals(view.getType())) {
-				code.append("var edit = BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var edit = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 				code.append(Bean.NOT_CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("edit");
 			}
 			else if (ViewType.create.equals(view.getType())) {
-				code.append("var create = BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var create = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 				code.append(Bean.CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("create");
@@ -195,7 +195,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 									boolean parentEnabled) {
 			tabNumbers.push(Integer.valueOf(0));
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizTabPane.create({");
+			code.append("var ").append(variable).append("=isc.BizTabPane.create({");
 			size(tabPane, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(tabPane.getDisabledConditionName(), code);
 			invisible(tabPane.getInvisibleConditionName(), code);
@@ -218,7 +218,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentVisible,
 								boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizContainer.create({membersMargin:10,layoutMargin:10});\n");
+			code.append("var ").append(variable).append("=isc.BizContainer.create({membersMargin:10,layoutMargin:10});\n");
 
 			containerVariables.push(variable);
 		}
@@ -254,7 +254,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentEnabled)
 		throws MetaDataException {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizVBox.create({");
+			code.append("var ").append(variable).append("=isc.BizVBox.create({");
 			size(vbox, null, code);
 			bordered(vbox, vbox.getPixelPadding(), code);
 			box(vbox);
@@ -304,7 +304,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentEnabled)
 		throws MetaDataException {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizHBox.create({");
+			code.append("var ").append(variable).append("=isc.BizHBox.create({");
 			size(hbox, null, code);
 			HorizontalAlignment h = hbox.getHorizontalAlignment();
 			if (h != null) {
@@ -401,7 +401,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			
 			formVariable = "v" + variableCounter++;
 			code.append("var ").append(formVariable);
-			code.append("=DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
+			code.append("=isc.DynamicForm.create({longTextEditorType:'text',longTextEditorThreshold:102400,");
 			// SC docs says that autoFocus will focus in first focusable item
 			// in the form when it is drawn.
 			// Don't use autoFocus as we have multiple dynamic forms that can be declared
@@ -563,7 +563,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 					code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 				}
 				else {
-					code.append("type:'canvas',showTitle:false,width:1,canvas:HLayout.create({height:22,members:[");
+					code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 					code.append(buttonCode).append("]}),");
 					disabled(action.getDisabledConditionName(), code);
 					invisible(action.getInvisibleConditionName(), code);
@@ -581,7 +581,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 										boolean parentVisible,
 										boolean parentEnabled) {
 			StringBuilder geoLocatorCode = new StringBuilder(256);
-			geoLocatorCode.append("BizUtil.createGeoLocator(view,");
+			geoLocatorCode.append("isc.BizUtil.createGeoLocator(view,");
 			String binding = locator.getLatitudeBinding();
 			if (binding == null) {
 				geoLocatorCode.append("null");
@@ -645,7 +645,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 			}
 			else {
-				code.append("type:'canvas',showTitle:false,canvas:HLayout.create({height:22,members:[");
+				code.append("type:'canvas',showTitle:false,canvas:isc.HLayout.create({height:22,members:[");
 				code.append(geoLocatorCode).append(")]}),");
 			}
 		}
@@ -681,12 +681,12 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 								boolean parentEnabled)
 		throws MetaDataException {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizMap.create({_view:view});");
+			code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
     		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 /*
 private void addImage(DynamicImage image) {
-code.append("BizDynamicImage.create({name:'");
+code.append("isc.BizDynamicImage.create({name:'");
 code.append(image.getName());
 code.append("',moduleDotDocument:'");
 code.append(document.getOwningModuleName());
@@ -713,7 +713,7 @@ code.append("_view:view})");
 										boolean parentEnabled) {
 			if (formVariable == null) {
 				String variable = "v" + variableCounter++;
-				code.append("var ").append(variable).append("=BizLabel.create({value: '");
+				code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
 				code.append(SmartClientGenerateUtils.processString(Util.i18n(button.getCommand(), locale)));
 				code.append("'});\n");
 				code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -746,7 +746,7 @@ code.append("_view:view})");
 		}
 
 		private void addImage(DynamicImage image) throws MetaDataException {
-			code.append("BizDynamicImage.create({name:'");
+			code.append("isc.BizDynamicImage.create({name:'");
 			code.append(image.getName());
 			code.append("',moduleDotDocument:'");
 			code.append(document.getOwningModuleName());
@@ -792,7 +792,7 @@ code.append("_view:view})");
 		}
 
 		private void addStaticImage(StaticImage image) {
-			code.append("BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
+			code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
 			code.append("',file:'").append(image.getRelativeFile()).append("',");
 			size(image, null, code);
 			removeTrailingComma(code);
@@ -803,7 +803,7 @@ code.append("_view:view})");
 		public void visitSpacer(Spacer spacer) throws MetaDataException {
 			if (formVariable == null) { // not a form
 				String variable = "v" + variableCounter++;
-				code.append("var ").append(variable).append("=LayoutSpacer.create(");
+				code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
 		        if ((spacer.getPixelWidth() != null) || spacer.getPixelHeight() != null) {
 		        	code.append('{');
 		        	size(spacer, null, code);
@@ -907,7 +907,7 @@ code.append("_view:view})");
 
 			if (formVariable == null) {
 				String variable = "v" + variableCounter++;
-				code.append("var ").append(variable).append("=BizLabel.create({");
+				code.append("var ").append(variable).append("=isc.BizLabel.create({");
 
 				size(label, null, code);
 				if (label.getPixelWidth() == null) { // default to whole width
@@ -987,7 +987,7 @@ code.append("_view:view})");
 */
 //TODO Make a value from CanvasItem.
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value: '");
+			code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
 			code.append(progressBar.getBinding());
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1015,7 +1015,7 @@ code.append("_view:view})");
 
 			dataGridDocument = module.getDocument(customer, documentName);
 			dataGridVariable = "v" + variableCounter++;
-			code.append("var ").append(dataGridVariable).append("=BizDataGrid.create({_mod:'");
+			code.append("var ").append(dataGridVariable).append("=isc.BizDataGrid.create({_mod:'");
 			code.append(dataGridDocument.getOwningModuleName());
 			code.append("',_doc:'");
 			code.append(dataGridDocument.getName());
@@ -1232,7 +1232,7 @@ code.append("_view:view})");
 			}
 			
 			listGridVariable = "v" + variableCounter++;
-			code.append("var ").append(listGridVariable).append("=BizListGrid.create({");
+			code.append("var ").append(listGridVariable).append("=isc.BizListGrid.create({");
 			if (tree) {
 				if (rootBinding != null) {
 					code.append("rootIdBinding:'").append(rootBinding.replace('.', '_')).append("',");
@@ -1321,7 +1321,7 @@ code.append("_view:view})");
 									boolean parentVisible,
 									boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value:'");
+			code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
 			code.append(SmartClientGenerateUtils.processString(Util.i18n(list.getTitle(), locale)));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1339,7 +1339,7 @@ code.append("_view:view})");
 											boolean parentVisible,
 											boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value:'");
+			code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
 			code.append(SmartClientGenerateUtils.processString(Util.i18n(column.getTitle(), locale)));
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1379,7 +1379,7 @@ code.append("_view:view})");
 											boolean parentVisible,
 											boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizLabel.create({value:'");
+			code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
 			code.append("check membership").append(membership.getBinding());
 			code.append("'});\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1562,7 +1562,7 @@ code.append("_view:view})");
 			Relation relation = (Relation) target.getAttribute();
 
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizListMembership.create({_b:'");
+			code.append("var ").append(variable).append("=isc.BizListMembership.create({_b:'");
 			code.append(membershipBinding.replace('.', '_'));
 			code.append('\'');
 			String heading = membership.getCandidatesHeading();
@@ -1605,7 +1605,7 @@ code.append("_view:view})");
 										boolean parentVisible,
 										boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
-			code.append("var ").append(variable).append("=BizComparison.create({_b:'");
+			code.append("var ").append(variable).append("=isc.BizComparison.create({_b:'");
 			code.append(comparison.getBinding().replace('.', '_'));
 			code.append("',_view:view,");
 			editable(comparison.getEditable(), code);
@@ -1898,7 +1898,7 @@ code.append("_view:view})");
 				// 2) optionCriteria:{}
 				// 3) optionFilterContext:{params{}}
 				// 4) getPickListFilterCriteria: function() {}
-				code.append("optionDataSource:BizUtil.PREVIOUS_VALUES_DATA_SOURCE,");
+				code.append("optionDataSource:isc.BizUtil.PREVIOUS_VALUES_DATA_SOURCE,");
 				code.append("optionFilterContext:{params:{").append(AbstractWebContext.MODULE_NAME).append(":'");
 				code.append(targetDocument.getOwningModuleName());
 				code.append("',").append(AbstractWebContext.DOCUMENT_NAME).append(":'").append(targetDocument.getName());
@@ -1970,7 +1970,7 @@ pickListFields:[{name:'value'}],
 			}
 			if (! viewHasAtLeastOneForm) {
 				String var = "v" + variableCounter++;
-				code.append("var ").append(var).append("=DynamicForm.create({invisibleConditionName:'true'});");
+				code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
 				code.append("view._vm.addMember(").append(var).append(");");
 				code.append("view.addContained(").append(var).append(");\n");
 			}
@@ -2740,12 +2740,12 @@ pickListFields:[{name:'value'}],
 				if (! user.canExecuteAction(document, actionName)) {
 					return null; // cannot execute this action
 				}
-				result.append("BizButton.create({validate:");
+				result.append("isc.BizButton.create({validate:");
 				result.append(! Boolean.FALSE.equals(clientValidation));
 				result.append(",actionName:'").append(actionName);
 			}
 			else {
-				result.append("BizButton.create({actionName:'");
+				result.append("isc.BizButton.create({actionName:'");
 				switch (implicitName) {
 				case Add:
 					if (! user.canCreateDocument(document)) {
@@ -3049,7 +3049,7 @@ pickListFields:[{name:'value'}],
 				pw.append(module.getName()).append('.').append(document.getName()).append(SmartClientWebContext.EDIT_ID_COUNTER).append("=0;");
 				pw.append(module.getName()).append('.').append(document.getName()).append(SmartClientWebContext.CREATE_ID_COUNTER).append("=0;");
 				pw.append(module.getName()).append(".create").append(document.getName()).append("=function(){");
-				pw.append("var view=EditView.create({width:'100%',height:'100%',title:'");
+				pw.append("var view=isc.EditView.create({width:'100%',height:'100%',title:'");
 				pw.append("',_mod:'").append(module.getName()).append("',_doc:'").append(document.getName());
 				String icon = editView.getIcon32x32RelativeFileName();
 				if (icon == null) {

@@ -80,17 +80,17 @@ isc.ListGrid.addProperties({
 var resizeTimerEvent = null;
 
 // register for page resize event to allow for resize of window stack
-Page.setEvent('resize', function() {
-	if (WindowStack) {
+isc.Page.setEvent('resize', function() {
+	if (isc.WindowStack) {
 		if (resizeTimerEvent) {
-			Timer.clearTimeout(resizeTimerEvent);
+			isc.Timer.clearTimeout(resizeTimerEvent);
 		}
-		resizeTimerEvent = Timer.setTimeout(WindowStack.resize, 50);
+		resizeTimerEvent = isc.Timer.setTimeout(isc.WindowStack.resize, 50);
 	}
 });
 
 // register new search operator types for spatial queries
-DataSource.addSearchOperator({ID:'gEquals',
+isc.DataSource.addSearchOperator({ID:'gEquals',
 	title: 'Equals',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -102,7 +102,7 @@ DataSource.addSearchOperator({ID:'gEquals',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gDisjoint',
+isc.DataSource.addSearchOperator({ID:'gDisjoint',
 	title: 'Disjoint',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -114,7 +114,7 @@ DataSource.addSearchOperator({ID:'gDisjoint',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gIntersects',
+isc.DataSource.addSearchOperator({ID:'gIntersects',
 	title: 'Intersects',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -126,7 +126,7 @@ DataSource.addSearchOperator({ID:'gIntersects',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gTouches',
+isc.DataSource.addSearchOperator({ID:'gTouches',
 	title: 'Touches',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -134,7 +134,7 @@ DataSource.addSearchOperator({ID:'gTouches',
 	compareCriteria: function(newCriterion, oldCriterion) {
 		return -1;
 	}});
-DataSource.addSearchOperator({ID:'gCrosses',
+isc.DataSource.addSearchOperator({ID:'gCrosses',
 	title: 'Crosses',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -146,7 +146,7 @@ DataSource.addSearchOperator({ID:'gCrosses',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gWithin',
+isc.DataSource.addSearchOperator({ID:'gWithin',
 	title: 'Within',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -155,7 +155,7 @@ DataSource.addSearchOperator({ID:'gWithin',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gContains',
+isc.DataSource.addSearchOperator({ID:'gContains',
 	title: 'Contains',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -167,7 +167,7 @@ DataSource.addSearchOperator({ID:'gContains',
 		return -1;
 	}
 });
-DataSource.addSearchOperator({ID:'gOverlaps',
+isc.DataSource.addSearchOperator({ID:'gOverlaps',
 	title: 'Overlaps',
 	fieldTypes:['geometry'],
 	valueType: 'fieldType',
@@ -214,9 +214,9 @@ isc.BizMap.addMethods({
 		}
 		else {
 			isc.BizMap.id = this.ID;
-			BizUtil.loadJS('wicket/wicket.js?v=' + BizUtil.version, function() {
-				BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + BizUtil.version, function() {
-					BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMap.initialise');
+			isc.BizUtil.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
+				isc.BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
+					isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMap.initialise');
 				});
 			});
 			return this.Super('draw', arguments);
@@ -365,7 +365,7 @@ isc.BizMap.addMethods({
 		}
 		
 		var wkt = new Wkt.Wkt();
-		var url = BizUtil.URL_PREFIX + 'map?';
+		var url = isc.BizUtil.URL_PREFIX + 'map?';
 /*
 		// set the map bounds
 		var bounds = wkt.write(this._map.getBounds());
@@ -395,7 +395,7 @@ isc.BizMap.addMethods({
 		this._refreshing = true;
 
 		var me = this;
-		RPCManager.sendRequest({
+		isc.RPCManager.sendRequest({
 			showPrompt: true,
 			evalResult: true,
 			actionURL: url,
@@ -618,13 +618,13 @@ isc.BizMap.addMethods({
 		var height = Math.floor((bottomRightWorldCoordinate.y - worldCoordinateNW.y) * scale) + pageRect[1] - y;
 		
 		var me = this;
-		BizUtil.getEditView(bizModule, 
-								bizDocument,
-								function(view) { // the view
-									WindowStack.popup([x, y, width, height], "Edit", true, [view]);
-									view.editInstance(bizId, null, null);
-									me._infoWindow.close();
-								});
+		isc.BizUtil.getEditView(bizModule, 
+									bizDocument,
+									function(view) { // the view
+										isc.WindowStack.popup([x, y, width, height], "Edit", true, [view]);
+										view.editInstance(bizId, null, null);
+										me._infoWindow.close();
+									});
 
 	}
 });
@@ -651,12 +651,12 @@ isc.BizUtil.addClassProperties({
 		fields: [{name: 'value', type: 'text'}]
 	})
 });
-BizUtil.URL_PREFIX = BizUtil.URL_PREFIX.substring(0, BizUtil.URL_PREFIX.lastIndexOf("/") + 1);
+isc.BizUtil.URL_PREFIX = isc.BizUtil.URL_PREFIX.substring(0, isc.BizUtil.URL_PREFIX.lastIndexOf("/") + 1);
 isc.BizUtil.addClassMethods({
 	_currentView: null, // the view currently displayed
 
 	getCurrentView: function() {
-		return BizUtil._currentView;
+		return isc.BizUtil._currentView;
 	},
 
 	loadJS: function(scriptPath, callback) {
@@ -712,7 +712,7 @@ isc.BizUtil.addClassMethods({
 		
 		// convert simple criteria to advanced criteria
 		if (result.operator) {} else {
-			result = DataSource.convertCriteria(result, 'substring');
+			result = isc.DataSource.convertCriteria(result, 'substring');
 		}
 
 		result = {_constructor: 'AdvancedCriteria', operator: 'and', criteria:[result]};
@@ -785,7 +785,7 @@ isc.BizUtil.addClassMethods({
 	},
 	
 	createUploadButton: function(contentFormItem) { // the item this upload button will live in
-		return BizUtil.createSplitButton(
+		return isc.BizUtil.createSplitButton(
 			'Upload', 
 			null, 
 			false, 
@@ -797,14 +797,14 @@ isc.BizUtil.addClassMethods({
 				if (contentFormItem.form._view._b) {
 					url += '&_b=' + contentFormItem.form._view._b.replaceAll('_', '.');
 				}
-				WindowStack.popup(null,
-									"Upload Content",
-									true,
-									[isc.HTMLPane.create({
-										contentsType: 'page',
-										contents: 'Loading Page...',
-										contentsURL: url
-									})]);
+				isc.WindowStack.popup(null,
+										"Upload Content",
+										true,
+										[isc.HTMLPane.create({
+											contentsType: 'page',
+											contents: 'Loading Page...',
+											contentsURL: url
+										})]);
 			},
 			'Other Options', 
 			null,
@@ -832,7 +832,7 @@ isc.BizUtil.addClassMethods({
 			getHoverHTML: function() {return "Select or search for a map location";},
 			click: function() {
 				var instance = editView.gather(false);
-				var url = BizUtil.URL_PREFIX;
+				var url = isc.BizUtil.URL_PREFIX;
 				url += 'pages/map/geolocate.jsp?';
 				if (latitudeBinding) {
 					var latitudeValue = instance[latitudeBinding];
@@ -867,14 +867,14 @@ isc.BizUtil.addClassMethods({
 					url += '_country=' + countryBinding + '&' + countryBinding + '=' + (countryValue ? countryValue : '') + '&';
 				}
 				
-				WindowStack.popup(null,
-									"Geo Locate",
-									true,
-									[isc.HTMLPane.create({
-										contentsType: 'page',
-										contents: 'Loading Page...',
-										contentsURL: url
-									})]);
+				isc.WindowStack.popup(null,
+										"Geo Locate",
+										true,
+										[isc.HTMLPane.create({
+											contentsType: 'page',
+											contents: 'Loading Page...',
+											contentsURL: url
+										})]);
 			}
 		});
 	},
@@ -884,18 +884,18 @@ isc.BizUtil.addClassMethods({
 							documentName,
 							onViewCreated) { // function with view as an argument
 		// place a module cache entry
-		if (BizUtil._modules[moduleName]) {
+		if (isc.BizUtil._modules[moduleName]) {
 			// do nothing - already exists
 		}
 		else {
-			BizUtil._modules[moduleName] = {};
+			isc.BizUtil._modules[moduleName] = {};
 			window[moduleName] = {};
 		}
 		
 		var view = null;
 		
 		// get one off the unused list
-		var documentEntry = BizUtil._modules[moduleName][documentName];
+		var documentEntry = isc.BizUtil._modules[moduleName][documentName];
 		if (documentEntry) { // have a document entry
 			// grab an unused view if available
 			view = documentEntry._unused.pop();
@@ -909,39 +909,39 @@ isc.BizUtil.addClassMethods({
 				view._documentName = documentName;
 			}
 			// put this one on the used list
-			BizUtil._modules[moduleName][documentName]._used.push(view);
+			isc.BizUtil._modules[moduleName][documentName]._used.push(view);
 			onViewCreated(view);
 		}
 		else {
-			RPCManager.sendRequest({
+			isc.RPCManager.sendRequest({
 				showPrompt: true,
 				evalResult: true,
-				actionURL: BizUtil.URL_PREFIX + "smartgen" + "?_mod=" + moduleName  + "&_doc=" + documentName,
+				actionURL: isc.BizUtil.URL_PREFIX + "smartgen" + "?_mod=" + moduleName  + "&_doc=" + documentName,
 				callback: function(rpcResponse, data, rpcRequest) {
 					// create the document entry structure
-					BizUtil._modules[moduleName][documentName] = {};
-					BizUtil._modules[moduleName][documentName]._used = []; // list of views in use
-					BizUtil._modules[moduleName][documentName]._unused = []; // list of views created but not in use
+					isc.BizUtil._modules[moduleName][documentName] = {};
+					isc.BizUtil._modules[moduleName][documentName]._used = []; // list of views in use
+					isc.BizUtil._modules[moduleName][documentName]._unused = []; // list of views created but not in use
 
 					// do a recursive call now that we have loaded the necessary javascript
-					BizUtil.getEditView(moduleName, documentName, onViewCreated);
+					isc.BizUtil.getEditView(moduleName, documentName, onViewCreated);
 				}
 			 });
 		}
 	},
 	
 	relinquishEditView: function(view) {
-		var documentEntry = BizUtil._modules[view._moduleName][view._documentName];
+		var documentEntry = isc.BizUtil._modules[view._moduleName][view._documentName];
 		documentEntry._used.remove(view);
 		documentEntry._unused.push(view);
 	},
 	
 	getPickList: function(lookupDescription, filterParams, view) {
-		var result = BizUtil._unusedPickLists.pop();
+		var result = isc.BizUtil._unusedPickLists.pop();
 		if (result) {
 		}
 		else {
-			result = BizListGrid.create({isPickList: true});
+			result = isc.BizListGrid.create({isPickList: true});
 		}
 		result.setLookup(lookupDescription, filterParams, view);
 		
@@ -951,7 +951,7 @@ isc.BizUtil.addClassMethods({
 	// put the pickList back onto the stack
 	relinquishPickList: function(pickList) {
 // TODO - why arent the fields defined when I used a cached BizListGrid
-//		BizUtil._unusedPickLists.push(pickList);
+//		isc.BizUtil._unusedPickLists.push(pickList);
 		pickList.destroy();
 	},
 	

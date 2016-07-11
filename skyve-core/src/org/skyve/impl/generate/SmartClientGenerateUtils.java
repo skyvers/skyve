@@ -616,7 +616,7 @@ public class SmartClientGenerateUtils {
 					result.append(",editorProperties:{allowEmptyValue:true}");
 				}
 				else if ("geometry".equals(type)) {
-	            	result.append(",formatCellValue:function(v){return GeometryItem.format(v)}");
+	            	result.append(",formatCellValue:function(v){return isc.GeometryItem.format(v)}");
 				}
 				else {
 					if ((mask != null) || (textBoxStyle != null)) {
@@ -1134,7 +1134,7 @@ public class SmartClientGenerateUtils {
 				result.append(",validOperators:['equals','notEqual']");
 			}
 			else if ("geometry".equals(type)) {
-				result.append(",validOperators:GeometryItem.validOperators");
+				result.append(",validOperators:isc.GeometryItem.validOperators");
 			}
 
 			return result.toString();

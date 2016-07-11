@@ -1,5 +1,5 @@
 isc.defineClass("ListView");
-ListView.addClassProperties({
+isc.ListView.addClassProperties({
 	// the heading HTML at the top of the list
 	// the template for the list view headers - has {title} and {link} in it
 	// this comes from the server renderer
@@ -15,32 +15,32 @@ ListView.addClassProperties({
 		margin: 2,
 		// rerender the opening view
 		rerender: function() {
-			if (ListView._grid && ListView._grid.isVisible()) {
-				ListView._grid.refresh();
+			if (isc.ListView._grid && isc.ListView._grid.isVisible()) {
+				isc.ListView._grid.refresh();
 			}
-			else if (ListView._calendar && ListView._calendar.isVisible()) {
-				ListView._calendar.refresh();
+			else if (isc.ListView._calendar && isc.ListView._calendar.isVisible()) {
+				isc.ListView._calendar.refresh();
 			}
-			else if (ListView._tree && ListView._tree.isVisible()) {
-				ListView._tree.refresh();
+			else if (isc.ListView._tree && isc.ListView._tree.isVisible()) {
+				isc.ListView._tree.refresh();
 			}
-			else if (ListView._map && ListView._map.isVisible()) {
-				ListView._map.rerender();
+			else if (isc.ListView._map && isc.ListView._map.isVisible()) {
+				isc.ListView._map.rerender();
 			}
 		},
 		// resume auto refresh
 		resume: function() {
-			if (ListView._grid && ListView._grid.isVisible()) {
-//				ListView._grid.resume();
+			if (isc.ListView._grid && isc.ListView._grid.isVisible()) {
+//				isc.ListView._grid.resume();
 			}
-			else if (ListView._calendar && ListView._calendar.isVisible()) {
-//				ListView._calendar.resume();
+			else if (isc.ListView._calendar && isc.ListView._calendar.isVisible()) {
+//				isc.ListView._calendar.resume();
 			}
-			else if (ListView._tree && ListView._tree.isVisible()) {
-//				ListView._tree.resume();
+			else if (isc.ListView._tree && isc.ListView._tree.isVisible()) {
+//				isc.ListView._tree.resume();
 			}
-			else if (ListView._map && ListView._map.isVisible()) {
-				ListView._map.resume();
+			else if (isc.ListView._map && isc.ListView._map.isVisible()) {
+				isc.ListView._map.resume();
 			}
 		}
 	}),
@@ -61,32 +61,32 @@ ListView.addClassProperties({
 
 	        	// derive the component required
 	        	if (leaf.ref == 'edit') {
-					BizUtil.getEditView(dragTarget.data.root.name, // module Name
-											leaf.name, // document name
-											function(view) { // the view
-												portlet.addItem(view);
-//												BizUtil._currentView = view;
-												view.newInstance(null, null, null, null, function() {view.hideMember(view._heading);});
-											});
+					isc.BizUtil.getEditView(dragTarget.data.root.name, // module Name
+												leaf.name, // document name
+												function(view) { // the view
+													portlet.addItem(view);
+//													isc.BizUtil._currentView = view;
+													view.newInstance(null, null, null, null, function() {view.hideMember(view._heading);});
+												});
 	        	}
 	        	else {
 		        	if (leaf.ref == 'grid') {
-		        		var grid = BizUtil.createListGrid();
+		        		var grid = isc.BizUtil.createListGrid();
 		        		portlet.addItem(grid);
 		        		grid.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
 					}
 					else if (leaf.ref == 'cal') {
-		        		var calendar = BizUtil.createCalendar();
+		        		var calendar = isc.BizUtil.createCalendar();
 		        		portlet.addItem(calendar);
 		        		calendar.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
 					}
 					else if (leaf.ref == 'tree') {
-		        		var tree = BizUtil.createTreeGrid();
+		        		var tree = isc.BizUtil.createTreeGrid();
 		        		portlet.addItem(tree);
 		        		tree.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
 					}
 					else if (leaf.ref == 'map') {
-		        		var map = BizUtil.createMap();
+		        		var map = isc.BizUtil.createMap();
 		        		portlet.addItem(map);
 		        		map.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
 					}
@@ -105,120 +105,120 @@ ListView.addClassProperties({
 	}),
 	
 	_setHeading: function(title, icon, modoc) {
-		var header = BizUtil.headerTemplate;
+		var header = isc.BizUtil.headerTemplate;
 		header = header.replace('{modoc}', modoc).replace('{icon}', icon).replace('{title}', title).replace('{link}', '');
-		ListView._heading.setContents(header);
+		isc.ListView._heading.setContents(header);
 	},
 	
 	// set the data source for the list view grid
 	setGridDataSource: function(ID) { // the ID of the data source
-		if (ListView._grid) {} else {
-			ListView._grid = BizUtil.createListGrid();
-			ListView.contents.addMember(ListView._grid);
+		if (isc.ListView._grid) {} else {
+			isc.ListView._grid = isc.BizUtil.createListGrid();
+			isc.ListView.contents.addMember(isc.ListView._grid);
 		}
-		if (ListView._calendar) {
-			ListView.contents.hideMember(ListView._calendar);
+		if (isc.ListView._calendar) {
+			isc.ListView.contents.hideMember(isc.ListView._calendar);
 		}
-		if (ListView._tree) {
-			ListView.contents.hideMember(ListView._tree);
+		if (isc.ListView._tree) {
+			isc.ListView.contents.hideMember(isc.ListView._tree);
 		}
-		if (ListView._map) {
-			ListView.contents.hideMember(ListView._map);
+		if (isc.ListView._map) {
+			isc.ListView.contents.hideMember(isc.ListView._map);
 		}
-		ListView.contents.hideMember(ListView._portal);
-		ListView.contents.showMember(ListView._grid);
+		isc.ListView.contents.hideMember(isc.ListView._portal);
+		isc.ListView.contents.showMember(isc.ListView._grid);
 		var ds = eval(ID);
-		ListView._setHeading(ListView._grid.setDataSource(ds), ds.icon, ds.modoc);
+		isc.ListView._setHeading(isc.ListView._grid.setDataSource(ds), ds.icon, ds.modoc);
 	},
 	
 	// set the data source for the list view calendar
 	setCalendarDataSource: function(ID) { // the ID of the data source
-		if (ListView._calendar) {} else {
-			ListView._calendar = BizUtil.createCalendar();
-			ListView.contents.addMember(ListView._calendar);
+		if (isc.ListView._calendar) {} else {
+			isc.ListView._calendar = isc.BizUtil.createCalendar();
+			isc.ListView.contents.addMember(isc.ListView._calendar);
 		}
-		if (ListView._grid) {
-			ListView.contents.hideMember(ListView._grid);
+		if (isc.ListView._grid) {
+			isc.ListView.contents.hideMember(isc.ListView._grid);
 		}
-		if (ListView._tree) {
-			ListView.contents.hideMember(ListView._tree);
+		if (isc.ListView._tree) {
+			isc.ListView.contents.hideMember(isc.ListView._tree);
 		}
-		if (ListView._map) {
-			ListView.contents.hideMember(ListView._map);
+		if (isc.ListView._map) {
+			isc.ListView.contents.hideMember(isc.ListView._map);
 		}
-		ListView.contents.hideMember(ListView._portal);
-		ListView.contents.showMember(ListView._calendar);
+		isc.ListView.contents.hideMember(isc.ListView._portal);
+		isc.ListView.contents.showMember(isc.ListView._calendar);
 
 		var ds = eval(ID);
-		ListView._calendar.setDataSource(ds);
-		ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
+		isc.ListView._calendar.setDataSource(ds);
+		isc.ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
 	},
 	
 	// set the data source for the list view tree
 	setTreeDataSource: function(ID) { // the ID of the data source
-		if (ListView._tree) {} else {
-			ListView._tree = BizUtil.createTreeGrid();
-			ListView.contents.addMember(ListView._tree);
+		if (isc.ListView._tree) {} else {
+			isc.ListView._tree = isc.BizUtil.createTreeGrid();
+			isc.ListView.contents.addMember(isc.ListView._tree);
 		}
-		if (ListView._grid) {
-			ListView.contents.hideMember(ListView._grid);
+		if (isc.ListView._grid) {
+			isc.ListView.contents.hideMember(isc.ListView._grid);
 		}
-		if (ListView._calendar) {
-			ListView.contents.hideMember(ListView._calendar);			
+		if (isc.ListView._calendar) {
+			isc.ListView.contents.hideMember(isc.ListView._calendar);			
 		}
-		if (ListView._map) {
-			ListView.contents.hideMember(ListView._map);
+		if (isc.ListView._map) {
+			isc.ListView.contents.hideMember(isc.ListView._map);
 		}
-		ListView.contents.hideMember(ListView._portal);
-		ListView.contents.showMember(ListView._tree);
+		isc.ListView.contents.hideMember(isc.ListView._portal);
+		isc.ListView.contents.showMember(isc.ListView._tree);
 
 		var ds = eval(ID);
-		ListView._setHeading(ListView._tree.setDataSource(ds), ds.icon, ds.modoc);
+		isc.ListView._setHeading(isc.ListView._tree.setDataSource(ds), ds.icon, ds.modoc);
 	},
 
 	// set the data source for the list view map
 	setMapDataSource: function(ID) { // the ID of the data source
-		if (ListView._map) {} else {
-			ListView._map = BizUtil.createMap();
-			ListView.contents.addMember(ListView._map);
+		if (isc.ListView._map) {} else {
+			isc.ListView._map = isc.BizUtil.createMap();
+			isc.ListView.contents.addMember(isc.ListView._map);
 		}
-		if (ListView._grid) {
-			ListView.contents.hideMember(ListView._grid);
+		if (isc.ListView._grid) {
+			isc.ListView.contents.hideMember(isc.ListView._grid);
 		}
-		if (ListView._calendar) {
-			ListView.contents.hideMember(ListView._calendar);			
+		if (isc.ListView._calendar) {
+			isc.ListView.contents.hideMember(isc.ListView._calendar);			
 		}
-		if (ListView._tree) {
-			ListView.contents.hideMember(ListView._tree);
+		if (isc.ListView._tree) {
+			isc.ListView.contents.hideMember(isc.ListView._tree);
 		}
-		ListView.contents.hideMember(ListView._portal);
-		ListView.contents.showMember(ListView._map);
+		isc.ListView.contents.hideMember(isc.ListView._portal);
+		isc.ListView.contents.showMember(isc.ListView._map);
 
 //		var ds = eval(ID);
-//		ListView._map.setDataSource(ds);
-//		ListView._setHeading("MAP", ds.icon, ds.modoc);
-		ListView._map.setDataSource(ID);
-		ListView._setHeading('MAP', 'shared/icons/Home.png', '');
+//		isc.ListView._map.setDataSource(ds);
+//		isc.ListView._setHeading("MAP", ds.icon, ds.modoc);
+		isc.ListView._map.setDataSource(ID);
+		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', '');
 	},
 	
 	showPortal: function() {
-		if (ListView._grid) {
-			ListView.contents.hideMember(ListView._grid);
+		if (isc.ListView._grid) {
+			isc.ListView.contents.hideMember(isc.ListView._grid);
 		}
-		if (ListView._calendar) {
-			ListView.contents.hideMember(ListView._calendar);			
+		if (isc.ListView._calendar) {
+			isc.ListView.contents.hideMember(isc.ListView._calendar);			
 		}
-		if (ListView._tree) {
-			ListView.contents.hideMember(ListView._tree);
+		if (isc.ListView._tree) {
+			isc.ListView.contents.hideMember(isc.ListView._tree);
 		}
-		if (ListView._map) {
-			ListView.contents.hideMember(ListView._map);
+		if (isc.ListView._map) {
+			isc.ListView.contents.hideMember(isc.ListView._map);
 		}
-		ListView.contents.showMember(ListView._portal);
+		isc.ListView.contents.showMember(isc.ListView._portal);
 
-		ListView._setHeading("DASHBOARD", "shared/icons/Home.png", '');
+		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", '');
 	}
 });
-ListView.contents.addMember(ListView._heading);
-ListView.contents.addMember(ListView._portal);
-ListView.contents.hideMember(ListView._portal);
+isc.ListView.contents.addMember(isc.ListView._heading);
+isc.ListView.contents.addMember(isc.ListView._portal);
+isc.ListView.contents.hideMember(isc.ListView._portal);

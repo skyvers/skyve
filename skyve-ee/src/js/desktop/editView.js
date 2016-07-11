@@ -1,7 +1,7 @@
 isc.ClassFactory.defineClass("BizContainer", "VLayout");
 // Properties
 // contained - an array of members added to this container
-BizContainer.addMethods({
+isc.BizContainer.addMethods({
 	initWidget: function () {
 		this.backgroundImage = 'background.png';
 		this.backgroundRepeat = 'repeat';
@@ -67,8 +67,8 @@ isc.EditView.addMethods({
 		
 		// init the values manager with the contained
 		var thisView = this;
-		this._vm = ValuesManager.create({
-			dataSource: EditView._DATA_SOURCE,
+		this._vm = isc.ValuesManager.create({
+			dataSource: isc.EditView._DATA_SOURCE,
 			handleHiddenValidationErrors: function(errors) { // map of item name to message or message[]
 				
 				// collect unique messages
@@ -88,7 +88,7 @@ isc.EditView.addMethods({
 							var grids = thisView._grids[gridBinding];
 							if (grids) {
 								var rowNum = parseInt(tokens[0].substring(lastUnderscore + 1));
-								if (isA.Number(rowNum)) {
+								if (isc.isA.Number(rowNum)) {
 									for (var gridID in grids) {
 										var grid = grids[gridID];
 										if (grid) {
@@ -406,7 +406,7 @@ isc.EditView.addMethods({
 					if (dsResponse.status >= 0) { // redundant success test
 						// if we came from a lookupDescription, this will be not null
 						var lookupDescription = null;
-						var opener = WindowStack.getOpener();
+						var opener = isc.WindowStack.getOpener();
 						
 						if (action == 'ZoomOut') {
 							var openerValues = opener.gather(false);
@@ -441,7 +441,7 @@ isc.EditView.addMethods({
 							var openerValue = openerValues[childBinding];
 							opener._source = childBinding;
 							if (isc.isAn.Array(openerValue)) { // we have zoomed in from a grid, so refresh the parent
-								WindowStack.popoff(true);
+								isc.WindowStack.popoff(true);
 								opener._source = null;
 								return;
 							}
@@ -480,33 +480,33 @@ isc.EditView.addMethods({
 								if (lookupDescription) {
 									if (instance.bizId) {
 										if (lookupDescription.bizEditedForServer) {
-											WindowStack.popoff(false); // don't rerender the opener view
+											isc.WindowStack.popoff(false); // don't rerender the opener view
 											lookupDescription.bizEditedForServer(lookupDescription.form,
 																					lookupDescription,
 																					data.bizId);
 											opener._source = null;
 										}
 										else {
-											WindowStack.popoff(true);
+											isc.WindowStack.popoff(true);
 											opener._source = null;
 										}
 									}
 									else {
 										if (lookupDescription.bizAddedForServer) {
-											WindowStack.popoff(false); // don't rerender the opener view
+											isc.WindowStack.popoff(false); // don't rerender the opener view
 											lookupDescription.bizAddedForServer(lookupDescription.form,
 																					lookupDescription,
 																					data.bizId);
 											opener._source = null;
 										}
 										else {
-											WindowStack.popoff(true);
+											isc.WindowStack.popoff(true);
 											opener._source = null;
 										}
 									}
 								}
 								else {
-									WindowStack.popoff(true); // rerender the opener view
+									isc.WindowStack.popoff(true); // rerender the opener view
 									opener._source = null;
 								}
 							}
@@ -535,13 +535,13 @@ isc.EditView.addMethods({
 	deleteInstance: function(successCallback) { // a function  to callback on when the operation is successful
 		var instance = this.gather(true); // validate
 		if (instance) {
-			EditView._DATA_SOURCE.removeData(
+			isc.EditView._DATA_SOURCE.removeData(
 				instance,
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
 							dsRequest) { // the request that was sent
 					if (dsResponse.status >= 0) { // redundant success test
-						WindowStack.popoff(true); // rerender the opener view
+						isc.WindowStack.popoff(true); // rerender the opener view
 
 						if (successCallback) {
 							successCallback(data);
@@ -633,7 +633,7 @@ isc.EditView.addMethods({
 					'&i=' + values.bizId + '" title="Link"><img src="images/menu_link.png"/></a>';
 		}
 		
-		var header = BizUtil.headerTemplate;
+		var header = isc.BizUtil.headerTemplate;
 		header = header.replace('{modoc}', this._mod + '.' + this._doc).replace('{icon}', this._icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
 
@@ -708,7 +708,7 @@ isc.EditView.addMethods({
 											row[name] = Date.parseSchemaDate(value);
 										}
 										else if (isTime) {
-											row[name] = Time.parseInput(value);
+											row[name] = isc.Time.parseInput(value);
 										}
 									}
 								}
@@ -745,7 +745,7 @@ isc.EditView.addMethods({
 			}
 		}
 
-		var onlyView = BizUtil.getCurrentView() == this;
+		var onlyView = isc.BizUtil.getCurrentView() == this;
 		
 		// enable/disable the actions on the form
 		var members = this._actionPanel.getMembers();
@@ -982,10 +982,10 @@ isc.EditView.addMethods({
 			this._enableDisable(contained, container, values);
 			var containedInvisible = invisible || this._showHide(contained, container, values, false);
 
-			if (isA.Function(contained.addContained)) {
+			if (isc.isA.Function(contained.addContained)) {
 				this._processWidgets(contained, containedInvisible, values, valueMaps);
 			}
-			if (isA.Function(contained.addBizTab)) { // tab pane
+			if (isc.isA.Function(contained.addBizTab)) { // tab pane
 				// hold the current tab pane
 				var selectedTab = contained.getSelectedTab();
 				var selectedTabPane = selectedTab ? selectedTab.pane : null;
@@ -1014,7 +1014,7 @@ isc.EditView.addMethods({
 				}
 			}
 
-			if (isA.Function(contained.getItems)) { // form
+			if (isc.isA.Function(contained.getItems)) { // form
 				// add/remove the form to/from the values manager if it is hidden/visible
 				if (containedInvisible) {
 					if (this._vm.members && this._vm.members.contains(contained)) { // is currently a member
@@ -1042,7 +1042,7 @@ isc.EditView.addMethods({
 							// if this item has an option data source, set the value map
 							if (item.optionDataSource) {
 								// is a previous values
-								if (item.optionDataSource == BizUtil.PREVIOUS_VALUES_DATA_SOURCE) {
+								if (item.optionDataSource == isc.BizUtil.PREVIOUS_VALUES_DATA_SOURCE) {
 									var valueMap = {};
 									valueMap[values[item.name]] = values[item.name];
 									item.setValueMap(valueMap);
@@ -1068,7 +1068,7 @@ isc.EditView.addMethods({
 					}
 				}
 			}
-			if (isA.Function(contained.rerender)) { // re-render (bound widgets and others that need a refresh)
+			if (isc.isA.Function(contained.rerender)) { // re-render (bound widgets and others that need a refresh)
 				contained.rerender();
 			}
 		}
@@ -1231,7 +1231,7 @@ isc.ClassFactory.defineClass("BizButton", "IButton");
 // hasDisabledIcon: false - Has a disabled icon?
 //
 // _view: null - The view that this button belongs to
-BizButton.addMethods({
+isc.BizButton.addMethods({
 	initWidget: function () {
 		this.autoFit = ! (arguments[0].width || arguments[0].height);
 		this.hasDisabledicon = false;
@@ -1283,20 +1283,20 @@ BizButton.addMethods({
 					this._view.saveInstance(this.actionName);
 				}
 				else {
-					var opener = WindowStack.getOpener();
-					WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action was taken
+					var opener = isc.WindowStack.getOpener();
+					isc.WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action was taken
 					opener._source = null;
 				}
 			}
 			else if (this.type == "C") { // Cancel on edit view and child edit view
 				var me = this;
 				var changedOnServer = this._view.gather(false)._changed;
-				var opener = WindowStack.getOpener();
+				var opener = isc.WindowStack.getOpener();
 				if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 					isc.ask('There are unsaved changes in the ' + this._view._singular + '.  Do you wish to cancel?',
 							function(value) {
 								if (value) {
-									WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+									isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
 									opener._source = null;
 								}
 							},
@@ -1304,7 +1304,7 @@ BizButton.addMethods({
 					);
 				}
 				else {
-					WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+					isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
 					opener._source = null;
 				}
 			}
@@ -1328,7 +1328,7 @@ BizButton.addMethods({
 				gridBinding = gridBinding.substring(gridBinding.lastIndexOf('.') + 1, 
 														gridBinding.lastIndexOf('ElementById'));
 
-				var opener = WindowStack.getOpener();
+				var opener = isc.WindowStack.getOpener();
 				if (opener) {
 					var openerListGrids = opener._grids[gridBinding];
 					if (openerListGrids) {
@@ -1345,10 +1345,10 @@ BizButton.addMethods({
 					}
 					opener._vm.setValue('_apply', true);
 				}
-				WindowStack.popoff(false); // don't rerender
+				isc.WindowStack.popoff(false); // don't rerender
 			}
 			else if (this.type == "P") { // Invoke a report
-				ReportDialog.popupReport(this._view, this.params);
+				isc.ReportDialog.popupReport(this._view, this.params);
 			}
 			else if (this.type == "X") { // BizExport
 				var instance = this._view.gather(false); // don't validate - saveInstance() call will validate below
@@ -1374,14 +1374,14 @@ BizButton.addMethods({
 						if (me._view._b) {
 							url += '&_b=' + me._view._b.replaceAll('_', '.');
 						}
-						WindowStack.popup(null,
-											"BizPort Import",
-											true,
-											[isc.HTMLPane.create({
-												contentsType: 'page',
-												contents: 'Loading Page...',
-												contentsURL: url
-											})]);
+						isc.WindowStack.popup(null,
+												"BizPort Import",
+												true,
+												[isc.HTMLPane.create({
+													contentsType: 'page',
+													contents: 'Loading Page...',
+													contentsURL: url
+												})]);
 					});
 				}
 			}
@@ -1409,14 +1409,14 @@ BizButton.addMethods({
 						if (me._view._b) {
 							url += '&_b=' + me._view._b.replaceAll('_', '.');
 						}
-						WindowStack.popup(null,
-											"Upload",
-											true,
-											[isc.HTMLPane.create({
-												contentsType: 'page',
-												contents: 'Loading Page...',
-												contentsURL: url
-											})]);
+						isc.WindowStack.popup(null,
+												"Upload",
+												true,
+												[isc.HTMLPane.create({
+													contentsType: 'page',
+													contents: 'Loading Page...',
+													contentsURL: url
+												})]);
 					});
 				}
 			}
@@ -1441,7 +1441,7 @@ BizButton.addMethods({
 isc.ClassFactory.defineClass("BizVBox", "VLayout");
 // contained: [] - the contained widgets
 // invisibleConditionName: null - the invisible condition 
-BizVBox.addMethods({
+isc.BizVBox.addMethods({
 	initWidget: function() {
 		this.contained = [];
 		this.Super("initWidget", arguments);
@@ -1457,7 +1457,7 @@ BizVBox.addMethods({
 isc.ClassFactory.defineClass("BizHBox", "HLayout");
 // contained: [] - the contained widgets
 // invisibleConditionName: null - the invisble condition 
-BizHBox.addMethods({
+isc.BizHBox.addMethods({
 	initWidget: function() {
 		this.contained = [];
 		this.Super("initWidget", arguments);
@@ -1476,7 +1476,7 @@ isc.ClassFactory.defineClass("BizTabPane", "TabSet");
 // height
 // tabs - defaults to []
 // bizTabs - the internal tab definitions, so we can show and hide tabs - defaults to []
-BizTabPane.addMethods({
+isc.BizTabPane.addMethods({
 	initWidget: function() {
 		this.tabs = [];
 		this.bizTabs = [];
@@ -1555,7 +1555,7 @@ isc.ClassFactory.defineClass("BizListMembership", "HLayout");
 // membersHeading: null, // title of members list
 // _view: null, // the containing view
 
-BizListMembership.addMethods({
+isc.BizListMembership.addMethods({
 	initWidget : function (config) {
 		this.membersMargin = 10;
 		this.height = "100%"; // need height to vertically centre the arrows
@@ -1690,7 +1690,7 @@ isc.ClassFactory.defineClass("BizComparison", "HLayout");
 // _view: null, // the containing view
 // editable: true/false // whether the thing has apply buttons and will post it's changes
 
-BizComparison.addMethods({
+isc.BizComparison.addMethods({
 	initWidget : function () {
 //		this.width = 100;
 //		this.height = '100%';
@@ -1772,7 +1772,7 @@ BizComparison.addMethods({
 			fields: []
 		});
 
-		BizUtil.loadJS('desktop/diff_match_patch.js?v=' + BizUtil.version, function() {
+		isc.BizUtil.loadJS('desktop/diff_match_patch.js?v=' + isc.BizUtil.version, function() {
 			me._comparisonForm.diff_match_patch = new diff_match_patch();
 			me._comparisonForm.diff_match_patch.Diff_EditCost = 4;
 		});
@@ -1903,7 +1903,7 @@ BizComparison.addMethods({
 						property.newValue = values[property.name];
 					}
 					isc.showPrompt('<span style="font-size:medium">Changes Applied</span>');
-					Timer.setTimeout("isc.clearPrompt()", 500);
+					isc.Timer.setTimeout("isc.clearPrompt()", 500);
 				}
 			});
 			fields.add({type: 'spacer', colSpan: 5, cellStyle: null, titleStyle: null, textBoxStyle: null});
@@ -1951,7 +1951,7 @@ BizComparison.addMethods({
 				var existing = result[binding];
 				if (existing) {
 					// not an array yet, so make it one; this can happen for unstructured audits with no metadata
-					if (! isAn.Array(existing)) {
+					if (! isc.isAn.Array(existing)) {
 						existing = [existing];
 					}
 					existing.add(childResult);
@@ -1995,7 +1995,7 @@ isc.ClassFactory.defineClass("BizDynamicImage", "VLayout");
 //	_heightSlider: null,
 //	_refreshButton: null,
 //	_img: null
-BizDynamicImage.addMethods({
+isc.BizDynamicImage.addMethods({
 	initWidget : function () {
 		this.overflow = 'hidden';
 
@@ -2072,9 +2072,9 @@ BizDynamicImage.addMethods({
 			this.hZoom = zoomLevel;
 			if (throttle) {
 				if (this.mouseWheelTimer) {
-					Timer.clear(this.mouseWheelTimer);
+					isc.Timer.clear(this.mouseWheelTimer);
 				}
-				this.mouseWheelTimer = Timer.setTimeout(this.ID + '.rerender()', 250);
+				this.mouseWheelTimer = isc.Timer.setTimeout(this.ID + '.rerender()', 250);
 			}
 			else {
 				this.rerender();
@@ -2083,11 +2083,11 @@ BizDynamicImage.addMethods({
 	},
 	
 	_open: function() {
-		var image = BizDynamicImage.create({name: this.name,
-												moduleDotDocument: this.moduleDotDocument,
-												format: this.format,
-												_view: this._view});
-		WindowStack.popup(null, "Image", true, [image]);
+		var image = isc.BizDynamicImage.create({name: this.name,
+													moduleDotDocument: this.moduleDotDocument,
+													format: this.format,
+													_view: this._view});
+		isc.WindowStack.popup(null, "Image", true, [image]);
 		image.rerender();
 	},
 	
@@ -2179,7 +2179,7 @@ isc.ClassFactory.defineClass("BizImage", "Img");
 // Properties
 // invisibleConditionName: null, // condition to evaluate
 // file: null, // for specifying a static file to display (when downloadFrom is 'resources')
-BizImage.addMethods({
+isc.BizImage.addMethods({
 	initWidget: function () {
 		this.imageType = "stretch";
 		this.src = "resources?_n=" + this.file + "&_doc=" + this.modoc + "&_b=null";
@@ -2197,7 +2197,7 @@ isc.ClassFactory.defineClass("BizLabel", "Label");
 // width, height: null, // pixel values
 // invisibleConditionName: null, // condition to evaluate
 // formatted: false
-BizLabel.addMethods({
+isc.BizLabel.addMethods({
 	initWidget : function () {
 		this.autoFit = ! (arguments[0].width || arguments[0].height);
 		if (this.value) {

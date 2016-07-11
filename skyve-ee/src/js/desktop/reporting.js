@@ -1,6 +1,6 @@
 // Reporting parameters
-ClassFactory.defineClass("ReportDialog");
-ReportDialog.addClassProperties({
+isc.ClassFactory.defineClass("ReportDialog");
+isc.ReportDialog.addClassProperties({
 	_pageFormats: {'LETTER': {width: 612, height: 792},
 					'NOTE':	{width: 540, height: 720},
 					'LEGAL': {width: 612, height: 1008},
@@ -88,7 +88,7 @@ ReportDialog.addClassProperties({
 	],
 	_valuesManager: isc.ValuesManager.create()
 });
-ReportDialog.addClassProperties({
+isc.ReportDialog.addClassProperties({
 	_columnList: isc.ListGrid.create({
 		width: "100%", 
 		height: "100%",
@@ -99,7 +99,7 @@ ReportDialog.addClassProperties({
 		autoFetchData: false,
 		leaveScrollbarGap: false,
 		showHeaderContextMenu: false,
-		fields: ReportDialog._available
+		fields: isc.ReportDialog._available
 	}),
 
 	_selectedColumnList: isc.ListGrid.create({
@@ -119,10 +119,10 @@ ReportDialog.addClassProperties({
 		preventDuplicates: true,
 		leaveScrollbarGap: false,
 		showHeaderContextMenu: false,
-		fields: ReportDialog._selected
+		fields: isc.ReportDialog._selected
 	})
 });
-ReportDialog.addClassProperties({
+isc.ReportDialog.addClassProperties({
 	// create a report format picklist
 	_createReportFormatPickList: function(colSpan, onChangeFunction) { // callback for onchange event
 		return {
@@ -168,12 +168,12 @@ ReportDialog.addClassProperties({
 		};
 	}
 });
-ReportDialog.addClassProperties({
+isc.ReportDialog.addClassProperties({
 	_columnSelectorLayout: isc.HLayout.create({
 		membersMargin: 10,
 		height: "100%", // need height to centre the arrow
 		members: [
-			ReportDialog._columnList,
+			isc.ReportDialog._columnList,
 			isc.VLayout.create({
 				layoutAlign: "center",
 				membersMargin: 10,
@@ -187,7 +187,7 @@ ReportDialog.addClassProperties({
 						showText: false, 
 						width: 32, 
 						height: 32, 
-						click: function() {ReportDialog._selectedColumnList.transferSelectedData(ReportDialog._columnList);},
+						click: function() {isc.ReportDialog._selectedColumnList.transferSelectedData(isc.ReportDialog._columnList);},
 						canHover: true,
 						getHoverHTML: function() {return "Move the selected columns into the report";}
 					}),
@@ -199,23 +199,23 @@ ReportDialog.addClassProperties({
 						showText: false,
 						width: 32, 
 						height: 32, 
-						click: function() {ReportDialog._columnList.transferSelectedData(ReportDialog._selectedColumnList);},
+						click: function() {isc.ReportDialog._columnList.transferSelectedData(isc.ReportDialog._selectedColumnList);},
 						canHover: true,
 						getHoverHTML: function() {return "Move the selected columns out of the report";}
 					})
 				]
 			}),
-			ReportDialog._selectedColumnList
+			isc.ReportDialog._selectedColumnList
 		]
 	}),
 
 	_reportFormatForm: isc.DynamicForm.create({
-		valuesManager: ReportDialog._valuesManager,
+		valuesManager: isc.ReportDialog._valuesManager,
 		numCols: 7,
 		colWidths: [60, 200, 40, 30, '*', 60, '*'],
 		padding: 15,
 		items: [
-	        ReportDialog._createReportFormatPickList(
+	        isc.ReportDialog._createReportFormatPickList(
 	        	3,
 	        	function(form, item, value, oldValue) {
 					if ((value == 'pdf') ||
@@ -254,17 +254,17 @@ ReportDialog.addClassProperties({
 				change: function(form, item, value, oldValue) {
 					if (value == "columnar") {
 						// hide table columns
-						ReportDialog._columnList.hideField("line");
-						ReportDialog._columnList.hideField("width");
-						ReportDialog._selectedColumnList.hideField("line");
-						ReportDialog._selectedColumnList.hideField("width");
+						isc.ReportDialog._columnList.hideField("line");
+						isc.ReportDialog._columnList.hideField("width");
+						isc.ReportDialog._selectedColumnList.hideField("line");
+						isc.ReportDialog._selectedColumnList.hideField("width");
 					}
 					else {
 						// show table columns
-						ReportDialog._columnList.showField("line");
-						ReportDialog._columnList.showField("width");
-						ReportDialog._selectedColumnList.showField("line");
-						ReportDialog._selectedColumnList.showField("width");
+						isc.ReportDialog._columnList.showField("line");
+						isc.ReportDialog._columnList.showField("width");
+						isc.ReportDialog._selectedColumnList.showField("line");
+						isc.ReportDialog._selectedColumnList.showField("width");
 					}
 				}
 			},
@@ -292,7 +292,7 @@ ReportDialog.addClassProperties({
 	}),
 	
 	_pageFormatForm: isc.DynamicForm.create({
-		valuesManager: ReportDialog._valuesManager,
+		valuesManager: isc.ReportDialog._valuesManager,
 		numCols: 10,
 		padding: 15,
 		items: [
@@ -334,12 +334,12 @@ ReportDialog.addClassProperties({
 				defaultValue: 'A4',
 				change: function(form, item, value, oldValue) {
 					if (form.getItem('orientation').getValue() == "portrait") {
-						form.getItem('width').setValue(ReportDialog._pageFormats[value].width);
-						form.getItem('height').setValue(ReportDialog._pageFormats[value].height);
+						form.getItem('width').setValue(isc.ReportDialog._pageFormats[value].width);
+						form.getItem('height').setValue(isc.ReportDialog._pageFormats[value].height);
 					}
 					else {
-						form.getItem('width').setValue(ReportDialog._pageFormats[value].height);
-						form.getItem('height').setValue(ReportDialog._pageFormats[value].width);
+						form.getItem('width').setValue(isc.ReportDialog._pageFormats[value].height);
+						form.getItem('height').setValue(isc.ReportDialog._pageFormats[value].width);
 					}
 				}
 			},
@@ -366,7 +366,7 @@ ReportDialog.addClassProperties({
 				min: 1,
 				max: 9999,
 				step: 1,
-				defaultValue: ReportDialog._pageFormats['A4'].width,
+				defaultValue: isc.ReportDialog._pageFormats['A4'].width,
 				validators: [{type: 'integerRange', min: 1, max: 9999}]
 			},
 			{name: 'height',
@@ -377,13 +377,13 @@ ReportDialog.addClassProperties({
 				min: 1,
 				max: 9999,
 				step: 1,
-				defaultValue: ReportDialog._pageFormats['A4'].height,
+				defaultValue: isc.ReportDialog._pageFormats['A4'].height,
 				validators: [{type: 'integerRange', min: 1, max: 9999}]
 			}
 		]
 	}),
 	_marginsForm: isc.DynamicForm.create({
-		valuesManager: ReportDialog._valuesManager,
+		valuesManager: isc.ReportDialog._valuesManager,
 		numCols: 8,
 		padding: 15,
 		items: [
@@ -486,8 +486,8 @@ ReportDialog.addClassProperties({
 	
 	// construct the interface
 	_createExport: function() {
-		if (ReportDialog._exportLayout == null) {
-			ReportDialog._exportLayout = isc.VLayout.create({
+		if (isc.ReportDialog._exportLayout == null) {
+			isc.ReportDialog._exportLayout = isc.VLayout.create({
 				backgroundImage: 'background.png',
 				backgroundRepeat: 'repeat',
 				height: "100%",
@@ -496,30 +496,30 @@ ReportDialog.addClassProperties({
 				margin: 5,
 				membersMargin: 5,
 				members: [
-			        ReportDialog._createReportPanel(
+			        isc.ReportDialog._createReportPanel(
 						isc.IButton.create({
 							title: 'Generate',
 							click: function() {
-								if (ReportDialog._valuesManager.validate()) {
-									var values = ReportDialog._valuesManager.getValues();
-									values.columns = ReportDialog._selectedColumnList.getData();
-									values.ds = ReportDialog._dataSourceID;
-									if (ReportDialog._criteria) {
-										values.criteria = ReportDialog._criteria;
+								if (isc.ReportDialog._valuesManager.validate()) {
+									var values = isc.ReportDialog._valuesManager.getValues();
+									values.columns = isc.ReportDialog._selectedColumnList.getData();
+									values.ds = isc.ReportDialog._dataSourceID;
+									if (isc.ReportDialog._criteria) {
+										values.criteria = isc.ReportDialog._criteria;
 									}
 
 									// Use a standard form POST, HTML/XHTML targeted to a blank window
-									var format = ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
-									var fileNameNoSuffix = ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
-									ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
-									if (ReportDialog._c) {
-										ReportDialog._submitForm.setValue('_c', ReportDialog._c);
+									var format = isc.ReportDialog._reportFormatForm.getItem("reportFormat").getValue();
+									var fileNameNoSuffix = isc.ReportDialog._reportFormatForm.getItem("fileNameNoSuffix").getValue();
+									isc.ReportDialog._submitForm.setValue('values', isc.JSON.encode(values, {prettyPrint:false}));
+									if (isc.ReportDialog._c) {
+										isc.ReportDialog._submitForm.setValue('_c', isc.ReportDialog._c);
 									}
-									ReportDialog._submitForm.setAction('export/' + fileNameNoSuffix + '.' + format);
-									ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
+									isc.ReportDialog._submitForm.setAction('export/' + fileNameNoSuffix + '.' + format);
+									isc.ReportDialog._submitForm.setTarget(((format === 'html') || (format === 'xhtml')) ?
 																		'_blank' :
 																		'_self');
-									ReportDialog._submitForm.submitForm();
+									isc.ReportDialog._submitForm.submitForm();
 								}
 							}
 						}),
@@ -537,7 +537,7 @@ ReportDialog.addClassProperties({
 															groupLabelStyleName:'bizhubBorderLabel',
 															backgroundImage: 'background.png',
 															backgroundRepeat: 'repeat',
-															members: [ReportDialog._reportFormatForm]}), 
+															members: [isc.ReportDialog._reportFormatForm]}), 
 										isc.VLayout.create({isGroup: true,
 																groupTitle: 'Page Format',
 																styleName: 'bizhubRoundedBorder',
@@ -547,7 +547,7 @@ ReportDialog.addClassProperties({
 																groupLabelStyleName:'bizhubBorderLabel',
 																backgroundImage: 'background.png',
 																backgroundRepeat: 'repeat',
-																members: [ReportDialog._pageFormatForm]}),
+																members: [isc.ReportDialog._pageFormatForm]}),
 										isc.VLayout.create({isGroup: true,
 																groupTitle: 'Margins',
 																styleName: 'bizhubRoundedBorder',
@@ -557,10 +557,10 @@ ReportDialog.addClassProperties({
 																groupLabelStyleName:'bizhubBorderLabel',
 																backgroundImage: 'background.png',
 																backgroundRepeat: 'repeat',
-																members: [ReportDialog._marginsForm]})]
+																members: [isc.ReportDialog._marginsForm]})]
 						})
 					),
-					ReportDialog._columnSelectorLayout
+					isc.ReportDialog._columnSelectorLayout
 				]
 			});
 		}
@@ -571,21 +571,21 @@ ReportDialog.addClassProperties({
 							criteria, // the criteria to apply to the server-side query or model
 							unselectedFields, // data for the unselected fields in field selection list grids
 							selectedFields) { // data for the selected fields in field selection list grids
-		ReportDialog._createExport();
+		isc.ReportDialog._createExport();
 		
-		ReportDialog._dataSourceID = dataSourceID;
-		ReportDialog._c = _c;
-		ReportDialog._criteria = criteria;
-		ReportDialog._columnList.setData(unselectedFields);
-		ReportDialog._selectedColumnList.setData(selectedFields);
+		isc.ReportDialog._dataSourceID = dataSourceID;
+		isc.ReportDialog._c = _c;
+		isc.ReportDialog._criteria = criteria;
+		isc.ReportDialog._columnList.setData(unselectedFields);
+		isc.ReportDialog._selectedColumnList.setData(selectedFields);
 		
-		WindowStack.popup(null, "Reporting", true, [ReportDialog._exportLayout]);
+		isc.WindowStack.popup(null, "Reporting", true, [isc.ReportDialog._exportLayout]);
 	},
 	
 	popupReport: function(view, // view
 							params) { // param names
-		if (ReportDialog._reportLayout == null) {
-			ReportDialog._reportLayout = ReportDialog._createReportPanel(
+		if (isc.ReportDialog._reportLayout == null) {
+			isc.ReportDialog._reportLayout = isc.ReportDialog._createReportPanel(
 				isc.IButton.create({
 					title: 'View',
 					ID: '_reportViewButton',
@@ -625,7 +625,7 @@ ReportDialog.addClassProperties({
 					fields: [
 				        {type:'rowSpacer'}, 
 				        {type:'rowSpacer'},
-					    ReportDialog._createReportFormatPickList(
+					    isc.ReportDialog._createReportFormatPickList(
 					    	1,
 				    		function(form, item, value, oldValue) {
 				    			// do nothing
@@ -637,6 +637,6 @@ ReportDialog.addClassProperties({
 		
 		_reportViewButton._view = view;
 		_reportViewButton._params = params;
-		WindowStack.popup(null, "Report", true, [ReportDialog._reportLayout], 180, 480);
+		isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._reportLayout], 180, 480);
 	}
 });

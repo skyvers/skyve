@@ -63,12 +63,12 @@
 						if (inout) {
 							inout.destroy();
 						}
-						inout = HTMLPane.create({width:'100%',
-													height:'100%',
-													contentsType:'page',
-													contentsURL:'whosinIntegrate/inout.xhtml',
-													contentsURLParams: {i: view._vm.getValue('bizId')}});
-						WindowStack.popup(null, 'In/Out', true, [inout], null, null, true);
+						inout = isc.HTMLPane.create({width:'100%',
+														height:'100%',
+														contentsType:'page',
+														contentsURL:'whosinIntegrate/inout.xhtml',
+														contentsURLParams: {i: view._vm.getValue('bizId')}});
+						isc.WindowStack.popup(null, 'In/Out', true, [inout], null, null, true);
 					}
 				});
 				v3.addContained(isc.LayoutSpacer.create({width: 100}));
@@ -80,4 +80,3 @@
         <defaults/>
     </actions>
 </view>
-

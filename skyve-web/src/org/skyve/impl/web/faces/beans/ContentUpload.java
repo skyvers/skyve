@@ -178,8 +178,8 @@ public class ContentUpload extends Localisable {
 			// update the content UUID value on the client and popoff the window on the stack
 			RequestContext rc = RequestContext.getCurrentInstance();
 			StringBuilder js = new StringBuilder(128);
-			js.append("top.WindowStack.getOpener()._vm.setValue('").append(contentBinding.replace('.', '_'));
-			js.append("','").append(contentId).append("');top.WindowStack.popoff(false);");
+			js.append("top.isc.WindowStack.getOpener()._vm.setValue('").append(contentBinding.replace('.', '_'));
+			js.append("','").append(contentId).append("');top.isc.WindowStack.popoff(false);");
 	        rc.execute(js.toString());
 		}
 		catch (Exception e) {
