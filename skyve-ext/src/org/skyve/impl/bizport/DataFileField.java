@@ -1,6 +1,7 @@
 package org.skyve.impl.bizport;
 
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.metadata.model.Attribute;
 
 /**
  * FieldLoader is a definition of how a data field will be loaded 
@@ -33,13 +34,23 @@ public class DataFileField {
 	//whether to treat a numeric value as 0
 	private boolean treatEmptyNumericAsZero = false;
 	
-	private Converter converter;
+	private Converter<?> converter;
 	
-	public Converter getConverter() {
+	private Attribute attribute;
+		
+	public Attribute getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(Attribute attribute) {
+		this.attribute = attribute;
+	}
+
+	public Converter<?> getConverter() {
 		return converter;
 	}
 
-	public void setConverter(Converter converter) {
+	public void setConverter(Converter<?> converter) {
 		this.converter = converter;
 	}
 
@@ -92,21 +103,21 @@ public class DataFileField {
 		this.binding = binding;
 		this.loadAction = LoadAction.SET_VALUE;
 		this.required=  false;
-		this.index = index;
+		this.index = new Integer(index);
 	}
 	
 	public DataFileField(String binding, LoadAction loadAction, boolean required, int index) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;
-		this.index = index;
+		this.index = new Integer(index);
 	}
 
-	public DataFileField(String binding, LoadAction loadAction, boolean required, int index, Converter converter) {
+	public DataFileField(String binding, LoadAction loadAction, boolean required, int index, Converter<?> converter) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;
-		this.index = index;
+		this.index = new Integer(index);
 		this.converter = converter;
 	}
 

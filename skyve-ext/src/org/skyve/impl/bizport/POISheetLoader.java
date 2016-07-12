@@ -20,8 +20,6 @@ import org.skyve.util.Util;
 
 public class POISheetLoader extends AbstractDataFileLoader {
 
-	private StringBuilder what;
-
 	private Workbook workbook;
 	private Sheet sheet;
 	private Row row;
@@ -48,8 +46,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		workbook = WorkbookFactory.create(fileInputStream);
 		sheet = workbook.getSheetAt(sheetIndex);
-		what = new StringBuilder();
-
+	
 		// set values
 		this.pers = CORE.getPersistence();
 		this.user = pers.getUser();
@@ -80,13 +77,10 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 *            - the specific bindings in corresponding order to the columns/fields being loaded
 	 */
 	public POISheetLoader(LoaderActivityType activityType, InputStream fileInputStream, int sheetIndex, BizPortException exception,
-			String moduleName, String documentName,
-			String... bindings) throws Exception {
+			String moduleName, String documentName) throws Exception {
 
 		this(fileInputStream, sheetIndex, moduleName, documentName, exception);
 		this.setActivityType(activityType);
-
-		addFields(bindings);
 	}
 
 
@@ -129,12 +123,15 @@ public class POISheetLoader extends AbstractDataFileLoader {
 		
 		boolean foundNonEmpty = false;
 		for (DataFileField field : fields) {
-			String val = getStringFieldValue(field.getIndex(), true);
+			if(field.getIndex()==null){
+				field.setIndex(new Integer(0));
+			}
+			String val = getStringFieldValue(field.getIndex().intValue(), true);
 			if (val != null && val.trim().length() > 0) {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
-				Util.LOGGER.info(getWhere(field.getIndex()) + " No value was found at this location.");
+				Util.LOGGER.info(getWhere(field.getIndex().intValue()) + " No value was found at this location.");
 			}
 		}
 		
