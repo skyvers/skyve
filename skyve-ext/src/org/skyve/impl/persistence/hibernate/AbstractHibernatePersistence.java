@@ -319,7 +319,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		try {
-	        try (Statement statement = connection.createStatement()) {
+			connection.setAutoCommit(true);
+			try (Statement statement = connection.createStatement()) {
 	            Dialect dialect = Dialect.getDialect(cfg.getProperties());
 	            DatabaseMetadata meta = new DatabaseMetadata( connection, dialect );
 	            Mapping mapping = cfg.buildMapping();
