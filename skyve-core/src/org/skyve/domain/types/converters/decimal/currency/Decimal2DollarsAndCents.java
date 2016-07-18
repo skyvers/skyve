@@ -22,9 +22,13 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 
 	@Override
 	public Decimal2 fromDisplayValue(String displayValue) throws Exception {
+		String numberValue = displayValue;
+		if(displayValue.startsWith("$")){
+			numberValue = displayValue.substring(1).trim();
+		}
 		DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 		df.setParseBigDecimal(true);
-		return new Decimal2((BigDecimal) df.parse(displayValue));
+		return new Decimal2((BigDecimal) df.parse(numberValue));
 	}
 
 	@Override

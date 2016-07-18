@@ -22,9 +22,13 @@ public class Decimal5DollarsAndCents implements Converter<Decimal5> {
 
 	@Override
 	public Decimal5 fromDisplayValue(String displayValue) throws Exception {
+		String numberValue = displayValue;
+		if(displayValue.startsWith("$")){
+			numberValue = displayValue.substring(1).trim();
+		}
 		DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 		df.setParseBigDecimal(true);
-		return new Decimal5((BigDecimal) df.parse(displayValue));
+		return new Decimal5((BigDecimal) df.parse(numberValue));
 	}
 
 	@Override
