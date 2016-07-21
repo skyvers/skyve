@@ -38,6 +38,7 @@ public class ThemeCharter {
 	private static final String THEME_FONT_NAME = "Arial";
 	private static final int THEME_NORMAL_FONT_SIZE = 12;
 	private static final int THEME_HEADER_FONT_SIZE = 14;
+	private static final Font THEME_LEGEND_FONT = new Font(THEME_FONT_NAME, Font.PLAIN, THEME_NORMAL_FONT_SIZE);
 	private static final Font THEME_TITLE_FONT = new Font(THEME_FONT_NAME, Font.BOLD, THEME_NORMAL_FONT_SIZE);
 	private static final Font THEME_RANGE_FONT = new Font(THEME_FONT_NAME, Font.PLAIN, THEME_HEADER_FONT_SIZE);
 	private static final Font THEME_DOMAIN_FONT = new Font(THEME_FONT_NAME, Font.PLAIN, THEME_NORMAL_FONT_SIZE);
@@ -160,6 +161,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
 			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
+			chart.getLegend().setItemFont(THEME_LEGEND_FONT);
 			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
@@ -223,6 +225,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
 			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
+			chart.getLegend().setItemFont(THEME_LEGEND_FONT);
 			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
@@ -286,6 +289,7 @@ public class ThemeCharter {
 			plot.getDomainAxis().setLabelFont(THEME_DOMAIN_FONT);
 			plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 
+			chart.getLegend().setItemFont(THEME_LEGEND_FONT);
 			chart.getLegend().setVisible(showLegend);
 
 			return chart.createBufferedImage(width, height);
@@ -305,7 +309,7 @@ public class ThemeCharter {
 		return null;
 	}
 
-	public BufferedImage getPieChartImage(Integer labelColumn, int width, int height, ChartAspect aspect, boolean showLegend) throws Exception {
+	public BufferedImage getPieChartImage(String title, Integer labelColumn, int width, int height, ChartAspect aspect, boolean showLegend) throws Exception {
 		Connection connection = null;
 		try {
 
@@ -313,9 +317,9 @@ public class ThemeCharter {
 			JDBCPieDataset data = new JDBCPieDataset(connection, this.sql);
 			JFreeChart chart;
 			if (ChartAspect.THREE_D.equals(aspect)) {
-				chart = ChartFactory.createPieChart3D(EMPTY_STRING, data, true, false, false);
+				chart = ChartFactory.createPieChart3D(title, data, true, false, false);
 			} else {
-				chart = ChartFactory.createPieChart(EMPTY_STRING, data, true, false, false);
+				chart = ChartFactory.createPieChart(title, data, true, false, false);
 			}
 			chart.setBackgroundImageAlpha(0.0F);
 			chart.getPlot().setBackgroundAlpha(0.0F);
@@ -339,6 +343,9 @@ public class ThemeCharter {
 				plot.setSectionPaint(plot.getDataset().getKey(seriesIndex), colouriser.getCurrent());
 				colouriser.nextColour();
 			}
+			
+			TextTitle textTitle = chart.getTitle();
+			textTitle.setFont(THEME_TITLE_FONT);
 
 			plot.setSectionOutlinesVisible(true);
 			plot.setBaseSectionOutlinePaint(new Color(0xFFFFFF));
@@ -346,6 +353,8 @@ public class ThemeCharter {
 
 			if (!showLegend) {
 				chart.removeLegend();
+			} else {
+				chart.getLegend().setItemFont(THEME_LEGEND_FONT);				
 			}
 
 			return chart.createBufferedImage(width, height);

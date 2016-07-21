@@ -24,7 +24,7 @@ public class ActivityContext implements DynamicImage<SystemDashboard> {
 	public static BufferedImage getActivityContextPieImage(modules.admin.domain.User adminUser, int width, int height, User user) throws Exception {
 		ThemeCharter charter = new ThemeCharter();
 		charter.setSql(getActivityContextSQL(user, adminUser));
-		return charter.getPieChartImage(new Integer(0), width, height, ChartAspect.FLAT, false);
+		return charter.getPieChartImage("",new Integer(0), width, height, ChartAspect.FLAT, false);
 	}
 
 	@Override
