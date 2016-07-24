@@ -1,41 +1,36 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:pm="http://primefaces.org/mobile"
-	xmlns:s="http://skyve.org/xml/ui"
-	xmlns:pe="http://primefaces.org/ui/extensions"
-	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-	dir="#{unsubscribe.dir}">
-<f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{unsubscribe.encoding}">
-	<pe:importEnum type="org.skyve.web.WebAction" var="WebAction"
-		allSuffix="ALL_ENUM_VALUES" />
-	<f:metadata>
-		<f:event type="preRenderView" listener="#{unsubscribe.preRender}" />
-	</f:metadata>
-	<ui:composition template="phone/template.xhtml">
-		<ui:param name="baseHref" value="#{unsubscribe.baseHref}" />
-		<ui:param name="skyveVersionComment"
-			value="#{unsubscribe.skyveVersionComment}" />
-		<ui:param name="javascriptFileVersion"
-			value="#{unsubscribe.javascriptFileVersion}" />
-		<ui:define name="pages">
-			<pm:page id="main">
-				<pm:header fixed="true" pt:data-tap-toggle="false"
-					title="#{unsubscribe.i18n['page.unsubscribe.title']}">
-				</pm:header>
-				<pm:content>
-					<h:panelGroup rendered="#{unsubscribe.success}">
-						<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.success']}</h1>
-					</h:panelGroup>
-					<h:panelGroup rendered="#{not unsubscribe.success}">
-						<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.error']}</h1>
-					</h:panelGroup>
-				</pm:content>
-			</pm:page>
-		</ui:define>
-	</ui:composition>
-</f:view>
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pm="http://primefaces.org/mobile"
+		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+		dir="#{unsubscribe.dir}">
+	<f:view renderKitId="PRIMEFACES_MOBILE" encoding="#{unsubscribe.encoding}">
+		<p:importEnum type="org.skyve.web.WebAction" var="WebAction" allSuffix="ALL_ENUM_VALUES" />
+		<f:metadata>
+			<f:event type="preRenderView" listener="#{unsubscribe.preRender}" />
+		</f:metadata>
+		<ui:composition template="phone/template.xhtml">
+			<ui:param name="baseHref" value="#{unsubscribe.baseHref}" />
+			<ui:param name="skyveVersionComment" value="#{unsubscribe.skyveVersionComment}" />
+			<ui:param name="javascriptFileVersion" value="#{unsubscribe.javascriptFileVersion}" />
+			<ui:define name="pages">
+				<pm:page id="main">
+					<pm:header fixed="true" pt:data-tap-toggle="false" title="#{unsubscribe.i18n['page.unsubscribe.title']}" />
+					<pm:content>
+						<h:panelGroup rendered="#{unsubscribe.success}">
+							<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.success']}</h1>
+						</h:panelGroup>
+						<h:panelGroup rendered="#{not unsubscribe.success}">
+							<h1 style="text-align: center">#{unsubscribe.i18n['page.unsubscribe.error']}</h1>
+						</h:panelGroup>
+					</pm:content>
+				</pm:page>
+			</ui:define>
+		</ui:composition>
+	</f:view>
 </html>
