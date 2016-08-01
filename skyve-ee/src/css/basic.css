@@ -270,7 +270,6 @@ a.buttonlink {
 	filter: alpha(opacity = 100);
 }
 
-
 input[type=submit] {
 	border: 1px solid #cccccc;
 	box-shadow: 3px 3px 2px #dddddd;
@@ -281,4 +280,9 @@ input[type=submit] {
 	color: white;
 	font-family: Arial, Verdana, sans-serif;
 	font-weight: normal
+}
+
+/* Primefaces style overrides */
+.ui-growl {
+	z-index: 300000 !important;
 }

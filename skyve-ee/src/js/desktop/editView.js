@@ -1270,10 +1270,14 @@ isc.BizButton.addMethods({
 		this._click = function() {
 			// New and Edit are list view actions
 			if (this.type == "O") { // OK on edit view
-				this._view.saveInstance(this.actionName);
+				this._view.saveInstance(this.actionName, function() {
+//					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
+				});
 			}
 			else if (this.type == "S") { // Save on edit view
-				this._view.saveInstance(this.actionName);
+				this._view.saveInstance(this.actionName, function() {
+//					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
+				});
 			}
 			else if (this.type == "A") { // Add on child edit view
 			}
@@ -1481,7 +1485,9 @@ isc.BizTabPane.addMethods({
 		this.tabs = [];
 		this.bizTabs = [];
 		this.destroyPanes = false; // dont destroy the tab panes when we remove them - show & hide
-		this.tabBarThickness = 30; // height
+		if (this.tabBarThickness) {} else {
+			this.tabBarThickness = 30; // height
+		}
 		this.Super("initWidget", arguments);
 	},
 	
@@ -1497,6 +1503,7 @@ isc.BizTabPane.addMethods({
 		this.addTab({name: bizTab.name,
 						title: bizTab.title,
 						icon: bizTab.icon,
+						prompt: bizTab.prompt,
 						pane: bizTab.pane,
 						disabledConditionName: bizTab.disabledConditionName,
 						invisibleConditionName: bizTab.invisibleConditionName,

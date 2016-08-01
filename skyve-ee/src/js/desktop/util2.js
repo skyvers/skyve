@@ -979,5 +979,9 @@ isc.BizUtil.addClassMethods({
 								name, 
 								'width=' + width + ',height=' + height + ',resizable=yes,scrollbars=no,toolbar=no,location=no,directories=no,status=yes,menubar=no,copyhistory=no'); 
 		win.focus();
+	},
+	
+	growl: function(severity, summary, detail) {
+		PrimeFaces.cw('Growl', 'growl', {id:'growl', widgetVar:'growl', life:6000, msgs:[{summary: summary, detail: detail, severity: severity}]});
 	}
 });

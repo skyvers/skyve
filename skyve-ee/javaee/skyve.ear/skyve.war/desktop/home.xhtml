@@ -4,7 +4,6 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		dir="#{desktop.dir}">
- 	<!-- Cannot use primefaces with smartclient 11 -->
     <f:view contentType="text/html" encoding="#{desktop.encoding}">
 		<f:metadata>
 			<f:viewParam name="m" value="#{desktop.bizModuleParameter}" />
@@ -27,11 +26,6 @@
 			<title>Skyve</title>
 			<h:outputText value="#{desktop.skyveVersionComment}" escape="false" />			
 			<link rel="stylesheet" type="text/css" href="#{desktop.cssRelativeFileNameUrl}" />
-			<style>
-				.ui-growl {
-					z-index: 300000 !important;
-				}
-			</style>
 		</h:head>
 		<h:body bgcolor="#e0e0e0" marginheight="0" marginwidth="0" leftmargin="0" topmargin="0">
 			<p:growl id="growl" widgetVar="growl" globalOnly="true" />
