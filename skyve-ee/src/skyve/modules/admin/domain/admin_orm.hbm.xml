@@ -126,7 +126,6 @@
 		<property name="email1" length="500" />
 		<property name="mobile" length="20" />
 		<property name="image" length="36" />
-		<property name="resume" length="36" />
 		<filter name="adminContactNoneFilter" condition="1=0"/>
 		<filter name="adminContactCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminContactDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
