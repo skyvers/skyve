@@ -124,7 +124,7 @@ class ViewValidator extends ViewVisitor {
 									boolean domainValuesRequired,
 									boolean scalarBindingOnly,
 									String widgetidentifier,
-									AttributeType assertType)
+									AttributeType... assertTypes)
 	throws MetaDataException {
 		if (bindingRequired && (binding == null)) {
 			throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - binding is required.");
@@ -164,17 +164,31 @@ class ViewValidator extends ViewVisitor {
 				throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - Binding points nowhere");
 			}
 			Attribute attribute = target.getAttribute();
-			if ((assertType != null) || domainValuesRequired) {
+			if (((assertTypes != null) && (assertTypes.length > 0)) || domainValuesRequired) {
 				if (attribute == null) {
 					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + 
 													" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
 				}
 			}
 			
-			if (assertType != null) {
-				if (! assertType.equals(attribute.getAttributeType())) {
-					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + 
-													" - Binding points to an attribute of type " + attribute.getAttributeType() + ", not " + assertType + ".");
+			if ((assertTypes != null) && (assertTypes.length > 0)) {
+				AttributeType type = attribute.getAttributeType();
+				boolean typeMatch = false;
+				for (AttributeType assertType : assertTypes) {
+					if (assertType.equals(type)) {
+						typeMatch = true;
+						break;
+					}
+				}
+				if (! typeMatch) {
+					StringBuilder msg = new StringBuilder(128);
+					msg.append(widgetidentifier).append(" in ").append(viewIdentifier);
+					msg.append(" - Binding points to an attribute of type ").append(type).append(", not one of ");
+					for (AttributeType assertType : assertTypes) {
+						msg.append(assertType).append(", ");
+					}
+					msg.setLength(msg.length() - 2); // remove last comma
+					msg.append('.');
 				}
 			}
 			
@@ -188,12 +202,14 @@ class ViewValidator extends ViewVisitor {
 			// Can only check this if the attribute is defined.
 			// Bindings to implicit attributes are always scalar.
 			// NB check assert type in outer if coz we dont need to do the test if we are asserting a type
-			if (scalarBindingOnly && (assertType == null) && (attribute != null)) {
+			if (scalarBindingOnly && ((assertTypes == null) || (assertTypes.length == 0)) && (attribute != null)) {
 				AttributeType type = attribute.getAttributeType();
 				if (AttributeType.association.equals(type) || 
-						AttributeType.collection.equals(type)) {
+						AttributeType.collection.equals(type) || 
+						AttributeType.inverseMany.equals(type) ||
+						AttributeType.inverseOne.equals(type)) {
 					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier +
-													" - Binding points to an attribute that is not scalar (pointing to an association or collection)");
+													" - Binding points to an attribute that is not scalar (pointing to an association or collection or inverse)");
 				}
 			}
 		}
@@ -249,8 +265,7 @@ class ViewValidator extends ViewVisitor {
 									false,
 									false,
 									false,
-									"Parameter " + parameter.getName() + " in " + parentWidgetIdentifier,
-									null);
+									"Parameter " + parameter.getName() + " in " + parentWidgetIdentifier);
 			}
 		}
 	}
@@ -473,7 +488,9 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							comboIdentifier,
-							null);
+							AttributeType.text,
+							AttributeType.association,
+							AttributeType.inverseOne);
 		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
 		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
 	}
@@ -547,8 +564,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							dataGridIdentifier,
-							null);
+							dataGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, dataGridIdentifier, AttributeType.id);
 		validateConditionName(grid.getDisabledConditionName(), dataGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), dataGridIdentifier);
@@ -570,8 +586,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							false,
-							columnIdentifier,
-							null);
+							columnIdentifier);
 	}
 
 	@Override
@@ -793,16 +808,14 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							labelIdentifier,
-							null);
+							labelIdentifier);
 		validateBinding(dataGridBinding,
 							label.getFor(),
 							false,
 							false,
 							false,
 							true,
-							labelIdentifier,
-							null);
+							labelIdentifier);
 		validateMessageBindings(label.getValue(), labelIdentifier, "a value");
 		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
 	}
@@ -835,7 +848,7 @@ class ViewValidator extends ViewVisitor {
 		validateConditionName(grid.getDisableRemoveConditionName(), treeGridIdentifier);
 		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
-		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier, null);
+		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
 		validateParameterBindings(grid.getParameters(), treeGridIdentifier);
 		validateQueryOrModel(grid.getQueryName(), grid.getModelName(), treeGridIdentifier);
 	}
@@ -851,7 +864,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							membershipIdentifier,
-							null);
+							AttributeType.collection,
+							AttributeType.inverseMany);
 		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
 		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
 	}
@@ -934,7 +948,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							lookupIdentifier,
-							AttributeType.association);
+							AttributeType.association,
+							AttributeType.inverseOne);
 		validateBinding(dataGridBinding,
 							// binding can be null if dataGridBinding is set and this 
 							// is a lookup to the elements in the collection
@@ -943,8 +958,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							lookupIdentifier,
-							null);
+							lookupIdentifier);
 		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
 		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
@@ -971,13 +985,13 @@ class ViewValidator extends ViewVisitor {
 				}
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
-    		Reference reference = (Reference) target.getAttribute();
-    		String queryName = reference.getQueryName();
+    		Relation relation = (Relation) target.getAttribute();
+    		String queryName = (relation instanceof Reference) ? ((Reference) relation).getQueryName() : null;
     		if (queryName != null) {
         		query = module.getDocumentQuery(queryName);
     		}
     		else {
-    			query = module.getDocumentDefaultQuery(customer, reference.getDocumentName());
+    			query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
     		}
 		}
 
@@ -1083,8 +1097,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							progressBarIdentifier,
-							null);
+							progressBarIdentifier);
 		validateConditionName(progressBar.getInvisibleConditionName(), progressBarIdentifier);
 	}
 
@@ -1103,7 +1116,10 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							radioIdentifier,
-							null);
+							AttributeType.text,
+							AttributeType.association,
+							AttributeType.inverseOne,
+							AttributeType.bool);
 		validateConditionName(radio.getDisabledConditionName(), radioIdentifier);
 		validateConditionName(radio.getInvisibleConditionName(), radioIdentifier);
 	}
@@ -1158,8 +1174,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							sliderIdentifier,
-							null);
+							sliderIdentifier);
 		validateConditionName(slider.getDisabledConditionName(), sliderIdentifier);
 		validateConditionName(slider.getInvisibleConditionName(), sliderIdentifier);
 	}
@@ -1191,8 +1206,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							spinnerIdentifier,
-							null);
+							spinnerIdentifier);
 		validateConditionName(spinner.getDisabledConditionName(), spinnerIdentifier);
 		validateConditionName(spinner.getInvisibleConditionName(), spinnerIdentifier);
 	}
@@ -1479,8 +1493,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							textIdentifier,
-							null);
+							textIdentifier);
 		validateConditionName(text.getDisabledConditionName(), textIdentifier);
 		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
 	}
@@ -1507,8 +1520,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							true,
-							textIdentifier,
-							null);
+							textIdentifier);
 		validateConditionName(text.getDisabledConditionName(), textIdentifier);
 		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
 	}
@@ -1959,7 +1971,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							widgetIdentifier,
-							null);
+							AttributeType.bool);
 		String disabledConditionName = setDisabled.getDisabledConditionName();
 		if (disabledConditionName == null) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
@@ -1981,7 +1993,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							widgetIdentifier,
-							null);
+							AttributeType.bool);
 	}
 
 	@Override
@@ -1997,7 +2009,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							false,
 							widgetIdentifier,
-							null);
+							AttributeType.bool);
 		String invisibleConditionName = setInvisible.getInvisibleConditionName();
 		if (invisibleConditionName == null) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 

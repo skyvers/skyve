@@ -14,6 +14,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -726,28 +727,53 @@ class ViewJSONManipulator extends ViewVisitor {
 																	startingDocument, 
 																	binding);
 			Attribute attribute = target.getAttribute();
-			if (attribute instanceof Association) {
-				Association association = (Association) attribute;
-				Document associationDocument = module.getDocument(customer, association.getDocumentName());
+			if ((attribute instanceof Association) || (attribute instanceof InverseOne)) {
+				String documentName = ((Relation) attribute).getDocumentName();
+				Document relatedDocument = module.getDocument(customer, documentName);
 
-				// put the associated bean (or null) into the values
-				Bean associationBean = (Bean) BindUtil.get(targetBean, binding);
-
-				Object associationValue = values.get(valueKey);
-				if (associationValue == null) {
-					if (associationBean != null) {
-						BindUtil.populateProperty(user, targetBean, binding, null, true);
-					}
+				Bean oldRelatedBean = (Bean) BindUtil.get(targetBean, binding);
+				Bean newRelatedBean = null;
+				boolean dirty = false;
+				
+				// put the new related bean (or null) into the values
+				Object relatedValue = values.get(valueKey);
+				if (relatedValue == null) {
+					dirty = (oldRelatedBean != null);
 				}
-				// Don't try to traverse an embedded association object here recursively.
+				// Don't try to traverse an embedded association or inverseOne object here recursively.
 				// The correct bindings are created when visiting the view during the apply.
 				// So here we only need to effect the replacement of bizId Strings with retrieved objects
-				else if (associationValue instanceof String) { // a bizId (not a JSON object)
-					String associationId = (String) associationValue;
+				else if (relatedValue instanceof String) { // a bizId (not a JSON object)
+					String relatedId = (String) relatedValue;
 					// old value id and new value id are different
-					if ((associationBean == null) || (! associationBean.getBizId().equals(associationId))) {
-						associationBean = findReferencedBean(associationDocument, associationId, persistence);
-						BindUtil.populateProperty(user, targetBean, binding, associationBean, true);
+					if ((oldRelatedBean == null) || (! oldRelatedBean.getBizId().equals(relatedId))) {
+						newRelatedBean = findReferencedBean(relatedDocument, relatedId, persistence);
+						dirty = true;
+					}
+				}
+				
+				if (dirty) {
+					BindUtil.populateProperty(user, targetBean, binding, newRelatedBean, true);
+
+					// if this is a cascaded inverse, set the other side
+					if (attribute instanceof Inverse) {
+						Inverse inverse = (Inverse) attribute;
+						if (Boolean.TRUE.equals(inverse.getCascade())) {
+							// clear out the old relation
+							if (oldRelatedBean != null) {
+								BindUtil.set(oldRelatedBean, inverse.getReferenceName(), null);
+							}
+							// Set the new relation
+							if (newRelatedBean != null) {
+								BindUtil.set(newRelatedBean, inverse.getReferenceName(), targetBean);
+							}
+						}
+						else {
+							UtilImpl.LOGGER.warning(String.format("A new value <%s> was set on binding '%s' but [cascading] " + 
+																		"is not enabled on the inverseOne attribute, so it will not be persisted.",
+																	relatedValue,
+																	binding));
+						}
 					}
 				}
 			}

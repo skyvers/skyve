@@ -25,8 +25,8 @@ import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
-import org.skyve.domain.types.converters.integer.SimplePercentage;
 import org.skyve.domain.types.converters.integer.IntegerSeparator;
+import org.skyve.domain.types.converters.integer.SimplePercentage;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -66,6 +66,7 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -100,18 +101,18 @@ public class SmartClientGenerateUtils {
         								Customer customer,
         								Module module,
         								Document document,
-        								Reference reference,
+        								Relation relation,
         								LookupDescription lookup)
 		throws MetaDataException {
             this.bindingToDataGrid = bindingToDataGrid;
             String queryName = (lookup == null) ? null : lookup.getQuery();
             // Use reference query name if none provided in lookup
-            if (queryName == null) {
-            	queryName = reference.getQueryName();
+            if ((queryName == null) && (relation instanceof Reference)) {
+            	queryName = ((Reference) relation).getQueryName();
             }
 			// Use the default query if none is defined, else get the named query.
             if (queryName == null) {
-            	query = module.getDocumentDefaultQuery(customer, reference.getDocumentName());
+            	query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
             	queryName = query.getName();
             }
             else {
@@ -120,7 +121,7 @@ public class SmartClientGenerateUtils {
             
             StringBuilder sb = new StringBuilder(128);
             sb.append(module.getName()).append('_').append(queryName).append('_');
-            sb.append(document.getName()).append('_').append(reference.getName());
+            sb.append(document.getName()).append('_').append(relation.getName());
             optionDataSource = sb.toString();
 
             String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
@@ -762,14 +763,14 @@ public class SmartClientGenerateUtils {
             	}
             }
             
-            if ((attribute instanceof Reference) && (widget instanceof LookupDescription)) { // widget could be a combo for instance
+            if ((attribute instanceof Relation) && (widget instanceof LookupDescription)) { // widget could be a combo for instance
             	editorType = "comboBox";
             	lookup = new SmartClientLookupDefinition(dataGridBindingOverride != null,
             												user,
             												customer,
             												module,
             												document,
-            												(Reference) attribute,
+            												(Relation) attribute,
             												(LookupDescription) widget);
             }
 
@@ -1038,7 +1039,7 @@ public class SmartClientGenerateUtils {
 																	customer,
 																	module,
 																	document,
-																	(Reference) attribute,
+																	(Relation) attribute,
 																	null);
 					}
 				}
