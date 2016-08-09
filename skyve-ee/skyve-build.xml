@@ -191,9 +191,9 @@
 		<copy todir="${staging.dir}/demo/skyve/src/skyve" overwrite="true">
 			<fileset dir="src/skyve" includes="**" />
 		</copy>
-		<delete dir="${staging.dir}/demo/skyve/tools/lib" includes="**" failonerror="false" />
-		<copy todir="${staging.dir}/demo/skyve/tools/lib" overwrite="true">
-			<fileset dir="tools/lib" includes="**" />
+		<delete dir="${staging.dir}/demo/skyve/tools" includes="**" failonerror="false" />
+		<copy todir="${staging.dir}/demo/skyve/tools" overwrite="true">
+			<fileset dir="tools" includes="**" />
 		</copy>
 		<copy todir="${staging.dir}/demo/skyve" overwrite="true">
 			<fileset dir="." includes="build.xml" />

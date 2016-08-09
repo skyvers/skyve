@@ -11,8 +11,10 @@ Installation
 ============
 
 Unzip the demo.zip anywhere - it is self contained.
-Edit demo/skyve/javaee/skyve.properties,
-find the line CONTENT_DIRECTORY=/C:/demo/skyve/content/ (line 25)
+Edit demo/skyve/javaee/skyve.json,
+find the lines:-
+		// directory path (line 26)
+		directory: "/C:/demo/skyve/content/", (line 27)
 and change it to the absolute path to the skyve/content folder within the demo folder.
 Ensure there is a trailing slash (slash can be used on ALL O/Ss)
 
