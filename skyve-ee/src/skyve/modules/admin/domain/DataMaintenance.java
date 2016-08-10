@@ -45,7 +45,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String yearlyBackupRetentionPropertyName = "yearlyBackupRetention";
 	/** @hidden */
-	public static final String selectedBackupTimestampFolderNamePropertyName = "selectedBackupTimestampFolderName";
+	public static final String selectedBackupNamePropertyName = "selectedBackupName";
 	/** @hidden */
 	public static final String selectedContentIdPropertyName = "selectedContentId";
 	/** @hidden */
@@ -77,7 +77,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
 	private Integer yearlyBackupRetention;
-	private String selectedBackupTimestampFolderName;
+	private String selectedBackupName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
 	private Boolean refreshContent = new Boolean(true);
@@ -235,20 +235,20 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #selectedBackupTimestampFolderName} accessor.
+	 * {@link #selectedBackupName} accessor.
 	 **/
-	public String getSelectedBackupTimestampFolderName() {
-		return selectedBackupTimestampFolderName;
+	public String getSelectedBackupName() {
+		return selectedBackupName;
 	}
 
 	/**
-	 * {@link #selectedBackupTimestampFolderName} mutator.
+	 * {@link #selectedBackupName} mutator.
 	 * 
-	 * @param selectedBackupTimestampFolderName	The new value to set.
+	 * @param selectedBackupName	The new value to set.
 	 **/
 	@XmlElement
-	public void setSelectedBackupTimestampFolderName(String selectedBackupTimestampFolderName) {
-		this.selectedBackupTimestampFolderName = selectedBackupTimestampFolderName;
+	public void setSelectedBackupName(String selectedBackupName) {
+		this.selectedBackupName = selectedBackupName;
 	}
 
 	/**
@@ -494,7 +494,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 */
 	@XmlTransient
 	public boolean isBackupSelected() {
-		return (selectedBackupTimestampFolderName != null);
+		return (selectedBackupName != null);
 	}
 
 	public boolean isNotBackupSelected() {

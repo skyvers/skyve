@@ -84,7 +84,7 @@ public class BatchesModel extends ListModel<Communication> {
 		String customerName = CORE.getUser().getCustomerName();
 		String backupDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
 
-		return DownloadFolderBizlet.fetch(backupDirPrefix, getStartRow(), getEndRow());
+		return DownloadFolderBizlet.fetchFolders(backupDirPrefix, getStartRow(), getEndRow());
 	}
 
 	@Override

@@ -329,11 +329,13 @@ public class FileUtil {
 		File[] files = (regexPattern == null) ? 
 							dir.listFiles() :
 							dir.listFiles((FilenameFilter) new RegexFileFilter(regexPattern));
-		if (SortDirection.ascending.equals(direction)) {
-			Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_COMPARATOR);
-		}
-		else if (SortDirection.descending.equals(direction)) {
-			Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_REVERSE);
+		if (files != null) {
+			if (SortDirection.ascending.equals(direction)) {
+				Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_COMPARATOR);
+			}
+			else if (SortDirection.descending.equals(direction)) {
+				Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_REVERSE);
+			}
 		}
 		
 		return files;

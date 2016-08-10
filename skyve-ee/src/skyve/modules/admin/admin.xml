@@ -185,7 +185,7 @@
 					<action name="Reindex" />
 					<action name="Restore" />
 					<action name="Truncate" />
-					<action name="ZipBackup" />
+					<action name="DownloadBackup" />
 				</document>
 				<document name="SystemDashboard" permission="_____" />
 				<document name="DocumentNumber" permission="CRUDC" />

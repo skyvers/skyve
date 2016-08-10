@@ -11,35 +11,30 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import modules.admin.domain.DownloadFolder;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.view.model.list.Page;
+import org.skyve.util.FileUtil;
+
+import modules.admin.domain.DownloadFolder;
 
 public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6554942396689007986L;
-
-
 
 	/**
 	 * fetch - generalised fetch for DownloadFolder
-	 * @param backupDirPrefix
+	 * @param dirPath
 	 * @param startRow
 	 * @param endRow
 	 * @return
 	 */
-	public static Page fetch(String backupDirPrefix, int startRow, int endRow) {
-		
-		File[] folders = new File(backupDirPrefix).listFiles(new FileFilter() {
+	public static Page fetchFolders(String dirPath, int startRow, int endRow) {
+		File[] folders = new File(dirPath).listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File pathname) {
 				return pathname.isDirectory() && (pathname.getName().length() == 14);
@@ -54,21 +49,53 @@ public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 			}
 		}
 
+		return fetch(folderNames, startRow, endRow);
+	}
+	
+	/**
+	 * Fetch backup zip files.
+	 * 
+	 * @param dirPath
+	 * @param startRow
+	 * @param endRow
+	 * @return
+	 */
+	public static Page fetchBackups(String dirPath, int startRow, int endRow) {
+		File[] files = FileUtil.listFiles(new File(dirPath), ".*.zip", SortDirection.descending);
+		Set<String> backups = new TreeSet<>();
+		if (files != null) {
+			for (File file : files) {
+				backups.add(file.getName());
+			}
+		}
+		
+		return fetch(backups, startRow, endRow);
+	}
+	
+	/**
+	 * Return a page of things.
+	 * 
+	 * @param things
+	 * @param startRow
+	 * @param endRow
+	 * @return
+	 */
+	private static Page fetch(Set<String> things, int startRow, int endRow) {
 		int start = startRow;
 		int end = endRow;
 		OptimisticLock lock = new OptimisticLock(CORE.getUser().getName(), new Date());
 
 		List<Bean> rows = new ArrayList<>(end - start);
 		int i = 0;
-		for (String folderName : folderNames) {
+		for (String thing : things) {
 			if (i >= start) {
 				Map<String, Object> properties = new TreeMap<>();
-				properties.put(Bean.DOCUMENT_ID, folderName);
+				properties.put(Bean.DOCUMENT_ID, thing);
 				properties.put(PersistentBean.LOCK_NAME, lock);
 				properties.put(PersistentBean.TAGGED_NAME, null);
 				properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
-				properties.put(Bean.BIZ_KEY, folderName);
-				properties.put(DownloadFolder.namePropertyName, folderName);
+				properties.put(Bean.BIZ_KEY, thing);
+				properties.put(DownloadFolder.namePropertyName, thing);
 				rows.add(new MapBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
 
 				if (i >= end) {
@@ -79,15 +106,12 @@ public class DownloadFolderBizlet extends Bizlet<DownloadFolder> {
 		}
 
 		Page page = new Page();
-		page.setTotalRows(folderNames.size());
+		page.setTotalRows(things.size());
 		page.setRows(rows);
 
 		Map<String, Object> properties = new TreeMap<>();
 		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 		page.setSummary(new MapBean(DownloadFolder.MODULE_NAME, DownloadFolder.DOCUMENT_NAME, properties));
 		return page;
-
 	}
-
-
 }

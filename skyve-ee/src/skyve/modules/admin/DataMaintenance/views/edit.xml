@@ -69,7 +69,7 @@
 			</form>
 			<vbox border="true" borderTitle="Backups">
 				<listGrid model="BackupsModel"
-							selectedIdBinding="selectedBackupTimestampFolderName"
+							selectedIdBinding="selectedBackupName"
 							continueConversation="false" 
 							showAdd="false" 
 							showEdit="false" 
@@ -87,7 +87,7 @@
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
 					<button actionName="Backup" pixelWidth="100" />
-					<button actionName="ZipBackup" pixelWidth="100" />
+					<button actionName="DownloadBackup" pixelWidth="100" />
 					<button actionName="DeleteBackup" pixelWidth="100" />
 					<button actionName="Restore" pixelWidth="100" />
 				</hbox>
@@ -213,6 +213,6 @@
 		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false"
 			relativeIconFileName="shared/icons/Search.gif" 
 		/>
-		<download className="ZipBackup" displayName="Download Zip" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
+		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
 	</actions>
 </view>

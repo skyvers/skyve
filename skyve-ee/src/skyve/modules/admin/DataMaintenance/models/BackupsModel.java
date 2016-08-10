@@ -84,7 +84,7 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		String customerName = CORE.getUser().getCustomerName();
 		String backupDirPrefix = Util.getContentDirectory() + "backup_" + customerName;
 		
-		return DownloadFolderBizlet.fetch(backupDirPrefix, getStartRow(), getEndRow());
+		return DownloadFolderBizlet.fetchBackups(backupDirPrefix, getStartRow(), getEndRow());
 	}
 
 	@Override

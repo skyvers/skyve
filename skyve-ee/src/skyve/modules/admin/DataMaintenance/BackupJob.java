@@ -38,37 +38,62 @@ public class BackupJob extends Job {
 		Integer dailyBackupRetention = dm.getDailyBackupRetention();
 		int daily = (dailyBackupRetention != null) ? dailyBackupRetention.intValue() : 0;
 		if (daily > 0) {
+			Util.LOGGER.warning("Take backup...");
 			backupDir = Backup.backup();
+		}
+		else {
+			Util.LOGGER.warning("No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero");
 		}
 
 		if (backupDir != null) {
+			Util.LOGGER.warning("Backup made to folder " + backupDir.getAbsolutePath());
+			
 			// make zip archive and delete backup folder
 			String backupDirName = backupDir.getName();
 			File backupZip = new File(backupDir.getParentFile(), String.format("DAILY_%s.zip", backupDirName));
+			Util.LOGGER.info(String.format("Archive Backup folder %s to %s",
+											backupDir.getAbsolutePath(),
+											backupZip.getAbsolutePath()));
 			FileUtil.createZipArchive(backupDir, backupZip);
+			Util.LOGGER.info("Delete Backup folder " + backupDir.getAbsolutePath());
 			FileUtil.delete(backupDir);
 			backupDir = backupDir.getParentFile();
 
 			// copy daily to weekly
 			if (weekly > 0) {
-				FileUtil.copy(backupZip, 
-								new File(backupDir, 
-											String.format("WEEKLY_%s.zip", 
-															ThreadSafeFactory.getDateFormat("yyyyMMWW").format(now))));
+				File copy = new File(backupDir, 
+										String.format("WEEKLY_%s.zip", 
+														ThreadSafeFactory.getDateFormat("yyyyMMWW").format(now)));
+				Util.LOGGER.info(String.format("Copy Backup %s to %s",
+												backupZip.getAbsolutePath(),
+												copy.getAbsolutePath()));
+				FileUtil.copy(backupZip, copy);
+			}
+			else {
+				Util.LOGGER.info("No weekly backup taken by the BackupJob as weeklyBackupRetention in DataMaintenance is null or zero");
 			}
 			// copy daily to monthly
 			if (monthly > 0) {
-				FileUtil.copy(backupZip, 
-								new File(backupDir, 
-											String.format("MONTHLY_%s.zip", 
-															ThreadSafeFactory.getDateFormat("yyyyMM").format(now))));
+				File copy = new File(backupDir, 
+										String.format("MONTHLY_%s.zip", 
+														ThreadSafeFactory.getDateFormat("yyyyMM").format(now)));
+				Util.LOGGER.info(String.format("Copy Backup %s to %s",
+												backupZip.getAbsolutePath(),
+												copy.getAbsolutePath()));
+				FileUtil.copy(backupZip, copy);
+			}
+			else {
+				Util.LOGGER.warning("No monthly backup taken by the BackupJob as monthlyBackupRetention in DataMaintenance is null or zero");
 			}
 			// copy daily to yearly
 			if (yearly > 0) {
-				FileUtil.copy(backupZip, 
-								new File(backupDir, 
-											String.format("YEARLY_%s.zip", 
-															ThreadSafeFactory.getDateFormat("yyyy").format(now))));
+				File copy = new File(backupDir, 
+										String.format("YEARLY_%s.zip", 
+														ThreadSafeFactory.getDateFormat("yyyy").format(now)));
+				Util.LOGGER.info(String.format("Copy Backup %s to %s",
+												backupZip.getAbsolutePath(),
+												copy.getAbsolutePath()));
+				FileUtil.copy(backupZip, copy);
 			}
 		
 			// cull daily
@@ -85,7 +110,9 @@ public class BackupJob extends Job {
 		
 		
 		setPercentComplete(100);
-		getLog().add("Finished Backup of customer " + CORE.getUser().getCustomerName() + " at " + new Date());
+		getLog().add(String.format("Finished Backup of customer %s at %s",
+									CORE.getUser().getCustomerName(),
+									new Date()));
 	}
 		
 	private static void cull(File backupDir, String prefix, int retain) 
