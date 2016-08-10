@@ -49,14 +49,17 @@ public class Backup {
 		// nothing to see here
 	}
 	
-	public static void backup() throws Exception {
+	public static File backup() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
 		Collection<Table> tables = BackupUtil.getTables();
 
-		String backupDir = UtilImpl.CONTENT_DIRECTORY + "backup_" + customerName + File.separator + 
-								ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()) + File.separator;
-
+		String backupDir = String.format("%sbackup_%s%s%s%s", 
+											UtilImpl.CONTENT_DIRECTORY, 
+											customerName, 
+											File.separator, 
+											ThreadSafeFactory.getDateFormat("yyyyMMddHHmmss").format(new java.util.Date()),
+											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();
 
@@ -267,6 +270,8 @@ public class Backup {
 				connection.commit();
 			}
 		}
+		
+		return directory;
 	}
 	
 	public static void main(String[] args) throws Exception {

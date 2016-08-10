@@ -6,19 +6,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.NameFileComparator;
+import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.skyve.content.MimeType;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.DownloadAction.Download;
-import org.skyve.util.FileUtil;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 /**
@@ -126,36 +130,60 @@ public class FileUtil {
 	 * @param zipName
 	 * @param webContext
 	 * @return
-	 * @throws Exception
+	 * @throws IOException
 	 */
 	public static Download prepareZipDownload(String directoryPath, String zipName, WebContext webContext)
-	throws Exception {
+	throws IOException {
 		try (ByteArrayOutputStream out = new ByteArrayOutputStream(20480)) {
 			File backupDir = new File(directoryPath);
-			if (backupDir.exists() && backupDir.isDirectory()) {
-
-				try (ZipOutputStream zip = new ZipOutputStream(out)) {
-					List<File> fileList = new ArrayList<>();
-		
-					getAllFiles(backupDir, fileList);
-		
-					for (File file : fileList) {
-						if (! file.isDirectory()) { // we only zip files, not directories
-							addToZip(backupDir, file, zip);
-						}
-					}
-					
-					zip.flush();
-				}
-			}
-			
-			out.flush();
+			createZipArchive(backupDir, out);
 			return new Download(zipName, new ByteArrayInputStream(out.toByteArray()), MimeType.zip);
 		}
 	}
 	
 	/**
-	 * Get all files from a directory
+	 * Create a zip archive for the directory
+	 * 
+	 * @param directory
+	 * @param zip	The archive file.
+	 * @throws IOException
+	 */
+	public static void createZipArchive(File directory, File zip)
+	throws IOException {
+		try (FileOutputStream fos = new FileOutputStream(zip)) {
+			createZipArchive(directory, fos);
+		}
+	}
+	
+	/**
+	 * Create a zip archive for the directory.
+	 * 
+	 * @param directory
+	 * @param out
+	 * @throws IOException
+	 */
+	public static void createZipArchive(File directory, OutputStream out) throws IOException {
+		if (directory.exists() && directory.isDirectory()) {
+			try (ZipOutputStream zos = new ZipOutputStream(out)) {
+				List<File> fileList = new ArrayList<>();
+	
+				getAllFiles(directory, fileList);
+	
+				for (File file : fileList) {
+					if (! file.isDirectory()) { // we only zip files, not directories
+						addToZip(directory, file, zos);
+					}
+				}
+				
+				zos.flush();
+			}
+		}
+		
+		out.flush();
+	}
+	
+	/**
+	 * Get all files from a directory recursively.
 	 * 
 	 * @param dir
 	 * @param fileList
@@ -171,7 +199,8 @@ public class FileUtil {
 	}
 
 	/**
-	 * Add files within a directory to a zip file
+	 * Add a file within a directory to a zip file.
+	 * 
 	 * @param directoryToZip
 	 * @param file
 	 * @param zos
@@ -203,10 +232,10 @@ public class FileUtil {
 	/**
 	 * Delete file with exception if unsuccessful
 	 * 
-	 * @param f
-	 * @throws ValidationException
+	 * @param f	The file to delete
+	 * @throws IOException
 	 */
-	public static void delete(File f) throws ValidationException {
+	public static void delete(File f) throws IOException {
 		if (f.isDirectory()) {
 			for (File c : f.listFiles()) {
 				delete(c);
@@ -214,8 +243,38 @@ public class FileUtil {
 		}
 		
 		if (! f.delete()) {
-			throw new ValidationException(new Message(f.getAbsolutePath() + " was not deleted"));
+			throw new IOException(f.getAbsolutePath() + " was not deleted");
 		}
 	}
 
+	/**
+	 * Copy the src file to the dest file, overwriting if necessary.
+	 * @param src
+	 * @param dest
+	 * @throws IOException
+	 */
+	public static void copy(File src, File dest) throws IOException {
+		FileUtils.copyFile(src, dest);
+	}
+	
+	/**
+	 * List files (non-recursive) for a directory.
+	 * @param dir	The directory to list for.
+	 * @param regexPattern	File pattern to match, or null for all files
+	 * @param direction	If defined, perform a case insensitive sort by the file name (not the whole path).
+	 * @return	The files.
+	 */
+	public static File[] listFiles(File dir, String regexPattern, SortDirection direction) {
+		File[] files = (regexPattern == null) ? 
+							dir.listFiles() :
+							dir.listFiles((FilenameFilter) new RegexFileFilter(regexPattern));
+		if (SortDirection.ascending.equals(direction)) {
+			Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_COMPARATOR);
+		}
+		else if (SortDirection.descending.equals(direction)) {
+			Arrays.sort(files, NameFileComparator.NAME_INSENSITIVE_REVERSE);
+		}
+		
+		return files;
+	}
 }

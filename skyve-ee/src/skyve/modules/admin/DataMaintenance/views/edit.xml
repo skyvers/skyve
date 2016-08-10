@@ -43,6 +43,30 @@
 					</item>
 				</row>
 			</form>
+			<form border="true" borderTitle="Job">
+				<column />
+				<column pixelWidth="60" />
+				<column />
+				<column pixelWidth="60" />
+				<column />
+				<column pixelWidth="60" />
+				<column />
+				<column pixelWidth="60" />
+				<row>
+					<item>
+						<spinner binding="dailyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="weeklyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="monthlyBackupRetention" min="0" />
+					</item>
+					<item>
+						<spinner binding="yearlyBackupRetention" min="0" />
+					</item>
+				</row>
+			</form>
 			<vbox border="true" borderTitle="Backups">
 				<listGrid model="BackupsModel"
 							selectedIdBinding="selectedBackupTimestampFolderName"

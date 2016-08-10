@@ -37,6 +37,14 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
 	/** @hidden */
+	public static final String dailyBackupRetentionPropertyName = "dailyBackupRetention";
+	/** @hidden */
+	public static final String weeklyBackupRetentionPropertyName = "weeklyBackupRetention";
+	/** @hidden */
+	public static final String monthlyBackupRetentionPropertyName = "monthlyBackupRetention";
+	/** @hidden */
+	public static final String yearlyBackupRetentionPropertyName = "yearlyBackupRetention";
+	/** @hidden */
 	public static final String selectedBackupTimestampFolderNamePropertyName = "selectedBackupTimestampFolderName";
 	/** @hidden */
 	public static final String selectedContentIdPropertyName = "selectedContentId";
@@ -65,6 +73,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	private String modDocName;
 	private String schemaName;
+	private Integer dailyBackupRetention;
+	private Integer weeklyBackupRetention;
+	private Integer monthlyBackupRetention;
+	private Integer yearlyBackupRetention;
 	private String selectedBackupTimestampFolderName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
@@ -148,6 +160,78 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setSchemaName(String schemaName) {
 		preset(schemaNamePropertyName, schemaName);
 		this.schemaName = schemaName;
+	}
+
+	/**
+	 * {@link #dailyBackupRetention} accessor.
+	 **/
+	public Integer getDailyBackupRetention() {
+		return dailyBackupRetention;
+	}
+
+	/**
+	 * {@link #dailyBackupRetention} mutator.
+	 * 
+	 * @param dailyBackupRetention	The new value to set.
+	 **/
+	@XmlElement
+	public void setDailyBackupRetention(Integer dailyBackupRetention) {
+		preset(dailyBackupRetentionPropertyName, dailyBackupRetention);
+		this.dailyBackupRetention = dailyBackupRetention;
+	}
+
+	/**
+	 * {@link #weeklyBackupRetention} accessor.
+	 **/
+	public Integer getWeeklyBackupRetention() {
+		return weeklyBackupRetention;
+	}
+
+	/**
+	 * {@link #weeklyBackupRetention} mutator.
+	 * 
+	 * @param weeklyBackupRetention	The new value to set.
+	 **/
+	@XmlElement
+	public void setWeeklyBackupRetention(Integer weeklyBackupRetention) {
+		preset(weeklyBackupRetentionPropertyName, weeklyBackupRetention);
+		this.weeklyBackupRetention = weeklyBackupRetention;
+	}
+
+	/**
+	 * {@link #monthlyBackupRetention} accessor.
+	 **/
+	public Integer getMonthlyBackupRetention() {
+		return monthlyBackupRetention;
+	}
+
+	/**
+	 * {@link #monthlyBackupRetention} mutator.
+	 * 
+	 * @param monthlyBackupRetention	The new value to set.
+	 **/
+	@XmlElement
+	public void setMonthlyBackupRetention(Integer monthlyBackupRetention) {
+		preset(monthlyBackupRetentionPropertyName, monthlyBackupRetention);
+		this.monthlyBackupRetention = monthlyBackupRetention;
+	}
+
+	/**
+	 * {@link #yearlyBackupRetention} accessor.
+	 **/
+	public Integer getYearlyBackupRetention() {
+		return yearlyBackupRetention;
+	}
+
+	/**
+	 * {@link #yearlyBackupRetention} mutator.
+	 * 
+	 * @param yearlyBackupRetention	The new value to set.
+	 **/
+	@XmlElement
+	public void setYearlyBackupRetention(Integer yearlyBackupRetention) {
+		preset(yearlyBackupRetentionPropertyName, yearlyBackupRetention);
+		this.yearlyBackupRetention = yearlyBackupRetention;
 	}
 
 	/**

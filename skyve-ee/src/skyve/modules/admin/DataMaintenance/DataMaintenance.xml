@@ -19,6 +19,20 @@
 			<displayName>Schema Name</displayName>
 			<length>1024</length>
 		</text>
+		<!-- Backup job parameters -->
+		<integer name="dailyBackupRetention">
+			<displayName>Daily Backup Retention</displayName>
+		</integer>
+		<integer name="weeklyBackupRetention">
+			<displayName>Weekly Backup Retention</displayName>
+		</integer>
+		<integer name="monthlyBackupRetention">
+			<displayName>Monthly Backup Retention</displayName>
+		</integer>
+		<integer name="yearlyBackupRetention">
+			<displayName>Yearly Backup Retention</displayName>
+		</integer>
+		
 		<id name="selectedBackupTimestampFolderName" persistent="false" trackChanges="false">
 			<displayName>Selected Backup Timestamp Folder Name</displayName>
 		</id>
