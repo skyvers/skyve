@@ -11,10 +11,8 @@ Installation
 ============
 
 Unzip the demo.zip anywhere - it is self contained.
-Edit demo/skyve/javaee/skyve.json,
-find the lines:-
-		// directory path (line 26)
-		directory: "/C:/demo/skyve/content/", (line 27)
+Edit demo/skyve/javaee/skyve.properties,
+find the line CONTENT_DIRECTORY=/C:/demo/skyve/content/ (line 25)
 and change it to the absolute path to the skyve/content folder within the demo folder.
 Ensure there is a trailing slash (slash can be used on ALL O/Ss)
 
@@ -27,6 +25,17 @@ The credentials to use are:-
 customer = demo
 username = admin
 password = admin
+
+If you want demonstration data
+==============================
+
+As per the getting started videos at skyve.org - if you want to see example data, there's a job which will create a randomised data set. To schedule the job, do the following:
+* Log in and expand the Admin module (accordion pane on left).
+* Go to the Jobs menu item and switch to Jobs Schedule tab.
+* Click the "Add" (green plus)
+* Select the Job to load Demonstration Data and select "Run As" admin
+* click the "Schedule Job For Now" button and then Cancel out of the form rather than OK to avoid the Job being permanently scheduled.
+* Expand Whosin module or WhosinIntegrate to see the created data.
 
 To use eclipse to perform development
 =====================================
