@@ -83,7 +83,7 @@ isc.RPCManager.addClassMethods({
 	            items: [
 	            	isc.VLayout.create({
 						width: 130,
-						height: BizUtil.customer ? 90 : 120,
+						height: isc.BizUtil.customer ? 90 : 120,
 						layoutMargin: 10,
 						members: [this.loginForm]
 					})
