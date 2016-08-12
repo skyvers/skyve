@@ -216,6 +216,7 @@ public class FileUtil {
 			// to the directory being zipped, so chop off the rest of the path
 			String zipFilePath = file.getCanonicalPath().substring(directoryToZip.getCanonicalPath().length() + 1,
 																	file.getCanonicalPath().length());
+			zipFilePath = zipFilePath.replace('\\', '/');
 			Util.LOGGER.info(String.format("Writing '%s' to zip file", zipFilePath));
 			ZipEntry zipEntry = new ZipEntry(zipFilePath);
 			zos.putNextEntry(zipEntry);
@@ -232,7 +233,9 @@ public class FileUtil {
 
 	private static void extractFile(ZipInputStream in, File outdir, String name)
 	throws IOException {
-		try (FileOutputStream fos = new FileOutputStream(new File(outdir, name))) {
+		File file = new File(outdir, name);
+		Util.LOGGER.info(String.format("Writing '%s' from zip file to %s", name, file));
+		try (FileOutputStream fos = new FileOutputStream(file)) {
 			try (BufferedOutputStream out = new BufferedOutputStream(fos)) {
 				byte[] bytes = new byte[1024];
 			    int length = 0;
@@ -251,7 +254,7 @@ public class FileUtil {
 	}
 
 	private static String dirpart(String name) {
-		int s = name.lastIndexOf(File.separatorChar);
+		int s = name.lastIndexOf('/');
 		return (s == -1) ? null : name.substring( 0, s );
 	  }
 
@@ -263,15 +266,15 @@ public class FileUtil {
 	 */
 	public static void extractZipArchive(File zipfile, File outdir)
 	throws IOException {
+		outdir.mkdirs();
 		try (FileInputStream fis = new FileInputStream(zipfile)) {
 			try (ZipInputStream zin = new ZipInputStream(fis)) {
 				ZipEntry entry = null;
-				while ((entry = zin.getNextEntry()) != null)
-				{
+				while ((entry = zin.getNextEntry()) != null) {
 					String name = entry.getName();
-					if (entry.isDirectory())
-					{
+					if (entry.isDirectory()) {
 						mkdirs(outdir, name);
+						Util.LOGGER.info("create dir " + name);
 						continue;
 					}
 					/* this part is necessary because file entry can come before
@@ -283,6 +286,7 @@ public class FileUtil {
 					String dir = dirpart(name);
 					if (dir != null) {
 						mkdirs(outdir, dir);
+						Util.LOGGER.info("create dir " + name);
 					}
 					extractFile(zin, outdir, name);
 				}
