@@ -210,7 +210,8 @@
 			</form>
 		</tab>
 		<tab title="Refresh">
-			<dataGrid binding="refreshDocuments" inline="true" showZoom="false" showAdd="false" >
+			<dataGrid binding="refreshDocuments" inline="true" 
+				showZoom="false" showAdd="false" showDeselect="false" showEdit="false" showRemove="false">
 				<boundColumn binding="include" editable="true"/>
 				<boundColumn binding="moduleName" editable="false"/>
 				<boundColumn binding="documentName" editable="false"/>
