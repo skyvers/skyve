@@ -1,5 +1,6 @@
 package org.skyve.impl.persistence;
 
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -96,7 +97,8 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	public abstract void disposeAllPersistenceInstances() throws MetaDataException;
-	public abstract String generateDDL() throws DomainException, MetaDataException;
+	public abstract void generateDDL(List<String> drops, List<String> creates, List<String> updates) 
+	throws DomainException, MetaDataException;
 
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);

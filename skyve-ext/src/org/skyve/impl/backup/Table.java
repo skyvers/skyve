@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -18,6 +20,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.util.JSON;
 
 class Table {
 	String name;
@@ -100,5 +103,41 @@ class Table {
 				}
 			}
 		}
+	}
+	
+	public String toJSON() throws Exception {
+		Map<String, Object> result = new TreeMap<>();
+		result.put("name", name);
+		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
+		for (String key : fields.keySet()) {
+			Map<String, Object> field = new TreeMap<>();
+			field.put(key, fields.get(key));
+			fieldList.add(field);
+		}
+		result.put("fields", fieldList);
+		result.put("relativeContentPaths", relativeContentPaths);
+		if (this instanceof JoinTable) {
+			result.put("ownerTableName", ((JoinTable) this).ownerTableName);
+		}
+		return JSON.marshall(null, result, null);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Table fromJSON(String json) throws Exception {
+		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
+		String tableName = (String) map.get("name");
+		String ownerTableName = (String) map.get("ownerTableName");
+		Table result = (ownerTableName == null) ? 
+							new Table(tableName) :
+							new JoinTable(tableName, ownerTableName);
+		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
+		for (Map<String, Object> field : fieldList) {
+			for (String key : field.keySet()) {
+				result.fields.put(key, AttributeType.valueOf((String) field.get(key)));
+			}
+		}
+		result.relativeContentPaths = (List<String>) map.get("relativeContentPaths");
+		
+		return result;
 	}
 }

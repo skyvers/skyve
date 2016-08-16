@@ -465,7 +465,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
     }
 	
 	@Override
-	public final String generateDDL()
+	public final void generateDDL(List<String> drops, List<String> creates, List<String> updates)
 	throws DomainException, MetaDataException {
 		Properties properties = new Properties();
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
@@ -505,38 +505,38 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		Dialect dialect = Dialect.getDialect(properties);
 
-		String[] drops = cfg.generateDropSchemaScript(dialect);
-		String[] creates = cfg.generateSchemaCreationScript(dialect);
-
-		DatabaseMetadata meta;
-		try (Connection connection = getConnection()) {
-			meta = new DatabaseMetadata(connection, dialect);
-
-			String[] updates = cfg.generateSchemaUpdateScript(dialect, meta);
-			sb.setLength(0);
-			sb.append("\n********* DROPS *********\n\n");
-			for (String drop : drops) {
-				sb.append(drop).append(";\n");
-			}
-			sb.append("\n******** CREATES ********\n\n");
-			for (String create : creates) {
-				sb.append(create).append(";\n");
-			}
-			sb.append("\n******** UPDATES ********\n\n");
-			for (String update : updates) {
-				sb.append(update).append(";\n");
-			}
-            sb.append("\n***** EXTRA UPDATES *****\n\n");
-			updates = generateExtraSchemaUpdates(cfg, false);
-            for (String update : updates) {
-                sb.append(update).append(";\n");
+		if (drops != null) {
+			String[] temp = cfg.generateDropSchemaScript(dialect);
+            for (String drop : temp) {
+				drops.add(drop);
             }
 		}
-		catch (Exception e) {
-			throw new DomainException("Could not get database metadata", e);
+		
+		if (creates != null) {
+			String[] temp = cfg.generateSchemaCreationScript(dialect);
+            for (String create : temp) {
+				creates.add(create);
+            }
 		}
 
-		return sb.toString();
+		if (updates != null) {
+			DatabaseMetadata meta;
+			try (Connection connection = getConnection()) {
+				meta = new DatabaseMetadata(connection, dialect);
+	
+				String[] temp = cfg.generateSchemaUpdateScript(dialect, meta);
+	            for (String update : temp) {
+					updates.add(update);
+	            }
+				temp = generateExtraSchemaUpdates(cfg, false);
+	            for (String update : temp) {
+					updates.add(update);
+	            }
+			}
+			catch (Exception e) {
+				throw new DomainException("Could not get database metadata", e);
+			}
+		}
 	}
 
 	@Override

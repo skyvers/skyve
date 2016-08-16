@@ -28,7 +28,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
 
 public class Restore {
-	public static void restore(String timestampFolderName) 
+	public static void restore(String timestampFolderName,
+								boolean useBackupTables)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
@@ -40,7 +41,9 @@ public class Restore {
 			throw new IllegalArgumentException(backupDirectoryPath + " is not a directory");
 		}
 
-		Collection<Table> tables = BackupUtil.getTables();
+		Collection<Table> tables = useBackupTables ? 
+										BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
+										BackupUtil.getTables();
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -319,7 +322,7 @@ public class Restore {
 
 		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		try {
-			restore(args[8]);
+			restore(args[8], true);
 		}
 		finally {
 			BackupUtil.finalise();

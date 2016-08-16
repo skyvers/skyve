@@ -1,5 +1,11 @@
 package org.skyve.impl.backup;
  
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +99,65 @@ final class BackupUtil {
 		return result.values();
 	}
 	
+	static void writeTables(Collection<Table> tables, File toWriteTo)
+	throws Exception {
+		try (FileWriter fw = new FileWriter(toWriteTo)) {
+			try (BufferedWriter bw = new BufferedWriter(fw)) {
+				for (Table table : tables) {
+					bw.write(table.toJSON());
+					bw.newLine();
+				}
+			}
+		}
+	}
+	
+	static Collection<Table> readTables(File toReadFrom) 
+	throws Exception {
+		Collection<Table> result = new ArrayList<>();
+		try (FileReader fr = new FileReader(toReadFrom)) {
+			try (BufferedReader br = new BufferedReader(fr)) {
+				String table = br.readLine();
+				while (table != null) {
+					result.add(Table.fromJSON(table));
+					table = br.readLine();
+				}
+			}
+		}
+		return result;
+	}
+	
+	static void writeScript(List<String> commands, File toWriteTo) 
+	throws Exception {
+		try (FileWriter fw = new FileWriter(toWriteTo)) {
+			try (BufferedWriter bw = new BufferedWriter(fw)) {
+				for (String command : commands) {
+					bw.write(command);
+					bw.write(';');
+					bw.newLine();
+				}
+			}
+		}
+	}
+
+	static List<String> readScript(File toReadFrom) 
+	throws Exception {
+		List<String> result = new ArrayList<>();
+		try (FileReader fr = new FileReader(toReadFrom)) {
+			try (BufferedReader br = new BufferedReader(fr)) {
+				String command = br.readLine();
+				while (command != null) {
+					if (command.endsWith(";")) {
+						command = command.substring(0, command.length() - 1);
+					}
+					result.add(command);
+					command = br.readLine();
+				}
+			}
+		}
+		
+		return result;
+	}
+
 	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document)
 	throws MetaDataException {
 		Persistent persistent = document.getPersistent();

@@ -11,7 +11,9 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,6 +26,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -62,6 +65,15 @@ public class Backup {
 											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();
+
+		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
+
+		AbstractPersistence p = AbstractPersistence.get();
+		List<String> drops = new ArrayList<>();
+		List<String> creates = new ArrayList<>();
+		p.generateDDL(drops, creates, null);
+		BackupUtil.writeScript(drops, new File(backupDir, "drop.sql"));
+		BackupUtil.writeScript(creates, new File(backupDir, "create.sql"));
 
 		UserType geometryUserType = null; // this is only created when we come across a geometry
 		

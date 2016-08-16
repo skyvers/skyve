@@ -47,7 +47,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		Util.LOGGER.info("Truncate " + ((schemaName == null) ? "default" : schemaName) + " schema");
 		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName());
 		Util.LOGGER.info("Restore " + extractDirName);
-		org.skyve.impl.backup.Restore.restore(extractDirName);
+		org.skyve.impl.backup.Restore.restore(extractDirName, true);
 		Util.LOGGER.info("Reindex textual indexes.");
 		org.skyve.impl.backup.Reindex.reindex();
 		Util.LOGGER.info("Delete extracted folder " + extractDir.getAbsolutePath());
