@@ -1,8 +1,8 @@
 package modules.admin.DataMaintenance.actions;
 
-import modules.admin.domain.DataMaintenance;
-
 import java.io.File;
+
+import modules.admin.domain.DataMaintenance;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
@@ -36,9 +36,9 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		File extractDir = new File(backup.getParentFile(), extractDirName);
 		Util.LOGGER.info("Extract " + backup.getAbsolutePath() + " to " + extractDir.getAbsolutePath());
 		if (extractDir.exists()) {
-			Util.LOGGER.info(backup.getAbsolutePath() + " already exists - delete it.");
+			Util.LOGGER.info(extractDir.getAbsolutePath() + " already exists - delete it.");
 			FileUtil.delete(extractDir);
-			Util.LOGGER.info(backup.getAbsolutePath() + " deleted");
+			Util.LOGGER.info(extractDir.getAbsolutePath() + " deleted");
 		}
 		FileUtil.extractZipArchive(backup, extractDir);
 		Util.LOGGER.info("Extracted " + backup.getAbsolutePath() + " to " + extractDir.getAbsolutePath());

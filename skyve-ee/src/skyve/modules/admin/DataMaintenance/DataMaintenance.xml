@@ -12,13 +12,24 @@
 	<attributes>
 		<text name="modDocName">
 			<displayName>Module.Document</displayName>
-			<domain>variant</domain>
+			<domain>constant</domain>
 			<length>100</length>
 		</text>
 		<text name="schemaName">
 			<displayName>Schema Name</displayName>
 			<length>1024</length>
 		</text>
+		
+		<!-- Data Refresh -->
+		<collection type="aggregation" persistent="false" audited="false" deprecated="false" name="refreshDocuments" ordered="true">
+			<displayName>Refresh Documents</displayName>
+			<domain>constant</domain>
+			<documentName>DataMaintenanceModuleDocument</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="notification">
+			<displayName>Notify me on completion</displayName>
+		</boolean>
 		<!-- Backup job parameters -->
 		<integer name="dailyBackupRetention">
 			<displayName>Daily Backup Retention</displayName>

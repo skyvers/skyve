@@ -14,9 +14,15 @@ import org.skyve.persistence.Persistence;
 
 import modules.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.DataMaintenanceModuleDocument;
 
 public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SYSTEM_DATA_REFRESH_NOTIFICATION = "SYSTEM Document Data Refresh Notification";
+	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
+	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete. Check Job log for details.";
+
 
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
@@ -26,14 +32,30 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 		if (result == null) {
 			result = bean;
 		}
+		
+		Customer c = CORE.getUser().getCustomer();
+		for (Module m : c.getModules()) {
+			for (String k : m.getDocumentRefs().keySet()) {
+				Document d = m.getDocument(c, k);
+				if (d.getPersistent() != null) {
+					DataMaintenanceModuleDocument doc = DataMaintenanceModuleDocument.newInstance();
+					doc.setModuleName(m.getName());
+					doc.setDocumentName(d.getName());
+					doc.setModDocName(String.format("%s.%s", m.getTitle(), d.getSingularAlias()));
+					result.getRefreshDocuments().add(doc);
+				}
+			}
+		}
 
 		return result;
 	}
 
+
 	@Override
-	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
-		if (DataMaintenance.modDocNamePropertyName.equals(attributeName)) {
-			List<DomainValue> result = new ArrayList<>();
+	public List<org.skyve.metadata.model.document.Bizlet.DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+		List<DomainValue> result = new ArrayList<>();
+		
+		if (DataMaintenance.modDocNamePropertyName.equals(attributeName) ) {
 
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
@@ -46,10 +68,9 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 				}
 			}
 			Collections.sort(result, new DomainValueSortByDescription());
-
-			return result;
 		}
-
-		return super.getVariantDomainValues(attributeName);
+		
+		return result;
 	}
+
 }

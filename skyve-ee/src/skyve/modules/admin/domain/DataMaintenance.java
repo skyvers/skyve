@@ -1,5 +1,7 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
@@ -16,6 +18,7 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
  * DataMaintenance
  * 
  * @depend - - - Operation
+ * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
  */
 @XmlType
@@ -36,6 +39,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String modDocNamePropertyName = "modDocName";
 	/** @hidden */
 	public static final String schemaNamePropertyName = "schemaName";
+	/** @hidden */
+	public static final String refreshDocumentsPropertyName = "refreshDocuments";
+	/** @hidden */
+	public static final String notificationPropertyName = "notification";
 	/** @hidden */
 	public static final String dailyBackupRetentionPropertyName = "dailyBackupRetention";
 	/** @hidden */
@@ -73,6 +80,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	private String modDocName;
 	private String schemaName;
+	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
+	private Boolean notification;
 	private Integer dailyBackupRetention;
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
@@ -160,6 +169,51 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setSchemaName(String schemaName) {
 		preset(schemaNamePropertyName, schemaName);
 		this.schemaName = schemaName;
+	}
+
+	/**
+	 * {@link #refreshDocuments} accessor.
+	 **/
+	@XmlElement
+	public List<DataMaintenanceModuleDocument> getRefreshDocuments() {
+		return refreshDocuments;
+	}
+
+	/**
+	 * {@link #refreshDocuments} accessor.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 **/
+	public DataMaintenanceModuleDocument getRefreshDocumentsElementById(String bizId) {
+		return getElementById(refreshDocuments, bizId);
+	}
+
+	/**
+	 * {@link #refreshDocuments} mutator.
+	 * 
+	 * @param bizId	The bizId of the element in the list.
+	 * @param refreshDocuments	The new value to set.
+	 **/
+	public void setRefreshDocumentsElementById(@SuppressWarnings("unused") String bizId, DataMaintenanceModuleDocument element) {
+		 setElementById(refreshDocuments, element);
+	}
+
+	/**
+	 * {@link #notification} accessor.
+	 **/
+	public Boolean getNotification() {
+		return notification;
+	}
+
+	/**
+	 * {@link #notification} mutator.
+	 * 
+	 * @param notification	The new value to set.
+	 **/
+	@XmlElement
+	public void setNotification(Boolean notification) {
+		preset(notificationPropertyName, notification);
+		this.notification = notification;
 	}
 
 	/**

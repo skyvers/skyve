@@ -160,6 +160,7 @@
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
 		<property name="modDocName" length="100" />
 		<property name="schemaName" length="1024" />
+		<property name="notification" />
 		<property name="dailyBackupRetention" />
 		<property name="weeklyBackupRetention" />
 		<property name="monthlyBackupRetention" />
