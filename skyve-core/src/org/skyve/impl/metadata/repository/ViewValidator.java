@@ -790,6 +790,10 @@ class ViewValidator extends ViewVisitor {
 		if (dataGridBinding != null) {
 			blurbIdentifier += " in" + dataGridIdentifier;
 		}
+		String markup = blurb.getMarkup();
+		if (markup == null) {
+			throw new MetaDataException(blurbIdentifier + " in " + viewIdentifier + " has no markup specified.");
+		}
 		validateMessageBindings(blurb.getMarkup(), blurbIdentifier, "markup");
 		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
 	}

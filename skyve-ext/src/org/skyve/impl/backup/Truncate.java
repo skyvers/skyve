@@ -21,42 +21,60 @@ import org.skyve.impl.backup.JoinTable;
 import org.skyve.impl.backup.Table;
 
 public class Truncate {
-	public static void truncate(String schemaName) 
+	public static void truncate(String schemaName, boolean database, boolean content) 
 	throws Exception {
 		Collection<Table> tables = getTables(schemaName);
-		truncate(tables, CORE.getUser().getCustomerName());
+		truncate(tables, CORE.getUser().getCustomerName(), database, content);
 	}
 	
-	private static void truncate(Collection<Table> tables, String customerName) throws Exception {
-		StringBuilder sql = new StringBuilder(128);
+	private static void truncate(Collection<Table> tables, 
+									String customerName, 
+									boolean database,
+									boolean content)
+	throws Exception {
+		if (database) {
+			StringBuilder sql = new StringBuilder(128);
 
-		AbstractPersistence persistence = AbstractPersistence.get();
-		try {
-			persistence.begin();
-
-			// update foreign keys to null
-			for (Table table : tables) { 
-				if (table instanceof JoinTable) {
-					continue;
-				}
-				sql.setLength(0);
-				sql.append("update ").append(table.name).append(" set ");
-				for (String fieldName : table.fields.keySet()) {
-					if (fieldName.toLowerCase().endsWith("_id")) {
-						sql.append(fieldName).append(" = null,");
+			AbstractPersistence persistence = AbstractPersistence.get();
+			try {
+				persistence.begin();
+	
+				// update foreign keys to null
+				for (Table table : tables) { 
+					if (table instanceof JoinTable) {
+						continue;
+					}
+					sql.setLength(0);
+					sql.append("update ").append(table.name).append(" set ");
+					for (String fieldName : table.fields.keySet()) {
+						if (fieldName.toLowerCase().endsWith("_id")) {
+							sql.append(fieldName).append(" = null,");
+						}
+					}
+					if (sql.charAt(sql.length() - 1) == ',') {
+						sql.setLength(sql.length() - 1); // remove the comma
+	
+						BackupUtil.secureSQL(sql, table, customerName);
+						persistence.newSQL(sql.toString()).execute();
 					}
 				}
-				if (sql.charAt(sql.length() - 1) == ',') {
-					sql.setLength(sql.length() - 1); // remove the comma
-
-					BackupUtil.secureSQL(sql, table, customerName);
-					persistence.newSQL(sql.toString()).execute();
+	
+				// delete rows from joining tables
+				for (Table table : tables) {
+					if (table instanceof JoinTable) {
+						sql.setLength(0);
+						sql.append("delete from ").append(table.name);
+						BackupUtil.secureSQL(sql, table, customerName);
+						UtilImpl.LOGGER.info("delete table " + table.name);
+						persistence.newSQL(sql.toString()).execute();
+					}
 				}
-			}
-
-			// delete rows from joining tables
-			for (Table table : tables) {
-				if (table instanceof JoinTable) {
+				
+				// delete rows from non-joining tables
+				for (Table table : tables) {
+					if (table instanceof JoinTable) {
+						continue;
+					}
 					sql.setLength(0);
 					sql.append("delete from ").append(table.name);
 					BackupUtil.secureSQL(sql, table, customerName);
@@ -64,25 +82,15 @@ public class Truncate {
 					persistence.newSQL(sql.toString()).execute();
 				}
 			}
-			
-			// delete rows from non-joining tables
-			for (Table table : tables) {
-				if (table instanceof JoinTable) {
-					continue;
-				}
-				sql.setLength(0);
-				sql.append("delete from ").append(table.name);
-				BackupUtil.secureSQL(sql, table, customerName);
-				UtilImpl.LOGGER.info("delete table " + table.name);
-				persistence.newSQL(sql.toString()).execute();
+			finally {
+				persistence.commit(false);
 			}
 		}
-		finally {
-			persistence.commit(false);
-		}
 		
-		try (ContentManager cm = EXT.newContentManager()) {
-			cm.truncate(customerName);
+		if (content) {
+			try (ContentManager cm = EXT.newContentManager()) {
+				cm.truncate(customerName);
+			}
 		}
 	}
 
@@ -165,7 +173,7 @@ public class Truncate {
 		}
 		BackupUtil.initialise(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
 		try {
-			truncate(args[8]);
+			truncate(args[8], true, true);
 		}
 		finally {
 			BackupUtil.finalise();

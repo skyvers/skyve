@@ -189,6 +189,9 @@
 					<action name="Truncate" />
 					<action name="DownloadBackup" />
 					<action name="RefreshDocumentTuples" />
+					<action name="Create" />
+					<action name="Drop" />
+					<action name="Sync" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
 				<document name="SystemDashboard" permission="_____" />

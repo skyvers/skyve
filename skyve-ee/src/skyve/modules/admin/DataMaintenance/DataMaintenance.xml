@@ -43,6 +43,20 @@
 		<integer name="yearlyBackupRetention">
 			<displayName>Yearly Backup Retention</displayName>
 		</integer>
+		<!-- Restore parameters -->
+		<enum name="restorePreProcess" required="true">
+			<displayName>Restore Pre-Process</displayName>
+			<values>
+				<value code="none" description="No Processing" />
+				<value name="dropUsingMetadataAndCreateUsingBackup" code="dmcb" description="Drop tables using Metadata &amp; recreate tables from backup create.sql" />
+				<value name="dropUsingBackupAndCreateUsingBackup" code="dbcb" description="Drop tables using backup drop.sql &amp; recreate tables from backup create.sql" />
+				<value name="dropUsingMetadataAndCreateUsingMetadata" code="dmcm" description="Drop tables using Metadata &amp; recreate tables from Metadata" />
+				<value name="dropUsingBackupAndCreateUsingMetadata" code="dbcm" description="Drop tables using Metadata &amp; recreate tables from Metadata" />
+				<value name="createUsingBackup" code="cb" description="Create tables from backup" />
+				<value name="createUsingMetadata" code="cm" description="Create tables from Metadata" />
+				<value name="deleteData" code="dmc" description="Delete existing table data using Metadata" />
+			</values>
+		</enum>
 		
 		<id name="selectedBackupName" persistent="false" trackChanges="false">
 			<displayName>Selected Backup Name</displayName>
@@ -89,6 +103,9 @@
 		</integer>
 		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
 			<displayName>Status</displayName>
+		</memo>
+		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
+			<displayName>Script</displayName>
 		</memo>
 	</attributes>
 	<conditions>

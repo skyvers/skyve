@@ -30,19 +30,6 @@
 			</form>
 		</tab>
 		<tab title="Backup/Restore">
-			<form border="true" borderTitle="Truncate">
-				<column pixelWidth="100" />
-				<column />
-				<column pixelWidth="75" />
-				<row>
-					<item>
-						<textField binding="schemaName" />
-					</item>
-					<item align="centre">
-						<button actionName="Truncate" />
-					</item>
-				</row>
-			</form>
 			<form border="true" borderTitle="Job">
 				<column />
 				<column pixelWidth="60" />
@@ -76,10 +63,58 @@
 					</onSelectedHandlers>
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
-					<button actionName="Backup" pixelWidth="100" />
-					<button actionName="DownloadBackup" pixelWidth="100" />
-					<button actionName="DeleteBackup" pixelWidth="100" />
-					<button actionName="Restore" pixelWidth="100" />
+					<form border="true" percentageWidth="100">
+						<column pixelWidth="120" />
+						<column />
+						<column pixelWidth="110" />
+						<row>
+							<item required="false">
+								<combo binding="restorePreProcess" />
+							</item>
+							<item>
+								<button actionName="Restore" pixelWidth="100" />
+							</item>
+						</row>
+					</form>
+					<vbox pixelMemberPadding="5">
+						<button actionName="Backup" pixelWidth="150" />
+						<button actionName="DownloadBackup" pixelWidth="150" />
+						<button actionName="DeleteBackup" pixelWidth="150" />
+					</vbox>
+				</hbox>
+			</vbox>
+		</tab>
+		<tab title="Data">
+			<form border="true" borderTitle="Truncate">
+				<column pixelWidth="100" />
+				<column />
+				<column pixelWidth="75" />
+				<row>
+					<item>
+						<textField binding="schemaName" />
+					</item>
+					<item align="centre">
+						<button actionName="Truncate" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="DDL">
+				<form border="true" borderTitle="Script" percentageHeight="100">
+					<column />
+					<row>
+						<item showLabel="false">
+							<blurb>
+								<![CDATA[
+									<span style="white-space:pre-wrap">{ddlScript}</span>
+								]]>
+							</blurb>
+						</item>
+					</row>
+				</form>
+				<hbox horizontalAlignment="right">
+					<button actionName="Create" pixelWidth="100" />
+					<button actionName="Drop" pixelWidth="100" />
+					<button actionName="Sync" pixelWidth="100" />
 				</hbox>
 			</vbox>
 		</tab>
@@ -218,5 +253,8 @@
 
 		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
+		<action className="Create" displayName="Create" inActionPanel="false" />
+		<action className="Drop" displayName="Drop" inActionPanel="false" />
+		<action className="Sync" displayName="Sync" inActionPanel="false" />
 	</actions>
 </view>

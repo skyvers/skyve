@@ -3,6 +3,7 @@ package modules.admin.domain;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
@@ -10,13 +11,16 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import modules.admin.domain.Audit.Operation;
 import org.skyve.CORE;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * DataMaintenance
  * 
+ * @depend - - - RestorePreProcess
  * @depend - - - Operation
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -52,6 +56,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String yearlyBackupRetentionPropertyName = "yearlyBackupRetention";
 	/** @hidden */
+	public static final String restorePreProcessPropertyName = "restorePreProcess";
+	/** @hidden */
 	public static final String selectedBackupNamePropertyName = "selectedBackupName";
 	/** @hidden */
 	public static final String selectedContentIdPropertyName = "selectedContentId";
@@ -77,6 +83,82 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String auditMatchCountPropertyName = "auditMatchCount";
 	/** @hidden */
 	public static final String auditResponsePropertyName = "auditResponse";
+	/** @hidden */
+	public static final String ddlScriptPropertyName = "ddlScript";
+
+	/**
+	 * Restore Pre-Process
+	 **/
+	@XmlEnum
+	public static enum RestorePreProcess implements Enumeration {
+		noProcessing("none", "No Processing"),
+		dropUsingMetadataAndCreateUsingBackup("dmcb", "Drop tables using Metadata & recreate tables from backup create.sql"),
+		dropUsingBackupAndCreateUsingBackup("dbcb", "Drop tables using backup drop.sql & recreate tables from backup create.sql"),
+		dropUsingMetadataAndCreateUsingMetadata("dmcm", "Drop tables using Metadata & recreate tables from Metadata"),
+		dropUsingBackupAndCreateUsingMetadata("dbcm", "Drop tables using Metadata & recreate tables from Metadata"),
+		createUsingBackup("cb", "Create tables from backup"),
+		createUsingMetadata("cm", "Create tables from Metadata"),
+		deleteData("dmc", "Delete existing table data using Metadata");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RestorePreProcess(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static RestorePreProcess fromCode(String code) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RestorePreProcess fromDescription(String description) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RestorePreProcess[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RestorePreProcess value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	private String modDocName;
 	private String schemaName;
@@ -86,6 +168,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
 	private Integer yearlyBackupRetention;
+	private RestorePreProcess restorePreProcess;
 	private String selectedBackupName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
@@ -99,6 +182,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private String auditUserName;
 	private Integer auditMatchCount;
 	private String auditResponse;
+	private String ddlScript;
 
 	@Override
 	@XmlTransient
@@ -286,6 +370,24 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setYearlyBackupRetention(Integer yearlyBackupRetention) {
 		preset(yearlyBackupRetentionPropertyName, yearlyBackupRetention);
 		this.yearlyBackupRetention = yearlyBackupRetention;
+	}
+
+	/**
+	 * {@link #restorePreProcess} accessor.
+	 **/
+	public RestorePreProcess getRestorePreProcess() {
+		return restorePreProcess;
+	}
+
+	/**
+	 * {@link #restorePreProcess} mutator.
+	 * 
+	 * @param restorePreProcess	The new value to set.
+	 **/
+	@XmlElement
+	public void setRestorePreProcess(RestorePreProcess restorePreProcess) {
+		preset(restorePreProcessPropertyName, restorePreProcess);
+		this.restorePreProcess = restorePreProcess;
 	}
 
 	/**
@@ -517,6 +619,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setAuditResponse(String auditResponse) {
 		this.auditResponse = auditResponse;
+	}
+
+	/**
+	 * {@link #ddlScript} accessor.
+	 **/
+	public String getDdlScript() {
+		return ddlScript;
+	}
+
+	/**
+	 * {@link #ddlScript} mutator.
+	 * 
+	 * @param ddlScript	The new value to set.
+	 **/
+	@XmlElement
+	public void setDdlScript(String ddlScript) {
+		this.ddlScript = ddlScript;
 	}
 
 	/**

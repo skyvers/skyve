@@ -33,6 +33,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.persistence.DataStore;
+import org.skyve.util.Util;
 
 final class BackupUtil {
 	private BackupUtil() {
@@ -156,6 +157,27 @@ final class BackupUtil {
 		}
 		
 		return result;
+	}
+	
+	static void executeScript(List<String> script) 
+	throws Exception {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		try {
+			persistence.begin();
+
+			for (String command : script) { 
+				try {
+					persistence.newSQL(command).execute();
+				}
+				catch (Exception e) {
+					Util.LOGGER.severe("Could not execute SQL " + command);
+					throw e;
+				}
+			}
+		}
+		finally {
+			persistence.commit(false);
+		}
 	}
 
 	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document)

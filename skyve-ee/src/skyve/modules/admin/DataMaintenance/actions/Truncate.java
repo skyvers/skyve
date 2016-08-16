@@ -14,7 +14,7 @@ public class Truncate implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		bean.setRefreshContent(Boolean.TRUE);
 
-		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName());
+		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName(), true, true);
 		return new ServerSideActionResult(bean);
 	}
 }
