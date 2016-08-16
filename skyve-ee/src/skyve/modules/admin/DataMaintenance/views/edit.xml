@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Export/Import">
-			<form border="true" percentageWidth="50">
-				<column percentageWidth="20" />
+			<form border="true" percentageWidth="60">
+				<column />
 				<column />
 				<row>
 					<item>
@@ -68,19 +68,9 @@
 				</row>
 			</form>
 			<vbox border="true" borderTitle="Backups">
-				<listGrid model="BackupsModel"
-							selectedIdBinding="selectedBackupName"
-							continueConversation="false" 
-							showAdd="false" 
-							showEdit="false" 
-							showExport="false"
-							showFilter="false" 
-							showRemove="false"
-							showSnap="false" 
-							showSummary="false" 
-							showTag="false" 
-							showZoom="false"
-							postRefresh="backupsRefreshRequired">
+				<listGrid model="BackupsModel" selectedIdBinding="selectedBackupName" continueConversation="false" showAdd="false"
+					showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
+					showTag="false" showZoom="false" postRefresh="backupsRefreshRequired">
 					<onSelectedHandlers>
 						<server action="BackupSelected" />
 					</onSelectedHandlers>
@@ -94,19 +84,9 @@
 			</vbox>
 		</tab>
 		<tab title="Content">
-			<listGrid model="ContentModel" 
-						selectedIdBinding="selectedContentId"
-						continueConversation="false" 
-						showAdd="false"
-						showEdit="false" 
-						showExport="false"
-						showFilter="false" 
-						showRemove="false" 
-						showSnap="false" 
-						showSummary="false" 
-						showTag="false" 
-						showZoom="false"
-						postRefresh="contentRefreshRequired">
+			<listGrid model="ContentModel" selectedIdBinding="selectedContentId" continueConversation="false" showAdd="false"
+				showEdit="false" showExport="false" showFilter="false" showRemove="false" showSnap="false" showSummary="false"
+				showTag="false" showZoom="false" postRefresh="contentRefreshRequired">
 				<onSelectedHandlers>
 					<server action="ContentSelected" />
 				</onSelectedHandlers>
@@ -129,62 +109,62 @@
 		</tab>
 		<tab title="Manage Audits" visible="auditManager">
 			<form border="true" percentageWidth="60" borderTitle="Filter">
-				<column percentageWidth="20"/>
-				<column/>
-				<column/>
+				<column percentageWidth="20" />
+				<column />
+				<column />
 				<row>
 					<item colspan="2">
-							<textField binding="auditModuleName"/>
+						<textField binding="auditModuleName" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-							<textField binding="auditDocumentName"/>
+						<textField binding="auditDocumentName" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-							<combo binding="auditOperation"/>
+						<combo binding="auditOperation" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-							<textField binding="auditTimestampStart"/>
+						<textField binding="auditTimestampStart" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-							<textField binding="auditTimestampEnd"/>
+						<textField binding="auditTimestampEnd" />
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-							<textField binding="auditUserName"/>
+						<textField binding="auditUserName" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<textField binding="auditMatchCount" disabled="true"/>
+						<textField binding="auditMatchCount" disabled="true" />
 					</item>
 					<item>
-						<button actionName="CheckAuditMatches" pixelWidth="150"/>
-					</item>					
+						<button actionName="CheckAuditMatches" pixelWidth="150" />
+					</item>
 				</row>
 			</form>
 			<form border="true" percentageWidth="60" borderTitle="Truncate">
-				<column percentageWidth="20"/>
-				<column/>			
+				<column percentageWidth="20" />
+				<column />
 				<row>
 					<item>
-						<spacer/>
+						<spacer />
 					</item>
 					<item>
-						<button actionName="TruncateAuditLog" pixelWidth="150"/>
+						<button actionName="TruncateAuditLog" pixelWidth="150" />
 					</item>
 				</row>
 				<row>
 					<item>
-						<spacer/>
+						<spacer />
 					</item>
 					<item>
 						<blurb>
@@ -193,7 +173,27 @@
 					</item>
 				</row>
 			</form>
-			
+		</tab>
+		<tab title="Refresh">
+			<dataGrid binding="refreshDocuments" inline="true" showZoom="false" showAdd="false" >
+				<boundColumn binding="include" editable="true"/>
+				<boundColumn binding="moduleName" editable="false"/>
+				<boundColumn binding="documentName" editable="false"/>
+			</dataGrid>
+			<form border="true" borderTitle="Document Data Refresh" percentageWidth="60">
+				<column />
+				<column />
+				<column />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="notification" triState="false" />
+					</item>
+					<item>
+						<button actionName="RefreshDocumentTuples"/>
+					</item>
+				</row>
+			</form>
 		</tab>
 	</tabPane>
 	<actions>
@@ -203,16 +203,20 @@
 		<action className="Backup" displayName="Backup" inActionPanel="false" />
 		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
 		<action className="ContentSelected" displayName="ContentSelected" inActionPanel="false" />
-		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to delete this backup folder from the server filesystem?" />
+		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to delete this backup folder from the server filesystem?" />
 		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
-		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
+		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
 		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
-		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false" confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)"
-			relativeIconFileName="shared/icons/Clear.gif" disabled="jobCommenced"
-		/>
-		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false"
-			relativeIconFileName="shared/icons/Search.gif" 
-		/>
-		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected" confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
+		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false"
+			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" relativeIconFileName="shared/icons/Clear.gif"
+			disabled="jobCommenced" />
+		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
+		<action className="RefreshDocumentTuples" displayName="Refresh Persisted Document Data" inActionPanel="false"
+			confirm="OK to start the Refresh Job? (There is no undo.)" relativeIconFileName="shared/icons/Job.gif" />
+
+		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected"
+			confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
 	</actions>
 </view>

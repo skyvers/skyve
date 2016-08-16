@@ -16,8 +16,8 @@ public class CheckAuditMatches implements ServerSideAction<DataMaintenance> {
 	throws Exception {
 		
 		Persistence pers = CORE.getPersistence();
-		bean = TruncateAuditLog.setResultCount(pers, bean);
+		DataMaintenance result = TruncateAuditLog.setResultCount(pers, bean);
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult(result);
 	}
 }
