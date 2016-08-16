@@ -154,7 +154,7 @@ public class SmartClientGenerateUtils {
 
                         	pickListFields.add(def.getName());
                         	// only add fields that can use the substring operator
-                        	if (! def.isOnlyEqualsFilterOperators()) {
+                        	if (def.getHasTextFilterOperators()) {
                         		filterFields.add(def.getName());
                         	}
                 		}
@@ -994,7 +994,8 @@ public class SmartClientGenerateUtils {
 		private boolean detail = false;
 		private boolean canSortClientOnly = false;
 		private boolean onlyEqualsFilterOperators = false;
-
+		private boolean hasTextFilterOperators = false;
+		
 		SmartClientQueryColumnDefinition(User user,
 											Customer customer, 
 											Module module, 
@@ -1022,6 +1023,11 @@ public class SmartClientGenerateUtils {
 					}
 				}
 				else {
+					AttributeType attributeType = attribute.getAttributeType();
+					hasTextFilterOperators = AttributeType.text.equals(attributeType) ||
+												AttributeType.memo.equals(attributeType) || 
+												AttributeType.markup.equals(attributeType) ||
+												AttributeType.colour.equals(attributeType);
 					if (attribute instanceof Text) {
 						Text text = (Text) attribute;
 						determineMaskAndStyle(text, this);
@@ -1088,10 +1094,10 @@ public class SmartClientGenerateUtils {
 			return mask;
 		}
 
-		public boolean isOnlyEqualsFilterOperators() {
-			return onlyEqualsFilterOperators;
+		public boolean getHasTextFilterOperators() {
+			return hasTextFilterOperators;
 		}
-
+		
 		public String toJavascript() {
 			StringBuilder result = new StringBuilder(64);
 
