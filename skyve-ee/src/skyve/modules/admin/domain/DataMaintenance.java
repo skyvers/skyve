@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - RestorePreProcess
  * @depend - - - Operation
+ * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
  */
@@ -78,7 +79,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String auditTimestampEndPropertyName = "auditTimestampEnd";
 	/** @hidden */
-	public static final String auditUserNamePropertyName = "auditUserName";
+	public static final String auditUserPropertyName = "auditUser";
 	/** @hidden */
 	public static final String auditMatchCountPropertyName = "auditMatchCount";
 	/** @hidden */
@@ -181,7 +182,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private Operation auditOperation;
 	private Timestamp auditTimestampStart;
 	private Timestamp auditTimestampEnd;
-	private String auditUserName;
+	private User auditUser = null;
 	private Integer auditMatchCount;
 	private String auditResponse;
 	private String ddlScript;
@@ -573,21 +574,21 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #auditUserName} accessor.
+	 * {@link #auditUser} accessor.
 	 **/
-	public String getAuditUserName() {
-		return auditUserName;
+	public User getAuditUser() {
+		return auditUser;
 	}
 
 	/**
-	 * {@link #auditUserName} mutator.
+	 * {@link #auditUser} mutator.
 	 * 
-	 * @param auditUserName	The new value to set.
+	 * @param auditUser	The new value to set.
 	 **/
 	@XmlElement
-	public void setAuditUserName(String auditUserName) {
-		preset(auditUserNamePropertyName, auditUserName);
-		this.auditUserName = auditUserName;
+	public void setAuditUser(User auditUser) {
+		preset(auditUserPropertyName, auditUser);
+		this.auditUser = auditUser;
 	}
 
 	/**

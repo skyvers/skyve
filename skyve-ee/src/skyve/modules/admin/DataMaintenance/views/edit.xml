@@ -162,33 +162,44 @@
 				<row>
 					<item colspan="2">
 						<combo binding="auditModuleName" >
-							<onBlurHandlers><rerender/></onBlurHandlers>
+							<onChangedHandlers><rerender/></onChangedHandlers>
 						</combo>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<combo binding="auditDocumentName" />
+						<combo binding="auditDocumentName" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<combo binding="auditOperation" />
+						<combo binding="auditOperation" >
+							<onChangedHandlers><rerender/></onChangedHandlers>
+						</combo>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<textField binding="auditTimestampStart" />
+						<textField binding="auditTimestampStart" >
+							<onBlurHandlers><rerender/>	</onBlurHandlers>
+						</textField>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<textField binding="auditTimestampEnd" />
+						<textField binding="auditTimestampEnd" >
+						<onBlurHandlers><rerender/>	</onBlurHandlers>
+						</textField>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<textField binding="auditUserName" />
+						<lookupDescription binding="auditUser"  descriptionBinding="bizKey" enableAdd="false">
+							<onPickedHandlers><rerender/></onPickedHandlers>
+							<onClearedHandlers><rerender/></onClearedHandlers>
+						</lookupDescription>
 					</item>
 				</row>
 				<row>
@@ -222,6 +233,14 @@
 					</item>
 				</row>
 			</form>
+			<listGrid continueConversation="false" query="qAudits">
+				<filterParameter operator="equal" name="auditModuleName" binding="auditModuleName"/>
+				<filterParameter operator="equal" name="auditDocumentName" binding="auditDocumentName"/>
+				<filterParameter operator="equal" name="operation" binding="auditOperation"/>
+				<filterParameter operator="greaterEqual" name="timestamp" binding="auditTimestampStart"/>
+				<filterParameter operator="lessEqual" name="timestamp" binding="auditTimestampEnd"/>
+				<filterParameter operator="equal" name="userName" binding="auditUser.userName"/>
+			</listGrid>
 		</tab>
 		<tab title="Refresh">
 			<dataGrid binding="refreshDocuments" inline="true" 

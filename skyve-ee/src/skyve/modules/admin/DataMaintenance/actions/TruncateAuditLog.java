@@ -64,8 +64,8 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		if (bean.getAuditTimestampEnd() != null) {
 			qAudits.getFilter().addLessThanOrEqualTo(Audit.timestampPropertyName, bean.getAuditTimestampEnd());
 		}
-		if (bean.getAuditUserName() != null) {
-			qAudits.getFilter().addEquals(Audit.userNamePropertyName, bean.getAuditUserName());
+		if (bean.getAuditUser() != null) {
+			qAudits.getFilter().addEquals(Audit.userNamePropertyName, bean.getAuditUser().getUserName());
 		}
 
 		return qAudits;

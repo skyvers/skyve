@@ -96,10 +96,10 @@
 		<timestamp name="auditTimestampEnd">
 			<displayName>To</displayName>
 		</timestamp>
-		<text name="auditUserName">
+		<association type="aggregation" name="auditUser">
 			<displayName>User</displayName>
-			<length>254</length>
-		</text>
+			<documentName>User</documentName>
+		</association>
 		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
 			<displayName>Found</displayName>
 		</integer>
