@@ -44,7 +44,7 @@
 			<displayName>Yearly Backup Retention</displayName>
 		</integer>
 		<!-- Restore parameters -->
-		<enum name="restorePreProcess" required="true">
+		<enum name="restorePreProcess">
 			<displayName>Restore Pre-Process</displayName>
 			<values>
 				<value code="none" description="No Processing" />

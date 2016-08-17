@@ -8,6 +8,9 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.backup.DDL;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -21,6 +24,20 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
+		
+		if(bean.getRestorePreProcess()==null){
+			Customer customer = CORE.getUser().getCustomer();
+			Module module = customer.getModule(DataMaintenance.MODULE_NAME);
+			Document document = module.getDocument(customer, DataMaintenance.DOCUMENT_NAME);
+			
+			StringBuilder sb = new StringBuilder(64);
+			sb.append("You must select a ");
+			sb.append(document.getAttribute(DataMaintenance.restorePreProcessPropertyName).getDisplayName());
+			sb.append(" before you can perform this action.");
+			
+			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName, sb.toString()));
+		}
+		
 		bean.setRefreshContent(Boolean.TRUE);
 
 		String selectedBackupName = bean.getSelectedBackupName();
