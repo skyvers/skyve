@@ -70,7 +70,41 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			Collections.sort(result, new DomainValueSortByDescription());
 		}
 		
+		if(DataMaintenance.auditModuleNamePropertyName.equals(attributeName)){
+			Customer c = CORE.getUser().getCustomer();
+			for (Module m : c.getModules()) {
+				result.add(new DomainValue(m.getName(), m.getTitle()));
+			}
+			Collections.sort(result, new DomainValueSortByDescription());			
+		}
+
 		return result;
 	}
+
+
+	@Override
+	public List<DomainValue> getDynamicDomainValues(String attributeName, DataMaintenance bean)
+			throws Exception {
+
+		
+		if(DataMaintenance.auditDocumentNamePropertyName.equals(attributeName) && bean.getAuditModuleName()!=null){
+			List<DomainValue> result = new ArrayList<>();
+			Customer c = CORE.getUser().getCustomer();
+			Module m = c.getModule(bean.getAuditModuleName());
+			for (String k : m.getDocumentRefs().keySet()) {
+				Document d = m.getDocument(c, k);
+				if (d.getPersistent() != null) {
+					result.add(new DomainValue(d.getName(), d.getSingularAlias()));
+				}
+			}
+
+			Collections.sort(result, new DomainValueSortByDescription());
+			return result;
+		}
+		
+		return super.getDynamicDomainValues(attributeName, bean);
+	}
+
+
 
 }

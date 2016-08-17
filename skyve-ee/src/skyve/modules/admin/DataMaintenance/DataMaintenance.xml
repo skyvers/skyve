@@ -79,10 +79,12 @@
 		<!-- transient for Audit Management Truncation Filtering -->
 		<text name="auditModuleName">
 			<displayName>Module</displayName>
+			<domain>constant</domain>
 			<length>128</length>
 		</text>
 		<text name="auditDocumentName">
 			<displayName>Document</displayName>
+			<domain>dynamic</domain>
 			<length>128</length>
 		</text>
 		<enum name="auditOperation" documentRef="Audit" attributeRef="operation">

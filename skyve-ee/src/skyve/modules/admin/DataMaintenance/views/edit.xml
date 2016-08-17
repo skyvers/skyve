@@ -149,12 +149,14 @@
 				<column />
 				<row>
 					<item colspan="2">
-						<textField binding="auditModuleName" />
+						<combo binding="auditModuleName" >
+							<onBlurHandlers><rerender/></onBlurHandlers>
+						</combo>
 					</item>
 				</row>
 				<row>
 					<item colspan="2">
-						<textField binding="auditDocumentName" />
+						<combo binding="auditDocumentName" />
 					</item>
 				</row>
 				<row>
