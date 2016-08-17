@@ -24,10 +24,10 @@ public class GeneratePassword implements ServerSideAction<User> {
 
 	@SuppressWarnings({ "unused", "static-access" })
 	public static void generatePassword(User user) throws Exception {
-		user.setClearTextPassword(new PasswordGenerator().generate());
+		user.setGeneratedPassword(new PasswordGenerator().generate());
 
-		user.setNewPassword(user.getClearTextPassword());
-		user.setConfirmPassword(user.getClearTextPassword());
+		user.setNewPassword(user.getGeneratedPassword());
+		user.setConfirmPassword(user.getGeneratedPassword());
 		user.setPasswordExpired(Boolean.TRUE);
 
 	}

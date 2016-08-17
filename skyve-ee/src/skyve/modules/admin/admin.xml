@@ -325,9 +325,6 @@
 			<edit document="Configuration" name="Password Complexity">
 				<role name="SecurityAdministrator" />
 			</edit>
-			<list name="Generated Credentials" query="qUserPasswords">
-				<role name="SecurityAdministrator" />
-			</list>
 		</group>
 		<list name="Snapshots" document="Snapshot">
 			<uxui name="desktop" />
@@ -358,22 +355,6 @@
 		</edit>
 	</menu>
 	<queries>
-		<documentQuery name="qUserPasswords" documentName="User">
-			<description>Generated Credentials</description>
-			<columns>
-				<column binding="contact.name" sortOrder="ascending" />
-				<column binding="userName" />
-				<column binding="clearTextPassword">
-					<filterOperator>notNull</filterOperator>
-				</column>
-				<column binding="createdDateTime" />
-				<column binding="passwordExpired">
-					<projected>false</projected>
-					<filterOperator>equal</filterOperator>
-					<filterExpression>true</filterExpression>
-				</column>
-			</columns>
-		</documentQuery>
 		<documentQuery name="qContacts" documentName="Contact">
 			<description>All Contact Details</description>
 			<columns>

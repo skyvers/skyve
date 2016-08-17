@@ -399,7 +399,6 @@
 		<property name="homeModule" length="30" />
 		<property name="generated" />
 		<property name="legacyId" length="100" />
-		<property name="clearTextPassword" length="50" />
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
 		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" />

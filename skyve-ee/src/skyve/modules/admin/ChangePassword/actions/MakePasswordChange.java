@@ -74,7 +74,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);
-		userBean.setClearTextPassword(null);
 		userBean.setPasswordLastChanged(new DateTime());
 
 		userBean = persistence.save(userDocument, userBean);

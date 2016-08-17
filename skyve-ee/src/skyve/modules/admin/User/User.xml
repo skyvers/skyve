@@ -27,6 +27,11 @@
 			<!--  The password is checked and populated in the Bizlet -->
 			<length>30</length>
 		</text>
+		<text name="generatedPassword" audited="false"  persistent="false" trackChanges="false">
+			<displayName>Generated Password</displayName>
+			<description>Used to temporarily hold generated passwords for further processing.</description>
+			<length>30</length>
+		</text>
 		<dateTime name="createdDateTime">
 			<displayName>Created</displayName>
 			<description>The time and date when this user account was created.</description>
@@ -55,13 +60,6 @@
 			<displayName>Legacy Id</displayName>
 			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
 			<length>100</length>
-		</text>
-		<text name="clearTextPassword" audited="false">
-			<displayName>Generated Password</displayName>
-			<description>
-				The newly assigned password - this password must be changed at your next login.
-			</description>
-			<length>50</length>
 		</text>
 		<boolean  name="passwordExpired">
 			<displayName>Must change password</displayName>

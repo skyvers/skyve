@@ -69,8 +69,10 @@
 					<item>
 						<checkBox binding="passwordExpired" triState="false" invisible="notSecurityAdministrator" />
 					</item>
+				</row>
+				<row>
 					<item>
-						<textField binding="clearTextPassword" disabled="true" invisible="notSecurityAdministrator" />
+						<textField binding="generatedPassword"  disabled="true"/>
 					</item>
 				</row>
 			</form>

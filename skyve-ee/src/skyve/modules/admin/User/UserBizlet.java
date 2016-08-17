@@ -132,7 +132,7 @@ public class UserBizlet extends Bizlet<User> {
 
 	@Override
 	public void preSave(User bean) throws Exception {
-		if (bean.getClearTextPassword() != null) {
+		if (bean.getGeneratedPassword() != null) {
 			bean.setPasswordExpired(Boolean.TRUE);
 		}
 
@@ -210,9 +210,9 @@ public class UserBizlet extends Bizlet<User> {
 						user.setPassword(hashedPassword);
 
 						// clear reset password details
-						if (user.getClearTextPassword() != null && !user.getClearTextPassword().equals(user.getNewPassword())) {
+						if (user.getGeneratedPassword() != null && !user.getGeneratedPassword().equals(user.getNewPassword())) {
 							user.setPasswordExpired(Boolean.FALSE);
-							user.setClearTextPassword(null);
+							user.setGeneratedPassword(null);
 							user.setPasswordLastChanged(new DateTime());
 						}
 						// clear out the new password entry fields

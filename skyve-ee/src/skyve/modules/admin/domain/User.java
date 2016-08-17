@@ -46,6 +46,8 @@ public class User extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String passwordPropertyName = "password";
 	/** @hidden */
+	public static final String generatedPasswordPropertyName = "generatedPassword";
+	/** @hidden */
 	public static final String createdDateTimePropertyName = "createdDateTime";
 	/** @hidden */
 	public static final String homeModulePropertyName = "homeModule";
@@ -57,8 +59,6 @@ public class User extends AbstractPersistentBean {
 	public static final String generatedPropertyName = "generated";
 	/** @hidden */
 	public static final String legacyIdPropertyName = "legacyId";
-	/** @hidden */
-	public static final String clearTextPasswordPropertyName = "clearTextPassword";
 	/** @hidden */
 	public static final String passwordExpiredPropertyName = "passwordExpired";
 	/** @hidden */
@@ -168,6 +168,10 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private String password;
 	/**
+	 * Used to temporarily hold generated passwords for further processing.
+	 **/
+	private String generatedPassword;
+	/**
 	 * The time and date when this user account was created.
 	 **/
 	private DateTime createdDateTime;
@@ -191,10 +195,6 @@ public class User extends AbstractPersistentBean {
 	 * Legacy ID value when imported from legacy System using the conversion tool.
 	 **/
 	private String legacyId;
-	/**
-	 * The newly assigned password - this password must be changed at your next login.
-	 **/
-	private String clearTextPassword;
 	/**
 	 * Whether the password must be changed
 	 **/
@@ -312,6 +312,23 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	}
 
 	/**
+	 * {@link #generatedPassword} accessor.
+	 **/
+	public String getGeneratedPassword() {
+		return generatedPassword;
+	}
+
+	/**
+	 * {@link #generatedPassword} mutator.
+	 * 
+	 * @param generatedPassword	The new value to set.
+	 **/
+	@XmlElement
+	public void setGeneratedPassword(String generatedPassword) {
+		this.generatedPassword = generatedPassword;
+	}
+
+	/**
 	 * {@link #createdDateTime} accessor.
 	 **/
 	public DateTime getCreatedDateTime() {
@@ -419,24 +436,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setLegacyId(String legacyId) {
 		preset(legacyIdPropertyName, legacyId);
 		this.legacyId = legacyId;
-	}
-
-	/**
-	 * {@link #clearTextPassword} accessor.
-	 **/
-	public String getClearTextPassword() {
-		return clearTextPassword;
-	}
-
-	/**
-	 * {@link #clearTextPassword} mutator.
-	 * 
-	 * @param clearTextPassword	The new value to set.
-	 **/
-	@XmlElement
-	public void setClearTextPassword(String clearTextPassword) {
-		preset(clearTextPasswordPropertyName, clearTextPassword);
-		this.clearTextPassword = clearTextPassword;
 	}
 
 	/**
