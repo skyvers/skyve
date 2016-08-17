@@ -64,9 +64,9 @@
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
 					<form border="true" percentageWidth="100">
-						<column pixelWidth="200" />
+						<column pixelWidth="120" />
 						<column />
-						<column pixelWidth="110" />
+						<column pixelWidth="150" />
 						<row>
 							<item required="false">
 								<combo binding="restorePreProcess" >
@@ -74,7 +74,7 @@
 								</combo>
 							</item>
 							<item>
-								<button actionName="Restore" pixelWidth="100" />
+								<button actionName="Restore" pixelWidth="150" />
 							</item>
 						</row>
 						<row>
