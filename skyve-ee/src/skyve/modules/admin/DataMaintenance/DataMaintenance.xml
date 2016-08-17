@@ -51,7 +51,7 @@
 				<value name="dropUsingMetadataAndCreateUsingBackup" code="dmcb" description="Drop tables using metadata &amp; recreate tables from backup create.sql" />
 				<value name="dropUsingBackupAndCreateUsingBackup" code="dbcb" description="Drop tables using backup drop.sql &amp; recreate tables from backup create.sql" />
 				<value name="dropUsingMetadataAndCreateUsingMetadata" code="dmcm" description="Drop tables using metadata &amp; recreate tables from metadata" />
-				<value name="dropUsingBackupAndCreateUsingMetadata" code="dbcm" description="Drop tables using backup &amp; recreate tables from metadata" />
+				<value name="dropUsingBackupAndCreateUsingMetadata" code="dbcm" description="Drop tables using backup drop.sql &amp; recreate tables from metadata" />
 				<value name="createUsingBackup" code="cb" description="Create tables from backup" />
 				<value name="createUsingMetadata" code="cm" description="Create tables from metadata" />
 				<value name="deleteData" code="dmc" description="Delete existing table data using metadata" />
