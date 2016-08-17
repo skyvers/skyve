@@ -2,6 +2,9 @@ package modules.admin.DataMaintenance.actions;
 
 import java.io.File;
 
+import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.DataMaintenance.RestorePreProcess;
+
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -14,9 +17,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
-
-import modules.admin.domain.DataMaintenance;
-import modules.admin.domain.DataMaintenance.RestorePreProcess;
 
 public class Restore implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 8521252561712649481L;
@@ -49,11 +49,6 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		if (! backup.exists()) {
 			Util.LOGGER.warning("Backup " + backup.getAbsolutePath() + " DNE");
 			throw new ValidationException(new Message("Backup " + selectedBackupName + " no longer exists"));
-		}
-		
-		if (bean.getRestorePreProcess() == null) {
-			throw new ValidationException(new Message(DataMaintenance.restorePreProcessPropertyName,
-														"Please select a pre-process value."));
 		}
 		
 		String extractDirName = selectedBackupName.substring(0, selectedBackupName.length() - 4);
