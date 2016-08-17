@@ -85,6 +85,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String auditResponsePropertyName = "auditResponse";
 	/** @hidden */
 	public static final String ddlScriptPropertyName = "ddlScript";
+	/** @hidden */
+	public static final String instructionHintPropertyName = "instructionHint";
 
 	/**
 	 * Restore Pre-Process
@@ -92,13 +94,13 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlEnum
 	public static enum RestorePreProcess implements Enumeration {
 		noProcessing("none", "No Processing"),
-		dropUsingMetadataAndCreateUsingBackup("dmcb", "Drop tables using Metadata & recreate tables from backup create.sql"),
+		dropUsingMetadataAndCreateUsingBackup("dmcb", "Drop tables using metadata & recreate tables from backup create.sql"),
 		dropUsingBackupAndCreateUsingBackup("dbcb", "Drop tables using backup drop.sql & recreate tables from backup create.sql"),
-		dropUsingMetadataAndCreateUsingMetadata("dmcm", "Drop tables using Metadata & recreate tables from Metadata"),
-		dropUsingBackupAndCreateUsingMetadata("dbcm", "Drop tables using Metadata & recreate tables from Metadata"),
+		dropUsingMetadataAndCreateUsingMetadata("dmcm", "Drop tables using metadata & recreate tables from metadata"),
+		dropUsingBackupAndCreateUsingMetadata("dbcm", "Drop tables using backup drop.sql & recreate tables from metadata"),
 		createUsingBackup("cb", "Create tables from backup"),
-		createUsingMetadata("cm", "Create tables from Metadata"),
-		deleteData("dmc", "Delete existing table data using Metadata");
+		createUsingMetadata("cm", "Create tables from metadata"),
+		deleteData("dmc", "Delete existing table data using metadata");
 
 		private String code;
 		private String description;
@@ -183,6 +185,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private Integer auditMatchCount;
 	private String auditResponse;
 	private String ddlScript;
+	private String instructionHint;
 
 	@Override
 	@XmlTransient
@@ -636,6 +639,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setDdlScript(String ddlScript) {
 		this.ddlScript = ddlScript;
+	}
+
+	/**
+	 * {@link #instructionHint} accessor.
+	 **/
+	public String getInstructionHint() {
+		return instructionHint;
+	}
+
+	/**
+	 * {@link #instructionHint} mutator.
+	 * 
+	 * @param instructionHint	The new value to set.
+	 **/
+	@XmlElement
+	public void setInstructionHint(String instructionHint) {
+		this.instructionHint = instructionHint;
 	}
 
 	/**
