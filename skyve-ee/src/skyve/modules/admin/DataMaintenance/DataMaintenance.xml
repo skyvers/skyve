@@ -48,13 +48,13 @@
 			<displayName>Restore Pre-Process</displayName>
 			<values>
 				<value code="none" description="No Processing" />
-				<value name="dropUsingMetadataAndCreateUsingBackup" code="dmcb" description="Drop tables using Metadata &amp; recreate tables from backup create.sql" />
+				<value name="dropUsingMetadataAndCreateUsingBackup" code="dmcb" description="Drop tables using metadata &amp; recreate tables from backup create.sql" />
 				<value name="dropUsingBackupAndCreateUsingBackup" code="dbcb" description="Drop tables using backup drop.sql &amp; recreate tables from backup create.sql" />
-				<value name="dropUsingMetadataAndCreateUsingMetadata" code="dmcm" description="Drop tables using Metadata &amp; recreate tables from Metadata" />
-				<value name="dropUsingBackupAndCreateUsingMetadata" code="dbcm" description="Drop tables using Metadata &amp; recreate tables from Metadata" />
+				<value name="dropUsingMetadataAndCreateUsingMetadata" code="dmcm" description="Drop tables using metadata &amp; recreate tables from metadata" />
+				<value name="dropUsingBackupAndCreateUsingMetadata" code="dbcm" description="Drop tables using backup &amp; recreate tables from metadata" />
 				<value name="createUsingBackup" code="cb" description="Create tables from backup" />
-				<value name="createUsingMetadata" code="cm" description="Create tables from Metadata" />
-				<value name="deleteData" code="dmc" description="Delete existing table data using Metadata" />
+				<value name="createUsingMetadata" code="cm" description="Create tables from metadata" />
+				<value name="deleteData" code="dmc" description="Delete existing table data using metadata" />
 			</values>
 		</enum>
 		
@@ -108,6 +108,9 @@
 		</memo>
 		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
 			<displayName>Script</displayName>
+		</memo>
+		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
+			<displayName>Hint</displayName>
 		</memo>
 	</attributes>
 	<conditions>
