@@ -112,9 +112,9 @@
 					</row>
 				</form>
 				<hbox horizontalAlignment="right">
-					<button actionName="Create" pixelWidth="100" />
-					<button actionName="Drop" pixelWidth="100" />
-					<button actionName="Sync" pixelWidth="100" />
+					<button actionName="Create" pixelWidth="200" />
+					<button actionName="Drop" pixelWidth="200" />
+					<button actionName="Sync" pixelWidth="200" />
 				</hbox>
 			</vbox>
 		</tab>
@@ -238,26 +238,36 @@
 		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
-		<action className="Backup" displayName="Backup" inActionPanel="false" />
+		<action className="Backup" displayName="Backup" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif"/>
 		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
 		<action className="ContentSelected" displayName="ContentSelected" inActionPanel="false" />
 		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected"
-			confirm="Are you sure you want to delete this backup folder from the server filesystem?" />
-		<action className="Reindex" displayName="Reindex" inActionPanel="false" />
+			confirm="Are you sure you want to delete this backup folder from the server filesystem?" 
+			relativeIconFileName="shared/icons/Clear.gif"/>
+		<action className="Reindex" displayName="Reindex" inActionPanel="false" 
+			relativeIconFileName="shared/icons/Wizard.gif"/>
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected"
-			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" />
-		<action className="Truncate" displayName="Truncate" inActionPanel="false" />
+			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" 
+			relativeIconFileName="shared/icons/Exclamation.gif"/>
+		<action className="Truncate" displayName="Truncate" inActionPanel="false" 
+			relativeIconFileName="shared/icons/Clear.gif"/>
 		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false"
-			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" relativeIconFileName="shared/icons/Clear.gif"
-			disabled="jobCommenced" />
+			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" 
+			relativeIconFileName="shared/icons/Clear.gif" disabled="jobCommenced" />
 		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
 		<action className="RefreshDocumentTuples" displayName="Refresh Persisted Document Data" inActionPanel="false"
 			confirm="OK to start the Refresh Job? (There is no undo.)" relativeIconFileName="shared/icons/Job.gif" />
 
 		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
-		<action className="Create" displayName="Create" inActionPanel="false" />
-		<action className="Drop" displayName="Drop" inActionPanel="false" />
-		<action className="Sync" displayName="Sync" inActionPanel="false" />
+		<action className="Create" displayName="Script Create DB" inActionPanel="false"
+			toolTip="Generate a script to create the SQL DB" 
+			relativeIconFileName="shared/icons/Script.gif"/>
+		<action className="Drop" displayName="Script Drop DB" inActionPanel="false"
+			toolTip="Generate a script to drop the SQL DB" 
+			relativeIconFileName="shared/icons/Script.gif"/>
+		<action className="Sync" displayName="Script Synchronise DB" inActionPanel="false"
+			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
+			relativeIconFileName="shared/icons/Script.gif"/>
 	</actions>
 </view>
