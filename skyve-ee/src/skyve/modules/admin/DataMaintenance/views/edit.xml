@@ -66,7 +66,7 @@
 					<form border="true" percentageWidth="100">
 						<column pixelWidth="120" />
 						<column />
-						<column pixelWidth="150" />
+						<column pixelWidth="110" />
 						<row>
 							<item required="false">
 								<combo binding="restorePreProcess" >
@@ -74,7 +74,7 @@
 								</combo>
 							</item>
 							<item>
-								<button actionName="Restore" pixelWidth="150" />
+								<button actionName="Restore" pixelWidth="110" />
 							</item>
 						</row>
 						<row>

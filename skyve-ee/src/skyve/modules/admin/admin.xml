@@ -45,9 +45,6 @@
 				Enough privileges and permissions to login and operate Skyve with access to the admin module only.
 			</description>
 			<privileges>
-				<document name="Audit" permission="_R__C">
-					<action name="SourceVersionChanged" />
-				</document>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
@@ -88,9 +85,6 @@
 				Enough privileges and permissions to login, change password and update own contact details.
 			</description>
 			<privileges>
-				<document name="Audit" permission="_R__C">
-					<action name="SourceVersionChanged" />
-				</document>
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
@@ -154,6 +148,9 @@
 		<role name="SecurityAdministrator">
 			<description>Allows administration of Users and Groups.</description>
 			<privileges>
+				<document name="Audit" permission="_R__C">
+					<action name="SourceVersionChanged" />
+				</document>
 				<document name="DownloadFolder" permission="_R__C" />
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
@@ -171,7 +168,6 @@
 					<action name="BatchSelected" />
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
-					
 				</document>
 				<document name="Configuration" permission="CRUDC" />
 				<document name="Contact" permission="CRUDC" />
@@ -301,7 +297,6 @@
 			<uxui name="tablet" />
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
-			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</list>
 		<list document="Communication" name="Communications">
@@ -325,7 +320,6 @@
 			<list document="DataGroup" name="Data Groups">
 				<uxui name="desktop" />
 				<uxui name="tablet" />
-				<role name="DataAdministrator" />
 				<role name="SecurityAdministrator" />
 			</list>
 			<edit document="Configuration" name="Password Complexity">
@@ -348,16 +342,15 @@
 		<list name="Audits" document="Audit">
 			<uxui name="desktop" />
 			<uxui name="tablet" />
-			<role name="BasicUser" />
+			<role name="SecurityAdministrator" />
+			<role name="AuditManager" />
 		</list>
 		<edit document="SystemDashboard" name="System Dashboard">
 			<uxui name="desktop" />
 			<uxui name="tablet" />
-			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</edit>
 		<list name="Document Numbers" document="DocumentNumber">
-			<role name="DataAdministrator" />
 			<role name="SecurityAdministrator" />
 		</list>
 		<edit document="Jobs" name="Jobs">

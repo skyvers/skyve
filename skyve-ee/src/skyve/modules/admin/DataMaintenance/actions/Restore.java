@@ -65,16 +65,21 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		RestorePreProcess pre = bean.getRestorePreProcess();
 		boolean truncateDatabase = RestorePreProcess.deleteData.equals(pre);
 		String schemaName = bean.getSchemaName();
-		Util.LOGGER.info("Truncate " + ((schemaName == null) ? "default" : schemaName) + " schema");
+		if (truncateDatabase) {
+			Util.LOGGER.info("Truncate " + ((schemaName == null) ? "default" : schemaName) + " schema");
+		}
 		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName(), truncateDatabase, true);
 
+		boolean createUsingBackup = false;
 		if (RestorePreProcess.createUsingBackup.equals(pre)) {
+			createUsingBackup = true;
 			DDL.create(new File(extractDir, "create.sql"), true);
 		}
 		else if (RestorePreProcess.createUsingMetadata.equals(pre)) {
 			DDL.create(null, true);
 		}
 		else if (RestorePreProcess.dropUsingBackupAndCreateUsingBackup.equals(pre)) {
+			createUsingBackup = true;
 			DDL.drop(new File(extractDir, "drop.sql"), true);
 			DDL.create(new File(extractDir, "create.sql"), true);
 		}
@@ -83,6 +88,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 			DDL.create(null, true);
 		}
 		else if (RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.equals(pre)) {
+			createUsingBackup = true;
 			DDL.drop(null, true);
 			DDL.create(new File(extractDir, "create.sql"), true);
 		}
@@ -92,7 +98,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		}
 
 		Util.LOGGER.info("Restore " + extractDirName);
-		org.skyve.impl.backup.Restore.restore(extractDirName, true);
+		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup);
 		Util.LOGGER.info("DDL Sync");
 		DDL.sync(true);
 		Util.LOGGER.info("Reindex textual indexes.");
