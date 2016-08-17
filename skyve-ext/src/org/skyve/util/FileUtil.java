@@ -254,7 +254,7 @@ public class FileUtil {
 	}
 
 	private static String dirpart(String name) {
-		int s = name.lastIndexOf('/');
+		int s = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
 		return (s == -1) ? null : name.substring( 0, s );
 	  }
 
