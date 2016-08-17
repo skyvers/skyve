@@ -82,7 +82,7 @@
 							<item colspan="2" >
 								<blurb >
 									<![CDATA[
-									<i>{instructionHint}</i>
+									<span style="white-space:pre-wrap"><i>{instructionHint}</i></span>
 									]]>
 								</blurb>
 							</item>

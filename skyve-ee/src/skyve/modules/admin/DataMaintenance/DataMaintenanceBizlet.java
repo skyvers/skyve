@@ -90,29 +90,29 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			String instructionHint = null;
 			switch(bean.getRestorePreProcess()){
 			case noProcessing:
-				instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and you've let the Skyve create all DDL.<br/>You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
+				instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and you've let the Skyve create all DDL. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
 				break;
 
 			case createUsingBackup:
-				instructionHint="Use this option when you've created a clean schema (manually or scripted).";
+				instructionHint="Use this option when you've created a empty schema (manually or scripted).";
 				break;
 			case createUsingMetadata:
-				instructionHint="Use this option when you have a clean schema but the backup doesn't match the current metadata.";
+				instructionHint="Use this option when you have a empty schema but the backup doesn't match the current metadata.";
 				break;
 			case deleteData:
 				instructionHint="Use this option when the backup matches and you have trivial or testing data (i.e. just delete the data and then run the restore.)";
 				break;
 			case dropUsingBackupAndCreateUsingBackup:
-				instructionHint="Use this option when for some reason the schema is in the shape of the backup (maybe your previous attempt to restore failed).<br/>You cant drop the schema without stopping the server and if you do that, you can't log in any more without restoring.<br/>Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
+				instructionHint="Use this option when for some reason the schema is in the shape of the backup (maybe your previous attempt to restore failed). You cant drop the schema without stopping the server and if you do that, you can't log in any more without restoring. Since the backup/restore only looks after tables under Skyve control, it could be that extra tables have constraints that you need to drop or other issues that you only find after trying to restore.";
 				break;
 			case dropUsingBackupAndCreateUsingMetadata:
 				instructionHint="Use this option when you've tried a restore before and your database is now in the shape of the backup.";
 				break;
 			case dropUsingMetadataAndCreateUsingBackup:
-				instructionHint="Use this option when your backup is a different version or you're not sure, you want the schema to be dropped (the schema matches the metadata) using the system metadata deployed,<br/>but you need the schema to look like it did when the backup was taken.<br/>(Part of the restore post-process is to sync the schema and reindex content.)";
+				instructionHint="Use this option when your backup is a different version or you're not sure, you want the schema to be dropped (the schema matches the metadata) using the system metadata deployed, but you need the schema to look like it did when the backup was taken. (Part of the restore post-process is to sync the schema and reindex content.)";
 				break;
 			case dropUsingMetadataAndCreateUsingMetadata:
-				instructionHint="Use this option when you know the backup is compatible with the schema as it currently stands.<br/>You have a large amount of data that you want to delete and the quickest way is drop and recreate the schema.";
+				instructionHint="Use this option when you know the backup is compatible with the schema as it currently stands. You have a large amount of data that you want to delete and the quickest way is drop and recreate the schema.";
 				break;
 			default:
 				break;
