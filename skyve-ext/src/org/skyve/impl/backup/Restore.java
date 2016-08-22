@@ -149,7 +149,8 @@ public class Restore {
 												AttributeType.memo.equals(attributeType) ||
 												AttributeType.markup.equals(attributeType) ||
 												AttributeType.text.equals(attributeType) ||
-												AttributeType.enumeration.equals(attributeType)) {
+												AttributeType.enumeration.equals(attributeType) ||
+												AttributeType.id.equals(attributeType)) {
 										statement.setString(index++, stringValue);
 									}
 									else if (attributeType == AttributeType.geometry) {

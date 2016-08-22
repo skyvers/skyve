@@ -110,7 +110,8 @@ public class Backup {
 													AttributeType.memo.equals(attributeType) ||
 													AttributeType.markup.equals(attributeType) ||
 													AttributeType.text.equals(attributeType) ||
-													AttributeType.enumeration.equals(attributeType)) {
+													AttributeType.enumeration.equals(attributeType) ||
+													AttributeType.id.equals(attributeType)) {
 												value = resultSet.getString(name);
 												if (resultSet.wasNull()) {
 													value = "";
