@@ -280,7 +280,8 @@
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" 
 			relativeIconFileName="shared/icons/Exclamation.gif"/>
-		<action className="Truncate" displayName="Truncate" inActionPanel="false" 
+		<action className="Truncate" displayName="Truncate" inActionPanel="false"
+			confirm="WARNING: Schema will be truncated (all data deleted) - there is no undo for this action. Ensure you have a backup of all data. OK to continue?" 
 			relativeIconFileName="shared/icons/Clear.gif"/>
 		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false"
 			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" 
