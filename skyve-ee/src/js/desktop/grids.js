@@ -1529,7 +1529,7 @@ isc.BizListGrid.addMethods({
 										// calling event if using the same conversation
 										if (contConv) { // continuing conversation
 											// set rerender source from datasource
-											me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
+											me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
 											me._zoom(zoomToNew, view, newParams, bizId, instance._c, gridRect);
 										}
 										else { // no conversation propagation
@@ -1539,14 +1539,14 @@ isc.BizListGrid.addMethods({
 												// apply changes to current form before zoom in
 												me._view.saveInstance(null, function() {
 													// set rerender source from datasource
-													me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
+													me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
 													// now zoom in, after changes applied
 													me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 												});
 											}
 											else { // no changes - just zoom right in there
 												// set rerender source from datasource
-												me._view._source = me.dataSource.substring(me.dataSource.lastIndexOf('_') + 1);
+												me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
 												me._zoom(zoomToNew, view, newParams, bizId, null, gridRect);
 											}
 										}
