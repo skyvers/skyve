@@ -69,12 +69,7 @@ public class ValidationUtil {
 	throws ValidationException, MetaDataException {
 		ValidationException e = new ValidationException();
 		for (Attribute attribute : document.getAttributes()) {
-			AttributeType type = attribute.getAttributeType();
-			if ((! AttributeType.inverseOne.equals(type)) && 
-					(! AttributeType.inverseMany.equals(type)) &&
-					(! attribute.getName().equals(Bean.BIZ_KEY))) {
-				validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
-			}
+			validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 		}
 
 		Extends inherits = document.getExtends();
@@ -83,12 +78,7 @@ public class ValidationUtil {
 			Module baseModule = customer.getModule(baseDocument.getOwningModuleName());
 			baseDocument = baseModule.getDocument(customer, inherits.getDocumentName());
 			for (Attribute attribute : baseDocument.getAttributes()) {
-				AttributeType type = attribute.getAttributeType();
-				if ((! AttributeType.inverseOne.equals(type)) && 
-						(! AttributeType.inverseMany.equals(type)) &&
-						(! attribute.getName().equals(Bean.BIZ_KEY))) {
-					validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
-				}
+				validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 			}
 			inherits = baseDocument.getExtends();
 		}
@@ -109,9 +99,16 @@ public class ValidationUtil {
 	 * 								otherwise messages are appended to the e argument.
 	 */
 	@SuppressWarnings("unchecked")
-	private static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e)
+	public static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e)
 	throws ValidationException {
 		String binding = attribute.getName();
+		AttributeType type = attribute.getAttributeType();
+		if (AttributeType.inverseOne.equals(type) || 
+				AttributeType.inverseMany.equals(type) ||
+				binding.equals(Bean.BIZ_KEY)) {
+			return;
+		}
+
 		String displayName = attribute.getDisplayName();
 		Converter<?> converter = (attribute instanceof ConvertableField) ? 
 									((ConvertableField) attribute).getConverterForCustomer(customer) : 
