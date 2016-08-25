@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -32,6 +33,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -48,6 +50,7 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -61,8 +64,6 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String UX_UI = "desktop";
-	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
 	throws ServletException, IOException {
@@ -109,7 +110,11 @@ public class SmartClientEditServlet extends HttpServlet {
 			            persistence.evictAllCached();
 			            webContext.setConversation(persistence);
 			        }
-			
+
+					Router router = CORE.getRepository().getRouter();
+					String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+					UtilImpl.LOGGER.info("UX/UI = " + uxui);
+					
 			    	persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
 			    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
@@ -242,7 +247,8 @@ public class SmartClientEditServlet extends HttpServlet {
 								Integer.parseInt(editIdCounter),
 								Integer.parseInt(createIdCounter),
 								parameters,
-								persistence, 
+								persistence,
+								uxui,
 								pw);
 					}
 					// we have an implicit action to run
@@ -267,7 +273,8 @@ public class SmartClientEditServlet extends HttpServlet {
 									Integer.parseInt(createIdCounter),
 									action,
 									parameters,
-									persistence, 
+									persistence,
+									uxui,
 									pw);
 							break;
 						case add:
@@ -292,7 +299,8 @@ public class SmartClientEditServlet extends HttpServlet {
 									Integer.parseInt(editIdCounter),
 									Integer.parseInt(createIdCounter),
 									parameters, 
-									persistence, 
+									persistence,
+									uxui,
 									pw);
 							break;
 						case remove:
@@ -442,6 +450,7 @@ public class SmartClientEditServlet extends HttpServlet {
 								ImplicitActionName action,
 								SortedMap<String, Object> parameters, 
 								AbstractPersistence persistence,
+								String uxui,
 								PrintWriter pw)
 	throws Exception {
     	Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
@@ -457,7 +466,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							processModule,
 	    							processDocument,
 	    							processBean,
-	    							parameters);
+	    							parameters,
+	    							uxui);
 	    		
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
 					CustomerImpl internalCustomer = (CustomerImpl) customer;
@@ -559,7 +569,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	    							processModule,
 	    							processDocument,
 	    							processBean,
-	    							parameters);
+	    							parameters,
+	    							uxui);
 
 	    		// Set the parent of a child bean, if applicable
 	    		if (processBean instanceof ChildBean<?>) {
@@ -665,7 +676,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
 																		processModule, 
 																		processDocument, 
-																		processDocument.getView(UX_UI, customer, processBean.isCreated() ? ViewType.edit : ViewType.create),
+																		processDocument.getView(uxui, customer, processBean.isCreated() ? ViewType.edit : ViewType.create),
 																		processBean,
 																		editIdCounter,
 																		createIdCounter,
@@ -691,9 +702,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	    									Module processModule,
 	    									Document processDocument, 
 	    									Bean processBean,
-	    									SortedMap<String, Object> parameters)
+	    									SortedMap<String, Object> parameters,
+	    									String uxui)
     throws Exception {
-		View view = processDocument.getView(UX_UI, customer, processBean.isCreated() ? ViewType.edit : ViewType.create);
+		View view = processDocument.getView(uxui, customer, processBean.isCreated() ? ViewType.edit : ViewType.create);
 		TreeMap<String, String> newParameterNamesToBindings = new TreeMap<>();
 		for (Parameter parameter : view.getParameters()) {
 			newParameterNamesToBindings.put(parameter.getName(), parameter.getBinding());
@@ -764,6 +776,7 @@ public class SmartClientEditServlet extends HttpServlet {
 								int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
 								SortedMap<String, Object> parameters, 
 								AbstractPersistence persistence,
+								String uxui,
 								PrintWriter pw)
 	throws Exception {
 		String mutableCustomActionName = customActionName;
@@ -772,7 +785,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    	ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
 																		formModule, 
 																		formDocument, 
-																		formDocument.getView(UX_UI, customer, formBean.isCreated() ? ViewType.edit : ViewType.create),
+																		formDocument.getView(uxui, customer, formBean.isCreated() ? ViewType.edit : ViewType.create),
 																		formBean, 
 																		editIdCounter,
 																		createIdCounter,
@@ -896,7 +909,7 @@ public class SmartClientEditServlet extends HttpServlet {
 			beanToRender = processedBean; 
 		}
 		
-		View renderView = formDocument.getView(UX_UI, customer, beanToRender.isCreated() ? ViewType.edit: ViewType.create);
+		View renderView = formDocument.getView(uxui, customer, beanToRender.isCreated() ? ViewType.edit: ViewType.create);
 		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, pw);
 	}
 

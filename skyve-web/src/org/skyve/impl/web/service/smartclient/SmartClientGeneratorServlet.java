@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -25,6 +26,7 @@ import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinit
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -115,6 +117,7 @@ import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
@@ -130,8 +133,6 @@ import org.skyve.util.Util;
 public class SmartClientGeneratorServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-	private static final String UX_UI = "desktop";
-	
 	private static class SmartClientViewVisitor extends ViewVisitor {
 		private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(100);
 		
@@ -3021,11 +3022,15 @@ pickListFields:[{name:'value'}],
 				if (documentName == null) {
 					throw new ServletException("No document name in the request.");
 				}
-	
+
+				Router router = CORE.getRepository().getRouter();
+				String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+				UtilImpl.LOGGER.info("UX/UI = " + uxui);
+
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);
-				View editView = document.getView(UX_UI, customer, ViewType.edit);
-				View createView = document.getView(UX_UI, customer, ViewType.create);
+				View editView = document.getView(uxui, customer, ViewType.edit);
+				View createView = document.getView(uxui, customer, ViewType.create);
 	
 				String editString = null;
 				String createString = null;
