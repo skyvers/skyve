@@ -71,6 +71,7 @@ public class SmartClientListServlet extends HttpServlet {
 	static final String ISC_META_DATA_PREFIX = "isc_metaDataPrefix";
 	static final String ISC_DATA_FORMAT = "isc_dataFormat";
 	static final String OLD_VALUES = "_oldValues";
+	static final String ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX = "$";
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -182,7 +183,11 @@ public class SmartClientListServlet extends HttpServlet {
 					java.util.Enumeration<String> names = request.getParameterNames();
 					while (names.hasMoreElements()) {
 						String name = names.nextElement();
-						if (ISC_META_DATA_PREFIX.equals(name) || ISC_DATA_FORMAT.equals(name)) {
+						if (ISC_META_DATA_PREFIX.equals(name) || 
+								ISC_DATA_FORMAT.equals(name) ||
+								// $ is sent down when list grid is in expander mode with hidden columns
+								// and a record flag is cleared
+								name.startsWith(ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX)) {
 							continue;
 						}
 						String value = request.getParameter(name);
@@ -1457,7 +1462,9 @@ public class SmartClientListServlet extends HttpServlet {
 			if (PersistentBean.TAGGED_NAME.equals(projection)) {
 				properties.put(projection, Boolean.valueOf(tagging));
 			}
-			properties.put(projection, parameters.get(projection));
+			else {
+				properties.put(projection, parameters.get(projection));
+			}
 		}
 
 		message.append(JSON.marshall(customer,
