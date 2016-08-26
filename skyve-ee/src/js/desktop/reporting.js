@@ -447,6 +447,9 @@ isc.ReportDialog.addClassProperties({
 	// The extra criteria defined on the query or model
 	_criteria: null,
 	
+	// The bizId of the selected tag (if any) in the listgrid
+	_tagId: null,
+	
 	// The data source representing the server-side query or model
 	_dataSourceID: null,
 	
@@ -506,6 +509,9 @@ isc.ReportDialog.addClassProperties({
 									values.ds = isc.ReportDialog._dataSourceID;
 									if (isc.ReportDialog._criteria) {
 										values.criteria = isc.ReportDialog._criteria;
+									}
+									if (isc.ReportDialog._tagId) {
+										values.tagId = isc.ReportDialog._tagId;
 									}
 
 									// Use a standard form POST, HTML/XHTML targeted to a blank window
@@ -569,6 +575,7 @@ isc.ReportDialog.addClassProperties({
 	popupExport: function(dataSourceID, // the ID of the data source - and thus the server-side query or model
 							_c, // the web context identifier
 							criteria, // the criteria to apply to the server-side query or model
+							tagId, // the tagId of the selected tag from the listgrid to apply server-side
 							unselectedFields, // data for the unselected fields in field selection list grids
 							selectedFields) { // data for the selected fields in field selection list grids
 		isc.ReportDialog._createExport();
@@ -576,6 +583,8 @@ isc.ReportDialog.addClassProperties({
 		isc.ReportDialog._dataSourceID = dataSourceID;
 		isc.ReportDialog._c = _c;
 		isc.ReportDialog._criteria = criteria;
+		isc.ReportDialog._tagId = tagId;
+		
 		isc.ReportDialog._columnList.setData(unselectedFields);
 		isc.ReportDialog._selectedColumnList.setData(selectedFields);
 		

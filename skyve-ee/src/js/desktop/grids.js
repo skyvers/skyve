@@ -466,9 +466,11 @@ isc.BizListGrid.addMethods({
 								// Put the filter parameters into this call also
 								var allCriteria = getAllCriteria();
 
+								// Make the call
 								isc.ReportDialog.popupExport(me._dataSource.ID,
 																me._view ? me._view.gather(false)._c : null,
 																allCriteria,
+																me.tagId,
 																unselectedFields, 
 																selectedFields);
 							}
