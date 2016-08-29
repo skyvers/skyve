@@ -145,6 +145,16 @@
 															<td>
 																<table>
 																	<tr>
+																		<td style="font-size:18px" colspan="2">
+																			<b><%=Util.i18n("page.changePassword.message", locale)%></b>
+																		</td>
+																	</tr>
+																	<tr>
+																		<td>
+																			&nbsp;
+																		</td>																		
+																	</tr>																
+																	<tr>
 																		<td style="font-size:18px">
 																			<%=Util.i18n("page.changePassword.newPassword.label", locale)%>
 																		</td>

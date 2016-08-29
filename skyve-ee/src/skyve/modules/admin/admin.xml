@@ -371,6 +371,8 @@
 				<column binding="contact.email1" sortOrder="ascending" />
 				<column binding="contact.mobile" sortOrder="ascending" />
 				<column binding="userName" sortOrder="ascending" />
+				<column binding="passwordExpired" hidden="true"/>
+				<column binding="generatedPassword" hidden="true"/>
 			</columns>
 		</documentQuery>
 		<documentQuery name="qActiveUsers" documentName="User">
