@@ -241,6 +241,16 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) 
 	throws MetaDataException {
 		Relation relation = relationsByFieldNames.get(relationName);
+
+		// Find the relation up the document extension hierarchy
+		Extends currentExtends = getExtends();
+		while ((relation == null) && (currentExtends != null)) {
+			Module module = customer.getModule(getOwningModuleName());
+			DocumentImpl baseDocument = (DocumentImpl) module.getDocument(customer, currentExtends.getDocumentName());
+			relation = baseDocument.relationsByFieldNames.get(relationName);
+			currentExtends = baseDocument.getExtends();
+		}
+		
 		if (relation == null) {
 			throw new IllegalStateException("Document has no related document defined for " + relationName);
 		}
@@ -381,7 +391,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 						}
 					}
 					if (result == null) {
-						result = useQuery(customer, attributeName);
+						result = useQuery(customer, attribute);
 					}
 				}
 			}
@@ -397,14 +407,13 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
-	private List<DomainValue> useQuery(Customer customer, String attributeName)
+	private List<DomainValue> useQuery(Customer customer, Attribute attribute)
 	throws Exception {
 		List<DomainValue> result = null;
 		
-		Attribute attribute = getAttribute(attributeName);
 		if (attribute instanceof Reference) {
 			Reference reference = (Reference) attribute;
-			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attributeName);
+			org.skyve.metadata.model.document.Document referencedDocument = getRelatedDocument(customer, attribute.getName());
 			AbstractDocumentQuery referenceQuery = null;
 			String queryName = reference.getQueryName();
 			if (queryName != null) {
