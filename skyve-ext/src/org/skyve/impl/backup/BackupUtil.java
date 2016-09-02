@@ -253,7 +253,9 @@ final class BackupUtil {
 			sql.append(" where bizCustomer = '").append(customerName).append("') ");
 		}
 		else {
-			sql.append(" where bizCustomer = '").append(customerName).append('\'');
+			if (! table.joinedExtensionOnly) {
+				sql.append(" where bizCustomer = '").append(customerName).append('\'');
+			}
 		}
 	}
 }

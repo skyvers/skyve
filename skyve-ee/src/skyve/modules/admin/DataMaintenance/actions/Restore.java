@@ -71,36 +71,45 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		org.skyve.impl.backup.Truncate.truncate(bean.getSchemaName(), truncateDatabase, true);
 
 		boolean createUsingBackup = false;
+		boolean sync = false;
 		if (RestorePreProcess.createUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.create(new File(extractDir, "create.sql"), true);
+			sync = true;
 		}
 		else if (RestorePreProcess.createUsingMetadata.equals(pre)) {
 			DDL.create(null, true);
+			sync = true;
 		}
 		else if (RestorePreProcess.dropUsingBackupAndCreateUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.drop(new File(extractDir, "drop.sql"), true);
 			DDL.create(new File(extractDir, "create.sql"), true);
+			sync = true;
 		}
 		else if (RestorePreProcess.dropUsingBackupAndCreateUsingMetadata.equals(pre)) {
 			DDL.drop(new File(extractDir, "drop.sql"), true);
 			DDL.create(null, true);
+			sync = true;
 		}
 		else if (RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.drop(null, true);
 			DDL.create(new File(extractDir, "create.sql"), true);
+			sync = true;
 		}
 		else if (RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(pre)) {
 			DDL.drop(null, true);
 			DDL.create(null, true);
+			sync = true;
 		}
 
 		Util.LOGGER.info("Restore " + extractDirName);
 		org.skyve.impl.backup.Restore.restore(extractDirName, createUsingBackup);
 		Util.LOGGER.info("DDL Sync");
-		DDL.sync(true);
+		if (sync) {
+			DDL.sync(true);
+		}
 		Util.LOGGER.info("Reindex textual indexes.");
 		org.skyve.impl.backup.Reindex.reindex();
 		Util.LOGGER.info("Delete extracted folder " + extractDir.getAbsolutePath());

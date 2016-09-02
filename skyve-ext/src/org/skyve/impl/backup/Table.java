@@ -26,7 +26,8 @@ class Table {
 	String name;
 	LinkedHashMap<String, AttributeType> fields = new LinkedHashMap<>();
 	List<String> relativeContentPaths = new ArrayList<>();
-
+	boolean joinedExtensionOnly = true;
+	
 	Table(String name) {
 		this.name = name;
 	}
@@ -67,6 +68,7 @@ class Table {
 			fields.put(PersistentBean.FLAG_COMMENT_NAME, AttributeType.text);
 			fields.put(Bean.DATA_GROUP_ID, AttributeType.text);
 			fields.put(Bean.USER_ID, AttributeType.text);
+			joinedExtensionOnly = false;
 		}
 		String parentDocumentName = document.getParentDocumentName();
 		if (parentDocumentName != null) {
