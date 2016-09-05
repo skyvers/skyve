@@ -12,13 +12,12 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.impl.backup.BackupUtil;
-import org.skyve.impl.backup.JoinTable;
-import org.skyve.impl.backup.Table;
+import org.skyve.util.Util;
 
 public class Truncate {
 	public static void truncate(String schemaName, boolean database, boolean content) 
@@ -81,6 +80,10 @@ public class Truncate {
 					UtilImpl.LOGGER.info("delete table " + table.name);
 					persistence.newSQL(sql.toString()).execute();
 				}
+			}
+			catch (DomainException e) {
+				Util.LOGGER.severe(sql.toString());
+				throw e;
 			}
 			finally {
 				persistence.commit(false);
@@ -157,6 +160,42 @@ public class Truncate {
 						if ((table != null) && 
 								(joinTable || hasBizIdColumn)) {
 							result.add(table);
+						}
+					}
+				}
+				
+				// Resolve join tables that have collections on joined extension persistence table strategies
+				// The owner Table name should be the ultimate base table (the one that has the bizCustomer column)
+				for (Table table : result) {
+					if (table instanceof JoinTable) {
+						JoinTable joinTable = (JoinTable) table;
+						String ownerTableName = joinTable.ownerTableName;
+
+						// Determine if the owner table has the bizCustomer field or not
+						boolean ownerTableHasBizCustomer = false;
+						for (Table ownerTable : result) {
+							if (ownerTableName.equals(ownerTable.name)) {
+								for (String fieldName : ownerTable.fields.keySet()) {
+									if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
+										ownerTableHasBizCustomer = true;
+										break;
+									}
+								}
+								break;
+							}
+						}
+						
+						// If it does not, look for the target of the FK from the bizId column
+						if (! ownerTableHasBizCustomer) {
+							// Look for the table name that the bizId FK points to
+							try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, ownerTableName)) {
+								while (foreignKeyResultSet.next()) {
+									String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
+									if (Bean.DOCUMENT_ID.equalsIgnoreCase(foreignKeyColumn)) {
+										joinTable.ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
+									}
+								}
+							}
 						}
 					}
 				}

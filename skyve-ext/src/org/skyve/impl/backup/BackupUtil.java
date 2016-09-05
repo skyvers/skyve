@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elasticsearch.ESClient;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -289,7 +290,14 @@ final class BackupUtil {
 			sql.append(" where bizCustomer = '").append(customerName).append("')");
 		}
 		else {
-			if (! table.joinedExtensionOnly) {
+			boolean hasBizCustomer = false;
+			for (String fieldName : table.fields.keySet()) {
+				if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
+					hasBizCustomer = true;
+					break;
+				}
+			}
+			if (hasBizCustomer) {
 				sql.append(" where bizCustomer = '").append(customerName).append('\'');
 			}
 		}
