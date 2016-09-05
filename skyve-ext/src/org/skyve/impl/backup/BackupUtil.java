@@ -283,6 +283,17 @@ final class BackupUtil {
 		}
 	}
 
+	static boolean hasBizCustomer(Table table) {
+		boolean result = false;
+		for (String fieldName : table.fields.keySet()) {
+			if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
+				result = true;
+				break;
+			}
+		}
+		return result;
+	}
+	
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
 		if (table instanceof JoinTable) {
 			JoinTable joinTable = (JoinTable) table;
@@ -290,14 +301,7 @@ final class BackupUtil {
 			sql.append(" where bizCustomer = '").append(customerName).append("')");
 		}
 		else {
-			boolean hasBizCustomer = false;
-			for (String fieldName : table.fields.keySet()) {
-				if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
-					hasBizCustomer = true;
-					break;
-				}
-			}
-			if (hasBizCustomer) {
+			if (hasBizCustomer(table)) {
 				sql.append(" where bizCustomer = '").append(customerName).append('\'');
 			}
 		}

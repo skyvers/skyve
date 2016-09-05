@@ -48,9 +48,14 @@ public class Restore {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
-			restoreData(backupDirectory, tables, connection, false);
+			// restore normal tables
+			restoreData(backupDirectory, tables, connection, false, false);
+			// restore extension join tables
+			restoreData(backupDirectory, tables, connection, false, true);
+			// link foreign keys
 			restoreForeignKeys(backupDirectory, tables, connection);
-			restoreData(backupDirectory, tables, connection, true);
+			// restore collection join tables
+			restoreData(backupDirectory, tables, connection, true, false);
 		}
 	}
 
@@ -62,7 +67,8 @@ public class Restore {
 	private static void restoreData(File backupDirectory,
 										Collection<Table> tables,
 										Connection connection,
-										boolean joinTables) 
+										boolean joinTables,
+										boolean extensionTables) 
 	throws Exception {
 		UserType geometryUserType = null; // this is only created when we come across a geometry
 
@@ -76,6 +82,16 @@ public class Restore {
 				else {
 					if (joinTables) {
 						continue;
+					}
+					if (BackupUtil.hasBizCustomer(table)) {
+						if (extensionTables) {
+							continue;
+						}
+					}
+					else {
+						if (! extensionTables) {
+							continue;
+						}
 					}
 				}
 				UtilImpl.LOGGER.info("restore table " + table.name);

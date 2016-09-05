@@ -54,7 +54,10 @@ public class Truncate {
 						sql.setLength(sql.length() - 1); // remove the comma
 	
 						BackupUtil.secureSQL(sql, table, customerName);
+						UtilImpl.LOGGER.info("unlink table " + table.name);
 						persistence.newSQL(sql.toString()).execute();
+						persistence.commit(false);
+						persistence.begin();
 					}
 				}
 	
@@ -64,14 +67,36 @@ public class Truncate {
 						sql.setLength(0);
 						sql.append("delete from ").append(table.name);
 						BackupUtil.secureSQL(sql, table, customerName);
-						UtilImpl.LOGGER.info("delete table " + table.name);
+						UtilImpl.LOGGER.info("delete joining table " + table.name);
 						persistence.newSQL(sql.toString()).execute();
+						persistence.commit(false);
+						persistence.begin();
 					}
 				}
 				
+				// delete rows from joined-extension tables
+				for (Table table : tables) {
+					if (table instanceof JoinTable) {
+						continue;
+					}
+					if (BackupUtil.hasBizCustomer(table)) {
+						continue;
+					}
+					sql.setLength(0);
+					sql.append("delete from ").append(table.name);
+					BackupUtil.secureSQL(sql, table, customerName);
+					UtilImpl.LOGGER.info("delete extension table " + table.name);
+					persistence.newSQL(sql.toString()).execute();
+					persistence.commit(false);
+					persistence.begin();
+				}
+
 				// delete rows from non-joining tables
 				for (Table table : tables) {
 					if (table instanceof JoinTable) {
+						continue;
+					}
+					if (! BackupUtil.hasBizCustomer(table)) {
 						continue;
 					}
 					sql.setLength(0);
@@ -79,6 +104,8 @@ public class Truncate {
 					BackupUtil.secureSQL(sql, table, customerName);
 					UtilImpl.LOGGER.info("delete table " + table.name);
 					persistence.newSQL(sql.toString()).execute();
+					persistence.commit(false);
+					persistence.begin();
 				}
 			}
 			catch (DomainException e) {
@@ -117,8 +144,12 @@ public class Truncate {
 								if (columnName.toLowerCase().endsWith("_id")) {
 									table.fields.put(columnName, AttributeType.text);
 								}
-								if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
+								else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
 									hasBizIdColumn = true;
+								}
+								// NB Ensure we can detect extension tables
+								else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
+									table.fields.put(columnName, AttributeType.text);
 								}
 							}
 						}
