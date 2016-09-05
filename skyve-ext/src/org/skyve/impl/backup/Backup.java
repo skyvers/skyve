@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +31,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.Util;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -76,14 +78,14 @@ public class Backup {
 		BackupUtil.writeScript(creates, new File(backupDir, "create.sql"));
 
 		UserType geometryUserType = null; // this is only created when we come across a geometry
-		
+
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
 			try (ContentManager cm = EXT.newContentManager()) {
 				for (Table table : tables) {
+					StringBuilder sql = new StringBuilder(128);
 					try (Statement statement = connection.createStatement()) {
-						StringBuilder sql = new StringBuilder(128);
 						sql.append("select * from ").append(table.name);
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
@@ -278,6 +280,10 @@ public class Backup {
 								}
 							}
 						}
+					}
+					catch (SQLException e) {
+						Util.LOGGER.severe(sql.toString());
+						throw e;
 					}
 				}
 				connection.commit();

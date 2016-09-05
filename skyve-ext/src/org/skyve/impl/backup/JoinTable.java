@@ -9,7 +9,8 @@ class JoinTable extends Table {
 	JoinTable(String name, String ownerTableName) {
 		super(name);
 		this.ownerTableName = ownerTableName;
-
+		this.joinedExtensionOnly = false;
+		
 		fields.put("owner_id", AttributeType.text);
 		fields.put("element_id", AttributeType.text);
 	}

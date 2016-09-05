@@ -118,6 +118,9 @@ class Table {
 		}
 		result.put("fields", fieldList);
 		result.put("relativeContentPaths", relativeContentPaths);
+		if (joinedExtensionOnly) {
+			result.put("joinedExtensionOnly", Boolean.valueOf(joinedExtensionOnly));
+		}
 		if (this instanceof JoinTable) {
 			result.put("ownerTableName", ((JoinTable) this).ownerTableName);
 		}
@@ -129,9 +132,11 @@ class Table {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
 		String tableName = (String) map.get("name");
 		String ownerTableName = (String) map.get("ownerTableName");
+		boolean joinedExtensionOnly = Boolean.TRUE.equals(map.get("joinedExtensionOnly"));
 		Table result = (ownerTableName == null) ? 
 							new Table(tableName) :
 							new JoinTable(tableName, ownerTableName);
+		result.joinedExtensionOnly = joinedExtensionOnly;
 		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {

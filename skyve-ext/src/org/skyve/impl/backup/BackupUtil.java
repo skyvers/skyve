@@ -26,6 +26,7 @@ import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -209,10 +210,11 @@ final class BackupUtil {
 								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
 									String ownerTableName = referencePersistent.getPersistentIdentifier();
-
+									ExtensionStrategy strategy = referencePersistent.getStrategy();
+									
 									// If it is a collection defined on a mapped document pointing to this document, find
 									// all persistent derivations with a table name to use
-									if (ExtensionStrategy.mapped.equals(referencePersistent.getStrategy())) {
+									if (ExtensionStrategy.mapped.equals(strategy)) {
 										List<String> derivedModocs = ((CustomerImpl) customer).getDerivedDocuments(referencedDocument);
 										for (String derivedModoc : derivedModocs) {
 											int dotIndex = derivedModoc.indexOf('.');
@@ -228,6 +230,40 @@ final class BackupUtil {
 													tables.put(tableName, joinTable);
 												}
 											}
+										}
+									}
+									// If it is a collection defined on a joined document pointing to this document, find 
+									// the base document with the biz fields in its table name to use
+									else if (ExtensionStrategy.joined.equals(strategy)) {
+										// Find the ultimate document (the document with the biz fields)
+										Document ultimateDocument = referencedDocument;
+										Extends currentInherits = ultimateDocument.getExtends();
+										while (currentInherits != null) {
+											Module module = customer.getModule(ultimateDocument.getOwningModuleName());
+											Document baseDocument = module.getDocument(customer, currentInherits.getDocumentName());
+											currentInherits = null;
+		
+											Persistent basePersistent = baseDocument.getPersistent();
+											if ((basePersistent != null) && (basePersistent.getName() != null)) {
+												ExtensionStrategy baseStrategy = basePersistent.getStrategy();
+												// keep looking if joined
+												if (ExtensionStrategy.joined.equals(baseStrategy)) {
+													ultimateDocument = baseDocument;
+													currentInherits = ultimateDocument.getExtends();
+												}
+												// stop at the base document if the strategy is null or single
+												else if (! ExtensionStrategy.mapped.equals(baseStrategy)) {
+													ultimateDocument = baseDocument;
+												}
+												// ignore a base document that is mapped
+											}
+										}
+
+										ownerTableName = ultimateDocument.getPersistent().getName();
+										String tableName = referencedDocument.getPersistent().getName() + '_' + referenceFieldName;
+										if (! tables.containsKey(tableName)) {
+											JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+											tables.put(tableName, joinTable);
 										}
 									}
 									else {
@@ -250,7 +286,7 @@ final class BackupUtil {
 		if (table instanceof JoinTable) {
 			JoinTable joinTable = (JoinTable) table;
 			sql.append(" where owner_id in (select bizId from ").append(joinTable.ownerTableName);
-			sql.append(" where bizCustomer = '").append(customerName).append("') ");
+			sql.append(" where bizCustomer = '").append(customerName).append("')");
 		}
 		else {
 			if (! table.joinedExtensionOnly) {
