@@ -1,14 +1,14 @@
 package modules.whosin.Staff;
 
-import modules.whosin.domain.Position;
-import modules.whosin.domain.Staff;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
+
+import modules.whosin.domain.Position;
+import modules.whosin.domain.Staff;
 
 public class StaffBizlet extends Bizlet<Staff> {
 
@@ -20,15 +20,15 @@ public class StaffBizlet extends Bizlet<Staff> {
 	@Override
 	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
 
+		//Load the transient reportsTo attribute
 		if (ImplicitActionName.Edit.equals(actionName)) {
 			Position position = bean.getPosition();
 			if (position != null) {
 				bean.setReportsTo(position.getParent());
-			} else {
-				bean.setReportsTo(null);
-			}
+			} 
 		}
 
+		//Update the hierarchy according to what is set in the reportsTo transient attribute
 		if (ImplicitActionName.Save.equals(actionName) || ImplicitActionName.OK.equals(actionName)) {
 			Persistence pers = CORE.getPersistence();
 			Position myPosition = bean.getPosition();
@@ -53,7 +53,6 @@ public class StaffBizlet extends Bizlet<Staff> {
 
 				newPosition = pers.save(newPosition);
 			}
-
 		}
 
 		return super.preExecute(actionName, bean, parentBean, webContext);

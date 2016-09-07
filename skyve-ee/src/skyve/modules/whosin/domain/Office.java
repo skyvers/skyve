@@ -80,7 +80,14 @@ public class Office extends AbstractPersistentBean {
 	@Override
 	@XmlTransient
 	public String getBizKey() {
-return modules.whosin.Office.OfficeBizlet.bizKey(this);
+		try {
+			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
+														"{buildingName}, {streetAddress} {suburb}",
+														this);
+		}
+		catch (Exception e) {
+			return "Unknown";
+		}
 	}
 
 	@Override

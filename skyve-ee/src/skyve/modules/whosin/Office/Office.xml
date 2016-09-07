@@ -11,11 +11,7 @@
 	<pluralAlias>Offices</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/office16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/office32.png</icon32x32RelativeFilePath>
-	<bizKey>
-		<![CDATA[
-			return modules.whosin.Office.OfficeBizlet.bizKey(this);
-		]]>
-	</bizKey>
+	<bizKey expression="{buildingName} {streetAddress} {suburb}"/>
 	<attributes>
 		<text name="levelUnit">
 			<displayName>Level/Unit</displayName>
