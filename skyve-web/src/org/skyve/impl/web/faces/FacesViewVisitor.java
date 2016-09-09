@@ -130,6 +130,9 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPerce
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.impl.web.faces.converters.integer.SimplePercentage;
+import org.skyve.impl.web.faces.converters.lang.Decimal10;
+import org.skyve.impl.web.faces.converters.lang.Decimal2;
+import org.skyve.impl.web.faces.converters.lang.Decimal5;
 import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
 import org.skyve.impl.web.faces.converters.time.HH24_MI;
 import org.skyve.impl.web.faces.converters.time.HH_MI;
@@ -1649,23 +1652,24 @@ public class FacesViewVisitor extends ViewVisitor {
                 converter = customer.getDefaultDateConverter();
             }
         }
-        if (AttributeType.dateTime.equals(type)) {
+        else if (AttributeType.dateTime.equals(type)) {
             useCalendar = ! UserAgentType.phone.equals(userAgentType);
             if (converter == null) {
                 converter = customer.getDefaultDateTimeConverter();
             }
         }
-        if (AttributeType.timestamp.equals(type)) {
+        else if (AttributeType.timestamp.equals(type)) {
             useCalendar = ! UserAgentType.phone.equals(userAgentType);
             if (converter == null) {
                 converter = customer.getDefaultTimestampConverter();
             }
         }
-        if (AttributeType.time.equals(type)) {
+        else if (AttributeType.time.equals(type)) {
             if (converter == null) {
                 converter = customer.getDefaultTimeConverter();
             }
         }
+
         UIComponentBase c = null;
         if (useCalendar) {
             c = b.calendar(listBinding,
@@ -1674,7 +1678,7 @@ public class FacesViewVisitor extends ViewVisitor {
                             def.isRequired(),
                             UserAgentType.phone.equals(userAgentType),
                             text.getDisabledConditionName(),
-                            convertConverter(converter));
+                            convertConverter(converter, type));
         }
         // p:inputMask doesn't work for mobile rendering
         else if ((format != null) && (! UserAgentType.phone.equals(userAgentType))) {
@@ -1685,7 +1689,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			                    text.getDisabledConditionName(),
 			                    def.getLength(),
 			                    format,
-			                    convertConverter(converter),
+			                    convertConverter(converter, type),
 			                    text.getPixelWidth(),
 			                    true);
         }
@@ -1696,7 +1700,7 @@ public class FacesViewVisitor extends ViewVisitor {
                                 def.isRequired(),
                                 text.getDisabledConditionName(),
                                 def.getLength(),
-                                convertConverter(converter),
+                                convertConverter(converter, type),
                                 text.getPixelWidth(),
                                 ! UserAgentType.phone.equals(userAgentType));
         }
@@ -1710,7 +1714,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// do nothing - this is for web 2 ux uis only
 	}
 
-	private static javax.faces.convert.Converter convertConverter(Converter<?> converter) {
+	private static javax.faces.convert.Converter convertConverter(Converter<?> converter, AttributeType type) {
 	    javax.faces.convert.Converter result = null;
 	    if (converter != null) {
 		    String converterName = converter.getClass().getSimpleName();
@@ -1789,6 +1793,24 @@ public class FacesViewVisitor extends ViewVisitor {
 	        else if ("DD_MMM_YYYY_HH24_MI_SS".equals(converterName)) {
 	            result = new DD_MMM_YYYY_HH24_MI_SS();
 	        }
+	    }
+	    else {
+	    	// Set default faces numeric converters if none is set
+	    	if (AttributeType.decimal2.equals(type)) {
+	    		result = new Decimal2();
+	    	}
+	    	else if (AttributeType.decimal5.equals(type)) {
+	    		result = new Decimal5();
+	    	}
+	    	else if (AttributeType.decimal10.equals(type)) {
+	    		result = new Decimal10();
+	    	}
+	    	else if (AttributeType.integer.equals(type)) {
+	    		result = new org.skyve.impl.web.faces.converters.lang.Integer();
+	    	}
+	    	else if (AttributeType.longInteger.equals(type)) {
+	    		result = new org.skyve.impl.web.faces.converters.lang.Long();
+	    	}
 	    }
 	    
 	    return result;
