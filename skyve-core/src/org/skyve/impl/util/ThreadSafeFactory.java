@@ -28,6 +28,7 @@ public class ThreadSafeFactory {
 		result = (SimpleDateFormat) map.get(formatString);
 		if (result == null) {
 			result = new SimpleDateFormat(formatString);
+			result.setLenient(false);
 			map.put(formatString, result);
 		}
 

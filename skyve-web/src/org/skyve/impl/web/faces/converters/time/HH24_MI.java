@@ -1,8 +1,10 @@
 package org.skyve.impl.web.faces.converters.time;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
+import javax.faces.convert.ConverterException;
 
 import org.skyve.domain.types.TimeOnly;
 
@@ -13,7 +15,10 @@ public class HH24_MI extends org.skyve.domain.types.converters.time.HH24_MI impl
 			return fromDisplayValue(value);
 		}
 		catch (Exception e) {
-			return null;
+			throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
+															"Invalid time (use HH24:MI format)",
+															"Invalid time (use HH24:MI format)"),
+											e);
 		}
 	}
 

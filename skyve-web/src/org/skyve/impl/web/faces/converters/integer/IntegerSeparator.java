@@ -1,8 +1,10 @@
 package org.skyve.impl.web.faces.converters.integer;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
+import javax.faces.convert.ConverterException;
 
 import org.skyve.impl.util.UtilImpl;
 
@@ -15,7 +17,10 @@ public class IntegerSeparator extends org.skyve.domain.types.converters.integer.
 				return fromDisplayValue(processedValue);
 			}
 			catch (Exception e) {
-				return null;
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
+																"Invalid number",
+																"Invalid number"),
+												e);
 			}
 		}
 		return null;
