@@ -19,8 +19,8 @@ public class Decimal5TwoDecimalPlaces extends org.skyve.domain.types.converters.
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid number",
-																"Invalid number"),
+																"Must be a decimal number",
+																"Must be a decimal number"),
 												e);
 			}
 		}

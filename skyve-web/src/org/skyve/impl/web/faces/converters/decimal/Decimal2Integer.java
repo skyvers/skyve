@@ -19,8 +19,8 @@ public class Decimal2Integer extends org.skyve.domain.types.converters.decimal.D
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid number",
-																"Invalid number"),
+																"Must be a whole number",
+																"Must be a whole number"),
 												e);
 			}
 		}

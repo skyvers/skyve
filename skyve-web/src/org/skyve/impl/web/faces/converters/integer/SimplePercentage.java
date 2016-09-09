@@ -18,8 +18,8 @@ public class SimplePercentage extends org.skyve.domain.types.converters.integer.
 			}
 			catch (Exception e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid number",
-																"Invalid number"),
+																"Must be a whole number",
+																"Must be a whole number"),
 												e);
 			}
 		}

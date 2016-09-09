@@ -22,8 +22,8 @@ public class Decimal10 implements Converter {
 	        }
 	        catch (NumberFormatException e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid number",
-																"Invalid number"),
+																"Must be a decimal number",
+																"Must be a decimal number"),
 												e);
 	        }
         }

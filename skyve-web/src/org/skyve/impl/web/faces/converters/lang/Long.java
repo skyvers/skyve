@@ -22,8 +22,8 @@ public class Long implements Converter {
 	        }
 	        catch (NumberFormatException e) {
 				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-																"Invalid number",
-																"Invalid number"),
+																"Must be a whole number",
+																"Must be a whole number"),
 												e);
 	        }
     	}
