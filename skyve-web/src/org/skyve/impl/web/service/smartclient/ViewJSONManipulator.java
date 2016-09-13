@@ -10,6 +10,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -697,7 +699,10 @@ class ViewJSONManipulator extends ViewVisitor {
 	private Bean findReferencedBean(Document referenceDocument, String bizId, AbstractPersistence persistence)
 	throws DomainException, MetaDataException {
 		Bean result = persistence.retrieve(referenceDocument, bizId, false);
-
+		if (result == null) {
+			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
+																		referenceDocument.getSingularAlias())));
+		}
 		if (! user.canReadBean(bizId, 
 								result.getBizModule(), 
 								result.getBizDocument(), 
