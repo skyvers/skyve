@@ -29,7 +29,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.ComponentRenderer;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.QueryDataModel;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -39,8 +38,8 @@ import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
 @FacesComponent(ListGrid.COMPONENT_TYPE)
@@ -212,8 +211,8 @@ public class ListGrid extends HtmlPanelGroup {
         addHeader(result, a, query, moduleName, documentName, canCreate, UserAgentType.phone.equals(type));
         List<UIComponent> children = result.getChildren();
         addBoundColumns(customer, moduleName, documentName, query, children, a, ef, elc, type);
-        if ((! UserAgentType.phone.equals(type)) && (! UserAgentType.tablet.equals(type))) {
-        	addActionColumn(children, a, ef, elc);
+        if (! UserAgentType.phone.equals(type)) {
+        	addActionColumn(type, children, a, ef, elc);
         }
         
 		return result;
@@ -340,23 +339,39 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 	}
 
-	private static void addActionColumn(List<UIComponent> componentChildrenToAddTo,
+	private static void addActionColumn(UserAgentType type,
+											List<UIComponent> componentChildrenToAddTo,
 											Application a,
 											ExpressionFactory ef,
 											ELContext elc) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
-		column.setHeaderText("Actions");
-		column.setStyle("width:75px;white-space:nowrap;text-align:centre");
-		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValue("Edit");
-		HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		StringBuilder value = new StringBuilder(128);
-		value.append("./?a=").append(WebAction.e.toString());
-		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
-		link.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
-		link.getChildren().add(outputText);
-		column.getChildren().add(link);
-		componentChildrenToAddTo.add(column);
+		column.setHeaderText("");
+		column.setStyle("width:40px;text-align:centre");
+
+		if (UserAgentType.tablet.equals(type)) {
+	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+	    	button.setValue(null);
+	    	button.setTitle("View Detail");
+	    	button.setIcon("ui-icon-keyboard-arrow-right");
+			StringBuilder value = new StringBuilder(128);
+			value.append("./?a=").append(WebAction.e.toString());
+			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+			column.getChildren().add(button);
+			componentChildrenToAddTo.add(column);
+		}
+		else {
+			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			outputText.setValue("Edit");
+			HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+			StringBuilder value = new StringBuilder(128);
+			value.append("./?a=").append(WebAction.e.toString());
+			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+			link.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+			link.getChildren().add(outputText);
+			column.getChildren().add(link);
+			componentChildrenToAddTo.add(column);
+		}
 	}
 
 //TODO Add sorting of columns

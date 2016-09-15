@@ -108,7 +108,9 @@ public class SkyvePhaseListener implements PhaseListener {
 			if (managedBeanName != null) {
 				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
 				AbstractWebContext webContext = view.getWebContext();
-				WebUtil.putConversationInCache(webContext);
+//				if (event.getFacesContext().getMaximumSeverity().getOrdinal() < FacesMessage.SEVERITY_ERROR) {
+					WebUtil.putConversationInCache(webContext);
+//				}
 				view.dehydrate();
 			}
 		}
