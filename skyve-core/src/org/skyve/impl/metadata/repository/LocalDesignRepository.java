@@ -24,7 +24,7 @@ import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.repository.router.UxUi;
+import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
@@ -914,7 +914,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
 
 						Router router = getRouter();
-						for (UxUi uxui : router.getUxUis()) {
+						for (UxUiMetadata uxui : router.getUxUis()) {
 							views.add(actionDocument.getView(uxui.getName(), customer, ViewType.edit));
 							views.add(actionDocument.getView(uxui.getName(), customer, ViewType.create));
 						}

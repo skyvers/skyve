@@ -28,12 +28,12 @@
 
   <xs:complexType name="router">
     <xs:sequence>
-      <xs:element name="uxui" type="tns:uxUi" form="qualified" maxOccurs="unbounded"/>
+      <xs:element name="uxui" type="tns:uxUiMetadata" form="qualified" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="uxuiSelectorClassName" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="uxUi">
+  <xs:complexType name="uxUiMetadata">
     <xs:complexContent>
       <xs:extension base="ns2:namedMetaData">
         <xs:sequence>

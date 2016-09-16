@@ -25,10 +25,10 @@ public class Router implements MetaData, PersistentMetaData<Router> {
 	private TaggingUxUiSelector uxuiSelector;
 	
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "uxui", required = true)
-	private List<UxUi> uxuis = new ArrayList<>();
+	private List<UxUiMetadata> uxuis = new ArrayList<>();
 
 	@XmlTransient
-	private Map<String, UxUi> uxuiMap = new TreeMap<>();
+	private Map<String, UxUiMetadata> uxuiMap = new TreeMap<>();
 	
 	public String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
@@ -46,12 +46,12 @@ public class Router implements MetaData, PersistentMetaData<Router> {
 		return uxuiSelector;
 	}
 
-	public List<UxUi> getUxUis() {
+	public List<UxUiMetadata> getUxUis() {
 		return uxuis;
 	}
 
 	public String getOutcomeUrl(String uxui, RouteCriteria criteria) {
-		UxUi selectedUxUi = uxuiMap.get(uxui);
+		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
 		for (Route route : selectedUxUi.getRoutes()) {
 			List<RouteCriteria> routeCriteria = route.getCriteria();
 			if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
@@ -71,7 +71,7 @@ public class Router implements MetaData, PersistentMetaData<Router> {
 	public Router convert(String metaDataName) throws MetaDataException {
 		// TODO look at conversion 
 		
-		for (UxUi uxui : uxuis) {
+		for (UxUiMetadata uxui : uxuis) {
 			uxuiMap.put(uxui.getName(), uxui);
 		}
 		

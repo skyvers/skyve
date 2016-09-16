@@ -28,7 +28,7 @@ public class SetTitleAction extends FacesAction<Void> {
 			Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-			View view = targetDocument.getView(facesView.getUxUi(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
+			View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
 			facesView.setTitle(Binder.formatMessage(customer, view.getTitle(), targetBean));
 	    }
 		

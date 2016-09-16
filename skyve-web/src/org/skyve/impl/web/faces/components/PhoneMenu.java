@@ -25,6 +25,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Binder;
 
@@ -41,10 +42,10 @@ public class PhoneMenu extends HtmlPanelGroup {
 				public Void callback() throws Exception {
 					Router router = CORE.getRepository().getRouter();
 					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-					String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
 
 					addMenuPage();
-					addModulePages(uxui);
+					addModulePages(uxui.getName());
 					return null;
 				}
 			}.execute();

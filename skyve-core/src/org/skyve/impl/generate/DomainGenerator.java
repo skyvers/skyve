@@ -4,7 +4,7 @@ import java.util.Map.Entry;
 
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
-import org.skyve.impl.metadata.repository.router.UxUi;
+import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -50,7 +50,7 @@ public abstract class DomainGenerator {
 				Document document = module.getDocument(customer, documentName);
 				System.out.println("Validate document " + documentName);
 				repository.validateDocument(customer, document);
-				for (UxUi uxui : repository.getRouter().getUxUis()) {
+				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
 					String uxuiName = uxui.getName();
 					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit);

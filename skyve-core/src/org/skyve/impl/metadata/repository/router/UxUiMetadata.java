@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class UxUi extends NamedMetaData {
+public class UxUiMetadata extends NamedMetaData {
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "route", required = true)
 	private List<Route> routes = new ArrayList<>();
 

@@ -30,6 +30,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
@@ -59,9 +60,9 @@ public class Menu extends Harness {
 					initialise(customer, internalUser, fc.getExternalContext().getRequestLocale());
 					
 					Router router = CORE.getRepository().getRouter();
-					String uxui = ((UxUiSelector) router.getUxuiSelector()).select((HttpServletRequest) fc.getExternalContext().getRequest());
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select((HttpServletRequest) fc.getExternalContext().getRequest());
 
-					menu = createMenuModel(getBizModuleParameter(), uxui);
+					menu = createMenuModel(getBizModuleParameter(), uxui.getName());
 				}
 				
 				return null;
