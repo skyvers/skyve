@@ -90,7 +90,8 @@ public class TextValidator extends FieldValidator<String> {
 					valid = new EAN13CheckDigit().isValid(value);
 					break;
 				case email:
-					valid = GenericValidator.isEmail(value);
+// NB The commons email validator doesn't handle registered domain suffixes correctly - ie poo@wee - it expects poo@wee.com
+//					valid = GenericValidator.isEmail(value);
 					break;
 				case ibanCheckDigit:
 					valid = new IBANCheckDigit().isValid(value);
