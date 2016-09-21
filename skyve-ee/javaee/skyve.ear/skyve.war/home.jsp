@@ -2,8 +2,9 @@
 <%@ page import="java.security.Principal"%>
 <%@ page import="javax.servlet.http.Cookie"%>
 <%@ page import="org.skyve.CORE"%>
-<%@ page import="org.skyve.metadata.router.UxUiSelector"%>
 <%@ page import="org.skyve.metadata.user.User"%>
+<%@ page import="org.skyve.metadata.router.UxUi"%>
+<%@ page import="org.skyve.metadata.router.UxUiSelector"%>
 <%@ page import="org.skyve.metadata.view.View.ViewType"%>
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebAction"%>
@@ -77,7 +78,7 @@
 		
 		// Set the UX/UI
 		Router router = CORE.getRepository().getRouter();
-		String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
 		request.setAttribute(FacesUtil.UX_UI_KEY, uxui);
 		
 		// Determine the route
@@ -96,7 +97,7 @@
 		if (WebAction.e.equals(webAction)) { // editing
 			criteria.setViewType((i == null) ? ViewType.create : ViewType.edit);
 		}
-		String outcomeUrl = router.getOutcomeUrl(uxui, criteria);
+		String outcomeUrl = router.getOutcomeUrl(uxui.getName(), criteria);
 		if (outcomeUrl == null) {
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
 		}

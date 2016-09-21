@@ -89,16 +89,18 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		else {
 			AbstractPersistence persistence = AbstractPersistence.get();
 			bean = persistence.retrieve(document, bizId, false);
-
-    		if (! user.canReadBean(bean.getBizId(), 
-									bean.getBizModule(), 
-									bean.getBizDocument(), 
-									bean.getBizCustomer(), 
-									bean.getBizDataGroupId(), 
-									bean.getBizUserId())) {
-    			throw new SecurityException("this data", user.getName());
-    		}
-    		
+			// NB bean can be null if it wasn't found in the retrieve above
+			if (bean != null) {
+	    		if (! user.canReadBean(bean.getBizId(), 
+										bean.getBizModule(), 
+										bean.getBizDocument(), 
+										bean.getBizCustomer(), 
+										bean.getBizDataGroupId(), 
+										bean.getBizUserId())) {
+	    			throw new SecurityException("this data", user.getName());
+	    		}
+			}
+			
 			// this is for the cancel, ok and delete buttons
 			String referer = ec.getRequestHeaderMap().get("referer");
 			facesView.getHistory().push(referer);

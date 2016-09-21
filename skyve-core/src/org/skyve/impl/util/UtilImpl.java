@@ -135,7 +135,7 @@ public class UtilImpl {
 	
 	// For versioning javascript for web site
 	public static final String JAVASCRIPT_FILE_VERSION = "20160912";
-	public static final String SKYVE_VERSION = "20160912";
+	public static final String SKYVE_VERSION = "20160916";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 	
 	private static String absoluteBasePath;

@@ -21,7 +21,7 @@ public class FacesUtil {
 	public static String MANAGED_BEAN_NAME_KEY = "skyveFacesBean";
 	// used to place the uxui (renderer) at play during this request as a request attribute
 	public static String UX_UI_KEY = "skyveUxUi";
-
+	
 	public static FacesView<?> getManagedBean(final String beanName) {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		FacesView<?> result;

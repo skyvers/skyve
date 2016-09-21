@@ -38,7 +38,7 @@
 	<!-- sam, redmond, smoothness, bootstrap -->
 	<context-param>
 		<param-name>primefaces.THEME</param-name>
-		<param-value>casablanca</param-value>
+		<param-value>#{request.getAttribute('skyveUxUi') == null ? 'casablanca' : request.getAttribute('skyveUxUi').getPfTheme()}</param-value>
 	</context-param>
 	<context-param>
 		<param-name>primefaces.mobile.THEME</param-name>

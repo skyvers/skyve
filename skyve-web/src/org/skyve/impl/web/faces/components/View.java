@@ -22,6 +22,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
@@ -55,7 +56,7 @@ public class View extends HtmlPanelGroup {
 	   		}
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
-	    	final String uxui = (String) fc.getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+	    	final UxUi uxui = (UxUi) fc.getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
 	    	
 	    	new FacesAction<Void>() {
 				@Override
@@ -66,7 +67,7 @@ public class View extends HtmlPanelGroup {
 			        Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
 			        Repository repository = CORE.getRepository();
 			        FacesViewVisitor fvv = null;
-			        org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit);
+			        org.skyve.metadata.view.View view = repository.getView(uxui.getName(), customer, document, ViewType.edit);
 			        if (view != null) {
 		        		fvv = new FacesViewVisitor(user,
 													(CustomerImpl) customer,
@@ -81,7 +82,7 @@ public class View extends HtmlPanelGroup {
 	                    fvv.visit();
 	                    View.this.getChildren().add(fvv.getFacesView());
 	                }
-	                view = repository.getView(uxui, customer, document, ViewType.create);
+	                view = repository.getView(uxui.getName(), customer, document, ViewType.create);
 	                if (view != null) {
 	                    fvv = new FacesViewVisitor(user,
 	                                              (CustomerImpl) customer,

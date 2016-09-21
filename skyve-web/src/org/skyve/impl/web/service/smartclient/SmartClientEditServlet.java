@@ -50,6 +50,7 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
@@ -112,8 +113,8 @@ public class SmartClientEditServlet extends HttpServlet {
 			        }
 
 					Router router = CORE.getRepository().getRouter();
-					String uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
-					UtilImpl.LOGGER.info("UX/UI = " + uxui);
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+					UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
 					
 			    	persistence.begin();
 			    	Principal userPrincipal = request.getUserPrincipal();
@@ -248,7 +249,7 @@ public class SmartClientEditServlet extends HttpServlet {
 								Integer.parseInt(createIdCounter),
 								parameters,
 								persistence,
-								uxui,
+								uxui.getName(),
 								pw);
 					}
 					// we have an implicit action to run
@@ -274,7 +275,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									action,
 									parameters,
 									persistence,
-									uxui,
+									uxui.getName(),
 									pw);
 							break;
 						case add:
@@ -300,7 +301,7 @@ public class SmartClientEditServlet extends HttpServlet {
 									Integer.parseInt(createIdCounter),
 									parameters, 
 									persistence,
-									uxui,
+									uxui.getName(),
 									pw);
 							break;
 						case remove:

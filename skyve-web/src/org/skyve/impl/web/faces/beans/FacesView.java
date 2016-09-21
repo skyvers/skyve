@@ -38,6 +38,7 @@ import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
@@ -46,18 +47,18 @@ import org.skyve.web.WebContext;
 public class FacesView<T extends Bean> extends Harness {
 	private static final long serialVersionUID = 3331890232012703780L;
 
-	private String uxui;
-	public String getUxUi() {
+	private UxUi uxui;
+	public UxUi getUxUi() {
 		return uxui;
 	}
-	public void setUxUi(String uxui) {
+	public void setUxUi(UxUi uxui) {
 		this.uxui = uxui;
 		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.UX_UI_KEY, uxui);
 	}
 	
 	@PostConstruct
 	private void postConstruct() {
-		this.uxui = (String) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
 	}
 	
 	private String queryNameParameter;

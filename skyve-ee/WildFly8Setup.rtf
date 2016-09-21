@@ -1,489 +1,89 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf340
-{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\froman\fcharset0 TimesNewRomanPSMT;\f2\fswiss\fcharset0 Helvetica;
-\f3\froman\fcharset0 Times-Roman;\f4\fmodern\fcharset0 CourierNewPSMT;\f5\fmodern\fcharset0 CourierNewPS-ItalicMT;
-\f6\fmodern\fcharset0 Courier;\f7\fmodern\fcharset0 Courier-Oblique;}
-{\colortbl;\red255\green255\blue255;\red0\green128\blue128;\red63\green127\blue127;\red127\green0\blue127;
-\red26\green26\blue26;\red42\green0\blue255;\red61\green61\blue61;}
-{\info
-{\author Robert Brown}}\margl1440\margr1440\vieww12540\viewh16140\viewkind1
-\deftab720
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 unzip wildfly to c:\\
-\f1\fs22 \
-
-\f0\fs20 run in standalone mode - use standalone.xml
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 Create $WILDFLY_HOME/modules/system/layers/base/com/mysql/main directory.
-\f1\fs22 \uc0\u8232 
-\f0\fs20 Drop the mysql-connector-java-5.1.15-bin.jar into this folder.
-\f1\fs22 \uc0\u8232 
-\f0\fs20 Create a file called module.xml in the same directory and place the following content in it...
-\f1\fs22 \
-
-\f0\fs20 <module xmlns="urn:jboss:module:1.1" name="com.mysql">
-\f1\fs22 \uc0\u8232 
-\f0\fs20     <resources>
-\f1\fs22 \uc0\u8232 
-\f0\fs20         <resource-root path="mysql-connector-java-5.1.15-bin.jar"/>    
-\f1\fs22 \uc0\u8232 
-\f0\fs20     </resources>
-\f1\fs22 \uc0\u8232 
-\f0\fs20     <dependencies>
-\f1\fs22 \uc0\u8232 
-\f0\fs20         <module name="javax.api"/>
-\f1\fs22 \uc0\u8232 
-\f2       <module name="javax.transaction.api"/>
-\f1 \uc0\u8232 
-\f0\fs20         <module name="javax.servlet.api" optional="true"/>\uc0\u8232     </dependencies>
-\f1\fs22 \uc0\u8232 
-\f0\fs20 </module>
-\f1\fs22 \
-
-\f0\fs20 (or use com.microsoft.sqlserver as the name and folder structure for sql server)
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 Edit $WILDFLY_HOME/standalone/configuration/standalone.xml and do the following:
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 Add driver to the driver stanza inside datasources.
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f3\fs20 \cf2 <\cf3 driver\cf2  \cf4 name\cf5 =
-\i \cf6 "mysql"
-\i0 \cf2  \cf4 module\cf5 =
-\i \cf6 "com.mysql"
-\i0 \cf2 />
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 or
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4\fs20 \cf2 <\cf3 driver\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "sqlserver"
-\f4\i0 \cf0  \cf4 module\cf0 =
-\f5\i \cf6 "com.microsoft.sqlserver"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2     
-\f4\fs20 \cf2 <\cf3 xa-datasource-class\cf2 >\cf0 com.microsoft.sqlserver.jdbc.SQLServerXADataSource\cf2 </\cf3 xa-datasource-class\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20 \cf2 </\cf3 driver\cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 Insert \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2 \cf5             
-\f3 \cf2 <\cf3 global-modules\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2\fs20 \cf5                 
-\f3 \cf2 <\cf3 module\cf0  \cf4 name\cf5 =
-\i \cf6 "com.mysql"
-\i0 \cf0  \cf4 slot\cf5 =
-\i \cf6 "main"
-\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2\fs20 \cf5             
-\f3 \cf2 </\cf3 global-modules\cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 at the top of
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2\fs20 \cf5         
-\f0 \cf2 <\cf3 subsystem\cf0  \cf4 xmlns\cf5 =
-\i \cf6 "urn:jboss:domain:ee:2.0"
-\i0 \cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 to enable Jackrabbit access to the mysql jdbc drivers
-\f1\fs22 \
-
-\f0\fs20 or use com.microsoft.sqlserver if applicable.
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 Set overall logging level to info (already set by default)
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2\fs22 \cf0             
-\f4\fs20 \cf2 <\cf3 root-logger\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2                 
-\f4\fs20 \cf2 <\cf3 level\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "INFO"
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2                 
-\f4\fs20 \cf2 <\cf3 handlers\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2                     
-\f4\fs20 \cf2 <\cf3 handler\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "CONSOLE"
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2                     
-\f4\fs20 \cf2 <\cf3 handler\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "FILE"
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2                 
-\f4\fs20 \cf2 </\cf3 handlers\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 </\cf3 root-logger\cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 Limit log output for jackrabbit
-\f1\fs22 \
-
-\f0\fs20 Add
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2 \cf0     <!-- Limit the org.apache.jackrabbit.core category to WARN as its INFO is verbose -->
-\f1 \uc0\u8232 
-\f4\fs20    <logger category="org.apache.jackrabbit.core">
-\f1\fs22 \uc0\u8232 
-\f4\fs20        <level name="WARN"/>
-\f1\fs22 \uc0\u8232 
-\f4\fs20    </logger>
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0\fs20 \cf0 just above the <root-logger> tag.
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 Find 
-\f4\fs22 <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">
-\f1 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 And a
-\f0\fs20 dd a deployment scanner stanza to point to dev - remove relative-to attribute so that it is an absolute path
-\f1\fs22 \
-\pard\pardeftab720\ri0\partightenfactor0
-
-\f6\fs20 \cf2 <\cf3 deployment-scanner\cf0  \cf4 name\cf0 =
-\f7\i \cf6 "risfuf"
-\f6\i0 \cf0  \cf4 path\cf0 =
-\f7\i \cf6 "C:/_/ris/risfuf/javaee"
-\f6\i0 \cf0  \cf4 scan-interval\cf0 =
-\f7\i \cf6 "5000"
-\f6\i0 \cf2 />\cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f1 \cf2 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 To change the default web ports
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2\fs22 \cf0     
-\f4\fs20 \cf2 <\cf3 socket-binding-group\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "standard-sockets"
-\f4\i0 \cf0  \cf4 default-interface\cf0 =
-\f5\i \cf6 "public"
-\f4\i0 \cf0  \cf4 port-offset\cf0 =
-\f5\i \cf6 "$\{jboss.socket.binding.port-offset:0\}"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \
-
-\f2         
-\f4\fs20 \cf2 <\cf3 socket-binding\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "http"
-\f4\i0 \cf0  \cf4 port\cf0 =
-\f5\i \cf6 "$\{jboss.http.port:8080
-\f1 \}
-\f5 "
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \
-
-\f2         
-\f4\fs20 \cf2 <\cf3 socket-binding\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "https"
-\f4\i0 \cf0  \cf4 port\cf0 =
-\f5\i \cf6 "$\{jboss.https.port:8443
-\f1 \}
-\f5 "
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4\fs20 \cf0 change them in there
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 To enable UTF-8 encoding by default\
-Find \
-<servlet-container name="default">
-\f1 \
-
-\f4 And change it to \
-<servlet-container name="default" I>
-\f1 \
-\
-
-\f4 To configure for TLS/SSL
-\f1\fs22 \
-
-\f4\fs20 Add a security realm under the <security-realms/> tag in standalone.xml\
-\pard\pardeftab720\ri0\sl293\partightenfactor0
-
-\f2 \cf7 <security-realm name="UndertowRealm">\uc0\u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <server-identities>\u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <ssl>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <keystore path="../standalone/configuration/localhost.keystore" relative-to="jboss.server.config.dir" keystore-password="secret" alias=\'94tomcat\'94 />\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </ssl>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </server-identities>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </security-realm>\
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f1 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 OR (for absolute file path
-\f1 \'85
-\f4 )
-\f1 \
-\pard\pardeftab720\ri0\sl293\partightenfactor0
-
-\f2 \cf7         <security-realm name="UndertowRealm">\uc0\u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <server-identities>\u8232 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <ssl>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 <keystore path="
-\f1\fs24 \cf0  
-\f2\fs20 \cf7 home/jbossuser/jboss-as-7.1.1.Final/standalone/configuration/bizhub.keystore" keystore-password="secret" alias=\'94tomcat\'94 />\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </ssl>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </server-identities>\
-\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 </security-realm>\
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f1 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 Add\
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f2 \cf7 <https-listener name="https" socket-binding="https" security-realm="UndertowRealm"/>\
-Under <server name=\'94default-server\'94> under the <subsystem xmlns=\'94urn:jboss:domain:undertow:1.0\'94>
-\f1 \cf0 \
-\
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 Add the following security domain to the end of <security-domains>
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf2 <\cf3 security-domain\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "bizhub"
-\f4\i0 \cf0  \cf4 cache-type\cf0 =
-\f5\i \cf6 "default"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2     
-\f4\fs20 \cf2 <\cf3 authentication\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2         
-\f4\fs20 \cf2 <\cf3 login-module\cf0  \cf4 code\cf0 =
-\f5\i \cf6 "Database"
-\f4\i0 \cf0  \cf4 flag\cf0 =
-\f5\i \cf6 "required"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "dsJndiName"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "java:/MySQLDB"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "principalsQuery"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "select password from ADM_SecurityUser where binary concat(bizCustomer, '/', userName) = ?;"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "rolesQuery"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "select 'Nobody', 'Roles' from ADM_SecurityUser where binary concat(bizCustomer, '/', userName) = ?"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "hashAlgorithm"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "MD5"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2             
-\f4\fs20 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "hashEncoding"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "base64"
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2         
-\f4\fs20 \cf2 </\cf3 login-module\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2     
-\f4\fs20 \cf2 </\cf3 authentication\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20 \cf2 </\cf3 security-domain\cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 or for sql server, set the domain and jndi name as per the ds.xml
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf2 <\cf3 security-domain\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "pgibsa"
-\f4\i0 \cf0  \cf4 cache-type\cf0 =
-\f5\i \cf6 "default"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2     
-\f4\fs20 \cf2 <\cf3 authentication\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2         
-\f4\fs20 \cf2 <\cf3 login-module\cf0  \cf4 code\cf0 =
-\f5\i \cf6 "Database"
-\f4\i0 \cf0  \cf4 flag\cf0 =
-\f5\i \cf6 "required"
-\f4\i0 \cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20             \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "dsJndiName"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "java:/PGIBSAMSSQLDB"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20             \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "principalsQuery"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "select password from ADM_SecurityUser where bizCustomer + '/' + userName = ?;"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20             \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "rolesQuery"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "select 'Nobody', 'Roles' from ADM_SecurityUser where bizCustomer + '/' + userName = ?"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20             \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "hashAlgorithm"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "MD5"
-\f4\i0 \cf0  \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2\fs20             
-\f4 \cf2 <\cf3 module-option\cf0  \cf4 name\cf0 =
-\f5\i \cf6 "hashEncoding"
-\f4\i0 \cf0  \cf4 value\cf0 =
-\f5\i \cf6 "base64"
-\f4\i0 \cf2 />
-\f1\fs22 \cf0 \uc0\u8232 
-\f2\fs20         
-\f4 \cf2 </\cf3 login-module\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f2\fs20     
-\f4 \cf2 </\cf3 authentication\cf2 >
-\f1\fs22 \cf0 \uc0\u8232 
-\f4\fs20 \cf2 </\cf3 security-domain\cf2 >
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 To start jBoss, u
-\f4 \cf2 se 
-\f1\fs22 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf2 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 ./standalone.sh -b 0.0.0.0 
-\f1\fs22 \
-
-\f4\fs20 or for windows, use
-\f1\fs22 \
-
-\f4\fs20 standalone.bat -b 0.0.0.0 
-\f1\fs22 \
-
-\f4\fs20 (or domain.bat/.sh)
-\f1\fs22 \
-
-\f4\fs20 to bind to any address.
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f0 \cf0 For Eclipse launch configuration arguments:
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4\fs20 \cf0 -b 0.0.0.0
-\f1\fs22 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\fs20 \cf0 \
-\pard\pardeftab720\ri0\sa200\partightenfactor0
-
-\f4 \cf0 VM Arguments
-\f1\fs22 \
+{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fswiss\fcharset0 ArialMT;}{\f1\froman\fcharset0 TimesNewRomanPSMT;}{\f2\fswiss\fcharset0 Helvetica;}{\f3\froman\fcharset0 Times-Roman;}{\f4\fmodern\fcharset0 CourierNewPSMT;}{\f5\fmodern\fcharset0 CourierNewPS-ItalicMT;}{\f6\fmodern\fcharset0 Courier;}{\f7\fmodern\fcharset0 Courier-Oblique;}{\f8\fnil Consolas;}}
+{\colortbl ;\red0\green128\blue128;\red63\green127\blue127;\red127\green0\blue127;\red26\green26\blue26;\red42\green0\blue255;\red61\green61\blue61;}
+{\*\generator Msftedit 5.41.21.2510;}\viewkind4\uc1\pard\sa200\lang9\f0\fs20 unzip wildfly to c:\\\f1\fs22\par
+\f0\fs20 run in standalone mode - use standalone.xml\f1\fs22\par
+\fs20\par
+\f0 Create $WILDFLY_HOME/modules/system/layers/base/com/mysql/main directory.\f1\fs22\line\f0\fs20 Drop the mysql-connector-java-5.1.15-bin.jar into this folder.\f1\fs22\line\f0\fs20 Create a file called module.xml in the same directory and place the following content in it...\f1\fs22\par
+\f0\fs20 <module xmlns="urn:jboss:module:1.1" name="com.mysql">\f1\fs22\line\f0\fs20     <resources>\f1\fs22\line\f0\fs20         <resource-root path="mysql-connector-java-5.1.15-bin.jar"/>    \f1\fs22\line\f0\fs20     </resources>\f1\fs22\line\f0\fs20     <dependencies>\f1\fs22\line\f0\fs20         <module name="javax.api"/>\f1\fs22\line\f2       <module name="javax.transaction.api"/>\f1\line\f0\fs20         <module name="javax.servlet.api" optional="true"/>\line     </dependencies>\f1\fs22\line\f0\fs20 </module>\f1\fs22\par
+\f0\fs20 (or use com.microsoft.sqlserver as the name and folder structure for sql server)\f1\fs22\par
+\fs20\par
+\f0 Edit $WILDFLY_HOME/standalone/configuration/standalone.xml and do the following:\f1\fs22\par
+\fs20\par
+\f0 Add driver to the driver stanza inside datasources.\f1\fs22\par
+\cf1\f3\fs20 <\cf2 driver\cf1  \cf3 name\cf4 =\cf5\i "mysql"\cf1\i0  \cf3 module\cf4 =\cf5\i "com.mysql"\cf1\i0 />\cf0\f1\fs22\par
+\f0\fs20 or\f1\fs22\par
+\cf1\f4\fs20 <\cf2 driver\cf0  \cf3 name\cf0 =\cf5\i\f5 "sqlserver"\cf0\i0\f4  \cf3 module\cf0 =\cf5\i\f5 "com.microsoft.sqlserver"\cf1\i0\f4 >\cf0\f1\fs22\line\f2     \cf1\f4\fs20 <\cf2 xa-datasource-class\cf1 >\cf0 com.microsoft.sqlserver.jdbc.SQLServerXADataSource\cf1 </\cf2 xa-datasource-class\cf1 >\cf0\f1\fs22\line\cf1\f4\fs20 </\cf2 driver\cf1 >\cf0\f1\fs22\par
+\f0\fs20 Insert \par
+\cf4\f2             \cf1\f3 <\cf2 global-modules\cf1 >\cf0\f1\fs22\line\cf4\f2\fs20                 \cf1\f3 <\cf2 module\cf0  \cf3 name\cf4 =\cf5\i "com.mysql"\cf0\i0  \cf3 slot\cf4 =\cf5\i "main"\cf1\i0 />\cf0\f1\fs22\line\cf4\f2\fs20             \cf1\f3 </\cf2 global-modules\cf1 >\cf0\f1\fs22\par
+\f0\fs20 at the top of\f1\fs22\par
+\cf4\f2\fs20         \cf1\f0 <\cf2 subsystem\cf0  \cf3 xmlns\cf4 =\cf5\i "urn:jboss:domain:ee:2.0"\cf1\i0 >\cf0\f1\fs22\par
+\f0\fs20 to enable Jackrabbit access to the mysql jdbc drivers\f1\fs22\par
+\f0\fs20 or use com.microsoft.sqlserver if applicable.\f1\fs22\par
+\fs20\par
+\f0 Set overall logging level to info (already set by default)\f1\fs22\par
+\fs20\par
+\f2\fs22             \cf1\f4\fs20 <\cf2 root-logger\cf1 >\cf0\f1\fs22\line\f2                 \cf1\f4\fs20 <\cf2 level\cf0  \cf3 name\cf0 =\cf5\i\f5 "INFO"\cf1\i0\f4 />\cf0\f1\fs22\line\f2                 \cf1\f4\fs20 <\cf2 handlers\cf1 >\cf0\f1\fs22\line\f2                     \cf1\f4\fs20 <\cf2 handler\cf0  \cf3 name\cf0 =\cf5\i\f5 "CONSOLE"\cf1\i0\f4 />\cf0\f1\fs22\line\f2                     \cf1\f4\fs20 <\cf2 handler\cf0  \cf3 name\cf0 =\cf5\i\f5 "FILE"\cf1\i0\f4 />\cf0\f1\fs22\line\f2                 \cf1\f4\fs20 </\cf2 handlers\cf1 >\cf0\f1\fs22\line\f2             \cf1\f4\fs20 </\cf2 root-logger\cf1 >\cf0\f1\fs22\par
+\f0\fs20 Limit log output for jackrabbit\f1\fs22\par
+\f0\fs20 Add\f1\fs22\par
+\f2     <!-- Limit the org.apache.jackrabbit.core category to WARN as its INFO is verbose -->\f1\line\f4\fs20    <logger category="org.apache.jackrabbit.core">\f1\fs22\line\f4\fs20        <level name="WARN"/>\f1\fs22\line\f4\fs20    </logger>\f1\fs22\par
+\f0\fs20 just above the <root-logger> tag.\f1\fs22\par
+\fs20\par
+\f0 Find \f4\fs22 <subsystem xmlns="urn:jboss:domain:deployment-scanner:2.0">\f1\par
+\f4 And a\f0\fs20 dd a deployment scanner stanza to point to dev - remove relative-to attribute so that it is an absolute path\f1\fs22\par
+\pard\cf1\f6\fs20 <\cf2 deployment-scanner\cf0  \cf3 name\cf0 =\cf5\i\f7 "risfuf"\cf0\i0\f6  \cf3 path\cf0 =\cf5\i\f7 "C:/_/ris/risfuf/javaee"\cf0\i0\f6  \cf3 scan-interval\cf0 =\cf5\i\f7 "5000"\cf1\i0\f6 />\cf0\par
+\pard\sa200\cf1\f1\par
+\cf0\f4 To change the default web ports\f1\fs22\par
+\fs20\par
+\f2\fs22     \cf1\f4\fs20 <\cf2 socket-binding-group\cf0  \cf3 name\cf0 =\cf5\i\f5 "standard-sockets"\cf0\i0\f4  \cf3 default-interface\cf0 =\cf5\i\f5 "public"\cf0\i0\f4  \cf3 port-offset\cf0 =\cf5\i\f5 "$\{jboss.socket.binding.port-offset:0\}"\cf1\i0\f4 >\cf0\f1\fs22\par
+\f2         \cf1\f4\fs20 <\cf2 socket-binding\cf0  \cf3 name\cf0 =\cf5\i\f5 "http"\cf0\i0\f4  \cf3 port\cf0 =\cf5\i\f5 "$\{jboss.http.port:8080\f1\}\f5 "\cf1\i0\f4 />\cf0\f1\fs22\par
+\f2         \cf1\f4\fs20 <\cf2 socket-binding\cf0  \cf3 name\cf0 =\cf5\i\f5 "https"\cf0\i0\f4  \cf3 port\cf0 =\cf5\i\f5 "$\{jboss.https.port:8443\f1\}\f5 "\cf1\i0\f4 />\cf0\f1\fs22\par
+\f4\fs20 change them in there\f1\fs22\par
+\fs20\par
+\f4 To enable UTF-8 encoding by default\par
+Find \par
+<servlet-container name="default">\f1\par
+\f4 And change it to \par
+<servlet-container name="default" I>\f1\par
+\par
+\f4 To configure for TLS/SSL\f1\fs22\par
+\f4\fs20 Add a security realm under the <security-realms/> tag in standalone.xml\par
+\pard\sl293\slmult0\cf6\f2 <security-realm name="UndertowRealm">\line\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <server-identities>\line\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <ssl>\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <keystore path="../standalone/configuration/localhost.keystore" relative-to="jboss.server.config.dir" keystore-password="secret" alias=\rdblquote tomcat\rdblquote  />\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ </ssl>\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ </server-identities>\par
+\~\~\~\~\~\~\~\~\~\~\~ </security-realm>\par
+\pard\sa200\cf0\f1\par
+\f4 OR (for absolute file path\f1\'85\f4 )\f1\par
+\pard\sl293\slmult0\cf6\f2         <security-realm name="UndertowRealm">\line\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <server-identities>\line\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <ssl>\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ <keystore path="\cf0\f1\fs24  \cf6\f2\fs20 home/jbossuser/jboss-as-7.1.1.Final/standalone/configuration/bizhub.keystore" keystore-password="secret" alias=\rdblquote tomcat\rdblquote  />\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ </ssl>\par
+\~\~\~\~\~\~\~\~\~\~\~\~\~\~\~ </server-identities>\par
+\~\~\~\~\~\~\~\~\~\~\~ </security-realm>\par
+\pard\sa200\cf0\f1\par
+\f4 Add\par
+\cf6\f2 <https-listener name="https" socket-binding="https" security-realm="UndertowRealm"/>\par
+Under <server name=\rdblquote default-server\rdblquote > under the <subsystem xmlns=\rdblquote urn:jboss:domain:undertow:1.0\rdblquote >\cf0\f1\par
+\par
+\f4 Add the following security domain to the end of <security-domains>\f1\fs22\par
+\fs20\par
+\cf1\f4 <\cf2 security-domain\cf0  \cf3 name\cf0 =\cf5\i\f5 "bizhub"\cf0\i0\f4  \cf3 cache-type\cf0 =\cf5\i\f5 "default"\cf1\i0\f4 >\cf0\f1\fs22\line\f2     \cf1\f4\fs20 <\cf2 authentication\cf1 >\cf0\f1\fs22\line\f2         \cf1\f4\fs20 <\cf2 login-module\cf0  \cf3 code\cf0 =\cf5\i\f5 "Database"\cf0\i0\f4  \cf3 flag\cf0 =\cf5\i\f5 "required"\cf1\i0\f4 >\cf0\f1\fs22\line\f2             \cf1\f4\fs20 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "dsJndiName"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "java:/MySQLDB"\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f2             \cf1\f4\fs20 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "principalsQuery"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "select password from ADM_SecurityUser where binary concat(bizCustomer, '/', userName) = ? \f8 and (inactive is null or inactive = 0)\f5 "\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f2             \cf1\f4\fs20 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "rolesQuery"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "select 'Nobody', 'Roles' from ADM_SecurityUser where binary concat(bizCustomer, '/', userName) = ? \f8 and (inactive is null or inactive = 0)\f5 "\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f2             \cf1\f4\fs20 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "hashAlgorithm"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "MD5"\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f2             \cf1\f4\fs20 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "hashEncoding"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "base64"\cf1\i0\f4 />\cf0\f1\fs22\line\f2         \cf1\f4\fs20 </\cf2 login-module\cf1 >\cf0\f1\fs22\line\f2     \cf1\f4\fs20 </\cf2 authentication\cf1 >\cf0\f1\fs22\line\cf1\f4\fs20 </\cf2 security-domain\cf1 >\cf0\f1\fs22\par
+\fs20\par
+\f4 or for sql server, set the domain and jndi name as per the ds.xml\f1\fs22\par
+\fs20\par
+\cf1\f4 <\cf2 security-domain\cf0  \cf3 name\cf0 =\cf5\i\f5 "pgibsa"\cf0\i0\f4  \cf3 cache-type\cf0 =\cf5\i\f5 "default"\cf1\i0\f4 >\cf0\f1\fs22\line\f2     \cf1\f4\fs20 <\cf2 authentication\cf1 >\cf0\f1\fs22\line\f2         \cf1\f4\fs20 <\cf2 login-module\cf0  \cf3 code\cf0 =\cf5\i\f5 "Database"\cf0\i0\f4  \cf3 flag\cf0 =\cf5\i\f5 "required"\cf1\i0\f4 >\cf0\f1\fs22\line\f4\fs20             \cf1 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "dsJndiName"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "java:/PGIBSAMSSQLDB"\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f4\fs20             \cf1 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "principalsQuery"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "select password from ADM_SecurityUser where bizCustomer + '/' + userName = ? \f8 and (inactive is null or inactive = 0)\f5 "\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f4\fs20             \cf1 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "rolesQuery"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "select 'Nobody', 'Roles' from ADM_SecurityUser where bizCustomer + '/' + userName = ? \f8 and (inactive is null or inactive = 0)\f5 "\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f4\fs20             \cf1 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "hashAlgorithm"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "MD5"\cf0\i0\f4  \cf1 />\cf0\f1\fs22\line\f2\fs20             \cf1\f4 <\cf2 module-option\cf0  \cf3 name\cf0 =\cf5\i\f5 "hashEncoding"\cf0\i0\f4  \cf3 value\cf0 =\cf5\i\f5 "base64"\cf1\i0\f4 />\cf0\f1\fs22\line\f2\fs20         \cf1\f4 </\cf2 login-module\cf1 >\cf0\f1\fs22\line\f2\fs20     \cf1\f4 </\cf2 authentication\cf1 >\cf0\f1\fs22\line\cf1\f4\fs20 </\cf2 security-domain\cf1 >\cf0\f1\fs22\par
+\fs20\par
+\par
+\f0 To start jBoss, u\cf1\f4 se \cf0\f1\fs22\par
+\cf1\fs20\par
+\cf0\f4 ./standalone.sh -b 0.0.0.0 \f1\fs22\par
+\f4\fs20 or for windows, use\f1\fs22\par
+\f4\fs20 standalone.bat -b 0.0.0.0 \f1\fs22\par
+\f4\fs20 (or domain.bat/.sh)\f1\fs22\par
+\f4\fs20 to bind to any address.\f1\fs22\par
+\fs20\par
+\f0 For Eclipse launch configuration arguments:\f1\fs22\par
+\f4\fs20 -b 0.0.0.0\f1\fs22\par
+\fs20\par
+\f4 VM Arguments\f1\fs22\par
 }
+ 

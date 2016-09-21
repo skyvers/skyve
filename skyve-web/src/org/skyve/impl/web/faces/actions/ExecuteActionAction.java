@@ -44,7 +44,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-		View view = targetDocument.getView(facesView.getUxUi(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
+		View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
 	    if (Boolean.FALSE.equals(action.getClientValidation())) {
