@@ -237,4 +237,18 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 		preset(imagePropertyName, image);
 		this.image = image;
 	}
+
+	/**
+	 * Updates to contact details is allowed
+	 */
+	@XmlTransient
+	public boolean isAllowUpdate() {
+		return ((CORE.getPersistence().getUser().getContactId().equals(this.getBizId())
+					|| isUserInRole("admin","ContactManager")
+					|| isUserInRole("admin","SecurityAdministrator")?true:false));
+	}
+
+	public boolean isNotAllowUpdate() {
+		return (! isAllowUpdate());
+	}
 }

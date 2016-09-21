@@ -10,6 +10,8 @@ import modules.admin.domain.User;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -106,6 +108,10 @@ public class ContactBizlet extends Bizlet<Contact> {
 	
 	@Override
 	public void preSave(Contact bean) throws Exception {
+		if(bean.isChanged() && !bean.isAllowUpdate()){
+			throw new ValidationException(new Message("You do not have access to update the contact details for " + bean.getBizKey()));
+		}
 		updateUserDataGroup(bean.getBizId(), bean.getBizDataGroupId());
+		
 	}
 }

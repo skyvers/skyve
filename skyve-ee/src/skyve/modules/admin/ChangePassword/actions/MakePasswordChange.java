@@ -70,6 +70,11 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Base64 base64Codec = new Base64();
 		String hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
 
+		if(hashedPassword.equals(userBean.getPassword())){
+			Message message = new Message("This password matches a previous one.  Please re-enter and confirm the password.");
+			message.addBinding(ChangePassword.confirmPasswordPropertyName);
+			throw new ValidationException(message);			
+		}
 		userBean.setPassword(hashedPassword);
 
 		// clear reset password details
