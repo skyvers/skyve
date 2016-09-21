@@ -41,6 +41,8 @@
 		</form>
 	</hbox>
 	<actions>
-		<defaults />
+		<defaults visible="allowUpdate"/>
+		<cancel visible="notAllowUpdate"/>
+		<zoomOut visible="notAllowUpdate"/>
 	</actions>
 </view>
