@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
+import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,13 +36,16 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
 @ManagedBean
-@ViewScoped
+@SessionScoped
 public class Menu extends Harness {
 	private static final long serialVersionUID = -7523306130675202901L;
 
 	// The modules menu on the LHS
 	private MenuModel menu;
 	public MenuModel getMenu() {
+		if (menu == null) {
+			preRender();
+		}
 		return menu;
 	}
 
@@ -134,7 +137,6 @@ public class Menu extends Harness {
 		DefaultMenuItem result = new DefaultMenuItem(item.getName(), null, url);
 		result.setAjax(false);
 		result.setHref(url);
-		result.setTarget("content");
 		return result;
 	}
 
