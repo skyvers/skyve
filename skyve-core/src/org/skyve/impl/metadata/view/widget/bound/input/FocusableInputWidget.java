@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
@@ -35,7 +36,8 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class),
-						@XmlElementRef(type = ToggleDisabledEventAction.class)})
+						@XmlElementRef(type = ToggleDisabledEventAction.class),
+						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
 	public List<EventAction> getFocusActions() {
 		return focusActions;
 	}
@@ -46,7 +48,8 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class),
-						@XmlElementRef(type = ToggleDisabledEventAction.class)})
+						@XmlElementRef(type = ToggleDisabledEventAction.class),
+						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
 	public List<EventAction> getBlurActions() {
 		return blurActions;
 	}

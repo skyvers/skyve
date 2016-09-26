@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -1992,6 +1993,22 @@ class ViewValidator extends ViewVisitor {
 		String widgetIdentifier = "[toggleDisabled] event action in an event handler";
 		validateBinding(null,
 							toggleDisabled.getBinding(),
+							true,
+							false,
+							false,
+							false,
+							widgetIdentifier,
+							AttributeType.bool);
+	}
+
+	@Override
+	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+													boolean parentVisible,
+													boolean parentEnabled)
+	throws MetaDataException {
+		String widgetIdentifier = "[toggleVisibility] event action in an event handler";
+		validateBinding(null,
+							toggleVisibility.getBinding(),
 							true,
 							false,
 							false,

@@ -32,7 +32,7 @@
 				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
 				<p:fileUpload fileUploadListener="#{_skyveBizImport.handleFileUpload}" 
 								update="messages problems" 
-								oncomplete="top.isc.WindowStack.getOpener().saveInstance('_PUSH');" />
+								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
 			    <p/>
 			    <p:dataTable id="problems" value="#{_skyveBizImport.problems}" var="problem">

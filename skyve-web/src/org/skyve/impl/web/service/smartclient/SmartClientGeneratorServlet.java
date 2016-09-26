@@ -64,6 +64,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
@@ -2452,7 +2453,9 @@ pickListFields:[{name:'value'}],
 			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
-			code.append("view.rerenderAction('").append(source.getSource()).append("');");
+			code.append("view.rerenderAction(");
+			code.append(Boolean.FALSE.equals(rerender.getClientValidation()) ? "false,'" : "true,'");
+			code.append(source.getSource()).append("');");
 		}
 
 		@Override
@@ -2492,6 +2495,15 @@ pickListFields:[{name:'value'}],
 													boolean parentEnabled)
 		throws MetaDataException {
 			code.append("view.toggleDisabled('").append(toggleDisabled.getBinding().replace('.', '_'));
+			code.append("');");
+		}
+
+		@Override
+		public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+														boolean parentVisible,
+														boolean parentEnabled)
+		throws MetaDataException {
+			code.append("view.toggleVisibility('").append(toggleVisibility.getBinding().replace('.', '_'));
 			code.append("');");
 		}
 

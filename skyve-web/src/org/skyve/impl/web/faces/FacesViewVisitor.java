@@ -60,6 +60,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -2077,6 +2078,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
 												boolean parentEnabled)
+	throws MetaDataException {
+		// event actions are handled when visiting the action handlers
+	}
+
+	@Override
+	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+													boolean parentVisible,
+													boolean parentEnabled)
 	throws MetaDataException {
 		// event actions are handled when visiting the action handlers
 	}

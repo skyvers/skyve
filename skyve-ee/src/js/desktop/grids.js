@@ -1539,7 +1539,7 @@ isc.BizListGrid.addMethods({
 											if (instance._apply || me._view._vm.valuesHaveChanged()) {
 												delete instance._apply;
 												// apply changes to current form before zoom in
-												me._view.saveInstance(null, function() {
+												me._view.saveInstance(true, null, function() {
 													// set rerender source from datasource
 													me._view._source = me._dataSource.ID.substring(me._dataSource.ID.lastIndexOf('_') + 1);
 													// now zoom in, after changes applied
@@ -1929,7 +1929,7 @@ isc.BizDataGrid.addMethods({
 										if (instance._apply || me._view._vm.valuesHaveChanged()) {
 											delete instance._apply;
 											// apply changes to current form before zoom in
-											me._view.saveInstance(null, function() {
+											me._view.saveInstance(true, null, function() {
 												me._zoom(zoomToNew,
 															zoomToBizId,
 															viewBinding,
