@@ -30,6 +30,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
@@ -494,6 +495,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 														boolean parentEnabled)
 	throws MetaDataException;
 	public abstract void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+															boolean parentVisible,
+															boolean parentEnabled)
+	throws MetaDataException;
+	public abstract void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 															boolean parentVisible,
 															boolean parentEnabled)
 	throws MetaDataException;
@@ -1034,6 +1039,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 				}
 				else if (action instanceof ToggleDisabledEventAction) {
 					visitToggleDisabledEventAction((ToggleDisabledEventAction) action, parentVisible, parentEnabled);
+				}
+				else if (action instanceof ToggleVisibilityEventAction) {
+					visitToggleVisibilityEventAction((ToggleVisibilityEventAction) action, parentVisible, parentEnabled);
 				}
 				else {
 					throw new MetaDataException(action + " is not catered for in ViewVisitor.visitChangeable()");

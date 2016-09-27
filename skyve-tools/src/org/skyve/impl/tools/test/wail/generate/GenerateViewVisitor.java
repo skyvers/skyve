@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DialogButton;
@@ -796,6 +797,14 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitToggleDisabledEventAction(
 			ToggleDisabledEventAction toggleDisabled, boolean parentVisible,
+			boolean parentEnabled) throws MetaDataException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitToggleVisibilityEventAction(
+			ToggleVisibilityEventAction toggleVisibility, boolean parentVisible,
 			boolean parentEnabled) throws MetaDataException {
 		// TODO Auto-generated method stub
 		

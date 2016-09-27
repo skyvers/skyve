@@ -360,16 +360,17 @@ isc.EditView.addMethods({
 	},
 
 	// called on the server-side code generation for rerender actions
-	rerenderAction: function(source) {
+	rerenderAction: function(validate, source) {
 		this._source = source;
-		this.saveInstance(null);
+		this.saveInstance(validate, null);
 	},
 	
 	// action - sent to server and use to determine whether to popoff the window on the window stack
 	// successCallback - successCallback(instance) called on successful save
-	saveInstance: function(action, // name of the action being performed
+	saveInstance: function(validate, // true to validate, otherwise false
+							action, // name of the action being performed
 							successCallback) { // a function to call back on when the operation is successful
-		var instance = this.gather(true); // validate
+		var instance = this.gather(validate);
 		if (instance) {
 			// We get the web context out of the bean in the response and put it
 			// as a post parameter in its own right.
@@ -399,6 +400,9 @@ isc.EditView.addMethods({
 			}
 			
 			var me = this;
+			// temporarily disable values manager validation as saveData() calls validate
+			// which is not required on all actions {and was conditionally called above during gather() anyway}
+			this._vm.disableValidation = true;
 			this._vm.saveData(
 				function(dsResponse, // metadata about the returned data
 							data, // the returned data
@@ -526,6 +530,7 @@ isc.EditView.addMethods({
 				}, 
 				{params: params, willHandleError: true}
 			);
+			this._vm.disableValidation = false; // reset to default immediately after call (not on callback)
 		}
 		else {
 			this._source = null;
@@ -1154,6 +1159,14 @@ isc.EditView.addMethods({
 		}
 	},
 	
+	// called from the view generator servlet
+	toggleVisibility: function(binding) {
+		var widget = this._vm.getItem(binding);
+		if (widget) {
+			this._setInvisible(widget, null, widget.isVisible() ? "true" : "false", null);
+		}
+	},
+
 	// returns whether the widget is invisible or not
 	_showHide: function(widget, // the widget to enable or disable
 							parent, // the parent container
@@ -1270,12 +1283,12 @@ isc.BizButton.addMethods({
 		this._click = function() {
 			// New and Edit are list view actions
 			if (this.type == "O") { // OK on edit view
-				this._view.saveInstance(this.actionName, function() {
+				this._view.saveInstance(true, this.actionName, function() {
 //					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
 				});
 			}
 			else if (this.type == "S") { // Save on edit view
-				this._view.saveInstance(this.actionName, function() {
+				this._view.saveInstance(true, this.actionName, function() {
 //					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
 				});
 			}
@@ -1284,7 +1297,7 @@ isc.BizButton.addMethods({
 			else if (this.type == "Z") { // Change on child edit view
 				var apply = this._view.gather(false)._apply;
 				if (apply || this._view._vm.valuesHaveChanged()) {
-					this._view.saveInstance(this.actionName);
+					this._view.saveInstance(true, this.actionName);
 				}
 				else {
 					var opener = isc.WindowStack.getOpener();
@@ -1359,7 +1372,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before exporting
-					this._view.saveInstance(null, function() {
+					this._view.saveInstance(true, null, function() {
 						window.location.assign('bizexport.xls?_n=' + me.actionName + 
 												'&_doc=' + me._view._mod + '.' + me._view._doc + 
 												'&_c=' + instance._c +
@@ -1372,7 +1385,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before importing
-					this._view.saveInstance(null, function() {
+					this._view.saveInstance(true, null, function() {
 						var url = 'bizImport.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {
@@ -1394,7 +1407,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before exporting
-					this._view.saveInstance(null, function() {
+					this._view.saveInstance(true, null, function() {
 						window.location.assign('download?_n=' + me.actionName + 
 												'&_doc=' + me._view._mod + '.' + me._view._doc + 
 												'&_c=' + instance._c +
@@ -1407,7 +1420,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before uploading
-					this._view.saveInstance(null, function() {
+					this._view.saveInstance(true, null, function() {
 						var url = 'fileUpload.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {

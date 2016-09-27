@@ -47,6 +47,7 @@ import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
+import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -2484,6 +2485,16 @@ class ViewJSONManipulator extends ViewVisitor {
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
 		addBinding(toggleDisabled.getBinding(), true);
 	}
+
+	@Override
+	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+													boolean parentVisible,
+													boolean parentEnabled)
+	throws MetaDataException {
+		// we add this binding as the widget could be visible client-side and we'd need to let the value through
+		addBinding(toggleVisibility.getBinding(), true);
+	}
+
 
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
