@@ -132,7 +132,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		DocumentQuery result = persistence.newDocumentQuery(document, replacedFromClause, replacedFilterClause);
 		if (! implicitParameters.isEmpty()) {
 			for (String implicitParameterName : implicitParameters.keySet()) {
-				result.putParameter(getName(), implicitParameters.get(implicitParameterName));
+				result.putParameter(implicitParameterName, implicitParameters.get(implicitParameterName));
 			}
 		}
 		
