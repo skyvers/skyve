@@ -249,12 +249,17 @@
 				<boundColumn binding="moduleName" editable="false"/>
 				<boundColumn binding="documentName" editable="false"/>
 			</dataGrid>
-			<form border="true" borderTitle="Document Data Refresh" percentageWidth="60">
+			<form border="true" borderTitle="Document Data Refresh" >
+				<column />
+				<column />
 				<column />
 				<column />
 				<column />
 				<column />
 				<row>
+					<item>
+						<combo binding="refreshOption"/>
+					</item>
 					<item>
 						<checkBox binding="notification" triState="false" />
 					</item>

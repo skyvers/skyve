@@ -112,6 +112,13 @@
 		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
 			<displayName>Hint</displayName>
 		</memo>
+		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
+			<displayName>Option</displayName>
+			<values>
+				<value code="Upsert"/>
+				<value code="Save"/>
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">
