@@ -16,6 +16,7 @@ import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenanceModuleDocument;
+import modules.admin.domain.DataMaintenance.RefreshOption;
 
 public class RefreshDocumentTuplesJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -65,7 +66,11 @@ public class RefreshDocumentTuplesJob extends Job {
 					PersistentBean pb = (PersistentBean) it.next();
 
 					try {
-						pers.upsertBeanTuple(pb);
+						if(RefreshOption.upsert.equals(dm.getRefreshOption())){
+							pers.upsertBeanTuple(pb);
+						} else if(RefreshOption.save.equals(dm.getRefreshOption())){
+							pb = pers.save(pb);
+						}
 						pers.commit(false);
 						pers.evictCached(pb);
 						pers.begin();

@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - RestorePreProcess
  * @depend - - - Operation
+ * @depend - - - RefreshOption
  * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -88,6 +89,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String ddlScriptPropertyName = "ddlScript";
 	/** @hidden */
 	public static final String instructionHintPropertyName = "instructionHint";
+	/** @hidden */
+	public static final String refreshOptionPropertyName = "refreshOption";
 
 	/**
 	 * Restore Pre-Process
@@ -163,6 +166,74 @@ public class DataMaintenance extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Option
+	 **/
+	@XmlEnum
+	public static enum RefreshOption implements Enumeration {
+		upsert("Upsert", "Upsert"),
+		save("Save", "Save");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RefreshOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static RefreshOption fromCode(String code) {
+			RefreshOption result = null;
+
+			for (RefreshOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RefreshOption fromDescription(String description) {
+			RefreshOption result = null;
+
+			for (RefreshOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RefreshOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RefreshOption value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
 	private String modDocName;
 	private String schemaName;
 	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
@@ -187,6 +258,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private String auditResponse;
 	private String ddlScript;
 	private String instructionHint;
+	private RefreshOption refreshOption;
 
 	@Override
 	@XmlTransient
@@ -657,6 +729,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setInstructionHint(String instructionHint) {
 		this.instructionHint = instructionHint;
+	}
+
+	/**
+	 * {@link #refreshOption} accessor.
+	 **/
+	public RefreshOption getRefreshOption() {
+		return refreshOption;
+	}
+
+	/**
+	 * {@link #refreshOption} mutator.
+	 * 
+	 * @param refreshOption	The new value to set.
+	 **/
+	@XmlElement
+	public void setRefreshOption(RefreshOption refreshOption) {
+		this.refreshOption = refreshOption;
 	}
 
 	/**

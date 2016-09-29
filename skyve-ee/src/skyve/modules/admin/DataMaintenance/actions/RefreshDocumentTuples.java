@@ -2,6 +2,8 @@ package modules.admin.DataMaintenance.actions;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -19,6 +21,10 @@ public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> 
 	@Override
 	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
 			throws Exception {
+		
+		if(bean.getRefreshOption()==null){
+			throw new ValidationException(new Message(DataMaintenance.refreshOptionPropertyName, "Value required."));
+		}
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
