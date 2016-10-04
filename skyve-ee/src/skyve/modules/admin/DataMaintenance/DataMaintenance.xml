@@ -30,6 +30,10 @@
 		<boolean name="notification">
 			<displayName>Notify me on completion</displayName>
 		</boolean>
+		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
+			<displayName>Script</displayName>
+		</memo>		
+		
 		<!-- Backup job parameters -->
 		<integer name="dailyBackupRetention">
 			<displayName>Daily Backup Retention</displayName>
@@ -43,6 +47,7 @@
 		<integer name="yearlyBackupRetention">
 			<displayName>Yearly Backup Retention</displayName>
 		</integer>
+		
 		<!-- Restore parameters -->
 		<enum name="restorePreProcess">
 			<displayName>Restore Pre-Process</displayName>
@@ -57,7 +62,6 @@
 				<value name="deleteData" code="dmc" description="Delete existing table data using metadata" />
 			</values>
 		</enum>
-		
 		<id name="selectedBackupName" persistent="false" trackChanges="false">
 			<displayName>Selected Backup Name</displayName>
 		</id>
@@ -68,6 +72,11 @@
 			<displayName>Refresh Backups</displayName>
 			<defaultValue>true</defaultValue>
 		</boolean>
+		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
+			<displayName>Hint</displayName>
+		</memo>
+		
+		<!-- Content -->
 		<boolean name="refreshContent" persistent="false" trackChanges="false">
 			<displayName>Refresh Content</displayName>
 			<defaultValue>true</defaultValue>
@@ -76,6 +85,7 @@
 			<displayName>Content Link</displayName>
 		</memo>
 		
+		<!-- Audit Truncation -->
 		<text name="auditModuleName">
 			<displayName>Module</displayName>
 			<domain>constant</domain>
@@ -99,21 +109,14 @@
 			<displayName>User</displayName>
 			<documentName>User</documentName>
 		</association>
-
-		<!-- transient for Audit Management Truncation Filtering -->
 		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
 			<displayName>Found</displayName>
 		</integer>
 		<memo name="auditResponse" persistent="false" trackChanges="false" audited="false">
 			<displayName>Status</displayName>
 		</memo>
-		<memo name="ddlScript" persistent="false" trackChanges="false" audited="false">
-			<displayName>Script</displayName>
-		</memo>
-		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
-			<displayName>Hint</displayName>
-		</memo>
 
+		<!-- Data Refresh -->
 		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
 			<displayName>Option</displayName>
 			<values>
