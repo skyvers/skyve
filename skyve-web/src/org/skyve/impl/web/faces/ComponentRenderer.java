@@ -27,6 +27,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
+import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.button.Button;
@@ -551,7 +552,12 @@ public class ComponentRenderer {
 				hasNoChildTags = false;
 			}
 			for (ClientBehavior behaviour : behaviours.get(eventName)) {
-				renderAjaxBehaviour(eventName, (AjaxBehavior) behaviour);
+				if (behaviour instanceof AjaxBehavior) {
+					renderAjaxBehaviour(eventName, (AjaxBehavior) behaviour);
+				}
+				else if (behaviour instanceof ConfirmBehavior) {
+					renderConfirmBehaviour((ConfirmBehavior) behaviour);
+				}
 			}
 		}
 		
@@ -633,5 +639,9 @@ public class ComponentRenderer {
 			out.append(" update=\"").append(value).append('"');
 		}
 		out.append(" />\n");
+	}
+
+	private void renderConfirmBehaviour(ConfirmBehavior behaviour) {
+		out.append(indentation).append("<p:confirm message=\"").append(behaviour.getMessage()).append("\" />\n");
 	}
 }

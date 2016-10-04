@@ -10,6 +10,7 @@ import javax.el.ValueExpression;
 import javax.faces.application.Application;
 import javax.faces.component.UICommand;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UIParameter;
@@ -24,6 +25,7 @@ import javax.faces.convert.Converter;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
+import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.button.Button;
@@ -551,6 +553,7 @@ public class ComponentBuilder {
 										Integer pixelWidth, 
 										Integer pixelHeight,
 										Boolean clientValidation, 
+										String confirmationText,
 										String disabled, 
 										String invisible) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
@@ -559,9 +562,9 @@ public class ComponentBuilder {
 		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, listBinding, inline);
-
 		addSize(result, null, pixelWidth, null, pixelHeight, null, null);
 		addDisabled(result, disabled);
+		addConfirmation(result, confirmationText);
 		setId(result);
 
 		// show/hide the implicit buttons - TODO base this also on security
@@ -615,6 +618,10 @@ public class ComponentBuilder {
 			result.setImmediate(true); // no validation
 			result.setProcess(process); // process the current form
 			result.setUpdate(update); // update all forms
+			// Add the standard confirmation text if non exists
+			if (confirmationText == null) {
+				addConfirmation(result, "Do you want to delete this data?");
+			}
 		}
 		else {
 			result.setProcess(process); // process the current form
@@ -693,6 +700,7 @@ public class ComponentBuilder {
 									Integer pixelWidth, 
 									Integer pixelHeight,
 									Boolean clientValidation, 
+									String confirmationText,
 									String disabled, 
 									String invisible) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
@@ -705,6 +713,7 @@ public class ComponentBuilder {
 		addSize(result, null, pixelWidth, null, pixelHeight, null, null);
 		addDisabled(result, disabled);
 		addInvisible(result, invisible, null);
+		addConfirmation(result, confirmationText);
 		setId(result);
 
 		if (ImplicitActionName.Cancel.equals(implicitActionName) || ImplicitActionName.OK.equals(implicitActionName)) {
@@ -1199,6 +1208,7 @@ public class ComponentBuilder {
 														null, 
 														null, 
 														Boolean.TRUE, 
+														null,
 														null, 
 														null) :
 										actionLink("Add a new " + singularDocumentAlias, 
@@ -1210,6 +1220,7 @@ public class ComponentBuilder {
 													null, 
 													null, 
 													Boolean.TRUE, 
+													null,
 													null, 
 													null);
 			dataTableOrList.getFacets().put("footer", buttonOrLink);
@@ -1369,6 +1380,14 @@ public class ComponentBuilder {
 		if (invisible != null) {
 			String visible = BindUtil.negateCondition(invisible);
 			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAppend));
+		}
+	}
+
+	private void addConfirmation(UIComponentBase component, String confirmationText) {
+		if (confirmationText != null) {
+			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
+			confirm.setMessage(confirmationText);
+			component.addClientBehavior("click", confirm);
 		}
 	}
 

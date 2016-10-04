@@ -695,6 +695,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            button.getPixelWidth(),
 	                            button.getPixelHeight(),
 	                            action.getClientValidation(),
+	                            action.getConfirmationText(),
 	                            action.getDisabledConditionName(),
 	                            action.getInvisibleConditionName());
 		}
@@ -896,6 +897,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									null,
 									Boolean.FALSE,
 									null,
+									null,
 									link.getInvisibleConditionName()));
 			}
 		}.process(outerReference);
@@ -1017,6 +1019,7 @@ public class FacesViewVisitor extends ViewVisitor {
 													null,
 													Boolean.TRUE,
 													null,
+													null,
 													null);
 				link.getChildren().add(outputText);
 				current.getChildren().add(link);
@@ -1050,6 +1053,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																null,
 																Boolean.TRUE,
 																null,
+																null,
 																null) :
 												b.actionLink("Edit",
 																"Edit the record",
@@ -1060,6 +1064,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																null,
 																null,
 																Boolean.TRUE,
+																null,
 																null,
 																null);
 				children.add(buttonOrLink);
@@ -1079,6 +1084,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																Integer.valueOf(35),
 																null,
 																Boolean.TRUE,
+																"Do you want to delete/remove the selected row?",
 																null,
 																null) :
 												b.actionLink("Remove",
@@ -1090,6 +1096,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																null,
 																null,
 																Boolean.TRUE,
+																"Do you want to delete/remove the selected row?",
 																null,
 																null);
 				children.add(buttonOrLink);
@@ -2116,6 +2123,7 @@ public class FacesViewVisitor extends ViewVisitor {
 												null,
 												null,
 												action.getClientValidation(),
+												action.getConfirmationText(),
 												action.getDisabledConditionName(),
 												action.getInvisibleConditionName());
 			toolbar.getChildren().add(cb);
@@ -2142,6 +2150,7 @@ public class FacesViewVisitor extends ViewVisitor {
 													null,
 													null,
 													action.getClientValidation(),
+													action.getConfirmationText(),
 													action.getDisabledConditionName(),
 													action.getInvisibleConditionName());
 				toolbar.getChildren().add(cb);

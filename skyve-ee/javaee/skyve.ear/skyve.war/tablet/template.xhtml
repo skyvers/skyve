@@ -64,6 +64,10 @@
 -->
 								<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
 								<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+								<p:confirmDialog global="true">
+									<p:commandButton value="Cancel" type="button" styleClass="ui-confirmdialog-no" style="float:right;" icon="ui-icon-close"/>
+									<p:commandButton value="OK" type="button" styleClass="ui-confirmdialog-yes" style="float:right;" icon="ui-icon-check"/>
+								</p:confirmDialog>
 								
 								<ui:insert name="body" />
 							</td>
