@@ -25,9 +25,9 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Someone who works for this organisation
  * 
  * @depend - - - Status
+ * @navhas n contact 0..1 Contact
  * @navhas n baseOffice 0..1 Office
  * @navhas n reportsTo 0..1 Position
- * @navhas n contact 0..1 Contact
  * @stereotype "persistent"
  */
 @XmlType
@@ -182,7 +182,7 @@ public class Staff extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{contact.name} {contact.mobile}",
+														"{contact.name} ({contact.mobile})",
 														this);
 		}
 		catch (Exception e) {

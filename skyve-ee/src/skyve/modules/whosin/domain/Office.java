@@ -82,7 +82,7 @@ public class Office extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{buildingName}, {streetAddress} {suburb}",
+														"{buildingName} {streetAddress} {suburb}",
 														this);
 		}
 		catch (Exception e) {

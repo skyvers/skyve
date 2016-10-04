@@ -50,6 +50,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
 	/** @hidden */
+	public static final String ddlScriptPropertyName = "ddlScript";
+	/** @hidden */
 	public static final String dailyBackupRetentionPropertyName = "dailyBackupRetention";
 	/** @hidden */
 	public static final String weeklyBackupRetentionPropertyName = "weeklyBackupRetention";
@@ -65,6 +67,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String selectedContentIdPropertyName = "selectedContentId";
 	/** @hidden */
 	public static final String refreshBackupsPropertyName = "refreshBackups";
+	/** @hidden */
+	public static final String instructionHintPropertyName = "instructionHint";
 	/** @hidden */
 	public static final String refreshContentPropertyName = "refreshContent";
 	/** @hidden */
@@ -85,10 +89,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String auditMatchCountPropertyName = "auditMatchCount";
 	/** @hidden */
 	public static final String auditResponsePropertyName = "auditResponse";
-	/** @hidden */
-	public static final String ddlScriptPropertyName = "ddlScript";
-	/** @hidden */
-	public static final String instructionHintPropertyName = "instructionHint";
 	/** @hidden */
 	public static final String refreshOptionPropertyName = "refreshOption";
 
@@ -238,6 +238,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private String schemaName;
 	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
 	private Boolean notification;
+	private String ddlScript;
 	private Integer dailyBackupRetention;
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
@@ -246,6 +247,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private String selectedBackupName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
+	private String instructionHint;
 	private Boolean refreshContent = new Boolean(true);
 	private String contentLink;
 	private String auditModuleName;
@@ -256,8 +258,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private User auditUser = null;
 	private Integer auditMatchCount;
 	private String auditResponse;
-	private String ddlScript;
-	private String instructionHint;
 	private RefreshOption refreshOption;
 
 	@Override
@@ -374,6 +374,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setNotification(Boolean notification) {
 		preset(notificationPropertyName, notification);
 		this.notification = notification;
+	}
+
+	/**
+	 * {@link #ddlScript} accessor.
+	 **/
+	public String getDdlScript() {
+		return ddlScript;
+	}
+
+	/**
+	 * {@link #ddlScript} mutator.
+	 * 
+	 * @param ddlScript	The new value to set.
+	 **/
+	@XmlElement
+	public void setDdlScript(String ddlScript) {
+		this.ddlScript = ddlScript;
 	}
 
 	/**
@@ -515,6 +532,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setRefreshBackups(Boolean refreshBackups) {
 		this.refreshBackups = refreshBackups;
+	}
+
+	/**
+	 * {@link #instructionHint} accessor.
+	 **/
+	public String getInstructionHint() {
+		return instructionHint;
+	}
+
+	/**
+	 * {@link #instructionHint} mutator.
+	 * 
+	 * @param instructionHint	The new value to set.
+	 **/
+	@XmlElement
+	public void setInstructionHint(String instructionHint) {
+		this.instructionHint = instructionHint;
 	}
 
 	/**
@@ -695,40 +729,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setAuditResponse(String auditResponse) {
 		this.auditResponse = auditResponse;
-	}
-
-	/**
-	 * {@link #ddlScript} accessor.
-	 **/
-	public String getDdlScript() {
-		return ddlScript;
-	}
-
-	/**
-	 * {@link #ddlScript} mutator.
-	 * 
-	 * @param ddlScript	The new value to set.
-	 **/
-	@XmlElement
-	public void setDdlScript(String ddlScript) {
-		this.ddlScript = ddlScript;
-	}
-
-	/**
-	 * {@link #instructionHint} accessor.
-	 **/
-	public String getInstructionHint() {
-		return instructionHint;
-	}
-
-	/**
-	 * {@link #instructionHint} mutator.
-	 * 
-	 * @param instructionHint	The new value to set.
-	 **/
-	@XmlElement
-	public void setInstructionHint(String instructionHint) {
-		this.instructionHint = instructionHint;
 	}
 
 	/**
