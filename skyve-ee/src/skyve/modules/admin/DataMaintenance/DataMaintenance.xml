@@ -76,7 +76,6 @@
 			<displayName>Content Link</displayName>
 		</memo>
 		
-		<!-- transient for Audit Management Truncation Filtering -->
 		<text name="auditModuleName">
 			<displayName>Module</displayName>
 			<domain>constant</domain>
@@ -100,6 +99,8 @@
 			<displayName>User</displayName>
 			<documentName>User</documentName>
 		</association>
+
+		<!-- transient for Audit Management Truncation Filtering -->
 		<integer name="auditMatchCount" persistent="false" trackChanges="false" audited="false">
 			<displayName>Found</displayName>
 		</integer>
@@ -112,6 +113,7 @@
 		<memo name="instructionHint" persistent="false" trackChanges="false" audited="false">
 			<displayName>Hint</displayName>
 		</memo>
+
 		<enum name="refreshOption" persistent="false" trackChanges="false" audited="false">
 			<displayName>Option</displayName>
 			<values>
