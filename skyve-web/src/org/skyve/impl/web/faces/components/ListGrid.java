@@ -278,6 +278,10 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 		
 		for (QueryColumn queryColumn : query.getColumns()) {
+			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+				continue;
+			}
+			
 			if (! UserAgentType.phone.equals(type)) {
 				String displayName = queryColumn.getDisplayName();
 				if (displayName == null) {
