@@ -85,15 +85,15 @@ public class View extends HtmlPanelGroup {
 	                view = repository.getView(uxui.getName(), customer, document, ViewType.create);
 	                if (view != null) {
 	                    fvv = new FacesViewVisitor(user,
-	                                              (CustomerImpl) customer,
-	                                              (ModuleImpl) module, 
-	                                              (DocumentImpl) document,
-	                                              (ViewImpl) view,
-	                                              managedBeanName,
-	                                              type,
-	                                              widgetId,
-	                                              process,
-	                                              update);
+		                                              (CustomerImpl) customer,
+		                                              (ModuleImpl) module, 
+		                                              (DocumentImpl) document,
+		                                              (ViewImpl) view,
+		                                              managedBeanName,
+		                                              type,
+		                                              widgetId,
+		                                              process,
+		                                              update);
 	                    fvv.visit();
 	                    View.this.getChildren().add(fvv.getFacesView());
 	                }

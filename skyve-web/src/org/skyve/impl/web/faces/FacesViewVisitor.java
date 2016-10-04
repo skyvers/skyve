@@ -70,6 +70,7 @@ import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.QueryListViewReference;
 import org.skyve.impl.metadata.view.reference.ReferenceProcessor;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
+import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -152,6 +153,8 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
@@ -673,17 +676,28 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		org.skyve.metadata.view.Action action = view.getAction(button.getActionName());
-	    UIComponent c = b.actionButton(action.getDisplayName(),
-			                            action.getToolTip(),
-			                            action.getImplicitName(),
-			                            action.getName(),
-			                            false,
-			                            listBinding,
-			                            button.getPixelWidth(),
-			                            button.getPixelHeight(),
-			                            action.getClientValidation(),
-			                            action.getDisabledConditionName(),
-			                            action.getInvisibleConditionName());
+		ImplicitActionName name = action.getImplicitName();
+		UIComponent c = null;
+		if (ImplicitActionName.Report.equals(name)) {
+			c = b.reportButton(action.getDisplayName(), 
+								action.getToolTip(), 
+								action.getParameters(), 
+								action.getDisabledConditionName(), 
+								action.getInvisibleConditionName());
+		}
+		else {
+			c = b.actionButton(action.getDisplayName(),
+	                            action.getToolTip(),
+	                            action.getImplicitName(),
+	                            action.getName(),
+	                            false,
+	                            listBinding,
+	                            button.getPixelWidth(),
+	                            button.getPixelHeight(),
+	                            action.getClientValidation(),
+	                            action.getDisabledConditionName(),
+	                            action.getInvisibleConditionName());
+		}
 	    addComponent(null, false, action.getInvisibleConditionName(), c, button.getPixelWidth(), null);
 	}
 
@@ -2110,18 +2124,28 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			CommandButton cb = b.actionButton(name.getDisplayName(),
-												action.getToolTip(),
-												name,
-												null,
-												false,
-												listBinding,
-												null,
-												null,
-												action.getClientValidation(),
-												action.getDisabledConditionName(),
-												action.getInvisibleConditionName());
-			toolbar.getChildren().add(cb);
+			if (ImplicitActionName.Report.equals(name)) {
+					org.primefaces.component.button.Button btn = b.reportButton(action.getDisplayName(), 
+																					action.getToolTip(), 
+																					action.getParameters(), 
+																					action.getDisabledConditionName(), 
+																					action.getInvisibleConditionName());
+					toolbar.getChildren().add(btn);
+			}
+			else {
+				CommandButton cb = b.actionButton(name.getDisplayName(),
+													action.getToolTip(),
+													name,
+													null,
+													false,
+													listBinding,
+													null,
+													null,
+													action.getClientValidation(),
+													action.getDisabledConditionName(),
+													action.getInvisibleConditionName());
+				toolbar.getChildren().add(cb);
+			}
 		}
 	}
 	
@@ -2165,6 +2189,13 @@ public class FacesViewVisitor extends ViewVisitor {
 		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
+	/**
+	 * Create a button with a href URL that looks like...
+	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
+	 * 
+	 * @param action
+	 * @throws MetaDataException
+	 */
 	@Override
 	public void visitReportAction(ActionImpl action) throws MetaDataException {
 		processImplicitAction(action, ImplicitActionName.Report);

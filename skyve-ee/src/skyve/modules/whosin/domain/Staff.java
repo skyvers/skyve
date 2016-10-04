@@ -182,7 +182,7 @@ public class Staff extends AbstractPersistentBean {
 	public String getBizKey() {
 		try {
 			return org.skyve.util.Binder.formatMessage(org.skyve.CORE.getUser().getCustomer(),
-														"{contact.name} {contact.mobile}",
+														"{contact.name} ({contact.mobile})",
 														this);
 		}
 		catch (Exception e) {

@@ -77,7 +77,6 @@ public class ReportServlet extends HttpServlet {
 
 	public static final String REPORT_PATH = "/report";
 	public static final String EXPORT_PATH = "/export";
-	public static final String REPORT_FORMAT = "_format";
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -100,12 +99,6 @@ public class ReportServlet extends HttpServlet {
 				persistence.setUser(user);
 		
 				String path = request.getServletPath();
-//				if (path.equals('/' + ThinClientWebContext.PARAM_PATH)) {
-//					doParams(request, response);
-//				}
-//				else if (path.equals(ThinClientWebContext.SETUP_PATH)) {
-//					doSetup(request, response);
-//				}
 				if (REPORT_PATH.equals(path)) {
 					doReport(request, response);
 				}
@@ -127,84 +120,26 @@ public class ReportServlet extends HttpServlet {
 			}
 		}
 	}
-/*
-	private void doSetup(HttpServletRequest request, HttpServletResponse response) 
-	throws IOException {
-		PrintWriter pw = response.getWriter();
-		try {
-			pw.print("<html><head/><body><form id=\"dummy\" name=\"dummy\" action=\"export.");
-			pw.print(request.getParameter("format")); 
-			pw.print("\" method=\"post\"><input type=\"hidden\" name=\"values\" value=\"");
-			pw.print(request.getParameter("values").replace("\"", "&quot;"));
-			pw.print("\"/></form><script type=\"text/javascript\">document.forms[0].submit()</script></body></html>");
-		}
-		catch (Exception e) {
-			System.err.println("Problem getting the report parameters - " + e.toString());
-			e.printStackTrace();
-		}
-		finally {
-			pw.close();
-		}
-	}
-*/
-/*
-	private static void doParams(HttpServletRequest request, HttpServletResponse response)
-	throws IOException {
-		ServletOutputStream out = response.getOutputStream();
-		try {
-			String documentName = request.getParameter(WebContext.DOCUMENT_NAME);
+
+	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
+		try (OutputStream out = response.getOutputStream()) {
+			String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
+			if (moduleName == null) {
+				throw new ServletException("No module name in the URL");
+			}
+			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
 			if (documentName == null) {
 				throw new ServletException("No document name in the URL");
 			}
-			int dotIndex = documentName.indexOf('.');
-			String moduleName = documentName.substring(0, dotIndex);
-			documentName = documentName.substring(dotIndex + 1);
-
-			String reportName = request.getParameter(WebContext.REPORT_NAME);
-			if (reportName == null) {
-				throw new ServletException("No report name in the URL");
-			}
-			
-			User user = Persistence.get().getUser();
-
-			View paramsView = new View();
-			
-			paramsView.setType(ViewType.params);
-			paramsView.setTitle("Select Format");
-
-			BaseWebContext webContext = new BaseWebContext(UUID.randomUUID().toString(), 
-															request,
-															response);
-			RenderContext<BaseWebContext> renderContext = webContext.getRenderContext();
-			Renderer<BaseWebContext> renderer = RendererFactory.getRenderer(renderContext, user);
-    		renderer.render(moduleName + '.' + documentName, paramsView, (Bean) null);
-		}
-		catch (Exception e) {
-			System.err.println("Problem getting the report parameters - " + e.toString());
-			e.printStackTrace();
-		}
-		finally {
-			out.close();
-		}
-	}
-*/
-	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
-		try (OutputStream out = response.getOutputStream()) {
-			String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
-			if (documentName == null) {
-				throw new ServletException("No module.document in the URL");
-			}
-			int dotIndex = documentName.indexOf('.');
-			if (dotIndex < 0 ) {
-				throw new ServletException(AbstractWebContext.DOCUMENT_NAME + " request parameter should be of the format <moduleName>.<documentName> - value is " + documentName);
-			}
-			String moduleName = documentName.substring(0, dotIndex);
-			documentName = documentName.substring(dotIndex + 1);
-
 			String reportName = request.getParameter(AbstractWebContext.REPORT_NAME);
 			if (reportName == null) {
 				throw new ServletException("No report name in the URL");
 			}
+			String formatString = request.getParameter(AbstractWebContext.REPORT_FORMAT);
+			if (formatString == null) {
+				throw new ServletException("No report format in the URL");
+			}
+			ReportFormat format = ReportFormat.valueOf(formatString);
 			
 			User user = AbstractPersistence.get().getUser();
 			Customer customer = user.getCustomer();
@@ -215,7 +150,6 @@ public class ReportServlet extends HttpServlet {
 			// Note - if there is no form in the view then there is no web context
 			Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
 
-	        ReportFormat format = ReportFormat.valueOf(request.getParameter(REPORT_FORMAT));
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			JasperPrint jasperPrint = ReportUtil.runReport(user, 
 															document, 
@@ -238,8 +172,12 @@ public class ReportServlet extends HttpServlet {
 
 		for (String paramName : request.getParameterMap().keySet()) {
     		String paramValue = request.getParameter(paramName);
-			if ((! paramName.equals(AbstractWebContext.DOCUMENT_NAME)) &&
-					(! paramName.equals(AbstractWebContext.REPORT_NAME))) {
+			if (! (AbstractWebContext.CONTEXT_NAME.equals(paramName) ||
+					AbstractWebContext.ID_NAME.equals(paramName) ||
+					AbstractWebContext.REPORT_FORMAT.equals(paramName) ||
+					AbstractWebContext.MODULE_NAME.equals(paramName) ||
+					AbstractWebContext.DOCUMENT_NAME.equals(paramName) ||
+					AbstractWebContext.REPORT_NAME.equals(paramName))) {
 				params.put(paramName, paramValue);
 				if (UtilImpl.HTTP_TRACE) UtilImpl.LOGGER.info("ReportServlet: Report Parameter " + paramName + " = " + paramValue);
 			}
@@ -515,7 +453,7 @@ public class ReportServlet extends HttpServlet {
 		
 		// JasperDesign
 		JasperDesign jasperDesign = new JasperDesign();
-		jasperDesign.setName("NoXmlDesignReport");
+		jasperDesign.setName("Export");
 		jasperDesign.setLanguage(JRReport.LANGUAGE_GROOVY);
 		jasperDesign.setPageWidth(params.getPageWidth());
 		jasperDesign.setPageHeight(params.getPageHeight());

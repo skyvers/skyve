@@ -29,6 +29,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.report.ReportFormat;
 
 public class ActionImpl implements Action {
 	/**
@@ -247,9 +248,15 @@ public class ActionImpl implements Action {
 				}
 				report.setReportName(reportName);
 				for (Parameter parameter : getParameters()) {
-					if (AbstractWebContext.DOCUMENT_NAME.equals(parameter.getName())) {
-						report.setDoc(parameter.getValue());
-						break;
+					String parameterName = parameter.getName();
+					if (AbstractWebContext.MODULE_NAME.equals(parameterName)) {
+						report.setModuleName(parameter.getValue());
+					}
+					else if (AbstractWebContext.DOCUMENT_NAME.equals(parameterName)) {
+						report.setDocumentName(parameter.getValue());
+					}
+					else if (AbstractWebContext.REPORT_FORMAT.equals(parameterName)) {
+						report.setReportFormat(ReportFormat.valueOf(parameter.getValue()));
 					}
 				}
 				result = report;

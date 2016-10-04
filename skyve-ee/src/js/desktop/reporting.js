@@ -592,60 +592,70 @@ isc.ReportDialog.addClassProperties({
 	},
 	
 	popupReport: function(view, // view
-							params) { // param names
-		if (isc.ReportDialog._reportLayout == null) {
-			isc.ReportDialog._reportLayout = isc.ReportDialog._createReportPanel(
-				isc.IButton.create({
-					title: 'View',
-					ID: '_reportViewButton',
-					_view: null,
-					_params: null,
-					click: function() {
-						var instance = this._view.gather(false); // don't validate
-						if (instance) {
-							var c = instance._c;
-							var b = this._view._b;
-							var bizId = instance.bizId;
-
-							// have to post to this setup URL as document.write() doesn't work in IE6
-							var format = _reportForm.getValue("reportFormat");
-							var src = 'report/' + this._params['_n'] + '.' + format +
-										'?_format=' + format +
-										(c ? '&_c=' + c : '') +
-										(b ? '&_b=' + b : '') +
-										(bizId ? '&_id=' + bizId : '');
-							if (this._params) {
-								for (var name in this._params) {
-									var binding = this._params[name];
-									src += '&' + name + '=' + this._view.toDisplay(binding, instance);
-								}
-							}
-							if ((format === 'html') || (format === 'xhtml')) {
-								window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
-							}
-							else {
-								window.location = encodeURI(src);
-							}
-						}
-					}
-				}),
-				isc.DynamicForm.create({
-					ID: '_reportForm',
-					fields: [
-				        {type:'rowSpacer'}, 
-				        {type:'rowSpacer'},
-					    isc.ReportDialog._createReportFormatPickList(
-					    	1,
-				    		function(form, item, value, oldValue) {
-				    			// do nothing
-				    		}),
-		         	]
-				})
-			);
+							params) { // param map (name -> binding expression with {} if required
+		if (params._f) {
+			var format = params._f;
+			delete params._f;
+			isc.ReportDialog._redirectToReport(view, params, format);
 		}
-		
-		_reportViewButton._view = view;
-		_reportViewButton._params = params;
-		isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._reportLayout], 180, 480);
+		else {
+			if (isc.ReportDialog._reportLayout == null) {
+				isc.ReportDialog._reportLayout = isc.ReportDialog._createReportPanel(
+					isc.IButton.create({
+						title: 'View',
+						ID: '_reportViewButton',
+						_view: null,
+						_params: null,
+						click: function() {
+							var format = _reportForm.getValue("reportFormat");
+							isc.ReportDialog._redirectToReport(view, params, format);
+						}
+					}),
+					isc.DynamicForm.create({
+						ID: '_reportForm',
+						fields: [
+					        {type:'rowSpacer'}, 
+					        {type:'rowSpacer'},
+						    isc.ReportDialog._createReportFormatPickList(
+						    	1,
+					    		function(form, item, value, oldValue) {
+					    			// do nothing
+					    		}),
+			         	]
+					})
+				);
+			}
+			
+			_reportViewButton._view = view;
+			_reportViewButton._params = params;
+			isc.WindowStack.popup(null, "Report", true, [isc.ReportDialog._reportLayout], 180, 480);
+		}
+	},
+	
+	_redirectToReport: function(view, params, format) {
+		var instance = view.gather(false); // don't validate
+		if (instance) {
+			var c = instance._c;
+			var b = view._b;
+			var bizId = instance.bizId;
+
+			var src = 'report/' + params['_n'] + '.' + format +
+						'?_f=' + format +
+						(c ? '&_c=' + c : '') +
+						(b ? '&_b=' + b : '') +
+						(bizId ? '&_id=' + bizId : '');
+			if (params) {
+				for (var name in params) {
+					var binding = params[name];
+					src += '&' + name + '=' + view.toDisplay(binding, instance);
+				}
+			}
+			if ((format === 'html') || (format === 'xhtml')) {
+				window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
+			}
+			else {
+				window.location = encodeURI(src);
+			}
+		}
 	}
 });
