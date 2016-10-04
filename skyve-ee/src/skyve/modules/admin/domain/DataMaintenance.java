@@ -22,6 +22,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - RestorePreProcess
  * @depend - - - Operation
+ * @depend - - - RefreshOption
  * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -49,6 +50,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String notificationPropertyName = "notification";
 	/** @hidden */
+	public static final String ddlScriptPropertyName = "ddlScript";
+	/** @hidden */
 	public static final String dailyBackupRetentionPropertyName = "dailyBackupRetention";
 	/** @hidden */
 	public static final String weeklyBackupRetentionPropertyName = "weeklyBackupRetention";
@@ -64,6 +67,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String selectedContentIdPropertyName = "selectedContentId";
 	/** @hidden */
 	public static final String refreshBackupsPropertyName = "refreshBackups";
+	/** @hidden */
+	public static final String instructionHintPropertyName = "instructionHint";
 	/** @hidden */
 	public static final String refreshContentPropertyName = "refreshContent";
 	/** @hidden */
@@ -85,9 +90,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String auditResponsePropertyName = "auditResponse";
 	/** @hidden */
-	public static final String ddlScriptPropertyName = "ddlScript";
-	/** @hidden */
-	public static final String instructionHintPropertyName = "instructionHint";
+	public static final String refreshOptionPropertyName = "refreshOption";
 
 	/**
 	 * Restore Pre-Process
@@ -163,10 +166,79 @@ public class DataMaintenance extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Option
+	 **/
+	@XmlEnum
+	public static enum RefreshOption implements Enumeration {
+		upsert("Upsert", "Upsert"),
+		save("Save", "Save");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RefreshOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		public static RefreshOption fromCode(String code) {
+			RefreshOption result = null;
+
+			for (RefreshOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RefreshOption fromDescription(String description) {
+			RefreshOption result = null;
+
+			for (RefreshOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RefreshOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RefreshOption value : values) {
+					domainValues.add(new DomainValue(value.code, value.description));
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
 	private String modDocName;
 	private String schemaName;
 	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
 	private Boolean notification;
+	private String ddlScript;
 	private Integer dailyBackupRetention;
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
@@ -175,6 +247,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private String selectedBackupName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
+	private String instructionHint;
 	private Boolean refreshContent = new Boolean(true);
 	private String contentLink;
 	private String auditModuleName;
@@ -185,8 +258,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private User auditUser = null;
 	private Integer auditMatchCount;
 	private String auditResponse;
-	private String ddlScript;
-	private String instructionHint;
+	private RefreshOption refreshOption;
 
 	@Override
 	@XmlTransient
@@ -302,6 +374,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public void setNotification(Boolean notification) {
 		preset(notificationPropertyName, notification);
 		this.notification = notification;
+	}
+
+	/**
+	 * {@link #ddlScript} accessor.
+	 **/
+	public String getDdlScript() {
+		return ddlScript;
+	}
+
+	/**
+	 * {@link #ddlScript} mutator.
+	 * 
+	 * @param ddlScript	The new value to set.
+	 **/
+	@XmlElement
+	public void setDdlScript(String ddlScript) {
+		this.ddlScript = ddlScript;
 	}
 
 	/**
@@ -443,6 +532,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setRefreshBackups(Boolean refreshBackups) {
 		this.refreshBackups = refreshBackups;
+	}
+
+	/**
+	 * {@link #instructionHint} accessor.
+	 **/
+	public String getInstructionHint() {
+		return instructionHint;
+	}
+
+	/**
+	 * {@link #instructionHint} mutator.
+	 * 
+	 * @param instructionHint	The new value to set.
+	 **/
+	@XmlElement
+	public void setInstructionHint(String instructionHint) {
+		this.instructionHint = instructionHint;
 	}
 
 	/**
@@ -626,37 +732,20 @@ public class DataMaintenance extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #ddlScript} accessor.
+	 * {@link #refreshOption} accessor.
 	 **/
-	public String getDdlScript() {
-		return ddlScript;
+	public RefreshOption getRefreshOption() {
+		return refreshOption;
 	}
 
 	/**
-	 * {@link #ddlScript} mutator.
+	 * {@link #refreshOption} mutator.
 	 * 
-	 * @param ddlScript	The new value to set.
+	 * @param refreshOption	The new value to set.
 	 **/
 	@XmlElement
-	public void setDdlScript(String ddlScript) {
-		this.ddlScript = ddlScript;
-	}
-
-	/**
-	 * {@link #instructionHint} accessor.
-	 **/
-	public String getInstructionHint() {
-		return instructionHint;
-	}
-
-	/**
-	 * {@link #instructionHint} mutator.
-	 * 
-	 * @param instructionHint	The new value to set.
-	 **/
-	@XmlElement
-	public void setInstructionHint(String instructionHint) {
-		this.instructionHint = instructionHint;
+	public void setRefreshOption(RefreshOption refreshOption) {
+		this.refreshOption = refreshOption;
 	}
 
 	/**
