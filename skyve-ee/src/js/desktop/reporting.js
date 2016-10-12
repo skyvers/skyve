@@ -608,7 +608,7 @@ isc.ReportDialog.addClassProperties({
 						_params: null,
 						click: function() {
 							var format = _reportForm.getValue("reportFormat");
-							isc.ReportDialog._redirectToReport(view, params, format);
+							isc.ReportDialog._redirectToReport(this._view, this._params, format);
 						}
 					}),
 					isc.DynamicForm.create({
