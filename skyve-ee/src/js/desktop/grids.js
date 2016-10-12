@@ -505,7 +505,9 @@ isc.BizListGrid.addMethods({
 			contextMenuData.add(this.clearSelectionItem);
 		}
 		if (me.showFilter) {
-			contextMenuData.add(clearFilterItem);
+			if (me._config.isTree) {} else {
+				contextMenuData.add(clearFilterItem);
+			}
 		}
 		contextMenuData.add(refreshItem);
 		if (me.showExport) {
@@ -843,20 +845,24 @@ isc.BizListGrid.addMethods({
 																me.clearSelectionItem.click));
 		}
 		if (me.showFilter) {
-			toolStripMembers.add(isc.BizUtil.createImageButton(clearFilterItem.icon,
-																false,
-																"<b>Clear filter</b> criteria.",
-																clearFilterItem.click));
+			if (me._config.isTree) {} else {
+				toolStripMembers.add(isc.BizUtil.createImageButton(clearFilterItem.icon,
+																	false,
+																	"<b>Clear filter</b> criteria.",
+																	clearFilterItem.click));
+			}
 		}
 		toolStripMembers.add(isc.BizUtil.createImageButton(refreshItem.icon,
 															false,
 															"<b>Refresh</b> table data.",
 															refreshItem.click));
 		if (me.showFilter) {
-			toolStripMembers.addList([
-      			"separator",
-    			me._advancedFilter.toggleButton
-			]);
+			if (me._config.isTree) {} else {
+				toolStripMembers.addList([
+	      			"separator",
+	    			me._advancedFilter.toggleButton
+				]);
+			}
 		}
 		if (config && config.isPickList) {} else {
 			if (me.showExport) {
@@ -969,7 +975,7 @@ isc.BizListGrid.addMethods({
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (me.showFilter && (! me._advancedFilter.toggleButton.selected)),
+			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._advancedFilter.toggleButton.selected)),
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,
