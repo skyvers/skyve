@@ -497,7 +497,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	private static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
+	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) throws Exception {
 		String result = expression;
 
 		// default url binding to first bean
