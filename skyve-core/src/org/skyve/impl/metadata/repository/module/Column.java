@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
@@ -21,7 +22,9 @@ import org.skyve.metadata.SortDirection;
 							"expression", 
 							"projected",
 							"filterOperator", 
-							"filterExpression"})
+							"filterExpression",
+							"pixelWidth",
+							"alignment"})
 public class Column {
 	// The name of the property within the bean list. Can be null.
 	private String name;
@@ -58,7 +61,13 @@ public class Column {
 
 	// Indicates if the user can edit the values in this column in list view
 	private Boolean editable;
+	
+	// If defined, the overridden pixel width of the column
+	private Integer pixelWidth;
 
+	// If defined, the overridden column alignment
+	private HorizontalAlignment alignment;
+	
 	public String getName() {
 		return name;
 	}
@@ -165,5 +174,23 @@ public class Column {
 	@XmlAttribute
 	public void setEditable(Boolean editable) {
 		this.editable = editable;
+	}
+
+	public Integer getPixelWidth() {
+		return pixelWidth;
+	}
+
+	@XmlAttribute
+	public void setPixelWidth(Integer pixelWidth) {
+		this.pixelWidth = pixelWidth;
+	}
+
+	public HorizontalAlignment getAlignment() {
+		return alignment;
+	}
+
+	@XmlAttribute
+	public void setAlignment(HorizontalAlignment alignment) {
+		this.alignment = alignment;
 	}
 }

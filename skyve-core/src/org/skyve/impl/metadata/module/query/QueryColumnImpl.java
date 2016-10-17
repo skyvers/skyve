@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.module.query;
 
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -30,6 +31,10 @@ public class QueryColumnImpl implements QueryColumn {
 	private boolean filterable = true;
 
 	private boolean editable = true;
+	
+	private Integer pixelWidth;
+	
+	private HorizontalAlignment alignment;
 
 	@Override
 	public String getName() {
@@ -137,5 +142,23 @@ public class QueryColumnImpl implements QueryColumn {
 
 	public void setEditable(boolean editable) {
 		this.editable = editable;
+	}
+	
+	@Override
+	public Integer getPixelWidth() {
+		return pixelWidth;
+	}
+
+	public void setPixelWidth(Integer pixelWidth) {
+		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public HorizontalAlignment getAlignment() {
+		return alignment;
+	}
+
+	public void setAlignment(HorizontalAlignment alignment) {
+		this.alignment = alignment;
 	}
 }
