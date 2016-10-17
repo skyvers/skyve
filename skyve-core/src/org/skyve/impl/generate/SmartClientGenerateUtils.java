@@ -794,6 +794,7 @@ public class SmartClientGenerateUtils {
 			if (attribute != null) {
 				AttributeType attributeType = attribute.getAttributeType();
 				align = determineDefaultColumnAlignment(attributeType);
+				pixelWidth = determineDefaultColumnWidth(attributeType);
 			}
         }
 
@@ -1007,7 +1008,8 @@ public class SmartClientGenerateUtils {
 				title = displayName;
 			}
 			align = column.getAlignment();
-			
+			pixelWidth = column.getPixelWidth();
+
 			Attribute attribute = (target != null) ? target.getAttribute() : null;
 			if (attribute != null) {
 				DomainType domainType = attribute.getDomainType();
@@ -1032,6 +1034,9 @@ public class SmartClientGenerateUtils {
 					if (align == null) {
 						align = determineDefaultColumnAlignment(attributeType);
 					}
+					if (pixelWidth == null) {
+						pixelWidth = determineDefaultColumnWidth(attributeType);
+					}
 				}
 				if (attribute instanceof Association) {
 					String targetDocumentName = ((Association) attribute).getDocumentName();
@@ -1055,7 +1060,6 @@ public class SmartClientGenerateUtils {
 			detail = column.isHidden();
 			canSortClientOnly = (! column.isSortable());
 			canSave = canSave && column.isEditable();
-			pixelWidth = column.getPixelWidth();
 		}
 
 		public boolean isCanFilter() {
@@ -1186,6 +1190,26 @@ public class SmartClientGenerateUtils {
 			return HorizontalAlignment.centre;
 		}
 		return HorizontalAlignment.left;
+	}
+	
+	static Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType)) {
+			return Integer.valueOf(100);
+		}
+		if (AttributeType.dateTime.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.time.equals(attributeType)) {
+			return Integer.valueOf(50);
+		}
+		if (AttributeType.timestamp.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return Integer.valueOf(50);
+		}
+
+		return null;
 	}
 	
 	private static String getConstantDomainValueMapString(Customer customer,
