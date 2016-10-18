@@ -71,6 +71,14 @@
 				<column binding="dueBack" />
 				<column binding="baseOffice.bizKey"/>
 				<column binding="location" hidden="true"/>
+				<column displayName="Image" editable="false" filterable="false" sortable="false" alignment="centre" pixelWidth="70">
+					<name>image</name>
+					<expression>
+						<![CDATA[
+							concat(concat('<img src="content?_n=', bean.contact.image), '&_doc=admin.Contact&_b=image&_w=64&_h=64" />')
+						]]>
+					</expression>
+				</column>
 			</columns>
 		</documentQuery>
 		<documentQuery name="qOfficeForPhone" documentName="Office">
