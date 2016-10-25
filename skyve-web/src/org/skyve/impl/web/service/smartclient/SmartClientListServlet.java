@@ -1368,19 +1368,24 @@ public class SmartClientListServlet extends HttpServlet {
 		// remove parameters that are not editable
 		for (QueryColumn column : model.getColumns()) {
 			String columnBinding = column.getBinding();
+			if (columnBinding == null) {
+				columnBinding = column.getName();
+			}
+			
 			if (! column.isEditable()) {
 				properties.remove(columnBinding);
 			}
-			
-			// replace association bizIds with the real object
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, columnBinding);
-			Attribute targetAttribute = target.getAttribute();
-			if (targetAttribute instanceof Association) {
-				properties.put(columnBinding,
-								persistence.retrieve(module.getName(),
-														((Association) targetAttribute).getDocumentName(),
-														(String) properties.get(columnBinding),
-														false));
+			else {
+				// replace association bizIds with the real object
+				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, columnBinding);
+				Attribute targetAttribute = target.getAttribute();
+				if (targetAttribute instanceof Association) {
+					properties.put(columnBinding,
+									persistence.retrieve(module.getName(),
+															((Association) targetAttribute).getDocumentName(),
+															(String) properties.get(columnBinding),
+															false));
+				}
 			}
 		}
 		

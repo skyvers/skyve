@@ -1200,13 +1200,13 @@ public class SmartClientGenerateUtils {
 			return Integer.valueOf(125);
 		}
 		if (AttributeType.time.equals(attributeType)) {
-			return Integer.valueOf(50);
+			return Integer.valueOf(75);
 		}
 		if (AttributeType.timestamp.equals(attributeType)) {
 			return Integer.valueOf(125);
 		}
 		if (AttributeType.bool.equals(attributeType)) {
-			return Integer.valueOf(50);
+			return Integer.valueOf(75);
 		}
 
 		return null;
