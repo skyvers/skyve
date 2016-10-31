@@ -114,7 +114,7 @@ public class FacesView<T extends Bean> extends Harness {
 
 	private long id = 0;
 	public String nextId() {
-		return new StringBuilder(10).append('w').append(id++).toString();
+		return new StringBuilder(10).append('s').append(id++).toString();
 	}
 
 	private AbstractWebContext webContext;

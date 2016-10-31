@@ -32,11 +32,12 @@
 					</pm:header>
 					<pm:content>
 						<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
-						<h:form>
+						<h:form prependId="false">
 							<s:view module="#{skyve.bizModuleParameter}"
 										document="#{skyve.bizDocumentParameter}"
 										managedBean="skyve"
-										type="phone" />
+										componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.MobileComponentBuilder" 
+										layoutBuilderClass="org.skyve.impl.web.faces.pipeline.layout.MobileLayoutBuilder" />
 						</h:form>
 					</pm:content>
 				</pm:page>

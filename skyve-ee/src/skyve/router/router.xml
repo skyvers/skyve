@@ -7,6 +7,15 @@
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
 	<uxui name="public">
+<!--
+		<route outcome="/ultima/grid.xhtml">
+			<criteria webAction="g" />
+		</route>
+		<route outcome="/ultima/edit.xhtml">
+			<criteria webAction="e" />
+		</route>
+		<route outcome="/ultima/frameset.xhtml" />
+-->		
 		<route outcome="/public/grid.xhtml">
 			<criteria webAction="g" />
 		</route>
@@ -40,7 +49,7 @@
 		<route outcome="/tablet/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/tablet/frameset.xhtml" />
+		<route outcome="/tablet/home.xhtml" />
 	</uxui>
 	<uxui name="phone">
 		<route outcome="/whosinIntegrate/inout.xhtml">

@@ -26,11 +26,10 @@
 			<ui:define name="head">
 			</ui:define>
 			<ui:define name="body">
-				<h:form>
+				<h:form prependId="false">
 					<s:view module="#{skyve.bizModuleParameter}"
 								document="#{skyve.bizDocumentParameter}"
-								managedBean="skyve"
-								type="tablet" />
+								managedBean="skyve" />
 				</h:form>
 			</ui:define>
 		</ui:composition>

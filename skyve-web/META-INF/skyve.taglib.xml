@@ -63,8 +63,20 @@
 		</attribute>
 		<attribute>
 			<name>type</name>
-			<required>true</required>
+			<required>false</required>
 			<type>org.skyve.impl.web.UserAgent.UserAgentType</type>
+		</attribute>
+		<attribute>
+			<description>The fully qualified class name of a component builder to use</description>
+			<name>componentBuilderClass</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
+		<attribute>
+			<description>The fully qualified class name of a layout builder to use</description>
+			<name>layoutBuilderClass</name>
+			<required>false</required>
+			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
 			<name>widgetId</name>

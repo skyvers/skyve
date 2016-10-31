@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces;
+package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -22,6 +22,7 @@ import javax.faces.component.html.HtmlInputTextarea;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
+import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
@@ -47,6 +48,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.message.Message;
+import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
@@ -154,6 +156,10 @@ public class ComponentRenderer {
 			putValueExpression(attributes, "sortBy", component);
 			putValue(attributes, "style", column.getStyle());
 			putValue(attributes, "styleClass", column.getStyleClass());
+			int priority = column.getPriority();
+			if ((priority > 0) && (priority <= 6)) {
+				putValue(attributes, "priority", Integer.toString(priority));
+			}
 		}
 		else if (component instanceof CommandButton) {
 			tagName = "p:commandButton";
@@ -250,7 +256,12 @@ public class ComponentRenderer {
 			putValue(attributes, "styleClass", form.getStyleClass());
 		}
 		else if (component instanceof HtmlOutputLabel) {
-			tagName = "h:outputLabel";
+			if (component instanceof OutputLabel) {
+				tagName = "p:outputLabel";
+			}
+			else {
+				tagName = "h:outputLabel";
+			}
 			
 			HtmlOutputLabel label = (HtmlOutputLabel) component;
 			putValue(attributes, "for", label.getFor());
@@ -276,7 +287,10 @@ public class ComponentRenderer {
 		else if (component instanceof HtmlPanelGroup) {
 			tagName = "h:panelGroup";
 			
-			putValue(attributes, "style", ((HtmlPanelGroup) component).getStyle());
+			HtmlPanelGroup panel = (HtmlPanelGroup) component;
+			putValue(attributes, "layout", panel.getLayout());
+			putValue(attributes, "style", panel.getStyle());
+			putValue(attributes, "styleClass", panel.getStyleClass());
 
 			excludedAttributeNames.add("type");
 			excludedAttributeNames.add("managedBean");
@@ -329,10 +343,15 @@ public class ComponentRenderer {
 			putValue(attributes, "style", panel.getStyle());
 			putValue(attributes, "styleClass", panel.getStyleClass());
 		}
-		else if (component instanceof PanelGrid) {
-			tagName = "p:panelGrid";
+		else if (component instanceof HtmlPanelGrid) {
+			if (component instanceof PanelGrid) {
+				tagName = "p:panelGrid";
+			}
+			else {
+				tagName = "h:panelGrid";
+			}
 			
-			PanelGrid grid = (PanelGrid) component;
+			HtmlPanelGrid grid = (HtmlPanelGrid) component;
 			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
 			putValue(attributes, "style", grid.getStyle());
 			putValue(attributes, "styleClass", grid.getStyleClass());

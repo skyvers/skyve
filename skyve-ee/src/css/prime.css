@@ -3,37 +3,20 @@ body,html {
 	padding: 0;
 	height: 100%;
 }
-/* to remove borders from panel grids */
-.ui-panelgrid .ui-widget-content, .ui-panelgrid td {
-	border-width: 0px !important;
-	border-style: none !important;
-	padding: 2px 8px !important;
-	text-align: left !important;
-}
-
-/* to reinstate borders on data tables removed by panel grid styling above */
-.ui-datatable td {
-	border-width: 1px !important;
-	border-style: solid !important;
-	padding: 4px 10px !important;
-	text-align: left !important;
-}
-/* to reinstate borders on tab panels removed by panel grid syling above */
-.ui-tabs .ui-tabs-panel {
-	border-width: 1px !important;
-	border-style: solid !important;
+.ui-outputlabel {
+	vertical-align: middle !important;
+	white-space: normal;
 }
 .ui-message-icon-only {
 	display: inline-block !important;
 	vertical-align: middle !important;
 }
-.ui-outputlabel {
-	vertical-align: middle !important;
+/* enable font-awesome in ultima */
+/*
+.fa {
+    font-family: "FontAwesome" !important;
 }
-/* ensure inner input element of autocompletes have a width of 100% so they can be styled by the outer div */
-.ui-autocomplete-input {
-	width: 100% !important;
-}
+*/
 /* popup wheel of death style */
 #busy {
 	display: none;

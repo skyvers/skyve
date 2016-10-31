@@ -27,8 +27,8 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent.UserAgentType;
-import org.skyve.impl.web.faces.ComponentRenderer;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -170,22 +170,21 @@ public class ListGrid extends HtmlPanelGroup {
 	        }
 	        table.setLazy(true);
 	        table.setEmptyMessage("No Items to show");
+	        table.setStickyHeader(true);
 	        
-			if (UserAgentType.tablet.equals(type)) {
-	        	String id = getId() + "_grid";
-	        	table.setId(id);
-	        	table.setWidgetVar(id);
-		        table.setSelectionMode("single");
-		        table.setValueExpression("rowKey", ef.createValueExpression(elc, "#{row['bizId']}", String.class));
-		        
-		        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-		        StringBuilder start = new StringBuilder(64);
-		        start.append("var s=PF('").append(id).append("').selection[0];window.location='");
-				start.append("?a=").append(WebAction.e.toString());
-				start.append("&m=").append(moduleName).append("&d=").append(documentName).append("&i='+s;return false;");
-				ajax.setOnstart(start.toString());
-		        table.addClientBehavior("rowSelect", ajax);
-			}
+        	String id = getId() + "_grid";
+        	table.setId(id);
+        	table.setWidgetVar(id);
+	        table.setSelectionMode("single");
+	        table.setValueExpression("rowKey", ef.createValueExpression(elc, "#{row['bizId']}", String.class));
+	        
+	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+	        StringBuilder start = new StringBuilder(64);
+	        start.append("var s=PF('").append(id).append("').selection[0];window.location='");
+			start.append("?a=").append(WebAction.e.toString());
+			start.append("&m=").append(moduleName).append("&d=").append(documentName).append("&i='+s;return false;");
+			ajax.setOnstart(start.toString());
+	        table.addClientBehavior("rowSelect", ajax);
 			
 	        result = table;
 		}
@@ -212,7 +211,7 @@ public class ListGrid extends HtmlPanelGroup {
         List<UIComponent> children = result.getChildren();
         addBoundColumns(customer, moduleName, documentName, query, children, a, ef, elc, type);
         if (! UserAgentType.phone.equals(type)) {
-        	addActionColumn(type, children, a, ef, elc);
+        	addActionColumn(moduleName, documentName, canCreate, children, a, ef, elc);
         }
         
 		return result;
@@ -225,37 +224,26 @@ public class ListGrid extends HtmlPanelGroup {
 									String documentName,
 									boolean canCreate,
 									boolean mobile) {
-		UIOutput heading = null;
-		if (! mobile) {
-			heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-	        heading.setValue(query.getDescription());
+		if (mobile) {
+			if (canCreate) {
+				Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+	        	button.setValue("New");
+	        	button.setTitle("New record");
+	        	StringBuilder value = new StringBuilder(128);
+	        	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
+	        	value.append("&d=").append(documentName);
+	        	button.setHref(value.toString());
+
+		        OutputPanel headingPanel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
+		        headingPanel.getChildren().add(button);
+		        componentToAddTo.getFacets().put("header", headingPanel);
+			}
 		}
-		
-        if (canCreate) {
-        	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
-        	button.setValue("New");
-        	button.setTitle("New record");
-        	StringBuilder value = new StringBuilder(128);
-        	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
-        	value.append("&d=").append(documentName);
-        	button.setHref(value.toString());
-        	
-//	        button.setStyle("float:left");
-//	        button.setStyle("position:absolute;top:5px;left:5px");
-	        OutputPanel headingPanel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
-//	        headingPanel.setStyle("width:100%;height:40px");
-	        
-	        if (! mobile) {
-	        	headingPanel.getChildren().add(heading);
-	        }
-	        headingPanel.getChildren().add(button);
-	        componentToAddTo.getFacets().put("header", headingPanel);
-        }
-        else {
-        	if (! mobile) {
-        		componentToAddTo.getFacets().put("header", heading);
-        	}
-        }
+		else {
+			UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+	        heading.setValue(query.getDescription());
+    		componentToAddTo.getFacets().put("header", heading);
+		}
 	}
 	
 	private static void addBoundColumns(Customer customer,
@@ -277,6 +265,8 @@ public class ListGrid extends HtmlPanelGroup {
 			document = module.getDocument(customer, documentName);
 		}
 		
+		int columnPriority = 1;
+
 		for (QueryColumn queryColumn : query.getColumns()) {
 			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
 				continue;
@@ -308,6 +298,11 @@ public class ListGrid extends HtmlPanelGroup {
 				}
 				Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 				column.setHeaderText(displayName);
+				column.setPriority(columnPriority);
+				if (columnPriority < 6) {
+					columnPriority++;
+				}
+				
 /* TODO complete this
 				column.setSortBy(queryColumn.getBinding());
 				column.setFilterBy(queryColumn.getBinding());
@@ -343,26 +338,45 @@ public class ListGrid extends HtmlPanelGroup {
 		}
 	}
 
-	private static void addActionColumn(UserAgentType type,
+	private static void addActionColumn(String moduleName,
+											String documentName,
+											boolean canCreate,
 											List<UIComponent> componentChildrenToAddTo,
 											Application a,
 											ExpressionFactory ef,
 											ELContext elc) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
-		column.setHeaderText("");
-		column.setStyle("width:40px;text-align:centre");
+		column.setPriority(1);
+		column.setWidth("40");
+		column.setStyle("text-align:center !important");
+        if (canCreate) {
+	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+	    	button.setValue(null);
+        	button.setTitle("New record");
+	    	button.setIcon("fa fa-plus");
+        	StringBuilder value = new StringBuilder(128);
+        	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
+        	value.append("&d=").append(documentName);
+        	button.setHref(value.toString());
 
-		if (UserAgentType.tablet.equals(type)) {
+	        column.getFacets().put("header", button);
+        }
+        else {
+    		column.setHeaderText("");
+        }
+
+//		if (UserAgentType.tablet.equals(type)) {
 	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 	    	button.setValue(null);
 	    	button.setTitle("View Detail");
-	    	button.setIcon("ui-icon-keyboard-arrow-right");
+	    	button.setIcon("fa fa-chevron-right");
 			StringBuilder value = new StringBuilder(128);
 			value.append("./?a=").append(WebAction.e.toString());
 			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
 			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
 			column.getChildren().add(button);
 			componentChildrenToAddTo.add(column);
+/*
 		}
 		else {
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
@@ -376,9 +390,9 @@ public class ListGrid extends HtmlPanelGroup {
 			column.getChildren().add(link);
 			componentChildrenToAddTo.add(column);
 		}
+*/
 	}
 
 //TODO Add sorting of columns
-//TODO Add click to edit
 //TODO Add filter to phone dataList
 }

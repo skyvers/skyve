@@ -28,37 +28,37 @@
 			<ui:insert name="head" />
 		</h:head>
 		<h:body>
-			<!-- This div is required for iOS scrolling within iframes -->
-			<div style="width:100%;height:100%;overflow:auto;-webkit-overflow-scrolling:touch">
 				<p:ajaxStatus onstart="$('#busy').css({display:'block',top:$(window).scrollTop()+($(window).height()/2)-25});" oncomplete="$('#busy').css({display:'none'})"/>
 				<div id="busy">
 					<p:graphicImage style="padding-top: 8px;" value="images/busy.gif" />
 				</div>
 				<table style="height:100%;width:100%;table-layout:fixed;border-collapse:collapse">
 					<tbody>
-						<tr>
-							<td style="height:100%;vertical-align:top">
+						<tr style="height:46px;background:url(images/skyve_bar.png) repeat-x 0 0;">
+							<td style="width:30%;padding-left:10px">
+								<img src="images/skyve_inv.png" alt="Skyve" />
+							</td>
+							<td style="width:70%">
 								<div id="formHeader">
 									<div>
-										<table style="width:100%;background:url(images/skyve_bar.png) repeat-x 0 0;">
-											<tbody>
-												<tr height="46px">
-													<td>
-														<h3 class="ui-widget" style="color: steelblue;">#{title}</h3>
-													</td>
-													<td width="10%" align="right">
-														<img src="images/skyve_inv.png" alt="Skyve" />
-													</td>
-													<td width="1%" align="right">
-														<a href="loggedOut" class="dhtmlPageButton" title="Logout" target="_top">
-															<img src="images/logout.gif" />
-														</a>
-													</td>
-												</tr>
-											</tbody>
-										</table>
+										<h3 class="ui-widget" style="color: steelblue;">#{title}</h3>
 									</div>
 								</div>
+							</td>
+							<td width="40px">
+								<a href="loggedOut" title="Logout">
+									<i style="color:whitesmoke" class="fa fa-power-off fa-2x" />
+								</a>
+							</td>
+						</tr>
+						<tr>
+							<td style="height:100%;vertical-align:top">
+								<div style="text-align:center;overflow:hidden"><img src="#{logoRelativeFileNameUrl}" /></div>
+								<h:form id="menuform" prependId="false"> 
+									<p:panelMenu model="#{menu.menu}" />
+								</h:form>
+							</td>
+							<td colspan="2" style="height:100%;vertical-align:top">
 <!--
 									<ui:insert name="breadcrumbs" />
 -->
@@ -68,13 +68,12 @@
 									<p:commandButton value="Cancel" type="button" styleClass="ui-confirmdialog-no" style="float:right;" icon="ui-icon-close"/>
 									<p:commandButton value="OK" type="button" styleClass="ui-confirmdialog-yes" style="float:right;" icon="ui-icon-check"/>
 								</p:confirmDialog>
-								
+
 								<ui:insert name="body" />
 							</td>
 						</tr>
 					</tbody>
 				</table>
-			</div>
 		</h:body>
 	</f:view>
 </html>

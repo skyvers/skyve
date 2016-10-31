@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces;
+package org.skyve.impl.web.faces.pipeline;
 
 import java.util.List;
 import java.util.Stack;
@@ -6,22 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
-import javax.faces.component.UIOutput;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.html.HtmlOutputLabel;
-import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.component.html.HtmlSelectOneMenu;
 
 import org.primefaces.component.calendar.Calendar;
-import org.primefaces.component.column.Column;
-import org.primefaces.component.commandbutton.CommandButton;
-import org.primefaces.component.commandlink.CommandLink;
-import org.primefaces.component.inputtext.InputText;
-import org.primefaces.component.message.Message;
-import org.primefaces.component.panel.Panel;
-import org.primefaces.component.panelgrid.PanelGrid;
-import org.primefaces.component.row.Row;
-import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
@@ -35,7 +21,6 @@ import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
@@ -70,7 +55,6 @@ import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.QueryListViewReference;
 import org.skyve.impl.metadata.view.reference.ReferenceProcessor;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
-import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -113,7 +97,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
-import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.converters.date.DD_MMM_YYYY;
 import org.skyve.impl.web.faces.converters.date.DD_MM_YYYY;
 import org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI;
@@ -131,17 +114,19 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
+import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
 import org.skyve.impl.web.faces.converters.integer.SimplePercentage;
 import org.skyve.impl.web.faces.converters.lang.Decimal10;
 import org.skyve.impl.web.faces.converters.lang.Decimal2;
 import org.skyve.impl.web.faces.converters.lang.Decimal5;
-import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
 import org.skyve.impl.web.faces.converters.time.HH24_MI;
 import org.skyve.impl.web.faces.converters.time.HH_MI;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MMM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -153,52 +138,39 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
-import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
-// handle domain values correctly
-// make associations be auto-completes
-// datagrid tag
-// listgrid tag
-// view titles
-// use converters
-// use calendars, date, time, date and time, timestamp versions
-// make buttons a command button with ajax at least that rerenders the form
 public class FacesViewVisitor extends ViewVisitor {
 	private User user;
-	private ComponentBuilder b;
+	private ComponentBuilder cb;
+	private LayoutBuilder lb;
 	private boolean createView;
-	private UserAgentType userAgentType;
 	private String widgetId;
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
 
-	
 	private UIComponent current; // current component being constructed
 	private Stack<Container> currentContainers = new Stack<>(); // used to determine how to add widgets to containers
 	private UIComponent facesView; // the result of construction
-	private UIComponent toolbar; // the toolbar
+	private UIComponent toolbarLayout; // the toolbar layout
 
 	public FacesViewVisitor(User user, 
 							CustomerImpl customer,
 							ModuleImpl module,
 							DocumentImpl document,
 							ViewImpl view,
-							String managedBeanName,
-							UserAgentType userAgentType,
 							String widgetId,
-							String process,
-							String update) {
-        super(customer, module, document, view);
-        this.user = user;
-        ViewType viewType = view.getType();
-        createView = ViewType.create.equals(viewType);
-        this.userAgentType = userAgentType;
-        b = new ComponentBuilder(managedBeanName, process, update);
-        this.widgetId = widgetId;
-    }
+							ComponentBuilder cb,
+							LayoutBuilder lb) {
+		super(customer, module, document, view);
+		this.user = user;
+		ViewType viewType = view.getType();
+		createView = ViewType.create.equals(viewType);
+		this.widgetId = widgetId;
+		this.cb = cb;
+		this.lb = lb;
+	}
 	
 	public UIComponent getFacesView() {
 		return facesView;
@@ -207,16 +179,15 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitView() throws MetaDataException {
 	    // Ensure visibility is set for both create and edit views
-        current = b.panelGroup(true, false, false, createView ? "created" : "notCreated");
+        current = cb.view(createView ? "created" : "notCreated");
         facesView = current;
         
 		// Create the toolbar
-    	toolbar = b.panelGroup(true, false, false, null);
+    	toolbarLayout = lb.toolbarLayout();
 
-        // Add the panel grid layout for the view container aspect for non-phone agents
-    	if (! UserAgentType.phone.equals(userAgentType)) {
-	        PanelGrid layout = b.panelGrid(null, Integer.valueOf(100), null, null, null);
-			layout.setColumns(1);
+        // Add the view layout if defined
+    	UIComponent layout = lb.viewLayout();
+    	if (layout != null) {
 			if (widgetId == null) {
 				current.getChildren().add(layout);
 			}
@@ -231,15 +202,16 @@ public class FacesViewVisitor extends ViewVisitor {
         currentContainers.pop();
 
         // Add the toolbar if this is a full view render and the toolbar has contents
-        if ((widgetId == null) && (! toolbar.getChildren().isEmpty())) {
-            if (UserAgentType.phone.equals(userAgentType)) {
+        if ((widgetId == null) && (! toolbarLayout.getChildren().isEmpty())) {
+        	// If we get a toolbar back, add the toolbar layout to it
+        	UIComponent toolbar = cb.toolbar();
+        	if (toolbar != null) {
+            	lb.addToolbarLayout(toolbar, toolbarLayout);
             	facesView.getChildren().add(0, toolbar);
-            }
-            else {
-				Toolbar bar = b.toolbar();
-				bar.getFacets().put("left", toolbar);
-				facesView.getChildren().add(0, bar);
-            }
+        	}
+        	else {
+            	facesView.getChildren().add(0, toolbarLayout);
+        	}
     	}
 	}
 
@@ -250,14 +222,12 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 //		currentTabPane = tabPane;
-		UIComponent tabView = UserAgentType.phone.equals(userAgentType) ? 
-				                    b.accordionPanel(tabPane.getInvisibleConditionName()) : 
-				                    b.tabView(tabPane.getInvisibleConditionName());
-        addToContainer(tabView, tabPane.getPixelWidth(), tabPane.getPercentageWidth());
+		UIComponent component = cb.tabPane(tabPane);
+        addToContainer(component, tabPane.getPixelWidth(), tabPane.getPercentageWidth());
 
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
-			fragment = tabView;
+			fragment = component;
 		}
 	}
 
@@ -267,7 +237,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 //		currentTabPane = null;
-		completeAddToContainer();
+		addedToContainer();
 
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
@@ -284,19 +254,13 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		tab.getSelectedConditionName();
-		org.primefaces.component.tabview.Tab pfTab = b.tab(tab.getTitle(), 
-															tab.getDisabledConditionName(), 
-															tab.getInvisibleConditionName());
-		current.getChildren().add(pfTab);
-		if (UserAgentType.phone.equals(userAgentType)) {
-			current = pfTab;
-		}
-		else {
-			PanelGrid layout = b.panelGrid(null, Integer.valueOf(100), null, null, null);
-			layout.setColumns(1);
-			pfTab.getChildren().add(layout);
-			current = layout;
+//		tab.getSelectedConditionName();
+		UIComponent component = cb.tab(tab);
+		lb.addTab(current, component);
+		current = component;
+		UIComponent layout = lb.tabLayout();
+		if (layout != null) {
+			current = lb.addTabLayout(component, layout);
 		}
 
 		currentContainers.push(tab);
@@ -307,12 +271,8 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) {
-			// remove the layout grid
-			current = current.getParent();
-		}
-		current = current.getParent();
 		currentContainers.pop();
+		current = lb.addedTab(current);
 	}
 
 	@Override
@@ -320,39 +280,33 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		// Cater for fieldset if this thing has a border
-		Panel fs = null;
+		// Cater for a border if this thing has a border
+		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			fs = b.panel(vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
-			addToContainer(fs, vbox.getPixelWidth(), vbox.getPercentageWidth());
+			border = cb.border(vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			addToContainer(border, vbox.getPixelWidth(), vbox.getPercentageWidth());
 		}
 
-		// VBox is a Panel grid with 1 column
-		PanelGrid pg = b.panelGrid(vbox.getPixelWidth(),
-									null, // the parent container sets the percentage width
-									vbox.getPixelHeight(),
-									vbox.getPercentageHeight(),
-									vbox.getInvisibleConditionName());
-		pg.setColumns(1);
-		
-		// Cater for fieldset if defined
-		if (fs != null) {
-			fs.getChildren().add(pg);
+		UIComponent layout = lb.vboxLayout(vbox);
+
+		// Cater for border if defined
+		if (border != null) {
+			lb.addBorderLayout(border, layout);
 
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
-				fragment = fs;
+				fragment = border;
 			}
 		}
 		else {
-			addToContainer(pg, vbox.getPixelWidth(), vbox.getPercentageWidth());
+			addToContainer(layout, vbox.getPixelWidth(), vbox.getPercentageWidth());
 
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
-				fragment = pg;
+				fragment = layout;
 			}
 		}
-		current = pg;
+		current = layout;
 
 		currentContainers.push(vbox);
 	}
@@ -362,12 +316,13 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		// Cater for fieldset, if one was added
-		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			current = current.getParent();
-		}
 		currentContainers.pop();
-		completeAddToContainer();
+
+		// Cater for border, if one was added
+		if (Boolean.TRUE.equals(vbox.getBorder())) {
+			current = lb.addedBorderLayout(current);
+		}
+		addedToContainer();
 		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
@@ -383,41 +338,33 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		// Cater for fieldset if this thing has a border
-		Panel fs = null;
+		// Cater for a border if this thing has a border
+		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			fs = b.panel(hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
-			addToContainer(fs, hbox.getPixelWidth(), hbox.getPercentageWidth());
+			border = cb.border(hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			addToContainer(border, hbox.getPixelWidth(), hbox.getPercentageWidth());
 		}
 
-		// HBox is a Panel grid with n columns
-		PanelGrid pg = b.panelGrid(hbox.getPixelWidth(),
-									null, // the parent container sets the percentage width
-									hbox.getPixelHeight(),
-									hbox.getPercentageHeight(),
-									hbox.getInvisibleConditionName());
-		if (UserAgentType.phone.equals(userAgentType)) { // HBox will layout vertically for phones
-			pg.setColumns(1);
-		}
-		
-		// Cater for fieldset if defined
-		if (fs != null) {
-			fs.getChildren().add(pg);
+		UIComponent layout = lb.hboxLayout(hbox);
+
+		// Cater for border if defined
+		if (border != null) {
+			lb.addBorderLayout(border, layout);
 
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
-				fragment = fs;
+				fragment = border;
 			}
 		}
 		else {
-			addToContainer(pg, hbox.getPixelWidth(), hbox.getPercentageWidth());
+			addToContainer(layout, hbox.getPixelWidth(), hbox.getPercentageWidth());
 			
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
-				fragment = pg;
+				fragment = layout;
 			}
 		}
-		current = pg;
+		current = layout;
 
 		currentContainers.push(hbox);
 	}
@@ -427,12 +374,13 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		// Cater for fieldset, if one was added
-		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			current = current.getParent();
-		}
 		currentContainers.pop();
-		completeAddToContainer();
+
+		// Cater for border, if one was added
+		if (Boolean.TRUE.equals(hbox.getBorder())) {
+			current = lb.addedBorderLayout(current);
+		}
+		addedToContainer();
 		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
@@ -451,41 +399,33 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-		if (UserAgentType.phone.equals(userAgentType)) {
-			HtmlPanelGroup g = b.panelGroup(false, false, true, form.getInvisibleConditionName());
-			addToContainer(g, null, null);
-			current = g;
+		// Cater for a border if this thing has a border
+		UIComponent border = null;
+		if (Boolean.TRUE.equals(form.getBorder())) {
+			border = cb.border(form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
+			addToContainer(border, form.getPixelWidth(), form.getPercentageWidth());
+		}
+
+		UIComponent layout = lb.formLayout(form);
+
+		// Cater for border if defined
+		if (border != null) {
+			lb.addBorderLayout(border, layout);
+
+			// start rendering if appropriate
+			if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
+				fragment = border;
+			}
 		}
 		else {
-			Panel fs = null;
-			if (Boolean.TRUE.equals(form.getBorder())) {
-				fs = b.panel(form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
-				addToContainer(fs, form.getPixelWidth(), form.getPercentageWidth());
-			}
+			addToContainer(layout, form.getPixelWidth(), form.getPercentageWidth());
 
-			PanelGrid pg = b.panelGrid(form.getPixelWidth(),
-										null, // the parent container sets the percentage width
-										form.getPixelHeight(), 
-										form.getPercentageHeight(),
-										form.getInvisibleConditionName());
-			if (fs != null) {
-				fs.getChildren().add(pg);
-
-				// start rendering if appropriate
-				if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
-					fragment = fs;
-				}
+			// start rendering if appropriate
+			if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
+				fragment = layout;
 			}
-			else {
-				addToContainer(pg, form.getPixelWidth(), form.getPercentageWidth());
-
-				// start rendering if appropriate
-				if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
-					fragment = pg;
-				}
-			}
-			current = pg;
 		}
+		current = layout;
 		currentForm = form;
 		currentFormColumn = 0;
 // TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
@@ -496,14 +436,14 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) {
-			if (Boolean.TRUE.equals(form.getBorder())) {
-				current = current.getParent();
-			}
-			completeAddToContainer();
+		currentForm = null; // reset form
+
+		// Cater for border, if one was added
+		if (Boolean.TRUE.equals(form.getBorder())) {
+			current = lb.addedBorderLayout(current);
 		}
-		currentForm = null;
-		
+		addedToContainer();
+
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
 			current.getChildren().remove(fragment);
@@ -521,17 +461,18 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Nothing to do here - for columns are a spec for html tables in this renderer.
 	}
 
+	private UIComponent formRowLayout = null;
+	
 	@Override
 	public void visitFormRow(FormRow row,
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) {
-			Row r = b.row();
-			current.getChildren().add(r);
-			current = r;
-			currentFormColumn = 0;
+		formRowLayout = lb.formRowLayout(row);
+		if (formRowLayout != null) {
+			current = lb.addFormRowLayout(current, formRowLayout);
 		}
+		currentFormColumn = 0;
 	}
 
 	private FormItem currentFormItem;
@@ -557,9 +498,10 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) {
-			current = current.getParent();
+		if (formRowLayout != null) {
+			current = lb.addedFormRowLayout(formRowLayout);
 		}
+		formRowLayout = null;
 	}
 
 	private void addComponent(String widgetLabel,
@@ -568,98 +510,36 @@ public class FacesViewVisitor extends ViewVisitor {
 								UIComponent component,
 								Integer pixelWidth,
 								Integer percentageWidth) {
+		if (component == null) {
+			return;
+		}
+
 		if (gridColumnExpression == null) { // not a bound column in a datagrid
 			if (currentFormItem == null) { // not a form item
 				if (currentGrid == null) { // not a container column in a datagrid
 					// This must be a container (vbox, hbox etc)
 					addToContainer(component, pixelWidth, percentageWidth);
-					completeAddToContainer();
+					addedToContainer();
 				}
 				else {
 					// This must be a data grid container column
 					// add a spacer, if required
 					List<UIComponent> children = current.getChildren();
 					if (! children.isEmpty()) {
-						children.add(b.label(null, null, " ", null));
+						children.add(cb.label(" "));
 					}
 					children.add(component);
 				}
 			}
 			else { // a form item
-				UIComponent columnOrField = null;
-
-				// Don't add spcers to the phone UI as they just leave a space and a line which sux
-				if (UserAgentType.phone.equals(userAgentType) &&
-						(component instanceof org.primefaces.component.spacer.Spacer)) {
-					return;
-				}
-				
-				// The label
-				if (! Boolean.FALSE.equals(currentFormItem.getShowLabel())) {
-					String label = currentFormItem.getLabel();
-					if (label == null) {
-						label = widgetLabel;
-					}
-					if (label != null) {
-						if (widgetRequired) {
-							label = label + " *";
-						}
-						
-						if (UserAgentType.phone.equals(userAgentType)) {
-							columnOrField = b.field(widgetInvisible);
-							HtmlOutputLabel l = b.label(null, null, label, null);
-							columnOrField.getChildren().add(l);
-//							Message m = b.message(component.getId());
-//							columnOrField.getChildren().add(m);
-							current.getChildren().add(columnOrField);
-						}
-						else {
-							List<FormColumn> formColumns = currentForm.getColumns();
-							if (currentFormColumn >= formColumns.size()) {
-								currentFormColumn = 0;
-							}
-							FormColumn formColumn = formColumns.get(currentFormColumn++);
-							columnOrField = b.column(widgetInvisible, 
-														true,
-														false,
-														formColumn.getPixelWidth(), 
-														formColumn.getPercentageWidth(),
-														null,
-														null);
-							current.getChildren().add(columnOrField);
-							HtmlPanelGroup pg = b.panelGroup(true, true, false, widgetInvisible);
-							columnOrField.getChildren().add(pg);
-							HtmlOutputLabel l = b.label(null, null, label, component.getId());
-							pg.getChildren().add(l);
-							Message m = b.message(component.getId());
-							pg.getChildren().add(m);
-						}
-					}
-				}
-				// The field
-				if (UserAgentType.phone.equals(userAgentType)) {
-					if (columnOrField == null) {
-						columnOrField = b.field(null);
-						current.getChildren().add(columnOrField);
-					}
-					columnOrField.getChildren().add(component);
-				}
-				else {
-					List<FormColumn> formColumns = currentForm.getColumns();
-					if (currentFormColumn >= formColumns.size()) {
-						currentFormColumn = 0;
-					}
-					FormColumn formColumn = formColumns.get(currentFormColumn++);
-					Column col = b.column(widgetInvisible,
-											true,
-											false,
-											formColumn.getPixelWidth(),
-											formColumn.getPercentageWidth(),
-											currentFormItem.getColspan(),
-											currentFormItem.getRowspan());
-					current.getChildren().add(col);
-					col.getChildren().add(component);
-				}
+				lb.layoutFormItem(current,
+									component,
+									currentForm, 
+									currentFormItem, 
+									currentFormColumn,
+									widgetLabel,
+									widgetRequired,
+									widgetInvisible);
 			}
 		}
 		else { // bound column
@@ -679,25 +559,10 @@ public class FacesViewVisitor extends ViewVisitor {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
-			c = b.reportButton(action.getDisplayName(), 
-								action.getToolTip(), 
-								action.getParameters(), 
-								action.getDisabledConditionName(), 
-								action.getInvisibleConditionName());
+			c = cb.reportButton(button, action);
 		}
 		else {
-			c = b.actionButton(action.getDisplayName(),
-	                            action.getToolTip(),
-	                            action.getImplicitName(),
-	                            action.getName(),
-	                            false,
-	                            listBinding,
-	                            button.getPixelWidth(),
-	                            button.getPixelHeight(),
-	                            action.getClientValidation(),
-	                            action.getConfirmationText(),
-	                            action.getDisabledConditionName(),
-	                            action.getInvisibleConditionName());
+			c = cb.actionButton(listBinding, button, action);
 		}
 	    addComponent(null, false, action.getInvisibleConditionName(), c, button.getPixelWidth(), null);
 	}
@@ -707,7 +572,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled)
 	throws MetaDataException {
-	    UIComponent l = b.label(null, null, "geoLocator", null); // TODO geolocator
+	    UIComponent l = cb.label("geoLocator"); // TODO geolocator
 	    addComponent(null, false, locator.getInvisibleConditionName(), l, null, null);
 	}
 
@@ -716,7 +581,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled)
 	throws MetaDataException {
-	    UIComponent l = b.label(null, null, "geometry", null); // TODO geometry
+	    UIComponent l = cb.label("geometry"); // TODO geometry
 	    addComponent(null, false, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null);
 	}
 
@@ -725,7 +590,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled)
 	throws MetaDataException {
-	    UIComponent l = b.label(null, null, "map", null); // TODO map
+	    UIComponent l = cb.label("map"); // TODO map
 	    addComponent(null, false, map.getInvisibleConditionName(), l, map.getPixelWidth(), map.getPercentageWidth());
 	}
 
@@ -734,7 +599,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled)
 	throws MetaDataException {
-	    UIComponent bn = b.label(null, null, "dialogButton", null); // TODO dialog button
+	    UIComponent bn = cb.label("dialogButton"); // TODO dialog button
 	    addComponent(null, false, button.getInvisibleConditionName(), bn, null, null);
 	}
 
@@ -768,18 +633,22 @@ public class FacesViewVisitor extends ViewVisitor {
 		url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
 		url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
 		
-		UIComponent i = b.graphicImage(pixelWidth,
-    									image.getPercentageWidth(),
-    									pixelHeight,
-    									image.getPercentageHeight(),
-    									url.toString(),
-    									image.getInvisibleConditionName());
+		UIComponent i = cb.image(pixelWidth,
+									image.getPercentageWidth(),
+									pixelHeight,
+									image.getPercentageHeight(),
+									url.toString(),
+									image.getInvisibleConditionName(),
+									true);
 		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
 	}
 
 	@Override
 	public void visitSpacer(Spacer spacer) throws MetaDataException {
-		addComponent(null, false, null, b.spacer(spacer.getPixelWidth(), spacer.getPixelHeight()), spacer.getPixelWidth(), null);
+		UIComponent component = cb.spacer(spacer.getPixelWidth(), spacer.getPixelHeight());
+		if (component != null) {
+			addComponent(null, false, null, component, spacer.getPixelWidth(), null);
+		}
 	}
 
 	@Override
@@ -787,12 +656,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentVisible,
 	                                boolean parentEnabled)
     throws MetaDataException {
-		UIComponent i = b.graphicImage(image.getPixelWidth(),
-	    								image.getPercentageWidth(),
-	    								image.getPixelHeight(),
-	    								image.getPercentageHeight(),
-	    								"images/" + image.getRelativeFile(),
-	    								image.getInvisibleConditionName());
+		UIComponent i = cb.image(image.getPixelWidth(),
+    								image.getPercentageWidth(),
+    								image.getPixelHeight(),
+    								image.getPercentageHeight(),
+    								"images/" + image.getRelativeFile(),
+    								image.getInvisibleConditionName(),
+    								false);
 		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
 	}
 
@@ -810,13 +680,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		else {
 			value = markup;
 		}
-		UIComponent c = b.text(value,
-								binding, 
-								blurb.getTextAlignment(), 
-								blurb.getPixelWidth(), 
-								blurb.getPixelHeight(), 
-								blurb.getInvisibleConditionName(),
-								false);
+		UIComponent c = cb.blurb(value, binding, blurb);
 		addComponent(null, false, null, c, blurb.getPixelWidth(), null);
 	}
 
@@ -830,33 +694,38 @@ public class FacesViewVisitor extends ViewVisitor {
 		final AtomicReference<UIComponent> c = new AtomicReference<>();
 		new ReferenceProcessor() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processResourceReference(ResourceReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("resource link")); // TODO link
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processReportReference(ReportReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("report link")); // TODO link
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processQueryListViewReference(QueryListViewReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("list view link")); // TODO link
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processImplicitActionReference(ImplicitActionReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("implicit action link")); // TODO link
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processExternalReference(ExternalReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("external link")); // TODO link
 			}
 			
 			@Override
@@ -867,38 +736,28 @@ public class FacesViewVisitor extends ViewVisitor {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 
-				c.set(b.outputLink(listBinding, link.getValue(), href.toString(), link.getInvisibleConditionName(), target));
+				c.set(cb.outputLink(listBinding, link.getValue(), href.toString(), link.getInvisibleConditionName(), target));
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processDefaultListViewReference(DefaultListViewReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("default list view link")); // TODO link
 			}
 			
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void processContentReference(ContentReference reference)
 			throws MetaDataException {
-				c.set(b.label(null, null, "link", null)); // TODO link
+				c.set(cb.label("content link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference)
 			throws MetaDataException {
-				// TODO do the tooltip and client validation, disabled, invisible thing
-				c.set(b.actionLink(link.getValue(),
-									null,
-									null,
-									reference.getActionName(),
-									false,
-									listBinding,
-									link.getPixelWidth(),
-									null,
-									Boolean.FALSE,
-									null,
-									null,
-									link.getInvisibleConditionName()));
+				c.set(cb.actionLink(listBinding, link, reference.getActionName()));
 			}
 		}.process(outerReference);
 
@@ -910,7 +769,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	                        boolean parentVisible,
 	                        boolean parentEnabled)
     throws MetaDataException {
-	    UIComponent c = b.label(listBinding, label.getBinding(), label.getValue(), null);
+		String value = label.getValue();
+		String binding = label.getBinding();
+		if ((value != null) && value.indexOf('{') > -1) {
+			binding = value;
+			value = null;
+		}
+	    UIComponent c = cb.label(value, binding, label);
 	    addComponent(null, false, label.getInvisibleConditionName(), c, label.getPixelWidth(), null);
 	}
 
@@ -919,7 +784,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentVisible,
 	                                boolean parentEnabled)
 	throws MetaDataException {
-	    UIComponent p = b.label(null, null, "progressBar", null); // TODO progress bar
+	    UIComponent p = cb.label("progressBar"); // TODO progress bar
 	    addComponent(null, false, null, p, progressBar.getPixelWidth(), null);
 	}
 
@@ -930,7 +795,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		HtmlOutputLabel l = b.label(null, null, "listGrid", null);
+		UIComponent l = cb.label("listGrid"); // TODO list grid
 		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO list grid
 		currentGrid = grid;
 	}
@@ -941,7 +806,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 		currentGrid = null;
-		completeAddToContainer();
+		addedToContainer();
 	}
 
 	@Override
@@ -949,8 +814,8 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		HtmlOutputLabel l = b.label(null, null, "treeGrid", null);
-		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO list grid
+		UIComponent l = cb.label("treeGrid");
+		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO tree grid
 		currentGrid = grid;
 	}
 
@@ -960,7 +825,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 		currentGrid = null;
-		completeAddToContainer();
+		addedToContainer();
 	}
 
 	private String listBinding;
@@ -968,29 +833,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
-		// Determine the document alias
-		String alias = null;
-		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
-		if (target != null) {
-			Collection targetCollection = (Collection) target.getAttribute();
-			if (targetCollection != null) {
-				alias = module.getDocument(customer, targetCollection.getDocumentName()).getSingularAlias();
-			}
-		}
-
 		// Create the datagrid faces component
-		UIComponent g = UserAgentType.phone.equals(userAgentType) ? 
-		                    b.dataList(grid.getBinding(), 
-		                    			grid.getTitle(),
-		                    			grid.getInvisibleConditionName(),
-		                    			(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null) : 
-		                    b.dataTable(grid.getBinding(),
-		                    				grid.getTitle(),
-		                    				grid.getInvisibleConditionName(),
-		                    				(! Boolean.FALSE.equals(grid.getEditable())) ? alias : null,
-		                    				UserAgentType.tablet.equals(userAgentType),
-		                    				Boolean.TRUE.equals(grid.getInline()),
-		                    				UserAgentType.tablet.equals(userAgentType));
+		UIComponent g = cb.dataGrid(grid);
         addToContainer(g, grid.getPixelWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 		listBinding = grid.getBinding();
@@ -1005,112 +849,26 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
     throws MetaDataException {
-		if (UserAgentType.phone.equals(userAgentType)) {
-			UIOutput outputText = b.outputText(gridColumnExpression.toString());
-			// If the grid is editable, add the ability to zoom
-			if (! Boolean.FALSE.equals(((DataGrid) currentGrid).getEditable())) {
-				CommandLink link = b.actionLink(null,
-													"Edit the record",
-													ImplicitActionName.Navigate,
-													null,
-													false,
-													listBinding,
-													null,
-													null,
-													Boolean.TRUE,
-													null,
-													null,
-													null);
-				link.getChildren().add(outputText);
-				current.getChildren().add(link);
-			}
-			else {
-				current.getChildren().add(outputText);
-			}
-
-			current = current.getParent(); // finished with the single dataList column
-		}
-		else {
-			Column col = b.column(null,
-									null,
-									"Actions",
-					                HorizontalAlignment.centre,
-					                true,
-					                Integer.valueOf(75));
-			List<UIComponent> children = col.getChildren();
-			// edit link if not on tablet, grid is editable, but grid is not inline
-			if ((! UserAgentType.tablet.equals(userAgentType)) && 
-					(! Boolean.FALSE.equals(grid.getEditable()) && 
-					(! Boolean.TRUE.equals(grid.getInline())))) {
-				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
-												b.actionButton("Edit",
-																"Edit the record",
-																ImplicitActionName.Navigate,
-																null,
-																false,
-																listBinding,
-																Integer.valueOf(35),
-																null,
-																Boolean.TRUE,
-																null,
-																null,
-																null) :
-												b.actionLink("Edit",
-																"Edit the record",
-																ImplicitActionName.Navigate,
-																null,
-																false,
-																listBinding,
-																null,
-																null,
-																Boolean.TRUE,
-																null,
-																null,
-																null);
-				children.add(buttonOrLink);
-			}
-
-			if (! Boolean.FALSE.equals(grid.getEditable())) {
-				if (! col.getChildren().isEmpty()) {
-					children.add(b.label(null, null, " ", null));
-				}
-				UIComponent buttonOrLink = UserAgentType.tablet.equals(userAgentType) ?
-												b.actionButton("Remove",
-																"Remove the record",
-																ImplicitActionName.Remove,
-																null,
-																true,
-																listBinding,
-																Integer.valueOf(35),
-																null,
-																Boolean.TRUE,
-																"Do you want to delete/remove the selected row?",
-																null,
-																null) :
-												b.actionLink("Remove",
-																"Remove the record",
-																ImplicitActionName.Remove,
-																null,
-																true,
-																listBinding,
-																null,
-																null,
-																Boolean.TRUE,
-																"Do you want to delete/remove the selected row?",
-																null,
-																null);
-				children.add(buttonOrLink);
-			}
-
-			if (! col.getChildren().isEmpty()) {
-				current.getChildren().add(col);
+		// Determine the document alias
+		String alias = null;
+		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
+		if (target != null) {
+			Collection targetCollection = (Collection) target.getAttribute();
+			if (targetCollection != null) {
+				alias = module.getDocument(customer, targetCollection.getDocumentName()).getSingularAlias();
 			}
 		}
+
+		current = cb.addDataGridActionColumn(current, 
+												grid, 
+												gridColumnExpression.toString(), 
+												alias, 
+												Boolean.TRUE.equals(grid.getInline()));
 		
 	    currentGrid = null;
 	    listBinding = null;
 	    gridColumnExpression = null;
-	    completeAddToContainer();
+	    addedToContainer();
 		
 		// stop rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
@@ -1148,37 +906,12 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 		}
-
-		if (UserAgentType.phone.equals(userAgentType)) {
-        	boolean first = false;
-        	if (gridColumnExpression.length() == 0) { // no columns processed yet
-        		first = true;
-        		Column col = b.column(null, false, false, null, null, null, null);
-    			current.getChildren().add(col);
-    	        current = col;
-        	}
-
-        	gridColumnExpression.append(first ? "<h2>" : "<p>");
-        	gridColumnExpression.append("#{").append(listBinding).append("['{");
-        	gridColumnExpression.append(binding).append("}']}");
-			gridColumnExpression.append(first ? "</h2>" : "</p>");
-        }
-        else {
-    		Column col = b.column(listBinding,
-									(binding == null) ? Bean.BIZ_KEY : binding,
-									title,
-		                            column.getAlignment(),
-		                            false,
-		                            column.getPixelWidth());
-			current.getChildren().add(col);
-	        current = col;
-
-			if (! Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
-		        gridColumnExpression.setLength(0);
-		        gridColumnExpression.append('{').append(binding).append('}');
-		        col.getChildren().add(b.outputText(listBinding, gridColumnExpression.toString()));
-			}
-        }
+		current = cb.addDataGridBoundColumn(current, 
+												(DataGrid) currentGrid, 
+												column, 
+												title, 
+												binding, 
+												gridColumnExpression);
 	}
 
 	@Override
@@ -1186,9 +919,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled)
 	throws MetaDataException {
-		if (! UserAgentType.phone.equals(userAgentType)) { // phone dataList has only 1 column
-			current = current.getParent(); // move from column to table
-		}
+		current = cb.addedDataGridBoundColumn(current);
 	}
 
 	@Override
@@ -1196,14 +927,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled)
 	throws MetaDataException {
-        Column col = b.column(listBinding,
-        						null,
-        						column.getTitle(),
-                                column.getAlignment(),
-                                false,
-                                column.getPixelWidth());
-        current.getChildren().add(col);
-        current = col;
+        current = cb.addDataGridContainerColumn(current, (DataGrid) currentGrid, column);
 	}
 
 	@Override
@@ -1211,7 +935,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled)
 	throws MetaDataException {
-        current = current.getParent();
+		current = cb.addedDataGridContainerColumn(current);
 	}
 
 	@Override
@@ -1219,7 +943,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		HtmlOutputLabel l = b.label(null, null, "pickList", null);
+		UIComponent l = cb.label("pickList");
 		addToContainer(l, list.getPixelWidth(), list.getPercentageWidth()); // TODO picklist
 	}
 
@@ -1228,7 +952,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled)
 	throws MetaDataException {
-		completeAddToContainer();
+		addedToContainer();
 	}
 
 	@Override
@@ -1248,28 +972,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(checkBox);
-/* TODO Why don't tri state checkboxes work???
-		UIComponentBase c = Boolean.FALSE.equals(checkBox.getTriState()) ?
-								b.checkbox(listBinding,
-										checkBox.getBinding(), 
-										def.getTitle(),
-										def.isRequired(),
-										checkBox.getDisabledConditionName()) :
-								b.triStateCheckbox(listBinding,
-													checkBox.getBinding(), 
-													def.getTitle(),
-													def.isRequired(),
-													checkBox.getDisabledConditionName());
-*/
-		UIComponentBase c = b.checkbox(listBinding,
-										checkBox.getBinding(), 
-										def.getTitle(),
-										def.isRequired(),
-										checkBox.getDisabledConditionName(),
-										UserAgentType.phone.equals(userAgentType));
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponentBase c = (UIComponentBase) cb.checkBox(listBinding, checkBox, title, required);
 		eventSource = c;
-		addComponent(UserAgentType.phone.equals(userAgentType) ? null : def.getTitle(), 
-						def.isRequired(),
+		addComponent(title,
+						required,
 						checkBox.getInvisibleConditionName(), 
 						c, 
 						checkBox.getPixelWidth(), 
@@ -1290,7 +998,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                    boolean parentEnabled)
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
-        UIComponentBase c = b.label(null, null, "checkMembership", null); // TODO check membership
+        UIComponentBase c = (UIComponentBase) cb.label("checkMembership"); // TODO check membership
         eventSource = c;
         addToContainer(c, null, null);
 	}
@@ -1300,7 +1008,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                    boolean parentVisible,
 	                                    boolean parentEnabled)
 	throws MetaDataException {
-	    completeAddToContainer();
+	    addedToContainer();
 	    eventSource = null;
 	}
 
@@ -1310,14 +1018,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(colour);
-		UIComponentBase c = b.colourPicker(listBinding, 
-											colour.getBinding(), 
-											def.getTitle(), 
-											def.isRequired(), 
-											colour.getPixelWidth(),
-											! UserAgentType.phone.equals(userAgentType));
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponentBase c = (UIComponentBase) cb.colourPicker(listBinding, colour, title, required);
 		eventSource = c;
-		addComponent(def.getTitle(), def.isRequired(), colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
+		addComponent(title, required, colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1334,17 +1039,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                        boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(combo);
-		String binding = combo.getBinding();
-		HtmlSelectOneMenu s = b.selectOneMenu(listBinding,
-												binding,
-					                            def.getTitle(),
-					                            def.isRequired(),
-					                            combo.getDisabledConditionName(),
-					                            null);
-		UISelectItems i = b.selectItems(listBinding, binding, true);
-		s.getChildren().add(i);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponentBase s = (UIComponentBase) cb.combo(listBinding, combo, title, required);
 		eventSource = s;
-		addComponent(def.getTitle(), def.isRequired(), combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null);
+		addComponent(title, required, combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1361,17 +1060,10 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(image);
-		UIComponent c = b.panelGroup(true, true, false, null);
-		c.getChildren().add(b.contentGraphicImage(image.getPixelWidth(), 
-													null, 
-													image.getPixelHeight(), 
-													null, 
-													image.getBinding(), 
-													null));
-		if (! Boolean.FALSE.equals(image.getEditable())) {
-			c.getChildren().add(b.label(null, null, "Upload", null));
-		}
-        addComponent(def.getTitle(), false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponent c = cb.contentImage(listBinding, image, title, required);
+        addComponent(title, false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1380,17 +1072,10 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
-		String text = link.getValue();
-		if (text == null) {
-			text = "Content";
-		}
-
-		UIComponent c = b.panelGroup(true, true, false, null);
-		c.getChildren().add(b.contentLink(link.getPixelWidth(), text, link.getBinding()));
-		if (! Boolean.FALSE.equals(link.getEditable())) {
-			c.getChildren().add(b.label(null, null, "Upload", null));
-		}
-        addComponent(def.getTitle(), def.isRequired(), link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponent c = cb.contentLink(listBinding, link, title, required);
+		addComponent(title, required, link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1399,12 +1084,10 @@ public class FacesViewVisitor extends ViewVisitor {
                             boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(html);
-        UIComponent c = b.editor(listBinding,
-									html.getBinding(),
-			                        def.getTitle(),
-			                        def.isRequired(),
-			                        html.getDisabledConditionName());
-        addComponent(def.getTitle(), def.isRequired(), html.getInvisibleConditionName(), c, html.getPixelWidth(), null);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponent c = cb.html(listBinding, html, title, required);
+        addComponent(title, required, html.getInvisibleConditionName(), c, html.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1412,7 +1095,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										boolean parentVisible,
 										boolean parentEnabled)
 	throws MetaDataException {
-		UIComponentBase c = b.label(null, null, "listMembership", null); // TODO complete this
+		UIComponentBase c = (UIComponentBase) cb.label("listMembership"); // TODO complete this
 		eventSource = c;
 		addToContainer(c, membership.getListWidthInPixels(), null);
 	}
@@ -1422,7 +1105,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										boolean parentVisible,
 										boolean parentEnabled)
 	throws MetaDataException {
-		completeAddToContainer();
+		addedToContainer();
 		eventSource = null;
 	}
 
@@ -1432,9 +1115,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
-        UIComponent c = b.label(null, null, "comparison", null); // TODO comparison
+        UIComponent c = cb.label("comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getPercentageWidth());
-        completeAddToContainer();
+        addedToContainer();
 	}
 
 	@Override
@@ -1444,44 +1127,17 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
 		SmartClientLookupDefinition ldef = def.getLookup();
-		boolean phone = UserAgentType.phone.equals(userAgentType);
-		UIComponentBase c = b.autoComplete(listBinding,
-	    									lookup.getBinding(),
-	                                        def.getTitle(),
-	                                        def.isRequired(),
-	                                        lookup.getDisabledConditionName(),
-	                                        ldef.getDisplayField().replace('_', '.'),
-	                                        ldef.getQuery(),
-	                                        lookup.getPixelWidth(),
-	                                        ! phone,
-	                                        phone);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponentBase c = (UIComponentBase) cb.lookupDescription(listBinding, 
+																	lookup, 
+																	title, 
+																	required,
+																	ldef.getDisplayField().replace('_', '.'),
+																	ldef.getQuery());
         eventSource = c;
         
-        if (phone) {
-        	c = b.panelGroup(false, false, false, null);
-        	List<UIComponent> children = c.getChildren();
-        	children.add(eventSource);
-        	InputText text = b.textField(listBinding,
-				        					lookup.getBinding() + '.' + ldef.getDisplayField().replace('_', '.'),
-				        					def.getTitle(),
-				        					def.isRequired(),
-											"true",
-											null,
-											null,
-											null,
-											false);
-        	children.add(text);
-        	
-        	org.primefaces.component.button.Button button = b.button("ui-icon-search", 
-        																"ui-btn-right",
-    																	(def.getTitle() == null) ?
-        																	"top:1em !important" :
-        																	"top:2.3em !important");
-        	children.add(button);
-        	button.setOnclick("return SKYVE.switchToAutoComplete(this)");
-        }
-        
-        addComponent(def.getTitle(), def.isRequired(), lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
+        addComponent(title, required, lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1497,7 +1153,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled)
 	throws MetaDataException {
-		UIComponent c = b.label(null, null, "lookup", null); // TODO lookup
+		UIComponent c = cb.label("lookup"); // TODO lookup
 		addComponent(null, false, null, c, null, null);
 	}
 
@@ -1515,15 +1171,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(password);
-        UIComponentBase c = b.password(listBinding,
-										password.getBinding(), 
-				                        def.getTitle(),
-				                        def.isRequired(),
-				                        password.getDisabledConditionName(),
-				                        password.getPixelWidth(),
-				                        ! UserAgentType.phone.equals(userAgentType));
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+        UIComponentBase c = (UIComponentBase) cb.password(listBinding, password, title, required);
         eventSource = c;
-        addComponent(def.getTitle(), def.isRequired(), password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
+        addComponent(title, required, password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1540,17 +1192,11 @@ public class FacesViewVisitor extends ViewVisitor {
                             boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(radio);
-		String binding = radio.getBinding();
-        UIComponentBase c = b.selectOneRadio(listBinding,
-												binding,
-				                                def.getTitle(),
-				                                def.isRequired(),
-				                                radio.getDisabledConditionName());
-        c.getAttributes().put("binding", radio.getBinding());
-        UISelectItems i = b.selectItems(listBinding, binding, false);
-		c.getChildren().add(i);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+        UIComponentBase c = (UIComponentBase) cb.radio(listBinding, radio, title, required);
 		eventSource = c;
-		addComponent(def.getTitle(), def.isRequired(), radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null);
+		addComponent(title, required, radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1567,13 +1213,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(richText);
-        UIComponentBase c = b.editor(listBinding,
-										richText.getBinding(),
-				                        def.getTitle(),
-				                        def.isRequired(),
-				                        richText.getDisabledConditionName());
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+        UIComponentBase c = (UIComponentBase) cb.richText(listBinding, richText, title, required);
         eventSource = c;
-        addComponent(def.getTitle(), def.isRequired(), richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null);
+        addComponent(title, required, richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1590,7 +1234,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
-        UIComponentBase c = b.label(null, null, "slider", null); // TODO slider
+        UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
         eventSource = c;
         addComponent(def.getTitle(), def.isRequired(), slider.getInvisibleConditionName(), c, slider.getPixelWidth(), null);
 	}
@@ -1609,14 +1253,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(spinner);
-        UIComponentBase c = b.spinner(listBinding,
-										spinner.getBinding(),
-				                        def.getTitle(),
-				                        def.isRequired(),
-				                        spinner.getDisabledConditionName(),
-				                        spinner.getPixelWidth());
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+        UIComponentBase c = (UIComponentBase) cb.spinner(listBinding, spinner, title, required);
         eventSource = c;
-        addComponent(def.getTitle(), def.isRequired(), spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null);
+        addComponent(title, required, spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1633,17 +1274,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentEnabled)
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
-        UIComponentBase c = b.textArea(listBinding,
-										text.getBinding(),
-				                        def.getTitle(),
-				                        def.isRequired(),
-				                        text.getDisabledConditionName(),
-				                        def.getLength(),
-				                        text.getPixelWidth(),
-				                        text.getPixelHeight(),
-				                        ! UserAgentType.phone.equals(userAgentType));
+		String title = def.getTitle();
+		boolean required = def.isRequired();
+		UIComponentBase c = (UIComponentBase) cb.textArea(listBinding, text, title, required, def.getLength());
         eventSource = c;
-        addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+        addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1660,6 +1295,8 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
+		String title = def.getTitle();
+		boolean required = def.isRequired();
 		Attribute attribute = def.getTarget().getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		TextFormat format = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
@@ -1667,21 +1304,17 @@ public class FacesViewVisitor extends ViewVisitor {
         if (attribute instanceof ConvertableField) {
             converter = ((ConvertableField) attribute).getConverter();
         }
-        boolean useCalendar = false;
         if (AttributeType.date.equals(type)) {
-        	useCalendar = true;
         	if (converter == null) {
                 converter = customer.getDefaultDateConverter();
             }
         }
         else if (AttributeType.dateTime.equals(type)) {
-            useCalendar = ! UserAgentType.phone.equals(userAgentType);
             if (converter == null) {
                 converter = customer.getDefaultDateTimeConverter();
             }
         }
         else if (AttributeType.timestamp.equals(type)) {
-            useCalendar = ! UserAgentType.phone.equals(userAgentType);
             if (converter == null) {
                 converter = customer.getDefaultTimestampConverter();
             }
@@ -1692,42 +1325,16 @@ public class FacesViewVisitor extends ViewVisitor {
             }
         }
 
-        UIComponentBase c = null;
-        if (useCalendar) {
-            c = b.calendar(listBinding,
-            				text.getBinding(),
-                            def.getTitle(),
-                            def.isRequired(),
-                            UserAgentType.phone.equals(userAgentType),
-                            text.getDisabledConditionName(),
-                            convertConverter(converter, type));
-        }
-        // p:inputMask doesn't work for mobile rendering
-        else if ((format != null) && (! UserAgentType.phone.equals(userAgentType))) {
-            c = b.maskField(listBinding,
-								text.getBinding(),
-			                    def.getTitle(),
-			                    def.isRequired(),
-			                    text.getDisabledConditionName(),
-			                    def.getLength(),
-			                    format,
-			                    convertConverter(converter, type),
-			                    text.getPixelWidth(),
-			                    true);
-        }
-        else {
-            c = b.textField(listBinding,
-            					text.getBinding(),
-                                def.getTitle(),
-                                def.isRequired(),
-                                text.getDisabledConditionName(),
-                                def.getLength(),
-                                convertConverter(converter, type),
-                                text.getPixelWidth(),
-                                ! UserAgentType.phone.equals(userAgentType));
-        }
+        UIComponentBase c = (UIComponentBase) cb.text(listBinding, 
+        												text, 
+        												title, 
+        												required,
+        												def.getLength(),
+        												converter,
+        												format,
+        												convertConverter(converter, type));
         eventSource = c;
-		addComponent(def.getTitle(), def.isRequired(), text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+		addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
 	}
 
 	@Override
@@ -1847,54 +1454,20 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	private void addToContainer(UIComponent component, Integer pixelWidth, Integer percentageWidth) {
-		if (UserAgentType.phone.equals(userAgentType)) {
-			current.getChildren().add(component);
+		if (currentContainers.isEmpty()) {
+			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
-		else if (current instanceof PanelGrid) {
-			if (currentContainers.isEmpty()) {
-				throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
-			}
-			Container currentContainer = currentContainers.peek();
-			if (currentContainer instanceof HBox) {
-				// get the row or add a row if there is none
-				Row r = null;
-				if (current.getChildCount() == 0) {
-					r = b.row();
-					current.getChildren().add(r);
-				}
-				else {
-					r = (Row) current.getChildren().get(0);
-				}
+		Container currentContainer = currentContainers.peek();
 
-				// add a column
-				Column col = b.column(null, false, true, pixelWidth, percentageWidth, null, null);
-				col.getChildren().add(component);
-				r.getChildren().add(col);
-			}
-			else { // every other container is a vertical layout and already has the panel grid columns set to 1
-				current.getChildren().add(component);
-			}
-		}
-		else {
-			throw new IllegalStateException("Trying to add to a container but the current faces component is not a panel grid!!! - " + current);
-		}
-		current = component;
+		current = lb.addToContainer(currentContainer, current, component, pixelWidth, percentageWidth);
 	}
 	
-	private void completeAddToContainer() {
-		current = current.getParent(); // account for the component
-
-		// strip off the column and the row for HBox containers
-		// All other components of containers are direct children
-		if (! UserAgentType.phone.equals(userAgentType)) {
-			if (currentContainers.isEmpty()) {
-				throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
-			}
-			Container currentContainer = currentContainers.peek();
-			if (currentContainer instanceof HBox) {
-				current = current.getParent().getParent();
-			}
+	private void addedToContainer() {
+		if (currentContainers.isEmpty()) {
+			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}
+		Container currentContainer = currentContainers.peek();
+		current = lb.addedToContainer(currentContainer, current);
 	}
 	
 	private void addAjaxBehavior(String eventName, List<EventAction> actions) {
@@ -1906,7 +1479,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		
-		eventSource.addClientBehavior(eventName, b.ajax(actionName, listBinding));
+		eventSource.addClientBehavior(eventName, cb.ajax(listBinding, actionName));
 	}
 	
 	@Override
@@ -2114,46 +1687,17 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitAction(ActionImpl action) throws MetaDataException {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			CommandButton cb = b.actionButton(action.getDisplayName(),
-												action.getToolTip(),
-												action.getImplicitName(),
-												action.getName(),
-												false,
-												listBinding,
-												null,
-												null,
-												action.getClientValidation(),
-												action.getConfirmationText(),
-												action.getDisabledConditionName(),
-												action.getInvisibleConditionName());
-			toolbar.getChildren().add(cb);
+			toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
 		}
 	}
 
 	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (ImplicitActionName.Report.equals(name)) {
-					org.primefaces.component.button.Button btn = b.reportButton(action.getDisplayName(), 
-																					action.getToolTip(), 
-																					action.getParameters(), 
-																					action.getDisabledConditionName(), 
-																					action.getInvisibleConditionName());
-					toolbar.getChildren().add(btn);
+				toolbarLayout.getChildren().add(cb.report(action));
 			}
 			else {
-				CommandButton cb = b.actionButton(name.getDisplayName(),
-													action.getToolTip(),
-													name,
-													null,
-													false,
-													listBinding,
-													null,
-													null,
-													action.getClientValidation(),
-													action.getConfirmationText(),
-													action.getDisabledConditionName(),
-													action.getInvisibleConditionName());
-				toolbar.getChildren().add(cb);
+				toolbarLayout.getChildren().add(cb.action(listBinding, action, name, name.getDisplayName()));
 			}
 		}
 	}
