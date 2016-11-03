@@ -20,16 +20,13 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.metadata.MetaData;
 
 public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
+/*
 	@Override
 	public UIComponent toolbarLayout() {
-		return responsiveColumn(null, null, false);
+		return panelGroup(false, false, true, null);
+//		return responsiveColumn(null, null, false);
 	}
-	
-	@Override
-	public void addToolbarLayout(UIComponent toolbar, UIComponent toolbarLayout) {
-		toolbar.getChildren().add(toolbarLayout);
-	}
-	
+*/	
 	@Override
 	public UIComponent viewLayout() {
 		return responsiveContainer();

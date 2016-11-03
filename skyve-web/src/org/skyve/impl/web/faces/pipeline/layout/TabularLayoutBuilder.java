@@ -29,12 +29,18 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 
 	@Override
 	public UIComponent toolbarLayout() {
-		return panelGroup(true, false, false, null);
+		return panelGroup(false, false, false, null);
 	}
 	
 	@Override
 	public void addToolbarLayout(UIComponent toolbar, UIComponent toolbarLayout) {
 		toolbar.getFacets().put("left", toolbarLayout);
+/*		
+		Sticky sticky = (Sticky) a.createComponent(Sticky.COMPONENT_TYPE);
+		sticky.setTarget(toolbar.getId());
+		sticky.setMargin(45);
+		toolbar.getParent().getChildren().add(sticky);
+*/
 	}
 	
 	@Override

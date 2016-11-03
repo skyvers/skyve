@@ -12,14 +12,12 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		result.setStyleClass("ui-g");
 		return result;
 	}
-	
+/*	
 	@Override
 	public UIComponent toolbar() {
-		HtmlPanelGroup result = panelGroup(false, false, true, null);
-		result.setStyleClass("ui-g");
-		return result;
+		return null;
 	}
-	
+*/	
 	@Override
 	public UIComponent border(String borderTitle, String invisibleConditionName, Integer pixelWidth) {
 /*

@@ -3,6 +3,7 @@ body,html {
 	padding: 0;
 	height: 100%;
 }
+/* Display the label and error message icon on the same line in a form */
 .ui-outputlabel {
 	vertical-align: middle !important;
 	white-space: normal;
@@ -11,12 +12,10 @@ body,html {
 	display: inline-block !important;
 	vertical-align: middle !important;
 }
-/* enable font-awesome in ultima */
-/*
-.fa {
-    font-family: "FontAwesome" !important;
+/* Ensure that there is a little margin on stacked buttons in wrapped toolbars */
+.ui-toolbar * {
+	margin-bottom: 1px !important;
 }
-*/
 /* popup wheel of death style */
 #busy {
 	display: none;

@@ -87,8 +87,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent toolbar() {
-		UIComponent result = a.createComponent(Toolbar.COMPONENT_TYPE);
+		Toolbar result = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
 		setId(result);
+		result.setStyle("width:100%");
 		return result;
 	}
 
