@@ -336,7 +336,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 							if (editable != null) {
 								queryColumn.setEditable(editable.booleanValue());
 							}
-	
+							queryColumn.setPixelWidth(column.getPixelWidth());
+							queryColumn.setAlignment(column.getAlignment());
+							
 							documentQueryImpl.getColumns().add(queryColumn);
 						}
 					}

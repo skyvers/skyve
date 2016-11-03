@@ -240,29 +240,36 @@ public class SmartClientGenerateUtils {
 													Module module,
 													Document document,
 													Locale locale,
-													String binding)
+													String binding,
+													String name)
 		throws MetaDataException {
 			this.locale = locale;
-			name = binding.replace('.', '_');
-			title = name;
+			this.name = (name != null) ? name : binding.replace('.', '_');
+			title = this.name;
 
-			this.target = BindUtil.getMetaDataForBinding(customer, 
-															module, 
-															document, 
-															binding);
-			Document bindingDocument = target.getDocument();
-			Attribute bindingAttribute = target.getAttribute();
-			if (binding.endsWith(Bean.BIZ_KEY)) {
-				if (bindingDocument != null) {
-					title = bindingDocument.getSingularAlias();
+			Document bindingDocument = null;
+			Attribute bindingAttribute = null;
+			if (binding != null) {
+				this.target = BindUtil.getMetaDataForBinding(customer, 
+																module, 
+																document, 
+																binding);
+				bindingDocument = target.getDocument();
+				bindingAttribute = target.getAttribute();
+
+				if (binding.endsWith(Bean.BIZ_KEY)) {
+					if (bindingDocument != null) {
+						title = bindingDocument.getSingularAlias();
+					}
+					else {
+						title = DocumentImpl.getBizKeyAttribute().getDisplayName();
+					}
 				}
-				else {
-					title = DocumentImpl.getBizKeyAttribute().getDisplayName();
+				else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+					title = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 				}
 			}
-			else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
-				title = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
-			}
+			
 			if ((bindingDocument != null) && (bindingAttribute != null)) {
 				title = bindingAttribute.getDisplayName();
 				required = bindingAttribute.isRequired();
@@ -737,7 +744,8 @@ public class SmartClientGenerateUtils {
                     module, 
                     document, 
                     user.getLocale(),
-                    (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride);
+                    (dataGridBindingOverride == null) ? widget.getBinding() : dataGridBindingOverride,
+            		null);
             // for datagrids, ensure that enum types are text so that valueMaps don't have to be set all the time.
 			if ("enum".equals(type)) {
 				type = "text";
@@ -785,23 +793,8 @@ public class SmartClientGenerateUtils {
 			// set the default alignment
 			if (attribute != null) {
 				AttributeType attributeType = attribute.getAttributeType();
-				if (AttributeType.date.equals(attributeType) || 
-						AttributeType.dateTime.equals(attributeType) ||
-						AttributeType.time.equals(attributeType) || 
-						AttributeType.timestamp.equals(attributeType) ||
-						AttributeType.decimal2.equals(attributeType) || 
-						AttributeType.decimal5.equals(attributeType) ||
-						AttributeType.decimal10.equals(attributeType) || 
-						AttributeType.integer.equals(attributeType) ||
-						AttributeType.longInteger.equals(attributeType)) {
-					align = HorizontalAlignment.right;
-				}
-				else if (AttributeType.bool.equals(attributeType)) {
-					align = HorizontalAlignment.centre;
-				}
-				else {
-					align = HorizontalAlignment.left;
-				}
+				align = determineDefaultColumnAlignment(attributeType);
+				pixelWidth = determineDefaultColumnWidth(attributeType);
 			}
         }
 
@@ -995,6 +988,8 @@ public class SmartClientGenerateUtils {
 		private boolean canSortClientOnly = false;
 		private boolean onlyEqualsFilterOperators = false;
 		private boolean hasTextFilterOperators = false;
+		protected Integer pixelWidth;
+		protected HorizontalAlignment align;
 		
 		SmartClientQueryColumnDefinition(User user,
 											Customer customer, 
@@ -1006,12 +1001,16 @@ public class SmartClientGenerateUtils {
 					module,
 					document,
 					user.getLocale(),
-					(column.getBinding() == null) ? column.getName() : column.getBinding());
+					column.getBinding(),
+					column.getName());
 			String displayName = column.getDisplayName();
 			if (displayName != null) {
 				title = displayName;
 			}
-			Attribute attribute = target.getAttribute();
+			align = column.getAlignment();
+			pixelWidth = column.getPixelWidth();
+
+			Attribute attribute = (target != null) ? target.getAttribute() : null;
 			if (attribute != null) {
 				DomainType domainType = attribute.getDomainType();
 				if (domainType != null) {
@@ -1031,6 +1030,12 @@ public class SmartClientGenerateUtils {
 					if (attribute instanceof Text) {
 						Text text = (Text) attribute;
 						determineMaskAndStyle(text, this);
+					}
+					if (align == null) {
+						align = determineDefaultColumnAlignment(attributeType);
+					}
+					if (pixelWidth == null) {
+						pixelWidth = determineDefaultColumnWidth(attributeType);
 					}
 				}
 				if (attribute instanceof Association) {
@@ -1055,7 +1060,6 @@ public class SmartClientGenerateUtils {
 			detail = column.isHidden();
 			canSortClientOnly = (! column.isSortable());
 			canSave = canSave && column.isEditable();
-			
 		}
 
 		public boolean isCanFilter() {
@@ -1088,6 +1092,22 @@ public class SmartClientGenerateUtils {
 
 		public void setDetail(boolean detail) {
 			this.detail = detail;
+		}
+
+        public HorizontalAlignment getAlign() {
+			return align;
+		}
+
+		public void setAlign(HorizontalAlignment align) {
+			this.align = align;
+		}
+	
+		public Integer getPixelWidth() {
+			return pixelWidth;
+		}
+
+		public void setPixelWidth(Integer pixelWidth) {
+			this.pixelWidth = pixelWidth;
 		}
 
 		public String getMask() {
@@ -1137,6 +1157,12 @@ public class SmartClientGenerateUtils {
 				// TODO should use the listgridcolumn to set sorting off
 				result.append(",canSortClientOnly:true");
 			}
+            if (align != null) {
+            	result.append(",align:'").append(align.toAlignmentString()).append('\'');
+            }
+            if (pixelWidth != null) {
+            	result.append(",width:").append(pixelWidth);
+            }
 			if (onlyEqualsFilterOperators) {
 				result.append(",validOperators:['equals','notEqual']");
 			}
@@ -1148,6 +1174,44 @@ public class SmartClientGenerateUtils {
 		}
 	}
 
+	static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType) || 
+				AttributeType.dateTime.equals(attributeType) ||
+				AttributeType.time.equals(attributeType) || 
+				AttributeType.timestamp.equals(attributeType) ||
+				AttributeType.decimal2.equals(attributeType) || 
+				AttributeType.decimal5.equals(attributeType) ||
+				AttributeType.decimal10.equals(attributeType) || 
+				AttributeType.integer.equals(attributeType) ||
+				AttributeType.longInteger.equals(attributeType)) {
+			return HorizontalAlignment.right;
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return HorizontalAlignment.centre;
+		}
+		return HorizontalAlignment.left;
+	}
+	
+	static Integer determineDefaultColumnWidth(AttributeType attributeType) {
+		if (AttributeType.date.equals(attributeType)) {
+			return Integer.valueOf(100);
+		}
+		if (AttributeType.dateTime.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.time.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+		if (AttributeType.timestamp.equals(attributeType)) {
+			return Integer.valueOf(125);
+		}
+		if (AttributeType.bool.equals(attributeType)) {
+			return Integer.valueOf(75);
+		}
+
+		return null;
+	}
+	
 	private static String getConstantDomainValueMapString(Customer customer,
 															Document document,
 															Attribute attribute,
