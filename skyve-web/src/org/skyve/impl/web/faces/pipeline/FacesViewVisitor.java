@@ -133,8 +133,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -853,9 +853,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		String alias = null;
 		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
 		if (target != null) {
-			Collection targetCollection = (Collection) target.getAttribute();
-			if (targetCollection != null) {
-				alias = module.getDocument(customer, targetCollection.getDocumentName()).getSingularAlias();
+			Relation targetRelation = (Relation) target.getAttribute();
+			if (targetRelation != null) {
+				alias = module.getDocument(customer, targetRelation.getDocumentName()).getSingularAlias();
 			}
 		}
 

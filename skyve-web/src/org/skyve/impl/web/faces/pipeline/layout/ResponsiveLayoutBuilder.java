@@ -53,7 +53,6 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										UIComponent componentToAdd,
 										Integer pixelWidth, 
 										Integer percentageWidth) {
-System.out.println(viewContainer + " : " + container +  " : " + componentToAdd);
 		Integer mutablePercentageWidth = percentageWidth;
 		boolean nopad = false;
 

@@ -37,7 +37,7 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 			// view type is set by the harness if no module or document is sent in the request
 			ViewType viewType = facesView.getViewType();
 			if (viewType == null) {
-				webAction = (facesView.getQueryNameParameter() != null) ? WebAction.g : WebAction.e;
+				webAction = (facesView.getQueryNameParameter() != null) ? WebAction.l : WebAction.e;
 			}
 			else {
 				if (ViewType.edit.equals(viewType)) {
@@ -46,7 +46,7 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 				else {
 					facesView.setQueryNameParameter(facesView.getBizDocumentParameter());
 					facesView.setBizDocumentParameter(null);
-					webAction = WebAction.g;
+					webAction = WebAction.l;
 				}
 			}
 			facesView.setWebActionParameter(webAction);
@@ -62,7 +62,7 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 			new EditAction<>(facesView).callback(); // execute without error trapping
 			new SetTitleAction(facesView).callback(); // execute without error trapping
 			break;
-		case g:
+		case l:
 			new PopulateAction(facesView).callback(); // execute without error trapping
 			break;
 		default:

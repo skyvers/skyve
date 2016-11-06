@@ -158,7 +158,7 @@ public class Menu extends Harness {
 		if (item instanceof ListItem) {
 			ListItem gridItem = (ListItem) item;
 			url.append(Util.getSkyveContextUrl());
-			url.append("/?a=").append(WebAction.g.toString()).append("&m=").append(module.getName());
+			url.append("/?a=").append(WebAction.l.toString()).append("&m=").append(module.getName());
 			url.append("&q=").append(Harness.deriveDocumentQuery(customer,
 																	module,
 																	item,
