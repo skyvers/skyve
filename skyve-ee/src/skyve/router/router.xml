@@ -7,17 +7,8 @@
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
 	<uxui name="public">
-<!--
-		<route outcome="/ultima/grid.xhtml">
-			<criteria webAction="g" />
-		</route>
-		<route outcome="/ultima/edit.xhtml">
-			<criteria webAction="e" />
-		</route>
-		<route outcome="/ultima/frameset.xhtml" />
--->		
-		<route outcome="/public/grid.xhtml">
-			<criteria webAction="g" />
+		<route outcome="/public/list.xhtml">
+			<criteria webAction="l" />
 		</route>
 		<route outcome="/public/edit.xhtml">
 			<criteria webAction="e" />
@@ -31,11 +22,11 @@
 		<route outcome="/public/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/public/frameset.xhtml" />
+		<route outcome="/public/home.xhtml" />
 	</uxui>
 	<uxui name="tablet">
-		<route outcome="/tablet/grid.xhtml">
-			<criteria webAction="g" />
+		<route outcome="/tablet/list.xhtml">
+			<criteria webAction="l" />
 		</route>
 		<route outcome="/tablet/edit.xhtml">
 			<criteria webAction="e" />
@@ -58,8 +49,8 @@
 		<route outcome="/whosinIntegrate/mystatus.xhtml">
 			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
 		</route>
-		<route outcome="/phone/grid.xhtml">
-			<criteria webAction="g" />
+		<route outcome="/phone/list.xhtml">
+			<criteria webAction="l" />
 		</route>
 		<route outcome="/phone/edit.xhtml">
 			<criteria webAction="e" />
