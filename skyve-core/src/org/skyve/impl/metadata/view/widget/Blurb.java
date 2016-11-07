@@ -28,9 +28,6 @@ import org.skyve.metadata.view.Invisible;
 							"invisibleConditionName",
 							"visibleConditionName"})
 public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1234525506006033853L;
 
 	/**

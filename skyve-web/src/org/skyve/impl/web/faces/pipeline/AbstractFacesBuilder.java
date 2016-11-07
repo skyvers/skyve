@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 
 import org.primefaces.component.column.Column;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -69,6 +70,7 @@ public abstract class AbstractFacesBuilder {
 	protected void setSize(UIComponent component, 
 							String existingStyle, 
 							Integer pixelWidth, 
+							Integer responsiveWidth,
 							Integer percentageWidth,
 							Integer pixelHeight, 
 							Integer percentageHeight, 
@@ -82,6 +84,12 @@ public abstract class AbstractFacesBuilder {
 			noWidth = false;
 			style.append("width:").append(pixelWidth).append("px");
 		} 
+		else if (responsiveWidth != null) {
+			noWidth = false;
+			style.append("width:");
+			style.append(LayoutUtil.responsiveWidthToPercentageWidth(responsiveWidth.doubleValue()));
+			style.append('%');
+		}
 		else if (percentageWidth != null) {
 			noWidth = false;
 			style.append("width:").append(percentageWidth).append('%');
@@ -188,6 +196,7 @@ public abstract class AbstractFacesBuilder {
 								boolean noWrap, 
 								boolean top, 
 								Integer pixelWidth, 
+								Integer responsiveWidth,
 								Integer percentageWidth,
 								Integer colspan, 
 								Integer rowspan) {
@@ -204,7 +213,7 @@ public abstract class AbstractFacesBuilder {
 		String existingStyle = noWrap ? 
 								(top ? "white-space:nowrap;vertical-align:top !important;" : "white-space:nowrap;") :
 								(top ? "vertical-align:top !important;" : null);
-		setSize(result, existingStyle, pixelWidth, percentageWidth, null, null, null);
+		setSize(result, existingStyle, pixelWidth, responsiveWidth, percentageWidth, null, null, null);
 
 		return result;
 	}

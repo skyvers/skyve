@@ -12,9 +12,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight"})
 public class HTML extends InputWidget implements AbsoluteSize {
-	/**
-	 * For Serialzation
-	 */
 	private static final long serialVersionUID = -2155059200252882977L;
 
 	private Integer pixelWidth;

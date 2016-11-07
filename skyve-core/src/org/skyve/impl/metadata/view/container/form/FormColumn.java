@@ -8,6 +8,7 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class FormColumn {
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 
 	public Integer getPercentageWidth() {
@@ -28,4 +29,12 @@ public class FormColumn {
 		this.pixelWidth = pixelWidth;
 	}
 
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
+	}
 }

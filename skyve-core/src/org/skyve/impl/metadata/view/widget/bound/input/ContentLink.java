@@ -25,9 +25,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"value", "pixelWidth", "parameters"})
 public class ContentLink extends InputWidget implements Editable, Parameterizable, AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 7902784327466913291L;
 	
 	private String value; // the title/label/value (not the href) of the link rendered on the UI

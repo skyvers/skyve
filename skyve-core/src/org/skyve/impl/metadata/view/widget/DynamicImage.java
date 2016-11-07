@@ -25,6 +25,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"imageInitialPixelWidth",
 							"imageInitialPixelHeight",
 							"pixelWidth", 
+							"responsiveWidth",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -44,6 +45,7 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	private Integer imageInitialPixelHeight;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -93,6 +95,17 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

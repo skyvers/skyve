@@ -13,9 +13,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 			propOrder = {"editable", "previousValues", "pixelWidth"})
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class TextField extends ChangeableInputWidget implements Editable, AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5061565177091806441L;
 
 	private Boolean editable;

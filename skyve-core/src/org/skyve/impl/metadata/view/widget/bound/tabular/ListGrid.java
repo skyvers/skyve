@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"pixelWidth",
+							"responsiveWidth",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -88,6 +89,7 @@ public class ListGrid implements MetaData,
 	private String title;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -191,6 +193,17 @@ public class ListGrid implements MetaData,
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

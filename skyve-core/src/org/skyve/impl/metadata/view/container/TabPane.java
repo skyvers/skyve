@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.view.container.Tab;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"pixelWidth",
+							"responsiveWidth",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -40,6 +41,7 @@ public final class TabPane implements MetaData, Identifiable, RelativeSize, Disa
 	private String widgetId;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -77,6 +79,17 @@ public final class TabPane implements MetaData, Identifiable, RelativeSize, Disa
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

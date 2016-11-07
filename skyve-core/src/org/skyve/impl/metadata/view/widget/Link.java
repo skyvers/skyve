@@ -37,9 +37,6 @@ import org.skyve.metadata.view.Invisible;
 							"invisibleConditionName",
 							"visibleConditionName"})
 public class Link implements MetaData, Invisible, AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 2694545058785836920L;
 
 	private Reference reference;

@@ -11,9 +11,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public final class Radio extends ChangeableInputWidget implements AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6194966991364516589L;
 	
 	private Boolean vertical;

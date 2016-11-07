@@ -18,6 +18,7 @@ import org.skyve.metadata.view.Invisible;
 							"refreshTimeInSeconds",
 							"showRefreshControls",
 							"pixelWidth", 
+							"responsiveWidth",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -35,6 +36,7 @@ public class MapDisplay implements MetaData, RelativeSize, Invisible {
 	private Boolean showRefreshControls;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -82,6 +84,17 @@ public class MapDisplay implements MetaData, RelativeSize, Invisible {
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

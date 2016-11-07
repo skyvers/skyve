@@ -17,9 +17,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.Lookup;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class LookupDescription extends Lookup implements Editable, AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6196902681383778156L;
 
 	private String descriptionBinding;

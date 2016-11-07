@@ -351,6 +351,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent contentImage(String listBinding, ContentImage image, String title, boolean required) {
 		UIComponent result = panelGroup(true, true, false, null);
 		result.getChildren().add(contentGraphicImage(image.getPixelWidth(), 
+														null,
 														null, 
 														image.getPixelHeight(), 
 														null, 
@@ -572,7 +573,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		setInvisible(result, invisible, null);
-		setSize(result, null, pixelWidth, null, null, null, NINETY_EIGHT);
+		setSize(result, null, pixelWidth, null, null, null, null, NINETY_EIGHT);
 		setId(result);
 		return result;
 	}
@@ -604,7 +605,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			style = "text-align:right;";
 		}
 
-		setSize(result, style, pixelWidth, null, pixelHeight, null, null);
+		setSize(result, style, pixelWidth, null, null, pixelHeight, null, null);
 		setInvisible(result, invisible, null);
 
 		return result;
@@ -618,7 +619,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		setSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -643,7 +644,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		setSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -687,7 +688,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (converter != null) {
 			result.setConverter(converter);
 		}
-		setSize(result, existingStyle, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		setSize(result, existingStyle, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -736,7 +737,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String disabled,
 								Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
-		setSize(result, null, pixelWidth, null, null, null, null);
+		setSize(result, null, pixelWidth, null, null, null, null, null);
 		return result;
 	}
 
@@ -819,7 +820,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
-		setSize(result, null, pixelWidth, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -849,7 +850,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, listBinding, inline);
-		setSize(result, null, pixelWidth, null, pixelHeight, null, null);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
 		setConfirmation(result, confirmationText);
 		setId(result);
@@ -997,7 +998,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		action(result, implicitActionName, actionName, collectionName, inline);
 
-		setSize(result, null, pixelWidth, null, pixelHeight, null, null);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
 		setInvisible(result, invisible, null);
 		setConfirmation(result, confirmationText);
@@ -1055,13 +1056,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
-		setSize(result, null, pixelWidth, null, pixelHeight, null, null);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setId(result);
 		return result;
 	}
 
 	@Override
 	public GraphicImage image(Integer pixelWidth, 
+								Integer responsiveWidth,
 								Integer percentageWidth, 
 								Integer pixelHeight,
 								Integer percentageHeight, 
@@ -1070,13 +1072,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								boolean border) {
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		result.setUrl(url);
-		setSize(result, border ? "border:1px solid gray;" : null, pixelWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		setSize(result, border ? "border:1px solid gray;" : null, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
 		setInvisible(result, invisible, null);
 		setId(result);
 		return result;
 	}
 
 	private GraphicImage contentGraphicImage(Integer pixelWidth, 
+												Integer responsiveWidth,
 												Integer percentageWidth, 
 												Integer pixelHeight,
 												Integer percentageHeight, 
@@ -1089,7 +1092,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		expression.append(binding).append("')}");
 
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
-		setSize(result, "border:1px solid gray;", pixelWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		setSize(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
 		setInvisible(result, invisible, null);
 		setId(result);
 		return result;
@@ -1110,7 +1113,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		result.setTarget("_blank");
-		setSize(result, null, pixelWidth, null, null, null, null);
+		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setId(result);
 
 		return result;
@@ -1143,7 +1146,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													title, 
 													required,
 													null);
-		setSize(result, null, pixelWidth, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
+		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
 
@@ -1161,7 +1164,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 														disabled);
 		// Do not default pixel width to 100% as it causes renderering issues on the drop button on the end.
 		// The control sets its width by default based on the font metrics of the drop-down values.
-		setSize(result, null, pixelWidth, null, null, null, null);
+		setSize(result, null, pixelWidth, null, null, null, null, null);
 		result.setConverter(new SelectItemsBeanConverter());
 		return result;
 	}
@@ -1222,6 +1225,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setSize(result, 
 					dontDisplay ? "display:none" : null, 
 					pixelWidth, 
+					null,
 					null, 
 					null, 
 					null,

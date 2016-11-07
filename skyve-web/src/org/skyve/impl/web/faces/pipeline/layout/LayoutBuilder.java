@@ -54,6 +54,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param container
 	 * @param componentToAdd
 	 * @param pixelWidth
+	 * @param responsiveWidth
 	 * @param percentageWidth
 	 * @return	The new current component to continue processing with.
 	 */
@@ -61,6 +62,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												UIComponent container, 
 												UIComponent componentToAdd, 
 												Integer pixelWidth, 
+												Integer responsiveWidth,
 												Integer percentageWidth);
 	
 	/**

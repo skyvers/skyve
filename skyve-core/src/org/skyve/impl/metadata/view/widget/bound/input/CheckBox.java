@@ -12,9 +12,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight", "triState"})
 public class CheckBox extends ChangeableInputWidget implements AbsoluteSize {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6260632670896362783L;
 	
 	private Integer pixelWidth;

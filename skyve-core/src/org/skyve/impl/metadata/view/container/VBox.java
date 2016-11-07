@@ -27,6 +27,7 @@ public class VBox extends Container implements Box, Identifiable, Invisible, Bor
 	private String borderTitle;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -141,6 +142,17 @@ public class VBox extends Container implements Box, Identifiable, Invisible, Bor
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

@@ -11,9 +11,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public final class ColourPicker extends ChangeableInputWidget implements AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 873627021901504703L;
 	
 	private Integer pixelWidth;

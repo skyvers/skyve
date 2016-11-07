@@ -223,7 +223,10 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 //		currentTabPane = tabPane;
 		UIComponent component = cb.tabPane(tabPane);
-        addToContainer(component, tabPane.getPixelWidth(), tabPane.getPercentageWidth());
+        addToContainer(component, 
+        				tabPane.getPixelWidth(), 
+        				tabPane.getResponsiveWidth(), 
+        				tabPane.getPercentageWidth());
 
 		// start rendering if appropriate
 		if ((widgetId != null) && (widgetId.equals(tabPane.getWidgetId()))) {
@@ -284,7 +287,10 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
 			border = cb.border(vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
-			addToContainer(border, vbox.getPixelWidth(), vbox.getPercentageWidth());
+			addToContainer(border, 
+							vbox.getPixelWidth(), 
+							vbox.getResponsiveWidth(),
+							vbox.getPercentageWidth());
 		}
 
 		UIComponent layout = lb.vboxLayout(vbox);
@@ -299,7 +305,10 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		else {
-			addToContainer(layout, vbox.getPixelWidth(), vbox.getPercentageWidth());
+			addToContainer(layout, 
+							vbox.getPixelWidth(), 
+							vbox.getResponsiveWidth(),
+							vbox.getPercentageWidth());
 
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(vbox.getWidgetId()))) {
@@ -342,7 +351,10 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
 			border = cb.border(hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
-			addToContainer(border, hbox.getPixelWidth(), hbox.getPercentageWidth());
+			addToContainer(border, 
+							hbox.getPixelWidth(), 
+							hbox.getResponsiveWidth(),
+							hbox.getPercentageWidth());
 		}
 
 		UIComponent layout = lb.hboxLayout(hbox);
@@ -357,7 +369,10 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		else {
-			addToContainer(layout, hbox.getPixelWidth(), hbox.getPercentageWidth());
+			addToContainer(layout, 
+							hbox.getPixelWidth(), 
+							hbox.getResponsiveWidth(),
+							hbox.getPercentageWidth());
 			
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(hbox.getWidgetId()))) {
@@ -403,7 +418,10 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
 			border = cb.border(form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
-			addToContainer(border, form.getPixelWidth(), form.getPercentageWidth());
+			addToContainer(border, 
+							form.getPixelWidth(), 
+							form.getResponsiveWidth(),
+							form.getPercentageWidth());
 		}
 
 		UIComponent layout = lb.formLayout(form);
@@ -418,7 +436,10 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		else {
-			addToContainer(layout, form.getPixelWidth(), form.getPercentageWidth());
+			addToContainer(layout, 
+							form.getPixelWidth(), 
+							form.getResponsiveWidth(),
+							form.getPercentageWidth());
 
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(form.getWidgetId()))) {
@@ -509,6 +530,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								String widgetInvisible,
 								UIComponent component,
 								Integer pixelWidth,
+								Integer responsiveWidth,
 								Integer percentageWidth) {
 		if (component == null) {
 			return;
@@ -518,7 +540,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			if (currentFormItem == null) { // not a form item
 				if (currentGrid == null) { // not a container column in a datagrid
 					// This must be a container (vbox, hbox etc)
-					addToContainer(component, pixelWidth, percentageWidth);
+					addToContainer(component, pixelWidth, responsiveWidth, percentageWidth);
 					addedToContainer();
 				}
 				else {
@@ -564,7 +586,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		else {
 			c = cb.actionButton(listBinding, button, action);
 		}
-	    addComponent(null, false, action.getInvisibleConditionName(), c, button.getPixelWidth(), null);
+	    addComponent(null, false, action.getInvisibleConditionName(), c, button.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -573,7 +595,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = cb.label("geoLocator"); // TODO geolocator
-	    addComponent(null, false, locator.getInvisibleConditionName(), l, null, null);
+	    addComponent(null, false, locator.getInvisibleConditionName(), l, null, null, null);
 	}
 
 	@Override
@@ -582,7 +604,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = cb.label("geometry"); // TODO geometry
-	    addComponent(null, false, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null);
+	    addComponent(null, false, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -591,7 +613,13 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent l = cb.label("map"); // TODO map
-	    addComponent(null, false, map.getInvisibleConditionName(), l, map.getPixelWidth(), map.getPercentageWidth());
+	    addComponent(null, 
+	    				false, 
+	    				map.getInvisibleConditionName(), 
+	    				l, 
+	    				map.getPixelWidth(), 
+	    				map.getResponsiveWidth(),
+	    				map.getPercentageWidth());
 	}
 
 	@Override
@@ -600,7 +628,7 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent bn = cb.label("dialogButton"); // TODO dialog button
-	    addComponent(null, false, button.getInvisibleConditionName(), bn, null, null);
+	    addComponent(null, false, button.getInvisibleConditionName(), bn, null, null, null);
 	}
 
 	@Override
@@ -634,20 +662,27 @@ public class FacesViewVisitor extends ViewVisitor {
 		url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
 		
 		UIComponent i = cb.image(pixelWidth,
+									image.getResponsiveWidth(),
 									image.getPercentageWidth(),
 									pixelHeight,
 									image.getPercentageHeight(),
 									url.toString(),
 									image.getInvisibleConditionName(),
 									true);
-		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
+		addComponent(null, 
+						false, 
+						image.getInvisibleConditionName(), 
+						i, 
+						image.getPixelWidth(), 
+						image.getResponsiveWidth(),
+						image.getPercentageWidth());
 	}
 
 	@Override
 	public void visitSpacer(Spacer spacer) throws MetaDataException {
 		UIComponent component = cb.spacer(spacer.getPixelWidth(), spacer.getPixelHeight());
 		if (component != null) {
-			addComponent(null, false, null, component, spacer.getPixelWidth(), null);
+			addComponent(null, false, null, component, spacer.getPixelWidth(), null, null);
 		}
 	}
 
@@ -657,13 +692,20 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
     throws MetaDataException {
 		UIComponent i = cb.image(image.getPixelWidth(),
+									image.getResponsiveWidth(),
     								image.getPercentageWidth(),
     								image.getPixelHeight(),
     								image.getPercentageHeight(),
     								"images/" + image.getRelativeFile(),
     								image.getInvisibleConditionName(),
     								false);
-		addComponent(null, false, image.getInvisibleConditionName(), i, image.getPixelWidth(), image.getPercentageWidth());
+		addComponent(null, 
+						false, 
+						image.getInvisibleConditionName(), 
+						i, 
+						image.getPixelWidth(), 
+						image.getResponsiveWidth(),
+						image.getPercentageWidth());
 	}
 
 	@Override
@@ -681,7 +723,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			value = markup;
 		}
 		UIComponent c = cb.blurb(value, binding, blurb);
-		addComponent(null, false, null, c, blurb.getPixelWidth(), null);
+		addComponent(null, false, null, c, blurb.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -761,7 +803,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}.process(outerReference);
 
-		addComponent(null, false, link.getInvisibleConditionName(), c.get(), link.getPixelWidth(), null);
+		addComponent(null, false, link.getInvisibleConditionName(), c.get(), link.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -776,7 +818,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			value = null;
 		}
 	    UIComponent c = cb.label(value, binding, label);
-	    addComponent(null, false, label.getInvisibleConditionName(), c, label.getPixelWidth(), null);
+	    addComponent(null, false, label.getInvisibleConditionName(), c, label.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -785,7 +827,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentEnabled)
 	throws MetaDataException {
 	    UIComponent p = cb.label("progressBar"); // TODO progress bar
-	    addComponent(null, false, null, p, progressBar.getPixelWidth(), null);
+	    addComponent(null, false, null, p, progressBar.getPixelWidth(), null, null);
 	}
 
 	private MetaData currentGrid;
@@ -796,7 +838,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		UIComponent l = cb.label("listGrid"); // TODO list grid
-		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO list grid
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth()); // TODO list grid
 		currentGrid = grid;
 	}
 
@@ -815,7 +857,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		UIComponent l = cb.label("treeGrid");
-		addToContainer(l, grid.getPixelWidth(), grid.getPercentageWidth()); // TODO tree grid
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth()); // TODO tree grid
 		currentGrid = grid;
 	}
 
@@ -835,7 +877,7 @@ public class FacesViewVisitor extends ViewVisitor {
     throws MetaDataException {
 		// Create the datagrid faces component
 		UIComponent g = cb.dataGrid(grid);
-        addToContainer(g, grid.getPixelWidth(), grid.getPercentageWidth());
+        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 		listBinding = grid.getBinding();
 		gridColumnExpression = new StringBuilder(512);
@@ -944,7 +986,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		UIComponent l = cb.label("pickList");
-		addToContainer(l, list.getPixelWidth(), list.getPercentageWidth()); // TODO picklist
+		addToContainer(l, list.getPixelWidth(), list.getResponsiveWidth(), list.getPercentageWidth()); // TODO picklist
 	}
 
 	@Override
@@ -981,6 +1023,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						checkBox.getInvisibleConditionName(), 
 						c, 
 						checkBox.getPixelWidth(), 
+						null,
 						null);
 	}
 
@@ -1000,7 +1043,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
         UIComponentBase c = (UIComponentBase) cb.label("checkMembership"); // TODO check membership
         eventSource = c;
-        addToContainer(c, null, null);
+        addToContainer(c, null, null, null);
 	}
 
 	@Override
@@ -1022,7 +1065,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
 		UIComponentBase c = (UIComponentBase) cb.colourPicker(listBinding, colour, title, required);
 		eventSource = c;
-		addComponent(title, required, colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null);
+		addComponent(title, required, colour.getInvisibleConditionName(), c, colour.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1043,7 +1086,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
 		UIComponentBase s = (UIComponentBase) cb.combo(listBinding, combo, title, required);
 		eventSource = s;
-		addComponent(title, required, combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null);
+		addComponent(title, required, combo.getInvisibleConditionName(), s, combo.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1063,7 +1106,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String title = def.getTitle();
 		boolean required = def.isRequired();
 		UIComponent c = cb.contentImage(listBinding, image, title, required);
-        addComponent(title, false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null);
+        addComponent(title, false, image.getInvisibleConditionName(), c, image.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1075,7 +1118,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String title = def.getTitle();
 		boolean required = def.isRequired();
 		UIComponent c = cb.contentLink(listBinding, link, title, required);
-		addComponent(title, required, link.getInvisibleConditionName(), c, link.getPixelWidth(), null);
+		addComponent(title, required, link.getInvisibleConditionName(), c, link.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1087,7 +1130,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String title = def.getTitle();
 		boolean required = def.isRequired();
 		UIComponent c = cb.html(listBinding, html, title, required);
-        addComponent(title, required, html.getInvisibleConditionName(), c, html.getPixelWidth(), null);
+        addComponent(title, required, html.getInvisibleConditionName(), c, html.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1097,7 +1140,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	throws MetaDataException {
 		UIComponentBase c = (UIComponentBase) cb.label("listMembership"); // TODO complete this
 		eventSource = c;
-		addToContainer(c, membership.getListWidthInPixels(), null);
+		addToContainer(c, membership.getListWidthInPixels(), null, null);
 	}
 
 	@Override
@@ -1116,7 +1159,7 @@ public class FacesViewVisitor extends ViewVisitor {
     throws MetaDataException {
 		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
         UIComponent c = cb.label("comparison"); // TODO comparison
-        addToContainer(c, comparison.getPixelWidth(), comparison.getPercentageWidth());
+        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth());
         addedToContainer();
 	}
 
@@ -1137,7 +1180,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																	ldef.getQuery());
         eventSource = c;
         
-        addComponent(title, required, lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null);
+        addComponent(title, required, lookup.getInvisibleConditionName(), c, lookup.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1154,7 +1197,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled)
 	throws MetaDataException {
 		UIComponent c = cb.label("lookup"); // TODO lookup
-		addComponent(null, false, null, c, null, null);
+		addComponent(null, false, null, c, null, null, null);
 	}
 
 	@Override
@@ -1175,7 +1218,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
         UIComponentBase c = (UIComponentBase) cb.password(listBinding, password, title, required);
         eventSource = c;
-        addComponent(title, required, password.getInvisibleConditionName(), c, password.getPixelWidth(), null);
+        addComponent(title, required, password.getInvisibleConditionName(), c, password.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1196,7 +1239,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
         UIComponentBase c = (UIComponentBase) cb.radio(listBinding, radio, title, required);
 		eventSource = c;
-		addComponent(title, required, radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null);
+		addComponent(title, required, radio.getInvisibleConditionName(), c, radio.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1217,7 +1260,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
         UIComponentBase c = (UIComponentBase) cb.richText(listBinding, richText, title, required);
         eventSource = c;
-        addComponent(title, required, richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null);
+        addComponent(title, required, richText.getInvisibleConditionName(), c, richText.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1236,7 +1279,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
         UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
         eventSource = c;
-        addComponent(def.getTitle(), def.isRequired(), slider.getInvisibleConditionName(), c, slider.getPixelWidth(), null);
+        addComponent(def.getTitle(), def.isRequired(), slider.getInvisibleConditionName(), c, slider.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1257,7 +1300,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
         UIComponentBase c = (UIComponentBase) cb.spinner(listBinding, spinner, title, required);
         eventSource = c;
-        addComponent(title, required, spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null);
+        addComponent(title, required, spinner.getInvisibleConditionName(), c, spinner.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1278,7 +1321,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
 		UIComponentBase c = (UIComponentBase) cb.textArea(listBinding, text, title, required, def.getLength());
         eventSource = c;
-        addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+        addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1334,7 +1377,7 @@ public class FacesViewVisitor extends ViewVisitor {
         												format,
         												convertConverter(converter, type));
         eventSource = c;
-		addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null);
+		addComponent(title, required, text.getInvisibleConditionName(), c, text.getPixelWidth(), null, null);
 	}
 
 	@Override
@@ -1453,13 +1496,21 @@ public class FacesViewVisitor extends ViewVisitor {
 		eventSource = null;
 	}
 
-	private void addToContainer(UIComponent component, Integer pixelWidth, Integer percentageWidth) {
+	private void addToContainer(UIComponent component, 
+									Integer pixelWidth, 
+									Integer responsiveWidth,
+									Integer percentageWidth) {
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
 		}
 		Container currentContainer = currentContainers.peek();
 
-		current = lb.addToContainer(currentContainer, current, component, pixelWidth, percentageWidth);
+		current = lb.addToContainer(currentContainer, 
+										current, 
+										component, 
+										pixelWidth, 
+										responsiveWidth, 
+										percentageWidth);
 	}
 	
 	private void addedToContainer() {

@@ -47,11 +47,20 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	protected void setSize(UIComponent component, 
 							String existingStyle, 
 							Integer pixelWidth, 
+							Integer responsiveWidth,
 							Integer percentageWidth,
 							Integer pixelHeight, 
 							Integer percentageHeight, 
 							Integer defaultPercentageWidth) {
-		// ensure no default percentage width is ever set for this renderer - leave this to the responsive shit.
-		super.setSize(component, existingStyle, pixelWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		// Ensure no default percentage width is ever set for this renderer.
+		// Leave this to the responsive shit.
+		super.setSize(component, 
+						existingStyle, 
+						pixelWidth, 
+						responsiveWidth, 
+						percentageWidth, 
+						pixelHeight, 
+						percentageHeight, 
+						null);
 	}
 }

@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
 							"pixelWidth",
+							"responsiveWidth",
 							"percentageWidth",
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -31,6 +32,7 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	private String title;
 	
 	private Integer pixelWidth;
+	private Integer responsiveWidth;
 	private Integer percentageWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
@@ -62,6 +64,17 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	@XmlAttribute(required = false)
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
 	}
 
 	@Override

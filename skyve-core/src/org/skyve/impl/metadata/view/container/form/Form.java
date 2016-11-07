@@ -25,6 +25,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"widgetId",
 							"pixelWidth", 
+							"responsiveWidth",
 							"percentageWidth", 
 							"minPixelWidth", 
 							"maxPixelWidth", 
@@ -51,6 +52,7 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 	
 	private Integer pixelWidth;
 	private Integer percentageWidth;
+	private Integer responsiveWidth;
 	private Integer minPixelWidth;
 	private Integer maxPixelWidth;
 
@@ -176,6 +178,16 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 		this.pixelWidth = pixelWidth;
 	}
 
+	@Override
+	public Integer getResponsiveWidth() {
+		return responsiveWidth;
+	}
+
+	@Override
+	@XmlAttribute(required = false)
+	public void setResponsiveWidth(Integer responsiveWidth) {
+		this.responsiveWidth = responsiveWidth;
+	}
 
 	@Override
 	public Integer getMinPixelWidth() {

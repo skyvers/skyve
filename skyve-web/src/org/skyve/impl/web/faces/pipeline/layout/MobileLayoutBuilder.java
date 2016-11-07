@@ -31,6 +31,7 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 	public UIComponent hboxLayout(HBox hbox) {
 		// HBox is a Panel grid with 1 column when mobile
 		PanelGrid result = panelGrid(hbox.getPixelWidth(),
+										null,
 										null, // the parent container sets the percentage width
 										hbox.getPixelHeight(),
 										hbox.getPercentageHeight(),
@@ -97,6 +98,7 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 										UIComponent container, 
 										UIComponent componentToAdd, 
 										Integer pixelWidth, 
+										Integer responsiveWidth,
 										Integer percentageWidth) {
 		container.getChildren().add(componentToAdd);
 		return componentToAdd;

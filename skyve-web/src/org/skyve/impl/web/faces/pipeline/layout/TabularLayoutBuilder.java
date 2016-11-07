@@ -22,7 +22,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
 	public UIComponent viewLayout() {
         // Add the panel grid layout for the view container aspect
-		PanelGrid result = panelGrid(null, ONE_HUNDRED, null, null, null);
+		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null);
 		result.setColumns(1);
     	return result;
 	}
@@ -45,7 +45,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	
 	@Override
 	public UIComponent tabLayout() {
-		PanelGrid result = panelGrid(null, ONE_HUNDRED, null, null, null);
+		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null);
 		result.setColumns(1);
 		return result;
 	}
@@ -81,6 +81,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	public UIComponent vboxLayout(VBox vbox) {
 		// VBox is a Panel grid with 1 column
 		PanelGrid result = panelGrid(vbox.getPixelWidth(),
+										null,
 										null, // the parent container sets the percentage width
 										vbox.getPixelHeight(),
 										vbox.getPercentageHeight(),
@@ -93,6 +94,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	public UIComponent hboxLayout(HBox hbox) {
 		// HBox is a Panel grid with n columns
 		return panelGrid(hbox.getPixelWidth(),
+							null,
 							null, // the parent container sets the percentage width
 							hbox.getPixelHeight(),
 							hbox.getPercentageHeight(),
@@ -102,6 +104,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
 	public UIComponent formLayout(Form form) {
 		return panelGrid(form.getPixelWidth(),
+							null,
 							null, // the parent container sets the percentage width
 							form.getPixelHeight(), 
 							form.getPercentageHeight(),
@@ -152,6 +155,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 											true,
 											false,
 											formColumn.getPixelWidth(), 
+											formColumn.getResponsiveWidth(),
 											formColumn.getPercentageWidth(),
 											null,
 											null);
@@ -174,6 +178,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 								true,
 								false,
 								formColumn.getPixelWidth(),
+								formColumn.getResponsiveWidth(),
 								formColumn.getPercentageWidth(),
 								currentFormItem.getColspan(),
 								currentFormItem.getRowspan());
@@ -186,6 +191,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										UIComponent container, 
 										UIComponent componentToAdd, 
 										Integer pixelWidth, 
+										Integer responsiveWidth,
 										Integer percentageWidth) {
 		if (container instanceof PanelGrid) {
 			if (viewContainer instanceof HBox) {
@@ -200,7 +206,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 				}
 
 				// add a column
-				Column col = column(null, false, true, pixelWidth, percentageWidth, null, null);
+				Column col = column(null, false, true, pixelWidth, responsiveWidth, percentageWidth, null, null);
 				col.getChildren().add(componentToAdd);
 				r.getChildren().add(col);
 			}
@@ -248,13 +254,21 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	protected PanelGrid panelGrid(Integer pixelWidth, 
+									Integer responsiveWidth,
 									Integer percentageWidth, 
 									Integer pixelHeight,
 									Integer percentageHeight,
 									String invisibleConditionName) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
 		setInvisible(result, invisibleConditionName, null);
-		setSize(result, null, pixelWidth, percentageWidth, pixelHeight, percentageHeight, NINETY_EIGHT);
+		setSize(result, 
+					null, 
+					pixelWidth, 
+					responsiveWidth, 
+					percentageWidth, 
+					pixelHeight, 
+					percentageHeight, 
+					NINETY_EIGHT);
 		setId(result);
 		result.setStyleClass("ui-panelgrid-blank");
 		return result;

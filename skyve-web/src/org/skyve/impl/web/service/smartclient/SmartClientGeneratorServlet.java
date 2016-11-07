@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.view.ConstrainableSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ShrinkWrap;
@@ -385,8 +386,9 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 				borderBox.setBorder(Boolean.TRUE);
 				borderBox.setBorderTitle(form.getBorderTitle());
 				borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
-				borderBox.setPercentageWidth(form.getPercentageWidth());
 				borderBox.setPixelWidth(form.getPixelWidth());
+				borderBox.setResponsiveWidth(form.getResponsiveWidth());
+				borderBox.setPercentageWidth(form.getPercentageWidth());
 				borderBox.setPixelPadding(Integer.valueOf(10));
 
 				// If no height is specified, use a height of 1 pixel 
@@ -452,11 +454,17 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		throws MetaDataException {
 			Integer percentage = column.getPercentageWidth();
 			Integer pixel = column.getPixelWidth();
-			if (percentage != null) {
+			Integer responsive = column.getResponsiveWidth();
+			if (pixel != null) {
+				code.append(pixel).append(',');
+			}
+			else if (percentage != null) {
 				code.append('\'').append(percentage).append("%',");
 			}
-			else if (pixel != null) {
-				code.append(pixel).append(',');
+			else if (responsive != null) {
+				code.append('\'');
+				code.append(LayoutUtil.responsiveWidthToPercentageWidth(responsive.doubleValue()));
+				code.append("%',"); 
 			}
 			else {
 				code.append("'*',");
@@ -2549,10 +2557,20 @@ pickListFields:[{name:'value'}],
 				}
 				else {
 					if (sizable instanceof RelativeSize) {
-						width = ((RelativeSize) sizable).getPercentageWidth();
+						RelativeSize relative = (RelativeSize) sizable;
+						width = relative.getPercentageWidth();
 						if (width != null) {
 							builder.append("width:'").append(width).append("%',");
 							specifiedWidth = true;
+						}
+						else {
+							width = relative.getResponsiveWidth();
+							if (width != null) {
+								builder.append("width:'");
+								builder.append(LayoutUtil.responsiveWidthToPercentageWidth(width.doubleValue()));
+								builder.append("%',");
+								specifiedWidth = true;
+							}
 						}
 					}
 				}

@@ -180,6 +180,7 @@
       <xs:extension base="tns:inputWidget">
         <xs:sequence/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -814,6 +815,7 @@
     <xs:sequence/>
     <xs:attribute name="relativeFile" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -843,6 +845,7 @@
         <xs:attribute name="pixelMemberPadding" type="xs:int"/>
         <xs:attribute name="pixelPadding" type="xs:int"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="visible" type="xs:string"/>
@@ -869,6 +872,7 @@
         <xs:attribute name="pixelMemberPadding" type="xs:int"/>
         <xs:attribute name="pixelPadding" type="xs:int"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="shrinkWrap" type="tns:shrinkWrap"/>
         <xs:attribute name="verticalAlignment" type="tns:verticalAlignment"/>
         <xs:attribute name="visible" type="xs:string"/>
@@ -898,12 +902,14 @@
     <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="formColumn">
     <xs:sequence/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="formRow">
@@ -1176,6 +1182,7 @@
     </xs:sequence>
     <xs:attribute name="widgetId" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1210,6 +1217,7 @@
     <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
     <xs:attribute name="showRefreshControls" type="xs:boolean"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1235,6 +1243,7 @@
     <xs:attribute name="imageInitialPixelWidth" type="xs:int"/>
     <xs:attribute name="imageInitialPixelHeight" type="xs:int"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1287,6 +1296,7 @@
         <xs:attribute name="modelName" type="xs:string"/>
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1385,6 +1395,7 @@
         <xs:sequence/>
         <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
+        <xs:attribute name="responsiveWidth" type="xs:int"/>
         <xs:attribute name="percentageWidth" type="xs:int"/>
         <xs:attribute name="minPixelWidth" type="xs:int"/>
         <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1476,6 +1487,7 @@
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
     <xs:attribute name="minPixelWidth" type="xs:int"/>
     <xs:attribute name="maxPixelWidth" type="xs:int"/>
@@ -1523,26 +1535,26 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="list"/>
-      <xs:enumeration value="params"/>
-      <xs:enumeration value="edit"/>
       <xs:enumeration value="pick"/>
+      <xs:enumeration value="edit"/>
+      <xs:enumeration value="params"/>
+      <xs:enumeration value="list"/>
       <xs:enumeration value="create"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="left"/>
       <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
+      <xs:enumeration value="left"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="width"/>
       <xs:enumeration value="both"/>
+      <xs:enumeration value="width"/>
       <xs:enumeration value="height"/>
     </xs:restriction>
   </xs:simpleType>
@@ -1557,32 +1569,32 @@
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="Download"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Cancel"/>
       <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="Edit"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="Save"/>
-      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="Remove"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="DEFAULTS"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Download"/>
       <xs:enumeration value="OK"/>
       <xs:enumeration value="Delete"/>
-      <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Add"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
       <xs:enumeration value="self"/>
+      <xs:enumeration value="modalWindow"/>
       <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="namedFame"/>
-      <xs:enumeration value="modalWindow"/>
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

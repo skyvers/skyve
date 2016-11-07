@@ -28,9 +28,6 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 						"visibleConditionName",
 						"formatted"})
 public class Label extends AbstractBound implements Invisible, AbsoluteSize, ContentSpecifiedWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1713640318580531970L;
 
 	/**

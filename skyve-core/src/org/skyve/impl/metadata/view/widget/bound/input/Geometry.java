@@ -14,9 +14,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class Geometry extends ChangeableInputWidget implements AbsoluteWidth {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 7902784327466913291L;
 	
 	private Integer pixelWidth;

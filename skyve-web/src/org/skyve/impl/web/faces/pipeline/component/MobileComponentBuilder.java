@@ -121,7 +121,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
     	boolean first = false;
     	if (gridColumnExpression.length() == 0) { // no columns processed yet
     		first = true;
-    		Column col = column(null, false, false, null, null, null, null);
+    		Column col = column(null, false, false, null, null, null, null, null);
 			current.getChildren().add(col);
 	        result = col;
     	}

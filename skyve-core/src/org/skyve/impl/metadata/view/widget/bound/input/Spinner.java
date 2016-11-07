@@ -11,9 +11,6 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"min", "max", "step"})
 public class Spinner extends TextField {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 5688526602834604710L;
 
 	private Double min;

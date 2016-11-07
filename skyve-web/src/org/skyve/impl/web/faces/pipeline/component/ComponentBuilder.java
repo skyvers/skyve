@@ -72,6 +72,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent reportButton(Button button, Action action);
 	
 	public abstract UIComponent image(Integer pixelWidth, 
+										Integer responsiveWidth,
 										Integer percentageWidth, 
 										Integer pixelHeight,
 										Integer percentageHeight, 
