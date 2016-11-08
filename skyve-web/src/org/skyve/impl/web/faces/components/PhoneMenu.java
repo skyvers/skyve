@@ -18,6 +18,8 @@ import org.primefaces.mobile.component.page.Page;
 import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.Menu;
 import org.skyve.metadata.MetaDataException;
@@ -40,9 +42,10 @@ public class PhoneMenu extends HtmlPanelGroup {
 			new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					Router router = CORE.getRepository().getRouter();
 					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+					UserAgentType userAgentType = UserAgent.getType(request);
+					Router router = CORE.getRepository().getRouter();
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 
 					addMenuPage();
 					addModulePages(uxui.getName());

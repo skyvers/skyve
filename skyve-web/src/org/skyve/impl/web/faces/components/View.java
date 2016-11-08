@@ -46,8 +46,6 @@ public class View extends HtmlPanelGroup {
 	    	final String widgetId = (String) attributes.get("widgetId");
 	    	final String process = (String) attributes.get("process");
 	    	final String update = (String) attributes.get("update");
-	    	String typeString = (String) attributes.get("type");
-	    	final UserAgentType type = (typeString == null) ? null : UserAgentType.valueOf(typeString);
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
@@ -73,13 +71,12 @@ public class View extends HtmlPanelGroup {
 	    	
 	    	if (UtilImpl.FACES_TRACE) {
 	   			UtilImpl.LOGGER.info(String.format("View - GENERATE moduleName=%s : documentName=%s : " + 
-	   													"managedBeanName=%s : type=%s : widgetId=%s" +
+	   													"managedBeanName=%s : widgetId=%s" +
 	   													" : process=%s : update=%s : managedBeanName=%s : " + 
 	   													"componentBuilderClass=%s : layoutBuilderClass=%s",
 			   										moduleName, 
 			   										documentName, 
 			   										managedBeanName, 
-			   										type, 
 			   										widgetId, 
 			   									 	process, 
 			   										update, 
@@ -89,7 +86,9 @@ public class View extends HtmlPanelGroup {
 	   		}
 
 	    	FacesContext fc = FacesContext.getCurrentInstance();
-	    	final UxUi uxui = (UxUi) fc.getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+	    	Map<String, Object> requestMap = fc.getExternalContext().getRequestMap();
+	    	final UxUi uxui = (UxUi) requestMap.get(FacesUtil.UX_UI_KEY);
+	    	final UserAgentType userAgentType = (UserAgentType) requestMap.get(FacesUtil.USER_AGENT_TYPE_KEY);
 	    	
 	    	new FacesAction<Void>() {
 				@Override
@@ -103,11 +102,11 @@ public class View extends HtmlPanelGroup {
 		        	componentBuilder.setManagedBeanName(managedBeanName);
 		        	componentBuilder.setProcess(process);
 		        	componentBuilder.setUpdate(update);
-		        	componentBuilder.setUserAgentType(type);
+		        	componentBuilder.setUserAgentType(userAgentType);
 		        	layoutBuilder.setManagedBeanName(managedBeanName);
 		        	layoutBuilder.setProcess(process);
 		        	layoutBuilder.setUpdate(update);
-		        	layoutBuilder.setUserAgentType(type);
+		        	layoutBuilder.setUserAgentType(userAgentType);
 
 			        FacesViewVisitor fvv = null;
 			        org.skyve.metadata.view.View view = repository.getView(uxui.getName(), customer, document, ViewType.edit);

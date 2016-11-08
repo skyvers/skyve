@@ -108,6 +108,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -3054,8 +3056,9 @@ pickListFields:[{name:'value'}],
 					throw new ServletException("No document name in the request.");
 				}
 
+				UserAgentType userAgentType = UserAgent.getType(request);
 				Router router = CORE.getRepository().getRouter();
-				UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+				UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 				UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
 
 				Module module = customer.getModule(moduleName);

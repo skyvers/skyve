@@ -39,6 +39,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -112,8 +114,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			            webContext.setConversation(persistence);
 			        }
 
-					Router router = CORE.getRepository().getRouter();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+					UserAgentType userAgentType = UserAgent.getType(request);
+			        Router router = CORE.getRepository().getRouter();
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 					UtilImpl.LOGGER.info("UX/UI = " + uxui.getName());
 					
 			    	persistence.begin();

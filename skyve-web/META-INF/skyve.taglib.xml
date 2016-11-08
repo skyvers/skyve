@@ -62,11 +62,6 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<name>type</name>
-			<required>false</required>
-			<type>org.skyve.impl.web.UserAgent.UserAgentType</type>
-		</attribute>
-		<attribute>
 			<description>The fully qualified class name of a component builder to use</description>
 			<name>componentBuilderClass</name>
 			<required>false</required>
@@ -147,11 +142,6 @@
 			<name>managedBean</name>
 			<required>true</required>
 			<type>java.lang.String</type>
-		</attribute>
-		<attribute>
-			<name>type</name>
-			<required>true</required>
-			<type>org.skyve.impl.web.UserAgent.UserAgentType</type>
 		</attribute>
 		<attribute>
 			<description>Indicates whether this grid should allow creation of a new document bean (New Button).</description>

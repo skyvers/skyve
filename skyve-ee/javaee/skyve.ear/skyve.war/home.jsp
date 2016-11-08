@@ -12,9 +12,11 @@
 <%@ page import="org.skyve.impl.metadata.repository.router.Router"%>
 <%@ page import="org.skyve.impl.metadata.repository.router.RouteCriteria"%>
 <%@ page import="org.skyve.impl.persistence.AbstractPersistence"%>
-<%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 <%@ page import="org.skyve.impl.web.AbstractWebContext"%>
+<%@ page import="org.skyve.impl.web.UserAgent"%>
+<%@ page import="org.skyve.impl.web.UserAgent.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
+<%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 
 <%
 	String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
@@ -76,9 +78,11 @@
 			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "pages/changePassword.jsp"));
 		}
 		
-		// Set the UX/UI
+		// Set the UX/UI and user agent type
+		UserAgentType userAgentType = UserAgent.getType(request);
+		request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
 		Router router = CORE.getRepository().getRouter();
-		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(request);
+		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 		request.setAttribute(FacesUtil.UX_UI_KEY, uxui);
 		
 		// Determine the route

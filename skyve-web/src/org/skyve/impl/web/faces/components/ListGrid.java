@@ -28,6 +28,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -54,7 +55,6 @@ public class ListGrid extends HtmlPanelGroup {
 			final String moduleName = (String) attributes.get("module");
 			final String queryName = (String) attributes.get("query");
 			final String managedBeanName = (String) attributes.get("managedBean");
-			final UserAgentType type = UserAgentType.valueOf((String) attributes.get("type"));
 			Object canCreateAttribute = attributes.get("canCreate");
 			final boolean canCreate = (canCreateAttribute == null) || "true".equals(canCreateAttribute);
 			final boolean paginator = "true".equals(attributes.get("paginator"));
@@ -71,6 +71,7 @@ public class ListGrid extends HtmlPanelGroup {
 					}
 					
 					FacesContext fc = FacesContext.getCurrentInstance();
+					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 					Application a = fc.getApplication();
 					ExpressionFactory ef = a.getExpressionFactory();
 				    ELContext elc = fc.getELContext();
@@ -78,7 +79,7 @@ public class ListGrid extends HtmlPanelGroup {
 //					form.setPrependId(false);
 //					form.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, true, paginator, type));
 //					ListGrid.this.getChildren().add(form);
-				    ListGrid.this.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, canCreate, paginator, type));
+				    ListGrid.this.getChildren().add(build(customer, query, a, ef, elc, managedBeanName, canCreate, paginator, userAgentType));
 				    
 					return null;
 				}

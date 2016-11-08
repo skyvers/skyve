@@ -25,6 +25,8 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -81,8 +83,10 @@ public class Desktop extends Harness {
 			    	
 					StringBuilder result = new StringBuilder(8192);
 
+					HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
+					UserAgentType userAgentType = UserAgent.getType(request);
 					Router router = CORE.getRepository().getRouter();
-					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select((HttpServletRequest) fc.getExternalContext().getRequest());
+					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 
 					constructMenu(customer, user, bizModule, uxui.getName(), result);
 					listDataSources(customer, user, result);
