@@ -57,6 +57,8 @@ import org.skyve.util.Binder.TargetMetaData;
 public class ViewGenerator {
 	private static final Integer THIRTY = new Integer(30);
 	private static final Integer SIXTY = new Integer(60);
+	private static final Integer FOUR = new Integer(4);
+	private static final Integer TWELVE = new Integer(12);
 	
 	private ViewGenerator() {
 		// do nothing
@@ -229,8 +231,10 @@ public class ViewGenerator {
 		Form form = new Form();
 		form.setBorder(Boolean.TRUE);
 		form.setPercentageWidth(SIXTY);
+		form.setResponsiveWidth(TWELVE);
 		FormColumn column = new FormColumn();
 		column.setPercentageWidth(THIRTY);
+		column.setResponsiveWidth(FOUR);
 		form.getColumns().add(column);
 		form.getColumns().add(new FormColumn());
 		

@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Profile">
-			<form border="true" percentageWidth="70">
-				<column percentageWidth="20" />
+			<form border="true" percentageWidth="70" responsiveWidth="12">
+				<column percentageWidth="20" responsiveWidth="4" />
 				<column />
 				<row>
 					<item>
@@ -52,8 +52,8 @@
 			<vbox />
 		</tab>
 		<tab title="Password">
-			<form border="true" percentageWidth="70">
-				<column percentageWidth="30" />
+			<form border="true" percentageWidth="70" responsiveWidth="12">
+				<column percentageWidth="30" responsiveWidth="4" />
 				<column />
 				<row>
 					<item>

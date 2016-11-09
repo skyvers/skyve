@@ -4,9 +4,10 @@ public class LayoutUtil {
 	private LayoutUtil() {}
 	
 	public static int MAX_RESPONSIVE_WIDTH_COLUMNS = 12;
+	private static double MAX_SMALL_SCREEN_WIDTH_PIXELS = 640.0;
 	private static double MAX_MEDIUM_SCREEN_WIDTH_PIXELS = 1024.0;
 	private static double MAX_LARGE_SCREEN_WIDTH_PIXELS = 1440.0;
-
+	
 	public static int responsiveWidthToPercentageWidth(double responsiveWidth) {
 		return (int) Math.ceil(responsiveWidth / MAX_RESPONSIVE_WIDTH_COLUMNS * 100.0);
 	}

@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane>
 		<tab title="Export/Import">
-			<form border="true" percentageWidth="60">
-				<column />
+			<form border="true" percentageWidth="60" responsiveWidth="12">
+				<column responsiveWidth="4" />
 				<column />
 				<row>
 					<item>
@@ -31,14 +31,14 @@
 		</tab>
 		<tab title="Backup/Restore">
 			<form border="true" borderTitle="Job">
-				<column />
-				<column pixelWidth="60" />
-				<column />
-				<column pixelWidth="60" />
-				<column />
-				<column pixelWidth="60" />
-				<column />
-				<column pixelWidth="60" />
+				<column responsiveWidth="9" />
+				<column pixelWidth="60" responsiveWidth="3" />
+				<column responsiveWidth="9" />
+				<column pixelWidth="60" responsiveWidth="3" />
+				<column responsiveWidth="9" />
+				<column pixelWidth="60" responsiveWidth="3" />
+				<column responsiveWidth="9" />
+				<column pixelWidth="60" responsiveWidth="3" />
 				<row>
 					<item>
 						<spinner binding="dailyBackupRetention" min="0" />
@@ -64,9 +64,9 @@
 				</listGrid>
 				<hbox horizontalAlignment="right" shrinkWrap="height">
 					<form border="true" percentageWidth="100">
-						<column pixelWidth="120" />
-						<column />
-						<column pixelWidth="110" />
+						<column pixelWidth="120" responsiveWidth="12" />
+						<column responsiveWidth="12" />
+						<column pixelWidth="110" responsiveWidth="12" />
 						<row>
 							<item required="false">
 								<combo binding="restorePreProcess" >

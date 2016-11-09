@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view title="Change Your Password" type="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<form border="true" percentageWidth="60">
-		<column percentageWidth="50" />
+<view title="Change Your Password" 
+		type="edit" 
+		xmlns="http://www.skyve.org/xml/view" 
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" percentageWidth="60" responsiveWidth="12">
+		<column percentageWidth="50" responsiveWidth="4" />
 		<column />
 		<row>
 			<item>

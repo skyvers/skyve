@@ -30,7 +30,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 */	
 	@Override
 	public UIComponent viewLayout() {
-		return responsiveContainer();
+		return responsiveColumn(null, Integer.valueOf(12), null, true);
 	}
 	
 	@Override
@@ -136,6 +136,24 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return rowLayout.getParent();
 	}
 
+	// respect responsive width if it is defined in this renderer
+	@Override
+	protected void setSize(UIComponent component, 
+							String existingStyle, 
+							Integer pixelWidth, 
+							Integer responsiveWidth,
+							Integer percentageWidth, 
+							Integer pixelHeight, 
+							Integer percentageHeight, 
+							Integer defaultPercentageWidth) {
+		if (responsiveWidth != null) {
+			super.setSize(component, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null);
+		}
+		else {
+			super.setSize(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
+		}
+	}
+	
 	@Override
 	public void layoutFormItem(UIComponent formOrRowLayout, 
 								UIComponent formItemComponent, 

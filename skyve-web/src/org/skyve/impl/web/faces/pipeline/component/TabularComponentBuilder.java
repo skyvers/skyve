@@ -1058,6 +1058,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setId(result);
+
 		return result;
 	}
 
