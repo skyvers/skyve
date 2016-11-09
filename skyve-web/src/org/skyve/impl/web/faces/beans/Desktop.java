@@ -28,6 +28,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -41,6 +42,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
+import org.skyve.web.WebAction;
 
 @ManagedBean
 @RequestScoped
@@ -65,7 +67,7 @@ public class Desktop extends Harness {
 	public void preRender() {
         final FacesContext fc = FacesContext.getCurrentInstance();
         if (! fc.isPostback()) {
-			script = new FacesAction<String>() {
+        	script = new FacesAction<String>() {
 				@Override
 				@SuppressWarnings("synthetic-access")
 				public String callback() throws Exception {
@@ -93,7 +95,11 @@ public class Desktop extends Harness {
 	
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
 					result.append("isc.BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
-					if (ViewType.list.equals(getViewType())) { // we have a home ref that is a list view
+
+					FacesUtil.setStateAfterParameterProcessing(Desktop.this);
+
+					WebAction a = Desktop.this.getWebActionParameter();
+					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						result.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
 						Module homeModule = customer.getModule(bizModule);

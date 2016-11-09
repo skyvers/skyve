@@ -44,6 +44,14 @@ public abstract class Harness extends Localisable {
 		this.bizDocumentParameter = bizDocumentParameter;
 	}
 	
+	private String queryNameParameter;
+	public String getQueryNameParameter() {
+		return queryNameParameter;
+	}
+	public void setQueryNameParameter(String queryNameParameter) {
+		this.queryNameParameter = queryNameParameter;
+	}
+
 	private String bizIdParameter;
 	public String getBizIdParameter() {
 		return bizIdParameter;

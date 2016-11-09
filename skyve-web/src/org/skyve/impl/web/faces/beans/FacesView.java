@@ -61,14 +61,6 @@ public class FacesView<T extends Bean> extends Harness {
 		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
 	}
 	
-	private String queryNameParameter;
-	public String getQueryNameParameter() {
-		return queryNameParameter;
-	}
-	public void setQueryNameParameter(String queryNameParameter) {
-		this.queryNameParameter = queryNameParameter;
-	}
-
 	private String viewBinding;
 	public String getViewBinding() {
 		return viewBinding;
@@ -141,7 +133,7 @@ public class FacesView<T extends Bean> extends Harness {
 			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
 									" : m=" + getBizModuleParameter() + 
 									" : d=" + getBizDocumentParameter() + 
-									" : q=" + queryNameParameter + 
+									" : q=" + getQueryNameParameter() + 
 									" : i=" + getBizIdParameter());
 		}
 	}

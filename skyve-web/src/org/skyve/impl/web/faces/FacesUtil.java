@@ -8,6 +8,9 @@ import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
 
 import org.skyve.impl.web.faces.beans.FacesView;
+import org.skyve.impl.web.faces.beans.Harness;
+import org.skyve.metadata.view.View.ViewType;
+import org.skyve.web.WebAction;
 
 public class FacesUtil {
 	/**
@@ -60,6 +63,28 @@ public class FacesUtil {
 		}
 		catch (Exception e) {
 			throw new FacesException("Method expression '" + expression + "' could not be created.");
+		}
+	}
+	
+	public static void setStateAfterParameterProcessing(Harness harness) {
+		WebAction webAction = harness.getWebActionParameter();
+		if (webAction == null) {
+			// view type is set by the harness if no module or document is sent in the request
+			ViewType viewType = harness.getViewType();
+			if (viewType == null) {
+				webAction = (harness.getQueryNameParameter() != null) ? WebAction.l : WebAction.e;
+			}
+			else {
+				if (ViewType.edit.equals(viewType)) {
+					webAction = WebAction.e;
+				}
+				else {
+					harness.setQueryNameParameter(harness.getBizDocumentParameter());
+					harness.setBizDocumentParameter(null);
+					webAction = WebAction.l;
+				}
+			}
+			harness.setWebActionParameter(webAction);
 		}
 	}
 }

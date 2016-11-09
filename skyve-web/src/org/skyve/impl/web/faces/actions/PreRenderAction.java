@@ -8,9 +8,9 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
@@ -32,25 +32,8 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 								internalUser, 
 								FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
 
+		FacesUtil.setStateAfterParameterProcessing(facesView);
 		WebAction webAction = facesView.getWebActionParameter();
-		if (webAction == null) {
-			// view type is set by the harness if no module or document is sent in the request
-			ViewType viewType = facesView.getViewType();
-			if (viewType == null) {
-				webAction = (facesView.getQueryNameParameter() != null) ? WebAction.l : WebAction.e;
-			}
-			else {
-				if (ViewType.edit.equals(viewType)) {
-					webAction = WebAction.e;
-				}
-				else {
-					facesView.setQueryNameParameter(facesView.getBizDocumentParameter());
-					facesView.setBizDocumentParameter(null);
-					webAction = WebAction.l;
-				}
-			}
-			facesView.setWebActionParameter(webAction);
-		}
 
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction - GO a=" + facesView.getWebActionParameter() + 
 													" : m=" + facesView.getBizModuleParameter() + 
