@@ -86,7 +86,7 @@ public class ActionUtil {
 		ec.redirect(outcome.toString());
     }
     
-    static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName)
+    public static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName)
 	throws MetaDataException {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();

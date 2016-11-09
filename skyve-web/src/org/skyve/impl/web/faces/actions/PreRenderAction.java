@@ -31,11 +31,9 @@ public class PreRenderAction<T extends Bean> extends FacesAction<Void> {
 		facesView.initialise(customer, 
 								internalUser, 
 								FacesContext.getCurrentInstance().getExternalContext().getRequestLocale());
-
-		FacesUtil.setStateAfterParameterProcessing(facesView);
 		WebAction webAction = facesView.getWebActionParameter();
 
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction - GO a=" + facesView.getWebActionParameter() + 
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PreRenderAction - GO a=" + webAction + 
 													" : m=" + facesView.getBizModuleParameter() + 
 													" : d=" + facesView.getBizDocumentParameter() + 
 													" : q=" + facesView.getQueryNameParameter() + 

@@ -28,7 +28,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.FacesUtil;
+import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -76,7 +76,6 @@ public class Desktop extends Harness {
 			    	Customer customer = user.getCustomer();
 			    	
 			    	initialise(customer, user, fc.getExternalContext().getRequestLocale());
-
 					createLocaleScriptIfRequired();
 
 			    	String bizModule = getBizModuleParameter();
@@ -96,14 +95,11 @@ public class Desktop extends Harness {
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
 					result.append("isc.BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
 
-					FacesUtil.setStateAfterParameterProcessing(Desktop.this);
-
 					WebAction a = Desktop.this.getWebActionParameter();
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						result.append("details.showMember(isc.ListView.contents);");
 						// TODO should cater for map, tree, calendar etc
-						Module homeModule = customer.getModule(bizModule);
-						QueryDefinition query = homeModule.getDocumentDefaultQuery(customer, bizDocument);
+						QueryDefinition query = ActionUtil.getDocumentQuery(bizModule, getQueryNameParameter());
 						result.append("isc.ListView.setGridDataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 					} 
 					else {

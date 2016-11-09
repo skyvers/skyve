@@ -634,7 +634,7 @@ isc.EditView.addMethods({
 		
 		var link = '';
 		if (values.persisted) {
-			link = '<a target="_top" href="?m=' + this._mod + '&d=' + this._doc +
+			link = '<a target="_top" href="?a=e&m=' + this._mod + '&d=' + this._doc +
 					'&i=' + values.bizId + '" title="Link"><img src="images/menu_link.png"/></a>';
 		}
 		

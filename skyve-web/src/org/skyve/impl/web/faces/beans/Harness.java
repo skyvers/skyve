@@ -125,6 +125,22 @@ public abstract class Harness extends Localisable {
 			bizDocumentParameter = homeModule.getHomeDocumentName();
 
 			viewType = homeModule.getHomeRef();
+			
+			if (ViewType.edit.equals(viewType)) {
+				webActionParameter = WebAction.e;
+			}
+			else {
+				if (queryNameParameter == null) {
+					queryNameParameter = bizDocumentParameter;
+				}
+				bizDocumentParameter = null;
+				webActionParameter = WebAction.l;
+			}
+		}
+		else {
+			if (webActionParameter == null) {
+				webActionParameter = (queryNameParameter != null) ? WebAction.l : WebAction.e;
+			}
 		}
 		
 		String cssRelativeFileName = customer.getHtmlResources().getCssRelativeFileName();

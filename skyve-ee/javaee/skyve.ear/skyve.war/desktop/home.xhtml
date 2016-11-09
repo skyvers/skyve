@@ -6,8 +6,10 @@
 		dir="#{desktop.dir}">
     <f:view contentType="text/html" encoding="#{desktop.encoding}">
 		<f:metadata>
+			<f:viewParam name="a" value="#{desktop.webActionParameter}" />
 			<f:viewParam name="m" value="#{desktop.bizModuleParameter}" />
 			<f:viewParam name="d" value="#{desktop.bizDocumentParameter}" />
+			<f:viewParam name="q" value="#{desktop.queryNameParameter}" />
 			<f:viewParam name="i" value="#{desktop.bizIdParameter}" />
 			<f:event type="preRenderView" listener="#{desktop.preRender}"/>
 		</f:metadata>
