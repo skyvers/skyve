@@ -30,6 +30,10 @@ public class Format<T> {
 		return mask;
 	}
 	
+	public final TextCase getTextCase() {
+		return textCase;
+	}
+	
 	/**
 	 * @param value
 	 * @return

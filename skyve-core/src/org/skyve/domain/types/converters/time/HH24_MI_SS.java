@@ -27,7 +27,7 @@ public class HH24_MI_SS implements Converter<TimeOnly> {
 
 	@Override
 	public Format<TimeOnly> getFormat() {
-		return null;
+		return new Format<>("##:##:##", null);
 	}
 
 	@Override

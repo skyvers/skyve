@@ -48,8 +48,8 @@ import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
-import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -68,6 +68,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
@@ -248,58 +249,68 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
-		String gridBinding = grid.getBinding();
-		
-		Column col = column(null,
-								null,
-								"",
-				                HorizontalAlignment.centre,
-				                true,
-				                Integer.valueOf(45));
-		col.setPriority(1);
-
-		List<UIComponent> children = col.getChildren();
-		// edit action if grid is editable, but grid is not inline
-		if ((! Boolean.FALSE.equals(grid.getEditable()) && 
-				(! Boolean.TRUE.equals(grid.getInline())))) {
-	    	CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-	    	button.setValue(null);
-        	button.setTitle("Add a new " + singularDocumentAlias);
-	    	button.setIcon("fa fa-plus");
-			action(button, ImplicitActionName.Add, null, gridBinding, inline);
-			col.getFacets().put("header", button);
-
-	    	button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-	    	button.setValue(null);
-        	button.setTitle("Edit this " + singularDocumentAlias);
-	    	button.setIcon("fa fa-chevron-right");
-			action(button, ImplicitActionName.Navigate, null, gridBinding, inline);
-			children.add(button);
-		}
-
+		// only add a column if grid is editable
 		if (! Boolean.FALSE.equals(grid.getEditable())) {
-			if (! col.getChildren().isEmpty()) {
-				children.add(label(" "));
+			String gridBinding = grid.getBinding();
+			
+			Column col = column(null,
+									null,
+									"",
+					                HorizontalAlignment.centre,
+					                true,
+					                Integer.valueOf(45));
+			col.setPriority(1);
+			List<UIComponent> children = col.getChildren();
+
+			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
+				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		    	button.setValue(null);
+	        	button.setTitle("Add a new " + singularDocumentAlias);
+		    	button.setIcon("fa fa-plus");
+				action(button, ImplicitActionName.Add, null, gridBinding, inline);
+				col.getFacets().put("header", button);
+			}
+			
+			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
+				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		    	button.setValue(null);
+	        	button.setTitle("Edit this " + singularDocumentAlias);
+		    	button.setIcon("fa fa-chevron-right");
+				action(button, ImplicitActionName.Navigate, null, gridBinding, inline);
+				children.add(button);
 			}
 
-			CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-	    	button.setValue(null);
-        	button.setTitle("Remove this " + singularDocumentAlias);
-	    	button.setIcon("fa fa-minus");
-			action(button, ImplicitActionName.Remove, null, gridBinding, true);
-			children.add(button);
-		}
-		
-		if (! children.isEmpty()) {
-			if (children.size() > 1) {
-				col.setStyle("width:90px;text-align:center !important");
+			if (! Boolean.FALSE.equals(grid.getShowRemove())) {
+				// Conditionally add some whitespace between buttons
+				if (! col.getChildren().isEmpty()) {
+					children.add(label(" "));
+				}
+	
+				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		    	button.setValue(null);
+	        	button.setTitle("Remove this " + singularDocumentAlias);
+		    	button.setIcon("fa fa-minus");
+				action(button, ImplicitActionName.Remove, null, gridBinding, true);
+				children.add(button);
 			}
-			current.getChildren().add(col);
+
+			if (! children.isEmpty()) {
+				if (children.size() > 1) {
+					col.setStyle("width:90px;text-align:center !important");
+				}
+				current.getChildren().add(col);
+			}
 		}
 		
 		return current;
 	}
 
+	@Override
+	public UIComponent listGrid(ListGrid grid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	@Override
 	public UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required) {
 /* TODO Why don't tri state checkboxes work???
@@ -473,14 +484,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								boolean required,
 								Integer length,
 								org.skyve.domain.types.converters.Converter<?> converter,
-								TextFormat format,
+								Format<?> format,
 								Converter facesConverter) {
 		boolean useCalendar = false;
+		Format<?> mutableFormat = format;
 		if (converter != null) {
 			AttributeType converterAttributeType = converter.getAttributeType();
 	        useCalendar = (AttributeType.date.equals(converterAttributeType) || 
 			        		AttributeType.dateTime.equals(converterAttributeType) ||
 			        		AttributeType.timestamp.equals(converterAttributeType));
+	        if (mutableFormat == null) {
+		        mutableFormat = converter.getFormat();
+	        }
 		}
 		
         UIComponent result = null;
@@ -493,14 +508,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	                            text.getDisabledConditionName(),
 	                            facesConverter);
         }
-        else if (format != null) {
+        else if (mutableFormat != null) {
             result = maskField(listBinding,
 								text.getBinding(),
 								title,
 								required,
 								text.getDisabledConditionName(),
 								length,
-								format,
+								mutableFormat,
 								facesConverter,
 								text.getPixelWidth(),
 								true);
@@ -654,7 +669,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									boolean required, 
 									String disabled,
 									Integer maxLength, 
-									TextFormat format, 
+									Format<?> format, 
 									Converter converter, 
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
@@ -669,7 +684,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setMask(determineMask(format));
 		String existingStyle = null;
-		TextCase textCase = format.getCase();
+		TextCase textCase = format.getTextCase();
 		if (textCase != null) {
 			switch (textCase) {
 			case upper:
@@ -708,7 +723,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * @param text
 	 * @return
 	 */
-	private static String determineMask(TextFormat format) {
+	private static String determineMask(Format<?> format) {
 		String result = null;
 
 		if (format != null) {
@@ -936,10 +951,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String paramValue = param.getValue();
 			String paramBinding = param.getBinding();
 			if (AbstractWebContext.REPORT_NAME.equals(paramName)) {
-				reportName = value;
+				reportName = paramValue;
 			}
 			else if (AbstractWebContext.REPORT_FORMAT.equals(paramName)) {
-				reportFormat = ReportFormat.valueOf(value);
+				reportFormat = ReportFormat.valueOf(paramValue);
 			}
 			
 			if (paramValue != null) {
@@ -950,18 +965,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				href.append(paramBinding).append("}']}&"); 
 			}
 		}
-		// remove last &
-		int hrefLength = href.length();
-		if (hrefLength > 0) {
-			href.setLength(hrefLength - 1);
-		}
 
+		// add Web Id and Current Bean Id
+		href.append(AbstractWebContext.CONTEXT_NAME).append("=#{").append(managedBeanName).append(".webContext.webId}&");
+		href.append(AbstractWebContext.ID_NAME).append("=#{").append(managedBeanName).append(".currentBean['{");
+		href.append(Bean.DOCUMENT_ID).append("}']}");
+		
 		// if no report format parameter set, add it
 		if (reportFormat == null) {
 			reportFormat = ReportFormat.pdf;
 			href.append('&').append(AbstractWebContext.REPORT_FORMAT).append('=').append(reportFormat);
 		}
 
+		
 		// NB yes this is backwards coz its inserted
 		href.insert(0, '?').insert(0, reportFormat).insert(0, '.').insert(0, reportName).insert(0, "report/");
 

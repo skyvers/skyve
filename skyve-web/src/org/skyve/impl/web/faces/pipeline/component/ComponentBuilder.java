@@ -9,7 +9,7 @@ import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.ajax.AjaxBehaviorListenerImpl;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
@@ -33,6 +33,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -101,6 +102,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String singluarDocumentAlias,
 															boolean inline);
 	
+	public abstract UIComponent listGrid(ListGrid grid);
+	
 	public abstract UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required);
 
 	public abstract UIComponent colourPicker(String listBinding, ColourPicker colour, String title, boolean required);
@@ -136,7 +139,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										boolean required,
 										Integer length,
 										Converter<?> converter,
-										TextFormat format,
+										Format<?> format,
 										javax.faces.convert.Converter facesConverter);
 	
 	public HtmlOutputLink outputLink(String listBinding, 

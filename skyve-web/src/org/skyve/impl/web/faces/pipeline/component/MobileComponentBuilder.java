@@ -15,7 +15,7 @@ import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.spacer.Spacer;
-import org.skyve.impl.metadata.model.document.field.TextFormat;
+import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -293,7 +293,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 								boolean required,
 								Integer length,
 								org.skyve.domain.types.converters.Converter<?> converter,
-								TextFormat format,
+								Format<?> format,
 								Converter facesConverter) {
         return textField(listBinding,
 							text.getBinding(),

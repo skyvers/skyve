@@ -7,19 +7,24 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 
 import org.skyve.domain.types.TimeOnly;
+import org.skyve.impl.util.UtilImpl;
 
 public class HH24_MI extends org.skyve.domain.types.converters.time.HH24_MI implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
-		try {
-			return fromDisplayValue(value);
-		}
-		catch (Exception e) {
-			throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
-															"Invalid time (use HH24:MI format)",
-															"Invalid time (use HH24:MI format)"),
-											e);
-		}
+    	String processedValue = UtilImpl.processStringValue(value);
+    	if (processedValue != null) {
+			try {
+				return fromDisplayValue(processedValue);
+			}
+			catch (Exception e) {
+				throw new ConverterException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
+																"Invalid time (use HH24:MI format)",
+																"Invalid time (use HH24:MI format)"),
+												e);
+			}
+    	}
+    	return null;
 	}
 
 	@Override

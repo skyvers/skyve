@@ -11,7 +11,7 @@ import org.skyve.impl.util.UtilImpl;
 public class SimplePercentage extends org.skyve.domain.types.converters.integer.SimplePercentage implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
-    	java.lang.String processedValue = UtilImpl.processStringValue(value);
+    	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
 				return fromDisplayValue(processedValue);

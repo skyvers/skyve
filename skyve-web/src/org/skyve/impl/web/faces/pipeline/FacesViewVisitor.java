@@ -10,6 +10,7 @@ import javax.faces.component.UIComponentBase;
 import org.primefaces.component.calendar.Calendar;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
@@ -1342,7 +1343,8 @@ public class FacesViewVisitor extends ViewVisitor {
 		boolean required = def.isRequired();
 		Attribute attribute = def.getTarget().getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
-		TextFormat format = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
+		TextFormat textFormat = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
+		Format<?> format = (textFormat == null) ? null : textFormat.getFormat();
 		Converter<?> converter = null;
         if (attribute instanceof ConvertableField) {
             converter = ((ConvertableField) attribute).getConverter();

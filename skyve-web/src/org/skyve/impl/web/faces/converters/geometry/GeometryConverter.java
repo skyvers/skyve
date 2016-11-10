@@ -15,7 +15,7 @@ import com.vividsolutions.jts.io.WKTWriter;
 public class GeometryConverter implements Converter {
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent component, String value) {
-		java.lang.String processedValue = UtilImpl.processStringValue(value);
+		String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
 				return new WKTReader().read(value);

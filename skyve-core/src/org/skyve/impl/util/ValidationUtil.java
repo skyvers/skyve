@@ -121,11 +121,13 @@ public class ValidationUtil {
 		}
 
 		if (converter != null) {
-			validateFormat(converter.getFormat(), attributeValue, binding, displayName, e);
-			@SuppressWarnings("rawtypes")
-			Validator validator = converter.getValidator();
-			if (validator != null) {
-				validator.validate(attributeValue, binding, displayName, converter, e);
+			if (attributeValue != null) {
+				validateFormat(converter.getFormat(), attributeValue, binding, displayName, e);
+				@SuppressWarnings("rawtypes")
+				Validator validator = converter.getValidator();
+				if (validator != null) {
+					validator.validate(attributeValue, binding, displayName, converter, e);
+				}
 			}
 		}
 		
