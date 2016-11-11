@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -143,8 +142,7 @@ public abstract class ExportedReferenceVisitor {
 
 	private void populateImmediateMapImplementingDerivations(CustomerImpl customer,
 																Document document,
-																Set<Document> result)
-	throws MetaDataException {
+																Set<Document> result) {
 		for (String derivedDocumentName : customer.getDerivedDocuments(document)) {
 			int dotIndex = derivedDocumentName.indexOf('.');
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));

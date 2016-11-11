@@ -242,8 +242,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document convert(String metaDataName)
-	throws MetaDataException {
+	public org.skyve.metadata.model.document.Document convert(String metaDataName) {
 		DocumentImpl result = new DocumentImpl();
 
 		// Set document metadata

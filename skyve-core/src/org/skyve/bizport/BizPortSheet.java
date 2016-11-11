@@ -85,8 +85,7 @@ public interface BizPortSheet {
 	 */
 	public <T> T getValue(String columnBinding, 
 							AttributeType attributeType,
-							BizPortException problems) 
-	throws BizPortException;
+							BizPortException problems);
 	
 	/**
 	 * Set the value in the Excel sheet in the column 
@@ -113,12 +112,10 @@ public interface BizPortSheet {
 	 * @param problems
 	 * @param column
 	 * @param message
-	 * @throws BizPortException
 	 */
 	public void addErrorAtCurrentRow(BizPortException problems, 
 										BizPortColumn column, 
-										String message) 
-	throws BizPortException;
+										String message);
 
 	/**
 	 * 

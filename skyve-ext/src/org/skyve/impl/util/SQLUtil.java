@@ -14,7 +14,6 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -46,13 +45,11 @@ public class SQLUtil {
 	 * @param searchValue
 	 * @param customerId This can be <code>null</code> if the document is a metadata document.
 	 * @return
-	 * @throws DomainException
 	 */
 	public static List<DynaBean> retrieveSuggestions(String fieldName, 
 														Document document, 
 														String searchValue, 
-														User user)
-	throws DomainException, MetaDataException {
+														User user) {
 		StringBuilder sql = new StringBuilder(64);
 
 		if (! document.getAttribute(fieldName).isPersistent()) {
@@ -82,14 +79,12 @@ public class SQLUtil {
 	 * @param id
 	 * @param customerId This can be <code>null</code> if document is a metadata document.
 	 * @return
-	 * @throws DomainException
 	 */
 	public static DynaBean retrieveBean(Document document, 
 											String id, 
 											User user, 
 											boolean forUpdate, 
-											@SuppressWarnings("unused") boolean withReadLock)
-	throws DomainException, MetaDataException {
+											@SuppressWarnings("unused") boolean withReadLock) {
 		assert (id != null);
 
 		StringBuilder sql = new StringBuilder(32);
@@ -166,8 +161,7 @@ public class SQLUtil {
 	}
 */
 
-	public static void disconnect(Connection connection)
-	throws DomainException {
+	public static void disconnect(Connection connection) {
 		try {
 			if ((connection != null) && (! connection.isClosed())) {
 				connection.close();
@@ -179,8 +173,7 @@ public class SQLUtil {
 	}
 
 	@SuppressWarnings("resource")
-	public static void commit(boolean disconnect)
-	throws DomainException {
+	public static void commit(boolean disconnect) {
 		Connection connection = threadLocalConnection.get();
 		if (connection != null) {
 			try {
@@ -204,7 +197,7 @@ public class SQLUtil {
 	}
 
 	@SuppressWarnings("resource")
-	public static void rollback() throws DomainException {
+	public static void rollback() {
 		Connection connection = threadLocalConnection.get();
 		if (connection != null) {
 			try {
@@ -232,8 +225,7 @@ public class SQLUtil {
 														String sql,
 														User user,
 														boolean forUpdate,
-														boolean withReadLock)
-	throws DomainException {
+														boolean withReadLock) {
 		assert (sql != null);
 		String newSQL = sql;
 		
@@ -282,8 +274,7 @@ public class SQLUtil {
 												String sql,
 												User user,
 												boolean forUpdate,
-												boolean withReadLock)
-	throws DomainException {
+												boolean withReadLock) {
 		DynaBean result = null;
 
 		List<DynaBean> list = retrieveListForSQL(moduleName, documentName, sql, user, forUpdate, withReadLock);

@@ -96,421 +96,323 @@ public abstract class ViewVisitor extends ActionVisitor {
 		this.view = view;
 	}
 
-	public final void visit() throws MetaDataException {
+	public final void visit() {
 		visitContainer(view, true, true);
 	}
 	
-	public abstract void visitView() throws MetaDataException;
-	public abstract void visitedView() throws MetaDataException;
+	public abstract void visitView();
+	public abstract void visitedView();
 
 	public abstract void visitTabPane(TabPane tabPane,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedTabPane(TabPane tabPane,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitTab(Tab tab,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitedTab(Tab tab,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitVBox(VBox vbox,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitedVBox(VBox vbox,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitHBox(HBox hbox,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitedHBox(HBox hbox,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 
 	// form
 	public abstract void visitForm(Form form, 
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitedForm(Form form,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitFormColumn(FormColumn column,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitFormRow(FormRow row,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitFormItem(FormItem item,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedFormItem(FormItem item,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitedFormRow(FormRow row,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 
 	// widgets
 	public abstract void visitButton(Button button,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitGeoLocator(GeoLocator locator,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitGeometry(Geometry geometry,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitMap(MapDisplay map,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitDialogButton(DialogButton button,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitDynamicImage(DynamicImage image,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
-	public abstract void visitSpacer(Spacer spacer)
-	throws MetaDataException;
+											boolean parentEnabled);
+	public abstract void visitSpacer(Spacer spacer);
 	public abstract void visitStaticImage(StaticImage image,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitLink(Link link,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 
 	public abstract void visitBlurb(Blurb blurb,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	
 	// bound widgets
 	public abstract void visitLabel(Label label,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitProgressBar(ProgressBar progressBar,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 
 	// tabular widgets
 	public abstract void visitListGrid(ListGrid grid,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedListGrid(ListGrid grid,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitTreeGrid(TreeGrid grid,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedTreeGrid(TreeGrid grid,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitDataGrid(DataGrid grid,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedDataGrid(DataGrid grid,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitDataGridBoundColumn(DataGridBoundColumn column,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedDataGridBoundColumn(DataGridBoundColumn column,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitDataGridContainerColumn(DataGridContainerColumn column,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitedDataGridContainerColumn(DataGridContainerColumn column,
 															boolean parentVisible,
-															boolean parentEnabled)
-	throws MetaDataException;
+															boolean parentEnabled);
 	public abstract void visitPickList(PickList list,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedPickList(PickList list,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitPickListColumn(PickListColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException;
+												boolean parentEnabled);
 
 	// input widgets
 	public abstract void visitCheckBox(CheckBox checkBox,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedCheckBox(CheckBox checkBox,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitCheckMembership(CheckMembership membership,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException;
+												boolean parentEnabled);
 	public abstract void visitedCheckMembership(CheckMembership membership,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitColourPicker(ColourPicker colour,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitedColourPicker(ColourPicker colour,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException;
+												boolean parentEnabled);
 	public abstract void visitCombo(Combo combo,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedCombo(Combo combo,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitContentImage(ContentImage image,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitContentLink(ContentLink link,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitHTML(HTML html,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException;
+									boolean parentEnabled);
 	public abstract void visitListMembership(ListMembership membership,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException;
+												boolean parentEnabled);
 	public abstract void visitedListMembership(ListMembership membership,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException;
+												boolean parentEnabled);
 	public abstract void visitComparison(Comparison comparison,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitLookupDescription(LookupDescription lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedLookupDescription(LookupDescription lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitLookup(Lookup lookup,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedLookup(Lookup lookup,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitPassword(Password password,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedPassword(Password password,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitRadio(Radio radio,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedRadio(Radio radio,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitRichText(RichText richText,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedRichText(RichText richText,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitSlider(Slider slider,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedSlider(Slider slider,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitSpinner(Spinner spinner,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedSpinner(Spinner spinner,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitTextArea(TextArea text,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 	public abstract void visitedTextArea(TextArea text,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitTextField(TextField text,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitedTextField(TextField text,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException;
+											boolean parentEnabled);
 	public abstract void visitInject(Inject inject,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException;
+										boolean parentEnabled);
 
 	public abstract void visitOnChangedEventHandler(Changeable changeable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitedOnChangedEventHandler(Changeable changeable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnFocusEventHandler(Focusable blurable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnFocusEventHandler(Focusable blurable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnBlurEventHandler(Focusable blurable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnBlurEventHandler(Focusable blurable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitOnAddedEventHandler(Addable addable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnAddedEventHandler(Addable addable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnEditedEventHandler(Editable editable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnEditedEventHandler(Editable editable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnRemovedEventHandler(Removable removable,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnRemovedEventHandler(Removable removable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnSelectedEventHandler(Selectable selectable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitedOnSelectedEventHandler(Selectable selectable,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnPickedEventHandler(Lookup lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnPickedEventHandler(Lookup lookup,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitOnClearedEventHandler(Lookup lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitedOnClearedEventHandler(Lookup lookup,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitRerenderEventAction(RerenderEventAction rerender,
 													EventSource source,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException;
+													boolean parentEnabled);
 	public abstract void visitServerSideActionEventAction(ServerSideActionEventAction server,
 															boolean parentVisible,
-															boolean parentEnabled)
-	throws MetaDataException;
+															boolean parentEnabled);
 	public abstract void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 														boolean parentVisible,
-														boolean parentEnabled)
-	throws MetaDataException;
+														boolean parentEnabled);
 	public abstract void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 															boolean parentVisible,
-															boolean parentEnabled)
-	throws MetaDataException;
+															boolean parentEnabled);
 	public abstract void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 															boolean parentVisible,
-															boolean parentEnabled)
-	throws MetaDataException;
+															boolean parentEnabled);
 
 	/**
 	 * Determines if an <code>Invisible</code> widget is visible or not.
 	 * @param invisible	The widget to test.
 	 * @return	if the widget is visible or not
-	 * @throws MetaDataException Potentially thrown by subclasses.
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean visible(Invisible invisible) throws MetaDataException {
+	protected boolean visible(Invisible invisible) {
 		return true;
 	}
 	
@@ -518,17 +420,15 @@ public abstract class ViewVisitor extends ActionVisitor {
 	 * Determines if an <code>Disableable</code> widget is visible or not.
 	 * @param disableable	The widget to test.
 	 * @return	if the widget is enabled or not
-	 * @throws MetaDataException Potentially thrown by subclasses.
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean enabled(Disableable disableable) throws MetaDataException {
+	protected boolean enabled(Disableable disableable) {
 		return true;
 	}
 
 	private void visitWidget(MetaData widget, 
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// containers
 		if (widget instanceof Container) {
 			visitContainer((Container) widget, parentVisible, parentEnabled);
@@ -879,8 +779,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	private void visitContainer(Container container, 
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (container == view) {
 			visitView();
 			for (MetaData widget : container.getContained()) {
@@ -924,8 +823,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	
 	protected void visitChangeable(Changeable changeable,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		List<EventAction> actions = changeable.getChangedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnChangedEventHandler(changeable, parentVisible, parentEnabled);
@@ -936,8 +834,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	protected void visitFocusable(Focusable focusable,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		List<EventAction> actions = focusable.getFocusActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnFocusEventHandler(focusable, parentVisible, parentEnabled);
@@ -954,8 +851,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	
 	private void visitLookupActions(Lookup lookup,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		visitAddableActions(lookup, parentVisible, parentEnabled);
 		visitEditableActions(lookup, parentVisible, parentEnabled);
 
@@ -975,8 +871,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	private void visitAddableActions(Addable addable,
 										boolean parentVisible,
-										boolean parentEnabled) 
-	throws MetaDataException {
+										boolean parentEnabled) {
 		List<EventAction> actions = addable.getAddedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnAddedEventHandler(addable, parentVisible, parentEnabled);
@@ -987,8 +882,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	private void visitEditableActions(Editable editable,
 										boolean parentVisible,
-										boolean parentEnabled) 
-	throws MetaDataException {
+										boolean parentEnabled) {
 		List<EventAction> actions = editable.getEditedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnEditedEventHandler(editable, parentVisible, parentEnabled);
@@ -999,8 +893,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	private void visitRemovableActions(Removable removable,
 										boolean parentVisible,
-										boolean parentEnabled) 
-	throws MetaDataException {
+										boolean parentEnabled) {
 		List<EventAction> actions = removable.getRemovedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnRemovedEventHandler(removable, parentVisible, parentEnabled);
@@ -1011,8 +904,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 
 	private void visitSelectableActions(Selectable selectable,
 											boolean parentVisible,
-											boolean parentEnabled) 
-	throws MetaDataException {
+											boolean parentEnabled) {
 		List<EventAction> actions = selectable.getSelectedActions();
 		if ((actions != null) && (! actions.isEmpty())) {
 			visitOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
@@ -1021,8 +913,10 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 	}
 
-	private void visitActions(EventSource source, List<EventAction> actions, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	private void visitActions(EventSource source, 
+								List<EventAction> actions, 
+								boolean parentVisible, 
+								boolean parentEnabled) {
 		if (actions != null) {
 			for (EventAction action : actions) {
 				if (action instanceof RerenderEventAction) {

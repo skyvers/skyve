@@ -33,7 +33,6 @@ import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -57,16 +56,12 @@ public class ValidationUtil {
 	 * @param document The document to validate.
 	 * @param bean The bean to validate.
 	 * @param e The exception to populate.
-	 * @throws ValidationException Thrown if validation or access errors are encountered.
-	 * @throws MetaDataException	When base the base document hierarchy cannot be accessed.
 	 */
-	public static void validateBeanAgainstDocument(Document document, Bean bean) 
-	throws ValidationException, MetaDataException {
+	public static void validateBeanAgainstDocument(Document document, Bean bean) {
 		validateBeanAgainstDocument(CORE.getUser().getCustomer(), document, bean);
 	}
 
-	private static void validateBeanAgainstDocument(Customer customer, Document document, Bean bean)
-	throws ValidationException, MetaDataException {
+	private static void validateBeanAgainstDocument(Customer customer, Document document, Bean bean) {
 		ValidationException e = new ValidationException();
 		for (Attribute attribute : document.getAttributes()) {
 			validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
@@ -95,12 +90,9 @@ public class ValidationUtil {
 	 * @param attribute The attribute to validate.
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
-	 * @throws ValidationException Only thrown if an exception occurs getting a bean value, 
-	 * 								otherwise messages are appended to the e argument.
 	 */
 	@SuppressWarnings("unchecked")
-	public static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e)
-	throws ValidationException {
+	public static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e) {
 		String binding = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
 		if (AttributeType.inverseOne.equals(type) || 
@@ -308,8 +300,7 @@ public class ValidationUtil {
 		}
 	}
 	
-	private static Object getAttributeValue(Bean bean, String binding) 
-	throws ValidationException {
+	private static Object getAttributeValue(Bean bean, String binding) {
 		Object result = null;
 		try {
 			result = BindUtil.get(bean, binding);
@@ -331,10 +322,8 @@ public class ValidationUtil {
 	 * 
 	 * @param bizlet	To validate against
 	 * @param bean	To validate
-	 * @throws ValidationException
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) 
-	throws ValidationException {
+	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) {
 		ValidationException e = new ValidationException();
 
 		try {
@@ -379,14 +368,11 @@ public class ValidationUtil {
 	 * @param e
 	 * @param masterBean
 	 * @param validatedBean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	public static void processErrorMessageBindings(Customer customer,
 													final Message e,
 													Bean masterBean,
-													final Bean validatedBean) 
-	throws DomainException, MetaDataException {
+													final Bean validatedBean) {
 		Document masterDocument = customer.getModule(masterBean.getBizModule()).getDocument(customer, 
 																								masterBean.getBizDocument());
 
@@ -397,8 +383,7 @@ public class ValidationUtil {
 							Document document,
 							Document owningDocument,
 							Relation owningRelation,
-							Bean bean)
-			throws DomainException, MetaDataException {
+							Bean bean) {
 				if (bean == validatedBean) {
 					if (binding.length() > 0) {
 						e.setBindingPrefix(binding + '.');
@@ -412,8 +397,7 @@ public class ValidationUtil {
 		}.visit(masterDocument, masterBean, customer);
 	}
 
-	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean)
-	throws UniqueConstraintViolationException, ValidationException {
+	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		try {
 			for (Attribute attribute : document.getAllAttributes()) {
 				if (attribute instanceof Collection) {

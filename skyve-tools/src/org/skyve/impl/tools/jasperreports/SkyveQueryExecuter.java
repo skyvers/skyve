@@ -1,20 +1,19 @@
 package org.skyve.impl.tools.jasperreports;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.query.JRQueryExecuter;
-
 import org.skyve.CORE;
 import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.query.JRQueryExecuter;
 
 public class SkyveQueryExecuter implements JRQueryExecuter {
 	private String moduleDotQuery;
@@ -50,8 +49,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
         }
 	}
 	
-	public static DocumentQueryDefinition getQuery(String moduleDotQuery)
-	throws MetaDataException {
+	public static DocumentQueryDefinition getQuery(String moduleDotQuery) {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
 		UserImpl user = new UserImpl();
 		user.setCustomerName("bizhub");

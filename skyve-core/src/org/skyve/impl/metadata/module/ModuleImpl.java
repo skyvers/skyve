@@ -89,8 +89,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) 
-	throws MetaDataException {
+	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
 		DocumentQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
@@ -137,8 +136,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		return result;
 	}
 
-	private void processColumns(Customer customer, Document document, List<QueryColumn> columns)
-	throws MetaDataException {
+	private void processColumns(Customer customer, Document document, List<QueryColumn> columns) {
 		// NB We have to manually traverse the document inheritence hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
@@ -195,11 +193,9 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 * @param customer Can be null which means that this method returns the un-overridden document.
 	 * @param documentName
 	 * @return
-	 * @throws MetaDataException
 	 */
 	@Override
-	public Document getDocument(Customer customer, String documentName) 
-	throws MetaDataException {
+	public Document getDocument(Customer customer, String documentName) {
 		Document result = AbstractRepository.get().getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new IllegalStateException("Document " + documentName + " does not exist in module " + getName());

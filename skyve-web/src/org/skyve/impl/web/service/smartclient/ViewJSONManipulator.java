@@ -291,8 +291,7 @@ class ViewJSONManipulator extends ViewVisitor {
 							Bean bean,
 							int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 							int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
-							boolean forApply)
-	throws MetaDataException {
+							boolean forApply) {
 		super((CustomerImpl) user.getCustomer(),
 				(ModuleImpl) module,
 				(DocumentImpl) document,
@@ -697,8 +696,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	// find the existing bean with retrieve
-	private Bean findReferencedBean(Document referenceDocument, String bizId, AbstractPersistence persistence)
-	throws DomainException, MetaDataException {
+	private Bean findReferencedBean(Document referenceDocument, String bizId, AbstractPersistence persistence) {
 		Bean result = persistence.retrieve(referenceDocument, bizId, false);
 		if (result == null) {
 			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
@@ -838,10 +836,8 @@ class ViewJSONManipulator extends ViewVisitor {
 	 * (if not there already) for inclusion in the instance.
 	 * 
 	 * @param binding	The binding for the domain values lookup.
-	 * @throws MetaDataException	When the binding cannot be resolved.
 	 */
-	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) 
-	throws MetaDataException {
+	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) {
 		String safeBinding = binding.replace('.', '_');
 		if (! valueMaps.containsKey(safeBinding)) {
             TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -902,16 +898,16 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	protected boolean visible(Invisible invisible) throws MetaDataException {
+	protected boolean visible(Invisible invisible) {
 		return evaluateConditionInOppositeSense(invisible.getInvisibleConditionName());
 	}
 
 	@Override
-	protected boolean enabled(Disableable disableable) throws MetaDataException {
+	protected boolean enabled(Disableable disableable) {
 		return evaluateConditionInOppositeSense(disableable.getDisabledConditionName());
 	}
 	
-	private boolean evaluateConditionInOppositeSense(String conditionName) throws MetaDataException {
+	private boolean evaluateConditionInOppositeSense(String conditionName) {
 		boolean result = true;
 
 		if (conditionName != null) {
@@ -927,7 +923,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() throws MetaDataException {
+	public void visitView() {
 		addCondition(Bean.PERSISTED_KEY); // for inplicit actions in toolbar
 		addCondition(Bean.CREATED_KEY); // for create/edit view to operate
 		addCondition(Bean.NOT_CREATED_KEY); // for create/edit view to operate
@@ -936,8 +932,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitTabPane(TabPane tabPane,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		addCondition(tabPane.getInvisibleConditionName());
 		addCondition(tabPane.getDisabledConditionName());
 	}
@@ -952,8 +947,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitTab(Tab tab,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		addCondition(tab.getInvisibleConditionName());
 		addCondition(tab.getDisabledConditionName());
 		addCondition(tab.getSelectedConditionName());
@@ -969,24 +963,21 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitVBox(VBox vbox,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		addCondition(vbox.getInvisibleConditionName());
 	}
 
 	@Override
 	public void visitHBox(HBox hbox,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		addCondition(hbox.getInvisibleConditionName());
 	}
 
 	@Override
 	public void visitForm(Form form,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		addCondition(form.getDisabledConditionName());
 		addCondition(form.getInvisibleConditionName());
 	}
@@ -994,8 +985,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedForm(Form form,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// keep this in sync with the generated edit views
 		if (ViewType.create.equals(view.getType())) {
 			createIdCounter++;
@@ -1008,46 +998,40 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitFormColumn(FormColumn column,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
 	public void visitFormRow(FormRow row,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
 	public void visitedFormItem(FormItem item,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
 	public void visitedFormRow(FormRow row,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
 	public void visitButton(Button button,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		Action action = view.getAction(button.getActionName());
 		addCondition(action.getInvisibleConditionName());
 		addCondition(action.getDisabledConditionName());
@@ -1056,8 +1040,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitGeoLocator(GeoLocator locator,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		addCondition(locator.getInvisibleConditionName());
 		addCondition(locator.getDisabledConditionName());
 	}
@@ -1065,8 +1048,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1084,16 +1066,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitMap(MapDisplay map,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		addCondition(map.getInvisibleConditionName());
 	}
 
 	@Override
 	public void visitDialogButton(DialogButton button,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		addCondition(button.getInvisibleConditionName());
 		addCondition(button.getDisabledConditionName());
 	}
@@ -1101,8 +1081,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitDynamicImage(DynamicImage image,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1141,15 +1120,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) throws MetaDataException {
+	public void visitSpacer(Spacer spacer) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitStaticImage(StaticImage image,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1167,8 +1145,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitContentImage(ContentImage image,
 									boolean parentVisible, 
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1198,8 +1175,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
-							boolean parentEnabled) 
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1236,8 +1212,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitLabel(Label label,
 							boolean parentVisible,
-							boolean parentEnabled) 
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1297,8 +1272,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitLink(Link link,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
@@ -1370,8 +1344,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitContentLink(ContentLink link, 
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1392,8 +1365,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitParameter(Parameter parameter,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -1405,16 +1377,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitFilterParameter(FilterParameter parameter,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		visitParameter(parameter, parentVisible, parentEnabled);
 	}
 
 	@Override
 	public void visitProgressBar(ProgressBar progressBar,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (parentVisible && visible(progressBar)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -1427,8 +1397,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitListGrid(ListGrid grid,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
 		addCondition(grid.getDisableAddConditionName());
@@ -1442,8 +1411,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitTreeGrid(TreeGrid grid,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
 		addCondition(grid.getDisableAddConditionName());
@@ -1461,8 +1429,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitDataGrid(DataGrid grid,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		htmlGuts.setLength(0);
 
 		// NB Allow bindings in a grid with getEditable() false through as there could be 
@@ -1583,8 +1550,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && 
@@ -1599,24 +1565,21 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		htmlGuts.setLength(0);
 	}
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		addFormat(UtilImpl.processStringValue(htmlGuts.toString()));
 	}
 
@@ -1625,8 +1588,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitPickList(PickList list,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (parentVisible && visible(list)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -1655,8 +1617,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitPickListColumn(PickListColumn column,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -1668,8 +1629,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitCheckBox(CheckBox checkBox,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1687,16 +1647,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedCheckBox(CheckBox checkBox,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitCheckMembership(CheckMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		addCondition(membership.getDisabledConditionName());
 		addCondition(membership.getInvisibleConditionName());
 
@@ -1723,16 +1681,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedCheckMembership(CheckMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitColourPicker(ColourPicker colour,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1750,16 +1706,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedColourPicker(ColourPicker colour,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitCombo(Combo combo,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			if (parentVisible) {
 				if ((! forApply) || 
@@ -1788,16 +1742,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedCombo(Combo combo,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitRichText(RichText text,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1815,16 +1767,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedRichText(RichText richText,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitHTML(HTML html,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -1841,8 +1791,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		addCondition(membership.getDisabledConditionName());
 		addCondition(membership.getInvisibleConditionName());
 
@@ -1871,16 +1820,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedListMembership(ListMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitComparison(Comparison comparison,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		addCondition(comparison.getDisabledConditionName());
 		addCondition(comparison.getInvisibleConditionName());
 
@@ -1917,8 +1864,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addComparisonBindingsForApply(ComparisonComposite node, Document nodeDocument)
-	throws MetaDataException {
+	private void addComparisonBindingsForApply(ComparisonComposite node, Document nodeDocument) {
         String nodeReferenceName = node.getReferenceName();
         if (nodeReferenceName != null) {
             currentBindings = currentBindings.putOrGetChild(nodeReferenceName, nodeDocument);
@@ -1943,8 +1889,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitLookupDescription(LookupDescription lookup,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		if (visitingDataGrid) {
 			// Can be no lookup binding if the lookup is in a data grid and represents the entire data grid row
 			String lookupBinding = lookup.getBinding();
@@ -1992,16 +1937,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedLookupDescription(LookupDescription lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitLookup(Lookup lookup,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2023,16 +1966,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedLookup(Lookup lookup,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitPassword(Password password, 
 								boolean parentVisible,
-								boolean parentEnabled) 
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2050,16 +1991,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedPassword(Password password,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitRadio(Radio radio,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2076,16 +2015,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedRadio(Radio radio,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitSlider(Slider slider, 
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2103,16 +2040,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedSlider(Slider slider,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitSpinner(Spinner spinner,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2130,16 +2065,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedSpinner(Spinner spinner,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitTextArea(TextArea text,
 								boolean parentVisible,
-								boolean parentEnabled) 
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2157,16 +2090,14 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedTextArea(TextArea text,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitTextField(TextField text,
 								boolean parentVisible,
-								boolean parentEnabled) 
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (visitingDataGrid) {
 			return;
 		}
@@ -2184,14 +2115,12 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitedTextField(TextField text,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -2227,226 +2156,208 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitAction(ActionImpl action) throws MetaDataException {
+	public void visitAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitReportAction(ActionImpl action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+	public void visitDownloadAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnEditedEventHandler(Editable editable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnSelectedEventHandler(Selectable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnPickedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnPickedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnClearedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitedOnClearedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -2454,24 +2365,21 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 											EventSource source,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// no properties here
 	}
 
 	@Override
 	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		// no properties here
 	}
 
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		addCondition(setDisabled.getDisabledConditionName());
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
 		addBinding(setDisabled.getBinding(), true);
@@ -2480,8 +2388,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
 		addBinding(toggleDisabled.getBinding(), true);
 	}
@@ -2489,8 +2396,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
 		addBinding(toggleVisibility.getBinding(), true);
 	}
@@ -2499,8 +2405,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		addCondition(setInvisible.getInvisibleConditionName());
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
 		addBinding(setInvisible.getBinding(), true);

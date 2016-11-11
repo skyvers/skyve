@@ -1,10 +1,7 @@
 package org.skyve.impl.metadata.view.reference;
 
-import org.skyve.metadata.MetaDataException;
-
 public abstract class ReferenceProcessor {
-	public final void process(Reference reference)
-	throws MetaDataException {
+	public final void process(Reference reference) {
 		if (reference instanceof ActionReference) {
 			processActionReference((ActionReference) reference);
 		}
@@ -37,22 +34,13 @@ public abstract class ReferenceProcessor {
 		}
 	}
 	
-	public abstract void processActionReference(ActionReference reference)
-	throws MetaDataException;
-	public abstract void processContentReference(ContentReference reference)
-	throws MetaDataException;
-	public abstract void processDefaultListViewReference(DefaultListViewReference reference)
-	throws MetaDataException;
-	public abstract void processEditViewReference(EditViewReference reference)
-	throws MetaDataException;
-	public abstract void processExternalReference(ExternalReference reference)
-	throws MetaDataException;
-	public abstract void processImplicitActionReference(ImplicitActionReference reference)
-	throws MetaDataException;
-	public abstract void processQueryListViewReference(QueryListViewReference reference)
-	throws MetaDataException;
-	public abstract void processReportReference(ReportReference reference)
-	throws MetaDataException;
-	public abstract void processResourceReference(ResourceReference reference)
-	throws MetaDataException;
+	public abstract void processActionReference(ActionReference reference);
+	public abstract void processContentReference(ContentReference reference);
+	public abstract void processDefaultListViewReference(DefaultListViewReference reference);
+	public abstract void processEditViewReference(EditViewReference reference);
+	public abstract void processExternalReference(ExternalReference reference);
+	public abstract void processImplicitActionReference(ImplicitActionReference reference);
+	public abstract void processQueryListViewReference(QueryListViewReference reference);
+	public abstract void processReportReference(ReportReference reference);
+	public abstract void processResourceReference(ResourceReference reference);
 }

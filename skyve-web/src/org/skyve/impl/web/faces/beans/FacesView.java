@@ -37,7 +37,6 @@ import org.skyve.impl.web.faces.actions.SaveAction;
 import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
@@ -320,8 +319,7 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	@SuppressWarnings("static-method")
-	public void setUser(String customerName, String userName)
-	throws MetaDataException {
+	public void setUser(String customerName, String userName) {
 		User user = null;
 		AbstractRepository repository = AbstractRepository.get();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();

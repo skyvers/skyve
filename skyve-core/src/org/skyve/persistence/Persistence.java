@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermissionScope;
@@ -58,90 +56,69 @@ public interface Persistence extends Serializable {
 	/**
 	 * Refresh the bean's state from the database.
 	 */
-	public void refresh(Bean bean) throws DomainException;
+	public void refresh(Bean bean);
 	
 	/**
 	 * 
 	 * @param document
 	 * @param beanToSave
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void preFlush(Document document, Bean beanToSave) throws DomainException, MetaDataException;
+	public void preFlush(Document document, Bean beanToSave);
 	
 	/**
 	 * 
 	 * @param document
 	 * @param bean
 	 * @return
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends PersistentBean> T save(Document document, T bean) throws DomainException, MetaDataException;
+	public <T extends PersistentBean> T save(Document document, T bean);
 	
 	/**
 	 * 
 	 * @param bean
 	 * @return
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends PersistentBean> T save(T bean) throws DomainException, MetaDataException;
+	public <T extends PersistentBean> T save(T bean);
 
 	/**
 	 * 
 	 * @param document
 	 * @param beanToSave
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void postFlush(Document document, Bean beanToSave) throws DomainException, MetaDataException;
+	public void postFlush(Document document, Bean beanToSave);
 	
 	/**
 	 * 
 	 * @param document
 	 * @param bean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends PersistentBean> void delete(Document document, T bean) throws DomainException, MetaDataException;
+	public <T extends PersistentBean> void delete(Document document, T bean);
 	
 	/**
 	 * 
 	 * @param bean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends PersistentBean> void delete(T bean) throws DomainException, MetaDataException;
+	public <T extends PersistentBean> void delete(T bean);
 
 	/**
 	 * 
 	 * @param bean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void upsertBeanTuple(PersistentBean bean) 
-	throws DomainException, MetaDataException;
+	public void upsertBeanTuple(PersistentBean bean);
 
 	/**
 	 * 
 	 * @param owningBean
 	 * @param collectionName
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName)
-	throws DomainException, MetaDataException;
+	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName);
 
 	/**
 	 * 
 	 * @param owningBean
 	 * @param collectionName
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void insertCollectionTuples(PersistentBean owningBean, String collectionName)
-	throws DomainException, MetaDataException;
+	public void insertCollectionTuples(PersistentBean owningBean, String collectionName);
 
 	/**
 	 * 
@@ -149,11 +126,8 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @param forUpdate
 	 * @return
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) 
-	throws DomainException, MetaDataException;
+	public <T extends Bean> T retrieve(Document document, String id, boolean forUpdate);
 
 	/**
 	 * 
@@ -162,11 +136,8 @@ public interface Persistence extends Serializable {
 	 * @param id
 	 * @param forUpdate
 	 * @return
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public <T extends Bean> T retrieve(String moduleName, String documentName, String id, boolean forUpdate) 
-	throws DomainException, MetaDataException;
+	public <T extends Bean> T retrieve(String moduleName, String documentName, String id, boolean forUpdate);
 
 
 	/**
@@ -179,15 +150,13 @@ public interface Persistence extends Serializable {
 	/**
 	 * Sets all document scopes for this persistence instance.
 	 * @param scope	The scope to use for ALL documents.
-	 * @throws MetaDataException	When the user modules and documents cannot be accessed.
 	 */
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope) throws MetaDataException;
+	public void setDocumentPermissionScopes(DocumentPermissionScope scope);
 
 	/**
 	 * Resets ALL the document scopes to what the user is allowed to access.
-	 * @throws MetaDataException	When the user modules and documents cannot be accessed.
 	 */
-	public void resetDocumentPermissionScopes() throws MetaDataException;
+	public void resetDocumentPermissionScopes();
 	
 	/**
 	 * 
@@ -196,9 +165,9 @@ public interface Persistence extends Serializable {
 	 */
 	public SQL newSQL(String query);	
 	
-	public SQL newNamedSQL(String moduleName, String queryName) throws MetaDataException;	
+	public SQL newNamedSQL(String moduleName, String queryName);	
 
-	public SQL newNamedSQL(Module module, String queryName) throws MetaDataException;
+	public SQL newNamedSQL(Module module, String queryName);
 
 	/**
 	 * 
@@ -207,8 +176,7 @@ public interface Persistence extends Serializable {
 	 */
 	public SQL newSQL(String moduleName, String documentName, String query);
 
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
-	throws MetaDataException;
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName);
 	
 	/**
 	 * 
@@ -217,7 +185,7 @@ public interface Persistence extends Serializable {
 	 */
 	public SQL newSQL(Document document, String query);	
 
-	public SQL newNamedSQL(Document document, String queryName) throws MetaDataException;	
+	public SQL newNamedSQL(Document document, String queryName);	
 
 	/**
 	 * 
@@ -226,14 +194,13 @@ public interface Persistence extends Serializable {
 	 */
 	public BizQL newBizQL(String query);	
 	
-	public BizQL newNamedBizQL(String moduleName, String queryName) throws MetaDataException;	
+	public BizQL newNamedBizQL(String moduleName, String queryName);	
 
-	public BizQL newNamedBizQL(Module module, String queryName) throws MetaDataException;
+	public BizQL newNamedBizQL(Module module, String queryName);
 
-	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName)
-	throws MetaDataException;
+	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName);
 
-	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) throws MetaDataException;
+	public DocumentQuery newNamedDocumentQuery(Module module, String queryName);
 
 	/**
 	 * 
@@ -247,10 +214,8 @@ public interface Persistence extends Serializable {
 	 * @param moduleName
 	 * @param documentName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName)
-	throws MetaDataException;	
+	public DocumentQuery newDocumentQuery(String moduleName, String documentName);	
 	
 	/**
 	 * 

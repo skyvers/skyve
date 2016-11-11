@@ -30,7 +30,6 @@ import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -146,8 +145,7 @@ public class ListGrid extends HtmlPanelGroup {
 						String managedBeanName,
 						boolean canCreate,
 						boolean paginator,
-						UserAgentType type) 
-	throws MetaDataException {
+						UserAgentType type) {
 		String moduleName = query.getOwningModule().getName();
 		String documentName = query.getDocumentName();
 
@@ -255,8 +253,7 @@ public class ListGrid extends HtmlPanelGroup {
 											Application a,
 											ExpressionFactory ef,
 											ELContext elc,
-											UserAgentType type)
-	throws MetaDataException {
+											UserAgentType type) {
 		StringBuilder value = new StringBuilder(128);
 		Module module = null;
 		Document document = null;

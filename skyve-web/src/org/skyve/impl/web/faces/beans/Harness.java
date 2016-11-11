@@ -90,8 +90,7 @@ public abstract class Harness extends Localisable {
 		return Util.getSkyveContextUrl() + '/';
 	}
 	
-	public final void initialise(Customer customer, UserImpl user, Locale requestLocale)
-	throws MetaDataException, SecurityException {
+	public final void initialise(Customer customer, UserImpl user, Locale requestLocale) {
 		super.initialise(user, requestLocale);
 		
 		StringBuilder sb = new StringBuilder(64);
@@ -160,8 +159,7 @@ public abstract class Harness extends Localisable {
 																Module module,
 																MenuItem item,
 																String queryName,
-																String documentName)
-	throws MetaDataException {
+																String documentName) {
         DocumentQueryDefinition query = null;
 		if (queryName != null) {
             query = module.getDocumentQuery(queryName);

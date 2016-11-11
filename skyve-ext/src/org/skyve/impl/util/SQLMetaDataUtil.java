@@ -26,7 +26,7 @@ public class SQLMetaDataUtil {
 		// no implementation
 	}
 
-	public static void populateUser(User user) throws MetaDataException {
+	public static void populateUser(User user) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
@@ -117,8 +117,7 @@ public class SQLMetaDataUtil {
 		}
 	}
 
-	public static List<Bean> retrieveAllJobSchedulesForAllCustomers()
-	throws MetaDataException {
+	public static List<Bean> retrieveAllJobSchedulesForAllCustomers() {
 		List<Bean> result = new ArrayList<>();
 		
 		// Principal -> User

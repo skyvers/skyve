@@ -7,7 +7,6 @@ import modules.admin.ThemeCharter.ChartAspect;
 import modules.admin.domain.SystemDashboard;
 
 import org.jfree.chart.plot.PlotOrientation;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 
@@ -24,7 +23,7 @@ public class ActivityBreakdown implements DynamicImage<SystemDashboard> {
 		return charter.getBarChartImage("", "", null, PlotOrientation.VERTICAL, width, height, ChartAspect.FLAT, false);
 	}
 
-	public static String getActivityBreakdownSQL(User user) throws MetaDataException {
+	public static String getActivityBreakdownSQL(User user) {
 
 		StringBuilder sb = new StringBuilder("SELECT userName");
 		sb.append(", sum(numberofhits) ");

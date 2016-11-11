@@ -14,7 +14,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.MetaDataException;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
@@ -68,7 +67,7 @@ public class Router implements MetaData, PersistentMetaData<Router> {
 	}
 	
 	@Override
-	public Router convert(String metaDataName) throws MetaDataException {
+	public Router convert(String metaDataName) {
 		// TODO look at conversion 
 		
 		for (UxUiMetadata uxui : uxuis) {

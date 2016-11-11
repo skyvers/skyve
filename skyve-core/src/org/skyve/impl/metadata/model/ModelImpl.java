@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -59,7 +58,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public List<? extends Attribute> getAllAttributes() throws MetaDataException {
+	public List<? extends Attribute> getAllAttributes() {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {

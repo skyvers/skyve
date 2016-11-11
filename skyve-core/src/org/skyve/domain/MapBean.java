@@ -6,7 +6,6 @@ import java.util.TreeMap;
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.impl.domain.AbstractBean;
 
@@ -88,7 +87,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 	}
 
 	@Override
-	public boolean evaluateCondition(String conditionName) throws MetaDataException {
+	public boolean evaluateCondition(String conditionName) {
 		// TODO we could evaluate conditions here I suppose using bean shell
 		return false;
 	}

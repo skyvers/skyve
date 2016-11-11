@@ -22,7 +22,6 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.Menu;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -57,7 +56,7 @@ public class PhoneMenu extends HtmlPanelGroup {
 		super.encodeBegin(context);
 	}
 	
-	void addMenuPage() throws MetaDataException {
+	void addMenuPage() {
 		UserImpl user = (UserImpl) CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -115,7 +114,7 @@ public class PhoneMenu extends HtmlPanelGroup {
 		PhoneMenu.this.getChildren().add(page);
 	}
 
-	void addModulePages(String uxui) throws MetaDataException {
+	void addModulePages(String uxui) {
 		UserImpl user = (UserImpl) CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -134,7 +133,7 @@ public class PhoneMenu extends HtmlPanelGroup {
 								List<MenuItem> items,
 								String uxui,
 								Customer customer,
-								Module module) throws MetaDataException {
+								Module module) {
 		FacesContext fc = FacesContext.getCurrentInstance();
 		Application a = fc.getApplication();
 

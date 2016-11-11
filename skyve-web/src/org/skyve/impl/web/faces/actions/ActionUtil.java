@@ -9,7 +9,6 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -86,8 +85,7 @@ public class ActionUtil {
 		ec.redirect(outcome.toString());
     }
     
-    public static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName)
-	throws MetaDataException {
+    public static DocumentQueryDefinition getDocumentQuery(final String bizModule, final String queryName) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bizModule);

@@ -165,7 +165,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	}
 
 	@Override
-	public org.skyve.metadata.view.View convert(String metaDataName) throws MetaDataException {
+	public org.skyve.metadata.view.View convert(String metaDataName) {
 		ViewImpl result = new ViewImpl();
 		String value = getTitle();
 		if (value == null) {

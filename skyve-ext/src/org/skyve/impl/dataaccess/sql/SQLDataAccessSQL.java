@@ -8,7 +8,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.persistence.AbstractSQL;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
@@ -24,8 +23,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 		this.dataAccess = dataAccess;
 	}
 
-	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccessImpl dataAccess)
-	throws MetaDataException {
+	SQLDataAccessSQL(String moduleName, String documentName, String query, SQLDataAccessImpl dataAccess) {
 		super(moduleName, documentName, query);
 		Customer customer = CORE.getUser().getCustomer();
 		this.document = customer.getModule(moduleName).getDocument(customer, documentName);
@@ -38,7 +36,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults() throws DomainException {
+	public <T extends Bean> List<T> beanResults() {
 		if (document == null) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
@@ -54,8 +52,7 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		if (document == null) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
@@ -64,32 +61,31 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults() throws DomainException {
+	public <T extends Bean> List<T> projectedResults() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public final <T extends Bean> T projectedResult() throws DomainException {
+	public final <T extends Bean> T projectedResult() {
 		List<T> results = projectedResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public final <T extends Bean> T retrieveProjected() throws DomainException {
+	public final <T extends Bean> T retrieveProjected() {
 		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) throws DomainException {
+	public <T> List<T> scalarResults(Class<T> type) {
 		List<T> results = new ArrayList<>(100);
 		try (SQLIterable<T> iterable = new SQLIterable<>(null, dataAccess, this, type)) {
 			for (T result : iterable) {
@@ -101,13 +97,12 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
-	throws DomainException {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		return new SQLIterable<>(null, dataAccess, this, type);
 	}
 
 	@Override
-	public List<Object[]> tupleResults() throws DomainException {
+	public List<Object[]> tupleResults() {
 		List<Object[]> results = new ArrayList<>(100);
 		try (SQLIterable<Object[]> iterable = new SQLIterable<>(null, dataAccess, this, null)) {
 			for (Object[] result : iterable) {
@@ -119,13 +114,12 @@ class SQLDataAccessSQL extends AbstractSQL implements ProjectedQuery {
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable() 
-	throws DomainException {
+	public AutoClosingIterable<Object[]> tupleIterable() {
 		return new SQLIterable<>(null, dataAccess, this, null);
 	}
 
 	@Override
-	public int execute() throws DomainException {
+	public int execute() {
 		// TODO Auto-generated method stub
 		return 0;
 	}

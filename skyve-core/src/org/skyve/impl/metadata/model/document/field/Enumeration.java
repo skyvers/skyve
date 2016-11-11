@@ -87,8 +87,7 @@ public class Enumeration extends Field {
 	private Document owningDocument;
 	
 	@XmlTransient
-	public String getTypeName()
-	throws MetaDataException {
+	public String getTypeName() {
 		return getTarget().typeName;
 	}
 
@@ -144,8 +143,7 @@ public class Enumeration extends Field {
 	}
 
 	@XmlTransient
-	public List<EnumeratedValue> getValues()
-	throws MetaDataException {
+	public List<EnumeratedValue> getValues() {
 		return getTarget().values;
 	}
 	
@@ -155,8 +153,7 @@ public class Enumeration extends Field {
 		return DomainType.constant;
 	}
 	
-	public String toJavaIdentifier()
-	throws MetaDataException{
+	public String toJavaIdentifier() {
 		String result = getTarget().typeName;
 
 		if (result == null) {
@@ -169,10 +166,8 @@ public class Enumeration extends Field {
 	/**
 	 * Get the target - it is either another enumeration or itself.
 	 * @return
-	 * @throws MetaDataException 
 	 */
-	public Enumeration getTarget()
-	throws MetaDataException {
+	public Enumeration getTarget() {
 		Enumeration result = this;
 		
 		// This is a reference to another enumeration

@@ -56,13 +56,10 @@ public abstract class BeanVisitor {
 	 * @param document
 	 * @param bean
 	 * @param customer
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	public void visit(Document document, 
 						Bean bean, 
-						Customer customer)
-	throws DomainException, MetaDataException {
+						Customer customer) {
 		Set<String> visited = new HashSet<>();
 		visit("", document, null, null, bean, customer, visited);
 	}
@@ -89,8 +86,7 @@ public abstract class BeanVisitor {
 						Relation owningRelation,
 						Bean bean,
 						Customer customer,
-						Set<String> visited) 
-	throws DomainException, MetaDataException {
+						Set<String> visited) {
 		if (bean == null) {
 			if (owningRelation != null) {
 				String owningRelationName = owningRelation.getName();

@@ -11,7 +11,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.web.SortParameter;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;
@@ -36,8 +35,7 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 	private Document drivingDocument;
 	private DocumentQueryDefinition query;
 
-	public void setQuery(DocumentQueryDefinition query) 
-	throws MetaDataException {
+	public void setQuery(DocumentQueryDefinition query) {
 		customer = CORE.getUser().getCustomer();
 		this.query = query;
 		description = query.getDescription();
@@ -200,7 +198,7 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		p.delete(drivingDocument, bean);
 	}
 	
-	private void establishQueries() throws MetaDataException {
+	private void establishQueries() {
 		if (detailQuery == null) {
 			detailQuery = query.constructDocumentQuery(null, getSelectedTagId());
 		}

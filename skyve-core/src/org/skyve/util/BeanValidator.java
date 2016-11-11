@@ -2,13 +2,10 @@ package org.skyve.util;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.ValidationUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
@@ -32,11 +29,8 @@ public class BeanValidator {
 	 * @param document The document to validate.
 	 * @param bean The bean to validate.
 	 * @param e The exception to populate.
-	 * @throws ValidationException Thrown if validation or access errors are encountered.
-	 * @throws MetaDataException	Thrown if the error message cannot access the attributes converter.
 	 */
-	public static void validateBeanAgainstDocument(Document document, Bean bean) 
-	throws ValidationException, MetaDataException {
+	public static void validateBeanAgainstDocument(Document document, Bean bean) {
 		ValidationUtil.validateBeanAgainstDocument(document, bean);
 	}
 
@@ -45,11 +39,8 @@ public class BeanValidator {
 	 * 
 	 * @param bean The bean to validate.
 	 * @param e The exception to populate.
-	 * @throws ValidationException Thrown if validation or access errors are encountered.
-	 * @throws MetaDataException	When base the base document hierarchy cannot be accessed.
 	 */
-	public static void validateBeanAgainstDocument(Bean bean) 
-	throws ValidationException, MetaDataException {
+	public static void validateBeanAgainstDocument(Bean bean) {
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -63,11 +54,11 @@ public class BeanValidator {
 	 * @param attribute The attribute to validate.
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
-	 * @throws ValidationException Only thrown if an exception occurs getting a bean value, 
-	 * 								otherwise messages are appended to the e argument.
 	 */
-	public static void validateBeanPropertyAgainstAttribute(Customer customer, Attribute attribute, Bean bean, ValidationException e)
-	throws ValidationException {
+	public static void validateBeanPropertyAgainstAttribute(Customer customer, 
+																Attribute attribute, 
+																Bean bean, 
+																ValidationException e) {
 		ValidationUtil.validateBeanPropertyAgainstAttribute(customer, attribute, bean, e);
 	}
 
@@ -77,12 +68,8 @@ public class BeanValidator {
 	 * @param attribute The attribute to validate.
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
-	 * @throws ValidationException Only thrown if an exception occurs getting a bean value, 
-	 * 								otherwise messages are appended to the e argument.
-	 * @throws MetaDataException	When the attribute cannot be validated.
 	 */
-	public static void validateBeanPropertyAgainstAttribute(Attribute attribute, Bean bean, ValidationException e)
-	throws ValidationException, MetaDataException {
+	public static void validateBeanPropertyAgainstAttribute(Attribute attribute, Bean bean, ValidationException e) {
 		validateBeanPropertyAgainstAttribute(CORE.getUser().getCustomer(), attribute, bean, e);
 	}
 	
@@ -92,12 +79,8 @@ public class BeanValidator {
 	 * @param attributeName The name of the attribute to validate.
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
-	 * @throws ValidationException Only thrown if an exception occurs getting a bean value, 
-	 * 								otherwise messages are appended to the e argument.
-	 * @throws MetaDataException	When the attribute cannot be validated.
 	 */
-	public static void validateBeanPropertyAgainstAttribute(String attributeName, Bean bean, ValidationException e)
-	throws ValidationException, MetaDataException {
+	public static void validateBeanPropertyAgainstAttribute(String attributeName, Bean bean, ValidationException e) {
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -114,10 +97,8 @@ public class BeanValidator {
 	 * 
 	 * @param bizlet	To validate against
 	 * @param bean	To validate
-	 * @throws ValidationException
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) 
-	throws ValidationException {
+	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) {
 		ValidationUtil.validateBeanAgainstBizlet(bizlet, bean);
 	}
 
@@ -130,11 +111,8 @@ public class BeanValidator {
 	 * 
 	 * @param document	To get the bizlet to validate against
 	 * @param bean	To validate
-	 * @throws ValidationException
-	 * @throws MetaDataException	when the Bizlet cannot be obtained
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Document document, T bean) 
-	throws ValidationException, MetaDataException {
+	public static <T extends Bean> void validateBeanAgainstBizlet(Document document, T bean) {
 		Bizlet<T> bizlet = ((DocumentImpl) document).getBizlet(CORE.getUser().getCustomer());
 		if (bizlet != null) { // has a bizlet
 			validateBeanAgainstBizlet(bizlet, bean);
@@ -148,11 +126,8 @@ public class BeanValidator {
 	 * bizlet methods required of the base bizlet classes through the standard java extension mechanism.
 	 * 
 	 * @param bean	To validate
-	 * @throws ValidationException
-	 * @throws MetaDataException	when the Bizlet cannot be obtained
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(T bean) 
-	throws ValidationException, MetaDataException {
+	public static <T extends Bean> void validateBeanAgainstBizlet(T bean) {
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -167,14 +142,11 @@ public class BeanValidator {
 	 * @param e
 	 * @param masterBean
 	 * @param validatedBean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	public static void processErrorMessageBindings(Customer customer,
 													final Message e,
 													Bean masterBean,
-													final Bean validatedBean) 
-	throws DomainException, MetaDataException {
+													final Bean validatedBean) {
 		ValidationUtil.processErrorMessageBindings(customer, e, masterBean, validatedBean);
 	}
 
@@ -183,11 +155,8 @@ public class BeanValidator {
 	 * @param customer
 	 * @param document
 	 * @param bean
-	 * @throws UniqueConstraintViolationException
-	 * @throws ValidationException
 	 */
-	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean)
-	throws UniqueConstraintViolationException, ValidationException {
+	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
 		ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 	}
 	
@@ -195,12 +164,8 @@ public class BeanValidator {
 	 * 
 	 * @param customer
 	 * @param bean
-	 * @throws UniqueConstraintViolationException
-	 * @throws ValidationException
-	 * @throws MetaDataException	When the unique constraints cannot be checked.
 	 */
-	public static void checkCollectionUniqueConstraints(Customer customer, Bean bean)
-	throws UniqueConstraintViolationException, ValidationException, MetaDataException {
+	public static void checkCollectionUniqueConstraints(Customer customer, Bean bean) {
 		Module m = customer.getModule(bean.getBizModule());
 		Document d = m.getDocument(customer, bean.getBizDocument());
 		checkCollectionUniqueConstraints(customer, d, bean);
@@ -210,12 +175,8 @@ public class BeanValidator {
 	 * 
 	 * @param document
 	 * @param bean
-	 * @throws UniqueConstraintViolationException
-	 * @throws ValidationException
-	 * @throws MetaDataException	When the unique constraints cannot be checked.
 	 */
-	public static void checkCollectionUniqueConstraints(Document document, Bean bean)
-	throws UniqueConstraintViolationException, ValidationException, MetaDataException {
+	public static void checkCollectionUniqueConstraints(Document document, Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), document, bean);
 	}
 	
@@ -223,13 +184,8 @@ public class BeanValidator {
 	 * 
 	 * @param document
 	 * @param bean
-	 * @throws UniqueConstraintViolationException
-	 * @throws ValidationException
-	 * @throws MetaDataException	When the unique constraints cannot be checked.
 	 */
-	public static void checkCollectionUniqueConstraints(Bean bean)
-	throws UniqueConstraintViolationException, ValidationException, MetaDataException {
+	public static void checkCollectionUniqueConstraints(Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), bean);
 	}
-
 }

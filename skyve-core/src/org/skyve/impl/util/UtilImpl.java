@@ -23,7 +23,6 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -207,11 +206,8 @@ public class UtilImpl {
 	 * Recurse the bean ensuring that everything is touched and loaded from the database.
 	 * 
 	 * @param bean The bean to load.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public static void populateFully(final Bean bean) 
-	throws DomainException, MetaDataException {
+	public static void populateFully(final Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -225,8 +221,7 @@ public class UtilImpl {
 										Document documentAccepted,
 										Document owningDocument,
 										Relation owningRelation,
-										Bean beanAccepted) 
-			throws DomainException, MetaDataException {
+										Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				try {
 					if (beanAccepted != bean) {
@@ -258,8 +253,7 @@ public class UtilImpl {
 									Document documentAccepted,
 									Document owningDocument,
 									Relation owningRelation,
-									Bean beanAccepted) 
-		throws DomainException, MetaDataException {
+									Bean beanAccepted) {
 			if (beanAccepted.isChanged()) {
 				changed = true;
 				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
@@ -278,11 +272,8 @@ public class UtilImpl {
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public static boolean hasChanged(Bean bean) 
-	throws DomainException, MetaDataException {
+	public static boolean hasChanged(Bean bean)  {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 

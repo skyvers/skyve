@@ -3,7 +3,6 @@ package org.skyve.metadata.view;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -85,8 +84,6 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @param customer
 	 * @param document
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public ServerSideAction<?> getServerSideAction(Customer customer, Document document)
-	throws MetaDataException;
+	public ServerSideAction<?> getServerSideAction(Customer customer, Document document);
 }

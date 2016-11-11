@@ -11,12 +11,10 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -31,7 +29,6 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.BeanVisitor;
-import org.skyve.impl.bizport.POISheet;
 
 /**
  * Utility class to generate a spreadsheet shape from a document definition.
@@ -84,11 +81,8 @@ public final class StandardGenerator {
 	 * into the given workbook.
 	 * 
 	 * @param workbook	The workbook to generate the structure into.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public void generateStructure(final BizPortWorkbook workbook) 
-	throws DomainException, MetaDataException {
+	public void generateStructure(final BizPortWorkbook workbook) {
 		new BeanVisitor(true, false, false) {
 			// processBean can be null as we are visiting ALL
 			@Override
@@ -142,12 +136,9 @@ public final class StandardGenerator {
 	 * Fill the workbook with data given a list of beans of the driving document type.
 	 * @param workbook	The workbook to fill.
 	 * @param beans	The data to use to fill with.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	public void generateData(final BizPortWorkbook workbook, 
-								Iterable<? extends Bean> beans) 
-	throws DomainException, MetaDataException {
+								Iterable<? extends Bean> beans) {
 		// Recursively walks the topBean's object graph populating the relevant 
 		// sheets in the workbook.
 		BeanVisitor excelBeanVisitor = new BeanVisitor(false, false, false) {

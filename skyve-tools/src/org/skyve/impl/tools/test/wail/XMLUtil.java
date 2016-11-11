@@ -37,8 +37,7 @@ public class XMLUtil {
 		// prevent construction
 	}
 
-	public static String marshalWAIL(TestSuite testSuite) 
-	throws MetaDataException {
+	public static String marshalWAIL(TestSuite testSuite) {
 		try {
 			Marshaller marshaller = WAIL_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -54,8 +53,7 @@ public class XMLUtil {
 		}
 	}
 
-	public static TestSuite unmarshalWAIL(Reader xmlReader) 
-	throws MetaDataException {
+	public static TestSuite unmarshalWAIL(Reader xmlReader) {
 		try {
 			Unmarshaller unmarshaller = WAIL_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(WAIL_SCHEMA);

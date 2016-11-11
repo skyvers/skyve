@@ -4,7 +4,6 @@ import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -13,7 +12,7 @@ import org.skyve.metadata.MetaDataException;
  */
 public class LocalSecureRepository extends LocalDesignRepository {
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) throws MetaDataException {
+	public UserImpl retrieveUser(String userPrincipal) {
 		UserImpl result = new UserImpl();
 
 		if (userPrincipal == null) {

@@ -8,9 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
@@ -106,7 +104,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 	}
 
 	@Override
-	public Hierarchical getParent() throws DomainException, MetaDataException {
+	public Hierarchical getParent() {
 		Hierarchical result = null;
 
 		if (bizParentId != null) {
@@ -121,7 +119,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 	@Override
 	@XmlTransient
-	public List<Hierarchical> getChildren() throws DomainException, MetaDataException {
+	public List<Hierarchical> getChildren() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(Hierarchical.MODULE_NAME, Hierarchical.DOCUMENT_NAME);
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);

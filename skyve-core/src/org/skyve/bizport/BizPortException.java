@@ -8,10 +8,7 @@ import java.util.Map;
 /**
  * 
  */
-public final class BizPortException extends Exception {
-	/**
-	 * For Serialization
-	 */
+public final class BizPortException extends RuntimeException {
 	private static final long serialVersionUID = 4401759405779814684L;
 
 	/**
@@ -131,9 +128,8 @@ public final class BizPortException extends Exception {
 	/**
 	 * 
 	 * @param problems
-	 * @throws BizPortException
 	 */
-	public void addErrors(List<Problem> problems) throws BizPortException {
+	public void addErrors(List<Problem> problems) {
 		for (Problem problem : problems) {
 			problem.error = true;
 			addError(problem);
@@ -143,9 +139,8 @@ public final class BizPortException extends Exception {
 	/**
 	 * 
 	 * @param problem
-	 * @throws BizPortException
 	 */
-	public void addError(Problem problem) throws BizPortException {
+	public void addError(Problem problem) {
 		// this will replace any previous problem
 		// Hopefully the last problem encountered is the most pertinent
 		errors.put(problem.getWhere(), problem);

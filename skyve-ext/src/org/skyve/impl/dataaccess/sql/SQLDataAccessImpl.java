@@ -7,7 +7,6 @@ import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DataStore;
@@ -48,14 +47,12 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 	
 	@Override
-	public SQL newSQL(String moduleName, String documentName, String query)
-	throws MetaDataException {
+	public SQL newSQL(String moduleName, String documentName, String query) {
 		return new SQLDataAccessSQL(moduleName, documentName, query, this);
 	}
 	
 	@Override
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
-	throws MetaDataException {
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
 		return new SQLDataAccessSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
 	}
@@ -66,8 +63,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 
 	@Override
-	public SQL newNamedSQL(Document document, String queryName) 
-	throws MetaDataException {
+	public SQL newNamedSQL(Document document, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
 		return new SQLDataAccessSQL(document, module.getSQL(queryName).getQuery(), this);
 	}
@@ -78,8 +74,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 
 	@Override
-	public SQL newNamedSQL(String moduleName, String queryName)
-	throws MetaDataException {
+	public SQL newNamedSQL(String moduleName, String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
 		return new SQLDataAccessSQL(module.getSQL(queryName).getQuery(), this);
 	}

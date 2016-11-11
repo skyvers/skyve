@@ -68,7 +68,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.tools.test.wail.language.TestCase;
 import org.skyve.impl.tools.test.wail.language.TestSuite;
 import org.skyve.impl.tools.test.wail.language.step.Call;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
@@ -85,7 +84,7 @@ class GenerateViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() throws MetaDataException {
+	public void visitView() {
 		TestCase foo = new TestCase();
 		foo.setIdentifier(module.getName() + '.' + document.getName());
 		Call call = new Call();
@@ -95,668 +94,641 @@ class GenerateViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedView() throws MetaDataException {
+	public void visitedView() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitTabPane(TabPane tabPane, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedTabPane(TabPane tabPane, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitVBox(VBox vbox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedVBox(VBox vbox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitHBox(HBox hbox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedHBox(HBox hbox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitForm(Form form, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedForm(Form form, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitFormColumn(FormColumn column, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitFormRow(FormRow row, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitFormItem(FormItem item, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedFormItem(FormItem item, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedFormRow(FormRow row, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitButton(Button button, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitGeoLocator(GeoLocator locator, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitGeometry(Geometry geometry, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitMap(MapDisplay map, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitDialogButton(DialogButton button, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitDynamicImage(DynamicImage image, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) throws MetaDataException {
+	public void visitSpacer(Spacer spacer) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitStaticImage(StaticImage image, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitLink(Link link, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitBlurb(Blurb blurb, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitLabel(Label label, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitProgressBar(ProgressBar progressBar,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitListGrid(ListGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedListGrid(ListGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitTreeGrid(TreeGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitPickList(PickList list, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedPickList(PickList list, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitPickListColumn(PickListColumn column,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitCheckBox(CheckBox checkBox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedCheckBox(CheckBox checkBox, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitCheckMembership(CheckMembership membership,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedCheckMembership(CheckMembership membership,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitColourPicker(ColourPicker colour, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedColourPicker(ColourPicker colour, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitCombo(Combo combo, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedCombo(Combo combo, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitContentImage(ContentImage image, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitContentLink(ContentLink link, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitHTML(HTML html, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitListMembership(ListMembership membership,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedListMembership(ListMembership membership,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitComparison(Comparison comparison, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitLookupDescription(LookupDescription lookup,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedLookupDescription(LookupDescription lookup,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitLookup(Lookup lookup, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedLookup(Lookup lookup, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitPassword(Password password, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedPassword(Password password, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitRadio(Radio radio, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedRadio(Radio radio, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitRichText(RichText richText, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedRichText(RichText richText, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitSlider(Slider slider, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedSlider(Slider slider, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitSpinner(Spinner spinner, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedSpinner(Spinner spinner, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitTextArea(TextArea text, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedTextArea(TextArea text, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitTextField(TextField text, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedTextField(TextField text, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitInject(Inject inject, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable selectable,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnPickedEventHandler(Lookup lookup, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnPickedEventHandler(Lookup lookup,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitOnClearedEventHandler(Lookup lookup,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitedOnClearedEventHandler(Lookup lookup,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -764,8 +736,7 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 			EventSource source,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -773,15 +744,14 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitServerSideActionEventAction(
 			ServerSideActionEventAction server, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -789,7 +759,7 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitSetInvisibleEventAction(
 			SetInvisibleEventAction setInvisible, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -797,7 +767,7 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitToggleDisabledEventAction(
 			ToggleDisabledEventAction toggleDisabled, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -805,118 +775,117 @@ class GenerateViewVisitor extends ViewVisitor {
 	@Override
 	public void visitToggleVisibilityEventAction(
 			ToggleVisibilityEventAction toggleVisibility, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitAction(ActionImpl action) throws MetaDataException {
+	public void visitAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitReportAction(ActionImpl action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+	public void visitDownloadAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitParameter(Parameter parameter, boolean parentVisible,
-			boolean parentEnabled) throws MetaDataException {
+			boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void visitFilterParameter(FilterParameter parameter,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -23,7 +23,6 @@ import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.impl.bizport.POISheet;
 
@@ -75,11 +74,8 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * 
 	 * @param customer	The current customer (for the logged in user).
 	 * @param workbook	The workbook.
-	 * @throws MetaDataException
-	 * @throws BizPortException
 	 */
-	public POIWorkbook(Customer customer, Workbook workbook, BizPortException e) 
-	throws MetaDataException, BizPortException {
+	public POIWorkbook(Customer customer, Workbook workbook, BizPortException e) {
 		this.workbook = workbook;
 		ooxmlFormat = workbook instanceof XSSFWorkbook;
 		

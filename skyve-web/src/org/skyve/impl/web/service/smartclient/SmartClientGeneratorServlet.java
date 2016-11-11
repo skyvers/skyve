@@ -257,8 +257,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitVBox(VBox vbox, 
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=isc.BizVBox.create({");
 			size(vbox, null, code);
@@ -307,8 +306,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitHBox(HBox hbox, 
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=isc.BizHBox.create({");
 			size(hbox, null, code);
@@ -375,8 +373,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitForm(Form form, 
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			viewHasAtLeastOneForm = true;
 			
 			// If a form is defined with a border, then wrap the form definition in a vbox.
@@ -435,8 +432,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitedForm(Form form,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			code.setLength(code.length() - 1); // remove last comma
 			code.append("]);\n");
 			code.append(containerVariables.peek()).append(".addContained(").append(formVariable).append(");\n");
@@ -452,8 +448,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitFormColumn(FormColumn column,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			Integer percentage = column.getPercentageWidth();
 			Integer pixel = column.getPixelWidth();
 			Integer responsive = column.getResponsiveWidth();
@@ -481,8 +476,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitFormRow(FormRow row,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			startedNewFormRow = true;
 			if (! visitedFormRow) {
 				code.setLength(code.length() - 1); // remove last column comma
@@ -498,8 +492,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		public FormItem visitedItem;
 		
 		@Override
-		public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled)
-		throws MetaDataException {
+		public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 			visitedItem = item;
 			
 			code.append('{');
@@ -532,8 +525,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitedFormItem(FormItem item,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			if (startedNewFormRow) {
 				code.append("startRow:true},");
 				startedNewFormRow = false;
@@ -547,8 +539,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitedFormRow(FormRow row,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// nothing to do here
 		}
 
@@ -666,8 +657,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitGeometry(Geometry geometry, 
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = geometry;
 				return;
@@ -691,8 +681,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 		@Override
 		public void visitMap(MapDisplay map,
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=isc.BizMap.create({_view:view});");
     		code.append(variable).append(".setDataSource('").append(map.getModelName()).append("');\n");
@@ -742,8 +731,7 @@ code.append("_view:view})");
 		@Override
 		public void visitDynamicImage(DynamicImage image,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// markup is generated in the JSON data for a data grid container column dynamic image
 			if (dataGridVariable != null) {
 				return;
@@ -758,7 +746,7 @@ code.append("_view:view})");
 			}
 		}
 
-		private void addImage(DynamicImage image) throws MetaDataException {
+		private void addImage(DynamicImage image) {
 			code.append("isc.BizDynamicImage.create({name:'");
 			code.append(image.getName());
 			code.append("',moduleDotDocument:'");
@@ -813,7 +801,7 @@ code.append("_view:view})");
 		}
 
 		@Override
-		public void visitSpacer(Spacer spacer) throws MetaDataException {
+		public void visitSpacer(Spacer spacer) {
 			if (formVariable == null) { // not a form
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
@@ -835,8 +823,7 @@ code.append("_view:view})");
 		@Override
 		public void visitLink(Link link, 
 								boolean parentVisible, 
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			// markup is generated in the JSON data for a data grid container column link
 			if (dataGridVariable != null) {
 				return;
@@ -863,8 +850,7 @@ code.append("_view:view})");
 		@Override
 		public void visitBlurb(Blurb blurb,
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			Label label = new Label();
 			label.setValue(blurb.getMarkup());
 			label.setPixelWidth(blurb.getPixelWidth());
@@ -878,8 +864,7 @@ code.append("_view:view})");
 		@Override
 		public void visitLabel(Label label,
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
 			if (dataGridVariable != null) {
 				return;
@@ -982,8 +967,7 @@ code.append("_view:view})");
 		@Override
 		public void visitFilterParameter(FilterParameter parameter,
 											boolean parentVisible,
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			// do nothing - parameters are handled separately
 		}
 
@@ -1016,8 +1000,7 @@ code.append("_view:view})");
 		@Override
 		public void visitDataGrid(DataGrid grid,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			dataGridBinding = grid.getBinding();
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
 																	module,
@@ -1104,16 +1087,14 @@ code.append("_view:view})");
 		@Override
 		public void visitDataGridBoundColumn(DataGridBoundColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (dataGridColumnInputWidget != null) {
 				SmartClientDataGridFieldDefinition def = null;
 				String binding = column.getBinding();
@@ -1168,8 +1149,7 @@ code.append("_view:view})");
 		@Override
 		public void visitDataGridContainerColumn(DataGridContainerColumn column,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("{name:'_").append(formatCounter++);
 			code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 			
@@ -1189,8 +1169,7 @@ code.append("_view:view})");
 		@Override
 		public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			// do nothing
 		}
 		
@@ -1199,21 +1178,18 @@ code.append("_view:view})");
 		@Override
 		public void visitListGrid(ListGrid grid,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			visitGrid(grid, false, null);
 		}
 
 		@Override
 		public void visitTreeGrid(TreeGrid grid,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			visitGrid(grid, true, grid.getRootIdBinding());
 		}
 	
-		private void visitGrid(ListGrid grid, boolean tree, String rootBinding)
-		throws MetaDataException {
+		private void visitGrid(ListGrid grid, boolean tree, String rootBinding) {
 			String queryName = grid.getQueryName();
 			String modelName = grid.getModelName();
 			String dataSourceId = null;
@@ -1361,8 +1337,7 @@ code.append("_view:view})");
 		@Override
 		public void visitCheckBox(CheckBox checkBox,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = checkBox;
 				return;
@@ -1381,8 +1356,7 @@ code.append("_view:view})");
 		@Override
 		public void visitedCheckBox(CheckBox checkBox,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// do nothing
 		}
 
@@ -1401,16 +1375,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedCheckMembership(CheckMembership membership,
 											boolean parentVisible, 
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			// do nothing - until implemented properly
 		}
 
 		@Override
 		public void visitColourPicker(ColourPicker colour,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = colour;
 				return;
@@ -1429,16 +1401,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedColourPicker(ColourPicker colour,
 											boolean parentVisible,
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitCombo(Combo combo,
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = combo;
 				return;
@@ -1457,16 +1427,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedCombo(Combo combo,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitContentImage(ContentImage image,
 										boolean parentVisible, 
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// markup is generated in the JSON data for a data grid container column content image
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = image;
@@ -1487,8 +1455,7 @@ code.append("_view:view})");
 		@Override
 		public void visitContentLink(ContentLink link,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = link;
 				return;
@@ -1511,8 +1478,7 @@ code.append("_view:view})");
 		@Override
 		public void visitRichText(RichText text,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = text;
 				return;
@@ -1531,16 +1497,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedRichText(RichText richText,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitHTML(HTML html,
 								boolean parentVisible,
-								boolean parentEnabled)
-		throws MetaDataException {
+								boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = html;
 				return;
@@ -1563,8 +1527,7 @@ code.append("_view:view})");
 		@Override
 		public void visitListMembership(ListMembership membership,
 											boolean parentVisible,
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			eventsWithNoForm = true;
 			
 			String membershipBinding = membership.getBinding();
@@ -1602,8 +1565,7 @@ code.append("_view:view})");
 		@Override
 		public void visitedListMembership(ListMembership membership,
 											boolean parentVisible,
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			removeTrailingComma(code);
 			code.append("});\n");
 
@@ -1633,8 +1595,7 @@ code.append("_view:view})");
 		@Override
 		public void visitLookupDescription(LookupDescription lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-		throws MetaDataException {
+											boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = lookup;
 				return;
@@ -1674,16 +1635,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedLookupDescription(LookupDescription lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitLookup(Lookup lookup,
 									boolean parentVisible,
-									boolean parentEnabled) 
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = lookup;
 				return;
@@ -1702,16 +1661,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedLookup(Lookup lookup,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitPassword(Password password, 
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = password;
 				return;
@@ -1730,16 +1687,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedPassword(Password password,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitRadio(Radio radio,
 								boolean parentVisible,
-								boolean parentEnabled) 
-		throws MetaDataException {
+								boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = radio;
 				return;
@@ -1761,16 +1716,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedRadio(Radio radio,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitSlider(Slider slider, 
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = slider;
 				return;
@@ -1808,16 +1761,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedSlider(Slider slider,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitSpinner(Spinner spinner, 
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = spinner;
 				return;
@@ -1848,16 +1799,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedSpinner(Spinner spinner,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitTextArea(TextArea text, 
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = text;
 				return;
@@ -1883,16 +1832,14 @@ code.append("_view:view})");
 		@Override
 		public void visitedTextArea(TextArea text,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
 		public void visitTextField(TextField text,
 									boolean parentVisible,
-									boolean parentEnabled)
-		throws MetaDataException {
+									boolean parentEnabled) {
 			if (dataGridVariable != null) {
 				dataGridColumnInputWidget = text;
 				return;
@@ -1948,14 +1895,12 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedTextField(TextField text,
 										boolean parentVisible,
-										boolean parentEnabled)
-		throws MetaDataException {
+										boolean parentEnabled) {
 			// do nothing
 		}
 
 		@Override
-		public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled)
-		throws MetaDataException {
+		public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
 			if (visitedItem != null) {
 				// NB instead of preprocessFormItem(), handle title and required
 				String value = visitedItem.getLabel();
@@ -2246,8 +2191,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOnChangedEventHandler(Changeable changeable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (eventsWithNoForm) {
 				code.append("changed:function(){var view=this._view;");
 			}
@@ -2259,40 +2203,35 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedOnChangedEventHandler(Changeable changeable,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 		}
 
 		@Override
 		public void visitOnFocusEventHandler(Focusable blurable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("editorEnter:function(form,item,value){if(item.validate()){var view=form._view;");
 		}
 
 		@Override
 		public void visitedOnFocusEventHandler(Focusable blurable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("}},");
 		}
 
 		@Override
 		public void visitOnBlurEventHandler(Focusable blurable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("editorExit:function(form,item,value){if(item.validate()){var view=form._view;");
 		}
 
 		@Override
 		public void visitedOnBlurEventHandler(Focusable blurable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("}},");
 		}
 
@@ -2302,8 +2241,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOnAddedEventHandler(Addable addable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (dataGridFieldsIncomplete) {
 				code.setLength(code.length() - 1);
 				code.append("],");
@@ -2321,8 +2259,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedOnAddedEventHandler(Addable addable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("},");
 			inOnAddedEventHandler = false;
 		}
@@ -2333,8 +2270,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (dataGridFieldsIncomplete) {
 				code.setLength(code.length() - 1);
 				code.append("],");
@@ -2352,8 +2288,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedOnEditedEventHandler(Editable editable,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 			inOnEditedEventHandler = false;
 		}
@@ -2364,8 +2299,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOnRemovedEventHandler(Removable removable,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (dataGridFieldsIncomplete) {
 				code.setLength(code.length() - 1);
 				code.append("],");
@@ -2383,8 +2317,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedOnRemovedEventHandler(Removable removable,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 			inOnRemovedEventHandler = false;
 		}
@@ -2392,8 +2325,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOnSelectedEventHandler(Selectable selectable,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			if (dataGridFieldsIncomplete) {
 				code.setLength(code.length() - 1);
 				code.append("],");
@@ -2405,40 +2337,35 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitedOnSelectedEventHandler(Selectable selectable,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 		}
 
 		@Override
 		public void visitOnPickedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("bizPicked:function(form,item,value){var view=form._view;");
 		}
 
 		@Override
 		public void visitedOnPickedEventHandler(Lookup lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 		}
 
 		@Override
 		public void visitOnClearedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			code.append("bizCleared:function(form,item,value){var view=form._view;");
 		}
 
 		@Override
 		public void visitedOnClearedEventHandler(Lookup lookup,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("},");
 		}
 
@@ -2458,8 +2385,7 @@ pickListFields:[{name:'value'}],
 		public void visitRerenderEventAction(RerenderEventAction rerender,
 												EventSource source,
 												boolean parentVisible,
-												boolean parentEnabled)
-		throws MetaDataException {
+												boolean parentEnabled) {
 			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
@@ -2471,8 +2397,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitServerSideActionEventAction(ServerSideActionEventAction server,
 														boolean parentVisible,
-														boolean parentEnabled)
-		throws MetaDataException {
+														boolean parentEnabled) {
 			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
@@ -2484,8 +2409,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("view.setDisabled('").append(setDisabled.getBinding().replace('.', '_'));
 			code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
 		}
@@ -2493,8 +2417,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("view.setInvisible('").append(setInvisible.getBinding().replace('.', '_'));
 			code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
 		}
@@ -2502,8 +2425,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 													boolean parentVisible,
-													boolean parentEnabled)
-		throws MetaDataException {
+													boolean parentEnabled) {
 			code.append("view.toggleDisabled('").append(toggleDisabled.getBinding().replace('.', '_'));
 			code.append("');");
 		}
@@ -2511,8 +2433,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 														boolean parentVisible,
-														boolean parentEnabled)
-		throws MetaDataException {
+														boolean parentEnabled) {
 			code.append("view.toggleVisibility('").append(toggleVisibility.getBinding().replace('.', '_'));
 			code.append("');");
 		}
@@ -2983,8 +2904,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
-																String typeOverride)
-		throws MetaDataException {
+																String typeOverride) {
 			SmartClientFieldDefinition def = SmartClientGenerateUtils.getField(user,
 																				customer,
 																				module,

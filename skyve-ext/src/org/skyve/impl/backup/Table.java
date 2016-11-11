@@ -12,7 +12,6 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -41,7 +40,7 @@ class Table {
 		return name.hashCode();
 	}
 
-	void addFieldsFromDocument(Document document) throws MetaDataException {
+	void addFieldsFromDocument(Document document) {
 		relativeContentPaths.add(document.getOwningModuleName() + File.separator + document.getName());
 
 		boolean joinedExtension = false;

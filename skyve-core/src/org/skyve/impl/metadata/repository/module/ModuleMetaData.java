@@ -131,7 +131,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	}
 
 	@Override
-	public Module convert(String metaDataName) throws MetaDataException {
+	public Module convert(String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
 
 		String value = getName();
@@ -471,8 +471,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private void populateModuleMenu(String metaDataName, 
 										List<MenuItem> items, 
 										List<Action> actions, 
-										Set<String> validRoleNames)
-	throws MetaDataException {
+										Set<String> validRoleNames) {
 		for (Action action : actions) {
 			if (action instanceof Group) {
 				String value = action.getName();
@@ -688,8 +687,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private void populateItem(String metaDataName,
 								Set<String> validRoleNames,
 								AbstractMenuItem result,
-								Item metadata) 
-	throws MetaDataException {
+								Item metadata) {
 		String value = metadata.getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");
@@ -728,8 +726,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 													String metaDataName,
 													ModuleImpl owningModule,
 													Set<String> queryNames,
-													Set<String> documentNames)
-	throws MetaDataException {
+													Set<String> documentNames) {
 		String value = queryMetaData.getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a query is required");
@@ -756,8 +753,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private static void populateUxuis(String metaDataName, 
 										String itemName, 
 										List<ApplicableTo> uxuis, 
-										Set<String> uxuisToAddTo)
-	throws MetaDataException {
+										Set<String> uxuisToAddTo) {
 		Set<String> applicableUxuis = new TreeSet<>();
 		for (ApplicableTo uxui : uxuis) {
 			String value = uxui.getUxUi();

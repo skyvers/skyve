@@ -3,8 +3,6 @@ package org.skyve.domain;
 import java.io.Serializable;
 import java.util.Map;
 
-import org.skyve.metadata.MetaDataException;
-
 /**
  * 
  */
@@ -131,9 +129,8 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * 
 	 * @param conditionName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public boolean evaluateCondition(String conditionName) throws MetaDataException;
+	public boolean evaluateCondition(String conditionName);
 
 	/**
 	 * Returns the original values that have been changed.

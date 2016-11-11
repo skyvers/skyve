@@ -12,7 +12,6 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -87,7 +86,7 @@ public final class JPADomainGenerator extends DomainGenerator {
 											FileWriter fw,
 											String packagePath,
 											String documentName) 
-	throws IOException, MetaDataException {
+	throws IOException {
 		UtilImpl.LOGGER.info(packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");

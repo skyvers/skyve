@@ -41,7 +41,6 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -128,11 +127,8 @@ public final class POISheet implements BizPortSheet {
 	 * from an existing Excel file.
 	 * 
 	 * @param sheet	The excel worksheet.
-	 * @throws MetaDataException 
-	 * @throws BizPortException
 	 */
-	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, BizPortException problems) 
-	throws MetaDataException, BizPortException {
+	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, BizPortException problems) {
 		title = sheet.getSheetName();
 		
 		// get the columns in the sheet (row 2 is binding, row 3 is titles)
@@ -570,8 +566,7 @@ public final class POISheet implements BizPortSheet {
 	@Override
 	public void addErrorAtCurrentRow(BizPortException problems, 
 										BizPortColumn column, 
-										String message) 
-	throws BizPortException {
+										String message) {
 		problems.addError(new Problem(message, getCurrentRowExcelRef(column)));
 	}
 	
@@ -592,8 +587,7 @@ public final class POISheet implements BizPortSheet {
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(String columnBinding, 
 							AttributeType attributeType,
-							BizPortException problems) 
-	throws BizPortException {
+							BizPortException problems) {
 		T result = null;
 		
 		if (sheet == null) {

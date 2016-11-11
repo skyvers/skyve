@@ -102,8 +102,7 @@ public class SmartClientGenerateUtils {
         								Module module,
         								Document document,
         								Relation relation,
-        								LookupDescription lookup)
-		throws MetaDataException {
+        								LookupDescription lookup) {
             this.bindingToDataGrid = bindingToDataGrid;
             String queryName = (lookup == null) ? null : lookup.getQuery();
             // Use reference query name if none provided in lookup
@@ -241,8 +240,7 @@ public class SmartClientGenerateUtils {
 													Document document,
 													Locale locale,
 													String binding,
-													String name)
-		throws MetaDataException {
+													String name) {
 			this.locale = locale;
 			this.name = (name != null) ? name : binding.replace('.', '_');
 			title = this.name;
@@ -738,8 +736,7 @@ public class SmartClientGenerateUtils {
                                             Module module, 
                                             Document document, 
                                             InputWidget widget,
-                                            String dataGridBindingOverride)
-        throws MetaDataException {
+                                            String dataGridBindingOverride) {
             super(customer,
                     module, 
                     document, 
@@ -872,8 +869,7 @@ public class SmartClientGenerateUtils {
 									Customer customer, 
 									Module module, 
 									Document document, 
-									InputWidget widget)
-		throws MetaDataException {
+									InputWidget widget) {
 			super(user, customer, module, document, widget, null);
 			Attribute attribute = target.getAttribute();
 			if (attribute != null) {
@@ -995,8 +991,7 @@ public class SmartClientGenerateUtils {
 											Customer customer, 
 											Module module, 
 											Document document, 
-											QueryColumn column)
-		throws MetaDataException {
+											QueryColumn column) {
 			super(customer, 
 					module,
 					document,
@@ -1215,8 +1210,7 @@ public class SmartClientGenerateUtils {
 	private static String getConstantDomainValueMapString(Customer customer,
 															Document document,
 															Attribute attribute,
-															Locale locale) 
-	throws MetaDataException {
+															Locale locale) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 
 																				attribute, 
@@ -1240,8 +1234,7 @@ public class SmartClientGenerateUtils {
 
 	public static Map<String, String> getConstantDomainValueMap(User user,
 																	Document document,
-																	Attribute attribute)
-	throws MetaDataException {
+																	Attribute attribute) {
 		Locale locale = user.getLocale();
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) user.getCustomer(), 
 																				DomainType.constant, 
@@ -1333,8 +1326,7 @@ public class SmartClientGenerateUtils {
 																	Customer customer,
 																	Module module,
 																	Document document,
-																	QueryColumn column) 
-	throws MetaDataException {
+																	QueryColumn column) {
 		return new SmartClientQueryColumnDefinition(user, customer, module, document, column);
 	}
 
@@ -1350,14 +1342,12 @@ public class SmartClientGenerateUtils {
 	 * @param widget	The widget metadata to use to define the smart client form field
 	 * @param bindingOverride	If defined, specifies a different binding to use.
 	 * @return
-	 * @throws MetaDataException
 	 */
 	public static SmartClientFieldDefinition getField(User user,
 														Customer customer, 
 														Module module, 
 														Document document, 
-														InputWidget widget)
-	throws MetaDataException {
+														InputWidget widget) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget);
 	}
 	
@@ -1366,8 +1356,7 @@ public class SmartClientGenerateUtils {
                                                                         Module module, 
                                                                         Document document, 
                                                                         InputWidget widget,
-                                                                        String dataGridBinding)
-    throws MetaDataException {
+                                                                        String dataGridBinding) {
     	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding);
     }
 
@@ -1382,7 +1371,6 @@ public class SmartClientGenerateUtils {
      * @param toAppendTo	definition is appended to this
      * @param visitedQueryNames
      * @return	The ID for the query definition generated.
-     * @throws MetaDataException
      */
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
@@ -1391,8 +1379,7 @@ public class SmartClientGenerateUtils {
 														String modelName,
 														boolean config,
 														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) 
-	throws MetaDataException {
+														Set<String> visitedQueryNames) {
 		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName);
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
@@ -1424,7 +1411,6 @@ public class SmartClientGenerateUtils {
      * @param toAppendTo	definition is appended to this
      * @param visitedQueryNames
      * @return	The ID for the query definition generated.
-     * @throws MetaDataException
      */
 	public static String appendDataSourceDefinition(User user,
 														Customer customer,
@@ -1433,8 +1419,7 @@ public class SmartClientGenerateUtils {
 														Lookup forLookup,
 														boolean config,
 														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) 
-	throws MetaDataException {
+														Set<String> visitedQueryNames) {
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
@@ -1472,8 +1457,7 @@ public class SmartClientGenerateUtils {
 														// indicates that this is for configuration in the harness page
 														boolean config,
 														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) 
-	throws MetaDataException {
+														Set<String> visitedQueryNames) {
 		Locale locale = user.getLocale();
 		
 		// dataSourceId -> defn

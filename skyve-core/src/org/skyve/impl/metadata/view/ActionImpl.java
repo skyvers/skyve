@@ -22,7 +22,6 @@ import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
@@ -155,7 +154,7 @@ public class ActionImpl implements Action {
 	}
 
 	@Override
-	public ServerSideAction<?> getServerSideAction(Customer customer, Document document) throws MetaDataException {
+	public ServerSideAction<?> getServerSideAction(Customer customer, Document document) {
 		if (resourceName == null) {
 			throw new IllegalStateException("The ActionConfig " + getName() + " is an implicit action.");
 		}

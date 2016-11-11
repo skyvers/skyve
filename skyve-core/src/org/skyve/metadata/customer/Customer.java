@@ -9,7 +9,6 @@ import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
@@ -48,24 +47,21 @@ public interface Customer extends NamedMetaData {
 	/**
 	 * 
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Module getHomeModule() throws MetaDataException;
+	public Module getHomeModule();
 	
 	/**
 	 * 
 	 * @param moduleName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Module getModule(String moduleName) throws MetaDataException;
+	public Module getModule(String moduleName);
 	
 	/**
 	 * 
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public List<Module> getModules() throws MetaDataException;
+	public List<Module> getModules();
 	
 	/**
 	 * 

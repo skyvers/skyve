@@ -61,8 +61,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private Querylet<? extends WebContext> querylet;
 
 	@Override
-	public Module getDocumentModule(Customer customer)
-	throws MetaDataException {
+	public Module getDocumentModule(Customer customer) {
 		Module result = getOwningModule();
 		DocumentRef ref = result.getDocumentRefs().get(getDocumentName());
 		String referencedModuleName = ref.getReferencedModuleName();
@@ -118,8 +117,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	@Override
 	@SuppressWarnings("incomplete-switch")
 	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
-													String tagId)
-	throws MetaDataException {
+													String tagId) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();

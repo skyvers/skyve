@@ -15,15 +15,14 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.module.query.SQLDefinition;
 
 public class QueryGenerator {
@@ -31,8 +30,7 @@ public class QueryGenerator {
 		// do nothing
 	}
 
-	public static List<QueryDefinition> generate(Customer customer, Module module) 
-	throws MetaDataException {
+	public static List<QueryDefinition> generate(Customer customer, Module module) {
 		Set<String> documentNames = module.getDocumentRefs().keySet();
 		List<QueryDefinition> result = new ArrayList<>(documentNames.size());
 
@@ -47,9 +45,7 @@ public class QueryGenerator {
 		return result;
 	}
 
-	public static String generateQueryXML(Customer customer,
-											Module module)
-	throws MetaDataException {
+	public static String generateQueryXML(Customer customer, Module module) {
 		ModuleMetaData newModule = new ModuleMetaData();
 
 		List<QueryDefinition> queries = generate(customer, module);

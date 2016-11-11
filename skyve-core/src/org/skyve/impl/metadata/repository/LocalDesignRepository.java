@@ -92,10 +92,9 @@ public class LocalDesignRepository extends AbstractRepository {
 	 * 
 	 * @param name The name of the metadata
 	 * @param metaData The metadata.
-	 * @throws MetaDataException When a name clash occurs.
 	 */
 	@Override
-	protected void put(String name, MetaData metaData) throws MetaDataException {
+	protected void put(String name, MetaData metaData) {
 		MetaData oldMetaData = cache.put(name, metaData);
 		if (oldMetaData != null) {
 			throw new MetaDataException("NAME CLASH - " + name + " is already used for " + oldMetaData);
@@ -103,7 +102,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public void evictCachedMetaData(Customer customer) throws MetaDataException {
+	public void evictCachedMetaData(Customer customer) {
 		// TODO evict for a certain customer needs attention
 		super.evictCachedMetaData(customer);
 
@@ -113,7 +112,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public Router getRouter() throws MetaDataException {
+	public Router getRouter() {
 		String routerKey = ROUTER_NAMESPACE + ROUTER_NAME;
 		Router result = null;
 		if (! UtilImpl.DEV_MODE) {
@@ -147,7 +146,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public Customer getCustomer(String customerName) throws MetaDataException {
+	public Customer getCustomer(String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Customer result = get(customerKey);
 		if (result == null) {
@@ -180,7 +179,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public List<String> getAllCustomerNames() throws MetaDataException {
+	public List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>();
 		
 		File customersDirectory = new File(UtilImpl.getAbsoluteBasePath() + CUSTOMERS_NAMESPACE);
@@ -196,7 +195,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public List<String> getAllVanillaModuleNames() throws MetaDataException {
+	public List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>();
 
 		File modulesDirectory = new File(UtilImpl.getAbsoluteBasePath() + MODULES_NAMESPACE);
@@ -211,7 +210,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		return result;
 	}
 
-	private void populateVTable(CustomerImpl customer) throws MetaDataException {
+	private void populateVTable(CustomerImpl customer) {
 		// determine vtable stuff for overrides etc
 
 		StringBuilder sb = new StringBuilder(256);
@@ -238,7 +237,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		customer.determineDependencies();
 	}
 
-	private void populateModuleLocation(CustomerImpl customer, String moduleName) throws MetaDataException {
+	private void populateModuleLocation(CustomerImpl customer, String moduleName) {
 		StringBuilder sb = new StringBuilder(256);
 		Map<String, String> vtable = customer.getVTable();
 		sb.append(CUSTOMERS_NAMESPACE).append(customer.getName()).append('/');
@@ -468,7 +467,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public Module getModule(Customer customer, String moduleName) throws MetaDataException {
+	public Module getModule(Customer customer, String moduleName) {
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		String moduleLocation = null;
 		if (customer == null) {
@@ -514,7 +513,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public Document getDocument(Customer customer, Module module, String documentName) throws MetaDataException {
+	public Document getDocument(Customer customer, Module module, String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
 			throw new IllegalArgumentException(documentName + " does not exist for this module - " + module.getName());
@@ -610,7 +609,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) throws MetaDataException {
+	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) {
 		StringBuilder fullyQualifiedBizletName = new StringBuilder(64);
 		fullyQualifiedBizletName.append(document.getOwningModuleName()).append('.');
 		fullyQualifiedBizletName.append(document.getName()).append("Bizlet");
@@ -620,8 +619,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration)
-	throws MetaDataException {
+	public Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) {
 		// No enum overriding, but there might be referencing
 		String encapulatingClasNameForEnumeration = getEncapsulatingClassNameForEnumeration(enumeration);
 		
@@ -638,7 +636,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName) throws MetaDataException {
+	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName) {
 		StringBuilder fullyQualifiedImageName = new StringBuilder(128);
 		fullyQualifiedImageName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedImageName.append(".images.").append(imageName);
@@ -649,8 +647,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	public View getView(String uxui,
 							Customer customer, 
 							Document document, 
-							ViewType viewType)
-	throws MetaDataException {
+							ViewType viewType) {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 		sb.append(".views.").append(uxui).append('.').append(viewType.toString());
@@ -735,8 +732,9 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public  <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName)
-	throws MetaDataException {
+	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, 
+																						Document document, 
+																						String modelName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".models.").append(modelName);
@@ -744,8 +742,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public  <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName)
-	throws MetaDataException {
+	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".models.").append(modelName);
@@ -753,8 +750,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public  <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName)
-	throws MetaDataException {
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".models.").append(modelName);
@@ -762,7 +758,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public ServerSideAction<Bean> getAction(Customer customer, Document document, String actionName) throws MetaDataException {
+	public ServerSideAction<Bean> getAction(Customer customer, Document document, String actionName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(actionName);
@@ -770,7 +766,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName) throws MetaDataException {
+	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(exportActionName);
@@ -778,7 +774,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName) throws MetaDataException {
+	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(importActionName);
@@ -786,7 +782,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String uploadActionName) throws MetaDataException {
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String uploadActionName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(uploadActionName);
@@ -794,7 +790,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName) throws MetaDataException {
+	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName) {
 		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
 		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedActionName.append(".actions.").append(uploadActionName);
@@ -802,12 +798,12 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) throws MetaDataException {
+	public UserImpl retrieveUser(String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public final void resetMenus(User user) throws MetaDataException {
+	public final void resetMenus(User user) {
 		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
 			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
@@ -859,7 +855,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public void validateCustomer(Customer customer) throws MetaDataException {
+	public void validateCustomer(Customer customer) {
 		populateVTable((CustomerImpl) customer);
 
 		try {
@@ -888,7 +884,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public void validateModule(Customer customer, Module module) throws MetaDataException {
+	public void validateModule(Customer customer, Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
 		if (homeDocumentName != null) {
@@ -999,8 +995,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		checkMenu(module.getMenu().getItems(), customer, module);
 	}
 
-	private void checkMenu(List<MenuItem> items, Customer customer, Module module)
-	throws MetaDataException {
+	private void checkMenu(List<MenuItem> items, Customer customer, Module module) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				checkMenu(((MenuGroup) item).getItems(), customer, module);
@@ -1101,7 +1096,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 	
 	@Override
-	public void validateDocument(Customer customer, Document document) throws MetaDataException {
+	public void validateDocument(Customer customer, Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 
 		// Check that conditions do not start with is or not
@@ -1244,7 +1239,7 @@ public class LocalDesignRepository extends AbstractRepository {
 
 	@Override
 	@SuppressWarnings("unused")
-	public void validateView(Customer customer, Document document, View view, String uxui) throws MetaDataException {
+	public void validateView(Customer customer, Document document, View view, String uxui) {
 		new ViewValidator((ViewImpl) view,
 							(CustomerImpl) customer,
 							(DocumentImpl) document,

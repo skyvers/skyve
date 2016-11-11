@@ -13,7 +13,6 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -50,8 +49,7 @@ public class SkyveDocumentExecuterFactory implements JRQueryExecuterFactory {
 			AbstractRepository repository = new LocalDesignRepository() {
 				// Don't use bizlets for reporting
 				@Override
-				public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document)
-				throws MetaDataException {
+				public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) {
 					return null;
 				}
 			};

@@ -7,7 +7,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
@@ -359,13 +358,11 @@ public class Binder {
 	 * 			The document is never null whereas the attribute can be null if'
 	 * 			the binding expression ultimately resolves to an implicit attribute
 	 * 			like bizKey or bizId or the like.
-	 * @throws MetaDataException	Thrown when the binding expression cannot be resolved fully.
 	 */
 	public static TargetMetaData getMetaDataForBinding(Customer customer, 
 																Module module, 
 																Document document, 
-																String binding)
-	throws MetaDataException {
+																String binding) {
 		return BindUtil.getMetaDataForBinding(customer, module, document, binding);
 	}
 
@@ -377,10 +374,8 @@ public class Binder {
 	 * @param bean
 	 * @param binding
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public static Object instantiateAndGet(User user, Module module, Document document, Bean bean, String binding)
-	throws MetaDataException {
+	public static Object instantiateAndGet(User user, Module module, Document document, Bean bean, String binding) {
 		return BindUtil.instantiateAndGet(user, module, document, bean, binding);
 	}
 	

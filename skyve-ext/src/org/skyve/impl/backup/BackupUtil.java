@@ -25,7 +25,6 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -182,8 +181,7 @@ final class BackupUtil {
 		}
 	}
 
-	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document)
-	throws MetaDataException {
+	static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
 			String persistentIdentifier = persistent.getPersistentIdentifier();

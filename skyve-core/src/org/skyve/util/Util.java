@@ -8,9 +8,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -57,11 +55,8 @@ public class Util {
 	 * Recurse the bean ensuring that everything is touched and loaded from the database.
 	 * 
 	 * @param bean The bean to load.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public static void populateFully(Bean bean) 
-	throws DomainException, MetaDataException {
+	public static void populateFully(Bean bean) {
 		UtilImpl.populateFully(bean);
 	}
 
@@ -70,11 +65,8 @@ public class Util {
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	public static boolean hasChanged(Bean bean) 
-	throws DomainException, MetaDataException {
+	public static boolean hasChanged(Bean bean) {
 		return UtilImpl.hasChanged(bean);
 	}
 

@@ -34,8 +34,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	}
 
 	@Override
-	public Interceptor getInterceptor(Customer customer)
-	throws MetaDataException {
+	public Interceptor getInterceptor(Customer customer) {
 		if (interceptor == null) {
 			try {
 				interceptor = (Interceptor) Thread.currentThread().getContextClassLoader().loadClass(className).newInstance();

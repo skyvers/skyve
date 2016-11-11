@@ -17,7 +17,6 @@ public class BeanShellUtil
 	}
 /*
 	public static <T> T getScriptedInterface(String code)
-	throws MetaDataException
 	{
 		T result = null;
 		
@@ -37,7 +36,6 @@ public class BeanShellUtil
 	}
 	
 	public static Object evaluateExpression(Bean bean, User user, String code)
-	throws MetaDataException
 	{
 		Object result = null;
 		
@@ -60,7 +58,6 @@ public class BeanShellUtil
 	}
 	
 	public static boolean evaluateCondition(Bean bean, User user, String condition)
-	throws MetaDataException
 	{
 		boolean result = false;
 		

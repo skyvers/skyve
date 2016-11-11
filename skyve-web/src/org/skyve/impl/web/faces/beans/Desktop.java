@@ -29,7 +29,6 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -284,7 +283,7 @@ public class Desktop extends Harness {
 								String moduleName,
 								String uxui,
 								StringBuilder result)
-	throws IOException, MetaDataException {
+	throws IOException {
 		result.append("isc.BizUtil.init('").append(getHeaderTemplate());
 		result.append("','../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
@@ -331,8 +330,7 @@ public class Desktop extends Harness {
 		result.append(']');
 	}
 
-	private static void listDataSources(Customer customer, UserImpl user, StringBuilder result) 
-	throws MetaDataException {
+	private static void listDataSources(Customer customer, UserImpl user, StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
 
 		result.append(",[");
@@ -364,8 +362,7 @@ public class Desktop extends Harness {
 														Module module, 
 														List<MenuItem> items,
 														StringBuilder dataSources,
-														Set<String> visitedQueryNames)
-	throws MetaDataException {
+														Set<String> visitedQueryNames) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup) {
 				listDataSourcesForMenuItems(user, customer, moduleName, module, ((MenuGroup) item).getItems(), dataSources, visitedQueryNames);
@@ -408,7 +405,7 @@ public class Desktop extends Harness {
 										List<MenuItem> items, 
 										String uxui,
 										StringBuilder result) 
-	throws MetaDataException, IOException {
+	throws IOException {
 		result.append("root:{name:'");
 		result.append(SmartClientGenerateUtils.processString(Util.i18n(module.getName(), getLocale())));
 		result.append("',sub:[");
@@ -421,7 +418,7 @@ public class Desktop extends Harness {
 									List<MenuItem> items, 
 									String uxui,
 									StringBuilder result)
-	throws MetaDataException, IOException {
+	throws IOException {
 		Locale locale = getLocale();
 		
 		for (int i = 0, l = items.size(); i < l; i++) {

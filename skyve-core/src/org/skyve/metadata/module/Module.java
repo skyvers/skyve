@@ -3,7 +3,6 @@ package org.skyve.metadata.module;
 import java.util.List;
 import java.util.Map;
 
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -116,20 +115,16 @@ public interface Module extends NamedMetaData {
 	 * @param customer
 	 * @param documentName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) 
-	throws MetaDataException;
+	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName);
 	
 	/**
 	 * 
 	 * @param customer Can be null which means that this method returns the un-overridden document.
 	 * @param documentName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Document getDocument(Customer customer, String documentName) 
-	throws MetaDataException;
+	public Document getDocument(Customer customer, String documentName);
 	
 	/**
 	 * 

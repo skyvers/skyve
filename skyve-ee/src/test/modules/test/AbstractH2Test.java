@@ -28,7 +28,6 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateNoContentPersistence;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -80,7 +79,7 @@ public abstract class AbstractH2Test {
 	protected Document msssd;
 	
 	@Before
-	public void beforeBase() throws MetaDataException {
+	public void beforeBase() {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateNoContentPersistence.class;
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
@@ -118,7 +117,7 @@ public abstract class AbstractH2Test {
 	}
 	
 	@After
-	public void afterBase() throws MetaDataException {
+	public void afterBase() {
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 		// For H2 by default, closing the last connection to a database closes the database. 
 		// For an in-memory database, this means the content is lost.

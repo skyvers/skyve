@@ -75,8 +75,7 @@ public class XMLMetaData {
 		// prevent construction
 	}
 
-	public static String marshalRouter(Router router) 
-	throws MetaDataException {
+	public static String marshalRouter(Router router) {
 		try {
 			Marshaller marshaller = ROUTER_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -91,8 +90,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Router unmarshalRouter(String file) 
-	throws MetaDataException {
+	public static Router unmarshalRouter(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -111,8 +109,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalCustomer(CustomerMetaData customer) 
-	throws MetaDataException {
+	public static String marshalCustomer(CustomerMetaData customer) {
 		try {
 			Marshaller marshaller = CUSTOMER_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -127,8 +124,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomer(String file) 
-	throws MetaDataException {
+	public static CustomerMetaData unmarshalCustomer(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -147,8 +143,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalModule(ModuleMetaData module, boolean overridden) 
-	throws MetaDataException {
+	public static String marshalModule(ModuleMetaData module, boolean overridden) {
 		try {
 			Marshaller marshaller = MODULE_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -165,8 +160,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ModuleMetaData unmarshalModule(String file) 
-	throws MetaDataException {
+	public static ModuleMetaData unmarshalModule(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -185,8 +179,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalDocument(DocumentMetaData document, boolean overridden) 
-	throws MetaDataException {
+	public static String marshalDocument(DocumentMetaData document, boolean overridden) {
 		try {
 			Marshaller marshaller = DOCUMENT_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -203,8 +196,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocument(String file) 
-	throws MetaDataException {
+	public static DocumentMetaData unmarshalDocument(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -223,8 +215,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) 
-	throws MetaDataException {
+	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
 		try {
 			Marshaller marshaller = VIEW_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -247,8 +238,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ViewMetaData unmarshalView(String file) 
-	throws MetaDataException {
+	public static ViewMetaData unmarshalView(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {

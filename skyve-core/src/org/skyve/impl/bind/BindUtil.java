@@ -699,7 +699,7 @@ public final class BindUtil {
 													Module module,
 													Document document,
 													String collectionBinding) 
-	throws MetaDataException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
 		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
@@ -1187,13 +1187,11 @@ public final class BindUtil {
 	 * 			The document is never null whereas the attribute can be null if'
 	 * 			the binding expression ultimately resolves to an implicit attribute
 	 * 			like bizKey or bizId or the like.
-	 * @throws MetaDataException	Thrown when the binding expression cannot be resolved fully.
 	 */
 	public static TargetMetaData getMetaDataForBinding(Customer customer, 
 														Module module, 
 														Document document, 
-														String binding)
-	throws MetaDataException {
+														String binding) {
 		Document navigatingDocument = document;
 		Module navigatingModule = module;
 		Attribute attribute = null;
@@ -1259,8 +1257,7 @@ public final class BindUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Object instantiateAndGet(User user, Module module, Document document, Bean bean, String binding)
-	throws MetaDataException {
+	public static Object instantiateAndGet(User user, Module module, Document document, Bean bean, String binding) {
 		Customer customer = user.getCustomer();
 		Document navigatingDocument = document;
 		Attribute attribute = null;

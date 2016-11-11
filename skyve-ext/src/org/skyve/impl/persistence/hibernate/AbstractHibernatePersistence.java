@@ -30,7 +30,6 @@ import org.apache.tika.exception.TikaException;
 import org.hibernate.EntityMode;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
-import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
 import org.hibernate.Query;
@@ -155,8 +154,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	protected abstract void commitContent() throws Exception;
 	
 	@Override
-	public final void disposeAllPersistenceInstances() 
-	throws MetaDataException {
+	public final void disposeAllPersistenceInstances() {
 		// remove this instance - and hopefully the only instance running
 		commit(true);
 
@@ -178,8 +176,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		configure();
 	}
 
-	private static void configure() 
-	throws MetaDataException {
+	private static void configure() {
 		Ejb3Configuration cfg = new Ejb3Configuration();
 
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
@@ -400,8 +397,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		                                                    Mapping mapping,
 		                                                    TableMetadata tableInfo,
 		                                                    String defaultCatalog,
-		                                                    String defaultSchema)
-    throws HibernateException {
+		                                                    String defaultSchema) {
         StringBuffer root = new StringBuffer("alter table ").append(table.getQualifiedName(dialect, defaultCatalog, defaultSchema)).append(' ');
 
         Iterator<?> iter = table.getColumnIterator();
@@ -465,8 +461,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
     }
 	
 	@Override
-	public final void generateDDL(List<String> drops, List<String> creates, List<String> updates)
-	throws DomainException, MetaDataException {
+	public final void generateDDL(List<String> drops, List<String> creates, List<String> updates) {
 		Properties properties = new Properties();
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
 		if (dataSource == null) {
@@ -551,8 +546,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		return moduleName + documentName;
 	}
 
-	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) 
-	throws DomainException, MetaDataException {
+	private void treatPersistenceThrowable(Throwable t, OperationType operationType, PersistentBean bean) {
 t.printStackTrace();
 		if (t instanceof javax.persistence.OptimisticLockException) {
 			if (bean.isPersisted()) {
@@ -610,14 +604,13 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void setUser(User user) throws MetaDataException {
+	public void setUser(User user) {
 		super.setUser(user);
 		resetDocumentPermissionScopes();
 	}
 
 	@Override
-	public void setDocumentPermissionScopes(DocumentPermissionScope scope)
-	throws MetaDataException {
+	public void setDocumentPermissionScopes(DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 
@@ -640,7 +633,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void resetDocumentPermissionScopes() throws MetaDataException {
+	public void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 
@@ -674,8 +667,7 @@ t.printStackTrace();
 	 * @param newScope
 	 * @return
 	 */
-	private void setFilters(Document document, DocumentPermissionScope scope)
-	throws MetaDataException {
+	private void setFilters(Document document, DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
 		AbstractRepository repository = AbstractRepository.get();
 		String userDataGroupId = user.getDataGroupId();
@@ -735,8 +727,7 @@ t.printStackTrace();
 	 * @param document
 	 * @param scope
 	 */
-	private void resetFilters(Document document)
-	throws MetaDataException {
+	private void resetFilters(Document document) {
 		DocumentPermissionScope scope = user.getScope(document.getOwningModuleName(), document.getName());
 		setFilters(document, scope);
 	}
@@ -806,7 +797,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void refresh(Bean bean) throws DomainException {
+	public void refresh(Bean bean) {
 		if (bean.isPersisted()) {
 			try {
 				session.refresh(bean);
@@ -820,8 +811,7 @@ t.printStackTrace();
 	}
 
 	// populate all implicit mandatory fields required
-	private void setMandatories(Document document, final Bean beanToSave)
-	throws DomainException, MetaDataException {
+	private void setMandatories(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
 
 		new BeanVisitor(false, false, false) {
@@ -870,8 +860,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void preFlush(Document document, final Bean beanToSave)
-	throws DomainException, MetaDataException {
+	public void preFlush(Document document, final Bean beanToSave) {
 		// set bizCustomer, bizLock & bizKey
 		setMandatories(document, beanToSave);
 		
@@ -949,8 +938,7 @@ t.printStackTrace();
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final <T extends PersistentBean> T save(Document document, T bean)
-	throws DomainException, MetaDataException {
+	public final <T extends PersistentBean> T save(Document document, T bean) {
 		T result = null;
 		
 		try {
@@ -986,8 +974,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void postFlush(Document document, final Bean beanToSave)
-	throws DomainException, MetaDataException {
+	public void postFlush(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
 		new BeanVisitor(false, false, false) {
@@ -1033,8 +1020,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void replaceTransientProperties(Document document, final Bean savedBean, final Bean unmergedBean)
-	throws DomainException, MetaDataException {
+	public void replaceTransientProperties(Document document, final Bean savedBean, final Bean unmergedBean) {
 		Customer customer = user.getCustomer();
 
 		new BeanVisitor(false, false, false) {
@@ -1043,8 +1029,7 @@ t.printStackTrace();
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
 										Relation parentRelation,
-										Bean bean) 
-			throws DomainException, MetaDataException {
+										Bean bean) {
 				String attributeBinding = null;
 
 				try {
@@ -1097,11 +1082,8 @@ t.printStackTrace();
 	 * 
 	 * @param document
 	 * @param bean
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
-	private void checkUniqueConstraints(Document document, Bean bean) 
-	throws DomainException, MetaDataException {
+	private void checkUniqueConstraints(Document document, Bean bean) {
 		String owningModuleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		String entityName = getDocumentEntityName(owningModuleName, documentName);
@@ -1216,8 +1198,7 @@ t.printStackTrace();
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final <T extends PersistentBean> void delete(Document document, T bean)
-	throws DomainException, MetaDataException {
+	public final <T extends PersistentBean> void delete(Document document, T bean) {
 		T newBean = bean;
 		
 		if (isPersisted(newBean)) {
@@ -1259,8 +1240,7 @@ t.printStackTrace();
 													PersistentBean beanToDelete, 
 													Set<String> documentsVisited,
 													Map<String, Set<Bean>> beansToBeCascaded,
-													boolean checkComposedCollection)
-	throws DomainException, MetaDataException {
+													boolean checkComposedCollection) {
 		Customer customer = user.getCustomer();
 		List<ExportedReference> refs = ((CustomerImpl) customer).getExportedReferences(document);
 		if (refs != null) {
@@ -1322,8 +1302,7 @@ t.printStackTrace();
 										Document document,
 										ExportedReference ref,
 										String entityName,
-										Document referenceDocument)
-	throws DomainException, MetaDataException {
+										Document referenceDocument) {
 		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
@@ -1393,8 +1372,7 @@ t.printStackTrace();
 										Document document,
 										ExportedReference ref,
 										String entityName,
-										Document referenceDocument)
-	throws DomainException, MetaDataException {
+										Document referenceDocument) {
 		if (ExtensionStrategy.mapped.equals(referenceDocument.getPersistent().getStrategy())) {
 			// Find all implementations below the mapped and check these instead
 			Set<Document> derivations = new HashSet<>();
@@ -1457,8 +1435,7 @@ t.printStackTrace();
 
 	private void populateImmediateMapImplementingDerivations(CustomerImpl customer,
 																Document document,
-																Set<Document> result)
-	throws MetaDataException {
+																Set<Document> result) {
 		for (String derivedDocumentName : customer.getDerivedDocuments(document)) {
 			int dotIndex = derivedDocumentName.indexOf('.');
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
@@ -1476,8 +1453,7 @@ t.printStackTrace();
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate)
-	throws DomainException, MetaDataException {
+	public final <T extends Bean> T retrieve(Document document, String id, boolean forUpdate) {
 		T result = null;
 		Class<?> beanClass = null;
 		String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
@@ -1755,8 +1731,7 @@ t.printStackTrace();
 	private static final String CHILD_PARENT_ID = ChildBean.PARENT_NAME + "_id";
 	
 	@Override
-	public void upsertBeanTuple(PersistentBean bean)
-	throws DomainException, MetaDataException {
+	public void upsertBeanTuple(PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -1993,8 +1968,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName)
-	throws DomainException, MetaDataException {
+	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
@@ -2036,8 +2010,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void insertCollectionTuples(PersistentBean owningBean, String collectionName)
-	throws DomainException, MetaDataException {
+	public void insertCollectionTuples(PersistentBean owningBean, String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
@@ -2085,8 +2058,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public SQL newNamedSQL(String moduleName, String queryName)
-	throws MetaDataException {
+	public SQL newNamedSQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		return new HibernateSQL(module.getSQL(queryName).getQuery(), this);
 	}
@@ -2107,15 +2079,13 @@ t.printStackTrace();
 	}
 
 	@Override
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName)
-	throws MetaDataException {
+	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		return new HibernateSQL(moduleName, documentName, module.getSQL(queryName).getQuery(), this);
 	}
 
 	@Override
-	public SQL newNamedSQL(Document document, String queryName) 
-	throws MetaDataException {
+	public SQL newNamedSQL(Document document, String queryName) {
 		Module module = user.getCustomer().getModule(document.getOwningModuleName());
 		return new HibernateSQL(document, module.getSQL(queryName).getQuery(), this);
 	}
@@ -2126,8 +2096,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public BizQL newNamedBizQL(String moduleName, String queryName) 
-	throws MetaDataException {
+	public BizQL newNamedBizQL(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		return new HibernateBizQL(module.getBizQL(queryName).getQuery(), this);
 	}
@@ -2138,16 +2107,14 @@ t.printStackTrace();
 	}
 
 	@Override
-	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName)
-	throws MetaDataException {
+	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
 
 	@Override
-	public DocumentQuery newNamedDocumentQuery(Module module, String queryName)
-	throws MetaDataException {
+	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
 		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
@@ -2158,8 +2125,7 @@ t.printStackTrace();
 	}
 
 	@Override
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName)
-	throws MetaDataException {
+	public DocumentQuery newDocumentQuery(String moduleName, String documentName) {
 		return new HibernateDocumentQuery(moduleName, documentName, this);
 	}
 

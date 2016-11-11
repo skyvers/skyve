@@ -24,7 +24,6 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -293,17 +292,17 @@ public class CustomerImpl implements Customer {
 	}
 
 	@Override
-	public Module getHomeModule() throws MetaDataException {
+	public Module getHomeModule() {
 		return getModule(homeModuleName);
 	}
 
 	@Override
-	public final Module getModule(String moduleName) throws MetaDataException {
+	public final Module getModule(String moduleName) {
 		return AbstractRepository.get().getModule(this, moduleName);
 	}
 
 	@Override
-	public List<Module> getModules() throws MetaDataException {
+	public List<Module> getModules() {
 		List<Module> result = new ArrayList<>(moduleNames.size());
 
 		for (String moduleName : moduleNames) {
@@ -357,7 +356,7 @@ public class CustomerImpl implements Customer {
 		this.loginResources = loginResources;
 	}
 
-	public void determineDependencies() throws MetaDataException {
+	public void determineDependencies() {
 		for (Module module : getModules()) {
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				DocumentRef documentRef = module.getDocumentRefs().get(documentName);

@@ -19,7 +19,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -62,7 +61,7 @@ final class SQLRowSetDynaClass implements DynaClass, Serializable {
 	protected transient List<DynaBean> rows = new ArrayList<>();
 
 	SQLRowSetDynaClass(Customer customer, Module module, String documentName, ResultSet resultSet)
-	throws SQLException, MetaDataException {
+	throws SQLException {
 		if (documentName != null) {
 			document = module.getDocument(customer, documentName);
 		}

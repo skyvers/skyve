@@ -18,7 +18,6 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -58,7 +57,7 @@ public class JSONReader {
 	private Object token;
 	private StringBuffer buf = new StringBuffer();
 
-	public JSONReader(User user) throws MetaDataException {
+	public JSONReader(User user) {
 		this.user = user;
 		this.customer = (user == null) ? null : user.getCustomer();
 	}

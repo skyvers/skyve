@@ -20,7 +20,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
@@ -119,7 +118,7 @@ public class UserBizlet extends Bizlet<User> {
 		return super.getVariantDomainValues(fieldName);
 	}
 
-	public static List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) throws MetaDataException {
+	public static List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) {
 		List<DomainValue> result = new ArrayList<>();
 		for (Module module : user.getCustomer().getModules()) {
 			for (Role role : module.getRoles()) {

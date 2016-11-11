@@ -110,8 +110,7 @@ class ViewValidator extends ViewVisitor {
 	private String dataGridIdentifier;
 	private String dataGridBinding;
 	
-	ViewValidator(ViewImpl view, CustomerImpl customer, DocumentImpl document, String uxui)
-	throws MetaDataException {
+	ViewValidator(ViewImpl view, CustomerImpl customer, DocumentImpl document, String uxui) {
 		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view);
 		viewIdentifier = view.getType() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 		this.uxui = uxui;
@@ -125,8 +124,7 @@ class ViewValidator extends ViewVisitor {
 									boolean domainValuesRequired,
 									boolean scalarBindingOnly,
 									String widgetidentifier,
-									AttributeType... assertTypes)
-	throws MetaDataException {
+									AttributeType... assertTypes) {
 		if (bindingRequired && (binding == null)) {
 			throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - binding is required.");
 		}
@@ -216,8 +214,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateConditionName(String conditionName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateConditionName(String conditionName, String widgetIdentifier) {
 		// ignore true and false when checking the condition exists
 		if ((conditionName != null) && (! "true".equals(conditionName)) && (! "false".equals(conditionName))) {
 			// reverse the sense of the condition if it starts with "not"
@@ -241,8 +238,7 @@ class ViewValidator extends ViewVisitor {
 	private void validateCondition(ModuleImpl currentModule, 
 									DocumentImpl currentDocument,
 									String testConditionName,
-									String widgetIdentifier)
-	throws MetaDataException {
+									String widgetIdentifier) {
 		if (! currentDocument.getConditionNames().contains(testConditionName)) {
 			Extends extension = currentDocument.getExtends();
 			if (extension == null) {
@@ -256,8 +252,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateParameterBindings(List<? extends Parameter> parameters, String parentWidgetIdentifier)
-	throws MetaDataException {
+	private void validateParameterBindings(List<? extends Parameter> parameters, String parentWidgetIdentifier) {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
 				validateBinding(null,
@@ -273,8 +268,7 @@ class ViewValidator extends ViewVisitor {
 	
 	private void validateMessageBindings(String message, 
 											String widgetIdentifier,
-											String description)
-	throws MetaDataException {
+											String description) {
 		if (message != null) {
 			Module testModule = module;
 			Document testDocument = document;
@@ -295,8 +289,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
 		if (queryName != null) {
 			if (modelName != null) {
 				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has a query and a model name.");
@@ -311,15 +304,13 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateQueryName(String queryName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateQueryName(String queryName, String widgetIdentifier) {
 		if ((queryName != null) && (module.getDocumentQuery(queryName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " does not reference a valid query of " + queryName);
 		}
 	}
 	
-	private void validateListModelName(String modelName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateListModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
@@ -335,8 +326,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateMapModelName(String modelName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateMapModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
@@ -352,8 +342,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateComparisonModelName(String modelName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateComparisonModelName(String modelName, String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				StringBuilder fullyQualifiedJavaCodeName = new StringBuilder(128);
@@ -369,32 +358,28 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 	
-	private void validateActionName(String actionName, String widgetIdentifier)
-	throws MetaDataException {
+	private void validateActionName(String actionName, String widgetIdentifier) {
 		if ((actionName != null) && (view.getAction(actionName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existent action " + actionName);
 		}
 	}
 	
 	@Override
-	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
 		String actionName = button.getActionName();
 		String buttonIdentifier = "A button " + button.getActionName();
 		validateActionName(actionName, buttonIdentifier);
 	}
 
 	@Override
-	public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "Dynamic Image " + image.getName();
 		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
 		validateParameterBindings(image.getParameters(), imageIdentifier);
 	}
 
 	@Override
-	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		String binding = checkBox.getBinding();
 		String checkBoxIdentifier = "CheckBox " + binding;
 		if (dataGridBinding != null) {
@@ -415,14 +400,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedCheckBox(CheckBox checkBox,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
 		String membershipIdentifier = "CheckBox " + membership.getBinding();
 		validateBinding(null,
 							membership.getBinding(),
@@ -439,16 +422,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedCheckMembership(CheckMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitColourPicker(ColourPicker colour,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		String binding = colour.getBinding();
 		String colourIdentifier = "Colour " + binding;
 		if (dataGridBinding != null) {
@@ -469,14 +450,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedColourPicker(ColourPicker colour,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
 		String binding = combo.getBinding();
 		String comboIdentifier = "Combo " + binding;
 		if (dataGridBinding != null) {
@@ -497,14 +476,12 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCombo(Combo combo, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitContentImage(ContentImage image, boolean parentVisible, boolean parentEnabled) {
 		String binding = image.getBinding();
 		String imageIdentifier = "ContentImage " + binding;
 		if (dataGridBinding != null) {
@@ -523,8 +500,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitContentLink(ContentLink link, boolean parentVisible, boolean parentEnabled) {
 		String binding = link.getBinding();
 		String linkIdentifier = "ContentLink " + link.getBinding();
 		if (dataGridBinding != null) {
@@ -544,8 +520,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		String title = grid.getTitle();
 		String id = grid.getWidgetId();
 		dataGridBinding = grid.getBinding();
@@ -578,8 +553,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String columnIdentifier = "Column " + column.getTitle() + " of " + dataGridIdentifier;
 		validateBinding(dataGridBinding,
 							column.getBinding(),
@@ -593,30 +567,26 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 											boolean parentVisible, 
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 												boolean parentVisible, 
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
-	public void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		String buttonIdentifier = "A Dialog Button" + button.getDialogName();
 		validateConditionName(button.getDisabledConditionName(), buttonIdentifier);
 		validateConditionName(button.getInvisibleConditionName(), buttonIdentifier);
@@ -624,8 +594,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		String formIdentifier = form.getWidgetId();
 		if (formIdentifier == null) {
 			formIdentifier = "A Form";
@@ -638,28 +607,24 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFormColumn(FormColumn column, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitFormColumn(FormColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to validate
 	}
 
 	@Override
-	public void visitFormRow(FormRow row, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
 		if (row.getItems().isEmpty()) {
 			throw new MetaDataException("A form row in " + viewIdentifier + " is empty (has not items declared).");
 		}
 	}
 
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// TODO Implement FormItem validation
 	}
 
 	@Override
-	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitGeoLocator(GeoLocator locator, boolean parentVisible, boolean parentEnabled) {
 		String locatorIdentifier = "A GeoLocator";
 		validateBinding(null,
 							locator.getAddressBinding(),
@@ -730,8 +695,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
 		validateBinding(null,
 							geometry.getBinding(),
@@ -746,16 +710,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();
 		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
 	}
 
 	@Override
-	public void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		String borderTitle = hbox.getBorderTitle();
 		String id = hbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
@@ -763,8 +725,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {
 		String binding = html.getBinding();
 		String htmlIdentifier = "HTML " + html.getBinding();
 		if (dataGridBinding != null) {
@@ -785,8 +746,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		String blurbIdentifier = "A Blurb";
 		if (dataGridBinding != null) {
 			blurbIdentifier += " in" + dataGridIdentifier;
@@ -800,8 +760,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLabel(Label label, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitLabel(Label label, boolean parentVisible, boolean parentEnabled) {
 		String labelIdentifier = "A Label";
 		if (dataGridBinding != null) {
 			labelIdentifier += " in " + dataGridIdentifier;
@@ -826,8 +785,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		String listGridIdentifier = "ListGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), listGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
@@ -842,8 +800,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		String treeGridIdentifier = "TreeGrid " + grid.getQueryName();
 		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
 		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
@@ -859,8 +816,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		String membershipIdentifier = "ListMembership " + membership.getBinding();
 		validateBinding(null,
 							membership.getBinding(),
@@ -878,16 +834,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedListMembership(ListMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// do nothing
 	}
 	
 	@Override
 	public void visitComparison(Comparison comparison,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		String comparisonIdentifier = "Comparison " + comparison.getBinding();
 		validateBinding(null,
 							comparison.getBinding(),
@@ -903,8 +857,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
 		String binding = lookup.getBinding();
 		String lookupIdentifier = "Lookup " + binding;
 		if (dataGridBinding != null) {
@@ -929,14 +882,12 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedLookup(Lookup lookup, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
 		String lookupIdentifier = "LookupDescription " + binding;
@@ -1035,26 +986,22 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// no validation required as parameters are checked by their parent widgets
 	}
 
 	@Override
-	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// no validation required as parameters are checked by their parent widgets
 	}
 
 	@Override
-	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
 		String binding = password.getBinding();
 		String passwordIdentifier = "Password " + binding;
 		if (dataGridBinding != null) {
@@ -1075,26 +1022,22 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedPassword(Password password,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitPickList(PickList list, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
 		// forget it, this should be defunct
 	}
 
 	@Override
-	public void visitPickListColumn(PickListColumn column, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitPickListColumn(PickListColumn column, boolean parentVisible, boolean parentEnabled) {
 		// forget it, this should be defunct
 	}
 
 	@Override
-	public void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
 		String progressBarIdentifier = "ProgressBar " + progressBar.getBinding();
 		validateBinding(null,
 							progressBar.getBinding(),
@@ -1107,8 +1050,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
 		String binding = radio.getBinding();
 		String radioIdentifier = "Radio " + binding;
 		if (dataGridBinding != null) {
@@ -1132,14 +1074,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedRadio(Radio radio,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
 		String binding = richText.getBinding();
 		String richTextIdentifier = "RichText " + binding;
 		if (dataGridBinding != null) {
@@ -1160,14 +1100,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedRichText(RichText richText,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
 		String binding = slider.getBinding();
 		String sliderIdentifier = "Slider " + binding;
 		if (dataGridBinding != null) {
@@ -1187,19 +1125,17 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedSlider(Slider slider,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) throws MetaDataException {
+	public void visitSpacer(Spacer spacer) {
 		// nothing to validate
 	}
 
 	@Override
-	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		String binding = spinner.getBinding();
 		String spinnerIdentifier = "Spinner " + binding;
 		if (dataGridBinding != null) {
@@ -1219,29 +1155,25 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedSpinner(Spinner spinner,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "StaticImage " + image.getRelativeFile();
 		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
 	}
 
 	@Override
-	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		final String linkIdentifier = "Link " + link.getValue();
 		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
 
 		new ReferenceProcessor() {
 			@SuppressWarnings("synthetic-access")
 			private ModuleImpl validateReferenceModuleName(String referenceModuleName, 
-															String referenceDescription)
-			throws MetaDataException {
+															String referenceDescription) {
 				ModuleImpl result = null;
 				
 				if (referenceModuleName.indexOf('{') < 0) {
@@ -1265,8 +1197,7 @@ class ViewValidator extends ViewVisitor {
 			@SuppressWarnings("synthetic-access")
 			private DocumentImpl validateReferenceDocumentName(ModuleImpl referenceModule,
 															String referenceDocumentName,
-															String referenceDescription)
-			throws MetaDataException {
+															String referenceDescription) {
 				DocumentImpl result = null;
 				
 				if (referenceDocumentName.indexOf('{') < 0) {
@@ -1290,8 +1221,7 @@ class ViewValidator extends ViewVisitor {
 			
 			@SuppressWarnings("synthetic-access")
 			private TargetMetaData validateReferenceBinding(String referenceBinding,
-																String referenceDescription)
-			throws MetaDataException {
+																String referenceDescription) {
 				String bindingToTest = referenceBinding;
 				if (dataGridBinding != null) {
 					if (referenceBinding == null) {
@@ -1324,15 +1254,13 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			@Override
-			public void processResourceReference(ResourceReference reference)
-			throws MetaDataException {
+			public void processResourceReference(ResourceReference reference) {
 				// nothing to do here
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processReportReference(ReportReference reference)
-			throws MetaDataException {
+			public void processReportReference(ReportReference reference) {
 				ModuleImpl reportModule = validateReferenceModuleName(reference.getModuleName(),
 																	"a report");
 				if (reportModule != null) { // valid module name with no '{'
@@ -1359,8 +1287,7 @@ class ViewValidator extends ViewVisitor {
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processQueryListViewReference(QueryListViewReference reference)
-			throws MetaDataException {
+			public void processQueryListViewReference(QueryListViewReference reference) {
 				try {
 					if (module.getDocumentQuery(reference.getQueryName()) == null) {
 						throw new IllegalStateException("No such query");
@@ -1374,20 +1301,17 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			@Override
-			public void processImplicitActionReference(ImplicitActionReference reference)
-			throws MetaDataException {
+			public void processImplicitActionReference(ImplicitActionReference reference) {
 				// nothing to do here
 			}
 			
 			@Override
-			public void processExternalReference(ExternalReference reference)
-			throws MetaDataException {
+			public void processExternalReference(ExternalReference reference) {
 				// nothing to do here
 			}
 			
 			@Override
-			public void processEditViewReference(EditViewReference reference)
-			throws MetaDataException {
+			public void processEditViewReference(EditViewReference reference) {
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), "an edit view");
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule, 
@@ -1398,8 +1322,7 @@ class ViewValidator extends ViewVisitor {
 			}
 			
 			@Override
-			public void processDefaultListViewReference(DefaultListViewReference reference)
-			throws MetaDataException {
+			public void processDefaultListViewReference(DefaultListViewReference reference) {
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), "an edit view");
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule, 
@@ -1411,8 +1334,7 @@ class ViewValidator extends ViewVisitor {
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processContentReference(ContentReference reference)
-			throws MetaDataException {
+			public void processContentReference(ContentReference reference) {
 				String widgetidentifier = linkIdentifier + " with a content reference";
 				if (dataGridBinding != null) {
 					widgetidentifier += " in " + dataGridIdentifier;
@@ -1429,8 +1351,7 @@ class ViewValidator extends ViewVisitor {
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processActionReference(ActionReference reference)
-			throws MetaDataException {
+			public void processActionReference(ActionReference reference) {
 				String widgetIdentifier = linkIdentifier + " with an action reference";
 				if (dataGridBinding != null) { // in a table or grid
 					widgetIdentifier += " in " + dataGridBinding;
@@ -1462,8 +1383,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String tabIdentifier = "Tab " + tab.getTitle();
 		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
 		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
@@ -1471,8 +1391,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		String tabPaneIdentifier = tabPane.getWidgetId();
 		if (tabPaneIdentifier != null) {
 			tabPaneIdentifier = "TabPane " + tabPaneIdentifier;
@@ -1485,8 +1404,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
 		String binding = text.getBinding();
 		String textIdentifier = "TextArea " + binding;
 		if (dataGridBinding != null) {
@@ -1506,14 +1424,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedTextArea(TextArea text,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
 		String binding = text.getBinding();
 		String textIdentifier = "Text " + binding;
 		if (dataGridBinding != null) {
@@ -1533,8 +1449,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedTextField(TextField text,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// do nothing
 	}
 
@@ -1542,14 +1457,12 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitInject(Inject inject,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		String borderTitle = vbox.getBorderTitle();
 		String id = vbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
@@ -1557,7 +1470,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() throws MetaDataException {
+	public void visitView() {
 		validateMessageBindings(view.getTitle(), viewIdentifier, "a title");
 		validateParameterBindings(view.getParameters(), viewIdentifier);
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
@@ -1565,79 +1478,67 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		dataGridBinding = null;
 		dataGridIdentifier = null;
 	}
 
 	@Override
-	public void visitedForm(Form form, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedForm(Form form, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedFormRow(FormRow row, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedHBox(HBox hbox, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedPickList(PickList list, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedVBox(VBox vbox, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitedVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedView() throws MetaDataException {
+	public void visitedView() {
 		// nothing to do here
 	}
 
-	private void validateAction(ActionImpl action)
-	throws MetaDataException {
+	private void validateAction(ActionImpl action) {
 		String actionIdentifier = "Action " + action.getName();
 		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
 		validateConditionName(action.getInvisibleConditionName(), actionIdentifier);
@@ -1647,103 +1548,102 @@ class ViewValidator extends ViewVisitor {
 	// TODO if an action has a class name, ensure we can load the class
 	
 	@Override
-	public void visitAction(ActionImpl action) throws MetaDataException {
+	public void visitAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+	public void visitDownloadAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitReportAction(ActionImpl action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) {
 		// TODO
 		validateAction(action);
 	}
 
-	private static void validateEventHandlerSequence(List<EventAction> actions, String widgetIdentifier) 
-	throws MetaDataException {
+	private static void validateEventHandlerSequence(List<EventAction> actions, String widgetIdentifier) {
 		if (actions != null) {
 			Iterator<EventAction> i = actions.iterator();
 			while (i.hasNext()) {
@@ -1767,8 +1667,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		validateEventHandlerSequence(changeable.getChangedActions(),
 										"[onChanged] event handler for widget with binding " + 
 											changeable.getBinding());
@@ -1777,16 +1676,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable focusable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String binding = (focusable instanceof Bound) ? ((Bound) focusable).getBinding() : "unknown";
 		validateEventHandlerSequence(focusable.getFocusActions(),
 				"[onFocus] event handler for widget with binding " + binding);
@@ -1795,16 +1692,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnBlurEventHandler(Focusable focusable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String binding = (focusable instanceof Bound) ? ((Bound) focusable).getBinding() : "unknown";
 		validateEventHandlerSequence(focusable.getBlurActions(),
 				"[onBlur] event handler for widget with binding " + binding);
@@ -1813,16 +1708,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
 		if (addable instanceof Bound) {
 			widgetIdentifier = "[onAdded] event handler for widget with binding " + ((Bound) addable).getBinding();
@@ -1836,16 +1729,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnEditedEventHandler(Editable editable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
 		if (editable instanceof Bound) {
 			widgetIdentifier = "[onEdited] event handler for widget with binding " + ((Bound) editable).getBinding();
@@ -1859,16 +1750,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
 		if (removable instanceof Bound) {
 			widgetIdentifier = "[onRemoved] event handler for widget with binding " + ((Bound) removable).getBinding();
@@ -1882,16 +1771,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		String widgetIdentifier = "Unknown widget";
 		if (selectable instanceof Bound) {
 			widgetIdentifier = "[onSelected] event handler for widget with binding " + ((Bound) selectable).getBinding();
@@ -1905,16 +1792,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnPickedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getPickedActions(),
 										"[onPicked] event handler for lookup with binding " + 
 											lookup.getBinding());
@@ -1923,16 +1808,14 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnPickedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnClearedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getClearedActions(),
 										"[onCleared] event handler for lookup with binding " + 
 											lookup.getBinding());
@@ -1941,8 +1824,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitedOnClearedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1950,24 +1832,21 @@ class ViewValidator extends ViewVisitor {
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 											EventSource source,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// no properties to check
 	}
 
 	@Override
 	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		validateActionName(server.getActionName(), "[server] event action in an event handler");
 	}
 
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		String widgetIdentifier = "[setDisabled] event action in an event handler";
 		validateBinding(null,
 							setDisabled.getBinding(),
@@ -1988,8 +1867,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		String widgetIdentifier = "[toggleDisabled] event action in an event handler";
 		validateBinding(null,
 							toggleDisabled.getBinding(),
@@ -2004,8 +1882,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		String widgetIdentifier = "[toggleVisibility] event action in an event handler";
 		validateBinding(null,
 							toggleVisibility.getBinding(),
@@ -2020,8 +1897,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		String widgetIdentifier = "[setInvisible] event action in an event handler";
 		validateBinding(null,
 							setInvisible.getBinding(),

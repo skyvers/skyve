@@ -78,8 +78,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 		return true;
     }
 	
-	public static Document getDocument(String moduleDotDocument)
-	throws MetaDataException {
+	public static Document getDocument(String moduleDotDocument) {
 		User user = SkyveDocumentExecuterFactory.getUser();
 		
 		int dotIndex = moduleDotDocument.indexOf('.');

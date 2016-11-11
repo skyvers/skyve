@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.skyve.domain.Bean;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
@@ -35,10 +34,8 @@ public interface Document extends Model {
 	 * @param customer
 	 * @param name
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name)
-	throws MetaDataException;
+	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name);
 
 	/**
 	 * Get the unique constraints for this document only - no super-documents.
@@ -50,7 +47,7 @@ public interface Document extends Model {
 	 * Get the unique constraints for this document and any super-documents.
 	 * @return
 	 */
-	public List<UniqueConstraint> getAllUniqueConstraints() throws MetaDataException;
+	public List<UniqueConstraint> getAllUniqueConstraints();
 
 	/**
 	 * 
@@ -64,10 +61,8 @@ public interface Document extends Model {
 	 * @param customer
 	 * @param relationName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Document getRelatedDocument(Customer customer, String relationName) 
-	throws MetaDataException;
+	public Document getRelatedDocument(Customer customer, String relationName);
 	
 	/**
 	 * 
@@ -103,10 +98,8 @@ public interface Document extends Model {
 	 * 
 	 * @param customer
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Set<Document> getReferencedDocuments(Customer customer) 
-	throws MetaDataException;
+	public Set<Document> getReferencedDocuments(Customer customer);
 	
 	/**
 	 * 
@@ -124,9 +117,8 @@ public interface Document extends Model {
 	 * 
 	 * @param customer
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Document getParentDocument(Customer customer) throws MetaDataException;
+	public Document getParentDocument(Customer customer);
 	
 	/**
 	 * 
@@ -134,9 +126,8 @@ public interface Document extends Model {
 	 * @param customer
 	 * @param type
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public View getView(String uxui, Customer customer, ViewType type) throws MetaDataException;
+	public View getView(String uxui, Customer customer, ViewType type);
 	
 	/**
 	 * 

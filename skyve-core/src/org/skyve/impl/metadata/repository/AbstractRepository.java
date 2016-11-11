@@ -70,16 +70,16 @@ public abstract class AbstractRepository implements Repository {
 	public final String CLIENT_NAME = "client";
 	public final String CLIENT_NAMESPACE = CLIENT_NAME + '/';
 
-	protected abstract <T extends MetaData> T get(String name) throws MetaDataException;
+	protected abstract <T extends MetaData> T get(String name);
 
-	protected abstract void put(String name, MetaData metaData) throws MetaDataException;
+	protected abstract void put(String name, MetaData metaData);
 
 	/**
 	 * 
 	 * @param customer if <code>null</code>, the entire repository goes.
 	 */
 	@Override
-	public void evictCachedMetaData(Customer customer) throws MetaDataException {
+	public void evictCachedMetaData(Customer customer) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		if (customer == null) {
@@ -98,8 +98,7 @@ public abstract class AbstractRepository implements Repository {
 	// class maps
 	private Map<String, Class<?>> classes = new TreeMap<>();
 	
-	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) 
-	throws MetaDataException {
+	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) {
 		Class<?> result = null;
 		
 		String javaCodeLocation = null;
@@ -140,13 +139,11 @@ public abstract class AbstractRepository implements Repository {
 	 * @param fullyQualifiedJavaCodeName
 	 * @param assertExistence
 	 * @return
-	 * @throws MetaDataException
 	 */
 	@SuppressWarnings("unchecked")
 	public final <T extends MetaData> T getJavaCode(Customer customer, 
 														String fullyQualifiedJavaCodeName,
-														boolean assertExistence)
-	throws MetaDataException {
+														boolean assertExistence) {
 		T result = null;
 		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);
 		
@@ -272,8 +269,7 @@ public abstract class AbstractRepository implements Repository {
 		return result.toString();
 	}
 	
-	public Document findNearestPersistentUnmappedSuperDocument(Customer customer, Module module, Document document)
-	throws MetaDataException {
+	public Document findNearestPersistentUnmappedSuperDocument(Customer customer, Module module, Document document) {
 		Document result = null;
 		
 		Extends inherits = document.getExtends();
@@ -307,24 +303,22 @@ public abstract class AbstractRepository implements Repository {
 		return result;
 	}
 
-	public abstract List<String> getAllCustomerNames() throws MetaDataException;
+	public abstract List<String> getAllCustomerNames();
 
 	/**
 	 * Used to return all module names defined in the modules area (not customer overridden definitions).
 	 * 
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public abstract List<String> getAllVanillaModuleNames() throws MetaDataException;
+	public abstract List<String> getAllVanillaModuleNames();
 
 	/**
 	 * 
 	 * @param customer Can be null, which means get the un-overridden module.
 	 * @param moduleName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public abstract Module getModule(Customer customer, String moduleName) throws MetaDataException;
+	public abstract Module getModule(Customer customer, String moduleName);
 
 	/**
 	 * 
@@ -332,25 +326,24 @@ public abstract class AbstractRepository implements Repository {
 	 * @param module
 	 * @param documentName
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public abstract Document getDocument(Customer customer, Module module, String documentName) throws MetaDataException;
+	public abstract Document getDocument(Customer customer, Module module, String documentName);
 
-	public abstract <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document) throws MetaDataException;
+	public abstract <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document);
 
-	public abstract Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration) throws MetaDataException;
+	public abstract Class<Enumeration> getEnum(org.skyve.impl.metadata.model.document.field.Enumeration enumeration);
 
-	public abstract void validateCustomer(Customer customer) throws MetaDataException;
+	public abstract void validateCustomer(Customer customer);
 
-	public abstract void validateModule(Customer customer, Module module) throws MetaDataException;
+	public abstract void validateModule(Customer customer, Module module);
 
-	public abstract void validateDocument(Customer customer, Document document) throws MetaDataException;
+	public abstract void validateDocument(Customer customer, Document document);
 
-	public abstract void validateView(Customer customer, Document document, View view, String uxui) throws MetaDataException;
+	public abstract void validateView(Customer customer, Document document, View view, String uxui);
 
 	/**
 	 * Override the interface method on AbstractRepository to return UserImpl.
 	 */
 	@Override
-	public abstract UserImpl retrieveUser(String userName) throws MetaDataException;
+	public abstract UserImpl retrieveUser(String userName);
 }

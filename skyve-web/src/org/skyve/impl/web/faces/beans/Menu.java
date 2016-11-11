@@ -27,7 +27,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
@@ -77,7 +76,7 @@ public class Menu extends Harness {
 		}.execute();
 	}
 	
-	private static MenuModel createMenuModel(String bizModule, String uxui) throws MetaDataException {
+	private static MenuModel createMenuModel(String bizModule, String uxui) {
 		MenuModel result = new DefaultMenuModel();
 
 		UserImpl user = (UserImpl) CORE.getUser();
@@ -121,8 +120,7 @@ public class Menu extends Harness {
 										Submenu menu,
 										Customer customer,
 										Module module,
-										String uxui)
-	throws MetaDataException {
+										String uxui) {
 		if (item.isApplicable(uxui)) {
 			if (item instanceof MenuGroup) {
 				menu.getElements().add(createSubMenu((MenuGroup) item, customer, module, uxui));
@@ -135,8 +133,7 @@ public class Menu extends Harness {
 
 	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
 																		Customer customer,
-																		Module module)
-	throws MetaDataException {
+																		Module module) {
 		String url = createMenuItemUrl(customer, module, item);
 		DefaultMenuItem result = new DefaultMenuItem(item.getName(), null, url);
 		result.setAjax(false);
@@ -147,8 +144,7 @@ public class Menu extends Harness {
 	private static Submenu createSubMenu(MenuGroup group,
 											Customer customer, 
 											Module module,
-											String uxui)
-	throws MetaDataException {
+											String uxui) {
 		Submenu result = new DefaultSubMenu(group.getName());
 		for (MenuItem subItem : group.getItems()) {
 			processItem(subItem, result, customer, module, uxui);
@@ -157,7 +153,7 @@ public class Menu extends Harness {
 		return result;
 	}
 	
-	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) throws MetaDataException {
+	public static String createMenuItemUrl(Customer customer, Module module, MenuItem item) {
 		StringBuilder url = new StringBuilder(64);
 		if (item instanceof ListItem) {
 			ListItem gridItem = (ListItem) item;

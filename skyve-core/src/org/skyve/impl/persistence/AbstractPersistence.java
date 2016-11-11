@@ -6,9 +6,7 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -17,9 +15,6 @@ import org.skyve.persistence.Persistence;
 import org.skyve.impl.persistence.AbstractPersistence;
 
 public abstract class AbstractPersistence implements Persistence {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -766607064543920926L;
 
 	public static Class<? extends AbstractPersistence> IMPLEMENTATION_CLASS;
@@ -60,8 +55,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * You will need to chuck away the old one and use a new one.
 	 * This is what this method does.
 	 */
-	public static AbstractPersistence renewPersistence()
-	throws MetaDataException {
+	public static AbstractPersistence renewPersistence() {
 		// Get old persistence and close
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
@@ -81,9 +75,7 @@ public abstract class AbstractPersistence implements Persistence {
 		return user;
 	}
 
-	@SuppressWarnings("unused")
-	public void setUser(User user) 
-	throws MetaDataException {
+	public void setUser(User user) {
 		this.user = user;
 	}
 
@@ -96,9 +88,8 @@ public abstract class AbstractPersistence implements Persistence {
 		return (bean instanceof AbstractPersistentBean) && (((PersistentBean) bean).getBizVersion() != null);
 	}
 
-	public abstract void disposeAllPersistenceInstances() throws MetaDataException;
-	public abstract void generateDDL(List<String> drops, List<String> creates, List<String> updates) 
-	throws DomainException, MetaDataException;
+	public abstract void disposeAllPersistenceInstances();
+	public abstract void generateDDL(List<String> drops, List<String> creates, List<String> updates);
 
 
 	public abstract String getDocumentEntityName(String moduleName, String documentName);
@@ -108,12 +99,10 @@ public abstract class AbstractPersistence implements Persistence {
 	public abstract void preRemove(AbstractPersistentBean bean) throws Exception;
 	public abstract void postRemove(AbstractPersistentBean bean) throws Exception;
 
-	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean) 
-	throws DomainException, MetaDataException;
+	public abstract void replaceTransientProperties(Document document, Bean targetBean, Bean sourceBean);
 
 	@Override
-	public final <T extends PersistentBean> T save(T bean)
-	throws DomainException, MetaDataException {
+	public final <T extends PersistentBean> T save(T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -122,8 +111,7 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	@Override
-	public final <T extends PersistentBean> void delete(T bean)
-	throws DomainException, MetaDataException {
+	public final <T extends PersistentBean> void delete(T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -135,8 +123,7 @@ public abstract class AbstractPersistence implements Persistence {
 	public final <T extends Bean> T retrieve(String moduleName,
 												String documentName,
 												String id,
-												boolean forUpdate)
-	throws DomainException, MetaDataException {
+												boolean forUpdate) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);

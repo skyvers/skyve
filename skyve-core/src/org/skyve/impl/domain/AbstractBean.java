@@ -174,7 +174,7 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public boolean evaluateCondition(String conditionName) throws MetaDataException {
+	public boolean evaluateCondition(String conditionName) {
 		boolean result = false;
 
 		try {

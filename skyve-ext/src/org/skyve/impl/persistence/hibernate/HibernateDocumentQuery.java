@@ -6,7 +6,6 @@ import org.hibernate.Query;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
@@ -37,8 +36,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 
 	public HibernateDocumentQuery(String moduleName, 
 									String documentName,
-									AbstractHibernatePersistence persistence)
-	throws MetaDataException {
+									AbstractHibernatePersistence persistence) {
 		super(moduleName, documentName);
 		this.delegate = new HibernateQueryDelegate(persistence);
 	}
@@ -56,8 +54,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults()
-	throws DomainException {
+	public <T extends Bean> List<T> beanResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, true, false);
@@ -68,8 +65,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, true, false);
@@ -80,8 +76,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults()
-	throws DomainException {
+	public <T extends Bean> List<T> projectedResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, false, false, false);
@@ -92,8 +87,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, false, false, false);
@@ -104,8 +98,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type)
-	throws DomainException {
+	public <T> List<T> scalarResults(Class<T> type) {
 		try {
 		Query query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
@@ -116,8 +109,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
-	throws DomainException {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
 		Query query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
@@ -128,8 +120,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public List<Object[]> tupleResults()
-	throws DomainException {
+	public List<Object[]> tupleResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, false, true);
@@ -140,8 +131,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable()
-	throws DomainException {
+	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, false, true);

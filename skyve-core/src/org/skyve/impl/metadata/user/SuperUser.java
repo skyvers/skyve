@@ -25,8 +25,7 @@ public class SuperUser extends UserImpl {
 								String beanBizDocument,
 								String beanBizCustomer,
 								String beanBizDataGroupId,
-								String beanBizUserId) 
-	throws MetaDataException, DomainException {
+								String beanBizUserId) {
 		return true;
 	}
 

@@ -10,13 +10,11 @@ import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -188,7 +186,7 @@ public class UserImpl implements User {
 	}
 
 	@Override
-	public Customer getCustomer() throws MetaDataException {
+	public Customer getCustomer() {
 		return AbstractRepository.get().getCustomer(customerName);
 	}
 
@@ -343,8 +341,6 @@ public class UserImpl implements User {
 	 * @param beanBizDataGroupId
 	 * @param beanBizUserId
 	 * @return
-	 * @throws MetaDataException
-	 * @throws DomainException
 	 */
 	@Override
 	@SuppressWarnings("incomplete-switch")
@@ -353,8 +349,7 @@ public class UserImpl implements User {
 								String beanBizDocument,
 								String beanBizCustomer,
 								String beanBizDataGroupId,
-								String beanBizUserId) 
-	throws MetaDataException, DomainException {
+								String beanBizUserId) {
 		boolean result = roleNames.contains(SUPER_ROLE);
 
 		if (! result) {
@@ -473,8 +468,6 @@ public class UserImpl implements User {
 	 * Indicates if the user is able to search or view the content
 	 * 
 	 * @return <code>true</code> if access is allowed, otherwise <code>false</code>.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	@Override
 	public boolean canAccessContent(String bizId,
@@ -483,8 +476,7 @@ public class UserImpl implements User {
 										String bizCustomer,
 										String bizDataGroupId,
 										String bizUserId,
-										String attributeName) 
-	throws MetaDataException, DomainException {
+										String attributeName) {
 		boolean result = roleNames.contains(SUPER_ROLE);
 
 		if (! result) {

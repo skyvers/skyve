@@ -34,7 +34,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -64,8 +63,7 @@ public class ViewGenerator {
 		// do nothing
 	}
 
-	public static ViewImpl generate(Customer customer, Document document, ViewType type) 
-	throws MetaDataException {
+	public static ViewImpl generate(Customer customer, Document document, ViewType type) {
 		ViewImpl result = null;
 
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -89,8 +87,7 @@ public class ViewGenerator {
 												Document document,
 												Reference reference,
 												List<Bean> beans,
-												String binding)
-	throws MetaDataException {
+												String binding) {
 		ViewImpl result = new ViewImpl();
 		result.setType(ViewType.pick);
 		result.setTitle("Pick a " + document.getSingularAlias());
@@ -186,8 +183,7 @@ public class ViewGenerator {
 		MetaData widget;
 	}
 	
-	private static ViewImpl generateEditView(Customer customer, Module module, Document document) 
-	throws MetaDataException {
+	private static ViewImpl generateEditView(Customer customer, Module module, Document document) {
 		ViewImpl result = new ViewImpl();
 		result.setType(ViewType.edit);
 
@@ -285,8 +281,7 @@ public class ViewGenerator {
 											Module module, 
 											Document document,
 											Form form,
-											List<Detail> details)
-	throws MetaDataException {
+											List<Detail> details) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -362,8 +357,7 @@ public class ViewGenerator {
 	private static void populatePropertyNames(Customer customer,
 												Module module,
 												Document document,
-												List<String> propertyNames)
-	throws MetaDataException {
+												List<String> propertyNames) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			String inheritedDocumentName = inherits.getDocumentName();
@@ -383,8 +377,7 @@ public class ViewGenerator {
 												Module module,
 												Document document,
 												String dataGridBinding,
-												List<String> propertyNames)
-	throws MetaDataException {
+												List<String> propertyNames) {
 		DataGrid result = new DataGrid();
 		if (dataGridBinding != null) {
 			result.setBinding(dataGridBinding);
@@ -435,8 +428,7 @@ public class ViewGenerator {
 	public static String generateEditViewXML(Customer customer,
 												Document document,
 												boolean customerOverridden,
-												boolean uxuiOverridden)
-	throws MetaDataException {
+												boolean uxuiOverridden) {
 		ViewImpl view = generate(customer, document, ViewType.edit);
 		
 		ViewMetaData repositoryView = new ViewMetaData();

@@ -195,8 +195,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private void populateModocDerivations(AbstractRepository repository, 
 											Module module, 
 											Document document, 
-											ExtensionStrategy strategyToAssert)
-	throws MetaDataException {
+											ExtensionStrategy strategyToAssert) {
 		Extends inherits = document.getExtends();
 		Persistent persistent = document.getPersistent();
 		ExtensionStrategy strategy = (persistent == null) ? null : persistent.getStrategy();
@@ -770,7 +769,7 @@ joined tables
 											Persistent persistent,
 											boolean forExt,
 											String indentation)
-	throws MetaDataException, IOException {
+	throws IOException {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -1348,8 +1347,11 @@ joined tables
 		return result;
 	}
 
-	private void populatePropertyLengths(AbstractRepository repository, Customer customer, Module module, Document document, String derivedPersistentIdentifier)
-	throws MetaDataException {
+	private void populatePropertyLengths(AbstractRepository repository, 
+											Customer customer, 
+											Module module, 
+											Document document, 
+											String derivedPersistentIdentifier) {
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
 			String persistentIdentifier = null;
@@ -1438,8 +1440,7 @@ joined tables
 	 */
 	private static void appendEnumDefinition(Enumeration enumeration,
 												String typeName,
-												StringBuilder enums)
-	throws MetaDataException {
+												StringBuilder enums) {
 		String doc = enumeration.getDocumentation();
 		if (doc == null) {
 			doc = enumeration.getDescription();
@@ -1537,8 +1538,7 @@ joined tables
 								String packagePath,
 								Set<String> imports,
 								StringBuilder attributes,
-								StringBuilder methods)
-	throws MetaDataException {
+								StringBuilder methods) {
 		String propertyClassName = reference.getDocumentName();
 		Document propertyDocument = module.getDocument(customer, propertyClassName);
 		String propertyPackageName = propertyDocument.getOwningModuleName();
@@ -1656,8 +1656,7 @@ joined tables
 								String packagePath,
 								Set<String> imports,
 								StringBuilder attributes,
-								StringBuilder methods)
-	throws MetaDataException {
+								StringBuilder methods) {
 		String propertyClassName = inverse.getDocumentName();
 		String propertyPackageName = module.getDocument(customer, propertyClassName).getOwningModuleName();
 		String name = inverse.getName();
@@ -1749,7 +1748,7 @@ joined tables
 								String documentName,
 								String baseDocumentName,
 								boolean overridden)
-	throws IOException, MetaDataException {
+	throws IOException {
 		System.out.println("Generate class for " + packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
@@ -2021,8 +2020,6 @@ joined tables
 				imports.add("org.skyve.domain.HierarchicalBean");
 				imports.add("org.skyve.persistence.DocumentQuery");
 				imports.add("org.skyve.persistence.Persistence");
-				imports.add("org.skyve.domain.messages.DomainException");
-				imports.add("org.skyve.metadata.MetaDataException");
 			}
 			else {
 				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
@@ -2235,7 +2232,7 @@ joined tables
 
 				// Traversal method
 				methods.append("\n\t@Override\n");
-				methods.append("\tpublic ").append(documentName).append(" getParent() throws DomainException, MetaDataException {\n");
+				methods.append("\tpublic ").append(documentName).append(" getParent() {\n");
 				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
 				methods.append("\t\tif (bizParentId != null) {\n");
 				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
@@ -2249,7 +2246,7 @@ joined tables
 				// Traversal method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlTransient\n");
-				methods.append("\tpublic List<").append(documentName).append("> getChildren() throws DomainException, MetaDataException {\n");
+				methods.append("\tpublic List<").append(documentName).append("> getChildren() {\n");
 				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
 				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");

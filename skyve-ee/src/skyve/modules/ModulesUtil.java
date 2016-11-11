@@ -26,7 +26,6 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.bizport.StandardLoader;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -560,7 +559,7 @@ public class ModulesUtil {
 		return user;
 	}
 
-	public static Contact getCurrentUserContact() throws MetaDataException, DomainException {
+	public static Contact getCurrentUserContact() {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -946,7 +945,7 @@ public class ModulesUtil {
 	 * @param moduleName
 	 * @return
 	 */
-	public static boolean hasModule(String moduleName) throws MetaDataException {
+	public static boolean hasModule(String moduleName) {
 		boolean result = false;
 		User user = CORE.getPersistence().getUser();
 		Customer customer = user.getCustomer();

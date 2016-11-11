@@ -129,7 +129,6 @@ import org.skyve.impl.web.faces.converters.timestamp.DD_MM_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -178,7 +177,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitView() throws MetaDataException {
+	public void visitView() {
 	    // Ensure visibility is set for both create and edit views
         current = cb.view(createView ? "created" : "notCreated");
         facesView = current;
@@ -199,7 +198,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedView() throws MetaDataException {
+	public void visitedView() {
         currentContainers.pop();
 
         // Add the toolbar if this is a full view render and the toolbar has contents
@@ -220,8 +219,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitTabPane(TabPane tabPane,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 //		currentTabPane = tabPane;
 		UIComponent component = cb.tabPane(tabPane);
         addToContainer(component, 
@@ -238,8 +236,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedTabPane(TabPane tabPane,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 //		currentTabPane = null;
 		addedToContainer();
 
@@ -256,8 +253,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitTab(Tab tab,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 //		tab.getSelectedConditionName();
 		UIComponent component = cb.tab(tab);
 		lb.addTab(current, component);
@@ -273,8 +269,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedTab(Tab tab,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		currentContainers.pop();
 		current = lb.addedTab(current);
 	}
@@ -282,8 +277,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitVBox(VBox vbox,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
@@ -324,8 +318,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedVBox(VBox vbox,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		currentContainers.pop();
 
 		// Cater for border, if one was added
@@ -346,8 +339,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitHBox(HBox hbox,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
@@ -388,8 +380,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedHBox(HBox hbox,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		currentContainers.pop();
 
 		// Cater for border, if one was added
@@ -413,8 +404,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitForm(Form form,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
@@ -456,8 +446,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedForm(Form form,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		currentForm = null; // reset form
 
 		// Cater for border, if one was added
@@ -478,8 +467,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitFormColumn(FormColumn column,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		// Nothing to do here - for columns are a spec for html tables in this renderer.
 	}
 
@@ -488,8 +476,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitFormRow(FormRow row,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		formRowLayout = lb.formRowLayout(row);
 		if (formRowLayout != null) {
 			current = lb.addFormRowLayout(current, formRowLayout);
@@ -502,24 +489,21 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitFormItem(FormItem item,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		currentFormItem = item;
 	}
 
 	@Override
 	public void visitedFormItem(FormItem item,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		currentFormItem = null;
 	}
 
 	@Override
 	public void visitedFormRow(FormRow row,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		if (formRowLayout != null) {
 			current = lb.addedFormRowLayout(formRowLayout);
 		}
@@ -576,8 +560,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitButton(Button button,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		org.skyve.metadata.view.Action action = view.getAction(button.getActionName());
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
@@ -593,8 +576,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitGeoLocator(GeoLocator locator,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 	    UIComponent l = cb.label("geoLocator"); // TODO geolocator
 	    addComponent(null, false, locator.getInvisibleConditionName(), l, null, null, null);
 	}
@@ -602,8 +584,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitGeometry(Geometry geometry,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 	    UIComponent l = cb.label("geometry"); // TODO geometry
 	    addComponent(null, false, geometry.getInvisibleConditionName(), l, geometry.getPixelWidth(), null, null);
 	}
@@ -611,8 +592,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitMap(MapDisplay map,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 	    UIComponent l = cb.label("map"); // TODO map
 	    addComponent(null, 
 	    				false, 
@@ -626,8 +606,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDialogButton(DialogButton button,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 	    UIComponent bn = cb.label("dialogButton"); // TODO dialog button
 	    addComponent(null, false, button.getInvisibleConditionName(), bn, null, null, null);
 	}
@@ -635,8 +614,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDynamicImage(DynamicImage image,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		String name = image.getName();
 		Integer pixelWidth = image.getPixelHeight();
 		Integer pixelHeight = image.getPixelHeight();
@@ -680,7 +658,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) throws MetaDataException {
+	public void visitSpacer(Spacer spacer) {
 		UIComponent component = cb.spacer(spacer.getPixelWidth(), spacer.getPixelHeight());
 		if (component != null) {
 			addComponent(null, false, null, component, spacer.getPixelWidth(), null, null);
@@ -690,8 +668,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitStaticImage(StaticImage image,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		UIComponent i = cb.image(image.getPixelWidth(),
 									image.getResponsiveWidth(),
     								image.getPercentageWidth(),
@@ -712,8 +689,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
-							boolean parentEnabled)
-	throws MetaDataException {
+							boolean parentEnabled) {
 		String value = null;
 		String binding = null;
 		String markup = blurb.getMarkup();
@@ -730,51 +706,44 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitLink(final Link link,
 	                        boolean parentVisible,
-	                        boolean parentEnabled)
-    throws MetaDataException {
+	                        boolean parentEnabled) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
 		final ReferenceTarget target = link.getTarget();
 		final AtomicReference<UIComponent> c = new AtomicReference<>();
 		new ReferenceProcessor() {
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processResourceReference(ResourceReference reference)
-			throws MetaDataException {
+			public void processResourceReference(ResourceReference reference) {
 				c.set(cb.label("resource link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processReportReference(ReportReference reference)
-			throws MetaDataException {
+			public void processReportReference(ReportReference reference) {
 				c.set(cb.label("report link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processQueryListViewReference(QueryListViewReference reference)
-			throws MetaDataException {
+			public void processQueryListViewReference(QueryListViewReference reference) {
 				c.set(cb.label("list view link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processImplicitActionReference(ImplicitActionReference reference)
-			throws MetaDataException {
+			public void processImplicitActionReference(ImplicitActionReference reference) {
 				c.set(cb.label("implicit action link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processExternalReference(ExternalReference reference)
-			throws MetaDataException {
+			public void processExternalReference(ExternalReference reference) {
 				c.set(cb.label("external link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processEditViewReference(EditViewReference reference)
-			throws MetaDataException {
+			public void processEditViewReference(EditViewReference reference) {
 				StringBuilder href = new StringBuilder(128);
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
@@ -784,22 +753,19 @@ public class FacesViewVisitor extends ViewVisitor {
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processDefaultListViewReference(DefaultListViewReference reference)
-			throws MetaDataException {
+			public void processDefaultListViewReference(DefaultListViewReference reference) {
 				c.set(cb.label("default list view link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processContentReference(ContentReference reference)
-			throws MetaDataException {
+			public void processContentReference(ContentReference reference) {
 				c.set(cb.label("content link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processActionReference(ActionReference reference)
-			throws MetaDataException {
+			public void processActionReference(ActionReference reference) {
 				c.set(cb.actionLink(listBinding, link, reference.getActionName()));
 			}
 		}.process(outerReference);
@@ -810,8 +776,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitLabel(Label label,
 	                        boolean parentVisible,
-	                        boolean parentEnabled)
-    throws MetaDataException {
+	                        boolean parentEnabled) {
 		String value = label.getValue();
 		String binding = label.getBinding();
 		if ((value != null) && value.indexOf('{') > -1) {
@@ -825,8 +790,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitProgressBar(ProgressBar progressBar,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-	throws MetaDataException {
+	                                boolean parentEnabled) {
 	    UIComponent p = cb.label("progressBar"); // TODO progress bar
 	    addComponent(null, false, null, p, progressBar.getPixelWidth(), null, null);
 	}
@@ -836,8 +800,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitListGrid(ListGrid grid,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		UIComponent l = cb.label("listGrid"); // TODO list grid
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth()); // TODO list grid
 		currentGrid = grid;
@@ -846,8 +809,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedListGrid(ListGrid grid,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		currentGrid = null;
 		addedToContainer();
 	}
@@ -855,8 +817,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitTreeGrid(TreeGrid grid,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		UIComponent l = cb.label("treeGrid");
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth()); // TODO tree grid
 		currentGrid = grid;
@@ -865,8 +826,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedTreeGrid(TreeGrid grid,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		currentGrid = null;
 		addedToContainer();
 	}
@@ -874,8 +834,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private String listBinding;
 	
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
-    throws MetaDataException {
+	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// Create the datagrid faces component
 		UIComponent g = cb.dataGrid(grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
@@ -890,8 +849,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled)
-    throws MetaDataException {
+	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// Determine the document alias
 		String alias = null;
 		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
@@ -927,8 +885,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
-	                                        boolean parentEnabled)
-	throws MetaDataException {
+	                                        boolean parentEnabled) {
 		String title = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
@@ -960,32 +917,28 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
-	                                        boolean parentEnabled)
-	throws MetaDataException {
+	                                        boolean parentEnabled) {
 		current = cb.addedDataGridBoundColumn(current);
 	}
 
 	@Override
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
-	                                            boolean parentEnabled)
-	throws MetaDataException {
+	                                            boolean parentEnabled) {
         current = cb.addDataGridContainerColumn(current, (DataGrid) currentGrid, column);
 	}
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
-	                                            boolean parentEnabled)
-	throws MetaDataException {
+	                                            boolean parentEnabled) {
 		current = cb.addedDataGridContainerColumn(current);
 	}
 
 	@Override
 	public void visitPickList(PickList list,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		UIComponent l = cb.label("pickList");
 		addToContainer(l, list.getPixelWidth(), list.getResponsiveWidth(), list.getPercentageWidth()); // TODO picklist
 	}
@@ -993,16 +946,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedPickList(PickList list,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		addedToContainer();
 	}
 
 	@Override
 	public void visitPickListColumn(PickListColumn column,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		// TODO pick list column
 	}
 
@@ -1012,8 +963,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitCheckBox(CheckBox checkBox,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(checkBox);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1031,16 +981,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedCheckBox(CheckBox checkBox,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitCheckMembership(CheckMembership membership,
 	                                    boolean parentVisible,
-	                                    boolean parentEnabled)
-	throws MetaDataException {
+	                                    boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
         UIComponentBase c = (UIComponentBase) cb.label("checkMembership"); // TODO check membership
         eventSource = c;
@@ -1050,8 +998,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedCheckMembership(CheckMembership membership,
 	                                    boolean parentVisible,
-	                                    boolean parentEnabled)
-	throws MetaDataException {
+	                                    boolean parentEnabled) {
 	    addedToContainer();
 	    eventSource = null;
 	}
@@ -1059,8 +1006,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitColourPicker(ColourPicker colour,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(colour);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1072,16 +1018,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedColourPicker(ColourPicker colour,
 	                                    boolean parentVisible,
-	                                    boolean parentEnabled)
-    throws MetaDataException {
+	                                    boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitCombo(Combo combo,
 	                        boolean parentVisible,
-	                        boolean parentEnabled)
-    throws MetaDataException {
+	                        boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(combo);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1093,16 +1037,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedCombo(Combo combo,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitContentImage(ContentImage image,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(image);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1113,8 +1055,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitContentLink(ContentLink link,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1125,8 +1066,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitHTML(HTML html,
                             boolean parentVisible,
-                            boolean parentEnabled)
-    throws MetaDataException {
+                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(html);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1137,8 +1077,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		UIComponentBase c = (UIComponentBase) cb.label("listMembership"); // TODO complete this
 		eventSource = c;
 		addToContainer(c, membership.getListWidthInPixels(), null, null);
@@ -1147,8 +1086,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedListMembership(ListMembership membership,
 										boolean parentVisible,
-										boolean parentEnabled)
-	throws MetaDataException {
+										boolean parentEnabled) {
 		addedToContainer();
 		eventSource = null;
 	}
@@ -1156,8 +1094,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitComparison(Comparison comparison,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
         UIComponent c = cb.label("comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth());
@@ -1167,8 +1104,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitLookupDescription(LookupDescription lookup,
 	                                    boolean parentVisible,
-	                                    boolean parentEnabled)
-	throws MetaDataException {
+	                                    boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(lookup);
 		SmartClientLookupDefinition ldef = def.getLookup();
 		String title = def.getTitle();
@@ -1187,16 +1123,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedLookupDescription(LookupDescription lookup,
 	                                        boolean parentVisible,
-	                                        boolean parentEnabled)
-	throws MetaDataException {
+	                                        boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitLookup(Lookup lookup,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		UIComponent c = cb.label("lookup"); // TODO lookup
 		addComponent(null, false, null, c, null, null, null);
 	}
@@ -1204,16 +1138,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedLookup(Lookup lookup,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
 	public void visitPassword(Password password,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(password);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1225,16 +1157,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedPassword(Password password,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitRadio(Radio radio,
                             boolean parentVisible,
-                            boolean parentEnabled)
-    throws MetaDataException {
+                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(radio);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1246,16 +1176,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedRadio(Radio radio,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitRichText(RichText richText,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(richText);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1267,16 +1195,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedRichText(RichText richText,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitSlider(Slider slider,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
         UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
         eventSource = c;
@@ -1286,16 +1212,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedSlider(Slider slider,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitSpinner(Spinner spinner,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(spinner);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1307,16 +1231,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedSpinner(Spinner spinner,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitTextArea(TextArea text,
 	                            boolean parentVisible,
-	                            boolean parentEnabled)
-    throws MetaDataException {
+	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1328,16 +1250,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedTextArea(TextArea text,
 	                                boolean parentVisible,
-	                                boolean parentEnabled)
-    throws MetaDataException {
+	                                boolean parentEnabled) {
 		eventSource = null;
 	}
 
 	@Override
 	public void visitTextField(TextField text,
 								boolean parentVisible,
-								boolean parentEnabled)
-	throws MetaDataException {
+								boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
@@ -1383,8 +1303,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - this is for web 2 ux uis only
 	}
 
@@ -1493,8 +1412,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedTextField(TextField text,
 									boolean parentVisible,
-									boolean parentEnabled)
-	throws MetaDataException {
+									boolean parentEnabled) {
 		eventSource = null;
 	}
 
@@ -1538,8 +1456,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		addAjaxBehavior("change", changeable.getChangedActions());
 		// Add this special event for date selection on calendar as "changed" doesn't fire on select
 		if (eventSource instanceof Calendar) {
@@ -1549,48 +1466,43 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedOnChangedEventHandler(Changeable changeable,
-												boolean parentVisible, boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentVisible,
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		addAjaxBehavior("focus", blurable.getFocusActions());
 	}
 
 	@Override
 	public void visitedOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		addAjaxBehavior("blur", blurable.getFocusActions());
 	}
 
 	@Override
 	public void visitedOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1598,8 +1510,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1607,8 +1518,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitOnEditedEventHandler(Editable editable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1616,8 +1526,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedOnEditedEventHandler(Editable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1625,8 +1534,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1634,8 +1542,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedOnRemovedEventHandler(Removable removable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
 		// TODO - need to account for data/list grids in here
 	}
@@ -1643,48 +1550,42 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitOnSelectedEventHandler(Selectable selectable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// TODO - need to account for data/list/tree grids in here
 	}
 
 	@Override
 	public void visitedOnSelectedEventHandler(Selectable editable,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// TODO - need to account for data/list/tree grids in here
 	}
 
 	@Override
 	public void visitOnPickedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		addAjaxBehavior("itemSelect", lookup.getPickedActions());
 	}
 
 	@Override
 	public void visitedOnPickedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
 	public void visitOnClearedEventHandler(Lookup lookup,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		addAjaxBehavior("itemUnselect", lookup.getClearedActions());
 	}
 
 	@Override
 	public void visitedOnClearedEventHandler(Lookup lookup,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1692,53 +1593,47 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitRerenderEventAction(RerenderEventAction rerender,
 											EventSource source,
 											boolean parentVisible,
-											boolean parentEnabled)
-	throws MetaDataException {
+											boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
 	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
 	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
 	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
 	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
-												boolean parentEnabled)
-	throws MetaDataException {
+												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
 	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
-													boolean parentEnabled)
-	throws MetaDataException {
+													boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
 	}
 
 	@Override
-	public void visitAction(ActionImpl action) throws MetaDataException {
+	public void visitAction(ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
 		}
@@ -1756,42 +1651,42 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitAddAction(ActionImpl action) throws MetaDataException {
+	public void visitAddAction(ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Add);
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) throws MetaDataException {
+	public void visitRemoveAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Remove);
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) throws MetaDataException {
+	public void visitZoomOutAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) throws MetaDataException {
+	public void visitNavigateAction(ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Navigate);
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) throws MetaDataException {
+	public void visitOKAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) throws MetaDataException {
+	public void visitSaveAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) throws MetaDataException {
+	public void visitCancelAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) throws MetaDataException {
+	public void visitDeleteAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
@@ -1800,61 +1695,57 @@ public class FacesViewVisitor extends ViewVisitor {
 	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
 	 * 
 	 * @param action
-	 * @throws MetaDataException
 	 */
 	@Override
-	public void visitReportAction(ActionImpl action) throws MetaDataException {
+	public void visitReportAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Report);
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizExportAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizExport);
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) throws MetaDataException {
+	public void visitBizImportAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizImport);
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) throws MetaDataException {
+	public void visitUploadAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Upload);
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) throws MetaDataException {
+	public void visitDownloadAction(ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Download);
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) throws MetaDataException {
+	public void visitNewAction(ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.New);
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) throws MetaDataException {
+	public void visitEditAction(ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
 	@Override
 	public void visitParameter(
 			org.skyve.metadata.view.widget.bound.Parameter parameter,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
 	public void visitFilterParameter(FilterParameter parameter,
-			boolean parentVisible, boolean parentEnabled)
-			throws MetaDataException {
+			boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 	}
 
-	private SmartClientDataGridFieldDefinition getFieldDef(InputWidget inputWidget)
-	throws MetaDataException {
+	private SmartClientDataGridFieldDefinition getFieldDef(InputWidget inputWidget) {
 		SmartClientDataGridFieldDefinition result = null;
 
 		DocumentImpl targetDocument = document;

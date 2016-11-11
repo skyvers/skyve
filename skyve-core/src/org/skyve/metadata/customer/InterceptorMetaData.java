@@ -1,7 +1,7 @@
 package org.skyve.metadata.customer;
 
 import org.skyve.metadata.MetaData;
-import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Interceptor;
 
 /**
  * 
@@ -13,6 +13,5 @@ public interface InterceptorMetaData extends MetaData {
 	 */
 	public String getClassName();
 	
-	public org.skyve.metadata.controller.Interceptor getInterceptor(Customer customer)
-	throws MetaDataException;
+	public Interceptor getInterceptor(Customer customer);
 }

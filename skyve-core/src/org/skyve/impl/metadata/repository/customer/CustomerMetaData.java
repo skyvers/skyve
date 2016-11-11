@@ -148,7 +148,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	}
 
 	@Override
-	public CustomerImpl convert(String metaDataName) throws MetaDataException {
+	public CustomerImpl convert(String metaDataName) {
 		CustomerImpl result = new CustomerImpl();
 		String value = getName();
 		if (value == null) {

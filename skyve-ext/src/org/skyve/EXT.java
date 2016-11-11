@@ -27,7 +27,6 @@ import org.skyve.content.MimeType;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
@@ -39,7 +38,6 @@ import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobDescription;
 import org.skyve.job.JobScheduler;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
@@ -83,13 +81,8 @@ public class EXT {
 	 *            population of the bizport workbook data structure. This method
 	 *            will automatically throw <code>e</code> if any errors are
 	 *            added to it.
-	 * @throws MetaDataException
-	 *             When the metadata is not valid.
-	 * @throws BizPortException
-	 *             When data or excel workbook structural errors are
-	 *             encountered.
 	 */
-	public static BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, BizPortException e) throws MetaDataException, BizPortException {
+	public static BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, BizPortException e) {
 		return new POIWorkbook(customer, workbook, e);
 	}
 
@@ -149,7 +142,7 @@ public class EXT {
 	 *            The mime type of the email body.
 	 * @param attachmentFileName
 	 */
-	public static void writeMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, OutputStream out, MailAttachment... attachments) throws ValidationException {
+	public static void writeMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, OutputStream out, MailAttachment... attachments) {
 		MailUtil.writeMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, out, attachments);
 	}
 
@@ -164,9 +157,8 @@ public class EXT {
 	 * @param attachmentFileName
 	 * @param attachment
 	 * @param attachmentType
-	 * @throws ValidationException
 	 */
-	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) throws ValidationException {
+	public static void sendMail(String[] recipientEmailAddresses, String[] ccEmailAddresses, String[] bccEmailAddresses, String senderEmailAddress, String subject, String body, MimeType contentType, MailAttachment... attachments) {
 		MailUtil.sendMail(recipientEmailAddresses, ccEmailAddresses, bccEmailAddresses, senderEmailAddress, subject, body, contentType, attachments);
 	}
 

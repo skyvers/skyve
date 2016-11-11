@@ -17,7 +17,6 @@ import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -554,8 +553,7 @@ public class StandardLoader {
 		beansBySheetKey.put(key, bean);
 	}
 	
-	public void addError(Customer customer, Bean bean, DomainException e)
-	throws BizPortException, MetaDataException {
+	public void addError(Customer customer, Bean bean, DomainException e) {
 		BizPortSheet sheet = workbook.getSheet(new SheetKey(bean.getBizModule(), bean.getBizDocument()));
 		BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 		Object sheetId = refs.get(bean.getBizId());
@@ -578,8 +576,7 @@ public class StandardLoader {
 							Document document, 
 							Bean bean,
 							BizPortSheet sheet, 
-							Message em) 
-	throws BizPortException {
+							Message em) {
 		boolean noBindings = true;
 		for (String binding : em.getBindings()) {
 			if (binding.indexOf('.') > 0) { // compound binding

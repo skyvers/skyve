@@ -3,10 +3,7 @@ package org.skyve.metadata;
 /**
  * 
  */
-public class MetaDataException extends Exception {
-	/**
-	 * For Serialization
-	 */
+public class MetaDataException extends RuntimeException {
 	private static final long serialVersionUID = 1447684367914523647L;
 
 	/**

@@ -4,8 +4,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.skyve.domain.messages.DomainException;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -56,9 +54,8 @@ public interface User extends NamedMetaData {
 	/**
 	 * 
 	 * @return
-	 * @throws MetaDataException
 	 */
-	public Customer getCustomer() throws MetaDataException;
+	public Customer getCustomer();
 	
 	public String getCustomerName();
 	public void setCustomerName(String customerName);
@@ -109,7 +106,6 @@ public interface User extends NamedMetaData {
 	 * @param beanBizDataGroupId
 	 * @param beanBizUserId
 	 * @return
-	 * @throws MetaDataException
 	 * @throws DomainException
 	 */
 	public boolean canReadBean(String beanBizId,
@@ -117,15 +113,12 @@ public interface User extends NamedMetaData {
 								String beanBizDocument,
 								String beanBizCustomer,
 								String beanBizDataGroupId,
-								String beanBizUserId) 
-	throws MetaDataException, DomainException;
+								String beanBizUserId);
 	
 	/**
 	 * Indicates if the user is able to search or view the content
 	 * 
 	 * @return <code>true</code> if access is allowed, otherwise <code>false</code>.
-	 * @throws DomainException
-	 * @throws MetaDataException
 	 */
 	public boolean canAccessContent(String bizId,
 										String bizModule,
@@ -133,8 +126,7 @@ public interface User extends NamedMetaData {
 										String bizCustomer,
 										String bizDataGroupId,
 										String bizUserId,
-										String attributeName) 
-	throws MetaDataException, DomainException;
+										String attributeName);
 	
 	/**
 	 * 

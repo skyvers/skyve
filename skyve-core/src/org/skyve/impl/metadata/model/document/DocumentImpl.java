@@ -194,7 +194,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) throws MetaDataException {
+	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
 		return AbstractRepository.get().getDynamicImage(customer, this, name);
 	}
 
@@ -204,7 +204,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 	
 	@Override
-	public List<UniqueConstraint> getAllUniqueConstraints() throws MetaDataException {
+	public List<UniqueConstraint> getAllUniqueConstraints() {
 		List<UniqueConstraint> result = new ArrayList<>(uniqueConstraints);
 		Extends currentExtends = getExtends();
 		if (currentExtends != null) {
@@ -238,8 +238,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) 
-	throws MetaDataException {
+	public org.skyve.metadata.model.document.Document getRelatedDocument(Customer customer, String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
 
 		// Find the relation up the document extension hierarchy
@@ -274,8 +273,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public Set<org.skyve.metadata.model.document.Document> getReferencedDocuments(Customer customer) 
-	throws MetaDataException {
+	public Set<org.skyve.metadata.model.document.Document> getReferencedDocuments(Customer customer) {
 		HashSet<org.skyve.metadata.model.document.Document> result = new HashSet<>();
 
 		for (String detailDocumentName : getReferencedDocumentNames()) {
@@ -334,7 +332,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 	
 	@Override
-	public org.skyve.metadata.model.document.Document getParentDocument(Customer customer) throws MetaDataException {
+	public org.skyve.metadata.model.document.Document getParentDocument(Customer customer) {
 		org.skyve.metadata.model.document.Document result = null;
 
 		if (parentDocumentName != null) {
@@ -349,15 +347,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		return result;
 	}
 
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) throws MetaDataException {
+	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
 		return AbstractRepository.get().getBizlet(customer, this);
 	}
 
 	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
 																DomainType domainType,
 																Attribute attribute,
-																T owningBean)
-	throws MetaDataException {
+																T owningBean) {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
@@ -457,7 +454,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public View getView(String uxui, Customer customer, ViewType type) throws MetaDataException {
+	public View getView(String uxui, Customer customer, ViewType type) {
 		AbstractRepository repository = AbstractRepository.get();
 		View view = repository.getView(uxui, customer, this, type);
 		if ((view == null) && (type == ViewType.create)) {
