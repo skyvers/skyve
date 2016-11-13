@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal;
@@ -131,37 +130,37 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	}
 	
 	@Override
-	public final <T extends Bean> T beanResult() throws DomainException {
+	public final <T extends Bean> T beanResult() {
 		List<T> results = beanResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public final <T extends Bean> T retrieveBean() throws DomainException {
+	public final <T extends Bean> T retrieveBean() {
 		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final <T> T scalarResult(Class<T> type) throws DomainException {
+	public final <T> T scalarResult(Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public final <T> T retrieveScalar(Class<T> type) throws DomainException {
+	public final <T> T retrieveScalar(Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final Object[] tupleResult() throws DomainException {
+	public final Object[] tupleResult() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public final Object[] retrieveTuple() throws DomainException {
+	public final Object[] retrieveTuple() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}

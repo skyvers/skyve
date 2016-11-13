@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.user;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;

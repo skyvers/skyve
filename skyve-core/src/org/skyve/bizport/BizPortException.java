@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.skyve.domain.messages.SkyveException;
+
 /**
  * 
  */
-public final class BizPortException extends RuntimeException {
+public final class BizPortException extends SkyveException {
 	private static final long serialVersionUID = 4401759405779814684L;
 
 	/**

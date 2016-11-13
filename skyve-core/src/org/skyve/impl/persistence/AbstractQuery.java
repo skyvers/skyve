@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ManyResultsException;
 import org.skyve.domain.messages.NoResultsException;
 
@@ -35,8 +34,7 @@ public abstract class AbstractQuery {
 
 	public abstract String toQueryString();
 
-	public static <T> T assertOneResult(List<T> results)
-	throws DomainException {
+	public static <T> T assertOneResult(List<T> results) {
 		if (results.size() == 1) {
 			return results.get(0);
 		}

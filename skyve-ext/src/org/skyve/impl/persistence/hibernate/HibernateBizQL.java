@@ -21,8 +21,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults()
-	throws DomainException {
+	public <T extends Bean> List<T> beanResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, true, false);
@@ -33,8 +32,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, true, false);
@@ -45,8 +43,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults()
-	throws DomainException {
+	public <T extends Bean> List<T> projectedResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, false, false, false);
@@ -57,8 +54,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, false, false, false);
@@ -69,8 +65,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type)
-	throws DomainException {
+	public <T> List<T> scalarResults(Class<T> type) {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, true, false);
@@ -81,8 +76,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) 
-	throws DomainException {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, true, false);
@@ -93,8 +87,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public List<Object[]> tupleResults()
-	throws DomainException {
+	public List<Object[]> tupleResults() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, false, true);
@@ -105,8 +98,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable()
-	throws DomainException {
+	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			Query query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, false, true);
@@ -117,8 +109,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	}
 
 	@Override
-	public int execute()
-	throws DomainException {
+	public int execute() {
 		try {
 			return delegate.execute(this);
 		}

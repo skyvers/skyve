@@ -28,7 +28,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	private NamedParameterPreparedStatement ps = null;
 	private ResultSet rs = null;
 	
-	SQLIterable(Document document, SQLDataAccessImpl dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) throws DomainException {
+	SQLIterable(Document document, SQLDataAccessImpl dataAccess, SQLDataAccessSQL sql, Class<T> scalarType) {
 		this.document = document;
 		this.dataAccess = dataAccess;
 		this.scalarType = scalarType;
@@ -153,7 +153,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 	}
 
 	@Override
-	public void close() throws DomainException {
+	public void close() {
 		try {
 			try {
 				if ((rs != null) && (! rs.isClosed())) {

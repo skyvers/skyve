@@ -106,7 +106,6 @@ public interface User extends NamedMetaData {
 	 * @param beanBizDataGroupId
 	 * @param beanBizUserId
 	 * @return
-	 * @throws DomainException
 	 */
 	public boolean canReadBean(String beanBizId,
 								String beanBizModule,

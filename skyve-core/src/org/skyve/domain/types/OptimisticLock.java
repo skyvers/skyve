@@ -11,9 +11,6 @@ import org.skyve.impl.util.ThreadSafeFactory;
  * 
  */
 public class OptimisticLock implements Serializable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -188896815713122L;
 
 	private static final String LOCK_TIMESTAMP_FORMAT = "yyyyMMddHHmmssSSS";
@@ -43,9 +40,8 @@ public class OptimisticLock implements Serializable {
 	/**
 	 * 
 	 * @param lockString
-	 * @throws DomainException
 	 */
-	public OptimisticLock(String lockString) throws DomainException {
+	public OptimisticLock(String lockString) {
 		if ((lockString == null) || (lockString.length() < 18)) {
 			throw new DomainException("bizLock " + lockString + " is invalid");
 		}

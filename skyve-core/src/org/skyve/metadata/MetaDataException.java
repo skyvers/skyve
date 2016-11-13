@@ -1,9 +1,11 @@
 package org.skyve.metadata;
 
+import org.skyve.domain.messages.SkyveException;
+
 /**
  * 
  */
-public class MetaDataException extends RuntimeException {
+public class MetaDataException extends SkyveException {
 	private static final long serialVersionUID = 1447684367914523647L;
 
 	/**

@@ -3,7 +3,7 @@ package org.skyve.domain.messages;
 /**
  * 
  */
-public class DomainException extends RuntimeException {
+public class DomainException extends SkyveException {
 	private static final long serialVersionUID = -2523236450510857431L;
 
 	/**

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.customer.Customer;
@@ -283,7 +282,6 @@ public class Binder {
 	 * @param bean
 	 * @param properties
 	 * @param fromSerializedFormat
-	 * @throws ValidationException
 	 */
 	// NB properties must be a sorted map to ensure that the shortest properties
 	// are processed first - ie User.contact is populated before User.contact.firstName,
@@ -291,8 +289,7 @@ public class Binder {
 	public static void populateProperties(User user, 
 											Bean bean, 
 											SortedMap<String, Object> properties, 
-											boolean fromSerializedFormat)
-	throws ValidationException {
+											boolean fromSerializedFormat) {
 		BindUtil.populateProperties(user, bean, properties, fromSerializedFormat);
 	}
 

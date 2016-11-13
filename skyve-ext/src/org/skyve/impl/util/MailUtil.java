@@ -38,8 +38,7 @@ public class MailUtil {
 											String body,
 											MimeType contentType, 
 											OutputStream out,
-											MailAttachment... attachments)
-	throws ValidationException {
+											MailAttachment... attachments) {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
 												ccEmailAddresses,
@@ -68,8 +67,7 @@ public class MailUtil {
 										String subject,
 										String body,
 										MimeType contentType, 
-										MailAttachment... attachments)
-	throws ValidationException {
+										MailAttachment... attachments) {
 		try {
 			MimeMessage message = createMail(recipientEmailAddresses,
 												ccEmailAddresses,

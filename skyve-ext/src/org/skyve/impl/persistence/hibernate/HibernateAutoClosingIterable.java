@@ -130,7 +130,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	}
 
 	@Override
-	public void close() throws DomainException {
+	public void close() {
 		try {
 			if (! closed) {
 				// results can be null on an error parsing the query

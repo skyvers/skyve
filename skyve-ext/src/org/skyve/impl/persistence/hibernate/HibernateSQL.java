@@ -51,8 +51,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults() 
-	throws DomainException {
+	public <T extends Bean> List<T> beanResults() {
 		String moduleName = getModuleName();
 		String documentName = getDocumentName();
 		
@@ -69,8 +68,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		String moduleName = getModuleName();
 		String documentName = getDocumentName();
 
@@ -87,8 +85,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type)
-	throws DomainException {
+	public <T> List<T> scalarResults(Class<T> type) {
 		try {
 			List<T> results = createQueryFromSQL().list();
 			if ((! results.isEmpty()) && (results.get(0) instanceof Object[])) {
@@ -102,8 +99,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
-	throws DomainException {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
 		}
@@ -114,8 +110,7 @@ class HibernateSQL extends AbstractSQL {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Object[]> tupleResults()
-	throws DomainException {
+	public List<Object[]> tupleResults() {
 		try {
 			List<?> results = createQueryFromSQL().list();
 			if ((! results.isEmpty()) && (! (results.get(0) instanceof Object[]))) {
@@ -129,8 +124,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable()
-	throws DomainException {
+	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
 		}
@@ -140,8 +134,7 @@ class HibernateSQL extends AbstractSQL {
 	}
 
 	@Override
-	public int execute()
-	throws DomainException {
+	public int execute() {
 		try {
 			SQLQuery query = createQueryFromSQL();
 			return query.executeUpdate();

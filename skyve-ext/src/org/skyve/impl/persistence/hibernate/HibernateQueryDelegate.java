@@ -71,8 +71,7 @@ class HibernateQueryDelegate {
 	}
 	
 	@SuppressWarnings("unchecked")
-	<T> List<T> list(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple)
-	throws DomainException {
+	<T> List<T> list(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			if (asIs) {
 				if (assertSingle && (query.getReturnAliases().length != 1)) {
@@ -121,8 +120,7 @@ class HibernateQueryDelegate {
 		}
 	}
 
-	<T> AutoClosingIterable<T> iterate(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple)
-	throws DomainException {
+	<T> AutoClosingIterable<T> iterate(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			if (asIs) {

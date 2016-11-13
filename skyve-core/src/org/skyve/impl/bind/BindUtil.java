@@ -973,8 +973,7 @@ public final class BindUtil {
 	public static void populateProperties(User user, 
 											Bean bean, 
 											SortedMap<String, Object> properties, 
-											boolean fromSerializedFormat)
-	throws ValidationException {
+											boolean fromSerializedFormat) {
 		ValidationException e = new ValidationException();
 
 		// Do nothing unless both arguments have been specified

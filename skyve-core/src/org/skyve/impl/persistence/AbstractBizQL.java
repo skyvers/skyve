@@ -42,7 +42,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 		return resolvedQuery;
 	}
 	
-	protected final void resolveDocuments(boolean checkForMalformation) throws DomainException {
+	protected final void resolveDocuments(boolean checkForMalformation) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 
 		StringBuilder result = new StringBuilder(query);
@@ -81,112 +81,103 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	}
 
 	@Override
-	public <T extends Bean> List<T> beanResults()
-	throws DomainException {
+	public <T extends Bean> List<T> beanResults() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public final <T extends Bean> T retrieveBean() throws DomainException {
+	public final <T extends Bean> T retrieveBean() {
 		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final <T extends Bean> T beanResult() throws DomainException {
+	public final <T extends Bean> T beanResult() {
 		List<T> results = beanResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> List<T> projectedResults()
-	throws DomainException {
+	public <T extends Bean> List<T> projectedResults() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public final <T extends Bean> T projectedResult() throws DomainException {
+	public final <T extends Bean> T projectedResult() {
 		List<T> results = projectedResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public final <T extends Bean> T retrieveProjected() throws DomainException {
+	public final <T extends Bean> T retrieveProjected() {
 		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable()
-	throws DomainException {
+	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public <T> List<T> scalarResults(Class<T> type)
-	throws DomainException {
+	public <T> List<T> scalarResults(Class<T> type) {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public final <T> T retrieveScalar(Class<T> type) throws DomainException {
+	public final <T> T retrieveScalar(Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final <T> T scalarResult(Class<T> type) throws DomainException {
+	public final <T> T scalarResult(Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type)
-	throws DomainException {
+	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public List<Object[]> tupleResults()
-	throws DomainException {
+	public List<Object[]> tupleResults() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public final Object[] retrieveTuple() throws DomainException {
+	public final Object[] retrieveTuple() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}
 
 	@Override
-	public final Object[] tupleResult() throws DomainException {
+	public final Object[] tupleResult() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.returnOneResult(results);
 	}
 
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable()
-	throws DomainException {
+	public AutoClosingIterable<Object[]> tupleIterable() {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public int execute()
-	throws DomainException {
+	public int execute() {
 		// No-op
 		return 0;
 	}

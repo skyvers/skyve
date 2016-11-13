@@ -861,8 +861,7 @@ public class SmartClientListServlet extends HttpServlet {
     									String valueString,
     									Customer customer,
     									Converter<?> converter,
-    									Class<?> type)
-    throws ValidationException {
+    									Class<?> type) {
     	Object result = null;
     	
 		if (valueString != null) {
