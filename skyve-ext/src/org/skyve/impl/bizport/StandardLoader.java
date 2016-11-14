@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.bizport.BizPortColumn;
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
@@ -47,7 +47,7 @@ public class StandardLoader {
 	private BizPortWorkbook workbook;
 	
 	// The exception that will be thrown at the end of processing if any messages are present
-	private BizPortException problems;
+	private UploadException problems;
 	
 	// Map of sheet IDs in the spreadsheet by bizId
 	// This map contains all the refs in the spreadsheet including child beans, child's child beans.
@@ -58,7 +58,7 @@ public class StandardLoader {
 	// This map contains all the beans in the spreadsheet including child beans, child's child beans.
 	private Map<String, Bean> beansBySheetKey = new TreeMap<>();
 	
-	public StandardLoader(BizPortWorkbook workbook, BizPortException problems) {
+	public StandardLoader(BizPortWorkbook workbook, UploadException problems) {
 		this.workbook = workbook;
 		this.problems = problems;
 	}

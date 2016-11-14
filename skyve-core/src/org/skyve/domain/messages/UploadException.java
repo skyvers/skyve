@@ -1,16 +1,14 @@
-package org.skyve.bizport;
+package org.skyve.domain.messages;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.skyve.domain.messages.SkyveException;
-
 /**
  * 
  */
-public final class BizPortException extends SkyveException {
+public final class UploadException extends SkyveException {
 	private static final long serialVersionUID = 4401759405779814684L;
 
 	/**
@@ -107,7 +105,7 @@ public final class BizPortException extends SkyveException {
 	/**
 	 * 
 	 */
-	public BizPortException() {
+	public UploadException() {
 		super();
 	}
 

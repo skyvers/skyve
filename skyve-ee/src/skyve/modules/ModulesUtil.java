@@ -12,11 +12,11 @@ import modules.admin.domain.DocumentNumber;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -1005,7 +1005,7 @@ public class ModulesUtil {
 		return result;
 	}
 
-	public static void standardBeanBizImport(BizPortWorkbook workbook, BizPortException problems) throws Exception {
+	public static void standardBeanBizImport(BizPortWorkbook workbook, UploadException problems) throws Exception {
 		final Persistence persistence = CORE.getPersistence();
 		final Customer customer = persistence.getUser().getCustomer();
 		StandardLoader loader = new StandardLoader(workbook, problems);

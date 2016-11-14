@@ -17,9 +17,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
-import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -150,7 +150,7 @@ public class BizportImport extends Localisable {
 																			document,
 																			action);
 
-			BizPortException exception = new BizPortException();
+			UploadException exception = new UploadException();
 			try {
 				try (InputStream fis = file.getInputstream()) {
 					POIWorkbook workbook = new POIWorkbook(customer,
@@ -169,7 +169,7 @@ public class BizportImport extends Localisable {
 					}
 				}
 			}
-			catch (BizPortException e) {
+			catch (UploadException e) {
 				e.printStackTrace();
 				persistence.rollback();
 				exception = e;

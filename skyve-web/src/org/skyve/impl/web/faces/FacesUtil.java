@@ -8,9 +8,6 @@ import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
 
 import org.skyve.impl.web.faces.beans.FacesView;
-import org.skyve.impl.web.faces.beans.Harness;
-import org.skyve.metadata.view.View.ViewType;
-import org.skyve.web.WebAction;
 
 public class FacesUtil {
 	/**

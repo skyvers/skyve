@@ -3,10 +3,10 @@ package modules;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.Interceptor;
@@ -189,7 +189,7 @@ public class LoggingInterceptor extends Interceptor {
 	}
 
 	@Override
-	public boolean beforeBizImportAction(Document document, String actionName, BizPortWorkbook bizPortable, BizPortException problems) {
+	public boolean beforeBizImportAction(Document document, String actionName, BizPortWorkbook bizPortable, UploadException problems) {
 		Util.LOGGER.log(Level.INFO, 
 							"beforeBizImportAction - doc = {0}.{1}, action = {2}, bean = {3}, workbook = {4}",
 							new Object[] {document.getOwningModuleName(), document.getName(), actionName, bizPortable});
@@ -197,7 +197,7 @@ public class LoggingInterceptor extends Interceptor {
 	}
 
 	@Override
-	public void afterBizImportAction(Document document, String actionName, BizPortWorkbook bizPortable, BizPortException problems) {
+	public void afterBizImportAction(Document document, String actionName, BizPortWorkbook bizPortable, UploadException problems) {
 		Util.LOGGER.log(Level.INFO, 
 							"afterBizImportAction - doc = {0}.{1}, action = {2}, bean = {3}, workbook = {4}",
 							new Object[] {document.getOwningModuleName(), document.getName(), actionName, bizPortable});

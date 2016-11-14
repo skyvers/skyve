@@ -2,10 +2,10 @@ package org.skyve.metadata.controller;
 
 import java.util.List;
 
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.DownloadAction.Download;
@@ -239,7 +239,7 @@ public abstract class Interceptor implements MetaData {
 	public boolean beforeBizImportAction(Document document, 
 											String actionName,
 											BizPortWorkbook bizPortable, 
-											BizPortException problems)
+											UploadException problems)
 	throws Exception {
 		return false;
 	}
@@ -248,7 +248,7 @@ public abstract class Interceptor implements MetaData {
 	public void afterBizImportAction(Document document,
 										String actionName,
 										BizPortWorkbook bizPortable,
-										BizPortException problems)
+										UploadException problems)
 	throws Exception {
 		// no-op
 	}

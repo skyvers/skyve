@@ -16,10 +16,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
-import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -149,7 +149,7 @@ public class FileUpload extends Localisable {
 			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
 																			document, 
 																			action);
-			BizPortException exception = new BizPortException();
+			UploadException exception = new UploadException();
 			MimeType mimeType = null;
 			try {
 				MimeType.valueOf(file.getContentType());
@@ -180,7 +180,7 @@ public class FileUpload extends Localisable {
 					}
 				}
 			}
-			catch(BizPortException e){
+			catch(UploadException e){
 				e.printStackTrace();
 				persistence.rollback();
 				exception = e;

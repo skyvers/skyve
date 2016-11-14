@@ -18,7 +18,6 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.apache.poi.ss.usermodel.Workbook;
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.AttachmentContent;
@@ -26,6 +25,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
@@ -82,7 +82,7 @@ public class EXT {
 	 *            will automatically throw <code>e</code> if any errors are
 	 *            added to it.
 	 */
-	public static BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, BizPortException e) {
+	public static BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, UploadException e) {
 		return new POIWorkbook(customer, workbook, e);
 	}
 

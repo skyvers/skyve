@@ -4,7 +4,7 @@ public class LayoutUtil {
 	private LayoutUtil() {}
 	
 	public static int MAX_RESPONSIVE_WIDTH_COLUMNS = 12;
-	private static double MAX_SMALL_SCREEN_WIDTH_PIXELS = 640.0;
+//	private static double MAX_SMALL_SCREEN_WIDTH_PIXELS = 640.0;
 	private static double MAX_MEDIUM_SCREEN_WIDTH_PIXELS = 1024.0;
 	private static double MAX_LARGE_SCREEN_WIDTH_PIXELS = 1440.0;
 	

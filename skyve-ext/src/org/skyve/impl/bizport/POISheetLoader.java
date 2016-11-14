@@ -13,7 +13,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.util.Util;
@@ -35,7 +35,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param sheetIndex
 	 * @throws Exception
 	 */
-	public POISheetLoader(InputStream fileInputStream, int sheetIndex, String moduleName, String documentName, BizPortException exception)
+	public POISheetLoader(InputStream fileInputStream, int sheetIndex, String moduleName, String documentName, UploadException exception)
 			throws Exception {
 
 		super(LoaderActivityType.CREATE_FIND, exception, moduleName, documentName);
@@ -76,7 +76,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param bindings
 	 *            - the specific bindings in corresponding order to the columns/fields being loaded
 	 */
-	public POISheetLoader(LoaderActivityType activityType, InputStream fileInputStream, int sheetIndex, BizPortException exception,
+	public POISheetLoader(LoaderActivityType activityType, InputStream fileInputStream, int sheetIndex, UploadException exception,
 			String moduleName, String documentName) throws Exception {
 
 		this(fileInputStream, sheetIndex, moduleName, documentName, exception);

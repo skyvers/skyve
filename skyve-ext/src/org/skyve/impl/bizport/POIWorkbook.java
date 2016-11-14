@@ -19,10 +19,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.skyve.bizport.BizPortColumn;
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.impl.bizport.POISheet;
 
@@ -75,7 +75,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @param customer	The current customer (for the logged in user).
 	 * @param workbook	The workbook.
 	 */
-	public POIWorkbook(Customer customer, Workbook workbook, BizPortException e) {
+	public POIWorkbook(Customer customer, Workbook workbook, UploadException e) {
 		this.workbook = workbook;
 		ooxmlFormat = workbook instanceof XSSFWorkbook;
 		

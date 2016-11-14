@@ -5,7 +5,6 @@ import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -300,9 +299,9 @@ public final class BindUtil {
 			}
 			else if (type.equals(Geometry.class)) {
 				if ((! (value instanceof Geometry)) && (value instanceof String)) {
-					result = new WKTReader().read((String) value);
+						result = new WKTReader().read((String) value);
+					}
 				}
-			}
 			// NB type.isEnum() doesn't work as our enums implement another interface
 			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
 			else if (Enum.class.isAssignableFrom(type)) {
@@ -310,11 +309,11 @@ public final class BindUtil {
 					// Since we can't test for assignable, see if we can see the Enumeration interface
 					Class<?>[] interfaces = type.getInterfaces();
 					if ((interfaces.length == 1) && (Enumeration.class.equals(interfaces[0]))) {
-						result = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
-						if (result == null) {
-							result = type.getMethod(Enumeration.FROM_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
+							result = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
+							if (result == null) {
+								result = type.getMethod(Enumeration.FROM_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
+							}
 						}
-					}
 					if (result == null) {
 						result = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
 					}
@@ -333,7 +332,7 @@ public final class BindUtil {
 	 * @param type
 	 * @param displayValue
 	 * @return
-	 * @throws ParseException
+	 * @throws Exception
 	 */
 	public static synchronized Object fromString(Customer customer,
 													Converter<?> converter,

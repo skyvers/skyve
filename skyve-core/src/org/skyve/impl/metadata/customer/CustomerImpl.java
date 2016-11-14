@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import org.skyve.bizport.BizPortException;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -767,7 +767,7 @@ public class CustomerImpl implements Customer {
 	public boolean interceptBeforeBizImportAction(Document document,
 													String actionName,
 													BizPortWorkbook bizPortable,
-													BizPortException problems)
+													UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor(this).beforeBizImportAction(document, actionName, bizPortable, problems)) {
@@ -780,7 +780,7 @@ public class CustomerImpl implements Customer {
 	public void interceptAfterBizImportAction(Document document,
 												String actionName,
 												BizPortWorkbook bizPortable,
-												BizPortException problems)
+												UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor(this).afterBizImportAction(document, actionName, bizPortable, problems);

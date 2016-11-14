@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
-import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -55,7 +55,7 @@ import org.skyve.util.Binder.TargetMetaData;
  * 
  * For example, a specific implementation of the DataFileLoader may have a usage similar to:
  * 
- *  BizPortException loadExceptions = new BizPortException();
+ *  UploadException loadExceptions = new UploadException();
  * 
  *  String[] bindings = new String[]{"company.contact.name", "company.abn", "invoiceNo", "invoiceDate", "invoiceAmount", "dueDate"};
  *  SpecificLoader loader = new SpecificLoader();
@@ -125,7 +125,7 @@ public abstract class AbstractDataFileLoader {
 	protected LoaderActivityType activityType;
 	protected boolean createMissingAssociations;
 	protected boolean treatAllEmptyNumericAsZero;
-	protected BizPortException exception;
+	protected UploadException exception;
 	protected Persistence pers;
 	protected User user;
 	protected Customer customer;
@@ -144,7 +144,7 @@ public abstract class AbstractDataFileLoader {
 
 	protected List<DataFileField> fields; // maintain order
 
-	public AbstractDataFileLoader(LoaderActivityType activityType, BizPortException exception,
+	public AbstractDataFileLoader(LoaderActivityType activityType, UploadException exception,
 			String moduleName, String documentName) throws Exception {
 		this.activityType = activityType;
 		this.exception = exception;
@@ -212,7 +212,7 @@ public abstract class AbstractDataFileLoader {
 		this.treatAllEmptyNumericAsZero = emptyAsZero;
 	}
 
-	public void setException(BizPortException exception) {
+	public void setException(UploadException exception) {
 		this.setException(exception);
 	}
 
@@ -220,7 +220,7 @@ public abstract class AbstractDataFileLoader {
 		this.activityType = activityType;
 	}
 
-	public BizPortException getException() {
+	public UploadException getException() {
 		return exception;
 	}
 

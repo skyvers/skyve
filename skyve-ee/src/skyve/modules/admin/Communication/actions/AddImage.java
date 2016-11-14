@@ -3,7 +3,7 @@ package modules.admin.Communication.actions;
 import modules.admin.domain.Communication;
 
 import org.apache.commons.codec.binary.Base64;
-import org.skyve.bizport.BizPortException;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.FileUtil;
 import org.skyve.web.WebContext;
@@ -16,7 +16,7 @@ public class AddImage extends UploadAction<Communication> {
 
 
 	@Override
-	public Communication upload(Communication communication, UploadedFile file, BizPortException exception, WebContext webContext) throws Exception {
+	public Communication upload(Communication communication, UploadedFile file, UploadException exception, WebContext webContext) throws Exception {
 
 		Communication result = communication;
 

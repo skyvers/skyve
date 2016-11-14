@@ -2,6 +2,7 @@ package org.skyve.bizport;
 
 import java.util.Set;
 
+import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 /**
@@ -85,7 +86,7 @@ public interface BizPortSheet {
 	 */
 	public <T> T getValue(String columnBinding, 
 							AttributeType attributeType,
-							BizPortException problems);
+							UploadException problems);
 	
 	/**
 	 * Set the value in the Excel sheet in the column 
@@ -113,7 +114,7 @@ public interface BizPortSheet {
 	 * @param column
 	 * @param message
 	 */
-	public void addErrorAtCurrentRow(BizPortException problems, 
+	public void addErrorAtCurrentRow(UploadException problems, 
 										BizPortColumn column, 
 										String message);
 
@@ -123,7 +124,7 @@ public interface BizPortSheet {
 	 * @param column
 	 * @param message
 	 */
-	public void addWarningAtCurrentRow(BizPortException problems, 
+	public void addWarningAtCurrentRow(UploadException problems, 
 										BizPortColumn column, 
 										String message);
 }

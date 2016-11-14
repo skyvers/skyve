@@ -3,8 +3,8 @@ package modules.admin.Tag.actions;
 import java.util.List;
 
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.DataFileField;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
@@ -31,7 +31,7 @@ public class UploadTagCriteria extends UploadAction<Tag> {
 	@Override
 	public Tag upload(Tag tag,
 						UploadedFile file, 
-						BizPortException exception,
+						UploadException exception,
 						WebContext webContext)
 	throws Exception {
 		Persistence persistence = CORE.getPersistence();

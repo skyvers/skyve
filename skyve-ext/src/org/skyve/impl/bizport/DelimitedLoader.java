@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.skyve.CORE;
-import org.skyve.bizport.BizPortException;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.util.Util;
@@ -57,7 +57,7 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		return values.toArray(new String[values.size()]);
 	}
 
-	public DelimitedLoader(LoaderActivityType activityType, InputStream fileInputStream, BizPortException exception, 
+	public DelimitedLoader(LoaderActivityType activityType, InputStream fileInputStream, UploadException exception, 
 			String moduleName, String documentName, String delimiter, String... bindings) throws Exception {
 		
 		super(activityType, exception, moduleName, documentName);

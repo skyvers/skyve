@@ -26,12 +26,12 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.skyve.bizport.BizPortColumn;
-import org.skyve.bizport.BizPortException;
-import org.skyve.bizport.BizPortException.Problem;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -128,7 +128,7 @@ public final class POISheet implements BizPortSheet {
 	 * 
 	 * @param sheet	The excel worksheet.
 	 */
-	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, BizPortException problems) {
+	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, UploadException problems) {
 		title = sheet.getSheetName();
 		
 		// get the columns in the sheet (row 2 is binding, row 3 is titles)
@@ -564,14 +564,14 @@ public final class POISheet implements BizPortSheet {
 	}
 	
 	@Override
-	public void addErrorAtCurrentRow(BizPortException problems, 
+	public void addErrorAtCurrentRow(UploadException problems, 
 										BizPortColumn column, 
 										String message) {
 		problems.addError(new Problem(message, getCurrentRowExcelRef(column)));
 	}
 	
 	@Override
-	public void addWarningAtCurrentRow(BizPortException problems, 
+	public void addWarningAtCurrentRow(UploadException problems, 
 										BizPortColumn column, 
 										String message) {
 		problems.addWarning(new Problem(message, getCurrentRowExcelRef(column)));
@@ -587,7 +587,7 @@ public final class POISheet implements BizPortSheet {
 	@SuppressWarnings("unchecked")
 	public <T> T getValue(String columnBinding, 
 							AttributeType attributeType,
-							BizPortException problems) {
+							UploadException problems) {
 		T result = null;
 		
 		if (sheet == null) {

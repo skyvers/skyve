@@ -8,7 +8,6 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.util.Util;
