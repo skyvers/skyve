@@ -5,6 +5,7 @@ import java.util.List;
 import javax.el.ValueExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
+import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.convert.Converter;
 
 import org.primefaces.component.button.Button;
@@ -13,6 +14,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.spacer.Spacer;
 import org.skyve.domain.types.converters.Format;
@@ -25,7 +27,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.web.WebAction;
 
 public class MobileComponentBuilder extends TabularComponentBuilder {
 
@@ -304,5 +309,100 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 							facesConverter,
 							text.getPixelWidth(),
 							false);
+	}
+	
+	/*
+		<p:dataList id="list" 
+						var="row"
+						paginator="true" 
+						rows="10" 
+						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.queryNameParameter)}">
+			<f:facet name="header">
+				<p:button href="./?a=#{WebAction.e.toString()}&amp;m=#{skyve.bizModuleParameter}&amp;d=#{skyve.bizDocumentParameter}" value="New" />
+			</f:facet>
+			<f:attribute name="paginatorText" value="More..." />
+			<f:attribute name="filter" value="true" />
+			<h:outputLink value="/?a=e&amp;m=#{row['bizModule']}&amp;d=#{row['bizDocument']}&amp;i=#{row['bizId']}">
+				<h2><h:outputText value="#{row['bizKey']}" /></h2>
+				<p><h:outputText value="#{row['bizKey']}" /></p>
+			</h:outputLink>
+		</p:dataList>
+	 */
+	@Override
+	public UIComponent listGrid(DocumentQueryDefinition query,
+									boolean canCreate,
+									boolean showPaginator,
+									boolean stickyHeader) {
+		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
+		result.setVar("row");
+		result.setPaginator(showPaginator);
+		if (showPaginator) {
+			result.setRows(20);
+	        result.setPaginatorAlwaysVisible(false);
+		}
+
+		String moduleName = query.getOwningModule().getName();
+		String documentName = query.getDocumentName();
+		
+		StringBuilder value = new StringBuilder(128);
+
+// TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
+        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
+        value.append(query.getName()).append("', null)}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
+/* Temporarily commented out but should be reinstated when we use the list model.
+        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
+        value.append(query.getName()).append("', null)}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
+*/
+        if (canCreate) {
+        	addListGridHeader(result, moduleName, documentName);
+        }
+		addListGridBoundColumns(query, result.getChildren());
+		
+		return result;
+	}
+	
+	private void addListGridHeader(UIComponent componentToAddTo,
+							String moduleName,
+							String documentName) {
+		Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+    	button.setValue("New");
+    	button.setTitle("New record");
+    	StringBuilder value = new StringBuilder(128);
+    	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
+    	value.append("&d=").append(documentName);
+    	button.setHref(value.toString());
+
+        OutputPanel headingPanel = (OutputPanel) a.createComponent(OutputPanel.COMPONENT_TYPE);
+        headingPanel.getChildren().add(button);
+        componentToAddTo.getFacets().put("header", headingPanel);
+	}
+	
+	private void addListGridBoundColumns(DocumentQueryDefinition query,
+											List<UIComponent> componentChildrenToAddTo) {
+		StringBuilder value = new StringBuilder(128);
+		
+		for (QueryColumn queryColumn : query.getColumns()) {
+			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+				continue;
+			}
+			
+			boolean first = (value.length() == 0);
+			value.append(first ? "<h2>" : "<p>");
+			value.append("#{row['{").append(queryColumn.getBinding()).append("}']}");
+			value.append(first ? "</h2>" : "</p>");
+		}
+		
+		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		outputText.setValueExpression("value", ef.createValueExpression(elc, value.toString(), Object.class));
+
+		HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+		value.setLength(0);
+		value.append("./?a=").append(WebAction.e.toString());
+		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+		link.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+		link.getChildren().add(outputText);
+		componentChildrenToAddTo.add(link);
 	}
 }

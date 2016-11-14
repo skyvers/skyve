@@ -47,9 +47,13 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -68,16 +72,23 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.web.WebAction;
 
 public class TabularComponentBuilder extends ComponentBuilder {
 
@@ -305,12 +316,182 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return current;
 	}
 
+	/*
+		<p:dataTable id="list"
+						var="row"
+						value="#{skyve.getBeans(skyve.bizModuleParameter, skyve.queryNameParameter)}">
+			<f:facet name="header">
+				<p:outputPanel>
+					Contacts
+					<p:button href="./?a=#{WebAction.e.toString()}&amp;m=#{skyve.bizModuleParameter}&amp;d=#{skyve.bizDocumentParameter}" value="New" />
+				</p:outputPanel>
+			</f:facet>
+			<p:column headerText="Name">
+				<h:outputText value="#{row['bizKey']}" />
+			</p:column>
+			<p:column headerText="Actions" style="width:75px">
+				<h:outputLink value="./">
+					<h:outputText value="Edit" />
+					<f:param name="a" value="#{WebAction.e.toString()}" />
+					<f:param name="f" value="t" />
+					<f:param name="m" value="#{row['bizModule']}" />
+					<f:param name="d" value="#{row['bizDocument']}" />
+					<f:param name="i" value="#{row['bizId']}" />
+				</h:outputLink>
+			</p:column>
+		</p:dataTable>
+	*/
 	@Override
-	public UIComponent listGrid(ListGrid grid) {
-		// TODO Auto-generated method stub
-		return null;
+	public UIComponent listGrid(DocumentQueryDefinition query,
+									boolean canCreate,
+									boolean showPaginator,
+									boolean stickyHeader) {
+		String moduleName = query.getOwningModule().getName();
+		String documentName = query.getDocumentName();
+
+		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
+        result.setVar("row");
+        result.setPaginator(showPaginator);
+        if (showPaginator) {
+	        result.setRowsPerPageTemplate("25,50,75,100");
+	        result.setRows(50);
+	        result.setPaginatorAlwaysVisible(false);
+        }
+        result.setLazy(true);
+        result.setEmptyMessage("No Items to show");
+        result.setStickyHeader(stickyHeader);
+        
+        setId(result);
+    	result.setWidgetVar(result.getId());
+        result.setSelectionMode("single");
+        result.setValueExpression("rowKey", ef.createValueExpression(elc, "#{row['bizId']}", String.class));
+        
+        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+        StringBuilder start = new StringBuilder(64);
+        start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
+		start.append("?a=").append(WebAction.e.toString());
+		start.append("&m=").append(moduleName).append("&d=").append(documentName).append("&i='+s;return false;");
+		ajax.setOnstart(start.toString());
+        result.addClientBehavior("rowSelect", ajax);
+
+        StringBuilder value = new StringBuilder(128);
+
+// TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
+        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
+        value.append(query.getName()).append("', null)}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
+/* Temporarily commented out but should be reinstated when we use the list model.
+        value.append("#{").append(managedBeanName).append(".getModel('").append(moduleName).append("', '");
+        value.append(query.getName()).append("')}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), QueryDataModel.class));
+*/
+
+        addListGridHeader(query, result);
+        List<UIComponent> children = result.getChildren();
+        addListGridBoundColumns(query, children);
+    	addListGridActionColumn(moduleName, documentName, canCreate, children);
+    	
+    	return result;
 	}
 	
+	private void addListGridHeader(QueryDefinition query,
+									UIComponent componentToAddTo) {
+		UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+        heading.setValue(query.getDescription());
+		componentToAddTo.getFacets().put("header", heading);
+	}
+	
+	private void addListGridBoundColumns(DocumentQueryDefinition query,
+											List<UIComponent> componentChildrenToAddTo) {
+		Customer customer = CORE.getUser().getCustomer();
+		Module module = query.getOwningModule();
+		Document document = module.getDocument(customer, query.getDocumentName());
+		
+		columnPriority = 1;
+
+		for (QueryColumn queryColumn : query.getColumns()) {
+			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+				continue;
+			}
+			
+			String displayName = queryColumn.getDisplayName();
+			if (displayName == null) {
+				String binding = queryColumn.getBinding();
+				if (binding != null) {
+					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+					Document bindingDocument = target.getDocument();
+					Attribute bindingAttribute = target.getAttribute();
+					if (binding.endsWith(Bean.BIZ_KEY)) {
+						if (bindingDocument != null) {
+							displayName = bindingDocument.getSingularAlias();
+						}
+						else {
+							displayName = DocumentImpl.getBizKeyAttribute().getDisplayName();
+						}
+					}
+					else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+						displayName = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
+					}
+					else if (bindingAttribute != null) {
+						displayName = bindingAttribute.getDisplayName();
+					}
+				}
+			}
+			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
+			column.setHeaderText(displayName);
+			column.setPriority(columnPriority);
+			if (columnPriority < 6) {
+				columnPriority++;
+			}
+				
+/* TODO complete this
+			column.setSortBy(queryColumn.getBinding());
+			column.setFilterBy(queryColumn.getBinding());
+*/
+			String value = String.format("#{row['{%s}']}", queryColumn.getBinding());
+			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
+			column.getChildren().add(outputText);
+			componentChildrenToAddTo.add(column);
+		}
+	}
+
+	private void addListGridActionColumn(String moduleName,
+											String documentName,
+											boolean canCreate,
+											List<UIComponent> componentChildrenToAddTo) {
+		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
+		column.setPriority(1);
+		column.setWidth("40");
+		column.setStyle("text-align:center !important");
+        if (canCreate) {
+	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+	    	button.setValue(null);
+        	button.setTitle("New record");
+	    	button.setIcon("fa fa-plus");
+        	StringBuilder value = new StringBuilder(128);
+        	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
+        	value.append("&d=").append(documentName);
+        	button.setHref(value.toString());
+
+	        column.getFacets().put("header", button);
+        }
+        else {
+    		column.setHeaderText("");
+        }
+
+	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+	    	button.setValue(null);
+	    	button.setTitle("View Detail");
+	    	button.setIcon("fa fa-chevron-right");
+			StringBuilder value = new StringBuilder(128);
+			value.append("./?a=").append(WebAction.e.toString());
+			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+			column.getChildren().add(button);
+			componentChildrenToAddTo.add(column);
+	}
+
 	@Override
 	public UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required) {
 /* TODO Why don't tri state checkboxes work???

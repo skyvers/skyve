@@ -33,9 +33,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 
@@ -102,7 +102,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String singluarDocumentAlias,
 															boolean inline);
 	
-	public abstract UIComponent listGrid(ListGrid grid);
+	public abstract UIComponent listGrid(DocumentQueryDefinition query, 
+											boolean canCreate,
+											boolean showPaginator,
+											boolean stickyHeader);
 	
 	public abstract UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required);
 

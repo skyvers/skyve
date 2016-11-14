@@ -149,5 +149,11 @@
 			<required>false</required>
 			<type>java.lang.Boolean</type>
 		</attribute>
+		<attribute>
+			<description>The fully qualified class name of a component builder to use</description>
+			<name>componentBuilderClass</name>
+			<required>false</required>
+			<type>java.lang.String</type>
+		</attribute>
 	</tag>
 </facelet-taglib>

@@ -34,7 +34,9 @@
 						<h:form prependId="false">
 							<s:listGrid module="#{skyve.bizModuleParameter}"
 										query="#{skyve.queryNameParameter}"
-										managedBean="skyve" />
+										managedBean="skyve"
+										paginator="true"
+										componentBuilderClass="org.skyve.impl.web.faces.pipeline.component.MobileComponentBuilder" />
 						</h:form>
 					</pm:content>
 				</pm:page>

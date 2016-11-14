@@ -135,6 +135,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -801,8 +802,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitListGrid(ListGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		UIComponent l = cb.label("listGrid"); // TODO list grid
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth()); // TODO list grid
+		String queryName = grid.getQueryName();
+		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+		if (query == null) {
+			query = module.getDocumentDefaultQuery(customer, queryName);
+		}
+
+		UIComponent l = cb.listGrid(query, true, true, false);
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 	}
 
