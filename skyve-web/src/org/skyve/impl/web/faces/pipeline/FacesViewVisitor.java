@@ -629,18 +629,25 @@ public class FacesViewVisitor extends ViewVisitor {
 		if (pixelWidth != null) {
 			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(pixelWidth);
 		}
-		else {
+		else if (initialPixelWidth != null) {
 			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(initialPixelWidth);
+		}
+		else {
+			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append("=200");
 		}
 		if (pixelHeight != null) {
 			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(pixelHeight);
 		}
-		else {
+		else if (initialPixelHeight != null) {
 			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(initialPixelHeight);
+		}
+		else {
+			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append("=200");
 		}
 		url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
 		url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
-		
+//		url.append('&').append(AbstractWebContext.CONTEXT_NAME).append("=#{skyve.webId}");
+//&bizId=fe557a8b-fba2-4d48-8dc1-004edc9df1bb&_ts=1479193692963
 		UIComponent i = cb.image(pixelWidth,
 									image.getResponsiveWidth(),
 									image.getPercentageWidth(),
