@@ -293,8 +293,6 @@
 			<role name="BasicUser" />
 		</edit>
 		<list document="Contact" name="Contacts">
-			<uxui name="desktop" />
-			<uxui name="tablet" />
 			<role name="ContactViewer" />
 			<role name="ContactManager" />
 			<role name="SecurityAdministrator" />
