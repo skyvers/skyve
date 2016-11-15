@@ -15,7 +15,7 @@
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/poi-3.10.1.jar"/>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.0.jar"/>
+	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.0.jar" sourcepath="C:/Users/sandsm01/.m2/repository/org/primefaces/primefaces/6.0/primefaces-6.0-sources.jar"/>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-extensions-6.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

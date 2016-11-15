@@ -803,6 +803,14 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		String queryName = grid.getQueryName();
+		String modelName = grid.getModelName();
+// TODO implement list models
+if ((queryName == null) && (modelName != null)) {
+	UIComponent l = cb.label("List Grid model=" + modelName);
+	addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
+	currentGrid = grid;
+	return;
+}
 		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 		if (query == null) {
 			query = module.getDocumentDefaultQuery(customer, queryName);
@@ -1085,7 +1093,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		UIComponentBase c = (UIComponentBase) cb.label("listMembership"); // TODO complete this
+		UIComponentBase c = (UIComponentBase) cb.listMembership(membership);
 		eventSource = c;
 		addToContainer(c, membership.getListWidthInPixels(), null, null);
 	}

@@ -23,6 +23,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.BeanMapAdapter;
+import org.skyve.impl.web.faces.DomainValueDualListModel;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.QueryDataModel;
 import org.skyve.impl.web.faces.actions.ActionUtil;
@@ -37,6 +38,7 @@ import org.skyve.impl.web.faces.actions.SaveAction;
 import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
@@ -275,6 +277,17 @@ public class FacesView<T extends Bean> extends Harness {
  		
 		return result;
 	}
+ 	
+ 	private Map<String, DomainValueDualListModel> listMembershipModels = new TreeMap<>();
+ 	public DomainValueDualListModel getListMembershipModel(String binding) {
+ 		DomainValueDualListModel result = listMembershipModels.get(binding);
+ 		if (result == null) {
+ 			result = new DomainValueDualListModel(new ArrayList<DomainValue>(), new ArrayList<DomainValue>());
+ 			listMembershipModels.put(binding, result);
+ 		}
+ 		
+ 		return result;
+ 	}
  	
  	public String getResourceUrl(final String binding) {
 		return new GetResourceURLAction(getBean(), binding).execute();

@@ -24,6 +24,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
@@ -106,6 +107,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											boolean canCreate,
 											boolean showPaginator,
 											boolean stickyHeader);
+	
+	public abstract UIComponent listMembership(ListMembership membership);
 	
 	public abstract UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required);
 

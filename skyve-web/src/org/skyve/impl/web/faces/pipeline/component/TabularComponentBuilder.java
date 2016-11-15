@@ -39,6 +39,7 @@ import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
@@ -65,6 +66,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -74,6 +76,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.BeanMapAdapter;
+import org.skyve.impl.web.faces.DomainValueDualListModel;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -490,6 +493,34 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
 			column.getChildren().add(button);
 			componentChildrenToAddTo.add(column);
+	}
+	
+	@Override
+	public UIComponent listMembership(ListMembership membership) {
+		PickList result = (PickList) a.createComponent(PickList.COMPONENT_TYPE);
+		result.setVar("item");
+		result.setShowSourceControls(false);
+		result.setShowTargetControls(false);
+		result.setShowSourceFilter(false);
+		result.setShowTargetFilter(false);
+		
+        StringBuilder value = new StringBuilder(128);
+        value.append("#{").append(managedBeanName).append(".getListMembershipModel('");
+        value.append(membership.getBinding()).append("')}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), DomainValueDualListModel.class));
+
+		Map<String, UIComponent> facets = result.getFacets();
+		String heading = membership.getCandidatesHeading();
+		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		text.setValue((heading == null) ? "Candidates" : heading);
+		setId(text);
+		facets.put("sourceCaption", text);
+		heading = membership.getMembersHeading();
+		text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		text.setValue((heading == null) ? "Members" : heading);
+		setId(text);
+		facets.put("targetCaption", text);
+		return result;
 	}
 
 	@Override
