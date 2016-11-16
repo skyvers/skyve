@@ -96,8 +96,6 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
 import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
-import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.faces.converters.date.DD_MMM_YYYY;
 import org.skyve.impl.web.faces.converters.date.DD_MM_YYYY;
 import org.skyve.impl.web.faces.converters.datetime.DD_MMM_YYYY_HH24_MI;
@@ -616,46 +614,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDynamicImage(DynamicImage image,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		String name = image.getName();
-		Integer pixelWidth = image.getPixelHeight();
-		Integer pixelHeight = image.getPixelHeight();
-		Integer initialPixelWidth = image.getImageInitialPixelWidth();
-		Integer initialPixelHeight = image.getImageInitialPixelHeight();
-		
-		StringBuilder url = new StringBuilder(128);
-		url.append("/images/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
-		url.append(module.getName()).append('.').append(document.getName());
-		url.append('&').append(DynamicImageServlet.IMAGE_NAME).append('=').append(name);
-		if (pixelWidth != null) {
-			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(pixelWidth);
-		}
-		else if (initialPixelWidth != null) {
-			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(initialPixelWidth);
-		}
-		else {
-			url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append("=200");
-		}
-		if (pixelHeight != null) {
-			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(pixelHeight);
-		}
-		else if (initialPixelHeight != null) {
-			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(initialPixelHeight);
-		}
-		else {
-			url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append("=200");
-		}
-		url.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
-		url.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
-//		url.append('&').append(AbstractWebContext.CONTEXT_NAME).append("=#{skyve.webId}");
-//&bizId=fe557a8b-fba2-4d48-8dc1-004edc9df1bb&_ts=1479193692963
-		UIComponent i = cb.image(pixelWidth,
-									image.getResponsiveWidth(),
-									image.getPercentageWidth(),
-									pixelHeight,
-									image.getPercentageHeight(),
-									url.toString(),
-									image.getInvisibleConditionName(),
-									true);
+		UIComponent i = cb.dynamicImage(image, module.getName(), document.getName());
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
@@ -677,14 +636,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitStaticImage(StaticImage image,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		UIComponent i = cb.image(image.getPixelWidth(),
-									image.getResponsiveWidth(),
-    								image.getPercentageWidth(),
-    								image.getPixelHeight(),
-    								image.getPercentageHeight(),
-    								"images/" + image.getRelativeFile(),
-    								image.getInvisibleConditionName(),
-    								false);
+		UIComponent i = cb.staticImage(image);
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 

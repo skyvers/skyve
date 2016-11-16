@@ -22,6 +22,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.DomainValueDualListModel;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -31,7 +32,7 @@ import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
 import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.GetBeansAction;
-import org.skyve.impl.web.faces.actions.GetResourceURLAction;
+import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
@@ -289,11 +290,49 @@ public class FacesView<T extends Bean> extends Harness {
  		return result;
  	}
  	
- 	public String getResourceUrl(final String binding) {
-		return new GetResourceURLAction(getBean(), binding).execute();
+ 	public String getContentUrl(final String binding) {
+		return new GetContentURLAction(getBean(), binding).execute();
  	}
  	
-	public List<BeanMapAdapter<Bean>> complete(String query) {
+ 	public String getDynamicImageUrl(String name, 
+ 										String moduleName,
+ 										String documentName,
+ 										Integer pixelWidth, 
+ 										Integer pixelHeight, 
+ 										Integer initialPixelWidth, 
+ 										Integer initialPixelHeight) {
+		StringBuilder result = new StringBuilder(128);
+		result.append("/images/dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append(moduleName).append('.').append(documentName);
+		result.append('&').append(DynamicImageServlet.IMAGE_NAME).append('=').append(name);
+		if (pixelWidth != null) {
+			result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(pixelWidth);
+		}
+		else if (initialPixelWidth != null) {
+			result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append('=').append(initialPixelWidth);
+		}
+		else {
+			result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_NAME).append("=200");
+		}
+		if (pixelHeight != null) {
+			result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(pixelHeight);
+		}
+		else if (initialPixelHeight != null) {
+			result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append('=').append(initialPixelHeight);
+		}
+		else {
+			result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_NAME).append("=200");
+		}
+		result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
+		result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(getWebContext().getWebId());
+		result.append("&bizId=").append(getCurrentBean().getBean().getBizId());
+		result.append("_ts=").append(System.currentTimeMillis());
+		
+		return result.toString();
+ 	}
+
+ 	public List<BeanMapAdapter<Bean>> complete(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");

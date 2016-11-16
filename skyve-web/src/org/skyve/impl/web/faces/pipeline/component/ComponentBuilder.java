@@ -16,7 +16,9 @@ import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -73,14 +75,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent actionButton(String listBinding, Button button, Action action);
 	public abstract UIComponent reportButton(Button button, Action action);
 	
-	public abstract UIComponent image(Integer pixelWidth, 
-										Integer responsiveWidth,
-										Integer percentageWidth, 
-										Integer pixelHeight,
-										Integer percentageHeight, 
-										String url, 
-										String invisible,
-										boolean border);
+	public abstract UIComponent staticImage(StaticImage image);
+	public abstract UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName);
 	
 	public abstract UIComponent blurb(String value, String binding, Blurb blurb);
 	public abstract UIComponent label(String value, String binding, Label label);

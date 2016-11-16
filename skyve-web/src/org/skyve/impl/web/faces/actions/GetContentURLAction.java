@@ -7,17 +7,17 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
-public class GetResourceURLAction extends FacesAction<String> {
+public class GetContentURLAction extends FacesAction<String> {
 	private Bean bean;
 	private String binding;
-	public GetResourceURLAction(Bean bean, String binding) {
+	public GetContentURLAction(Bean bean, String binding) {
 		this.bean = bean;
 		this.binding = binding;
 	}
 	
 	@Override
 	public String callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetResourceURLAction - binding=" + binding);
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetContentURLAction - binding=" + binding);
 
 		String contentId = (String) Binder.get(bean, binding);
 		if (contentId == null) {

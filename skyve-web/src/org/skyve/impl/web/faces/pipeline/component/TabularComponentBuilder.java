@@ -58,7 +58,9 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -1291,22 +1293,56 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public GraphicImage image(Integer pixelWidth, 
-								Integer responsiveWidth,
-								Integer percentageWidth, 
-								Integer pixelHeight,
-								Integer percentageHeight, 
-								String url, 
-								String invisible,
-								boolean border) {
+	public GraphicImage staticImage(StaticImage image) {
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
-		result.setUrl(url);
-		setSize(result, border ? "border:1px solid gray;" : null, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
-		setInvisible(result, invisible, null);
+		result.setUrl("images/" + image.getRelativeFile());
+		setSize(result, 
+					null, 
+					image.getPixelWidth(), 
+					image.getResponsiveWidth(), 
+					image.getPercentageWidth(), 
+					image.getPixelHeight(), 
+					image.getPercentageHeight(), 
+					null);
+		setInvisible(result, image.getInvisibleConditionName(), null);
 		setId(result);
 		return result;
 	}
 
+	@Override
+	public UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName) {
+		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
+
+		String name = image.getName();
+		Integer pixelWidth = image.getPixelHeight();
+		Integer pixelHeight = image.getPixelHeight();
+		Integer initialPixelWidth = image.getImageInitialPixelWidth();
+		Integer initialPixelHeight = image.getImageInitialPixelHeight();
+		
+		String expression = String.format("#{%s.getDynamicImageUrl('%s','%s','%s',%s,%s,%s,%s)}", 
+											managedBeanName,
+											name,
+											moduleName,
+											documentName,
+											(pixelWidth == null) ? "null" : pixelWidth.toString(),
+											(pixelHeight == null) ? "null" : pixelHeight.toString(),
+											(initialPixelWidth == null) ? "null" : initialPixelWidth.toString(),
+											(initialPixelHeight == null) ? "null" : initialPixelHeight.toString());
+		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
+
+		setSize(result, 
+					"border:1px solid gray;", 
+					pixelWidth, 
+					image.getResponsiveWidth(), 
+					image.getPercentageWidth(), 
+					pixelHeight, 
+					image.getPercentageHeight(),
+					null);
+		setInvisible(result, image.getInvisibleConditionName(), null);
+		setId(result);
+		return result;
+	}
+	
 	private GraphicImage contentGraphicImage(Integer pixelWidth, 
 												Integer responsiveWidth,
 												Integer percentageWidth, 
@@ -1317,7 +1353,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 
 		StringBuilder expression = new StringBuilder(64);
-		expression.append("#{").append(managedBeanName).append(".getResourceUrl('");
+		expression.append("#{").append(managedBeanName).append(".getContentUrl('");
 		expression.append(binding).append("')}");
 
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
@@ -1331,7 +1367,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 
 		StringBuilder expression = new StringBuilder(64);
-		expression.append("#{").append(managedBeanName).append(".getResourceUrl('");
+		expression.append("#{").append(managedBeanName).append(".getContentUrl('");
 		expression.append(binding).append("')}");
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 
