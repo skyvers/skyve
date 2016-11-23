@@ -6,7 +6,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
-import org.skyve.web.WebContext;
 
 /**
  * 
@@ -42,12 +41,6 @@ public interface DocumentQueryDefinition extends QueryDefinition {
 	 * @return
 	 */
 	public List<QueryColumn> getColumns();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public <T extends WebContext> Querylet<T> getQuerylet();
 	
 	/**
 	 * 

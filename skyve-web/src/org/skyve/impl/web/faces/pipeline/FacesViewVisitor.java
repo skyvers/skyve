@@ -8,6 +8,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
 
 import org.primefaces.component.calendar.Calendar;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -136,6 +137,8 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -763,19 +766,25 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentEnabled) {
 		String queryName = grid.getQueryName();
 		String modelName = grid.getModelName();
-// TODO implement list models
-if ((queryName == null) && (modelName != null)) {
-	UIComponent l = cb.label("List Grid model=" + modelName);
-	addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
-	currentGrid = grid;
-	return;
-}
-		DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, queryName);
+		String modelDocumentName = null;
+		
+		ListModel<? extends Bean> model = null;
+		if ((queryName == null) && (modelName != null)) {
+			model = CORE.getRepository().getListModel(customer, document, modelName);
+			modelDocumentName = document.getName();
 		}
-
-		UIComponent l = cb.listGrid(query, true, true, false);
+		else {
+			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			if (query == null) {
+				query = module.getDocumentDefaultQuery(customer, queryName);
+			}
+	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+	        queryModel.setQuery(query);
+			modelName = queryName;
+	        model = queryModel;
+		}
+		
+		UIComponent l = cb.listGrid(modelDocumentName, modelName, model, true, true, false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 	}

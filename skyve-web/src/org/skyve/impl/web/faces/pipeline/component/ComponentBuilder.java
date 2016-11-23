@@ -38,9 +38,9 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.model.list.ListModel;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	/**
@@ -99,7 +99,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 															String singluarDocumentAlias,
 															boolean inline);
 	
-	public abstract UIComponent listGrid(DocumentQueryDefinition query, 
+	public abstract UIComponent listGrid(String modelDocumentName,
+											String modelName,
+											ListModel<? extends Bean> model, 
 											boolean canCreate,
 											boolean showPaginator,
 											boolean stickyHeader);

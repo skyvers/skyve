@@ -26,7 +26,7 @@ public class DomainException extends SkyveException {
 	 * @param t
 	 */
 	public DomainException(Throwable t) {
-		super("A problem was encountered.", t);
+		super(t);
 	}
 
 	/**

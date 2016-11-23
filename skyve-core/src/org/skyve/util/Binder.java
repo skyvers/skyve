@@ -31,10 +31,8 @@ public class Binder {
 	 * @param message
 	 * @param bean
 	 * @return
-	 * @throws Exception
 	 */
-	public static String formatMessage(Customer customer, String message, Bean... beans)
-	throws Exception {
+	public static String formatMessage(Customer customer, String message, Bean... beans) {
 		return BindUtil.formatMessage(customer, message, beans);
 	}
 
@@ -49,10 +47,8 @@ public class Binder {
 	 * @param type
 	 * @param value
 	 * @return
-	 * @throws Exception 
 	 */
-	public static Object convert(Class<?> type, Object value)
-	throws Exception {
+	public static Object convert(Class<?> type, Object value) {
 		return BindUtil.convert(type, value);
 	}
 
@@ -64,14 +60,12 @@ public class Binder {
 	 * @param type
 	 * @param displayValue
 	 * @return
-	 * @throws Exception
 	 */
 	public static Object fromString(Customer customer,
 													Converter<?> converter,
 													Class<?> type,
 													String stringValue,
-													boolean fromSerializedFormat) 
-	throws Exception {
+													boolean fromSerializedFormat) {
 		return BindUtil.fromString(customer, converter, type, stringValue, fromSerializedFormat);
 	}
 
@@ -81,10 +75,8 @@ public class Binder {
 	 * @param bean
 	 * @param binding
 	 * @return
-	 * @throws Exception
 	 */
-	public static String getDisplay(Customer customer, Bean bean, String binding)
-	throws Exception {
+	public static String getDisplay(Customer customer, Bean bean, String binding) {
 		return BindUtil.getDisplay(customer, bean, binding);
 	}
 
@@ -112,10 +104,8 @@ public class Binder {
 	 * @param binding
 	 * @param element
 	 * @return	The found or added element.
-	 * @throws Exception
 	 */
-	public static Bean ensureElementIsInCollection(Bean owner, String binding, Bean element) 
-	throws Exception {
+	public static Bean ensureElementIsInCollection(Bean owner, String binding, Bean element) {
 		return BindUtil.ensureElementIsInCollection(owner, binding, element);
 	}
 
@@ -126,10 +116,8 @@ public class Binder {
 	 * @param binding
 	 * @param elementBizId
 	 * @return	The found element or null.
-	 * @throws xception
 	 */
-	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) 
-	throws Exception {
+	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) {
 		return BindUtil.getElementInCollection(owner, binding, elementBizId);
 	}
 
@@ -158,14 +146,12 @@ public class Binder {
 	 * @param module The module of the owningBean.
 	 * @param document The document of the owningBean.
 	 * @param collectionBinding The (possibly compound) collection binding (from Document context).
-	 * @throws Exception
 	 */
 	public static void sortCollectionByMetaData(Bean owningBean,
 													Customer customer,
 													Module module,
 													Document document,
-													String collectionBinding) 
-	throws Exception {
+													String collectionBinding) {
 		BindUtil.sortCollectionByMetaData(owningBean, customer, module, document, collectionBinding);
 	}
 
@@ -176,10 +162,8 @@ public class Binder {
 	 * @param collection The metadata representing the collection. 
 	 * 						This method does not cater for compound binding expressions.
 	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
-	 * @throws Exception
 	 */
-	public static void sortCollectionByMetaData(Bean owningBean, Collection collection) 
-	throws Exception {
+	public static void sortCollectionByMetaData(Bean owningBean, Collection collection) {
 		BindUtil.sortCollectionByMetaData(owningBean, collection);
 	}
 	
@@ -200,10 +184,8 @@ public class Binder {
 	 * @param bean The bean to get the property value from.
 	 * @param fullyQualifiedAttributeName The fully qualified name of a bean property, separating components with a '.'. 
 	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
-	 * @exception Exception Thrown when 
 	 */
-	public static Object get(Object bean, String fullyQualifiedPropertyName) 
-	throws Exception {
+	public static Object get(Object bean, String fullyQualifiedPropertyName) {
 		return BindUtil.get(bean, fullyQualifiedPropertyName);
 	}
 
@@ -212,10 +194,8 @@ public class Binder {
 	 * @param bean
 	 * @param propertyName
 	 * @param value
-	 * @throws Exception
 	 */
-	public static void convertAndSet(Object bean, String propertyName, Object value)
-	throws Exception {
+	public static void convertAndSet(Object bean, String propertyName, Object value) {
 		BindUtil.convertAndSet(bean, propertyName, value);
 	}
 
@@ -226,10 +206,8 @@ public class Binder {
 	 * @param value The value to the bean property value to.
 	 * @param fullyQualifiedPropertyName The fully qualified name of a bean property, separating components with a '.'. 
 	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
-	 * @exception Exception Thrown when
 	 */
-	public static void set(Object bean, String fullyQualifiedPropertyName, Object value)
-	throws Exception {
+	public static void set(Object bean, String fullyQualifiedPropertyName, Object value) {
 		BindUtil.set(bean, fullyQualifiedPropertyName, value);
 	}
 
@@ -238,10 +216,8 @@ public class Binder {
 	 * @param bean
 	 * @param propertyName
 	 * @return
-	 * @throws Exception
 	 */
-	public static Class<?> getPropertyType(Object bean, String propertyName)
-	throws Exception {
+	public static Class<?> getPropertyType(Object bean, String propertyName) {
 		return BindUtil.getPropertyType(bean, propertyName);
 	}
 
@@ -250,10 +226,8 @@ public class Binder {
 	 * @param bean
 	 * @param propertyName
 	 * @return
-	 * @throws Exception
 	 */
-	public static boolean isWriteable(Object bean, String propertyName) 
-	throws Exception {
+	public static boolean isWriteable(Object bean, String propertyName) {
 		return BindUtil.isWriteable(bean, propertyName);
 	}
 
@@ -300,10 +274,12 @@ public class Binder {
 	 * @param name
 	 * @param value
 	 * @param fromSerializedFormat
-	 * @throws Exception
 	 */
-	public static void populateProperty(User user, Bean bean, String name, Object value, boolean fromSerializedFormat)
-	throws Exception {
+	public static void populateProperty(User user, 
+											Bean bean, 
+											String name, 
+											Object value, 
+											boolean fromSerializedFormat) {
 		BindUtil.populateProperty(user, bean, name, value, fromSerializedFormat);
 	}
 

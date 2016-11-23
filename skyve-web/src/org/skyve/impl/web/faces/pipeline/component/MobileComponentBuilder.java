@@ -17,6 +17,7 @@ import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.spacer.Spacer;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -27,9 +28,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebAction;
 
 public class MobileComponentBuilder extends TabularComponentBuilder {
@@ -238,7 +240,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										true);
 
 		UIComponent result = panelGroup(false, false, false, null);
-		List<UIComponent> children = c.getChildren();
+		List<UIComponent> children = result.getChildren();
 		children.add(c);
 		InputText text = textField(listBinding, 
 									String.format("%s.%s", lookup.getBinding(), displayBinding), 
@@ -329,7 +331,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		</p:dataList>
 	 */
 	@Override
-	public UIComponent listGrid(DocumentQueryDefinition query,
+	public UIComponent listGrid(String modelDocumentName,
+									String modelName,
+									ListModel<? extends Bean> model,
 									boolean canCreate,
 									boolean showPaginator,
 									boolean stickyHeader) {
@@ -340,25 +344,37 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			result.setRows(20);
 	        result.setPaginatorAlwaysVisible(false);
 		}
+        result.setLazy(true);
+        result.setEmptyMessage("No Items to show");
 
-		String moduleName = query.getOwningModule().getName();
-		String documentName = query.getDocumentName();
-		
-		StringBuilder value = new StringBuilder(128);
-
-// TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
-        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
-        value.append(query.getName()).append("', null)}");
-        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
-/* Temporarily commented out but should be reinstated when we use the list model.
-        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
-        value.append(query.getName()).append("', null)}");
-        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
+		Document drivingDocument = model.getDrivingDocument();
+		String moduleName = drivingDocument.getOwningModuleName();
+		String drivingDocumentName = drivingDocument.getName();
+// Lazy data models don't seem to work on mobile data lists 		
+/*
+		String value = (model instanceof DocumentQueryListModel) ? 
+        					String.format("#{%s.getModel('%s','%s','%s',null)}",
+											managedBeanName, 
+											moduleName, 
+											drivingDocumentName, 
+											modelName) :
+    						String.format("#{%s.getModel('%s','%s',null,'%s')}", 
+										managedBeanName, 
+										moduleName, 
+										modelDocumentName, 
+										modelName);
+        result.setValueExpression("value", ef.createValueExpression(elc, value, SkyveLazyDataModel.class));
 */
-        if (canCreate) {
-        	addListGridHeader(result, moduleName, documentName);
+        String value = String.format("#{%s.getBeans('%s','%s',null)}", 
+        								managedBeanName, 
+        								moduleName,
+        								modelName);
+        result.setValueExpression("value", ef.createValueExpression(elc, value, List.class));
+
+		if (canCreate) {
+        	addListGridHeader(result, moduleName, drivingDocumentName);
         }
-		addListGridBoundColumns(query, result.getChildren());
+		addListGridBoundColumns(model, result.getChildren());
 		
 		return result;
 	}
@@ -379,18 +395,18 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
         componentToAddTo.getFacets().put("header", headingPanel);
 	}
 	
-	private void addListGridBoundColumns(DocumentQueryDefinition query,
+	private void addListGridBoundColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo) {
 		StringBuilder value = new StringBuilder(128);
 		
-		for (QueryColumn queryColumn : query.getColumns()) {
-			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
+		for (QueryColumn column : model.getColumns()) {
+			if (column.isHidden() || (! column.isProjected())) {
 				continue;
 			}
 			
 			boolean first = (value.length() == 0);
 			value.append(first ? "<h2>" : "<p>");
-			value.append("#{row['{").append(queryColumn.getBinding()).append("}']}");
+			value.append("#{row['{").append(column.getBinding()).append("}']}");
 			value.append(first ? "</h2>" : "</p>");
 		}
 		

@@ -79,6 +79,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.DomainValueDualListModel;
+import org.skyve.impl.web.faces.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -87,9 +88,10 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder.TargetMetaData;
@@ -347,12 +349,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		</p:dataTable>
 	*/
 	@Override
-	public UIComponent listGrid(DocumentQueryDefinition query,
+	public UIComponent listGrid(String modelDocumentName,
+									String modelName,
+									ListModel<? extends Bean> model,
 									boolean canCreate,
 									boolean showPaginator,
 									boolean stickyHeader) {
-		String moduleName = query.getOwningModule().getName();
-		String documentName = query.getDocumentName();
+		Document drivingDocument =  model.getDrivingDocument();
+		String moduleName = drivingDocument.getOwningModuleName();
+		String drivingDocumentName = drivingDocument.getName();
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         result.setVar("row");
@@ -375,46 +380,57 @@ public class TabularComponentBuilder extends ComponentBuilder {
         StringBuilder start = new StringBuilder(64);
         start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
 		start.append("?a=").append(WebAction.e.toString());
-		start.append("&m=").append(moduleName).append("&d=").append(documentName).append("&i='+s;return false;");
+		start.append("&m=").append(moduleName).append("&d=").append(drivingDocumentName).append("&i='+s;return false;");
 		ajax.setOnstart(start.toString());
         result.addClientBehavior("rowSelect", ajax);
 
-        StringBuilder value = new StringBuilder(128);
-
 // TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
+/*
+        StringBuilder value = new StringBuilder(128);
         value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
         value.append(query.getName()).append("', null)}");
         result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
-/* Temporarily commented out but should be reinstated when we use the list model.
-        value.append("#{").append(managedBeanName).append(".getModel('").append(moduleName).append("', '");
-        value.append(query.getName()).append("')}");
-        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), QueryDataModel.class));
 */
+/* Temporarily commented out but should be reinstated when we use the list model.
+*/
+        String value = (model instanceof DocumentQueryListModel) ?
+    						String.format("#{%s.getModel('%s','%s','%s',null)}", 
+    										managedBeanName, 
+    										moduleName, 
+    										drivingDocumentName,
+    										modelName) : 
+							String.format("#{%s.getModel('%s','%s',null,'%s')}", 
+    										managedBeanName, 
+    										moduleName, 
+    										modelDocumentName, 
+    										modelName);
+        result.setValueExpression("value", ef.createValueExpression(elc, value, SkyveLazyDataModel.class));
+/**/
 
-        addListGridHeader(query, result);
+        addListGridHeader(model, result);
         List<UIComponent> children = result.getChildren();
-        addListGridBoundColumns(query, children);
-    	addListGridActionColumn(moduleName, documentName, canCreate, children);
+        addListGridBoundColumns(model, children);
+    	addListGridActionColumn(moduleName, drivingDocumentName, canCreate, children);
     	
     	return result;
 	}
 	
-	private void addListGridHeader(QueryDefinition query,
+	private void addListGridHeader(ListModel<? extends Bean> model,
 									UIComponent componentToAddTo) {
 		UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(query.getDescription());
+        heading.setValue(model.getDescription());
 		componentToAddTo.getFacets().put("header", heading);
 	}
 	
-	private void addListGridBoundColumns(DocumentQueryDefinition query,
+	private void addListGridBoundColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo) {
 		Customer customer = CORE.getUser().getCustomer();
-		Module module = query.getOwningModule();
-		Document document = module.getDocument(customer, query.getDocumentName());
+		Document document = model.getDrivingDocument();
+		Module module = customer.getModule(document.getOwningModuleName());
 		
 		columnPriority = 1;
 
-		for (QueryColumn queryColumn : query.getColumns()) {
+		for (QueryColumn queryColumn : model.getColumns()) {
 			if (queryColumn.isHidden() || (! queryColumn.isProjected())) {
 				continue;
 			}

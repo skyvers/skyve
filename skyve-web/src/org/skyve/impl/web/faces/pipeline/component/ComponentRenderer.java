@@ -138,7 +138,7 @@ public class ComponentRenderer {
 			putValue(attributes, "pattern", calendar.getPattern());
 			putValue(attributes, "mask", calendar.getMask());
 			putValue(attributes, "style", calendar.getStyle());
-			putValue(attributes, "style", calendar.getStyle());
+			putValue(attributes, "styleClass", calendar.getStyleClass());
 		}
 		else if (component instanceof CellEditor) {
 			tagName = "p:cellEditor";
@@ -203,6 +203,7 @@ public class ComponentRenderer {
 			tagName = "p:dataTable";
 
 			DataTable table = (DataTable) component;
+			putValueExpression(attributes, "value", component);
 			putValue(attributes, "var", table.getVar());
 			putValue(attributes, "widgetVar", table.getWidgetVar());
 			putValue(attributes, "selectionMode", table.getSelectionMode());

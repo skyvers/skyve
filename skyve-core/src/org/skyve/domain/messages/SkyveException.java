@@ -19,6 +19,6 @@ public abstract class SkyveException extends RuntimeException {
 	}
 
 	public SkyveException(Throwable cause) {
-		super(cause);
+		super("A problem was encountered.", cause);
 	}
 }

@@ -30,13 +30,10 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
-import org.skyve.metadata.module.query.Querylet;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.web.WebContext;
-import org.skyve.impl.metadata.module.query.QueryDefinitionImpl;
 
 public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements DocumentQueryDefinition {
 	private static final long serialVersionUID = 1867738351262041832L;
@@ -57,8 +54,6 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private String filterClause;
 
 	private List<QueryColumn> columns = new ArrayList<>();
-
-	private Querylet<? extends WebContext> querylet;
 
 	@Override
 	public Module getDocumentModule(Customer customer) {
@@ -102,16 +97,6 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	@Override
 	public List<QueryColumn> getColumns() {
 		return columns;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends WebContext> Querylet<T> getQuerylet() {
-		return (Querylet<T>) querylet;
-	}
-
-	public <T extends WebContext> void setQuerylet(Querylet<T> querylet) {
-		this.querylet = querylet;
 	}
 
 	@Override

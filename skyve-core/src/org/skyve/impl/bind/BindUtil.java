@@ -1,8 +1,6 @@
 package org.skyve.impl.bind;
 
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -20,7 +18,9 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -58,6 +58,7 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 /**
@@ -66,7 +67,7 @@ import com.vividsolutions.jts.io.WKTReader;
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
 
-	public static String formatMessage(Customer customer, String message, Bean... beans) throws Exception {
+	public static String formatMessage(Customer customer, String message, Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
 		while (openCurlyBraceIndex >= 0) {
@@ -224,11 +225,9 @@ public final class BindUtil {
 	 * @param type
 	 * @param value
 	 * @return
-	 * @throws Exception 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Object convert(Class<?> type, Object value)
-	throws Exception {
+	public static Object convert(Class<?> type, Object value) {
 		Object result = value;
 
 		if (value != null) {
@@ -298,10 +297,15 @@ public final class BindUtil {
 				}
 			}
 			else if (type.equals(Geometry.class)) {
-				if ((! (value instanceof Geometry)) && (value instanceof String)) {
+				if (value instanceof String) {
+					try {
 						result = new WKTReader().read((String) value);
 					}
+					catch (ParseException e) {
+						throw new DomainException(value + " is not valid WKT", e);
+					}
 				}
+			}
 			// NB type.isEnum() doesn't work as our enums implement another interface
 			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
 			else if (Enum.class.isAssignableFrom(type)) {
@@ -309,11 +313,16 @@ public final class BindUtil {
 					// Since we can't test for assignable, see if we can see the Enumeration interface
 					Class<?>[] interfaces = type.getInterfaces();
 					if ((interfaces.length == 1) && (Enumeration.class.equals(interfaces[0]))) {
+						try {
 							result = type.getMethod(Enumeration.FROM_CODE_METHOD_NAME, String.class).invoke(null, value);
 							if (result == null) {
 								result = type.getMethod(Enumeration.FROM_DESCRIPTION_METHOD_NAME, String.class).invoke(null, value);
 							}
 						}
+						catch (Exception e) {
+							throw new DomainException(value + " is not a valid enumerated value in type " + type, e);
+						}
+					}
 					if (result == null) {
 						result = Enum.valueOf(type.asSubclass(Enum.class), (String) value);
 					}
@@ -332,108 +341,114 @@ public final class BindUtil {
 	 * @param type
 	 * @param displayValue
 	 * @return
-	 * @throws Exception
 	 */
 	public static synchronized Object fromString(Customer customer,
 													Converter<?> converter,
 													Class<?> type,
 													String stringValue,
-													boolean fromSerializedFormat) 
-	throws Exception {
+													boolean fromSerializedFormat) {
 		Object result = null;
 
-		if ((! fromSerializedFormat) && (converter != null)) {
-			result = converter.fromDisplayValue(stringValue);
-		}
-		else if (type.equals(String.class)) {
-			result = stringValue;
-		}
-		else if (type.equals(Integer.class)) {
-			if(converter!=null){
+		try {
+			if ((! fromSerializedFormat) && (converter != null)) {
 				result = converter.fromDisplayValue(stringValue);
 			}
+			else if (type.equals(String.class)) {
+				result = stringValue;
+			}
+			else if (type.equals(Integer.class)) {
+				if(converter!=null){
+					result = converter.fromDisplayValue(stringValue);
+				}
+				else {
+					result = new Integer(stringValue);
+				}
+			}
+			else if (type.equals(Long.class)) {
+				result = new Long(stringValue);
+			}
+			else if (type.equals(Float.class)) {
+				result = new Float(stringValue);
+			}
+			else if (type.equals(Double.class)) {
+				result = new Double(stringValue);
+			}
+			else if (type.equals(BigDecimal.class)) {
+				result = new BigDecimal(stringValue);
+			}
+			else if (type.equals(Decimal2.class)) {
+				result = new Decimal2(stringValue);
+			}
+			else if (type.equals(Decimal5.class)) {
+				result = new Decimal5(stringValue);
+			}
+			else if (type.equals(Decimal10.class)) {
+				result = new Decimal10(stringValue);
+			}
+			else if (type.equals(Boolean.class)) {
+				result = Boolean.valueOf(stringValue.equals("true"));
+			}
+			else if (type.equals(DateOnly.class)) {
+				if (fromSerializedFormat) {
+					result = new DateOnly(stringValue);
+				}
+				else {
+					Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
+					result = new DateOnly(date.getTime());
+				}
+			}
+			else if (type.equals(TimeOnly.class)) {
+				if (fromSerializedFormat) {
+					result = new TimeOnly(stringValue);
+				}
+				else {
+					Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
+					result = new TimeOnly(date.getTime());
+				}
+			}
+			else if (type.equals(DateTime.class)) {
+				if (fromSerializedFormat) {
+					result = new DateTime(stringValue);
+				}
+				else {
+					Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
+					result = new DateTime(date.getTime());
+				}
+			}
+			else if (type.equals(Timestamp.class)) {
+				if (fromSerializedFormat) {
+					result = new Timestamp(stringValue);
+				}
+				else {
+					Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
+					result = new Timestamp(date.getTime());
+				}
+			}
+			else if (Geometry.class.isAssignableFrom(type)) {
+				result = new WKTReader().read(stringValue);
+			}
+			else if (Date.class.isAssignableFrom(type)) {
+				result = new java.sql.Timestamp(ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
+			}
+			else if (type.equals(OptimisticLock.class)) {
+				result = new OptimisticLock(stringValue);
+			}
+			// NB type.isEnum() doesn't work as our enums implement another interface
+			// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
+			else if (Enum.class.isAssignableFrom(type)) {
+				result = convert(type, stringValue);
+			}
 			else {
-				result = new Integer(stringValue);
+				throw new IllegalStateException("BindUtil.setPropertyFromDisplay() - Can't convert type " + type);
 			}
 		}
-		else if (type.equals(Long.class)) {
-			result = new Long(stringValue);
-		}
-		else if (type.equals(Float.class)) {
-			result = new Float(stringValue);
-		}
-		else if (type.equals(Double.class)) {
-			result = new Double(stringValue);
-		}
-		else if (type.equals(BigDecimal.class)) {
-			result = new BigDecimal(stringValue);
-		}
-		else if (type.equals(Decimal2.class)) {
-			result = new Decimal2(stringValue);
-		}
-		else if (type.equals(Decimal5.class)) {
-			result = new Decimal5(stringValue);
-		}
-		else if (type.equals(Decimal10.class)) {
-			result = new Decimal10(stringValue);
-		}
-		else if (type.equals(Boolean.class)) {
-			result = Boolean.valueOf(stringValue.equals("true"));
-		}
-		else if (type.equals(DateOnly.class)) {
-			if (fromSerializedFormat) {
-				result = new DateOnly(stringValue);
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
 			}
-			else {
-				Date date = customer.getDefaultDateConverter().fromDisplayValue(stringValue);
-				result = new DateOnly(date.getTime());
-			}
+			throw new DomainException(e);
 		}
-		else if (type.equals(TimeOnly.class)) {
-			if (fromSerializedFormat) {
-				result = new TimeOnly(stringValue);
-			}
-			else {
-				Date date = customer.getDefaultTimeConverter().fromDisplayValue(stringValue);
-				result = new TimeOnly(date.getTime());
-			}
-		}
-		else if (type.equals(DateTime.class)) {
-			if (fromSerializedFormat) {
-				result = new DateTime(stringValue);
-			}
-			else {
-				Date date = customer.getDefaultDateTimeConverter().fromDisplayValue(stringValue);
-				result = new DateTime(date.getTime());
-			}
-		}
-		else if (type.equals(Timestamp.class)) {
-			if (fromSerializedFormat) {
-				result = new Timestamp(stringValue);
-			}
-			else {
-				Date date = customer.getDefaultTimestampConverter().fromDisplayValue(stringValue);
-				result = new Timestamp(date.getTime());
-			}
-		}
-		else if (Geometry.class.isAssignableFrom(type)) {
-			result = new WKTReader().read(stringValue);
-		}
-		else if (Date.class.isAssignableFrom(type)) {
-			result = new java.sql.Timestamp(ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).parse(stringValue).getTime());
-		}
-		else if (type.equals(OptimisticLock.class)) {
-			result = new OptimisticLock(stringValue);
-		}
-		// NB type.isEnum() doesn't work as our enums implement another interface
-		// NB Enumeration.class.isAssignableFrom(type) doesn't work as enums are not assignable as they are a synthesised class
-		else if (Enum.class.isAssignableFrom(type)) {
-			result = convert(type, stringValue);
-		}
-		else {
-			throw new IllegalStateException("BindUtil.setPropertyFromDisplay() - Can't convert type " + type);
-		}
-
+		
 		return result;
 	}
 
@@ -448,89 +463,105 @@ public final class BindUtil {
 	private static synchronized String toDisplay(Customer customer, 
 													@SuppressWarnings("rawtypes") Converter converter, 
 													List<DomainValue> domainValues, 
-													Object value)
-	throws Exception {
+													Object value) {
 		String result = "";
-		if (value == null) {
-			// do nothing as result is already empty
-		}
-		else if (domainValues != null) {
-			if (value instanceof Enumeration) {
-				result = ((Enumeration) value).toDescription();
+		try {
+			if (value == null) {
+				// do nothing as result is already empty
 			}
-			else {
-				boolean found = false;
-				Object codeValue = value;
-				for (DomainValue domainValue : domainValues) {
-					if (domainValue.getCode().equals(codeValue)) {
-						result = domainValue.getDescription();
-						found = true;
-						break;
+			else if (domainValues != null) {
+				if (value instanceof Enumeration) {
+					result = ((Enumeration) value).toDescription();
+				}
+				else {
+					boolean found = false;
+					Object codeValue = value;
+					for (DomainValue domainValue : domainValues) {
+						if (domainValue.getCode().equals(codeValue)) {
+							result = domainValue.getDescription();
+							found = true;
+							break;
+						}
+					}
+					if (! found) {
+						result = value.toString();
 					}
 				}
-				if (! found) {
-					result = value.toString();
-				}
+			}
+			else if (converter != null) {
+				result = converter.toDisplayValue(convert(converter.getAttributeType().getImplementingType(),
+															value));
+			}
+			else if (value instanceof DateOnly) {
+				result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
+			}
+			else if (value instanceof TimeOnly) {
+				result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
+			}
+			else if (value instanceof DateTime) {
+				result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
+			}
+			else if (value instanceof Timestamp) {
+				result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
+			}
+			else if (value instanceof Date) {
+				result = ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
+			}
+			else if (value instanceof Boolean) {
+				result = (((Boolean) value).booleanValue() ? "Yes" : "No");
+			}
+			else {
+				result = value.toString();
 			}
 		}
-		else if (converter != null) {
-			result = converter.toDisplayValue(convert(converter.getAttributeType().getImplementingType(),
-														value));
-		}
-		else if (value instanceof DateOnly) {
-			result = customer.getDefaultDateConverter().toDisplayValue((DateOnly) value);
-		}
-		else if (value instanceof TimeOnly) {
-			result = customer.getDefaultTimeConverter().toDisplayValue((TimeOnly) value);
-		}
-		else if (value instanceof DateTime) {
-			result = customer.getDefaultDateTimeConverter().toDisplayValue((DateTime) value);
-		}
-		else if (value instanceof Timestamp) {
-			result = customer.getDefaultTimestampConverter().toDisplayValue((Timestamp) value);
-		}
-		else if (value instanceof Date) {
-			result = ThreadSafeFactory.getDateFormat(DEFAULT_DISPLAY_DATE_FORMAT).format((Date) value);
-		}
-		else if (value instanceof Boolean) {
-			result = (((Boolean) value).booleanValue() ? "Yes" : "No");
-		}
-		else {
-			result = value.toString();
-		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
 
+			throw new DomainException(e);
+		}
 		return result;
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static Object getSerialized(Customer customer, Bean bean, String binding) throws Exception {
-		Object result = BindUtil.get(bean, binding);
-		String documentName = bean.getBizDocument();
-		if (documentName != null) {
-			Module module = customer.getModule(bean.getBizModule());
-			Document document = module.getDocument(customer, documentName);
-			try {
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				Attribute attribute = target.getAttribute();
-				if (attribute instanceof ConvertableField) {
-					Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
-					if (converter != null) {
-						Format format = converter.getFormat();
-						if (format != null) {
-							result = format.toDisplayValue(result);
+	public static Object getSerialized(Customer customer, Bean bean, String binding) {
+		Object result = null;
+		try {
+			result = BindUtil.get(bean, binding);
+			String documentName = bean.getBizDocument();
+			if (documentName != null) {
+				Module module = customer.getModule(bean.getBizModule());
+				Document document = module.getDocument(customer, documentName);
+				try {
+					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+					Attribute attribute = target.getAttribute();
+					if (attribute instanceof ConvertableField) {
+						Converter<?> converter = ((ConvertableField) attribute).getConverterForCustomer(customer);
+						if (converter != null) {
+							Format format = converter.getFormat();
+							if (format != null) {
+								result = format.toDisplayValue(result);
+							}
 						}
 					}
 				}
+				catch (MetaDataException e) {
+					// The binding may be a column alias with no metadata, so do nothing when this occurs
+				}
 			}
-			catch (MetaDataException e) {
-				// The binding may be a column alias with no metadata, so do nothing when this occurs
+		}
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
 			}
+			throw new DomainException(e);
 		}
 		
 		return result;
 	}
 	
-	public static String getDisplay(Customer customer, Bean bean, String binding) throws Exception {
+	public static String getDisplay(Customer customer, Bean bean, String binding) {
 		Converter<?> converter = null;
 		List<DomainValue> domainValues = null;
 		Object value = get(bean, binding);
@@ -621,13 +652,9 @@ public final class BindUtil {
 	 * @param binding
 	 * @param element
 	 * @return	The found or added element.
-	 * @throws NoSuchMethodException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
 	 */
 	@SuppressWarnings("unchecked")
-	public static Bean ensureElementIsInCollection(Bean owner, String binding, Bean element) 
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public static Bean ensureElementIsInCollection(Bean owner, String binding, Bean element) {
 		List<Bean> list = (List<Bean>) get(owner, binding);
 		String elementId = element.getBizId();
 
@@ -649,13 +676,9 @@ public final class BindUtil {
 	 * @param binding
 	 * @param elementBizId
 	 * @return	The found element or null.
-	 * @throws NoSuchMethodException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
 	 */
 	@SuppressWarnings("unchecked")
-	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) 
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public static Bean getElementInCollection(Bean owner, String binding, String elementBizId) {
 		List<Bean> list = (List<Bean>) get(owner, binding);
 		return getElementInCollection(list, elementBizId);
 	}
@@ -689,16 +712,12 @@ public final class BindUtil {
 	 * @param module The module of the owningBean.
 	 * @param document The document of the owningBean.
 	 * @param collectionBinding The (possibly compound) collection binding (from Document context).
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws NoSuchMethodException
 	 */
 	public static void sortCollectionByMetaData(Bean bean,
 													Customer customer,
 													Module module,
 													Document document,
-													String collectionBinding) 
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+													String collectionBinding) {
 		// Cater for compound bindings here
 		Bean owningBean = bean;
 		int lastDotIndex = collectionBinding.lastIndexOf('.'); // compound binding
@@ -717,13 +736,9 @@ public final class BindUtil {
 	 * @param collection The metadata representing the collection. 
 	 * 						This method does not cater for compound binding expressions.
 	 * 						Use {@link sortCollectionByMetaData(Customer, Module, Document, Bean, String)} for that.
-	 * @throws InvocationTargetException
-	 * @throws IllegalAccessException
-	 * @throws NoSuchMethodException
 	 */
 	@SuppressWarnings("unchecked")
-	public static void sortCollectionByMetaData(Bean owningBean, Collection collection) 
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public static void sortCollectionByMetaData(Bean owningBean, Collection collection) {
 		// We only sort by ordinal if this is a child collection as bizOrdinal is on the elements.
 		// For aggregation/composition, bizOrdinal is on the joining table and handled automatically
 		boolean sortByOrdinal = Boolean.TRUE.equals(collection.getOrdered()) && 
@@ -786,12 +801,8 @@ public final class BindUtil {
 	 * @param bean The bean to get the property value from.
 	 * @param fullyQualifiedAttributeName The fully qualified name of a bean property, separating components with a '.'. 
 	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
-	 * @exception InvocationTargetException Thrown when a read method cannot be invoked.
-	 * @exception IllegalAccessException Thrown when a read method cannot be accessed.
-	 * @exception IntrospectionException Thrown when the bean cannot be introspected.
 	 */
-	public static Object get(Object bean, String fullyQualifiedPropertyName) 
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+	public static Object get(Object bean, String fullyQualifiedPropertyName) {
 		if (bean instanceof MapBean) {
 			return ((MapBean) bean).get(fullyQualifiedPropertyName);
 		}
@@ -801,7 +812,12 @@ public final class BindUtil {
 		StringTokenizer tokenizer = new StringTokenizer(fullyQualifiedPropertyName, ".");
 		while (tokenizer.hasMoreTokens()) {
 			String simplePropertyName = tokenizer.nextToken();
-			result = PropertyUtils.getProperty(currentBean, simplePropertyName);
+			try {
+				result = PropertyUtils.getProperty(currentBean, simplePropertyName);
+			}
+			catch (Exception e) {
+				throw new MetaDataException(e);
+			}
 
 			if (result == null) {
 				break;
@@ -842,8 +858,7 @@ public final class BindUtil {
 		return result;
 	}
 	
-	public static void convertAndSet(Object bean, String propertyName, Object value)
-	throws Exception {
+	public static void convertAndSet(Object bean, String propertyName, Object value) {
 		Class<?> type = getPropertyType(bean, propertyName);
 		set(bean, propertyName, convert(type, value));
 	}
@@ -855,50 +870,61 @@ public final class BindUtil {
 	 * @param value The value to the bean property value to.
 	 * @param fullyQualifiedPropertyName The fully qualified name of a bean property, separating components with a '.'. 
 	 * 										Examples would be "identifier" {simple} or "identifier.clientId" {compound}.
-	 * @exception InvocationTargetException Thrown when a read or write method cannot be invoked.
-	 * @exception IllegalAccessException Thrown when a read or write method cannot be accessed.
-	 * @exception NoSuchMethodException Thrown when the <code>fullyQualifiedPropertyName</code> has no write method.
-	 * @exception InstantiationException Thrown when a <code>null</code> component cannot be replaced with newly instantiated value.
-	 * @exception IntrospectionException Thrown when the bean cannot be introspected.
 	 */
-	public static void set(Object bean, String fullyQualifiedPropertyName, Object value)
-	throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
-		Object valueToSet = value;
-		// empty strings to null
-		if ((valueToSet != null) && valueToSet.equals("")) {
-			valueToSet = null;
-		}
-
-		if (valueToSet != null) {
-			Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
-
-			// if we are setting a String value to a non-string property then
-			// use an appropriate constructor or static valueOf()
-			if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
-				try {
-					valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
-				}
-				catch (NoSuchMethodException e) {
-					valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
-				}
+	public static void set(Object bean, String fullyQualifiedPropertyName, Object value) {
+		try {
+			Object valueToSet = value;
+			// empty strings to null
+			if ((valueToSet != null) && valueToSet.equals("")) {
+				valueToSet = null;
 			}
-
-			// Convert the value to String if required
-			if (String.class.equals(propertyType)) {
-				valueToSet = valueToSet.toString();
-			} // if (we have a String property)
+	
+			if (valueToSet != null) {
+				Class<?> propertyType = BindUtil.getPropertyType(bean, fullyQualifiedPropertyName);
+	
+				// if we are setting a String value to a non-string property then
+				// use an appropriate constructor or static valueOf()
+				if (String.class.equals(valueToSet.getClass()) && (! String.class.equals(propertyType))) {
+					try {
+						valueToSet = propertyType.getConstructor(valueToSet.getClass()).newInstance(valueToSet);
+					}
+					catch (NoSuchMethodException e) {
+						valueToSet = propertyType.getMethod("valueOf", String.class).invoke(null, valueToSet);
+					}
+				}
+	
+				// Convert the value to String if required
+				if (String.class.equals(propertyType)) {
+					valueToSet = valueToSet.toString();
+				} // if (we have a String property)
+			}
+			PropertyUtils.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
 		}
-		PropertyUtils.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+		catch (Exception e) {
+			if (e instanceof SkyveException) {
+				throw (SkyveException) e;
+			}
+			
+			throw new MetaDataException(e);
+		}
 	}
 
-	public static Class<?> getPropertyType(Object bean, String propertyName)
-	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		return PropertyUtils.getPropertyType(bean, propertyName);
+	public static Class<?> getPropertyType(Object bean, String propertyName) {
+		try {
+			return PropertyUtils.getPropertyType(bean, propertyName);
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
 	}
 
-	public static boolean isWriteable(Object bean, String propertyName) 
-	throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-		return (PropertyUtils.getWriteMethod(PropertyUtils.getPropertyDescriptor(bean, propertyName)) != null);
+	public static boolean isWriteable(Object bean, String propertyName) {
+		try {
+			return (PropertyUtils.getWriteMethod(PropertyUtils.getPropertyDescriptor(bean, propertyName)) != null);
+		}
+		catch (Exception e) {
+			throw new MetaDataException(e);
+		}
 	}
 
 	/**
@@ -1004,8 +1030,11 @@ public final class BindUtil {
 		}
 	}
 
-	public static void populateProperty(User user, Bean bean, String propertyName, Object propertyValue, boolean fromSerializedFormat)
-	throws Exception {
+	public static void populateProperty(User user, 
+											Bean bean, 
+											String propertyName, 
+											Object propertyValue, 
+											boolean fromSerializedFormat) {
 		String name = propertyName;
 		Object value = propertyValue;
 		
@@ -1134,8 +1163,8 @@ public final class BindUtil {
 				convertAndSet(target, propName, newValue);
 			}
 		}
-		catch (NoSuchMethodException e) {
-			throw new InvocationTargetException(e, "Cannot set " + propName);
+		catch (Exception e) {
+			throw new MetaDataException("Cannot set " + propName, e);
 		}
 	}
 

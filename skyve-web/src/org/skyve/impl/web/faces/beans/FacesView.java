@@ -26,7 +26,7 @@ import org.skyve.impl.web.DynamicImageServlet;
 import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.DomainValueDualListModel;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.QueryDataModel;
+import org.skyve.impl.web.faces.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
@@ -49,8 +49,41 @@ import org.skyve.web.WebContext;
 public class FacesView<T extends Bean> extends Harness {
 	private static final long serialVersionUID = 3331890232012703780L;
 
+	// NB whatever state is added here needs to be handled by hydrate/dehydrate
+
 	private UxUi uxui;
-	public UxUi getUxUi() {
+	private String viewBinding;
+	// The page title
+	private String title;
+	private AbstractWebContext webContext;
+	// The bean currently under edit (for the view binding)
+	private BeanMapAdapter<T> currentBean = null;
+	// A stack of referring urls set as we edit beans from a list grid
+	private Stack<String> history = new Stack<>();
+	private Map<String, SkyveLazyDataModel> models = new TreeMap<>();
+ 	private Map<String, DomainValueDualListModel> listMembershipModels = new TreeMap<>();
+	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
+
+	@PostConstruct
+	private void postConstruct() {
+		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
+	}
+	
+	public void preRender() {
+		FacesContext fc = FacesContext.getCurrentInstance();
+		if (! fc.isPostback()) {
+			new PreRenderAction<>(this).execute();
+		}
+		else if (UtilImpl.FACES_TRACE) {
+			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
+									" : m=" + getBizModuleParameter() + 
+									" : d=" + getBizDocumentParameter() + 
+									" : q=" + getQueryNameParameter() + 
+									" : i=" + getBizIdParameter());
+		}
+	}
+
+ 	public UxUi getUxUi() {
 		return uxui;
 	}
 	public void setUxUi(UxUi uxui) {
@@ -58,12 +91,6 @@ public class FacesView<T extends Bean> extends Harness {
 		FacesContext.getCurrentInstance().getExternalContext().getRequestMap().put(FacesUtil.UX_UI_KEY, uxui);
 	}
 	
-	@PostConstruct
-	private void postConstruct() {
-		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
-	}
-	
-	private String viewBinding;
 	public String getViewBinding() {
 		return viewBinding;
 	}
@@ -71,8 +98,6 @@ public class FacesView<T extends Bean> extends Harness {
 		this.viewBinding = viewBinding;
 	}
 	
-	// The page title
-	private String title;
 	public String getTitle() {
 		return title;
 	}
@@ -80,8 +105,6 @@ public class FacesView<T extends Bean> extends Harness {
 		this.title = title;
 	}
 	
-	// A stack of referring urls set as we edit beans from a list grid
-	private Stack<String> history = new Stack<>();
 	public Stack<String> getHistory() {
 		return history;
 	}
@@ -100,8 +123,6 @@ public class FacesView<T extends Bean> extends Harness {
 		currentBean = new BeanMapAdapter<>((T) ActionUtil.getTargetBeanForViewAndCollectionBinding(this, null, null));
 	}
 
-	// The bean currently under edit (for the view binding)
-	private BeanMapAdapter<T> currentBean = null;
 	public BeanMapAdapter<T> getCurrentBean() {
 		return currentBean;
 	}
@@ -111,33 +132,11 @@ public class FacesView<T extends Bean> extends Harness {
 		return new StringBuilder(10).append('s').append(id++).toString();
 	}
 
-	private AbstractWebContext webContext;
 	public AbstractWebContext getWebContext() {
 		return webContext;
 	}
 	public void setWebContext(AbstractWebContext webContext) {
 		this.webContext = webContext;
-	}
-	private String webId;
-	public String getWebId() {
-		return webId;
-	}
-	public void setWebId(String webId) {
-		this.webId = webId;
-	}
-	
-	public void preRender() {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		if (! fc.isPostback()) {
-			new PreRenderAction<>(this).execute();
-		}
-		else if (UtilImpl.FACES_TRACE) {
-			UtilImpl.LOGGER.info("FacesView - POSTPACK a=" + getWebActionParameter() + 
-									" : m=" + getBizModuleParameter() + 
-									" : d=" + getBizDocumentParameter() + 
-									" : q=" + getQueryNameParameter() + 
-									" : i=" + getBizIdParameter());
-		}
 	}
 
 	public void ok() {
@@ -233,20 +232,32 @@ public class FacesView<T extends Bean> extends Harness {
 									UtilImpl.processStringValue(bizId)).execute();
 	}
 	
-	private Map<String, QueryDataModel> models = new TreeMap<>();
-	public QueryDataModel getModel(String bizModule, final String queryName) {
- 		String key = new StringBuilder(64).append(bizModule).append('.').append(queryName).toString();
-		QueryDataModel result = models.get(key);
+	public SkyveLazyDataModel getModel(String moduleName, 
+										String documentName, 
+										String queryName,
+										String modelName) {
+		String key = null;
+		if ((moduleName != null) && (queryName != null)) {
+			key = String.format("%s.%s", moduleName, queryName);
+		}
+		else if ((moduleName != null) && (documentName != null)) {
+			if (modelName != null) {
+				key = String.format("%s.%s.%s", moduleName, documentName, modelName);
+			}
+			else {
+				key = String.format("%s.%s", moduleName, documentName);
+			}
+		}
+		SkyveLazyDataModel result = models.get(key);
 
 		if (result == null) {
-			result = new QueryDataModel(bizModule, queryName);
+			result = new SkyveLazyDataModel(this, moduleName, documentName, queryName, modelName);
 			models.put(key, result);
 		}
  		
 		return result;
 	}
 	
-	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 	// Note - this is also called from EL in ListGrid tag
  	public List<BeanMapAdapter<Bean>> getBeans(final String bizModule, 
 												final String queryName,
@@ -279,7 +290,6 @@ public class FacesView<T extends Bean> extends Harness {
 		return result;
 	}
  	
- 	private Map<String, DomainValueDualListModel> listMembershipModels = new TreeMap<>();
  	public DomainValueDualListModel getListMembershipModel(String binding) {
  		DomainValueDualListModel result = listMembershipModels.get(binding);
  		if (result == null) {
@@ -344,7 +354,13 @@ public class FacesView<T extends Bean> extends Harness {
 		return getBeans(completeModule, completeQuery, parameters);
 	}
 	
-	// restore the webContext and current bean etc
+	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
+	private String webId;
+	public String getWebId() {
+		return webId;
+	}
+
+ 	// restore the webContext and current bean etc
 	public void hydrate(AbstractWebContext newWebContext)
 	throws Exception {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - hydrate");
@@ -360,6 +376,8 @@ public class FacesView<T extends Bean> extends Harness {
 			webId = webContext.getWebId();
 		}
 		webContext = null;
+		models.clear();
+		listMembershipModels.clear();
 		beans.clear();
 		currentBean = null;
 	}
