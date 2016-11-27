@@ -11,7 +11,7 @@ import javax.faces.model.SelectItemGroup;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
-import org.skyve.impl.web.faces.BeanMapAdapter;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
 
 public class SelectItemsBeanConverter implements Converter {
 	@Override

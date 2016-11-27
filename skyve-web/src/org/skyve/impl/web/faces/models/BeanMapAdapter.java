@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces;
+package org.skyve.impl.web.faces.models;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,6 +13,7 @@ import javax.faces.model.SelectItem;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.util.Binder;
 

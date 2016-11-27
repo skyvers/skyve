@@ -17,16 +17,14 @@ import javax.faces.context.FacesContext;
 
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
+import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
-import org.skyve.impl.web.faces.BeanMapAdapter;
-import org.skyve.impl.web.faces.DomainValueDualListModel;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.impl.web.faces.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
 import org.skyve.impl.web.faces.actions.DeleteAction;
@@ -39,6 +37,8 @@ import org.skyve.impl.web.faces.actions.SaveAction;
 import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
+import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
@@ -61,7 +61,7 @@ public class FacesView<T extends Bean> extends Harness {
 	// A stack of referring urls set as we edit beans from a list grid
 	private Stack<String> history = new Stack<>();
 	private Map<String, SkyveLazyDataModel> models = new TreeMap<>();
- 	private Map<String, DomainValueDualListModel> listMembershipModels = new TreeMap<>();
+ 	private Map<String, DualListModel<DomainValue>> listMembershipModels = new TreeMap<>();
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 
 	@PostConstruct
@@ -290,7 +290,20 @@ public class FacesView<T extends Bean> extends Harness {
 		return result;
 	}
  	
- 	public DomainValueDualListModel getListMembershipModel(String binding) {
+ 	private static List<DomainValue> domainValues = null;
+ 	private DualListModel<DomainValue> listMembershipModel = new DualListModel<>();
+ 	public DualListModel<DomainValue> getListMembershipModel() {
+ 		if (domainValues == null) {
+ 			domainValues = new ArrayList<>();
+ 			domainValues.add(new DomainValue("FUCKED"));
+ 		}
+ 		return listMembershipModel;
+ 	}
+	public void setListMembershipModel(DualListModel<DomainValue> listMembershipModel) {
+		this.listMembershipModel = listMembershipModel;
+	}
+/*
+	public Map<String, DomainValueDualListModel> getListMembershipModels() {
  		DomainValueDualListModel result = listMembershipModels.get(binding);
  		if (result == null) {
  			result = new DomainValueDualListModel(new ArrayList<DomainValue>(), new ArrayList<DomainValue>());
@@ -299,7 +312,7 @@ public class FacesView<T extends Bean> extends Harness {
  		
  		return result;
  	}
- 	
+*/ 	
  	public String getContentUrl(final String binding) {
 		return new GetContentURLAction(getBean(), binding).execute();
  	}

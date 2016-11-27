@@ -48,6 +48,7 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -77,11 +78,10 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.faces.BeanMapAdapter;
-import org.skyve.impl.web.faces.DomainValueDualListModel;
-import org.skyve.impl.web.faces.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
+import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -523,11 +523,22 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setShowTargetFilter(false);
 		
         StringBuilder value = new StringBuilder(128);
+        /*
         value.append("#{").append(managedBeanName).append(".getListMembershipModel('");
         value.append(membership.getBinding()).append("')}");
         result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), DomainValueDualListModel.class));
+		*/
+        value.append("#{").append(managedBeanName).append(".listMembershipModel");
+        value.append("}");
+        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), DualListModel.class));
 
-		Map<String, UIComponent> facets = result.getFacets();
+        result.setVar("item");
+        result.setValueExpression("itemValue", ef.createValueExpression(elc, "#{item.code}", String.class));
+        result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.description}", String.class));
+        
+        // TODO add a converter for domain values - can I use select converter shit?
+        
+        Map<String, UIComponent> facets = result.getFacets();
 		String heading = membership.getCandidatesHeading();
 		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		text.setValue((heading == null) ? "Candidates" : heading);

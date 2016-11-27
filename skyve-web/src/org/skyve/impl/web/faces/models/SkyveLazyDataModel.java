@@ -1,4 +1,4 @@
-package org.skyve.impl.web.faces;
+package org.skyve.impl.web.faces.models;
 
 import java.util.ArrayList;
 import java.util.List;

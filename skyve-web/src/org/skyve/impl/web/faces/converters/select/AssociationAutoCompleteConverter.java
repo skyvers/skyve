@@ -7,8 +7,8 @@ import javax.faces.convert.Converter;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.faces.BeanMapAdapter;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
 
 public class AssociationAutoCompleteConverter implements Converter {
     @Override
