@@ -523,7 +523,13 @@ public class FacesViewVisitor extends ViewVisitor {
 			return;
 		}
 
-		if (gridColumnExpression == null) { // not a bound column in a datagrid
+		if (visitingDataGridBoundColumn) { // bound column in a datagrid
+			if ((currentGrid instanceof DataGrid) && 
+					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+				current.getChildren().add(component);
+			}
+		}
+		else { // not a bound column in a datagrid
 			if (currentFormItem == null) { // not a form item
 				if (currentGrid == null) { // not a container column in a datagrid
 					// This must be a container (vbox, hbox etc)
@@ -549,12 +555,6 @@ public class FacesViewVisitor extends ViewVisitor {
 									widgetLabel,
 									widgetRequired,
 									widgetInvisible);
-			}
-		}
-		else { // bound column
-			if ((currentGrid instanceof DataGrid) && 
-					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
-				current.getChildren().add(component);
 			}
 		}
 	}
@@ -662,7 +662,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		else {
 			value = markup;
 		}
-		UIComponent c = cb.blurb(value, binding, blurb);
+		UIComponent c = cb.blurb(listBinding, value, binding, blurb);
 		addComponent(null, false, null, c, blurb.getPixelWidth(), null, null);
 	}
 
@@ -746,7 +746,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			binding = value;
 			value = null;
 		}
-	    UIComponent c = cb.label(value, binding, label);
+	    UIComponent c = cb.label(listBinding, value, binding, label);
 	    addComponent(null, false, label.getInvisibleConditionName(), c, label.getPixelWidth(), null, null);
 	}
 
@@ -864,11 +864,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	private StringBuilder gridColumnExpression;
+	private boolean visitingDataGridBoundColumn = false;
 	
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled) {
+		visitingDataGridBoundColumn = true;
 		String title = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
@@ -902,6 +904,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled) {
 		current = cb.addedDataGridBoundColumn(current);
+		visitingDataGridBoundColumn = false;
 	}
 
 	@Override

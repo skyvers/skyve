@@ -78,8 +78,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent staticImage(StaticImage image);
 	public abstract UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName);
 	
-	public abstract UIComponent blurb(String value, String binding, Blurb blurb);
-	public abstract UIComponent label(String value, String binding, Label label);
+	public abstract UIComponent blurb(String listBinding, String value, String binding, Blurb blurb);
+	public abstract UIComponent label(String listBinding, String value, String binding, Label label);
 
 	public abstract UIComponent dataGrid(DataGrid grid);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 

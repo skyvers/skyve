@@ -79,8 +79,10 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 				int curlyBraceIndex = binding.indexOf('{');
 				if (curlyBraceIndex > -1) {
 					if (curlyBraceIndex == 0) {
+						curlyBraceIndex = binding.indexOf('{', curlyBraceIndex);
 						int lastCharIndex = binding.length() - 1;
-						if (binding.charAt(lastCharIndex) == '}') {
+						// no more occurrences of '{' after the '{' at char 0, and ends with '}'
+						if ((curlyBraceIndex == -1) && (binding.charAt(lastCharIndex) == '}')) {
 							result = Binder.getDisplay(CORE.getUser().getCustomer(), bean, binding.substring(1, lastCharIndex));
 						}
 						else {

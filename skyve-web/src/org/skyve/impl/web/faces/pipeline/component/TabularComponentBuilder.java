@@ -169,8 +169,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent blurb(String value, String binding, Blurb blurb) {
-		return text(value, 
+	public UIComponent blurb(String listBinding, String value, String binding, Blurb blurb) {
+		return text(listBinding,
+						value, 
 						binding, 
 						blurb.getTextAlignment(), 
 						blurb.getPixelWidth(), 
@@ -180,14 +181,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent label(String value, String binding, Label label) {
+	public UIComponent label(String listBinding, String value, String binding, Label label) {
 		HtmlOutputLabel result = (HtmlOutputLabel) a.createComponent(HtmlOutputLabel.COMPONENT_TYPE);
 		setId(result);
 		if (value != null) {
 			result.setValue(value);
 		} 
 		else {
-			result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
+			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
 		}
 
 		return result;
@@ -258,7 +259,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent addedDataGridContainerColumn(UIComponent current) {
-		return current.getParent();
+		return current.getParent(); // move from column to table
 	}
 	
 	@Override
@@ -834,7 +835,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlOutputText text(String value, 
+	private HtmlOutputText text(String listBinding,
+									String value, 
 									String binding, 
 									HorizontalAlignment textAlignment, 
 									Integer pixelWidth,
@@ -845,8 +847,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result);
 		if (value != null) {
 			result.setValue(value);
-		} else {
-			result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
+		} 
+		else {
+			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
 		}
 		result.setEscape(escape);
 
