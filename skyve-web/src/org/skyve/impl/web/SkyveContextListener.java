@@ -42,10 +42,17 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		if (propertiesFilePath == null) {
 			UtilImpl.LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
-			File ear = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH).getParentFile();
-			String earName = ear.getName();
-			earName = earName.substring(0, earName.length() - 4);
-			propertiesFilePath = ear.getParent() + '/' + earName + ".json";
+			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
+			String archiveName = null;
+			if (archive.getParentFile().getName().endsWith("ear")) {
+				archive = archive.getParentFile();
+				archiveName = archive.getName();
+			} 
+			else {
+				archiveName = archive.getName();
+			}
+			archiveName = archiveName.substring(0, archiveName.length() - 4);
+			propertiesFilePath = archive.getParent() + '/' + archiveName + ".json";
 		}
 
 		Map<String, Object> properties = null;
