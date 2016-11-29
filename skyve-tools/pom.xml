@@ -1,0 +1,69 @@
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.skyve</groupId>
+		<artifactId>skyve-parent</artifactId>
+		<version>1.0</version>
+	</parent>
+	<artifactId>skyve-tools</artifactId>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+	</build>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.skyve</groupId>
+			<artifactId>skyve-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.skyve</groupId>
+			<artifactId>skyve-ext</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.opengeo</groupId>
+			<artifactId>geodb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.supercsv</groupId>
+			<artifactId>super-csv</artifactId>
+		</dependency>
+<!--
+		<dependency>
+		    <groupId>com.jaspersoft</groupId>
+		    <artifactId>ireport</artifactId>
+		</dependency>
+-->
+		<dependency>
+		    <groupId>cglib</groupId>
+		    <artifactId>cglib</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.ow2.asm</groupId>
+		    <artifactId>asm</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.umlgraph</groupId>
+		    <artifactId>umlgraph</artifactId>
+		</dependency>
+	</dependencies>
+</project>
