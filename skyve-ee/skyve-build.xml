@@ -31,7 +31,7 @@
 		</jar>
 		<jar jarfile="javaee/skyve.ear/lib/skyve-ext.jar" basedir="../skyve-ext/bin" />
 		<jar jarfile="javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" basedir="../skyve-web/bin">
-			<metainf dir="../skyve-web/META-INF" includes="*.xml" />
+			<metainf dir="../skyve-web/src/main/resources/META-INF" includes="*.xml" />
 		</jar>
 		<jar jarfile="tools/lib/skyve-tools.jar" basedir="../skyve-tools/bin" />
 	</target>
