@@ -1,1 +1,3 @@
 mvn versions:set -DnewVersion=<version>
+mvn install:install-file -Dfile=/path/to/ireport.jar -DgroupId=com.jaspersoft -DartifactId=ireport -Dversion=4.7.0 -Dpackaging=jar
+mvn install:install-file -Dfile=/path/to/skyve-tools.jar -DgroupId=org.skyve -DartifactId=skyve-tools -Dversion=1.0 -Dpackaging=jar

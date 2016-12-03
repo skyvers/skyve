@@ -7,8 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-1.13.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-ext.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jfreechart-1.0.12.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
@@ -28,5 +26,7 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-ext.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

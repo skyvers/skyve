@@ -22,18 +22,18 @@
 	</path>
 
 	<target name="build" description="Create jars for the skyve framework and associated tools">
-		<jar jarfile="javaee/skyve.ear/lib/skyve-core.jar" basedir="../skyve-core/bin" />
+		<jar jarfile="javaee/skyve.ear/lib/skyve-core.jar" basedir="../skyve-core/target/classes" />
 		<jar destfile="lib/skyve-src.jar">
 			<fileset dir="../skyve-core/src" />
 			<fileset dir="../skyve-ext/src" />
 			<fileset dir="../skyve-tools/src" />
-			<fileset dir="../skyve-web/src" />
+			<fileset dir="../skyve-web/src/main/java" />
 		</jar>
-		<jar jarfile="javaee/skyve.ear/lib/skyve-ext.jar" basedir="../skyve-ext/bin" />
-		<jar jarfile="javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" basedir="../skyve-web/bin">
+		<jar jarfile="javaee/skyve.ear/lib/skyve-ext.jar" basedir="../skyve-ext/target/classes" />
+		<jar jarfile="javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" basedir="../skyve-web/target/classes">
 			<metainf dir="../skyve-web/src/main/resources/META-INF" includes="*.xml" />
 		</jar>
-		<jar jarfile="tools/lib/skyve-tools.jar" basedir="../skyve-tools/bin" />
+		<jar jarfile="tools/lib/skyve-tools.jar" basedir="../skyve-tools/target/classes" />
 	</target>
 	<target name="concatSkyveJavascript">
 		<concat destfile="src/js/desktop/skyve.js" append="false" >

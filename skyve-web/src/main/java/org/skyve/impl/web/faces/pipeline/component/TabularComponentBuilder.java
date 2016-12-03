@@ -170,14 +170,37 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent blurb(String listBinding, String value, String binding, Blurb blurb) {
-		return text(listBinding,
-						value, 
-						binding, 
-						blurb.getTextAlignment(), 
-						blurb.getPixelWidth(), 
-						blurb.getPixelHeight(), 
-						blurb.getInvisibleConditionName(),
-						false);
+		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		setId(result);
+		if (value != null) {
+			result.setValue(value);
+		} 
+		else {
+			if (listBinding != null) {
+				result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
+			}
+			else {
+				result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
+			}
+		}
+		result.setEscape(false);
+
+		HorizontalAlignment textAlignment = blurb.getTextAlignment();
+		String style = null;
+		if (HorizontalAlignment.left.equals(textAlignment)) {
+			style = "text-align:left;";
+		} 
+		else if (HorizontalAlignment.centre.equals(textAlignment)) {
+			style = "text-align:center;";
+		} 
+		else if (HorizontalAlignment.right.equals(textAlignment)) {
+			style = "text-align:right;";
+		}
+
+		setSize(result, style, blurb.getPixelWidth(), null, null, blurb.getPixelHeight(), null, null);
+		setInvisible(result, blurb.getInvisibleConditionName(), null);
+
+		return result;
 	}
 	
 	@Override
@@ -832,41 +855,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		setSize(result, null, pixelWidth, null, null, null, null, NINETY_EIGHT);
 		setId(result);
-		return result;
-	}
-
-	private HtmlOutputText text(String listBinding,
-									String value, 
-									String binding, 
-									HorizontalAlignment textAlignment, 
-									Integer pixelWidth,
-									Integer pixelHeight, 
-									String invisible, 
-									boolean escape) {
-		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-		setId(result);
-		if (value != null) {
-			result.setValue(value);
-		} 
-		else {
-			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
-		}
-		result.setEscape(escape);
-
-		String style = null;
-		if (HorizontalAlignment.left.equals(textAlignment)) {
-			style = "text-align:left;";
-		} 
-		else if (HorizontalAlignment.centre.equals(textAlignment)) {
-			style = "text-align:center;";
-		} 
-		else if (HorizontalAlignment.right.equals(textAlignment)) {
-			style = "text-align:right;";
-		}
-
-		setSize(result, style, pixelWidth, null, null, pixelHeight, null, null);
-		setInvisible(result, invisible, null);
-
 		return result;
 	}
 
