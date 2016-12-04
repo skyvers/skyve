@@ -3,16 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20161129</version>
+	<version>20161203</version>
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>skyve-core</module>
 		<module>skyve-ext</module>
 		<module>skyve-web</module>
-<!--
 		<module>skyve-tools</module>
--->
 	</modules>
 
 	<build>

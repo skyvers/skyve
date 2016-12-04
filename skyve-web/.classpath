@@ -2,7 +2,12 @@
 <classpath>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
-	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/ehcache-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/quartz-1.6.0.jar"/>
@@ -23,6 +28,18 @@
 	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-extensions-6.0.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.nondependency" value=""/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
