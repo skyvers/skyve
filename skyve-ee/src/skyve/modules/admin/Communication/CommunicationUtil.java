@@ -256,7 +256,6 @@ public class CommunicationUtil {
 	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery query = pers.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		query.getFilter().addEquals(Communication.systemPropertyName, Boolean.TRUE);
 		query.getFilter().addEquals(Communication.descriptionPropertyName, description);
 
 		Communication result = query.beanResult();
