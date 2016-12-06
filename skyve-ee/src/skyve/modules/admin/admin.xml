@@ -48,7 +48,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_RU_D" />
+				<document name="Contact" permission="_RU_C" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
@@ -74,7 +74,7 @@
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="Subscription" permission="CRUDU"/>
-				<document name="User" permission="_R__D" />
+				<document name="User" permission="_R__C" />
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
@@ -88,7 +88,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_RU_D" />
+				<document name="Contact" permission="_RU_C" />
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
@@ -119,7 +119,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_R__D" />
+				<document name="Contact" permission="_R__C" />
 			</privileges>
 		</role>
 		<role name="ContactManager">
@@ -128,7 +128,7 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Communication" permission="CRUDD">
+				<document name="Communication" permission="CRUDC">
 					<action name="AddUnsubscribeLink" />
 					<action name="AddImage" />
 					<action name="CreateFiles" />
@@ -142,7 +142,7 @@
 					<action name="DeleteBatch" />
 					<action name="ZipBatch" />
 				</document>
-				<document name="Contact" permission="CRUDD" />
+				<document name="Contact" permission="CRUDC" />
 			</privileges>
 		</role>
 		<role name="SecurityAdministrator">
@@ -194,7 +194,7 @@
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
-				<document name="User" permission="CRUDD">
+				<document name="User" permission="CRUDC">
 					<action name="Check" />
 					<action name="GeneratePassword" />
 					<action name="GenerateUniqueUserName" />
@@ -214,8 +214,8 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Job" permission="CRUDD" />
-				<document name="JobSchedule" permission="CRUDD">
+				<document name="Job" permission="CRUDC" />
+				<document name="JobSchedule" permission="CRUDC">
 					<action name="RunJobNow" />
 				</document>
 				<document name="Jobs" permission="_____">
