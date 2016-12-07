@@ -47,12 +47,10 @@
 			<groupId>net.sf.supercsv</groupId>
 			<artifactId>super-csv</artifactId>
 		</dependency>
-<!--
 		<dependency>
 		    <groupId>com.jaspersoft</groupId>
 		    <artifactId>ireport</artifactId>
 		</dependency>
--->
 		<dependency>
 		    <groupId>cglib</groupId>
 		    <artifactId>cglib</artifactId>
