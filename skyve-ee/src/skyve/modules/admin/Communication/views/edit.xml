@@ -255,8 +255,8 @@
 			relativeIconFileName="shared/icons/Job.gif" confirm="OK to create email files?" />
 		<action clientValidation="true" className="SendNow" displayName="Send Now" inActionPanel="false"
 			relativeIconFileName="shared/icons/Mail.gif" confirm="OK to send emails?" />
-		<action clientValidation="true" className="TestSend" displayName="Test Send to yourself" inActionPanel="false"
-			relativeIconFileName="shared/icons/Mail.gif" confirm="Send test email to yourself?" />
+		<action clientValidation="true" className="TestSend" displayName="Send to Me" inActionPanel="false"
+			relativeIconFileName="shared/icons/Mail.gif" confirm="ok to send?" />
 		<action clientValidation="false" className="AddUnsubscribeLink" displayName="Add Unsubscribe Link"
 			inActionPanel="false" relativeIconFileName="shared/icons/Globe.gif" />
 
