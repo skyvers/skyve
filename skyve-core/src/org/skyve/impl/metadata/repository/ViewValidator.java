@@ -891,16 +891,12 @@ class ViewValidator extends ViewVisitor {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
 		String lookupIdentifier = "LookupDescription " + binding;
-		// lookupDescription cannot have a compound binding when used on a form as the value
-		// cannot be set by the pick.
-		// In a grid is OK though as picking is not available
-		// 
-		// Also a lookupDescription in a data grid bound to an aggregated collection 
+		// A lookupDescription in a data grid bound to an aggregated collection 
 		// doesn't have to have a binding
 		validateBinding(dataGridBinding,
 							binding,
 							(dataGridBinding == null),
-							(dataGridBinding == null),
+							false,
 							false,
 							false,
 							lookupIdentifier,

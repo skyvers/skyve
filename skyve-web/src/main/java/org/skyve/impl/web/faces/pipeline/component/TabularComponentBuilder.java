@@ -1484,12 +1484,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													disabled);
 		result.setForceSelection(true);
 		result.setDropdown(true);
-		result.setVar(binding);
+		String var = binding.replace('.', '_');
+		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromBinding(binding, displayBinding, true, null, String.class));
+									createValueExpressionFromBinding(var, displayBinding, true, null, String.class));
 		result.setValueExpression("itemValue",
-									createValueExpressionFromBinding(null, binding, false, null, BeanMapAdapter.class));
+									createValueExpressionFromBinding(null, var, false, null, BeanMapAdapter.class));
 		result.setConverter(new AssociationAutoCompleteConverter());
 		result.setScrollHeight(200);
 
