@@ -129,6 +129,11 @@
 					</item>
 				</row>
 				<row>
+					<item colspan="4">
+						<textField binding="ccTo" />
+					</item>
+				</row>
+				<row>
 					<item>
 						<spacer />
 					</item>

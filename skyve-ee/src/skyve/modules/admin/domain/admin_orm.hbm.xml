@@ -56,6 +56,7 @@
 		<property name="documentName" length="500" />
 		<property name="toBinding" length="500" />
 		<property name="sendTo" length="250" />
+		<property name="ccTo" length="250" />
 		<property name="sendFrom" length="250" />
 		<property name="monitorBcc" />
 		<property name="subject" length="250" />
