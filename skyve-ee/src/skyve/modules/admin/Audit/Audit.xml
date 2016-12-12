@@ -39,6 +39,7 @@
 		</timestamp>
 		<longInteger name="millis" required="true">
 			<displayName>Millis</displayName>
+			<index>database</index>
 		</longInteger>
 		<text name="userName" required="true">
 			<displayName>User</displayName>
