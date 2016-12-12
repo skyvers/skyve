@@ -32,7 +32,7 @@
 			</type>
 		</property>
 		<property name="timestamp" type="Timestamp" />
-		<property name="millis" />
+		<property name="millis" index="adminAuditmillis" />
 		<property name="userName" length="254" />
 		<property name="audit" type="text" />
 		<filter name="adminAuditNoneFilter" condition="1=0"/>
