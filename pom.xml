@@ -118,6 +118,10 @@
 						<artifactId>ehcache</artifactId>
 						<groupId>net.sf.ehcache</groupId>
 					</exclusion>
+					<exclusion>
+						<groupId>javax.transaction</groupId>
+						<artifactId>jta</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
