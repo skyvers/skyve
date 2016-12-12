@@ -177,7 +177,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		} 
 		else {
 			if (listBinding != null) {
-				result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
 			}
 			else {
 				result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
@@ -211,7 +211,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setValue(value);
 		} 
 		else {
-			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
+			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
 		}
 
 		return result;
@@ -1113,6 +1113,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (invisible == null) {
 				result.setValueExpression("rendered",
 											createValueExpressionFromBinding(null, 
+																				false,
 																				expression.toString(), 
 																				false, 
 																				null, 
@@ -1130,6 +1131,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				if (invisible == null) {
 					result.setValueExpression("rendered",
 												createValueExpressionFromBinding(null, 
+																					false,
 																					expression.toString(), 
 																					false, 
 																					null, 
@@ -1294,7 +1296,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	private UIOutput outputText(String listBinding, String binding) {
-		ValueExpression ve = createValueExpressionFromBinding(listBinding, binding, true, null, String.class);
+		ValueExpression ve = createValueExpressionFromBinding(listBinding, true, binding, true, null, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
 		setId(result);
@@ -1488,9 +1490,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromBinding(var, displayBinding, true, null, String.class));
+									createValueExpressionFromBinding(var, false, displayBinding, true, null, String.class));
 		result.setValueExpression("itemValue",
-									createValueExpressionFromBinding(null, var, false, null, BeanMapAdapter.class));
+									createValueExpressionFromBinding(null, false, var, false, null, BeanMapAdapter.class));
 		result.setConverter(new AssociationAutoCompleteConverter());
 		result.setScrollHeight(200);
 
@@ -1549,7 +1551,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
-		result.setVar(binding);
+		result.setVar(binding.replace('.',  '_'));
 		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
 
 		if (! inline) {
@@ -1558,6 +1560,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setSelectionMode("single");
 			result.setValueExpression("rowKey",
 										createValueExpressionFromBinding(result.getVar(),
+																			false,
 																			Bean.DOCUMENT_ID, 
 																			true, 
 																			null, 
@@ -1646,7 +1649,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setHeaderText(title);
 		if (sortBinding != null) {
 			result.setValueExpression("sortBy",
-										createValueExpressionFromBinding(listBinding, sortBinding, true, null, Object.class));
+										createValueExpressionFromBinding(listBinding, true, sortBinding, true, null, Object.class));
 		}
 
 		StringBuilder style = new StringBuilder(64);
@@ -1673,7 +1676,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		expression.append("getSelectItems('").append(binding).append("',").append(includeEmptyItems).append(')');
 		ValueExpression valueExpression = null;
 		if (listBinding != null) {
-			valueExpression = createValueExpressionFromBinding(listBinding, expression.toString(), false, null, List.class);
+			valueExpression = createValueExpressionFromBinding(listBinding, true, expression.toString(), false, null, List.class);
 		}
 		else {
 			valueExpression = createValueExpressionFromBinding(expression.toString(), false, null, List.class);
@@ -1693,7 +1696,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result);
 		if (listBinding != null) {
 			result.setValueExpression("value",
-										createValueExpressionFromBinding(listBinding, binding, true, null, Object.class));
+										createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
 		}
 		else {
 			result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));

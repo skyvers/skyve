@@ -121,6 +121,7 @@ public abstract class AbstractFacesBuilder {
 		String fullBinding = binding;
 
 		return createValueExpressionFromBinding(expressionPrefix.toString(), 
+													false,
 													fullBinding, 
 													map, 
 													extraELConditionToAppend,
@@ -128,6 +129,7 @@ public abstract class AbstractFacesBuilder {
 	}
 
 	protected ValueExpression createValueExpressionFromBinding(String expressionPrefix, 
+																boolean listVar,
 																String binding, 
 																boolean map,
 																String extraELConditionToAppend, 
@@ -135,12 +137,8 @@ public abstract class AbstractFacesBuilder {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
 		if (expressionPrefix != null) {
-			if (map) {
-				sb.append(expressionPrefix).append("['");
-			}
-			else {
-				sb.append(expressionPrefix).append('.');
-			}
+			sb.append(listVar ? expressionPrefix.replace('.', '_') : expressionPrefix);
+			sb.append(map ? "['" : ".");
 		}
 		sb.append(binding);
 		if (map && (expressionPrefix != null)) {
@@ -163,7 +161,7 @@ public abstract class AbstractFacesBuilder {
 				return ef.createValueExpression(condition, Boolean.class);
 			}
 
-			return createValueExpressionFromBinding(null, extraELConditionToAppend, false, null, Boolean.class);
+			return createValueExpressionFromBinding(null, false, extraELConditionToAppend, false, null, Boolean.class);
 		}
 
 		return createValueExpressionFromBinding(condition, true, extraELConditionToAppend, Boolean.class);
