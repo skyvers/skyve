@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20161203</version>
+	<version>20161212</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -117,6 +117,10 @@
 					<exclusion>
 						<artifactId>ehcache</artifactId>
 						<groupId>net.sf.ehcache</groupId>
+					</exclusion>
+					<exclusion>
+						<groupId>javax.transaction</groupId>
+						<artifactId>jta</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>

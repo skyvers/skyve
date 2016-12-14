@@ -125,4 +125,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 											Map<String, Object> filters) {
 		return load(first, pageSize, null, filters);
 	}
+
+	@Override
+	public Object getRowKey(BeanMapAdapter<Bean> bean) {
+		return bean.getBean().getBizId();
+	}
 }

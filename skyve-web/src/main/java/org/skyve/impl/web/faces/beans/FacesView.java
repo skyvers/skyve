@@ -202,7 +202,7 @@ public class FacesView<T extends Bean> extends Harness {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
 		String listBinding = ((DataTable) evt.getComponent()).getVar();
-		navigate(listBinding, bizId);
+		navigate(listBinding.replace('_',  '.'), bizId);
 	}
 	
 	public void add(String listBinding, boolean inline) {

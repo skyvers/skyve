@@ -153,7 +153,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										ReferenceTarget target) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (listBinding != null) {
-			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, href, true, null, String.class));
+			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, true, href, true, null, String.class));
 		}
 		else {
 			result.setValueExpression("value", createValueExpressionFromBinding(href, true, null, String.class));
