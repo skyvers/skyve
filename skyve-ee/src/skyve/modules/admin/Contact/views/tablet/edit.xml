@@ -35,7 +35,7 @@
 			<column />
 			<row>
 				<item>
-					<contentImage binding="image" pixelHeight="160" pixelWidth="160" />
+					<contentImage binding="image" pixelHeight="160" pixelWidth="160" editable="false"/>
 				</item>
 			</row>
 		</form>
