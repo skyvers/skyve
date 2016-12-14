@@ -131,7 +131,12 @@ public class CommunicationUtil {
 				}
 			}
 		}
-
+		
+		String ccTo = formatCommunicationMessage(customer, communication.getCcTo(), beans);
+		if(communication.getCcToOverride()!=null){
+			ccTo = formatCommunicationMessage(customer, communication.getCcToOverride(), beans);
+		}
+		
 		//add myself to bcc if monitoring outgoing email
 		String[] bcc = null;
 		if(Boolean.TRUE.equals(communication.getMonitorBcc())){
@@ -188,7 +193,7 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
 					case email:
-						EXT.writeMail(new String[] { sendTo }, null, bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
+						EXT.writeMail(new String[] { sendTo }, new String[] { ccTo } , bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
 						break;
 					default:
 						break;
@@ -208,7 +213,11 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					EXT.sendMail(new String[] { sendTo }, null, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					String[] cc = null;
+					if(ccTo!=null){
+						cc=  new String[] { ccTo };
+					}
+					EXT.sendMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
 					break;
 				default:
 					break;
@@ -256,7 +265,6 @@ public class CommunicationUtil {
 	public static Communication getSystemCommunicationByDescription(String description) throws Exception {
 		Persistence pers = CORE.getPersistence();
 		DocumentQuery query = pers.newDocumentQuery(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
-		query.getFilter().addEquals(Communication.systemPropertyName, Boolean.TRUE);
 		query.getFilter().addEquals(Communication.descriptionPropertyName, description);
 
 		Communication result = query.beanResult();
@@ -297,10 +305,9 @@ public class CommunicationUtil {
 	 * 
 	 * @return
 	 */
-	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody) throws Exception {
 
 		// create a default communication
-		String sendTo = "{contact.email1}"; // user contact email address
 		Communication result = getSystemCommunicationByDescription(description);
 		if (result == null) {
 			// create a basic default system email
@@ -309,7 +316,8 @@ public class CommunicationUtil {
 			result.setFormatType(FormatType.email);
 			result.setSystem(Boolean.TRUE);
 			result.setSendFrom(DEFAULT_SENDER);
-			result.setSendTo(sendTo);
+			result.setSendTo(sendToExpression);
+			result.setCcTo(ccExpression);
 			result.setSubject(defaultSubject);
 			result.setBody(defaultBody);
 
@@ -319,6 +327,12 @@ public class CommunicationUtil {
 
 		return result;
 	}
+	
+	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+		
+		return initialiseSystemCommunication(description, "{contact.email1}",null,  defaultSubject, defaultBody);
+	}
+
 
 	/**
 	 * Initialise system communication if it doesn't exist and then send it.
@@ -331,7 +345,28 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
-		Communication c = initialiseSystemCommunication(description, defaultSubject, defaultBody);
+		
+		String sendTo = "{contact.email1}"; // user contact email address
+		String ccTo = null;
+		
+		sendFailSafeSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
+	}
+
+	
+	/**
+	 * Initialise system communication if it doesn't exist and then send it.
+	 * 
+	 * @param description
+	 * @param sendTo
+	 * @param ccTo
+	 * @param defaultSubject
+	 * @param defaultBody
+	 * @param responseMode
+	 * @param bean
+	 * @throws Exception
+	 */
+	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
 		actionCommunicationRequest(ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
 
@@ -501,10 +536,10 @@ public class CommunicationUtil {
 		String result = expression;
 
 		// default url binding to first bean
-		if (beans != null && beans.length > 0) {
+		if (beans != null && beans.length > 0 && expression!=null) {
 			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+			result = Binder.formatMessage(customer, result, beans);
 		}
-		result = Binder.formatMessage(customer, result, beans);
 		return result;
 	}
 
