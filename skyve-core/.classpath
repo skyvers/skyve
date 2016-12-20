@@ -11,14 +11,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-beanutils.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-collections-3.2.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/ejb3-persistence.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/hibernate-annotations.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/hibernate3.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/jts-1.13.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-lang3-3.1.jar"/>
-	<classpathentry kind="lib" path="/skyve-ee/javaee/skyve.ear/lib/commons-validator-1.4.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>

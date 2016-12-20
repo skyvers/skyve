@@ -47,10 +47,18 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>dom4j</groupId>
 			<artifactId>dom4j</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
+-->
 		<dependency>
 			<groupId>org.opengeo</groupId>
 			<artifactId>geodb</artifactId>

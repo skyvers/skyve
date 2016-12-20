@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="Skyve Dev" default="build" basedir=".">
+	<property name="skyve-version" value="20161212" />
 	<path id="classpath">
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
@@ -95,27 +96,49 @@
 		</condition>
 		<echo>maven.repo.local=${maven.repo.local}</echo>
 		<artifact:localRepository id="local.repository" path="${maven.repo.local}" />
-		<artifact:pom file="pom.xml" id="maven.project" />
-		<artifact:dependencies filesetId="maven.fileset">
-			<pom refid="maven.project" />
+<!-- 
+		<artifact:pom file="ear-pom.xml" id="maven.ear" />
+		<artifact:dependencies filesetId="maven.ear.fileset">
+			<pom refid="maven.ear" />
 			<localRepository refid="local.repository" />
 		</artifact:dependencies>
+		<delete dir="javaee/skyve.ear/lib" />
+		<copy todir="javaee/skyve.ear/lib" flatten="true">
+			<fileset refid="maven.ear.fileset" />
+		</copy>
 
-		<delete dir="javaee/skyve.ear/lib" excludes="commons-javaflow-20060411.jar,skyve*.jar" />
+		<artifact:pom file="war-pom.xml" id="maven.war" />
+		<artifact:dependencies filesetId="maven.war.fileset">
+			<pom refid="maven.war" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<delete dir="javaee/skyve.ear/skyve.war/WEB-INF/lib" />
+		<copy todir="javaee/skyve.ear/skyve.war/WEB-INF/lib" flatten="true">
+			<fileset refid="maven.war.fileset" />
+		</copy>
+-->
+		<artifact:pom file="pom.xml" id="maven" />
+		<artifact:dependencies filesetId="maven.fileset">
+			<pom refid="maven" />
+			<localRepository refid="local.repository" />
+		</artifact:dependencies>
+		<delete dir="javaee/skyve.ear/lib" />
+		<delete dir="javaee/skyve.ear/skyve.war/WEB-INF/lib" />
 		<copy todir="javaee/skyve.ear/lib" flatten="true">
 			<fileset refid="maven.fileset" />
 		</copy>
+		<move todir="javaee/skyve.ear/skyve.war/WEB-INF/lib" failonerror="true">
+			<fileset dir="javaee/skyve.ear/lib" 
+						includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
+		</move>
+		<delete dir="javaee/skyve.ear/lib" includes="javax.mail-*.jar,servlet-api-*.jar" failonerror="true" />
+
+<!--
 		<get src="http://downloads.sourceforge.net/project/jasperreports/jasperreports/JasperReports%205.0.0/jasperreports-javaflow-5.0.0.jar?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjasperreports%2Ffiles%2Fjasperreports%2FJasperReports%25205.0.0%2F&amp;ts=1360285830&amp;use_mirror=internode"
 				dest="testical/jasperreports-javaflow-5.0.0.jar" 
 				usetimestamp="true"
 				verbose="true" />
-
-		<!-- Delete older versions of the same libraries -->
-		<delete dir="testical" includes="ehcache-1.2.3.jar,bcmail-jdk14-1.38.jar,bcprov-jdk14-1.38.jar,commons-lang-2.6.jar,ehcache-1.2.3.jar,jaxb*.jar" failonerror="true" />
-
-		<move todir="javaee/skyve.ear/skyve.war/WEB-INF/lib" failonerror="true">
-			<fileset dir="javaee/skyve.ear/lib" includes="commons-fileupload-1.2.2.jar,commons-io-2.3.jar,jsf-api-2.1.17.jar,jsf-impl-2.1.17.jar,primefaces-3.4.2.jar,primefaces-extensions-0.6.2.jar" />
-		</move>
+-->
 	</target>
 
 	<target name="MANIFEST.MF">
@@ -146,9 +169,11 @@
 		</manifest>
 	</target>
 	
+<!--
 	<taskdef name="schemagen" classname="com.sun.tools.jxc.SchemaGenTask">
 		<classpath refid="classpath" />
 	</taskdef>
+-->
 	<target name="buildXmlSchemas">
 		<schemagen destdir="src/skyve/schemas" includeantruntime="true" verbose="false" >
 			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/router" />
