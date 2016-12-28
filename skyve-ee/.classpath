@@ -21,11 +21,11 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jackson-mapper-asl-1.9.4.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-3.15.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-beanutils-1.9.3.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-ext.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-beanutils-1.9.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

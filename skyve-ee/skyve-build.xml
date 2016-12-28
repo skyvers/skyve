@@ -96,34 +96,15 @@
 		</condition>
 		<echo>maven.repo.local=${maven.repo.local}</echo>
 		<artifact:localRepository id="local.repository" path="${maven.repo.local}" />
-<!-- 
-		<artifact:pom file="ear-pom.xml" id="maven.ear" />
-		<artifact:dependencies filesetId="maven.ear.fileset">
-			<pom refid="maven.ear" />
-			<localRepository refid="local.repository" />
-		</artifact:dependencies>
-		<delete dir="javaee/skyve.ear/lib" />
-		<copy todir="javaee/skyve.ear/lib" flatten="true">
-			<fileset refid="maven.ear.fileset" />
-		</copy>
-
-		<artifact:pom file="war-pom.xml" id="maven.war" />
-		<artifact:dependencies filesetId="maven.war.fileset">
-			<pom refid="maven.war" />
-			<localRepository refid="local.repository" />
-		</artifact:dependencies>
-		<delete dir="javaee/skyve.ear/skyve.war/WEB-INF/lib" />
-		<copy todir="javaee/skyve.ear/skyve.war/WEB-INF/lib" flatten="true">
-			<fileset refid="maven.war.fileset" />
-		</copy>
--->
 		<artifact:pom file="pom.xml" id="maven" />
 		<artifact:dependencies filesetId="maven.fileset">
 			<pom refid="maven" />
 			<localRepository refid="local.repository" />
 		</artifact:dependencies>
 		<delete dir="javaee/skyve.ear/lib" />
+		<mkdir dir="javaee/skyve.ear/lib" />
 		<delete dir="javaee/skyve.ear/skyve.war/WEB-INF/lib" />
+		<mkdir dir="javaee/skyve.ear/skyve.war/WEB-INF/lib" />
 		<copy todir="javaee/skyve.ear/lib" flatten="true">
 			<fileset refid="maven.fileset" />
 		</copy>
@@ -132,7 +113,6 @@
 						includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
 		</move>
 		<delete dir="javaee/skyve.ear/lib" includes="javax.mail-*.jar,servlet-api-*.jar" failonerror="true" />
-
 <!--
 		<get src="http://downloads.sourceforge.net/project/jasperreports/jasperreports/JasperReports%205.0.0/jasperreports-javaflow-5.0.0.jar?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fjasperreports%2Ffiles%2Fjasperreports%2FJasperReports%25205.0.0%2F&amp;ts=1360285830&amp;use_mirror=internode"
 				dest="testical/jasperreports-javaflow-5.0.0.jar" 

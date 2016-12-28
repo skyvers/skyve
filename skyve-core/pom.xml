@@ -4,10 +4,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-		<parent>
+	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20161212</version>	
+		<version>${skyve.version}</version>	
 	</parent>
 	<artifactId>skyve-core</artifactId>
 
@@ -19,34 +19,42 @@
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
+			<version>${commons-beanutils.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-validator</groupId>
-			<artifactId>commons-validator</artifactId>
+			<version>${commons-collections.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.persistence</groupId>
 			<artifactId>persistence-api</artifactId>
+			<version>${persistence-api.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>xml-apis</groupId>
-			<artifactId>xml-apis</artifactId>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+			<version>${hibernate.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

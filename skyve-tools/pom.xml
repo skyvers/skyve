@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20161212</version>
+		<version>${skyve.version}</version>
 	</parent>
 	<artifactId>skyve-tools</artifactId>
 
@@ -18,50 +18,29 @@
 		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-core</artifactId>
+			<version>${skyve.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-ext</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.opengeo</groupId>
-			<artifactId>geodb</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.jasperreports</groupId>
-			<artifactId>jasperreports</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.supercsv</groupId>
-			<artifactId>super-csv</artifactId>
+			<version>${skyve.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 		    <groupId>com.jaspersoft</groupId>
 		    <artifactId>ireport</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>cglib</groupId>
-		    <artifactId>cglib</artifactId>
-		</dependency>
-		<dependency>
-		    <groupId>org.ow2.asm</groupId>
-		    <artifactId>asm</artifactId>
+		    <version>${ireport.version}</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.umlgraph</groupId>
 		    <artifactId>umlgraph</artifactId>
+		    <version>${umlgraph.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opengeo</groupId>
+			<artifactId>geodb</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

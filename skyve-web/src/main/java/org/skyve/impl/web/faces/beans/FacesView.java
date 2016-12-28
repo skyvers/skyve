@@ -51,6 +51,9 @@ public class FacesView<T extends Bean> extends Harness {
 
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
+	// This is set from a request attribute (the attribute is set in home.jsp)
+	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
+	// NNB hydrate/dehydrate does not clear/set this property
 	private UxUi uxui;
 	private String viewBinding;
 	// The page title
