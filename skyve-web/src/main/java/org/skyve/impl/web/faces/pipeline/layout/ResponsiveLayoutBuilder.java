@@ -119,7 +119,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	public UIComponent formLayout(Form form) {
 		formColumnStyles = responsiveFormStyleClasses(form.getColumns());
 		
-		HtmlPanelGroup result = panelGroup(false, false, true, null);
+		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName());
 		result.setStyleClass("ui-g ui-g-nopad ui-fluid");
 		return result;
 	}
