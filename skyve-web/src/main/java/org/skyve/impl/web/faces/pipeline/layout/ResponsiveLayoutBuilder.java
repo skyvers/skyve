@@ -35,17 +35,17 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	
 	@Override
 	public UIComponent tabLayout() {
-		return responsiveContainer();
+		return responsiveContainer(null);
 	}
 	
 	@Override
 	public UIComponent vboxLayout(VBox vbox) {
-		return responsiveContainer();
+		return responsiveContainer(vbox.getInvisibleConditionName());
 	}
 	
 	@Override
 	public UIComponent hboxLayout(HBox hbox) {
-		return responsiveContainer();
+		return responsiveContainer(hbox.getInvisibleConditionName());
 	}
 
 	@Override
@@ -206,8 +206,9 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		div.getChildren().add(formItemComponent);
 	}
 	
-	private HtmlPanelGroup responsiveContainer() {
+	private HtmlPanelGroup responsiveContainer(String invisibleConditionName) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null);
+		setInvisible(result, invisibleConditionName, null);
 		result.setStyleClass("ui-g");
 		return result;
 	}
