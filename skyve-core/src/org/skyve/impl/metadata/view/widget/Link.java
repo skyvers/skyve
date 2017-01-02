@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -36,7 +37,7 @@ import org.skyve.metadata.view.Invisible;
 							"pixelWidth",
 							"invisibleConditionName",
 							"visibleConditionName"})
-public class Link implements MetaData, Invisible, AbsoluteWidth {
+public class Link implements MetaData, Invisible, AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = 2694545058785836920L;
 
 	private Reference reference;
@@ -45,6 +46,11 @@ public class Link implements MetaData, Invisible, AbsoluteWidth {
 	private Integer pixelWidth;
 	
 	private String invisibleConditionName;
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
 	
 	public Reference getReference() {
 		return reference;

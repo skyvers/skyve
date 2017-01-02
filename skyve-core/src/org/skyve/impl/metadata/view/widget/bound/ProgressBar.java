@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableSize;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
@@ -23,7 +24,7 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 							"maxPixelHeight",
 							"invisibleConditionName", 
 							"visibleConditionName"})
-public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSize, ConstrainableSize {
+public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSize, ConstrainableSize, FormItemWidget {
 	private static final long serialVersionUID = 4360024000275982927L;
 
 	private Integer pixelWidth;
@@ -34,6 +35,11 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	private Integer maxPixelHeight;
 	private String invisibleConditionName;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
+	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

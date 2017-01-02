@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -21,10 +22,7 @@ import org.skyve.metadata.view.Invisible;
 							"stateBinding",
 							"postcodeBinding",
 							"countryBinding"})
-public class GeoLocator implements MetaData, Disableable, Invisible {
-	/**
-	 * For Serialization
-	 */
+public class GeoLocator implements MetaData, Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 7302870279072305100L;
 
 	private String latitudeBinding;
@@ -38,6 +36,11 @@ public class GeoLocator implements MetaData, Disableable, Invisible {
 	private String disabledConditionName;
 	private String invisibleConditionName;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
+	
 	public String getLatitudeBinding() {
 		return latitudeBinding;
 	}

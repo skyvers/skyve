@@ -162,7 +162,8 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 								int currentFormColumn, 
 								String widgetLabel, 
 								boolean widgetRequired,
-								String widgetInvisible) {
+								String widgetInvisible,
+								boolean widgetShowsLabelByDefault) {
 		int mutableCurrentFormColumn = currentFormColumn;
 
 		// The label

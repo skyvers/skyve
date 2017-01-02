@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -23,7 +24,7 @@ import org.skyve.metadata.MetaData;
 							"pixelHeight",
 							"minPixelHeight",
 							"maxPixelHeight"})
-public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight {
+public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -2344473519207771461L;
 
 	private String actionName;
@@ -32,6 +33,11 @@ public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, Co
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
+	
 	public String getActionName() {
 		return actionName;
 	}

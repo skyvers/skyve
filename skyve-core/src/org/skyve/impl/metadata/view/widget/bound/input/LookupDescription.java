@@ -24,6 +24,11 @@ public class LookupDescription extends Lookup implements Editable, AbsoluteWidth
 	private Integer pixelWidth;
 	private Set<String> dropDownColumns = new LinkedHashSet<>();
 	
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
+	
 	public String getDescriptionBinding() {
 		return descriptionBinding;
 	}

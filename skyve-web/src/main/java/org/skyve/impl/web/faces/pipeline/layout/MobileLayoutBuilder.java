@@ -69,7 +69,8 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 								int currentFormColumn,
 								String widgetLabel,
 								boolean widgetRequired,
-								String widgetInvisible) {
+								String widgetInvisible,
+								boolean widgetShowsLabelByDefault) {
 		UIComponent field = null;
 
 		// The label

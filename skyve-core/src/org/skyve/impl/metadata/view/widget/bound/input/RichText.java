@@ -6,13 +6,14 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight"})
-public class RichText extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight {
+public class RichText extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -4873861225052464043L;
 
 	private Integer pixelWidth;
@@ -20,6 +21,11 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
+	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

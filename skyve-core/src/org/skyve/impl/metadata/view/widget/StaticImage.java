@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -25,7 +26,7 @@ import org.skyve.metadata.view.Invisible;
 						"maxPixelHeight", 
 						"invisibleConditionName",
 						"visibleConditionName"})
-public class StaticImage implements MetaData, RelativeSize, Invisible {
+public class StaticImage implements MetaData, RelativeSize, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 314857374179338882L;
 
 	private String relativeFile;
@@ -43,6 +44,11 @@ public class StaticImage implements MetaData, RelativeSize, Invisible {
 	
 	private String invisibleConditionName;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
+	
 	public String getRelativeFile() {
 		return relativeFile;
 	}
