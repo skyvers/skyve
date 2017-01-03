@@ -39,6 +39,7 @@ import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
+import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
@@ -419,5 +420,17 @@ public class FacesView<T extends Bean> extends Harness {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
+	}
+	
+	/**
+	 * This method produces a style class that implements 
+	 * the form column/row contract in the skyve view metadata.
+	 * This method is called within the div styleClass attribute
+	 * in form layouts.
+	 */
+	@SuppressWarnings({"unchecked", "static-method"})
+	public String getResponsiveFormStyle(int formIndex, int colspan) {
+		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
+		return formStyles.get(formIndex).getStyle(colspan);
 	}
 }

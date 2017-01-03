@@ -1,11 +1,14 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
+import javax.faces.context.FacesContext;
 
 import org.primefaces.component.message.Message;
 import org.skyve.impl.metadata.Container;
@@ -18,6 +21,9 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
+import org.skyve.impl.web.faces.FacesUtil;
+import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
+import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
 import org.skyve.metadata.MetaData;
 
 public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
@@ -113,17 +119,39 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return container.getParent().getParent(); // account for the previously pushed component, and the grid css div
 	}
 	
-	private String[] formColumnStyles;
-	
 	@Override
 	public UIComponent formLayout(Form form) {
-		formColumnStyles = responsiveFormStyleClasses(form.getColumns());
+		// Add the set of form column styles to the Faces ViewRoot.
+		ResponsiveGridStyle[] formColumnStyles = responsiveFormStyleClasses(form.getColumns());
+		ResponsiveFormGrid grid = new ResponsiveFormGrid(formColumnStyles);
+		addResponsiveStyles(grid);
 		
 		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName());
 		result.setStyleClass("ui-g ui-g-nopad ui-fluid");
 		return result;
 	}
+
+	private int formIndex = Integer.MIN_VALUE;
 	
+	/**
+	 * Add the responsive form grid to the faces view root.
+	 * Return the index to the responsive form grid added for use
+	 * in the EL expressions in the ensuing form markup.
+	 * @param grid	The for 
+	 * @return
+	 */
+	public void addResponsiveStyles(ResponsiveFormGrid grid) {
+		Map<String, Object> attributes = FacesContext.getCurrentInstance().getViewRoot().getAttributes();
+		@SuppressWarnings("unchecked")
+		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) attributes.get(FacesUtil.FORM_STYLES_KEY);
+		if (formStyles == null) {
+			formStyles = new ArrayList<>(5);
+			attributes.put(FacesUtil.FORM_STYLES_KEY, formStyles);
+		}
+		formStyles.add(grid);
+		formIndex = formStyles.size() - 1;
+	}
+
 	@Override
 	public UIComponent formRowLayout(FormRow row) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null);
@@ -159,27 +187,31 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 								UIComponent formItemComponent, 
 								Form currentForm,
 								FormItem currentFormItem, 
-								int currentFormColumn, 
+								int currentFormColumn,
 								String widgetLabel, 
 								boolean widgetRequired,
 								String widgetInvisible,
 								boolean widgetShowsLabelByDefault) {
-		int mutableCurrentFormColumn = currentFormColumn;
-
 		// The label
-		if (! Boolean.FALSE.equals(currentFormItem.getShowLabel())) {
+		boolean showLabel = widgetShowsLabelByDefault;
+		Boolean itemShowLabel = currentFormItem.getShowLabel();
+		if (itemShowLabel != null) {
+			showLabel = itemShowLabel.booleanValue();
+		}
+		if (showLabel) {
 			String label = currentFormItem.getLabel();
 			if (label == null) {
 				label = widgetLabel;
 			}
 			if (label != null) {
-				List<FormColumn> formColumns = currentForm.getColumns();
-				if (currentFormColumn >= formColumns.size()) {
-					mutableCurrentFormColumn = 0;
-				}
 				HtmlPanelGroup div = panelGroup(false, false, false, null);
 				setInvisible(div, widgetInvisible, null);
-				div.setStyleClass(formColumnStyles[mutableCurrentFormColumn++]);
+				// style="<repsonsive column calc method call>"
+				String expression = String.format("#{%s.getResponsiveFormStyle(%s, 1)}", 
+													managedBeanName, 
+													Integer.toString(formIndex));
+				div.setValueExpression("styleClass", 
+										ef.createValueExpression(elc, expression, String.class));
 				formOrRowLayout.getChildren().add(div);
 				HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 				setId(pg);
@@ -192,17 +224,27 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			}
 		}
 		// The field
-		List<FormColumn> formColumns = currentForm.getColumns();
-		if (currentFormColumn >= formColumns.size()) {
-			mutableCurrentFormColumn = 0;
-		}
-//		FormColumn formColumn = formColumns.get(mutableCurrentFormColumn++);
-		// TODO Calculate colspan and row span
-		//currentFormItem.getColspan(),
-		//currentFormItem.getRowspan());
+		Integer colspan = currentFormItem.getColspan();
 		HtmlPanelGroup div = panelGroup(false, false, false, null);
 		setInvisible(div, widgetInvisible, null);
-		div.setStyleClass(formColumnStyles[mutableCurrentFormColumn++]);
+		// colspan should be 1.
+		if ((colspan == null) || (colspan.intValue() <= 1)) {
+			// style="<repsonsive column calc method call>"
+			String expression = String.format("#{%s.getResponsiveFormStyle(%s, 1)}", 
+												managedBeanName, 
+												Integer.toString(formIndex));
+			div.setValueExpression("styleClass", 
+									ef.createValueExpression(elc, expression, String.class));
+		}
+		else { // colspan > 1
+			// style="<repsonsive column calc method call>"
+			String expression = String.format("#{%s.getResponsiveFormStyle(%s, %d)}", 
+												managedBeanName, 
+												Integer.toString(formIndex),
+												colspan);
+			div.setValueExpression("styleClass", 
+									ef.createValueExpression(elc, expression, String.class));
+		}
 		formOrRowLayout.getChildren().add(div);
 		div.getChildren().add(formItemComponent);
 	}
@@ -226,25 +268,25 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	private static String responsiveGridStyleClasses(Integer pixelWidth, Integer responsiveWidth, Integer percentageWidth) {
 		if (responsiveWidth != null) {
-			return String.format("ui-g-12 ui-md-%s ui-lg-%s", responsiveWidth, responsiveWidth);
+			int width = responsiveWidth.intValue();
+			return new ResponsiveGridStyle(width, width).toString();
 		}
 		else if (pixelWidth != null) {
 			double width = pixelWidth.doubleValue();
 			int medium = LayoutUtil.pixelWidthToMediumResponsiveWidth(width);
 			int large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
-			return String.format("ui-g-12 ui-md-%s ui-lg-%s", Integer.toString(medium), Integer.toString(large));
+			return new ResponsiveGridStyle(medium, large).toString();
 		}
 		else if (percentageWidth != null) {
-			Integer result = Integer.valueOf(LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue()));
-			return String.format("ui-g-12 ui-md-%s ui-lg-%s", result, result);
+			int width = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
+			return new ResponsiveGridStyle(width, width).toString();
 		}
 		
 		return "ui-g-12";
 	}
 	
-	// TODO Need to cater for colspan in forms
-	private static String[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
-		String[] result = new String[formColumns.size()];
+	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
+		ResponsiveGridStyle[] result = new ResponsiveGridStyle[formColumns.size()];
 		
 		// max number of columns
 		int mediumColsRemaining = LayoutUtil.MAX_RESPONSIVE_WIDTH_COLUMNS;
@@ -261,7 +303,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				int width = responsiveWidth.intValue();
 				mediumColsRemaining -= width;
 				largeColsRemaining -= width;
-				result[i] = String.format("ui-g-12 ui-md-%s ui-lg-%s", responsiveWidth, responsiveWidth);
+				result[i] = new ResponsiveGridStyle(width, width);
 			}
 			else if (pixelWidth != null) {
 				double width = pixelWidth.doubleValue();
@@ -269,14 +311,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				int large = LayoutUtil.pixelWidthToLargeResponsiveWidth(width);
 				mediumColsRemaining -= medium;
 				largeColsRemaining -= large;
-				result[i] = String.format("ui-g-12 ui-md-%s ui-lg-%s", Integer.toString(medium), Integer.toString(large));
+				result[i] = new ResponsiveGridStyle(medium, large);
 			}
 			else if (percentageWidth != null) {
 				int cols = LayoutUtil.percentageWidthToResponsiveWidth(percentageWidth.doubleValue());
 				mediumColsRemaining -= cols;
 				largeColsRemaining -= cols;
-				String col = Integer.toString(cols);
-				result[i] = String.format("ui-g-12 ui-md-%s ui-lg-%s", col, col);
+				result[i] = new ResponsiveGridStyle(cols, cols);
 			}
 			else {
 				unsizedCols++;
@@ -289,7 +330,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 			for (int i = 0, l = formColumns.size(); i < l; i++) {
 				if (result[i] == null) {
-					result[i] = String.format("ui-g-12 ui-md-%s ui-lg-%s", Integer.toString(medium), Integer.toString(large));
+					result[i] = new ResponsiveGridStyle(medium, large);
 				}
 			}
 		}
