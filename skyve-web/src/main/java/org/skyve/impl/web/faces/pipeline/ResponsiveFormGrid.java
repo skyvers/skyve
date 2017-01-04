@@ -79,4 +79,11 @@ public class ResponsiveFormGrid implements Serializable {
 
 		return result.toString();
 	}
+	
+	/**
+	 * Reset the style.
+	 */
+	public void reset() {
+		currentColumn = 0;
+	}
 }

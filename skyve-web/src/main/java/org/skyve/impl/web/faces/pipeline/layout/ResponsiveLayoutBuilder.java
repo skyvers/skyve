@@ -131,14 +131,14 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
+	// Used to create dynamic style classes for responsive form layouts
 	private int formIndex = Integer.MIN_VALUE;
 	
 	/**
 	 * Add the responsive form grid to the faces view root.
 	 * Return the index to the responsive form grid added for use
 	 * in the EL expressions in the ensuing form markup.
-	 * @param grid	The for 
-	 * @return
+	 * @param grid	The responsive form layout grid definition
 	 */
 	public void addResponsiveStyles(ResponsiveFormGrid grid) {
 		Map<String, Object> attributes = FacesContext.getCurrentInstance().getViewRoot().getAttributes();
@@ -155,7 +155,12 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	@Override
 	public UIComponent formRowLayout(FormRow row) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null);
-		result.setStyleClass("ui-g-12 ui-g-nopad");
+		// style="<repsonsive column reset method call>"
+		String expression = String.format("#{%s.resetResponsiveFormStyle(%s)}", 
+											managedBeanName, 
+											Integer.toString(formIndex));
+		result.setValueExpression("styleClass", 
+									ef.createValueExpression(elc, expression, String.class));
 		return result;
 	}
 	
