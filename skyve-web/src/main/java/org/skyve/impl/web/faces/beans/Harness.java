@@ -3,17 +3,24 @@ package org.skyve.impl.web.faces.beans;
 import java.util.Locale;
 import java.util.Set;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
 import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
+import org.skyve.web.WebContext;
 
 public abstract class Harness extends Localisable {
 	private static final long serialVersionUID = 2805839690076647L;
@@ -179,5 +186,28 @@ public abstract class Harness extends Localisable {
         }
 
         return query;
+	}
+	
+	@SuppressWarnings("static-method")
+	public User getUser() {
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		return (User) ec.getSessionMap().get(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+	}
+	
+	@SuppressWarnings("static-method")
+	public void setUser(String customerName, String userName) {
+		User user = null;
+		AbstractRepository repository = AbstractRepository.get();
+		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
+		if (ec.getUserPrincipal() == null) { // not logged in
+			user = repository.retrieveUser(new StringBuilder(64).append(customerName).append('/').append(userName).toString());
+		}
+		else {
+			user = repository.retrieveUser(ec.getUserPrincipal().toString());
+		}
+		ec.getSessionMap().put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
+
+		AbstractPersistence persistence = AbstractPersistence.get();
+		persistence.setUser(user);
 	}
 }

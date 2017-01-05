@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.component.message.Message;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -209,18 +210,21 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				label = widgetLabel;
 			}
 			if (label != null) {
-				HtmlPanelGroup div = panelGroup(false, false, false, null);
+				HtmlPanelGroup div = panelGroup(false, false, true, null);
 				setInvisible(div, widgetInvisible, null);
 				// style="<repsonsive column calc method call>"
-				String expression = String.format("#{%s.getResponsiveFormStyle(%s, 1)}", 
-													managedBeanName, 
+				String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
+				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)}", 
+													managedBeanName,
 													Integer.toString(formIndex));
 				div.setValueExpression("styleClass", 
 										ef.createValueExpression(elc, expression, String.class));
 				formOrRowLayout.getChildren().add(div);
 				HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 				setId(pg);
+				pg.setStyle("width:100%");
 				pg.setColumns(2);
+				pg.setColumnClasses(alignment); // set first column style only
 				div.getChildren().add(pg);
 				HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
 				pg.getChildren().add(l);
@@ -230,28 +234,39 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		}
 		// The field
 		Integer colspan = currentFormItem.getColspan();
-		HtmlPanelGroup div = panelGroup(false, false, false, null);
+		HtmlPanelGroup div = panelGroup(false, false, true, null);
 		setInvisible(div, widgetInvisible, null);
 		// colspan should be 1.
 		if ((colspan == null) || (colspan.intValue() <= 1)) {
 			// style="<repsonsive column calc method call>"
-			String expression = String.format("#{%s.getResponsiveFormStyle(%s, 1)}", 
+			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', 1)}", 
 												managedBeanName, 
-												Integer.toString(formIndex));
+												Integer.toString(formIndex),
+												alignment(currentFormItem.getHorizontalAlignment(), false));
 			div.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		else { // colspan > 1
 			// style="<repsonsive column calc method call>"
-			String expression = String.format("#{%s.getResponsiveFormStyle(%s, %d)}", 
+			String expression = String.format("#{%s.getResponsiveFormStyle(%s, '%s', %d)}", 
 												managedBeanName, 
 												Integer.toString(formIndex),
+												alignment(currentFormItem.getHorizontalAlignment(), false),
 												colspan);
 			div.setValueExpression("styleClass", 
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		formOrRowLayout.getChildren().add(div);
 		div.getChildren().add(formItemComponent);
+	}
+	
+	private static String alignment(HorizontalAlignment alignment, boolean defaultRight) {
+		if (alignment == null) {
+			return (defaultRight ? 
+						HorizontalAlignment.right.toAlignmentString() : 
+						HorizontalAlignment.left.toAlignmentString());
+		}
+		return String.format("%s", alignment.toAlignmentString());
 	}
 	
 	private HtmlPanelGroup responsiveContainer(String invisibleConditionName) {
