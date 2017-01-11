@@ -89,6 +89,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
 			</plugin>
 		</plugins>
 	</build>
@@ -109,6 +110,10 @@
 		<repository>
 			<id>Prime Faces</id>
 			<url>http://repository.primefaces.org/</url>
+		</repository>
+		<repository>
+			<id>skyve</id>
+			<url>http://repo.skyve.org/repository/skyve/</url>
 		</repository>
 	</repositories>
 

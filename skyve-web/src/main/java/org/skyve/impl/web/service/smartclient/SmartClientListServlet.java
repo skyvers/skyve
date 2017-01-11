@@ -208,6 +208,14 @@ public class SmartClientListServlet extends HttpServlet {
 						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
 					}
 
+					String tagId = request.getParameter("_tagId");
+					// "null" can be sent by Smart Client
+					if (tagId != null) {
+						if ((tagId.length() == 0) || "null".equals(tagId)) {
+							tagId = null;
+						}
+					}
+
 					switch (operation) {
 					case fetch:
 						if (! user.canReadDocument(drivingDocument)) {
@@ -248,7 +256,6 @@ public class SmartClientListServlet extends HttpServlet {
 						if ("".equals(summary)) {
 							summary = null;
 						}
-	
 						fetch(module,
 								drivingDocument,
 								startRow, 
@@ -259,7 +266,7 @@ public class SmartClientListServlet extends HttpServlet {
 								(summary == null) ? null : AggregateFunction.valueOf(summary),
 								// include a summary extra row (for list grids)
 								request.getParameterMap().containsKey("_summary"),
-								request.getParameter("_tagId"),
+								tagId,
 								parameters, 
 								persistence, 
 								pw,
@@ -271,7 +278,6 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						break;
 					case update:
-						String tagId = request.getParameter("_tagId");
 						String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 						if ("TAG".equals(bizTagged)) {
 							tag(customer, module, model, tagId, parameters, pw);
