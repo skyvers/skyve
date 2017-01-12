@@ -34,6 +34,7 @@
 		<hibernate.version>3.2.6.ga</hibernate.version>
 		<hibernate-entitymanager.version>3.3.2.GA</hibernate-entitymanager.version>
 		<ireport.version>4.7.0</ireport.version>
+		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>4.7.0</jasperreports.version>
 		<java.version>1.7</java.version>
 		<javassist.version>3.12.0.GA</javassist.version>
@@ -232,6 +233,11 @@
 						<artifactId>asm-tree</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-all</artifactId>
+				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.jasperreports</groupId>

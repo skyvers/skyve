@@ -454,7 +454,7 @@ public class ReportServlet extends HttpServlet {
 		// JasperDesign
 		JasperDesign jasperDesign = new JasperDesign();
 		jasperDesign.setName("Export");
-		jasperDesign.setLanguage(JRReport.LANGUAGE_JAVA);
+		jasperDesign.setLanguage(JRReport.LANGUAGE_GROOVY);
 		jasperDesign.setPageWidth(params.getPageWidth());
 		jasperDesign.setPageHeight(params.getPageHeight());
 		jasperDesign.setColumnWidth(reportColumnWidth);
