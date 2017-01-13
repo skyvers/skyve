@@ -63,11 +63,11 @@
 
 	<distributionManagement>
 		<repository>
-			<id>maven-releases</id>
+			<id>skyve</id>
 			<url>http://repo.skyve.org/repository/maven-releases/</url>
 		</repository>
 		<snapshotRepository>
-			<id>maven-snapshots</id>
+			<id>skyve</id>
 			<url>http://repo.skyve.org/repository/maven-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
