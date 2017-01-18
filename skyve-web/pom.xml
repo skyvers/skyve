@@ -12,12 +12,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.skyve</groupId>
-			<artifactId>skyve-core</artifactId>
-			<version>${skyve.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.skyve</groupId>
 			<artifactId>skyve-ext</artifactId>
 			<version>${skyve.version}</version>
 			<scope>compile</scope>
