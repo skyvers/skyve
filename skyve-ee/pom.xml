@@ -9,7 +9,7 @@
 		<version>20161229</version>	
 	</parent>
 	<artifactId>skyve-ee</artifactId>
-<!-- 
+ 
  	<build>
  		<plugins>
 			<plugin>
@@ -25,14 +25,39 @@
 						</goals>
 						<configuration>
 							<overWriteIfNewer>true</overWriteIfNewer>
-							<outputDirectory>shite/</outputDirectory>
+							<outputDirectory>javaee/skyve.ear/lib/</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin> 		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>move-web-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<move todir="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib" failonerror="true">
+									<fileset dir="${basedir}/javaee/skyve.ear/lib" 
+												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
+								</move>
+								<move file="${basedir}/javaee/skyve.ear/lib/skyve-core-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-core.jar" />
+								<move file="${basedir}/javaee/skyve.ear/lib/skyve-ext-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-ext.jar" />
+								<delete file="${basedir}/javaee/skyve.ear/lib/skyve-ee-${parent.version}.jar" />
+								<move file="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" />
+							</tasks>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
  		</plugins>
  	</build>
--->
+
 	<!-- This is a copy/paste of skyve/pom.xml dependencies -->
 	<dependencies>
 		<dependency>
