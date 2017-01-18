@@ -26,6 +26,7 @@
 						<configuration>
 							<overWriteIfNewer>true</overWriteIfNewer>
 							<outputDirectory>javaee/skyve.ear/lib/</outputDirectory>
+							
 						</configuration>
 					</execution>
 				</executions>
@@ -34,6 +35,19 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
+					<execution>
+						<id>clear-all-dependencies</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete dir="${basedir}/javaee/skyve.ear/lib" />
+								<delete dir="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib" />
+							</tasks>
+						</configuration>
+					</execution>
 					<execution>
 						<id>move-web-dependencies</id>
 						<phase>package</phase>
@@ -46,10 +60,10 @@
 									<fileset dir="${basedir}/javaee/skyve.ear/lib" 
 												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
 								</move>
-								<move file="${basedir}/javaee/skyve.ear/lib/skyve-core-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-core.jar" />
-								<move file="${basedir}/javaee/skyve.ear/lib/skyve-ext-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-ext.jar" />
-								<delete file="${basedir}/javaee/skyve.ear/lib/skyve-ee-${parent.version}.jar" />
-								<move file="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web-${parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" />
+								<move file="${basedir}/javaee/skyve.ear/lib/skyve-core-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-core.jar" />
+								<move file="${basedir}/javaee/skyve.ear/lib/skyve-ext-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-ext.jar" />
+								<delete file="${basedir}/javaee/skyve.ear/lib/skyve-ee-${project.parent.version}.jar" />
+								<move file="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" />
 							</tasks>
 						</configuration>
 					</execution>
