@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
@@ -21,7 +22,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 							"minPixelHeight", 
 							"maxPixelHeight", 
 							"editable"})
-public class ContentImage extends InputWidget implements Editable, RelativeSize {
+public class ContentImage extends InputWidget implements Editable, RelativeSize, FormItemWidget {
 	private static final long serialVersionUID = 314857374179338882L;
 
 	private Boolean editable;
@@ -34,6 +35,11 @@ public class ContentImage extends InputWidget implements Editable, RelativeSize 
 	private Integer percentageHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
 	
 	@Override
 	public Boolean getEditable() {

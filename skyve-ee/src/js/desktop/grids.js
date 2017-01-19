@@ -1259,6 +1259,11 @@ isc.BizListGrid.addMethods({
 */
 			
 		};
+		
+		if (config.gridConfig) {
+			isc.addProperties(gridConfig, config.gridConfig);
+		}
+		
 		if (config.isTree) {
 			gridConfig.folderIcon = null;
 			gridConfig.loadOnDemand = true;

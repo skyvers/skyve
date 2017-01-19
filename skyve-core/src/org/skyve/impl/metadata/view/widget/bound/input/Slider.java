@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
@@ -20,7 +21,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 							"pixelHeight",
 							"minPixelHeight",
 							"maxPixelHeight"})
-public class Slider extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight {
+public class Slider extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -1215719151652616337L;
 
 	private Double min;
@@ -32,6 +33,11 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize, Const
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
 	
 	public Double getMin() {
 		return min;

@@ -104,6 +104,7 @@ public class SkyvePhaseListener implements PhaseListener {
 	throws Exception {
 		UIViewRoot vr = event.getFacesContext().getViewRoot();
 		if (vr != null) {
+			// Cache and dehydrate
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
 				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);

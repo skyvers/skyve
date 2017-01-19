@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -32,10 +33,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"disabledConditionName", 
 							"enabledConditionName",
 							"parameters"})
-public class DialogButton implements MetaData, Parameterizable, Disableable, Invisible {
-	/**
-	 * For Serialization
-	 */
+public class DialogButton implements MetaData, Parameterizable, Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 4201233664827983726L;
 
 	private String displayName;
@@ -48,6 +46,11 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	private String disabledConditionName;
 	private List<Parameter> parameters = new ArrayList<>();
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
+	
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "parameters")
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE,

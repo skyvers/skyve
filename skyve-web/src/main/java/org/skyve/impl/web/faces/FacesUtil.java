@@ -6,7 +6,9 @@ import javax.el.MethodExpression;
 import javax.el.ValueExpression;
 import javax.faces.FacesException;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 
+import org.primefaces.context.RequestContext;
 import org.skyve.impl.web.faces.beans.FacesView;
 
 public class FacesUtil {
@@ -23,6 +25,8 @@ public class FacesUtil {
 	public static String UX_UI_KEY = "skyveUxUi";
 	// used to place the user agent type of the requesting as a request attribute
 	public static String USER_AGENT_TYPE_KEY = "skyveUserAgentType";
+	// used to get the responsive form grid out of the view root when required
+	public static String FORM_STYLES_KEY = "skyveFormStyles";
 	
 	public static FacesView<?> getManagedBean(final String beanName) {
 		FacesContext fc = FacesContext.getCurrentInstance();
@@ -62,4 +66,19 @@ public class FacesUtil {
 			throw new FacesException("Method expression '" + expression + "' could not be created.");
 		}
 	}
+	
+	public static String xmlPartialRedirect(String url) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+		sb.append("<partial-response><redirect url=\"").append(url.replace("&", "&amp;")).append("\"/></partial-response>");
+		return sb.toString();
+	}
+
+    public static boolean isAjax(HttpServletRequest request) {
+        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
+    }
+    
+    public static void jsRedirect(String url) {
+		RequestContext.getCurrentInstance().execute(String.format("window.location='%s'", url));
+    }
 }

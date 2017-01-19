@@ -213,11 +213,7 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					String[] cc = null;
-					if(ccTo!=null){
-						cc=  new String[] { ccTo };
-					}
-					EXT.sendMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					EXT.sendMail(new String[] { sendTo }, new String[] { ccTo }, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
 					break;
 				default:
 					break;

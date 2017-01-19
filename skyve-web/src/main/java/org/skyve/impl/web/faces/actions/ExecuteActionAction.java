@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.actions;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -44,6 +45,11 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
+
+		if (! user.canExecuteAction(targetDocument, actionName)) {
+			throw new SecurityException(actionName, user.getName());
+		}
+
 		View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);

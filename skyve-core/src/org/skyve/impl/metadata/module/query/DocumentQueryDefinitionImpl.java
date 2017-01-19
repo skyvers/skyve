@@ -160,6 +160,9 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					// determine if we need to left join this reference (as it is not required)
 					// NB check each token of the binding and if ANY is optional, we need to left join the lot
 					boolean leftJoin = false;
+					// determine if the projected value is transient
+					// NB check each token of the binding and if ANY is transient, the lot is transient
+					boolean transientBinding = false;
 					int dotIndex = associationBinding.indexOf('.');
 					if (dotIndex < 0) {
 						dotIndex = associationBinding.length();
@@ -168,11 +171,15 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						String associationBindingPart = associationBinding.substring(0, dotIndex);
 						target = BindUtil.getMetaDataForBinding(customer, owningModule, document, associationBindingPart);
 						attribute = target.getAttribute();
-						Relation relation = (Relation) attribute;
 						// Association could be null if 'parent' used in query
-						if ((relation != null) && (! relation.isRequired())) {
-							leftJoin = true;
-							break;
+						if (attribute != null) {
+							if (! attribute.isPersistent()) {
+								transientBinding = true;
+							}
+							Relation relation = (Relation) attribute;
+							if (! relation.isRequired()) {
+								leftJoin = true;
+							}
 						}
 						// We've checked the entire association binding - bug out
 						if (dotIndex == associationBinding.length()) {
@@ -192,7 +199,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					target = BindUtil.getMetaDataForBinding(customer, owningModule, document, binding);
 					attribute = target.getAttribute();
 					if (attribute != null) {
-						if (! attribute.isPersistent()) {
+						if (transientBinding || (! attribute.isPersistent())) {
 							continue;
 						}
 						// If we have a reference directly to a mapped document, don't process it coz it can't be joined.

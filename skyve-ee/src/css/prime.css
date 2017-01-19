@@ -3,19 +3,31 @@ body,html {
 	padding: 0;
 	height: 100%;
 }
-/* Display the label and error message icon on the same line in a form */
-.ui-outputlabel {
-	vertical-align: middle !important;
-	white-space: normal;
-}
-.ui-message-icon-only {
-	display: inline-block !important;
-	vertical-align: middle !important;
-}
 /* Ensure that there is a little margin on stacked buttons in wrapped toolbars */
 .ui-toolbar * {
 	margin-bottom: 1px !important;
 }
+
+/* skyve alignment styles */
+.left {
+	text-align: left;
+}
+span.left {
+	display: block;
+}
+.center {
+	text-align: center;
+}
+span.left {
+	display: block;
+}
+.right {
+	text-align: right;
+}
+span.right {
+	display: block;
+}
+
 /* popup wheel of death style */
 #busy {
 	display: none;

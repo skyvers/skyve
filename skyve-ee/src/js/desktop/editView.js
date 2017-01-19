@@ -12,6 +12,11 @@ isc.BizContainer.addMethods({
 	addContained: function(contained) { // the widget to be contained in this container
 		this.contained.add(contained);
 		this.addMember(contained);
+	},
+	
+	removeContained: function(contained) { // the widget to remove in this container
+		this.contained.remove(contained);
+		this.removeMember(contained);
 	}
 });
 

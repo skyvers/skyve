@@ -5,18 +5,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteSize;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight"})
-public class HTML extends InputWidget implements AbsoluteSize {
+public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	private static final long serialVersionUID = -2155059200252882977L;
 
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
+	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteWidth;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
@@ -13,10 +14,15 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class Geometry extends ChangeableInputWidget implements AbsoluteWidth {
+public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = 7902784327466913291L;
 	
 	private Integer pixelWidth;
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
 	
 	@Override
 	public Integer getPixelWidth() {

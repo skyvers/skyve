@@ -114,7 +114,6 @@ public class WebUtil {
 		UtilImpl.LOGGER.info("Count = " + conversations.getSize());
 		UtilImpl.LOGGER.info("Count in memory = " + conversations.getMemoryStoreSize());
 		UtilImpl.LOGGER.info("Count on disk = " + conversations.getDiskStoreSize());
-		UtilImpl.LOGGER.info("Avg get time (ms) = " + conversations.getAverageGetTime());
 		UtilImpl.LOGGER.info("In-Memory (MB) = " + (conversations.calculateInMemorySize() / 1048576.0));
 		UtilImpl.LOGGER.info("**************************************************************");
 	}

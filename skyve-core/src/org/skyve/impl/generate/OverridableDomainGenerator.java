@@ -318,7 +318,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					try (FileWriter fw = new FileWriter(classFile)) {
 						Extends inherits = document.getExtends();
-						generateJava(null, 
+						generateJava(repository,
+										null, 
 										module, 
 										document, 
 										fw, 
@@ -334,7 +335,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						classFile.createNewFile();
 	
 						try (FileWriter fw = new FileWriter(classFile)) {
-							generateJava(null, 
+							generateJava(repository,
+											null, 
 											module, 
 											document, 
 											fw, 
@@ -424,9 +426,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 							File classFile = new File(classFileName + ".java");
 							classFile.createNewFile();
-
+							
 							try (FileWriter fw = new FileWriter(classFile)) {
-								generateJava(customer, 
+								generateJava(repository,
+												customer, 
 												module, 
 												document, 
 												fw,
@@ -1740,7 +1743,8 @@ joined tables
 	}
 	
 	@SuppressWarnings("synthetic-access")
-	private void generateJava(Customer customer,
+	private void generateJava(AbstractRepository repository,
+								Customer customer,
 								Module module,
 								Document document,
 								FileWriter fw,
@@ -2026,11 +2030,18 @@ joined tables
 				imports.add("org.skyve.domain.ChildBean");
 			}
 		}
+		// indicates if the base document has <BaseDocument>Extension.java defined in the document folder.
+		boolean baseDocumentExtensionClassExists = false;
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
-
-			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + '/' + baseDocumentName + '/' + baseDocumentName + "Extension.java";
-			if (new File(extensionPath).exists()) {
+			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java", 
+																SRC_PATH, 
+																repository.MODULES_NAMESPACE,
+																baseDocument.getOwningModuleName(),
+																baseDocumentName,
+																baseDocumentName);
+			baseDocumentExtensionClassExists = new File(baseDocumentExtensionPath).exists();
+			if (baseDocumentExtensionClassExists) {
 				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName + "Extension");
 			}
 			else {
@@ -2188,8 +2199,7 @@ joined tables
 				fw.append("Ext");
 			}
 			
-			String extensionPath = SRC_PATH + packagePath.substring(0, packagePath.lastIndexOf('.')).replace('.', '/') + '/' + baseDocumentName + '/' + baseDocumentName + "Extension.java";
-			if (new File(extensionPath).exists()) {
+			if (baseDocumentExtensionClassExists) {
 				fw.append(" extends ").append(baseDocumentName).append("Extension");
 			}
 			else {
