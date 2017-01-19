@@ -260,13 +260,18 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		div.getChildren().add(formItemComponent);
 	}
 	
-	private static String alignment(HorizontalAlignment alignment, boolean defaultRight) {
+	private static String alignment(HorizontalAlignment alignment, boolean forFormLabel) {
+		String result = null;
 		if (alignment == null) {
-			return (defaultRight ? 
+			result = forFormLabel ? 
 						HorizontalAlignment.right.toAlignmentString() : 
-						HorizontalAlignment.left.toAlignmentString());
+						HorizontalAlignment.left.toAlignmentString();
 		}
-		return String.format("%s", alignment.toAlignmentString());
+		else {
+			result = alignment.toAlignmentString();
+		}
+
+		return (forFormLabel ? (result + "FormLabel") : result);
 	}
 	
 	private HtmlPanelGroup responsiveContainer(String invisibleConditionName) {

@@ -18,7 +18,7 @@ span.left {
 .center {
 	text-align: center;
 }
-span.left {
+span.center {
 	display: block;
 }
 .right {
@@ -26,6 +26,27 @@ span.left {
 }
 span.right {
 	display: block;
+}
+
+/* skyve form label alignment (left always on phone) */
+.leftFormLabel {
+	text-align: left;
+}
+@media (min-width: 641px) {
+	.rightFormLabel {
+		text-align: right;
+	}
+	.centerFormLabel {
+		text-align: center;
+	}
+}
+@media (max-width: 640px) {
+	.rightFormLabel {
+		text-align: left;
+	}
+	.centerFormLabel {
+		text-align: left;
+	}
 }
 
 /* popup wheel of death style */
