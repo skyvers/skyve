@@ -1,2 +1,16 @@
 mvn versions:set -DnewVersion=<version>
 mvn install:install-file -Dfile=skyve-ee/tools/lib/com-jaspersoft-ireport.jar -DgroupId=com.jaspersoft -DartifactId=ireport -Dversion=4.7.0 -Dpackaging=jar
+
+mvn deploy:deploy-file -Dfile=skyve-ee/tools/lib/com-jaspersoft-ireport.jar -DgroupId=com.jaspersoft -DartifactId=ireport -Dversion=4.7.0 -Dpackaging=jar -DrepositoryId=skyve -Durl='http://repo.skyve.org/repository/ThirdParty/'
+in ~/.m2/settings.xml
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+	<servers>
+		<server>
+			<id>skyve</id>
+			<username>bizhub</username>
+			<password>rbmspedc</password>
+		</server>
+	</servers>
+</settings>

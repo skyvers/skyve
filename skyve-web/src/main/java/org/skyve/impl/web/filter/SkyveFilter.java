@@ -21,8 +21,15 @@ public class SkyveFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	throws IOException, ServletException {
+		HttpServletRequest httpRequest = (HttpServletRequest) request;
+		String requestURI = httpRequest.getRequestURI();
+		// ignore faces resource requests
+		if (requestURI.contains("javax.faces.resource/")) {
+			chain.doFilter(request, response);
+			return;
+		}
+		
 		if (UtilImpl.HTTP_TRACE) {
-			HttpServletRequest httpRequest = (HttpServletRequest) request;
 			UtilImpl.LOGGER.info("************************** REQUEST ***************************");
 			UtilImpl.LOGGER.info("ContextPath=" + httpRequest.getContextPath());
 			UtilImpl.LOGGER.info("LocalAddr=" + request.getLocalAddr());
@@ -38,7 +45,7 @@ public class SkyveFilter implements Filter {
 			UtilImpl.LOGGER.info("RemotePort=" + request.getRemotePort());
 			UtilImpl.LOGGER.info("RemoteUser=" + httpRequest.getRemoteUser());
 			UtilImpl.LOGGER.info("RequestedSessionId=" + httpRequest.getRequestedSessionId());
-			UtilImpl.LOGGER.info("RequestURI=" + httpRequest.getRequestURI());
+			UtilImpl.LOGGER.info("RequestURI=" + requestURI);
 			UtilImpl.LOGGER.info("RequestURL=" + httpRequest.getRequestURL().toString());
 			UtilImpl.LOGGER.info("Scheme=" + request.getScheme());
 			UtilImpl.LOGGER.info("ServerName=" + request.getServerName());

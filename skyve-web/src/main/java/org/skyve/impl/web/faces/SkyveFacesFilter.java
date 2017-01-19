@@ -96,8 +96,8 @@ public class SkyveFacesFilter implements Filter {
                 // String redirect = request.getHeader("Referer");
                 String redirect = absoluteContextURL.toString() + forwardURI;
                 redirect = response.encodeRedirectURL(redirect);
-                if (isAjax(request)) {
-                	response.getWriter().print(xmlPartialRedirectToPage(redirect.replace("&", "&amp;")));
+                if (FacesUtil.isAjax(request)) {
+                	response.getWriter().print(FacesUtil.xmlPartialRedirect(redirect));
                     response.flushBuffer();
                 }
                 else {
@@ -124,8 +124,8 @@ public class SkyveFacesFilter implements Filter {
             	uri = expiredURI;
             }
             
-            if (isAjax(request)) {
-                response.getWriter().print(xmlPartialRedirectToPage(absoluteContextURL.toString() + uri));
+            if (FacesUtil.isAjax(request)) {
+                response.getWriter().print(FacesUtil.xmlPartialRedirect(absoluteContextURL.toString() + uri));
                 response.flushBuffer();
             }
             else {
@@ -139,16 +139,5 @@ public class SkyveFacesFilter implements Filter {
 			persistence.commit(true);
 			if (UtilImpl.FACES_TRACE) WebUtil.logConversationsStats();
 		}
-    }
-    
-    private static String xmlPartialRedirectToPage(String page) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version='1.0' encoding='UTF-8'?>");
-        sb.append("<partial-response><redirect url=\"").append(page).append("\"/></partial-response>");
-        return sb.toString();
-    }
-
-    private static boolean isAjax(HttpServletRequest request) {
-        return "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
     }
 }

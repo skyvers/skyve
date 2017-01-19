@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlValue;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -27,7 +28,7 @@ import org.skyve.metadata.view.Invisible;
 							"textAlignment",
 							"invisibleConditionName",
 							"visibleConditionName"})
-public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth {
+public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
 	private static final long serialVersionUID = -1234525506006033853L;
 
 	/**
@@ -44,6 +45,11 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 	 * Default alignment is left.
 	 */
 	private HorizontalAlignment textAlignment = null;
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
 	
 	public String getMarkup() {
 		return markup;

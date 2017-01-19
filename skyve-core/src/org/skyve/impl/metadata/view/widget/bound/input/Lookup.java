@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.Editable;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -43,10 +44,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 							"editedActions",
 							"addedActions",
 							"parameters"})
-public class Lookup extends InputWidget implements Filterable, Addable, Editable {
-	/**
-	 * For Serialization
-	 */
+public class Lookup extends InputWidget implements Filterable, Addable, Editable, FormItemWidget {
 	private static final long serialVersionUID = 7742358399386599267L;
 
 	private String query;
@@ -62,6 +60,11 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 	private List<EventAction> addedActions = new ArrayList<>();
 
 	private List<FilterParameter> parameters = new ArrayList<>();
+	
+	@Override
+	public boolean showsLabelByDefault() {
+		return false;
+	}
 	
 	public String getQuery() {
 		return query;

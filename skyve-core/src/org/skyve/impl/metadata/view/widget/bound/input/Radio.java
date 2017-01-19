@@ -5,17 +5,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.AbsoluteWidth;
+import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-public final class Radio extends ChangeableInputWidget implements AbsoluteWidth {
+public final class Radio extends ChangeableInputWidget implements AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = -6194966991364516589L;
 	
 	private Boolean vertical;
 	private Integer pixelWidth;
 
+	@Override
+	public boolean showsLabelByDefault() {
+		return true;
+	}
+	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

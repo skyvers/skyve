@@ -12,15 +12,12 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
-import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -39,10 +36,9 @@ import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
+import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.user.User;
-import org.skyve.web.WebContext;
 
 @ViewScoped
 @ManagedBean(name = "skyve")
@@ -51,6 +47,9 @@ public class FacesView<T extends Bean> extends Harness {
 
 	// NB whatever state is added here needs to be handled by hydrate/dehydrate
 
+	// This is set from a request attribute (the attribute is set in home.jsp)
+	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
+	// NNB hydrate/dehydrate does not clear/set this property
 	private UxUi uxui;
 	private String viewBinding;
 	// The page title
@@ -395,26 +394,38 @@ public class FacesView<T extends Bean> extends Harness {
 		currentBean = null;
 	}
 	
-	@SuppressWarnings("static-method")
-	public User getUser() {
-		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-		return (User) ec.getSessionMap().get(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+	/**
+	 * This method produces a style class that implements 
+	 * the form column/row contract in the skyve view metadata.
+	 * This method is called within the div styleClass attribute
+	 * in form layouts.
+	 * @param formIndex	The form to get the style for.
+	 * @param colspan	The colspan to style for.
+	 * @return	The responsive grid style classes required.
+	 */
+	@SuppressWarnings({"unchecked", "static-method"})
+	public String getResponsiveFormStyle(int formIndex, String alignment, int colspan) {
+		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
+		String result = formStyles.get(formIndex).getStyle(colspan);
+		if (alignment != null) {
+			result = String.format("%s %s", result, alignment);
+		}
+		
+		return result;
 	}
 	
-	@SuppressWarnings("static-method")
-	public void setUser(String customerName, String userName) {
-		User user = null;
-		AbstractRepository repository = AbstractRepository.get();
-		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-		if (ec.getUserPrincipal() == null) { // not logged in
-			user = repository.retrieveUser(new StringBuilder(64).append(customerName).append('/').append(userName).toString());
-		}
-		else {
-			user = repository.retrieveUser(ec.getUserPrincipal().toString());
-		}
-		ec.getSessionMap().put(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
-
-		AbstractPersistence persistence = AbstractPersistence.get();
-		persistence.setUser(user);
+	/**
+	 * This method produces a style class for each edit view form row.
+	 * The side-effect is that the style is reset for the new row to layout.
+	 * This method is called within the div styleClass attribute
+	 * in form layouts.
+	 * @param formIndex	The form to reset the style for.
+	 * @return ui-g-12 ui-g-nopad
+	 */
+	@SuppressWarnings({"unchecked", "static-method"})
+	public String resetResponsiveFormStyle(int formIndex) {
+		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
+		formStyles.get(formIndex).reset();
+		return "ui-g-12 ui-g-nopad";
 	}
 }

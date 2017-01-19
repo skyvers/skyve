@@ -142,7 +142,7 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
-	public static UIComponent findComponentByClientId(UIComponent base, String id) {
+	private static UIComponent findComponentByClientId(UIComponent base, String id) {
 		if (id.equals(base.getClientId())) {
 			return base;
 		}
@@ -165,9 +165,17 @@ public abstract class FacesAction<T> {
 		return result;
 	}
 
-	public static List<UIComponent> findComponentsByBinding(UIComponent base, String binding) {
+	private static List<UIComponent> findComponentsByBinding(UIComponent base, String binding) {
 		List<UIComponent> result = new ArrayList<>();
 		findComponentsByBinding(base, binding, result);
+
+		// check the last part of a compound binding
+		int lastDotIndex = binding.lastIndexOf('.');
+		if (lastDotIndex > 0) { // compound binding
+			String simpleBinding = binding.substring(lastDotIndex);
+			findComponentsByBinding(base, simpleBinding, result);
+		}
+		
 		return result;
 	}
 
