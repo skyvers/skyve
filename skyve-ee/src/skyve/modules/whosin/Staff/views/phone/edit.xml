@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view title="Staff - {contact.name}" type="edit" xmlns="http://www.skyve.org/xml/view" 
+xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox shrinkWrap="height">
+		<hbox border="true" borderTitle="Details">
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<default binding="contact.name" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="contact.mobile" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="contact.email1" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="reportsTo" descriptionBinding="bizKey">
+							<filterParameter operator="notEqual" name="staff" binding="bizId" />
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="staffCode" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="dateOfBirth" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="roleTitle" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<default binding="baseOffice" />
+					</item>
+				</row>
+			</form>
+			<form percentageWidth="50">
+				<column percentageWidth="20" />
+				<column />
+				<row>
+					<item>
+						<contentImage binding="contact.image" pixelWidth="200" pixelHeight="200"  editable="false"/>
+					</item>
+				</row>
+
+			</form>
+		</hbox>
+		<form border="true" borderTitle="Status" percentageWidth="50">
+			<column percentageWidth="20" />
+			<column />
+			<row>
+				<item>
+					<default binding="status" />
+				</item>
+			</row>
+			<row>
+				<item>
+					<default binding="dueBack" />
+				</item>
+			</row>
+		</form>
+	</vbox>
+	<actions>
+		<defaults />
+	</actions>
+</view>

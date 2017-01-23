@@ -51,7 +51,11 @@ public class Communication extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String sendToPropertyName = "sendTo";
 	/** @hidden */
+	public static final String ccToPropertyName = "ccTo";
+	/** @hidden */
 	public static final String sendToOverridePropertyName = "sendToOverride";
+	/** @hidden */
+	public static final String ccToOverridePropertyName = "ccToOverride";
 	/** @hidden */
 	public static final String sendFromPropertyName = "sendFrom";
 	/** @hidden */
@@ -252,13 +256,21 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private String toBinding;
 	/**
-	 * The address to send to. Bindings are allowed relative to the above module document.
+	 * The address to send to.
 	 **/
 	private String sendTo;
+	/**
+	 * The address to send to.
+	 **/
+	private String ccTo;
 	/**
 	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendToOverride;
+	/**
+	 * The address to send to. Bindings are allowed relative to the above module document.
+	 **/
+	private String ccToOverride;
 	/**
 	 * The address to send from.
 	 **/
@@ -474,6 +486,24 @@ public class Communication extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #ccTo} accessor.
+	 **/
+	public String getCcTo() {
+		return ccTo;
+	}
+
+	/**
+	 * {@link #ccTo} mutator.
+	 * 
+	 * @param ccTo	The new value to set.
+	 **/
+	@XmlElement
+	public void setCcTo(String ccTo) {
+		preset(ccToPropertyName, ccTo);
+		this.ccTo = ccTo;
+	}
+
+	/**
 	 * {@link #sendToOverride} accessor.
 	 **/
 	public String getSendToOverride() {
@@ -488,6 +518,23 @@ public class Communication extends AbstractPersistentBean {
 	@XmlElement
 	public void setSendToOverride(String sendToOverride) {
 		this.sendToOverride = sendToOverride;
+	}
+
+	/**
+	 * {@link #ccToOverride} accessor.
+	 **/
+	public String getCcToOverride() {
+		return ccToOverride;
+	}
+
+	/**
+	 * {@link #ccToOverride} mutator.
+	 * 
+	 * @param ccToOverride	The new value to set.
+	 **/
+	@XmlElement
+	public void setCcToOverride(String ccToOverride) {
+		this.ccToOverride = ccToOverride;
 	}
 
 	/**

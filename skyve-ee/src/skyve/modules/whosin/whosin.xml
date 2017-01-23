@@ -46,6 +46,11 @@
 		</list>
 		<list name="All Staff" query="qStaff">
 			<uxui name="desktop" />
+			<role name="Manager" />
+			<role name="StaffMember" />
+		</list>
+		<list name="All Staff" query="qStaffMobile">
+			<uxui name="phone" />
 			<uxui name="tablet"/>
 			<role name="Manager" />
 			<role name="StaffMember" />
@@ -85,7 +90,18 @@
 				<column binding="location" hidden="true"/>
 			</columns>
 		</documentQuery>
-		<documentQuery name="qOfficeForPhone" documentName="Office">
+		<documentQuery name="qStaffMobile" documentName="Staff">
+			<description>All Staff</description>
+			<columns>
+				<column binding="contact.name" sortOrder="ascending"/>
+				<column binding="roleTitle" />
+				<column binding="status" />
+				<column binding="contact.mobile" />
+				<column binding="dueBack" />
+				<column binding="baseOffice.bizKey"/>
+				<column binding="location" hidden="true"/>
+			</columns>
+		</documentQuery>		<documentQuery name="qOfficeForPhone" documentName="Office">
 			<description>All Offices</description>
 			<columns>
 				<column binding="bizKey" sortOrder="ascending"/>

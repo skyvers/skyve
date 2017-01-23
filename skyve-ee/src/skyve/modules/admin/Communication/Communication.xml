@@ -35,8 +35,13 @@
 			<length>500</length>
 		</text>
 		<text name="sendTo">
-			<displayName>To (expression)</displayName>
-			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
+			<displayName>To</displayName>
+			<description>The address to send to.</description>
+			<length>250</length>
+		</text>
+		<text name="ccTo">
+			<displayName>CC To</displayName>
+			<description>The address to send to.</description>
 			<length>250</length>
 		</text>
 		<text name="sendToOverride" persistent="false" trackChanges="false">
@@ -44,6 +49,11 @@
 			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
 		</text>
+		<text name="ccToOverride" persistent="false" trackChanges="false">
+			<displayName>CC To (expression)</displayName>
+			<description>The address to send to. Bindings are allowed relative to the above module document.</description>
+			<length>250</length>
+		</text>		
 		<text name="sendFrom">
 			<displayName>From (expression)</displayName>
 			<description>The address to send from.</description>
