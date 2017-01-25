@@ -31,11 +31,13 @@
 		    <groupId>com.jaspersoft</groupId>
 		    <artifactId>ireport</artifactId>
 		    <version>${ireport.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.umlgraph</groupId>
 		    <artifactId>umlgraph</artifactId>
 		    <version>${umlgraph.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.opengeo</groupId>
