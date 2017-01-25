@@ -26,9 +26,32 @@
 						<configuration>
 							<overWriteIfNewer>true</overWriteIfNewer>
 							<outputDirectory>javaee/skyve.ear/lib/</outputDirectory>
-							
 						</configuration>
 					</execution>
+<!-- Use this to make the web app
+					<execution>
+						<id>unpack</id>
+						<phase>package</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.skyve</groupId>
+									<artifactId>skyve-web</artifactId>
+									<version>${skyve.version}</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>target/testical</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+							
+							<overWriteIfNewer>true</overWriteIfNewer>
+							<outputDirectory>target/unpacked/</outputDirectory>
+						</configuration>
+					</execution>
+-->
 				</executions>
 			</plugin> 		
 			<plugin>
@@ -73,8 +96,8 @@
  		</plugins>
  	</build>
 
-	<!-- This is a copy/paste of skyve/pom.xml dependencies -->
 	<dependencies>
+		<!-- This is a copy/paste of skyve/pom.xml dependencies -->
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
@@ -574,11 +597,28 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- These need to remain and are not a copy of the skyve dependencies -->
         <dependency>
             <groupId>org.skyve</groupId>
             <artifactId>skyve-web</artifactId>
             <version>${skyve.version}</version>
         </dependency>
+		<dependency>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>${javaee-api.version}</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>activation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
         <!-- Test dependencies -->
 <!--
@@ -588,15 +628,6 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
--->
-<!--
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>sqljdbc41</artifactId>
-			<version>4.1</version>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/sqljdbc41.jar</systemPath>
-		</dependency>
 -->
 	</dependencies>
 </project>
