@@ -54,7 +54,7 @@
 		<thumbnailator.version>0.4.8</thumbnailator.version>
 		<tika.version>1.5</tika.version>
 		<umlgraph.version>5.6.6</umlgraph.version>
-		<UserAgentUtils.version>1.19</UserAgentUtils.version>
+		<UserAgentUtils.version>1.20</UserAgentUtils.version>
 		<xercesImpl.version>2.8.1</xercesImpl.version>
 		<xmlbeans.version>2.6.0</xmlbeans.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
@@ -108,22 +108,26 @@
 	</build>
 
 	<repositories>
-		<repository>
-			<id>geotools</id>
-			<url>http://download.osgeo.org/webdav/geotools/</url>
-		</repository>
-		<repository>
-			<id>boundless geo</id>
-			<url>http://repo.boundlessgeo.com/main/</url>
-		</repository>
-		<repository>
-			<id>OpenNMS</id>
-			<url>http://repo.opennms.org/maven2/</url>
-		</repository>
-		<repository>
-			<id>Prime Faces</id>
-			<url>http://repository.primefaces.org/</url>
-		</repository>
+        <repository>
+            <id>maven2</id>
+            <url>https://repo.maven.apache.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>oss.sonatype.org</id>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>Prime Faces</id>
+            <url>http://repository.primefaces.org/</url>
+        </repository>
+        <repository>
+            <id>osgeo</id>
+            <url>http://download.osgeo.org/webdav/geotools/</url>
+        </repository>
+        <repository>
+            <id>boundlessgeo</id>
+            <url>https://repo.boundlessgeo.com/main</url>
+        </repository>
 		<repository>
 			<id>skyve</id>
 			<url>http://repo.skyve.org/repository/skyve/</url>
