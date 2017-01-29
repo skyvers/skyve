@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20161229</version>
+	<version>20170130</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20161229</skyve.version>
+		<skyve.version>20170130</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
@@ -35,7 +35,7 @@
 		<hibernate-entitymanager.version>3.3.2.GA</hibernate-entitymanager.version>
 		<ireport.version>4.7.0</ireport.version>
 		<groovy.version>2.3.2</groovy.version>
-		<jasperreports.version>4.7.0</jasperreports.version>
+		<jasperreports.version>6.3.1</jasperreports.version>
 		<java.version>1.7</java.version>
 		<javassist.version>3.12.0.GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
@@ -95,6 +95,11 @@
 						</execution>
 					</executions>
 				</plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.5.0</version>
+                </plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -248,6 +253,10 @@
 				<artifactId>jasperreports</artifactId>
 				<version>${jasperreports.version}</version>
 				<exclusions>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>spring-context</artifactId>
+					</exclusion>
 					<exclusion>
 						<groupId>bouncycastle</groupId>
 						<artifactId>bcmail-jdk14</artifactId>

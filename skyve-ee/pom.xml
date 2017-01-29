@@ -6,10 +6,16 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20161229</version>	
+		<version>20170130</version>	
 	</parent>
 	<artifactId>skyve-ee</artifactId>
- 
+
+	<properties>
+		<javaee-path>${basedir}/javaee</javaee-path>
+		<ear-path>${javaee-path}/skyve.ear</ear-path>
+		<war-path>${ear-path}/skyve.war</war-path>
+	</properties>
+
  	<build>
  		<plugins>
 			<plugin>
@@ -25,7 +31,7 @@
 						</goals>
 						<configuration>
 							<overWriteIfNewer>true</overWriteIfNewer>
-							<outputDirectory>javaee/skyve.ear/lib/</outputDirectory>
+							<outputDirectory>${ear-path}/lib/</outputDirectory>
 						</configuration>
 					</execution>
 <!-- Use this to make the web app
@@ -66,8 +72,8 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<delete dir="${basedir}/javaee/skyve.ear/lib" />
-								<delete dir="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib" />
+								<delete dir="${ear-path}/lib" />
+								<delete dir="${war-path}/WEB-INF/lib" />
 							</tasks>
 						</configuration>
 					</execution>
@@ -79,15 +85,50 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<move file="${basedir}/javaee/skyve.ear/lib/javaee-api-7.0.jar" tofile="${basedir}/lib/javaee-api-7.0.jar" />
-								<move todir="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib" failonerror="true">
-									<fileset dir="${basedir}/javaee/skyve.ear/lib" 
+								<move file="${ear-path}/lib/javaee-api-7.0.jar" tofile="${basedir}/lib/javaee-api-7.0.jar" />
+								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
+									<fileset dir="${ear-path}/lib" 
 												includes="all-themes-*.jar,atmosphere-runtime-*.jar,commons-fileupload-*.jar,gson-*.jar,primefaces-*.jar,primefaces-extensions-*.jar,skyve-web-*.jar" />
 								</move>
-								<move file="${basedir}/javaee/skyve.ear/lib/skyve-core-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-core.jar" />
-								<move file="${basedir}/javaee/skyve.ear/lib/skyve-ext-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/lib/skyve-ext.jar" />
-								<delete file="${basedir}/javaee/skyve.ear/lib/skyve-ee-${project.parent.version}.jar" />
-								<move file="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web-${project.parent.version}.jar" tofile="${basedir}/javaee/skyve.ear/skyve.war/WEB-INF/lib/skyve-web.jar" />
+								<move file="${ear-path}/lib/skyve-core-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-core.jar" />
+								<move file="${ear-path}/lib/skyve-ext-${project.parent.version}.jar" tofile="${ear-path}/lib/skyve-ext.jar" />
+								<delete file="${ear-path}/lib/skyve-ee-${project.parent.version}.jar" />
+								<move file="${war-path}/WEB-INF/lib/skyve-web-${project.parent.version}.jar" tofile="${war-path}/WEB-INF/lib/skyve-web.jar" />
+							</tasks>
+						</configuration>
+					</execution>
+					
+					<!-- Touch: mvn antrun:run@touch -->
+					<execution>
+						<id>touch</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<delete file="${javaee-path}/*.failed" />
+								<touch file="${ear-path}.dodeploy" />
+							</tasks>
+						</configuration>
+					</execution>
+					<!-- Generate Domain: mvn antrun:run@generate-domain -->
+					<execution>
+						<id>generate-domain</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<java fork="true" classname="org.skyve.impl.generate.DomainGenerator">
+									<classpath>
+										<fileset dir="${ear-path}/lib">
+											<include name="**/*.jar"/>
+										</fileset>
+										<!-- don't use a file element here - doesn't work in old ant -->
+										<pathelement path="${ear-path}/apps.jar/" />
+									</classpath>
+									<arg value="${basedir}/src/skyve/" />
+								</java>
 							</tasks>
 						</configuration>
 					</execution>
@@ -210,6 +251,10 @@
 			<artifactId>jasperreports</artifactId>
 			<version>${jasperreports.version}</version>
 			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-context</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>bouncycastle</groupId>
 					<artifactId>bcmail-jdk14</artifactId>

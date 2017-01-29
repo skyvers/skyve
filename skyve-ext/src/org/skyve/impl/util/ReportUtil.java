@@ -1,8 +1,20 @@
 package org.skyve.impl.util;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.Map;
+
+import org.skyve.EXT;
+import org.skyve.domain.Bean;
+import org.skyve.impl.jasperreports.SkyveDataSource;
+import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
+import org.skyve.report.ReportFormat;
 
 import net.sf.jasperreports.engine.JRAbstractExporter;
 import net.sf.jasperreports.engine.JRException;
@@ -21,26 +33,12 @@ import net.sf.jasperreports.engine.export.JRTextExporterParameter;
 import net.sf.jasperreports.engine.export.JRXhtmlExporter;
 import net.sf.jasperreports.engine.export.JRXlsAbstractExporterParameter;
 import net.sf.jasperreports.engine.export.JRXmlExporter;
-import net.sf.jasperreports.engine.export.JRXmlExporterParameter;
 import net.sf.jasperreports.engine.export.oasis.JROdsExporter;
 import net.sf.jasperreports.engine.export.oasis.JROdtExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
-
-import org.skyve.EXT;
-import org.skyve.domain.Bean;
-import org.skyve.impl.jasperreports.SkyveDataSource;
-import org.skyve.impl.metadata.repository.AbstractRepository;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.user.User;
-import org.skyve.report.ReportFormat;
-import org.skyve.impl.util.SQLUtil;
 
 public final class ReportUtil {
 	private ReportUtil() {
@@ -79,7 +77,7 @@ public final class ReportUtil {
 		Customer customer = user.getCustomer();
 		String reportFileName = preProcess(customer, document, reportName, parameters);
 
-        JasperReport jasperReport = (JasperReport) JRLoader.loadObject(reportFileName);
+        JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
 		String queryLanguage = jasperReport.getQuery().getLanguage();
 		
 		JasperPrint result = null;
@@ -201,7 +199,7 @@ public final class ReportUtil {
 			break;
 		case xml:
 			exporter = new JRXmlExporter();
-			exporter.setParameter(JRXmlExporterParameter.DTD_LOCATION, "");
+//			exporter.setParameter(JRXmlExporterParameter.DTD_LOCATION, "");
 			break;
 		default:
 			throw new IllegalStateException("Report format " + format + " not catered for.");

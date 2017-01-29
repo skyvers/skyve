@@ -3,6 +3,7 @@ package org.skyve.impl.util;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -133,8 +134,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript for web site
-	public static final String JAVASCRIPT_FILE_VERSION = "20161110";
-	public static final String SKYVE_VERSION = "20161229";
+	public static final String JAVASCRIPT_FILE_VERSION = "20170130";
+	public static final String SKYVE_VERSION = "20170130";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 	
 	private static String absoluteBasePath;
@@ -145,9 +146,24 @@ public class UtilImpl {
 			}
 			else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
-				absoluteBasePath = url.getPath();
-				absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
-				absoluteBasePath = absoluteBasePath.replace('\\', '/');
+				if (url == null) {
+		        	UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
+					ClassLoader cl = Thread.currentThread().getContextClassLoader();
+					if (cl instanceof URLClassLoader) {
+						UtilImpl.LOGGER.severe("The context classloader paths are:-");
+						for (URL entry : ((URLClassLoader) cl).getURLs()) {
+				        	UtilImpl.LOGGER.severe(entry.getFile());
+				        }
+					}
+					else {
+						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
+					}
+				}
+				else {
+					absoluteBasePath = url.getPath();
+					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
+					absoluteBasePath = absoluteBasePath.replace('\\', '/');
+				}
 			}
 		}
 		
