@@ -9,8 +9,8 @@ in ~/.m2/settings.xml
 	<servers>
 		<server>
 			<id>skyve</id>
-			<username>bizhub</username>
-			<password>rbmspedc</password>
+			<username>{admin_username}</username>
+			<password>{admin_password}</password>
 		</server>
 	</servers>
 </settings>
