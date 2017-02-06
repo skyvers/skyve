@@ -37,7 +37,7 @@
 		<groovy.version>2.3.2</groovy.version>
 		<jasperreports.version>6.3.1</jasperreports.version>
 		<java.version>1.7</java.version>
-		<javassist.version>3.12.0.GA</javassist.version>
+		<javassist.version>3.20.0-GA</javassist.version>
 		<javaee-api.version>7.0</javaee-api.version>
 		<jts.version>1.13</jts.version>
 		<lucene.version>4.10.2</lucene.version>
@@ -498,6 +498,12 @@
 				<groupId>org.opengeo</groupId>
 				<artifactId>geodb</artifactId>
 				<version>0.7</version>
+				<scope>runtime</scope>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.hatbox</groupId>
+				<artifactId>hatbox</artifactId>
+				<version>1.0.b7</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>

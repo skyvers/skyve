@@ -59,8 +59,8 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>javassist</groupId>
-			<artifactId>javassist</artifactId> 
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
 			<version>${javassist.version}</version>
 			<scope>compile</scope>
 		</dependency>
