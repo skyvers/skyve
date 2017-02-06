@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20170130</skyve.version>
+		<skyve.version>20170206</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
