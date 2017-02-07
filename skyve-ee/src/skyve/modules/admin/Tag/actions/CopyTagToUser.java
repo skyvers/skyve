@@ -21,7 +21,7 @@ public class CopyTagToUser implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext) throws Exception {
 
 		if (bean.getCopyToUser() != null) {
 
@@ -44,6 +44,6 @@ public class CopyTagToUser implements ServerSideAction<Tag> {
 				pers.upsertBeanTuple(tgd);
 			}
 		}
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

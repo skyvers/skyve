@@ -17,7 +17,7 @@ public class UpdateMyDetails implements ServerSideAction<UserDashboard> {
 	private static final long serialVersionUID = -4317908281075686229L;
 
 	@Override
-	public ServerSideActionResult execute(UserDashboard bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<UserDashboard> execute(UserDashboard bean, WebContext webContext) throws Exception {
 
 		Persistence pers= CORE.getPersistence();
 		
@@ -27,6 +27,6 @@ public class UpdateMyDetails implements ServerSideAction<UserDashboard> {
 		me = pers.save(me);
 		bean.setCurrentUser(me);
 		
-		return new ServerSideActionResult(bean); // stay on the same form
+		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }

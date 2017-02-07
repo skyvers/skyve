@@ -10,9 +10,9 @@ public class BackupSelected implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 8136709192590507528L;
 
 	@Override
-	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		bean.setRefreshBackups(Boolean.FALSE);
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

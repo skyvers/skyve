@@ -18,7 +18,7 @@ public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Snapshot bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Snapshot> execute(Snapshot bean, WebContext webContext) throws Exception {
 
 		if (bean.getCopyToUser() != null) {
 
@@ -29,6 +29,6 @@ public class CopySnapshotToUser implements ServerSideAction<Snapshot> {
 			Persistence pers = CORE.getPersistence();
 			pers.upsertBeanTuple(newSnapshot);			
 		}
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

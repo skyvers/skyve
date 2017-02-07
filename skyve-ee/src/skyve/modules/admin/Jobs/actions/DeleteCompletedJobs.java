@@ -15,11 +15,11 @@ public class DeleteCompletedJobs implements ServerSideAction<Jobs> {
 	private static final long serialVersionUID = -1037253249182913062L;
 
 	@Override
-	public ServerSideActionResult execute(Jobs bean, WebContext webContext) 
+	public ServerSideActionResult<Jobs> execute(Jobs bean, WebContext webContext) 
 	throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		persistence.newBizQL("delete from {admin.Job} as job").execute();
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

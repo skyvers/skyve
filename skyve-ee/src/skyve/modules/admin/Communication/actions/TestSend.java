@@ -26,7 +26,7 @@ public class TestSend implements ServerSideAction<Communication> {
 	 * Kick off the annual returns job.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 
 		communication.setActionType(ActionType.sendImmediately);
 
@@ -43,6 +43,6 @@ public class TestSend implements ServerSideAction<Communication> {
 		communication.setSendToOverride(me.getEmail1());
 		CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
 
-		return new ServerSideActionResult(communication);
+		return new ServerSideActionResult<>(communication);
 	}
 }

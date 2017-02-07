@@ -11,7 +11,7 @@ public class Create implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 7301976416286938546L;
 
 	@Override
-	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		StringBuilder result = new StringBuilder(2048);
 		for (String create : DDL.create(null, false)) {
@@ -19,6 +19,6 @@ public class Create implements ServerSideAction<DataMaintenance> {
 		}
 		
 		bean.setDdlScript(result.toString());
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

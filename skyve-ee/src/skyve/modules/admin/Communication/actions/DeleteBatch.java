@@ -15,7 +15,7 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 	private static final long serialVersionUID = 5306067916641877356L;
 
 	@Override
-	public ServerSideActionResult execute(Communication bean, WebContext webContext)
+	public ServerSideActionResult<Communication> execute(Communication bean, WebContext webContext)
 	throws Exception {
 		
 		bean.setRefreshBatches(Boolean.TRUE);
@@ -28,7 +28,7 @@ public class DeleteBatch implements ServerSideAction<Communication> {
 
 		bean.setSelectedBatchTimestampFolderName(null); // deselect the deleted backup
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 	
 }

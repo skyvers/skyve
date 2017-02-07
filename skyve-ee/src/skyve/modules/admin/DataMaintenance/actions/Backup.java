@@ -14,7 +14,7 @@ public class Backup implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = -2943997026132660437L;
 
 	@Override
-	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		bean.setRefreshBackups(Boolean.TRUE);
 		
@@ -28,6 +28,6 @@ public class Backup implements ServerSideAction<DataMaintenance> {
 		FileUtil.delete(backupDir);
 		Util.LOGGER.info("Deleted backup folder " + backupDir.getAbsolutePath());
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

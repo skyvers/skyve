@@ -5,19 +5,19 @@ import org.skyve.domain.Bean;
 /**
  * 
  */
-public final class ServerSideActionResult {
+public final class ServerSideActionResult<T extends Bean> {
 	/**
 	 * A reference to the bean sent in to the execute method. 
 	 * The reference could have changed during processing - eg saving a new bean will yield a different reference.
 	 */
-	private Bean bean;
+	private T bean;
 
 	/**
 	 * 
 	 * @param executeLocation
 	 * @param bean
 	 */
-	public ServerSideActionResult(Bean bean) {
+	public ServerSideActionResult(T bean) {
 		this.bean = bean;
 	}
 
@@ -25,7 +25,7 @@ public final class ServerSideActionResult {
 	 * 
 	 * @return
 	 */
-	public Bean getBean() {
+	public T getBean() {
 		return bean;
 	}
 
@@ -33,7 +33,7 @@ public final class ServerSideActionResult {
 	 * 
 	 * @param bean
 	 */
-	public void setBean(Bean bean) {
+	public void setBean(T bean) {
 		this.bean = bean;
 	}
 }

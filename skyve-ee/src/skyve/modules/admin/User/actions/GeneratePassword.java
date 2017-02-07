@@ -14,11 +14,11 @@ public class GeneratePassword implements ServerSideAction<User> {
 	private static final long serialVersionUID = 3904239033808385824L;
 
 	@Override
-	public ServerSideActionResult execute(User user, WebContext webContext) throws Exception {
+	public ServerSideActionResult<User> execute(User user, WebContext webContext) throws Exception {
 
 		generatePassword(user);
 
-		return new ServerSideActionResult(user);
+		return new ServerSideActionResult<>(user);
 		// form
 	}
 

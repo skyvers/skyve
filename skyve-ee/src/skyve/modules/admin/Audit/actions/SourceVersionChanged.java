@@ -16,9 +16,9 @@ public class SourceVersionChanged implements ServerSideAction<Audit> {
 	private static final long serialVersionUID = -1225628735166059147L;
 
 	@Override
-	public ServerSideActionResult execute(Audit bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Audit> execute(Audit bean, WebContext webContext) throws Exception {
 		sourceVersionChanged(bean);
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 	
 	public static void sourceVersionChanged(Audit bean) throws Exception {

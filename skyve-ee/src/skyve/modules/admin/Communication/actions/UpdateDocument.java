@@ -16,9 +16,9 @@ public class UpdateDocument implements ServerSideAction<Communication> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication bean, WebContext webContext)
+	public ServerSideActionResult<Communication> execute(Communication bean, WebContext webContext)
 	throws Exception {
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

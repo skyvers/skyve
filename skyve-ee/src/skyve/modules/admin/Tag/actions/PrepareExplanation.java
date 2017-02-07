@@ -17,7 +17,7 @@ public class PrepareExplanation implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext) throws Exception {
 
 		StringBuilder ex = new StringBuilder(128);
 
@@ -60,6 +60,6 @@ public class PrepareExplanation implements ServerSideAction<Tag> {
 		
 		bean.setActionTagCount(TagBizlet.getCount(bean.getActionTag()));
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

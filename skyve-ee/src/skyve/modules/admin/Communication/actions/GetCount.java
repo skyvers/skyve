@@ -13,12 +13,12 @@ public class GetCount implements ServerSideAction<Communication> {
 	private static final long serialVersionUID = 60089863446674901L;
 
 	@Override
-	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 
 		String results = GetResults.getResults(communication);
 		
 		communication.setResults(results);
 		
-		return new ServerSideActionResult(communication);
+		return new ServerSideActionResult<>(communication);
 	}
 }

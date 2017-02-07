@@ -23,7 +23,7 @@ public class GetResults implements ServerSideAction<Communication> {
 	 * Kick off the annual returns job.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 
 		communication.setActionType(ActionType.testBindingsAndOutput);
 
@@ -37,7 +37,7 @@ public class GetResults implements ServerSideAction<Communication> {
 
 		result = CommunicationUtil.kickOffJob(result);
 
-		return new ServerSideActionResult(result);
+		return new ServerSideActionResult<>(result);
 	}
 
 	public static String getResults(Communication bean) throws Exception {

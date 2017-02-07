@@ -19,7 +19,7 @@ public class UnionTag implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext)
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext)
 	throws Exception {
 		
 		if(bean.getActionTag()==null){
@@ -28,6 +28,6 @@ public class UnionTag implements ServerSideAction<Tag> {
 		
 		TagBizlet.union(bean, bean.getActionTag());
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

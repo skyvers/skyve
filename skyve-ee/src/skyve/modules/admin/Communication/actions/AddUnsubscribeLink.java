@@ -16,7 +16,7 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 	 * Add an unsubscribe link to the communication body.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 
 		Communication result = communication;
 
@@ -31,6 +31,6 @@ public class AddUnsubscribeLink implements ServerSideAction<Communication> {
 			}
 		}
 		
-		return new ServerSideActionResult(result);
+		return new ServerSideActionResult<>(result);
 	}
 }

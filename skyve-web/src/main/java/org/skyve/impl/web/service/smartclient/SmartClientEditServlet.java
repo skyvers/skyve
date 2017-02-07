@@ -818,7 +818,7 @@ public class SmartClientEditServlet extends HttpServlet {
 																					processedBean, 
 																					webContext);
 				if (! vetoed) {
-					ServerSideActionResult result = customAction.execute(processedBean, webContext);
+					ServerSideActionResult<Bean> result = customAction.execute(processedBean, webContext);
 					internalCustomer.interceptAfterServerSideAction(processDocument,
 																		mutableCustomActionName,
 																		result, 

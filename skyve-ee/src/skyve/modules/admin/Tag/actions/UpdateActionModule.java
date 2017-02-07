@@ -16,12 +16,12 @@ public class UpdateActionModule implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext)
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext)
 	throws Exception {
 		
 		bean.setActionDocumentName(null);
 		UpdateActionDocument.resetDocument(bean);
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

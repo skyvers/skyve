@@ -30,7 +30,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	private static final long serialVersionUID = -4317908281075686229L;
 
 	@Override
-	public ServerSideActionResult execute(ChangePassword bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<ChangePassword> execute(ChangePassword bean, WebContext webContext) throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -92,6 +92,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
 		
-		return new ServerSideActionResult(bean); // stay on the same form
+		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }

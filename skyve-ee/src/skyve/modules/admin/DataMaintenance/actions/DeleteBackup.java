@@ -15,7 +15,7 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 5306067916641877356L;
 
 	@Override
-	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		File backup = new File(String.format("%sbackup_%s%s%s", 
@@ -35,6 +35,6 @@ public class DeleteBackup implements ServerSideAction<DataMaintenance> {
 		bean.setSelectedBackupName(null); // deselect the deleted backup
 		bean.setRefreshBackups(Boolean.TRUE);
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

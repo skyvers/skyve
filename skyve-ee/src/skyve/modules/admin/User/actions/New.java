@@ -16,7 +16,7 @@ public class New implements ServerSideAction<User> {
 	private static final long serialVersionUID = 7776867319664519408L;
 
 	@Override
-	public ServerSideActionResult execute(User adminUser, WebContext webContext) throws Exception {
+	public ServerSideActionResult<User> execute(User adminUser, WebContext webContext) throws Exception {
 	
 		// Clear out old matches
 		adminUser.getCandidateContacts().clear();
@@ -33,6 +33,6 @@ public class New implements ServerSideAction<User> {
 		
 		adminUser.setWizardState(WizardState.createContact);
 
-		return new ServerSideActionResult(adminUser);
+		return new ServerSideActionResult<>(adminUser);
 	}
 }

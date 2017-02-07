@@ -23,7 +23,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 	private static final long serialVersionUID = -1037253249182913062L;
 
 	@Override
-	public ServerSideActionResult execute(JobSchedule bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<JobSchedule> execute(JobSchedule bean, WebContext webContext) throws Exception {
 
 		Persistence persistence = CORE.getPersistence();
 		User user = persistence.getUser();
@@ -48,6 +48,6 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		// run as the current user
 		EXT.runOneShotJob(job, bean, user);
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

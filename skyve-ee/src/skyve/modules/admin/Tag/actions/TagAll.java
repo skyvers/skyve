@@ -23,7 +23,7 @@ public class TagAll implements ServerSideAction<Tag> {
 	 * Tag all records
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext)
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext)
 	throws Exception {
 		
 		Persistence pers = CORE.getPersistence();
@@ -42,6 +42,6 @@ public class TagAll implements ServerSideAction<Tag> {
 			pers.upsertBeanTuple(tagged);
 		}
 		
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

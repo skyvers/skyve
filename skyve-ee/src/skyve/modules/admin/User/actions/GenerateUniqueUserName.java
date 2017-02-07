@@ -21,11 +21,11 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 	private static final long serialVersionUID = 3904239033808385824L;
 
 	@Override
-	public ServerSideActionResult execute(User user, WebContext webContext) throws Exception {
+	public ServerSideActionResult<User> execute(User user, WebContext webContext) throws Exception {
 
 		user.setUserName(generateUniqueUserNameFromContactName(user));
 
-		return new ServerSideActionResult(user);
+		return new ServerSideActionResult<>(user);
 	}
 
 	public static String generateUniqueUserNameFromContactName(User user) throws Exception {

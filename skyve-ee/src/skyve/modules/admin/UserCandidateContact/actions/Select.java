@@ -16,7 +16,7 @@ public class Select implements ServerSideAction<UserCandidateContact> {
 	private static final long serialVersionUID = 4813596591072958231L;
 
 	@Override
-	public ServerSideActionResult execute(UserCandidateContact candidate, WebContext webContext)
+	public ServerSideActionResult<UserCandidateContact> execute(UserCandidateContact candidate, WebContext webContext)
 	throws Exception {
 		User user = candidate.getParent();
 		user.setContact(candidate.getContact());
@@ -25,6 +25,6 @@ public class Select implements ServerSideAction<UserCandidateContact> {
 		user.setWizardState(WizardState.confirmUserNameAndPassword);
 		user.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(user));
 		
-		return new ServerSideActionResult(candidate);
+		return new ServerSideActionResult<>(candidate);
 	}
 }

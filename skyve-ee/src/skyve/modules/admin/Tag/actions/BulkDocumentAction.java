@@ -25,7 +25,7 @@ public class BulkDocumentAction implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag tag, WebContext webContext)
+	public ServerSideActionResult<Tag> execute(Tag tag, WebContext webContext)
 	throws Exception {
 		
 		Persistence pers = CORE.getPersistence();
@@ -59,6 +59,6 @@ public class BulkDocumentAction implements ServerSideAction<Tag> {
 		
 		tag.setDocumentActionResults(sb.toString());
 		
-		return new ServerSideActionResult(tag);
+		return new ServerSideActionResult<>(tag);
 	}
 }

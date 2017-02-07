@@ -14,9 +14,9 @@ public class Refresh implements ServerSideAction<Jobs> {
 	private static final long serialVersionUID = -2274023750260116612L;
 
 	@Override
-	public ServerSideActionResult execute(Jobs jobs, WebContext webContext)
+	public ServerSideActionResult<Jobs> execute(Jobs jobs, WebContext webContext)
 	throws Exception {
 		JobsBizlet.refresh(jobs);
-		return new ServerSideActionResult(jobs);
+		return new ServerSideActionResult<>(jobs);
 	}
 }

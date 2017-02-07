@@ -54,7 +54,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
     	Action action = view.getAction(actionName);
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
 	    if (Boolean.FALSE.equals(action.getClientValidation())) {
-	    	ServerSideActionResult result = serverSideAction.execute(targetBean, facesView.getWebContext());
+	    	ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, facesView.getWebContext());
 	    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
 	    }
 	    else {
@@ -66,7 +66,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 																					targetBean,
 																					webContext);
 				if (! vetoed) {
-					ServerSideActionResult result = serverSideAction.execute(targetBean, webContext);
+					ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
 					internalCustomer.interceptAfterServerSideAction(targetDocument, actionName, result, webContext);
 					ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
 				}

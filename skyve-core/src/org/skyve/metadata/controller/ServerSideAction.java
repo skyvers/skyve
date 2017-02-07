@@ -16,5 +16,5 @@ public interface ServerSideAction<T extends Bean> extends MetaData {
 	 * @return The result - the bean and whether to execute the current location - postback.
 	 * @throws Exception
 	 */
-	public ServerSideActionResult execute(T bean, WebContext webContext) throws Exception;
+	public ServerSideActionResult<T> execute(T bean, WebContext webContext) throws Exception;
 }

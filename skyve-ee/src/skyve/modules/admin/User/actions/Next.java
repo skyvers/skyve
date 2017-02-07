@@ -17,7 +17,7 @@ public class Next implements ServerSideAction<User> {
 	private static final long serialVersionUID = -4667349358677521637L;
 
 	@Override
-	public ServerSideActionResult execute(User adminUser, WebContext webContext) throws Exception {
+	public ServerSideActionResult<User> execute(User adminUser, WebContext webContext) throws Exception {
 
 		ValidationException e = new ValidationException();
 		
@@ -41,6 +41,6 @@ public class Next implements ServerSideAction<User> {
 		}
 		
 		
-		return new ServerSideActionResult(adminUser);
+		return new ServerSideActionResult<>(adminUser);
 	}
 }

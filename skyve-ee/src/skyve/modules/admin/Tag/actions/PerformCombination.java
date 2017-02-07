@@ -19,7 +19,7 @@ public class PerformCombination implements ServerSideAction<Tag> {
 	 * Update the payment batch details.
 	 */
 	@Override
-	public ServerSideActionResult execute(Tag bean, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Tag> execute(Tag bean, WebContext webContext) throws Exception {
 
 		if (bean.getCombinationsOperator() == null) {
 			throw new ValidationException(new Message(Tag.combinationsOperatorPropertyName, "You have not set an operator."));
@@ -48,6 +48,6 @@ public class PerformCombination implements ServerSideAction<Tag> {
 		bean.setActionTagCount(TagBizlet.getCount(bean.getActionTag()));
 
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

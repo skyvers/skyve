@@ -22,7 +22,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 8521252561712649481L;
 
 	@Override
-	public ServerSideActionResult execute(DataMaintenance bean, WebContext webContext)
+	public ServerSideActionResult<DataMaintenance> execute(DataMaintenance bean, WebContext webContext)
 	throws Exception {
 		
 		if(bean.getRestorePreProcess()==null){
@@ -116,6 +116,6 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		FileUtil.delete(extractDir);
 		Util.LOGGER.info("DONE");
 
-		return new ServerSideActionResult(bean);
+		return new ServerSideActionResult<>(bean);
 	}
 }

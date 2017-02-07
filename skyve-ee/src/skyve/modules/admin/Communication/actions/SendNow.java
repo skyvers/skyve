@@ -18,12 +18,12 @@ public class SendNow implements ServerSideAction<Communication> {
 	 * Kick off the annual returns job.
 	 */
 	@Override
-	public ServerSideActionResult execute(Communication communication, WebContext webContext) throws Exception {
+	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
 
 		communication.setActionType(ActionType.sendImmediately);
 		
 		Communication result = CommunicationUtil.kickOffJob(communication);
 		
-		return new ServerSideActionResult(result);
+		return new ServerSideActionResult<>(result);
 	}
 }

@@ -86,7 +86,7 @@ public class PerformDocumentActionForTagJob extends Job {
 							CustomerImpl internalCustomer = (CustomerImpl) customer;
 							boolean vetoed = internalCustomer.interceptBeforeServerSideAction(document, tag.getDocumentAction(), pb, null);
 							if (!vetoed) {
-								ServerSideActionResult result = act.execute(pb, null);
+								ServerSideActionResult<Bean> result = act.execute(pb, null);
 								internalCustomer.interceptAfterServerSideAction(document, tag.getDocumentAction(), result, null);
 								pb = (PersistentBean) result.getBean();
 							}
