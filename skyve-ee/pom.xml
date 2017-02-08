@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20170206</version>	
+		<version>20170208</version>	
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -423,16 +423,6 @@
 			<version>${xmlschema-core.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.lucee</groupId>
-			<artifactId>xmpcore</artifactId>
-			<version>${xmpcore.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>stax</groupId>
-			<artifactId>stax-api</artifactId>
-			<version>${stax-api.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
 			<version>${jts.version}</version>
@@ -489,13 +479,13 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>fontbox</artifactId>
-			<version>1.8.4</version>
+			<version>${pdfbox.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.opengeo</groupId>
 			<artifactId>geodb</artifactId>
-			<version>0.7</version>
+			<version>${geodb.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -511,18 +501,6 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.5.2</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.5.2</version>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
 			<groupId>jdom</groupId>
 			<artifactId>jdom</artifactId>
 			<version>1.0</version>
@@ -533,6 +511,12 @@
 			<artifactId>jhighlight</artifactId>
 			<version>1.0</version>
 			<scope>runtime</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
@@ -584,25 +568,25 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
-			<version>1.8.4</version>
+			<version>${pdfbox.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
-			<version>3.10.1</version>
+			<version>${poi.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml-schemas</artifactId>
-			<version>3.10.1</version>
+			<version>${poi.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-scratchpad</artifactId>
-			<version>3.10.1</version>
+			<version>${poi.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>

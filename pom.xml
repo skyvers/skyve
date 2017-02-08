@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20170206</version>
+	<version>20170208</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20170206</skyve.version>
+		<skyve.version>20170208</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
@@ -42,6 +42,7 @@
 		<jts.version>1.13</jts.version>
 		<lucene.version>4.10.2</lucene.version>
 		<persistence-api.version>1.0.2</persistence-api.version>
+		<pdfbox.version>1.8.4</pdfbox.version>
 		<poi.version>3.15</poi.version>
 		<primefaces.version>6.0</primefaces.version>
 		<primefaces-extensions.version>6.0.0</primefaces-extensions.version>
@@ -49,7 +50,6 @@
 		<quartz.version>1.7.2</quartz.version>
 		<slf4j-api.version>1.5.8</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
-		<stax-api.version>1.0.1</stax-api.version>
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
 		<tika.version>1.5</tika.version>
@@ -58,7 +58,6 @@
 		<xercesImpl.version>2.8.1</xercesImpl.version>
 		<xmlbeans.version>2.6.0</xmlbeans.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
-		<xmpcore.version>5.1.2</xmpcore.version>
 	</properties>
 
 	<distributionManagement>
@@ -285,6 +284,10 @@
 						<groupId>commons-collections</groupId>
 						<artifactId>commons-collections</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.codehaus.castor</groupId>
+						<artifactId>castor-xml</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 			<dependency>
@@ -425,16 +428,6 @@
 				<version>${xmlschema-core.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.lucee</groupId>
-				<artifactId>xmpcore</artifactId>
-				<version>${xmpcore.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>stax</groupId>
-				<artifactId>stax-api</artifactId>
-				<version>${stax-api.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.vividsolutions</groupId>
 				<artifactId>jts</artifactId>
 				<version>${jts.version}</version>
@@ -491,13 +484,13 @@
 			<dependency>
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>fontbox</artifactId>
-				<version>1.8.4</version>
+				<version>${pdfbox.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.opengeo</groupId>
 				<artifactId>geodb</artifactId>
-				<version>0.7</version>
+				<version>${geodb.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -510,18 +503,6 @@
 				<groupId>com.googlecode.mp4parser</groupId>
 				<artifactId>isoparser</artifactId>
 				<version>1.0-RC-1</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-core</artifactId>
-				<version>2.5.2</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.fasterxml.jackson.core</groupId>
-				<artifactId>jackson-databind</artifactId>
-				<version>2.5.2</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
@@ -592,25 +573,25 @@
 			<dependency>
 				<groupId>org.apache.pdfbox</groupId>
 				<artifactId>pdfbox</artifactId>
-				<version>1.8.4</version>
+				<version>${pdfbox.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml</artifactId>
-				<version>3.10.1</version>
+				<version>${poi.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-ooxml-schemas</artifactId>
-				<version>3.10.1</version>
+				<version>${poi.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi-scratchpad</artifactId>
-				<version>3.10.1</version>
+				<version>${poi.version}</version>
 				<scope>runtime</scope>
 			</dependency>
 			<dependency>

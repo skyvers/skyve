@@ -7,11 +7,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.poi.hssf.usermodel.DVConstraint;
-import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFDataValidation;
-import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
@@ -24,7 +23,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.NumberToTextConverter;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
@@ -49,9 +47,6 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.bizport.POISheet;
-import org.skyve.impl.bizport.POIWorkbook;
-import org.skyve.impl.bizport.StandardGenerator;
 
 /**
  * Sets up a sheet with a number of columns in it.
@@ -318,7 +313,6 @@ public final class POISheet implements BizPortSheet {
 					Cell titleCell = titleRow.createCell(i, Cell.CELL_TYPE_STRING);
 					titleCell.setCellValue(column.getTitle() + " Description");
 					createCellComment(titleCell, 
-										i,
 										"The business description of the related record.  " +
 											"This value is NOT uploaded but allows a referential description within the spreadsheet.");
 					titleCell.setCellStyle(parent.headingStyle);
@@ -340,7 +334,7 @@ public final class POISheet implements BizPortSheet {
 			}
 			
 			// Set the column comment if applicable
-			createCellComment(cell, i, column.getComment());
+			createCellComment(cell, column.getComment());
 			
 			// Set the range values if necessary
 			String[] rangeValues = column.getRangeValues();
@@ -407,19 +401,21 @@ public final class POISheet implements BizPortSheet {
 		}
 	}
 
-	private void createCellComment(Cell cell, int cellIndex, String comment) {
+	private void createCellComment(Cell cell, String comment) {
 		if (comment != null) {
-			Comment commentBox = null;
-			if (parent.ooxmlFormat) {
-				commentBox = ((XSSFSheet) sheet).createComment();
-			}
-			else {
-				HSSFPatriarch patriarch = (HSSFPatriarch) drawing;
-				commentBox = patriarch.createComment(new HSSFClientAnchor(0, 0, 0, 0, (short) (cellIndex + 1), 2, (short) (cellIndex + 4), 6));
-			}
-			commentBox.setAuthor("BizHub");
-			commentBox.setString(parent.creationHelper.createRichTextString(comment));
-			cell.setCellComment(commentBox);
+		    // When the comment box is visible, have it show in a 1x3 space
+		    ClientAnchor anchor = parent.creationHelper.createClientAnchor();
+		    anchor.setCol1(cell.getColumnIndex());
+		    anchor.setCol2(cell.getColumnIndex() + 1);
+		    anchor.setRow1(cell.getRow().getRowNum());
+		    anchor.setRow2(cell.getRow().getRowNum() + 3);
+
+		    // Create the comment and set the text+author
+		    Comment commentBox = drawing.createCellComment(anchor);
+		    commentBox.setString(parent.creationHelper.createRichTextString(comment));
+		    commentBox.setAuthor("Biz Hub");
+
+		    cell.setCellComment(commentBox);
 		}
 	}
 	
