@@ -395,6 +395,11 @@ public class UtilImpl {
 		}
 	}
 
+	/**
+	 * Process and transform empty Strings.
+	 * @param value	The String.
+	 * @return null, if the trimmed value is empty, otherwise value.
+	 */
 	public static String processStringValue(String value) {
 		String result = value;
 

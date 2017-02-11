@@ -3,6 +3,7 @@ package org.skyve.util;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -135,21 +136,36 @@ public class BeanValidator {
 	}
 
 	/**
-	 * Updates the bindings in the error message (and its children) 
+	 * Updates the bindings in the error message 
 	 * based on the binding of the validatedBean in relation to the masterBean.
 	 * 
-	 * @param customer
-	 * @param e
+	 * @param m
 	 * @param masterBean
 	 * @param validatedBean
 	 */
-	public static void processErrorMessageBindings(Customer customer,
-													final Message e,
-													Bean masterBean,
-													final Bean validatedBean) {
-		ValidationUtil.processErrorMessageBindings(customer, e, masterBean, validatedBean);
+	public static void processMessageBindings(Message m,
+												Bean masterBean,
+												Bean validatedBean) {
+		ValidationUtil.processMessageBindings(CORE.getUser().getCustomer(), m, masterBean, validatedBean);
 	}
 
+	/**
+	 * Updates the bindings in the messages in the exception 
+	 * based on the binding of the validatedBean in relation to the masterBean.
+	 * 
+	 * @param m
+	 * @param masterBean
+	 * @param validatedBean
+	 */
+	public static void processMessageBindings(MessageException e,
+												Bean masterBean,
+												Bean validatedBean) {
+		Customer c = CORE.getUser().getCustomer();
+		for (Message m : e.getMessages()) {
+			ValidationUtil.processMessageBindings(c, m, masterBean, validatedBean);
+		}
+	}
+	
 	/**
 	 * 
 	 * @param customer

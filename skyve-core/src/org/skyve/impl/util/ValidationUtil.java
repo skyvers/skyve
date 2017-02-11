@@ -360,7 +360,7 @@ public class ValidationUtil {
 	}
 
 	/**
-	 * Updates the bindings in the error message (and its children) 
+	 * Updates the bindings in the message 
 	 * based on the binding of the validatedBean in relation to the masterBean.
 	 * 
 	 * @param customer
@@ -368,10 +368,10 @@ public class ValidationUtil {
 	 * @param masterBean
 	 * @param validatedBean
 	 */
-	public static void processErrorMessageBindings(Customer customer,
-													final Message e,
-													Bean masterBean,
-													final Bean validatedBean) {
+	public static void processMessageBindings(Customer customer,
+												final Message e,
+												Bean masterBean,
+												final Bean validatedBean) {
 		Document masterDocument = customer.getModule(masterBean.getBizModule()).getDocument(customer, 
 																								masterBean.getBizDocument());
 

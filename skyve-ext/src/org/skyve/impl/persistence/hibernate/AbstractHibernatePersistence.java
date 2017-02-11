@@ -922,7 +922,7 @@ t.printStackTrace();
 				}
 				catch (ValidationException e) {
 					for (Message message : e.getMessages()) {
-						ValidationUtil.processErrorMessageBindings(customer, message, beanToSave, bean);
+						ValidationUtil.processMessageBindings(customer, message, beanToSave, bean);
 					}
 					throw e;
 				}
@@ -1005,7 +1005,7 @@ t.printStackTrace();
 					}
 					catch (ValidationException e) {
 						for (Message message : e.getMessages()) {
-							ValidationUtil.processErrorMessageBindings(customer, message, beanToSave, bean);
+							ValidationUtil.processMessageBindings(customer, message, beanToSave, bean);
 						}
 						throw e;
 					}
@@ -1710,7 +1710,7 @@ t.printStackTrace();
 		}
 		catch (ValidationException e) {
 			for (Message message : e.getMessages()) {
-				ValidationUtil.processErrorMessageBindings(customer, message, beanToDelete, beanToDelete);
+				ValidationUtil.processMessageBindings(customer, message, beanToDelete, beanToDelete);
 			}
 			throw e;
 		}

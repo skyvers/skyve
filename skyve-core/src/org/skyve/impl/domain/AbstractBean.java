@@ -39,18 +39,16 @@ public abstract class AbstractBean implements Bean {
 	 */
 	protected final void preset(String propertyName, Object propertyValue) {
 		try {
-			Object oldValue = BindUtil.get(this, propertyName);
-			if (oldValue == null) {
-				if (propertyValue != null) {
-					if (! originalValues.containsKey(propertyName)) {
+			if (! originalValues.containsKey(propertyName)) {
+				Object oldValue = BindUtil.get(this, propertyName);
+				if (oldValue == null) {
+					if (propertyValue != null) {
 						originalValues.put(propertyName,  oldValue);
 						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
 				}
-			}
-			else {
-				if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
-					if (! originalValues.containsKey(propertyName)) {
+				else {
+					if ((propertyValue == null) || (! oldValue.equals(propertyValue))) {
 						originalValues.put(propertyName,  oldValue);
 						if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("AbstractBean.preset(): Bean " + toString() + " is DIRTY : property " + propertyName + " is now " + propertyValue + " from " + oldValue);
 					}
