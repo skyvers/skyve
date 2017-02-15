@@ -187,7 +187,7 @@ public class Truncate {
 									joinTable = false;
 								}
 								else {
-									table = new JoinTable(tableName, ownerTableName);
+									table = new JoinTable(tableName, ownerTableName, (tableFieldSize == 3));
 								}
 							}
 						}

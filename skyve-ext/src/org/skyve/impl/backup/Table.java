@@ -75,9 +75,10 @@ class Table {
 			else {
 				fields.put(ChildBean.PARENT_NAME + "_id", AttributeType.association);
 			}
-		}
-		if (document.isOrdered()) {
-			fields.put(Bean.ORDINAL_NAME, AttributeType.integer);
+
+			if (document.isOrdered()) {
+				fields.put(Bean.ORDINAL_NAME, AttributeType.integer);
+			}
 		}
 		
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes()) {
@@ -116,7 +117,9 @@ class Table {
 		result.put("fields", fieldList);
 		result.put("relativeContentPaths", relativeContentPaths);
 		if (this instanceof JoinTable) {
-			result.put("ownerTableName", ((JoinTable) this).ownerTableName);
+			JoinTable join = (JoinTable) this;
+			result.put("ownerTableName", join.ownerTableName);
+			result.put("ordered", Boolean.valueOf(join.ordered));
 		}
 		return JSON.marshall(null, result, null);
 	}
@@ -126,9 +129,10 @@ class Table {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(null, json);
 		String tableName = (String) map.get("name");
 		String ownerTableName = (String) map.get("ownerTableName");
+		Boolean ordered = (Boolean) map.get("ordered");
 		Table result = (ownerTableName == null) ? 
 							new Table(tableName) :
-							new JoinTable(tableName, ownerTableName);
+							new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(ordered));
 		List<Map<String, Object>> fieldList = (List<Map<String, Object>>) map.get("fields");
 		for (Map<String, Object> field : fieldList) {
 			for (String key : field.keySet()) {

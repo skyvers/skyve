@@ -226,7 +226,7 @@ final class BackupUtil {
 												ownerTableName = derivedPersistent.getName();
 												String tableName = ownerTableName + '_' + referenceFieldName;
 												if (! tables.containsKey(tableName)) {
-													JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+													JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
 													tables.put(tableName, joinTable);
 												}
 											}
@@ -262,14 +262,14 @@ final class BackupUtil {
 										ownerTableName = ultimateDocument.getPersistent().getName();
 										String tableName = referencedDocument.getPersistent().getName() + '_' + referenceFieldName;
 										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(tableName, joinTable);
 										}
 									}
 									else {
 										String tableName = ownerTableName + '_' + referenceFieldName;
 										if (! tables.containsKey(tableName)) {
-											JoinTable joinTable = new JoinTable(tableName, ownerTableName);
+											JoinTable joinTable = new JoinTable(tableName, ownerTableName, Boolean.TRUE.equals(collection.getOrdered()));
 											tables.put(tableName, joinTable);
 										}
 									}
