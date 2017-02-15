@@ -18,7 +18,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
 
@@ -45,7 +45,7 @@ class CreateAction extends AbstractAction {
 		try {
 			UIUtil.startWaitCursor(panel);
 
-			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 //			UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 			UtilImpl.DATA_STORE = new DataStore(panel.getDBDriver(),
 													panel.getDBUrl(),
@@ -60,7 +60,7 @@ class CreateAction extends AbstractAction {
 			user.setCustomerName(panel.getCustomer());
 			user.setName(panel.getUser());
 			
-			HibernateElasticSearchPersistence persistence = (HibernateElasticSearchPersistence) AbstractPersistence.get();
+			HibernateContentPersistence persistence = (HibernateContentPersistence) AbstractPersistence.get();
 			persistence.setUser(user);
 
 			Connection connection = null;

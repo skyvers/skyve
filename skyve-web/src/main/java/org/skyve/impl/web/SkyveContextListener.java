@@ -16,7 +16,7 @@ import org.skyve.impl.content.elasticsearch.ESClient;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
@@ -163,7 +163,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
 				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT");
-				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+				AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 			}
 			else {
 				UtilImpl.LOGGER.info("SET SKYVE PERSISTENCE CLASS TO " + UtilImpl.SKYVE_PERSISTENCE_CLASS);

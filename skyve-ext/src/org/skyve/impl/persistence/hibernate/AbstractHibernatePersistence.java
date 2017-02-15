@@ -162,7 +162,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		emf = null;
 
 		if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
-			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		}
 		else {
 			try {

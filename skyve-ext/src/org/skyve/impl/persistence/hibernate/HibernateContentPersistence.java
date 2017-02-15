@@ -6,7 +6,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 
-public class HibernateElasticSearchPersistence extends AbstractHibernatePersistence {
+public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	private static final long serialVersionUID = 1433618526097088364L;
 
 	private transient ContentManager cm;

@@ -4,7 +4,7 @@ import org.skyve.CORE;
 import org.skyve.impl.jasperreports.SkyveDataSource;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -50,7 +50,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	}
 	
 	public static DocumentQueryDefinition getQuery(String moduleDotQuery) {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		UserImpl user = new UserImpl();
 		user.setCustomerName("bizhub");
 		user.setName("mike");

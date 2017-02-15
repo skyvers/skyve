@@ -24,7 +24,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateElasticSearchPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
@@ -51,7 +51,7 @@ final class BackupUtil {
 							String databaseUsername,
 							String databasePassword) 
 	throws Exception {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateElasticSearchPersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractContentManager.IMPLEMENTATION_CLASS = ESClient.class;
 		UtilImpl.CONTENT_DIRECTORY = contentDirectory;
 		UtilImpl.CONTENT_FILE_STORAGE = Boolean.parseBoolean(contentFileStorage);

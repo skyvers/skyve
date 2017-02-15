@@ -22,11 +22,13 @@ import org.junit.Before;
 //import org.powermock.core.classloader.annotations.PrepareForTest;
 //import org.powermock.modules.junit4.PowerMockRunner;
 import org.skyve.CORE;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.persistence.hibernate.HibernateNoContentPersistence;
+import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -55,7 +57,8 @@ public abstract class AbstractH2Test {
 	//private static final String DB_URL = "jdbc:h2:file:./target/test/db/H2;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE";
 	private static final String DB_UNAME = "user";
 	private static final String DB_PWD = "password";
-
+	private static final String CONTENT_DIRECTORY = "content/";
+	
 	// Add common mocks here
 //	@Mock
 //	protected WebContext webContext;
@@ -80,12 +83,14 @@ public abstract class AbstractH2Test {
 	
 	@Before
 	public void beforeBase() {
-		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateNoContentPersistence.class;
+		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;
 		UtilImpl.SQL_TRACE = false;
 		UtilImpl.QUERY_TRACE = false;
+		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
 
 		AbstractRepository.set(new LocalDesignRepository());
 

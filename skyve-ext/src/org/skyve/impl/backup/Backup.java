@@ -69,6 +69,7 @@ public class Backup {
 											File.separator);
 		File directory = new File(backupDir);
 		directory.mkdirs();
+		UtilImpl.LOGGER.info("Backup to " + directory.getAbsolutePath());
 
 		BackupUtil.writeTables(tables, new File(backupDir, "tables.txt"));
 
