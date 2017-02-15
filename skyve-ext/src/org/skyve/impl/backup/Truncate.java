@@ -164,7 +164,7 @@ public class Truncate {
 							Set<String> columnNames = table.fields.keySet();
 							for (String columnName : columnNames) {
 								if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
-										(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) ||
+										(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
 										(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
 									joinTable = false;
 									break;
