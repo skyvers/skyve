@@ -33,6 +33,16 @@ public interface PersistentBean extends Bean {
 
 	/**
 	 * 
+	 */
+	public static final String OWNER_COLUMN_NAME = "owner_id";
+	
+	/**
+	 * 
+	 */
+	public static final String ELEMENT_COLUMN_NAME = "element_id";
+	
+	/**
+	 * 
 	 * @return
 	 */
 	public Integer getBizVersion();

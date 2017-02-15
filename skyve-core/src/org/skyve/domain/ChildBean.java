@@ -12,11 +12,6 @@ public interface ChildBean<T extends Bean> extends Bean {
 	
 	/**
 	 * 
-	 */
-	public static final String ORDINAL_KEY = "bizOrdinal";
-	
-	/**
-	 * 
 	 * @return
 	 */
 	public T getParent();

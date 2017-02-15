@@ -784,7 +784,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			// we have a binding to an implicit property that is settable.
 			else if ((attribute != null) ||
 					binding.endsWith(PersistentBean.FLAG_COMMENT_NAME) ||
-					binding.endsWith(ChildBean.ORDINAL_KEY)) {
+					binding.endsWith(Bean.ORDINAL_NAME)) {
 //Util.LOGGER.info("SET " + targetBean + '.' + binding + " = " + values.get(valueKey));
 				BindUtil.populateProperty(user, 
 											targetBean, 
@@ -1459,7 +1459,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			        Collection collection = (Collection) targetRelation;
 			        // Only child collections have the bizOrdinal property exposed
 			        if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
-						addBinding(ChildBean.ORDINAL_KEY, true);
+						addBinding(Bean.ORDINAL_NAME, true);
 					}
 		        }
 		        

@@ -10,6 +10,7 @@ import java.util.TreeSet;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
@@ -245,19 +246,22 @@ public abstract class ExportedReferenceVisitor {
 						statement.append("update ");
 						statement.append(referenceDocument.getPersistent().getPersistentIdentifier());
 						statement.append('_').append(exportedReference.getReferenceFieldName());
-						statement.append(" set owner_id = :newBizId where element_id = :").append(Bean.DOCUMENT_ID);
+						statement.append(" set ").append(PersistentBean.OWNER_COLUMN_NAME);
+						statement.append(" = :").append(PersistentBean.OWNER_COLUMN_NAME);
+						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+						statement.append(" = :").append(Bean.DOCUMENT_ID);
 						if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						SQL sql = CORE.getPersistence().newSQL(statement.toString());
 						sql.putParameter(Bean.DOCUMENT_ID, bizId, false);
-						sql.putParameter("newBizId",newBizId, false);
+						sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, newBizId, false);
 						sql.execute();
 					}
 					else {
 						statement.append("delete from ");
 						statement.append(referenceDocument.getPersistent().getPersistentIdentifier());
 						statement.append('_').append(exportedReference.getReferenceFieldName());
-						statement.append(" where element_id = :").append(Bean.DOCUMENT_ID);
+						statement.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :").append(Bean.DOCUMENT_ID);
 						if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(statement.toString());
 						logger.debug(statement.toString());
 						CORE.getPersistence().newSQL(statement.toString()).putParameter(Bean.DOCUMENT_ID, bizId, false).execute();

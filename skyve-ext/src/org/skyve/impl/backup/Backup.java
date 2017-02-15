@@ -12,6 +12,8 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -149,7 +151,7 @@ public class Backup {
 													}
 												}
 											}
-											else if (attributeType == AttributeType.geometry) {
+											else if (AttributeType.geometry.equals(attributeType)) {
 												if (geometryUserType == null) {
 													SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
 													geometryUserType = dialect.getGeometryUserType();
@@ -162,7 +164,7 @@ public class Backup {
 													value = new WKTWriter().write(geometry);
 												}
 											}
-											else if (attributeType == AttributeType.bool) {
+											else if (AttributeType.bool.equals(attributeType)) {
 												boolean booleanValue = resultSet.getBoolean(name);
 												if (resultSet.wasNull()) {
 													value = "";
@@ -171,10 +173,7 @@ public class Backup {
 													value = Boolean.valueOf(booleanValue);
 												}
 											}
-											else if ((attributeType == AttributeType.date) ||
-														(attributeType == AttributeType.dateTime) ||
-														(attributeType == AttributeType.time) ||
-														(attributeType == AttributeType.timestamp)) {
+											else if (AttributeType.date.equals(attributeType)) {
 												Date date = resultSet.getDate(name);
 												if (resultSet.wasNull()) {
 													value = "";
@@ -183,9 +182,28 @@ public class Backup {
 													value = new Long(date.getTime());
 												}
 											}
-											else if ((attributeType == AttributeType.decimal2) ||
-														(attributeType == AttributeType.decimal5) ||
-														(attributeType == AttributeType.decimal10)) {
+											else if (AttributeType.time.equals(attributeType)) {
+												Time time = resultSet.getTime(name);
+												if (resultSet.wasNull()) {
+													value = "";
+												}
+												else {
+													value = new Long(time.getTime());
+												}
+											}
+											else if (AttributeType.dateTime.equals(attributeType) ||
+														AttributeType.timestamp.equals(attributeType)) {
+												Timestamp timestamp = resultSet.getTimestamp(name);
+												if (resultSet.wasNull()) {
+													value = "";
+												}
+												else {
+													value = new Long(timestamp.getTime());
+												}
+											}
+											else if (AttributeType.decimal2.equals(attributeType) ||
+														AttributeType.decimal5.equals(attributeType) ||
+														AttributeType.decimal10.equals(attributeType)) {
 												BigDecimal bigDecimal = resultSet.getBigDecimal(name);
 												if (resultSet.wasNull()) {
 													value = "";
@@ -194,7 +212,7 @@ public class Backup {
 													value = bigDecimal;
 												}
 											}
-											else if (attributeType == AttributeType.integer) {
+											else if (AttributeType.integer.equals(attributeType)) {
 												int intValue = resultSet.getInt(name);
 												if (resultSet.wasNull()) {
 													value = "";
@@ -211,7 +229,7 @@ public class Backup {
 												}
 
 											}
-											else if (attributeType == AttributeType.longInteger) {
+											else if (AttributeType.longInteger.equals(attributeType)) {
 												long longValue = resultSet.getLong(name);
 												if (resultSet.wasNull()) {
 													value = "";
@@ -220,7 +238,7 @@ public class Backup {
 													value = new Long(longValue);
 												}
 											}
-											else if (attributeType == AttributeType.content) {
+											else if (AttributeType.content.equals(attributeType)) {
 												String stringValue = resultSet.getString(name);
 												if (resultSet.wasNull()) {
 													value = "";

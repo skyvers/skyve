@@ -240,7 +240,7 @@ public class JSONWriter {
 					add(',');
 					add(ChildBean.PARENT_NAME, childBean.getParent(), propertyNames, topLevel);
 					add(',');
-					add(ChildBean.ORDINAL_KEY, childBean.getBizOrdinal(), propertyNames, topLevel);
+					add(Bean.ORDINAL_NAME, childBean.getBizOrdinal(), propertyNames, topLevel);
 				}
 				
 				if (bean instanceof HierarchicalBean<?>) {

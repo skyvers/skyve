@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Map;
@@ -169,7 +171,7 @@ public class Restore {
 												AttributeType.id.equals(attributeType)) {
 										statement.setString(index++, stringValue);
 									}
-									else if (attributeType == AttributeType.geometry) {
+									else if (AttributeType.geometry.equals(attributeType)) {
 										Geometry geometry = new WKTReader().read(stringValue);
 										if (geometryUserType == null) {
 											SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
@@ -177,27 +179,31 @@ public class Restore {
 										}
 										geometryUserType.nullSafeSet(statement, geometry, index++);
 									}
-									else if (attributeType == AttributeType.bool) {
+									else if (AttributeType.bool.equals(attributeType)) {
 										statement.setBoolean(index++, Boolean.parseBoolean(stringValue));
 									}
-									else if ((attributeType == AttributeType.date) || 
-												(attributeType == AttributeType.dateTime) ||
-												(attributeType == AttributeType.time) ||
-												(attributeType == AttributeType.timestamp)) {
+									else if (AttributeType.date.equals(attributeType)) {
+										statement.setDate(index++, new Date(Long.parseLong(stringValue)));
+									}
+									else if (AttributeType.time.equals(attributeType)) {
+										statement.setTime(index++, new Time(Long.parseLong(stringValue)));
+									}
+									else if (AttributeType.dateTime.equals(attributeType) ||
+												AttributeType.timestamp.equals(attributeType)) {
 										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)));
 									}
-									else if ((attributeType == AttributeType.decimal2) ||
-												(attributeType == AttributeType.decimal5) ||
-												(attributeType == AttributeType.decimal10)) {
+									else if (AttributeType.decimal2.equals(attributeType) ||
+												AttributeType.decimal5.equals(attributeType) ||
+												AttributeType.decimal10.equals(attributeType)) {
 										statement.setBigDecimal(index++, new BigDecimal(stringValue));
 									}
-									else if (attributeType == AttributeType.integer) {
+									else if (AttributeType.integer.equals(attributeType)) {
 										statement.setInt(index++, Integer.parseInt(stringValue));
 									}
-									else if (attributeType == AttributeType.longInteger) {
+									else if (AttributeType.longInteger.equals(attributeType)) {
 										statement.setLong(index++, Long.parseLong(stringValue));
 									}
-									else if (attributeType == AttributeType.content) {
+									else if (AttributeType.content.equals(attributeType)) {
 										// check the relative content paths for the content file
 										File contentFile = null;
 										String moduleName = null;

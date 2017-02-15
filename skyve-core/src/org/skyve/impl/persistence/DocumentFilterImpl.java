@@ -1,7 +1,7 @@
 package org.skyve.impl.persistence;
 
 import org.skyve.CORE;
-import org.skyve.domain.ChildBean;
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.customer.Customer;
@@ -12,8 +12,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.persistence.AbstractBizQL;
-import org.skyve.impl.persistence.AbstractDocumentQuery;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -408,7 +406,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 				lastBinding = binding.substring(lastDotIndex + 1);
 			}
 			if (BindUtil.isImplicit(lastBinding)) {
-				if (ChildBean.ORDINAL_KEY.equals(lastBinding) ||
+				if (Bean.ORDINAL_NAME.equals(lastBinding) ||
 						PersistentBean.VERSION_NAME.equals(lastBinding)) {
 					return true;
 				}

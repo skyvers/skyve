@@ -30,6 +30,11 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	/**
 	 * 
 	 */
+	public static final String ORDINAL_NAME = "bizOrdinal";
+	
+	/**
+	 * 
+	 */
 	public static final String MODULE_KEY = "bizModule";
 	
 	/**

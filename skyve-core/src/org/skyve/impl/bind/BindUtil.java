@@ -773,7 +773,7 @@ public final class BindUtil {
 												SortDirection.descending.equals(order.getSort()));
 			}
 			if (finallySortByOrdinal) {
-				comparatorChain.addComparator(new NullTolerantBeanComparator(ChildBean.ORDINAL_KEY), false);
+				comparatorChain.addComparator(new NullTolerantBeanComparator(Bean.ORDINAL_NAME), false);
 			}
 			
 			// Test if the collection is sorted before sorting as 
@@ -977,7 +977,7 @@ public final class BindUtil {
 					Bean.DATA_GROUP_ID.equals(attributeName) ||
 					Bean.USER_ID.equals(attributeName) ||
 					Bean.BIZ_KEY.equals(attributeName) ||
-					ChildBean.ORDINAL_KEY.equals(attributeName) ||
+					Bean.ORDINAL_NAME.equals(attributeName) ||
 					Bean.CREATED_KEY.equals(attributeName) ||
 					Bean.NOT_CREATED_KEY.equals(attributeName) ||
 					Bean.PERSISTED_KEY.equals(attributeName) ||

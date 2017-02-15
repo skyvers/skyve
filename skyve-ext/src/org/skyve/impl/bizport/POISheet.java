@@ -28,6 +28,7 @@ import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.types.DateOnly;
@@ -177,7 +178,7 @@ public final class POISheet implements BizPortSheet {
 				}
 			}
 			else { // have a collection sheet
-				if (StandardGenerator.OWNER_ID.equals(binding)) {
+				if (PersistentBean.OWNER_COLUMN_NAME.equals(binding)) {
 					int lastDotIndex = collectionBinding.lastIndexOf('.');
 					if (lastDotIndex < 0) { // simple binding from driving document
 						column.setReferencedSheet(new SheetKey(moduleName, documentName));
@@ -230,14 +231,14 @@ public final class POISheet implements BizPortSheet {
 			}
 			else { // have a collection sheet
 // TODO key columns should be stored in the spread sheet?
-				String ownerId = getValue(StandardGenerator.OWNER_ID, AttributeType.text, problems);
-				String elementId = getValue(StandardGenerator.ELEMENT_ID, AttributeType.text, problems);
+				String ownerId = getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
+				String elementId = getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
 				if ((ownerId != null) && (elementId != null)) {
 					indices.put(ownerId + elementId, new Integer(nextRow));
 				}
 				while (nextRow()) {
-					ownerId = getValue(StandardGenerator.OWNER_ID, AttributeType.text, problems);
-					elementId = getValue(StandardGenerator.ELEMENT_ID, AttributeType.text, problems);
+					ownerId = getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
+					elementId = getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
 					if ((ownerId != null) && (elementId != null)) {
 						indices.put(ownerId + elementId, new Integer(nextRow));
 					}

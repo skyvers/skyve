@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.view;
 import java.util.List;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -78,10 +77,6 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.metadata.view.ActionVisitor;
-import org.skyve.impl.metadata.view.Inject;
-import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.WidgetReference;
 
 public abstract class ViewVisitor extends ActionVisitor {
 	protected CustomerImpl customer;
@@ -596,7 +591,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 						if (fullyQualifiedColumnBinding.endsWith(Bean.BIZ_KEY)) {
 							inputWidget = DocumentImpl.getBizKeyAttribute().getDefaultInputWidget();
 						}
-						else if (fullyQualifiedColumnBinding.endsWith(ChildBean.ORDINAL_KEY)) {
+						else if (fullyQualifiedColumnBinding.endsWith(Bean.ORDINAL_NAME)) {
 							inputWidget = DocumentImpl.getBizOrdinalAttribute().getDefaultInputWidget();
 						}
 						else {

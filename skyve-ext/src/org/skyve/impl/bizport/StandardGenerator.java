@@ -38,16 +38,6 @@ import org.skyve.util.BeanVisitor;
  */
 public final class StandardGenerator {
 	/**
-	 * Used in creating rows in joining tables.
-	 */
-	static final String OWNER_ID = "owner_id";
-	
-	/**
-	 * Used in creating rows in joining tables
-	 */
-	static final String ELEMENT_ID = "element_id";
-
-	/**
 	 * The relevant customer for the generation.
 	 */
 	private Customer customer;
@@ -183,8 +173,8 @@ public final class StandardGenerator {
 							}
 
 							collectionSheet.addRow(ownerId + bizId);
-							collectionSheet.setValue(OWNER_ID, ownerId);
-							collectionSheet.setValue(ELEMENT_ID, bizId);
+							collectionSheet.setValue(PersistentBean.OWNER_COLUMN_NAME, ownerId);
+							collectionSheet.setValue(PersistentBean.ELEMENT_COLUMN_NAME, bizId);
 						}
 					}
 				}
@@ -239,8 +229,8 @@ public final class StandardGenerator {
 							Document parentDocument = currentDocument.getParentDocument(customer);
 							Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
 							if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered()) &&
-									columnBindings.contains(ChildBean.ORDINAL_KEY)) {
-								sheet.setValue(ChildBean.ORDINAL_KEY, BindUtil.get(bean, ChildBean.ORDINAL_KEY));
+									columnBindings.contains(Bean.ORDINAL_NAME)) {
+								sheet.setValue(Bean.ORDINAL_NAME, BindUtil.get(bean, Bean.ORDINAL_NAME));
 							}
 						}
 					}
@@ -331,7 +321,7 @@ public final class StandardGenerator {
 				Reference reference = ((DocumentImpl) parentDocument).getReferenceByDocumentName(currentDocument.getName());
 				if ((reference instanceof Collection) && Boolean.TRUE.equals(((Collection) reference).getOrdered())) {
 					column = new BizPortColumn("Ordinal", "The order of these records", AttributeType.integer);
-					sheet.addColumn(ChildBean.ORDINAL_KEY, column);
+					sheet.addColumn(Bean.ORDINAL_NAME, column);
 				}
 			}
 		}
@@ -360,14 +350,14 @@ public final class StandardGenerator {
 													"The 'From' link of the relationship.  Populate this with " + owningDocument.getSingularAlias() + " IDs.",
 													AttributeType.text);
 		column.setReferencedSheet(new SheetKey(owningDocument.getOwningModuleName(), owningDocument.getName()));
-		sheet.addColumn(OWNER_ID, column);
+		sheet.addColumn(PersistentBean.OWNER_COLUMN_NAME, column);
 
 		// Element ID column
 		column = new BizPortColumn(collectionDocument.getSingularAlias() + " ID (To)",
 									"The 'To' link of the relationship.  Populate this with " + collectionDocument.getSingularAlias() + " IDs.",
 									AttributeType.text);
 		column.setReferencedSheet(new SheetKey(collectionDocument.getOwningModuleName(), collectionDocument.getName()));
-		sheet.addColumn(ELEMENT_ID, column);
+		sheet.addColumn(PersistentBean.ELEMENT_COLUMN_NAME, column);
 
 		
 		workbook.addSheet(new SheetKey(document.getOwningModuleName(), document.getName(), binding), sheet);

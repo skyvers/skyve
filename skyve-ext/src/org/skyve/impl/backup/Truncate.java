@@ -12,6 +12,7 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -155,13 +156,16 @@ public class Truncate {
 						}
 
 						// detect joining tables
-						boolean joinTable = (table.fields.size() == 2);
+						int tableFieldSize = table.fields.size();
+						boolean joinTable = ((tableFieldSize == 2) || // unordered collection 
+												(tableFieldSize == 3)); // ordered collection
 						if (joinTable) {
 							// check for owner_id and element_id
 							Set<String> columnNames = table.fields.keySet();
 							for (String columnName : columnNames) {
-								if ((! "owner_id".equalsIgnoreCase(columnName)) &&
-										(! "element_id".equalsIgnoreCase(columnName))) {
+								if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
+										(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) ||
+										(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
 									joinTable = false;
 									break;
 								}
@@ -172,7 +176,7 @@ public class Truncate {
 								try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
 									while (foreignKeyResultSet.next()) {
 										String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
-										if ("owner_id".equalsIgnoreCase(foreignKeyColumn)) {
+										if (PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(foreignKeyColumn)) {
 											ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
 										}
 									}

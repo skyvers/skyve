@@ -9,7 +9,6 @@ import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
@@ -263,7 +262,7 @@ public class SmartClientGenerateUtils {
 						title = DocumentImpl.getBizKeyAttribute().getDisplayName();
 					}
 				}
-				else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 					title = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 				}
 			}

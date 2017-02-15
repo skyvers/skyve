@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.admin.domain.User;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.AbstractTransientBean;
 
@@ -126,7 +127,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	@Override
 	@XmlElement
 	public void setBizOrdinal(Integer bizOrdinal) {
-		preset(ChildBean.ORDINAL_KEY, bizOrdinal);
+		preset(Bean.ORDINAL_NAME, bizOrdinal);
 		this.bizOrdinal =  bizOrdinal;
 	}
 }

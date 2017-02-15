@@ -14,7 +14,6 @@ import java.util.logging.Level;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.flow.Flow;
@@ -498,7 +497,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			bizOrdinalField.setAttributeType(AttributeType.integer);
 			bizOrdinalField.setDisplayName("Order");
-			bizOrdinalField.setName(ChildBean.ORDINAL_KEY);
+			bizOrdinalField.setName(Bean.ORDINAL_NAME);
 			bizOrdinalField.setPersistent(true);
 			bizOrdinalField.setRequired(false);
 			bizOrdinalField.setDescription(null);

@@ -707,7 +707,7 @@ public class CustomerImpl implements Customer {
 	
 	public void interceptAfterServerSideAction(Document document, 
 												String actionName, 
-												ServerSideActionResult result, 
+												ServerSideActionResult<Bean> result, 
 												WebContext webContext) 
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {

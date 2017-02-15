@@ -12,7 +12,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
@@ -837,7 +837,7 @@ joined tables
 					}
 					fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append("\" order-by=\"").append(ChildBean.ORDINAL_KEY);
+						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
 					}
 					else if (orderBy != null) {
 						fw.append("\" order-by=\"").append(orderBy);
@@ -880,9 +880,9 @@ joined tables
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
-					fw.append(indentation).append("\t\t\t<key column=\"owner_id\" />\n");
+					fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME).append("\" />\n");
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
-						fw.append(indentation).append("\t\t\t<list-index column=\"bizOrdinal\"/>\n");
+						fw.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
 					}
 					
 					if (mapped) {
@@ -916,7 +916,7 @@ joined tables
 							fw.append(customerName);
 						}
 						fw.append(referencedModuleName).append(referencedDocumentName);
-						fw.append("\" column=\"element_id\" />\n");
+						fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME).append("\" />\n");
 					}
 					
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
@@ -1108,7 +1108,7 @@ joined tables
 					fw.append(inverseModuleName).append(inverseDocumentName);
 					
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
-						fw.append("\" column=\"owner_id");
+						fw.append("\" column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
@@ -2108,6 +2108,88 @@ joined tables
 		imports.add("javax.xml.bind.annotation.XmlType");
 		imports.add("javax.xml.bind.annotation.XmlRootElement");
 
+		// Add parent reference and bizOrdinal property 
+		// if this is a base class of a child document
+		if ((parentDocumentName != null) && 
+				((! overridden) || (baseDocumentName == null))) {
+			if (parentDocumentName.equals(documentName)) {
+				attributes.append("\tprivate String bizParentId;\n\n");
+				
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic String getBizParentId() {\n");
+				methods.append("\t\treturn bizParentId;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setBizParentId(String bizParentId) {\n");
+				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, bizParentId);\n");
+				methods.append("\t\tthis.bizParentId = bizParentId;\n");
+				methods.append("\t}\n");
+
+				// Traversal method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic ").append(documentName).append(" getParent() {\n");
+				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
+				methods.append("\t\tif (bizParentId != null) {\n");
+				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
+				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\t\tq.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);\n");
+				methods.append("\t\t\tresult = q.retrieveBean();\n");
+				methods.append("\t\t}\n\n");
+				methods.append("\t\treturn result;\n");
+				methods.append("\t}\n");
+				
+				// Traversal method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlTransient\n");
+				methods.append("\tpublic List<").append(documentName).append("> getChildren() {\n");
+				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
+				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
+				methods.append("\t\treturn q.beanResults();\n");
+				methods.append("\t}\n");
+			}
+			else {
+				attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
+	
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
+				methods.append("\t\treturn parent;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setParent(");
+				methods.append(parentDocumentName).append(" parent) {\n");
+				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
+				methods.append("\t\tthis.parent = ").append(" parent;\n");
+				methods.append("\t}\n");
+	
+				// BizOrdinal property
+				imports.add("org.skyve.domain.Bean");
+				attributes.append("\tprivate Integer bizOrdinal;\n\n");
+	
+				// Accessor method
+				methods.append("\n\t@Override\n");
+				methods.append("\tpublic Integer getBizOrdinal() {\n");
+				methods.append("\t\treturn bizOrdinal;\n");
+				methods.append("\t}\n");
+	
+				// Mutator method
+				methods.append("\n\t@Override\n");
+				methods.append("\t@XmlElement\n");
+				methods.append("\tpublic void setBizOrdinal(Integer bizOrdinal) {\n");
+				methods.append("\t\tpreset(Bean.ORDINAL_NAME, bizOrdinal);\n");
+				methods.append("\t\tthis.bizOrdinal = ").append(" bizOrdinal;\n");
+				methods.append("\t}\n");
+			}
+		}
+
 		for (String importClassName : imports) {
 			fw.append("import ").append(importClassName).append(";\n");
 		}
@@ -2218,88 +2300,6 @@ joined tables
 			}
 		}
 		fw.append(" {\n");
-		
-		// Add parent reference and bizOrdinal property 
-		// if this is a base class of a child document
-		if ((parentDocumentName != null) && 
-				((! overridden) || (baseDocumentName == null))) {
-			if (parentDocumentName.equals(documentName)) {
-				attributes.append("\tprivate String bizParentId;\n\n");
-				
-				// Accessor method
-				methods.append("\n\t@Override\n");
-				methods.append("\tpublic String getBizParentId() {\n");
-				methods.append("\t\treturn bizParentId;\n");
-				methods.append("\t}\n");
-	
-				// Mutator method
-				methods.append("\n\t@Override\n");
-				methods.append("\t@XmlElement\n");
-				methods.append("\tpublic void setBizParentId(String bizParentId) {\n");
-				methods.append("\t\tpreset(HierarchicalBean.PARENT_ID, bizParentId);\n");
-				methods.append("\t\tthis.bizParentId = bizParentId;\n");
-				methods.append("\t}\n");
-
-				// Traversal method
-				methods.append("\n\t@Override\n");
-				methods.append("\tpublic ").append(documentName).append(" getParent() {\n");
-				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
-				methods.append("\t\tif (bizParentId != null) {\n");
-				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
-				methods.append("\t\t\tq.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);\n");
-				methods.append("\t\t\tresult = q.retrieveBean();\n");
-				methods.append("\t\t}\n\n");
-				methods.append("\t\treturn result;\n");
-				methods.append("\t}\n");
-				
-				// Traversal method
-				methods.append("\n\t@Override\n");
-				methods.append("\t@XmlTransient\n");
-				methods.append("\tpublic List<").append(documentName).append("> getChildren() {\n");
-				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
-				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
-				methods.append("\t\treturn q.beanResults();\n");
-				methods.append("\t}\n");
-			}
-			else {
-				attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
-	
-				// Accessor method
-				methods.append("\n\t@Override\n");
-				methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
-				methods.append("\t\treturn parent;\n");
-				methods.append("\t}\n");
-	
-				// Mutator method
-				methods.append("\n\t@Override\n");
-				methods.append("\t@XmlElement\n");
-				methods.append("\tpublic void setParent(");
-				methods.append(parentDocumentName).append(" parent) {\n");
-				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
-				methods.append("\t\tthis.parent = ").append(" parent;\n");
-				methods.append("\t}\n");
-	
-				// BizOrdinal property
-				
-				attributes.append("\tprivate Integer bizOrdinal;\n\n");
-	
-				// Accessor method
-				methods.append("\n\t@Override\n");
-				methods.append("\tpublic Integer getBizOrdinal() {\n");
-				methods.append("\t\treturn bizOrdinal;\n");
-				methods.append("\t}\n");
-	
-				// Mutator method
-				methods.append("\n\t@Override\n");
-				methods.append("\t@XmlElement\n");
-				methods.append("\tpublic void setBizOrdinal(Integer bizOrdinal) {\n");
-				methods.append("\t\tpreset(ChildBean.ORDINAL_KEY, bizOrdinal);\n");
-				methods.append("\t\tthis.bizOrdinal = ").append(" bizOrdinal;\n");
-				methods.append("\t}\n");
-			}
-		}
 
 		fw.append("\t/**\n");
 		fw.append("\t * For Serialization\n");

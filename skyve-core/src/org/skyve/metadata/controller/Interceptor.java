@@ -190,7 +190,7 @@ public abstract class Interceptor implements MetaData {
 	@SuppressWarnings("unused")
 	public void afterServerSideAction(Document document, 
 										String actionName, 
-										ServerSideActionResult result, 
+										ServerSideActionResult<Bean> result, 
 										WebContext webContext)
 	throws Exception {
 		// no-op

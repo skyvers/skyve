@@ -1387,7 +1387,7 @@ t.printStackTrace();
 			queryString.append(referenceDocument.getPersistent().getPersistentIdentifier());
 			if (ref.isCollection()) {
 				queryString.append('_').append(ref.getReferenceFieldName());
-				queryString.append(" where element_id = :reference_id");
+				queryString.append(" where ").append(PersistentBean.ELEMENT_COLUMN_NAME).append(" = :reference_id");
 			}
 			else {
 				queryString.append(" where ").append(ref.getReferenceFieldName());
@@ -1399,10 +1399,10 @@ t.printStackTrace();
 				int i = 0;
 				for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 					if (ref.isCollection()) {
-						queryString.append(" and owner_id != :deleted_id");
+						queryString.append(" and ").append(PersistentBean.OWNER_COLUMN_NAME).append(" != :deleted_id");
 					}
 					else {
-						queryString.append(" and bizId != :deleted_id");
+						queryString.append(" and ").append(Bean.DOCUMENT_ID).append(" != :deleted_id");
 					}
 					queryString.append(i++);
 				}
@@ -1987,21 +1987,25 @@ t.printStackTrace();
 		
 		for (Bean elementBean : elementBeans) {
 			query.append("select * from ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
-			query.append(" where owner_id=:owner_id and element_id=:element_id");
+			query.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME).append("=:");
+			query.append(PersistentBean.OWNER_COLUMN_NAME).append(" and ").append(PersistentBean.ELEMENT_COLUMN_NAME);
+			query.append("=:").append(PersistentBean.ELEMENT_COLUMN_NAME);
 
 			SQL sql = newSQL(query.toString());
-			sql.putParameter("owner_id", owningBean.getBizId(), false);
-			sql.putParameter("element_id", elementBean.getBizId(), false);
+			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
 
 			boolean notExists = sql.tupleResults().isEmpty();
 			query.setLength(0);
 			if (notExists) {
 				query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
-				query.append(" (owner_id,element_id) values (:owner_id,:element_id)");
+				query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
+				query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+				query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 
 				sql = newSQL(query.toString());
-				sql.putParameter("owner_id", owningBean.getBizId(), false);
-				sql.putParameter("element_id", elementBean.getBizId(), false);
+				sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+				sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
 
 				sql.execute();
 				query.setLength(0);
@@ -2016,7 +2020,9 @@ t.printStackTrace();
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
 		StringBuilder query = new StringBuilder(256);
 		query.append("insert into ").append(document.getPersistent().getPersistentIdentifier()).append('_').append(collectionName);
-		query.append(" (owner_id,element_id) values (:owner_id,:element_id)");
+		query.append(" (").append(PersistentBean.OWNER_COLUMN_NAME).append(',').append(PersistentBean.ELEMENT_COLUMN_NAME);
+		query.append(") values (:").append(PersistentBean.OWNER_COLUMN_NAME).append(",:");
+		query.append(PersistentBean.ELEMENT_COLUMN_NAME).append(')');
 
 		List<PersistentBean> elementBeans = null;
 		try {
@@ -2031,8 +2037,8 @@ t.printStackTrace();
 		
 		for (Bean elementBean : elementBeans) {
 			SQL sql = newSQL(query.toString());
-			sql.putParameter("owner_id", owningBean.getBizId(), false);
-			sql.putParameter("element_id", elementBean.getBizId(), false);
+			sql.putParameter(PersistentBean.OWNER_COLUMN_NAME, owningBean.getBizId(), false);
+			sql.putParameter(PersistentBean.ELEMENT_COLUMN_NAME, elementBean.getBizId(), false);
 
 			sql.execute();
 		}

@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.bind.BindUtil;
@@ -1044,7 +1043,7 @@ code.append("_view:view})");
 			disableCRUD(grid, code);
 			if ((relation instanceof Collection) && 
 					Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
-				code.append("_ordinal:'").append(ChildBean.ORDINAL_KEY).append("',");
+				code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
 			}
 			String title = grid.getTitle();
 			if (title != null) {
@@ -1553,7 +1552,7 @@ code.append("_view:view})");
 			}
 			if ((relation instanceof Collection) && 
 					Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
-				code.append(",_ordinal:'").append(ChildBean.ORDINAL_KEY).append('\'');
+				code.append(",_ordinal:'").append(Bean.ORDINAL_NAME).append('\'');
 			}
 			code.append(",_view:view,");
 			disabled(membership.getDisabledConditionName(), code);

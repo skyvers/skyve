@@ -11,6 +11,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -29,7 +30,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.impl.bizport.StandardGenerator;
 
 /**
  * This class assembles all the contain beans into a big map keyed by "module.document.bizId", 
@@ -182,8 +182,8 @@ public class StandardLoader {
 				String binding = attribute.getName();
 				// Ignore bizId, owner id and element id, bizKey columns
 				if (Bean.DOCUMENT_ID.equals(binding) ||
-						StandardGenerator.OWNER_ID.equals(binding) ||
-						StandardGenerator.ELEMENT_ID.equals(binding) ||
+						PersistentBean.OWNER_COLUMN_NAME.equals(binding) ||
+						PersistentBean.ELEMENT_COLUMN_NAME.equals(binding) ||
 						Bean.BIZ_KEY.equals(binding)) {
 					continue;
 				}
@@ -457,16 +457,16 @@ public class StandardLoader {
 											Document elementDocument,
 											BizPortSheet collectionSheet) 
 	throws Exception {
-		Object ownerSheetId = collectionSheet.getValue(StandardGenerator.OWNER_ID, AttributeType.text, problems);
-		BizPortColumn ownerSheetIdColumn = collectionSheet.getColumn(StandardGenerator.OWNER_ID);
+		Object ownerSheetId = collectionSheet.getValue(PersistentBean.OWNER_COLUMN_NAME, AttributeType.text, problems);
+		BizPortColumn ownerSheetIdColumn = collectionSheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
 		if (ownerSheetId == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
 													ownerSheetIdColumn, 
 													"The owner cell is empty. You must specify the owner of this relationship.");
 			return;
 		}
-		Object elementSheetId = collectionSheet.getValue(StandardGenerator.ELEMENT_ID, AttributeType.text, problems);
-		BizPortColumn elementSheetIdColumn = collectionSheet.getColumn(StandardGenerator.ELEMENT_ID);
+		Object elementSheetId = collectionSheet.getValue(PersistentBean.ELEMENT_COLUMN_NAME, AttributeType.text, problems);
+		BizPortColumn elementSheetIdColumn = collectionSheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME);
 		if (elementSheetId == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
 													elementSheetIdColumn, 
@@ -480,7 +480,7 @@ public class StandardLoader {
 		if (ownerSheet == null) {
 			collectionSheet.addErrorAtCurrentRow(problems, 
 													ownerSheetIdColumn, 
-													"The referenced sheet for " + StandardGenerator.OWNER_ID + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
+													"The referenced sheet for " + PersistentBean.OWNER_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
 			return;
 		}
 		Bean owner = beansBySheetKey.get(createSheetKey(owningDocument, ownerSheetId));
@@ -497,7 +497,7 @@ public class StandardLoader {
 		if (elementSheet == null) {
 			collectionSheet.addWarningAtCurrentRow(problems, 
 													elementSheetIdColumn, 
-													"The referenced sheet for " + StandardGenerator.ELEMENT_ID + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
+													"The referenced sheet for " + PersistentBean.ELEMENT_COLUMN_NAME + " does not exist in this workbook. Check the template you started with and copy the missing sheet back in.");
 			return;
 		}
 		Bean element = beansBySheetKey.get(createSheetKey(elementDocument, elementSheetId));

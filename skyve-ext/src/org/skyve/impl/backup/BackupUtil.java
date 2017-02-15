@@ -15,6 +15,7 @@ import java.util.TreeMap;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.elasticsearch.ESClient;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -295,12 +296,13 @@ final class BackupUtil {
 	static void secureSQL(StringBuilder sql, Table table, String customerName) {
 		if (table instanceof JoinTable) {
 			JoinTable joinTable = (JoinTable) table;
-			sql.append(" where owner_id in (select bizId from ").append(joinTable.ownerTableName);
-			sql.append(" where bizCustomer = '").append(customerName).append("')");
+			sql.append(" where ").append(PersistentBean.OWNER_COLUMN_NAME);
+			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerTableName);
+			sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append("')");
 		}
 		else {
 			if (hasBizCustomer(table)) {
-				sql.append(" where bizCustomer = '").append(customerName).append('\'');
+				sql.append(" where ").append(Bean.CUSTOMER_NAME).append(" = '").append(customerName).append('\'');
 			}
 		}
 	}

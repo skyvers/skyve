@@ -77,7 +77,7 @@ class Table {
 			}
 		}
 		if (document.isOrdered()) {
-			fields.put(ChildBean.ORDINAL_KEY, AttributeType.integer);
+			fields.put(Bean.ORDINAL_NAME, AttributeType.integer);
 		}
 		
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes()) {

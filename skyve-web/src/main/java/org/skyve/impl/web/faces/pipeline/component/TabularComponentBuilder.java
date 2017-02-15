@@ -51,7 +51,6 @@ import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
@@ -474,7 +473,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							displayName = DocumentImpl.getBizKeyAttribute().getDisplayName();
 						}
 					}
-					else if (binding.endsWith(ChildBean.ORDINAL_KEY)) {
+					else if (binding.endsWith(Bean.ORDINAL_NAME)) {
 						displayName = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 					}
 					else if (bindingAttribute != null) {
