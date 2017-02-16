@@ -549,7 +549,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			Action action = view.getAction(button.getActionName());
 
 			String buttonCode = generateButton(action.getName(), 
-												action.getImplicitName(), 
+												action.getResourceName(),
+												action.getImplicitName(),
 												action.getDisplayName(),
 												action.getClientValidation(),
 												action.getRelativeIconFileName(),
@@ -1949,7 +1950,8 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitAction(ActionImpl action) {
-			addAction(action.getResourceName(), 
+			addAction(action.getName(),
+						action.getResourceName(), 
 						null, 
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -1965,6 +1967,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitAddAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Add,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -1980,6 +1983,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitRemoveAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Remove,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -1995,6 +1999,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitZoomOutAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.ZoomOut,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2010,6 +2015,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitNavigateAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Navigate,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2025,6 +2031,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOKAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.OK,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2040,6 +2047,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitSaveAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Save,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2055,6 +2063,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitCancelAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Cancel,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2070,6 +2079,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitDeleteAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Delete,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2085,6 +2095,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitReportAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Report,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2099,7 +2110,8 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitBizExportAction(ActionImpl action) {
-			addAction(action.getResourceName(),
+			addAction(action.getName(),
+						action.getResourceName(),
 						ImplicitActionName.BizExport,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2114,7 +2126,8 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitBizImportAction(ActionImpl action) {
-			addAction(action.getResourceName(),
+			addAction(action.getName(),
+						action.getResourceName(),
 						ImplicitActionName.BizImport,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2129,7 +2142,8 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitDownloadAction(ActionImpl action) {
-			addAction(action.getResourceName(),
+			addAction(action.getName(),
+						action.getResourceName(),
 						ImplicitActionName.Download,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2144,7 +2158,8 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitUploadAction(ActionImpl action) {
-			addAction(action.getResourceName(),
+			addAction(action.getName(),
+						action.getResourceName(),
 						ImplicitActionName.Upload,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2160,6 +2175,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitNewAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.New,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2175,6 +2191,7 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitEditAction(ActionImpl action) {
 			addAction(null,
+						null,
 						ImplicitActionName.Edit,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2638,6 +2655,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		private void addAction(String actionName,
+								String resourceName,
 								ImplicitActionName implicitName,
 								String displayName,
 								Boolean inActionPanel,
@@ -2652,6 +2670,7 @@ pickListFields:[{name:'value'}],
 					(! ImplicitActionName.Add.equals(implicitName)) &&
 					(! ImplicitActionName.Edit.equals(implicitName))) {
 				String buttonCode = generateButton(actionName,
+													resourceName,
 													implicitName,
 													displayName,
 													clientValidation,
@@ -2676,6 +2695,7 @@ pickListFields:[{name:'value'}],
 
 		// return null if the button should NOT be added
 		private String generateButton(String actionName,
+										String resourceName,
 										ImplicitActionName implicitName,
 										String displayName,
 										Boolean clientValidation,
@@ -2687,7 +2707,6 @@ pickListFields:[{name:'value'}],
 										String invisibleConditionName,
 										Button button) { // null if called from an action defn
 			StringBuilder result = new StringBuilder(128);
-
 			String revisedRelativeIconFileName = relativeIconFileName;
 			char actionType = ' ';
 			if (implicitName == null) {
@@ -2696,7 +2715,7 @@ pickListFields:[{name:'value'}],
 				}
 				result.append("isc.BizButton.create({validate:");
 				result.append(! Boolean.FALSE.equals(clientValidation));
-				result.append(",actionName:'").append(actionName);
+				result.append(",actionName:'").append(resourceName);
 			}
 			else {
 				result.append("isc.BizButton.create({actionName:'");
