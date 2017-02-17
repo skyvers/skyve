@@ -595,8 +595,9 @@ isc.ReportDialog.addClassProperties({
 							params) { // param map (name -> binding expression with {} if required
 		if (params._f) {
 			var format = params._f;
-			delete params._f;
-			isc.ReportDialog._redirectToReport(view, params, format);
+			var paramsCopy = isc.addProperties({}, params);
+			delete paramsCopy._f;
+			isc.ReportDialog._redirectToReport(view, paramsCopy, format);
 		}
 		else {
 			if (isc.ReportDialog._reportLayout == null) {
