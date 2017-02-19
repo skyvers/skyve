@@ -167,7 +167,7 @@ public class LoggingInterceptor extends Interceptor {
 	}
 
 	@Override
-	public void afterServerSideAction(Document document, String actionName, ServerSideActionResult result, WebContext webContext) {
+	public void afterServerSideAction(Document document, String actionName, ServerSideActionResult<Bean> result, WebContext webContext) {
 		Util.LOGGER.log(Level.INFO, 
 							"afterServerSideAction - doc = {0}.{1}, action = {2}, result = {3}",
 							new Object[] {document.getOwningModuleName(), document.getName(), actionName, result});
