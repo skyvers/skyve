@@ -127,9 +127,8 @@ public class TimeUtil {
 	 * 
 	 * @param date	The date to add to.
 	 * @param numberOfHours The number of hours to add (This can be negative).
-	 * @return	The date passed in to allow method chaining.
 	 */
-	public static final Date addHours(Date date, int numberOfHours) {
+	public static final void addHours(Date date, int numberOfHours) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -138,8 +137,6 @@ public class TimeUtil {
 		calendar.add(Calendar.HOUR_OF_DAY, numberOfHours);
 
 		date.setTime(calendar.getTime().getTime());
-		
-		return date;
 	}
 
 	/**
@@ -147,9 +144,8 @@ public class TimeUtil {
 	 * 
 	 * @param date	The date to add to.
 	 * @param numberOfDays The number of days to add (This can be negative).
-	 * @return	The date passed in to allow method chaining.
 	 */
-	public static final Date addDays(Date date, int numberOfDays) {
+	public static final void addDays(Date date, int numberOfDays) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -162,8 +158,6 @@ public class TimeUtil {
 		calendar.add(Calendar.DATE, numberOfDays);
 
 		date.setTime(calendar.getTime().getTime());
-		
-		return date;
 	}
 
 	/**
@@ -171,9 +165,8 @@ public class TimeUtil {
 	 * 
 	 * @param date	The date to add months to.
 	 * @param numberOfMonths The number of months to add (This can be negative).
-	 * @return	The date passed in to allow method chaining.
 	 */
-	public static final Date addMonths(Date date, int numberOfMonths) {
+	public static final void addMonths(Date date, int numberOfMonths) {
 		Calendar calendar = new GregorianCalendar();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -186,8 +179,6 @@ public class TimeUtil {
 		calendar.add(Calendar.MONTH, numberOfMonths);
 
 		date.setTime(calendar.getTime().getTime());
-		
-		return date;
 	}
 
 	/**
@@ -256,14 +247,14 @@ public class TimeUtil {
 			while (startDateCalendar.after(endDateCalendar)) {
 				startDateCalendar.add(Calendar.DATE, -1);
 				daysBetweenStartDateAndEndDate--;
-			} // while (more days to subtract)
-		} // if (startDate is after endDate)
+			}
+		}
 		else {
 			while (startDateCalendar.before(endDateCalendar)) {
 				startDateCalendar.add(Calendar.DATE, 1);
 				daysBetweenStartDateAndEndDate++;
-			} // while (more days to add)
-		} // else (startDate is the same as or before endDate)
+			}
+		}
 
 		return daysBetweenStartDateAndEndDate;
 	}
@@ -281,7 +272,7 @@ public class TimeUtil {
 		int numberOfDays = numberOfDaysBetween(startDate, endDate);
 		// now add 1 to the absolute value of the days between to give the
 		// total number of days included in the range (because the number
-		// of days between 1/7/2002 and 2/7/2002 is 1, but the total number
+		// of days between 1/7/1970 and 2/7/1970 is 1, but the total number
 		// of days in the range is 2).
 		if (numberOfDays >= 0) {
 			numberOfDays++;

@@ -120,10 +120,9 @@ public class Time {
 	 * 
 	 * @param date	The date to add to.
 	 * @param numberOfDays The number of days to add (This can be negative).
-	 * @return	The date passed in to allow method chaining.
 	 */
-	public static final Date addDays(Date date, int numberOfDays) {
-		return TimeUtil.addDays(date, numberOfDays);
+	public static final void addDays(Date date, int numberOfDays) {
+		TimeUtil.addDays(date, numberOfDays);
 	}
 
 	/**
@@ -131,10 +130,9 @@ public class Time {
 	 * 
 	 * @param date	The date to add months to.
 	 * @param numberOfMonths The number of months to add (This can be negative).
-	 * @return	The date passed in to allow method chaining.
 	 */
-	public static final Date addMonths(Date date, int numberOfMonths) {
-		return TimeUtil.addMonths(date, numberOfMonths);
+	public static final void addMonths(Date date, int numberOfMonths) {
+		TimeUtil.addMonths(date, numberOfMonths);
 	}
 
 	/**
