@@ -56,8 +56,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
-import org.skyve.util.JSON;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -1385,11 +1385,17 @@ public class SmartClientListServlet extends HttpServlet {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, columnBinding);
 				Attribute targetAttribute = target.getAttribute();
 				if (targetAttribute instanceof Association) {
-					properties.put(columnBinding,
-									persistence.retrieve(module.getName(),
-															((Association) targetAttribute).getDocumentName(),
-															(String) properties.get(columnBinding),
-															false));
+					String associationId = (String) properties.get(columnBinding);
+					if (associationId == null) {
+						properties.put(columnBinding, null);
+					}
+					else {
+						properties.put(columnBinding,
+										persistence.retrieve(module.getName(),
+																((Association) targetAttribute).getDocumentName(),
+																associationId,
+																false));
+					}
 				}
 			}
 		}
