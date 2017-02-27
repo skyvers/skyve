@@ -49,6 +49,7 @@
 					<action name="MakePasswordChange" />
 				</document>
 				<document name="Contact" permission="_RU_C" />
+				<document name="Communication" permission="_R__C"/>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
