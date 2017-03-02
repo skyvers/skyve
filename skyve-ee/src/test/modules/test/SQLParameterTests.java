@@ -235,9 +235,10 @@ public class SQLParameterTests extends AbstractH2Test {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
 		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where integer = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
-		sql.putParameter("param", aap.getInteger());
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where %s = :param", 
+												aapd.getPersistent().getPersistentIdentifier(),
+												AllAttributesPersistent.normalIntegerPropertyName));
+		sql.putParameter("param", aap.getNormalInteger());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
@@ -245,7 +246,7 @@ public class SQLParameterTests extends AbstractH2Test {
 
 	@Test
 	public void testObjectIntegerParam() throws Exception {
-		testObject(AllAttributesPersistent.integerPropertyName, Integer.valueOf(0), AttributeType.integer);
+		testObject(AllAttributesPersistent.normalIntegerPropertyName, Integer.valueOf(0), AttributeType.integer);
 	}
 
 	@Test

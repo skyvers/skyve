@@ -77,7 +77,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	/** @hidden */
 	public static final String idPropertyName = "id";
 	/** @hidden */
-	public static final String integerPropertyName = "integer";
+	public static final String normalIntegerPropertyName = "normalInteger";
 	/** @hidden */
 	public static final String inverseAggregatedAssociationPropertyName = "inverseAggregatedAssociation";
 	/** @hidden */
@@ -174,7 +174,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	private Enum3 enum3;
 	private Geometry geometry;
 	private String id;
-	private Integer integer;
+	private Integer normalInteger;
 	private AllAttributesInverseOneToOnePersistent inverseAggregatedAssociation;
 	private Long longInteger;
 	private String markup;
@@ -452,21 +452,21 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	}
 
 	/**
-	 * {@link #integer} accessor.
+	 * {@link #normalInteger} accessor.
 	 **/
-	public Integer getInteger() {
-		return integer;
+	public Integer getNormalInteger() {
+		return normalInteger;
 	}
 
 	/**
-	 * {@link #integer} mutator.
+	 * {@link #normalInteger} mutator.
 	 * 
-	 * @param integer	The new value to set.
+	 * @param normalInteger	The new value to set.
 	 **/
 	@XmlElement
-	public void setInteger(Integer integer) {
-		preset(integerPropertyName, integer);
-		this.integer = integer;
+	public void setNormalInteger(Integer normalInteger) {
+		preset(normalIntegerPropertyName, normalInteger);
+		this.normalInteger = normalInteger;
 	}
 
 	/**

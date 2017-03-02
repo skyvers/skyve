@@ -48,7 +48,7 @@
 		<id name="id" required="true">
 			<displayName>Id</displayName>
 		</id>
-		<integer name="integer" required="true">
+		<integer name="normalInteger" required="true">
 			<displayName>Integer</displayName>
 		</integer>
 		<longInteger name="longInteger" required="true">
