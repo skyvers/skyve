@@ -1527,6 +1527,13 @@ isc.BizLookupDescriptionItem.addMethods({
 		this.Super("setValue", [newValue]);
 	},
 	
+	// Override focusInItem to focus in the combo selection
+	focusInItem: function() {
+		if (this._form) {
+			this._form.getItem('_combo').focusInItem();
+		}
+	},
+	
 	// bizhub events
 	bizAdded: function(form, item, value) {
 		// do nothing - overridden in serverside generated definition if required
