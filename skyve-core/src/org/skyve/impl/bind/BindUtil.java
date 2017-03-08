@@ -768,12 +768,12 @@ public final class BindUtil {
 													List<Ordering> ordering) {
 		if (beans != null) {
 			ComparatorChain comparatorChain = new ComparatorChain();
+			if (finallySortByOrdinal) {
+				comparatorChain.addComparator(new NullTolerantBeanComparator(Bean.ORDINAL_NAME), false);
+			}
 			for (Ordering order : ordering) {
 				comparatorChain.addComparator(new NullTolerantBeanComparator(order.getBy()),
 												SortDirection.descending.equals(order.getSort()));
-			}
-			if (finallySortByOrdinal) {
-				comparatorChain.addComparator(new NullTolerantBeanComparator(Bean.ORDINAL_NAME), false);
 			}
 			
 			// Test if the collection is sorted before sorting as 
