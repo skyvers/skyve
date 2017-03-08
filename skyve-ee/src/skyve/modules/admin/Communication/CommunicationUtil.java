@@ -136,6 +136,11 @@ public class CommunicationUtil {
 		if(communication.getCcToOverride()!=null){
 			ccTo = formatCommunicationMessage(customer, communication.getCcToOverride(), beans);
 		}
+		String[] cc = null;
+		if(ccTo!=null){
+			cc = new String[] {ccTo};
+		}
+		
 		
 		//add myself to bcc if monitoring outgoing email
 		String[] bcc = null;
@@ -193,7 +198,7 @@ public class CommunicationUtil {
 				if (RunMode.ACTION.equals(runMode)) {
 					switch (format) {
 					case email:
-						EXT.writeMail(new String[] { sendTo }, new String[] { ccTo } , bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
+						EXT.writeMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, htmlEnclose(emailBody.toString()), MimeType.html, fos, attachments);
 						break;
 					default:
 						break;
@@ -213,7 +218,7 @@ public class CommunicationUtil {
 			if (RunMode.ACTION.equals(runMode)) {
 				switch (format) {
 				case email:
-					EXT.sendMail(new String[] { sendTo }, new String[] { ccTo }, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					EXT.sendMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
 					break;
 				default:
 					break;
