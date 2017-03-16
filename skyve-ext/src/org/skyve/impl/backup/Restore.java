@@ -23,6 +23,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
@@ -136,8 +137,8 @@ public class Restore {
 						sql.setLength(sql.length() - 1); // remove the last comma
 						sql.append(')');
 
+						Map<String, String> values = null;
 						try (PreparedStatement statement = connection.prepareStatement(sql.toString())) {
-							Map<String, String> values = null;
 							while ((values = reader.read(headers)) != null) {
 								statement.clearParameters();
 
@@ -258,6 +259,26 @@ public class Restore {
 							} // while (each CSV line)
 
 							connection.commit();
+						}
+						catch (Throwable t) {
+							Util.LOGGER.severe(t.getLocalizedMessage());
+							Util.LOGGER.severe("AT LINE " + rowCount + " OF " + backupFile.getAbsolutePath());
+							Util.LOGGER.severe("CAUSED BY:- " + sql.toString());
+							
+							StringBuilder sb = new StringBuilder(512);
+							sb.append("VALUES  :- ");
+							if (values == null) {
+								sb.append("NONE");
+							}
+							else {
+								for (String header : values.keySet()) {
+									sb.append(header).append('=').append(values.get(header)).append(',');
+								}
+								sb.setLength(sb.length() - 1); // remove last comma
+							}
+							Util.LOGGER.severe(sb.toString());
+							
+							throw t;
 						}
 					}
 				}
