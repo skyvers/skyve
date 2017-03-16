@@ -10,7 +10,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	private static final UxUi PHONE = new UxUi("phone", "water");
 	private static final UxUi TABLET = new UxUi("tablet", "omega");
 	private static final UxUi DESKTOP = new UxUi("desktop", "omega");
-	private static final UxUi PUBLIC = new UxUi("public", "casablanca");
+	private static final UxUi EXTERNAL = new UxUi("external", "casablanca");
 	
 	@Override
 	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
@@ -22,7 +22,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 			case desktop:
 				return DESKTOP;
 			default:
-				return PUBLIC;
+				return EXTERNAL;
 		}
 	}
 }
