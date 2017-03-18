@@ -36,6 +36,7 @@ import org.skyve.util.Util;
 public class CommunicationUtil {
 
 	public static final String SPECIAL_BEAN_URL = "{#url}";
+	public static final String SPECIAL_CONTEXT = "{#context}";
 	public static final String DEFAULT_SENDER = "default.sender@skyve.org";
 
 	/**
@@ -539,6 +540,7 @@ public class CommunicationUtil {
 		// default url binding to first bean
 		if (beans != null && beans.length > 0 && expression!=null) {
 			result = expression.replace(SPECIAL_BEAN_URL, Util.getDocumentUrl(beans[0]));
+			result = result.replace(SPECIAL_CONTEXT, Util.getHomeUrl());
 			result = Binder.formatMessage(customer, result, beans);
 		}
 		return result;
