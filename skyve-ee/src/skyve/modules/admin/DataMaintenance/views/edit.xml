@@ -91,6 +91,7 @@
 					<vbox pixelMemberPadding="5">
 						<button actionName="Backup" pixelWidth="150" />
 						<button actionName="DownloadBackup" pixelWidth="150" />
+						<button actionName="UploadBackup" pixelWidth="150" />
 						<button actionName="DeleteBackup" pixelWidth="150" />
 					</vbox>
 				</hbox>
@@ -306,5 +307,6 @@
 		<action className="Sync" displayName="Script Synchronise DB" inActionPanel="false"
 			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
 			relativeIconFileName="shared/icons/Script.gif"/>
+		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
 	</actions>
 </view>
