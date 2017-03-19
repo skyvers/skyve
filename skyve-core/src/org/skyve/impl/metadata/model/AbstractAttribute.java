@@ -38,12 +38,14 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 
 	private String displayName;
 	private AttributeType attributeType;
+	private UsageType usage;
 	private String description;
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
 	private boolean deprecated;
 	private Boolean trackChanges;
 	private boolean audited = true;
+	private Boolean auditedBool = null;
 	private String documentation;
 	
 	@Override
@@ -77,6 +79,16 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		this.attributeType = fieldType;
 	}
 
+	@Override
+	public UsageType getUsage() {
+		return usage;
+	}
+	
+	@XmlAttribute
+	public void setUsage(UsageType usage) {
+		this.usage = usage;
+	}
+	
 	@Override
 	public InputWidget getDefaultInputWidget() {
 		if (defaultInputWidget == null) {
@@ -184,8 +196,13 @@ public abstract class AbstractAttribute extends org.skyve.impl.metadata.reposito
 		this.audited = audited;
 	}
 
+	public Boolean getAuditedBool() {
+		return auditedBool;
+	}
+	
 	@XmlAttribute(name="audited", required = false)
 	public void setAuditedBool(Boolean audited) {
+		this.auditedBool = audited;
 		this.audited = audited.booleanValue();
 	}
 

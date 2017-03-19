@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
@@ -59,6 +60,7 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
@@ -341,6 +343,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				value = attribute.getDisplayName();
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
+				}
+				
+				// Default auditing to off for view attributes 
+				// that don't have an audited value set in their definition.
+				if (attribute instanceof AbstractAttribute) {
+					AbstractAttribute aa = (AbstractAttribute) attribute;
+					if ((aa.getAuditedBool() == null) && UsageType.view.equals(attribute.getUsage())) {
+						((AbstractAttribute) attribute).setAudited(false);
+					}
 				}
 				
 				AttributeType type = attribute.getAttributeType();
@@ -662,6 +673,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 				condition.setExpression(conditionExpression);
 				condition.setDocumentation(conditionMetaData.getDocumentation());
 				condition.setDescription(conditionMetaData.getDescription());
+				condition.setUsage(condition.getUsage());
 				
 				if (result.getConditions().put(conditionName, condition) != null) {
 					throw new MetaDataException(metaDataName + " : A duplicate condition of " + conditionName + " is defined.");

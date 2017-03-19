@@ -1,11 +1,13 @@
 package org.skyve.impl.metadata.model.document;
 
+import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
 public class ConditionImpl implements Condition {
 	private String documentation;
 	private String description;
 	private String expression;
+	private UsageType usage;
 
 	@Override
 	public String getDocumentation() {
@@ -29,5 +31,13 @@ public class ConditionImpl implements Condition {
 	}
 	public void setExpression(String expression) {
 		this.expression = expression;
+	}
+
+	@Override
+	public UsageType getUsage() {
+		return usage;
+	}
+	public void setUsage(UsageType usage) {
+		this.usage = usage;
 	}
 }

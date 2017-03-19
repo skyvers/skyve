@@ -149,11 +149,10 @@
 		</manifest>
 	</target>
 	
-<!--
 	<taskdef name="schemagen" classname="com.sun.tools.jxc.SchemaGenTask">
 		<classpath refid="classpath" />
 	</taskdef>
--->
+
 	<target name="buildXmlSchemas">
 		<schemagen destdir="src/skyve/schemas" includeantruntime="true" verbose="false" >
 			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/router" />

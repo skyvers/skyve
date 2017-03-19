@@ -1,11 +1,13 @@
 package org.skyve.impl.metadata.repository.document;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
@@ -15,6 +17,7 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	private String description;
 	private String documentation;
 	private String expression;
+	private UsageType usage;
 	
 	@Override
 	public String getDocumentation() {
@@ -44,5 +47,15 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	public void setExpression(String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
+	}
+
+	@Override
+	public UsageType getUsage() {
+		return usage;
+	}
+
+	@XmlAttribute
+	public void setUsage(UsageType usage) {
+		this.usage = usage;
 	}
 }

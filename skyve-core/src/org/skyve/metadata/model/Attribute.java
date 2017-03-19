@@ -13,6 +13,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.DomainType;
 
@@ -23,7 +24,8 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public interface Attribute extends NamedMetaData {
 	/**
-	 * 
+	 * The Skyve type of the attribute.
+	 * This also encapsulates the implementation type.
 	 */
 	@XmlType
 	public enum AttributeType {
@@ -53,20 +55,23 @@ public interface Attribute extends NamedMetaData {
 		private Class<?> implementingType;
 
 		/**
-		 * 
-		 * @param implementingType
+		 * @param implementingType	The java class that implements the Skyve type.
 		 */
 		private AttributeType(Class<?> implementingType) {
 			this.implementingType = implementingType;
 		}
 
 		/**
-		 * 
-		 * @return
+		 * @return	the java class that implements the Skyve type.
 		 */
 		public Class<?> getImplementingType() {
 			return implementingType;
 		}
+	}
+	
+	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public enum UsageType {
+		domain, view
 	}
 	
 	/**
@@ -87,6 +92,12 @@ public interface Attribute extends NamedMetaData {
 	 */
 	public AttributeType getAttributeType();
 
+	/**
+	 * Informs the Skyve framework when to include and exclude the attributes.
+	 * @return	the usage.
+	 */
+	public UsageType getUsage();
+	
 	/**
 	 * 
 	 * @return
