@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE project>
 <project name="Skyve App" default="generateDomain" basedir=".">
+	<!-- create the lib directory if it doesn't exist -->
+	<mkdir dir="tools/lib"/>
+	
 	<path id="classpath">
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>

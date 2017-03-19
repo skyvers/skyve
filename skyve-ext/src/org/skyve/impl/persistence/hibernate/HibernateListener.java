@@ -24,9 +24,10 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 
 public class HibernateListener implements PostUpdateEventListener,
 											PostInsertEventListener,
@@ -125,14 +126,16 @@ public class HibernateListener implements PostUpdateEventListener,
 			Customer customer = persistence.getUser().getCustomer();
 			Module module = customer.getModule(eventBean.getBizModule());
 			Document document = module.getDocument(customer, eventBean.getBizDocument());
-			for (String referenceName : document.getReferenceNames()) {
-				if (BindUtil.get(eventBean, referenceName) == list) {
-					CollectionImpl collection = (CollectionImpl) document.getReferenceByName(referenceName);
+			for (Attribute attribute : document.getAllAttributes()) {
+				if (attribute instanceof Collection) {
+					CollectionImpl collection = (CollectionImpl) attribute;
 					if (collection.isComplexOrdering()) {
-						BindUtil.sortCollectionByMetaData(eventBean, collection);
-						list.clearDirty();
+						if (BindUtil.get(eventBean, attribute.getName()) == list) {
+							BindUtil.sortCollectionByMetaData(eventBean, collection);
+							list.clearDirty();
+							break;
+						}
 					}
-					break;
 				}
 			}
 		}

@@ -103,11 +103,15 @@ public class MappedBase extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private Enum3(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -118,6 +122,11 @@ public class MappedBase extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static Enum3 fromCode(String code) {
@@ -151,7 +160,7 @@ public class MappedBase extends AbstractPersistentBean {
 				Enum3[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (Enum3 value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

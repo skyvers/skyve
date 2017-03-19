@@ -1002,7 +1002,6 @@ isc.BizListGrid.addMethods({
 					me._eventRecord = record;
 					me._eventRowNum = rowNum;
 					me._eventColNum = colNum;
-					this.selectSingleRecord(record);
 				}
 	
 				// ensure that recordClick() on the data source fields get called
@@ -1062,7 +1061,12 @@ isc.BizListGrid.addMethods({
 					}
 				}
 				if (me.bizSelected) {
-					me.bizSelected();
+					if (me.showZoom && me.canZoom) {
+						me.delayCall('bizSelected', [], this.doubleClickDelay);
+					}
+					else {
+						me.bizSelected();
+					}
 				}
 			},
 			editComplete: function(rowNum, colNum, newValues, oldValues, editCompletionEvent, dsResponse) {
@@ -1821,7 +1825,12 @@ isc.BizDataGrid.addMethods({
 					}
 				}
 				if (me.bizSelected) {
-					me.bizSelected();
+					if (me.showZoom && me.canZoom && config.editable) {
+						me.delayCall('bizSelected', [], this.doubleClickDelay);
+					}
+					else {
+						me.bizSelected();
+					}
 				}
 			},
 

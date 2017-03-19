@@ -17,15 +17,12 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
-import org.skyve.impl.metadata.model.document.field.Enumeration;
-import org.skyve.impl.metadata.model.document.field.Field;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "enum")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"xmlTypeName", "moduleRef", "documentRef", "attributeRef", "xmlValues"})
-public class Enumeration extends Field {
+public class Enumeration extends ConstrainableField {
 	/**
 	 * For Serialization
 	 */
@@ -145,12 +142,6 @@ public class Enumeration extends Field {
 	@XmlTransient
 	public List<EnumeratedValue> getValues() {
 		return getTarget().values;
-	}
-	
-	@XmlTransient
-	@Override
-	public DomainType getDomainType() {
-		return DomainType.constant;
 	}
 	
 	public String toJavaIdentifier() {

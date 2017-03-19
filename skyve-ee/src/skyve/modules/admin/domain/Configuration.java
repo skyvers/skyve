@@ -48,11 +48,15 @@ public class Configuration extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private PasswordComplexityModel(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -63,6 +67,11 @@ public class Configuration extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static PasswordComplexityModel fromCode(String code) {
@@ -96,7 +105,7 @@ public class Configuration extends AbstractPersistentBean {
 				PasswordComplexityModel[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (PasswordComplexityModel value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

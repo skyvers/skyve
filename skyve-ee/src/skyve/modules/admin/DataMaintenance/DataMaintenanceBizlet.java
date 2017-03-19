@@ -54,10 +54,10 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
-		List<DomainValue> result = new ArrayList<>();
+		List<DomainValue> result = null;
 		
 		if (DataMaintenance.modDocNamePropertyName.equals(attributeName) ) {
-
+			result = new ArrayList<>();
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
 				for (String k : m.getDocumentRefs().keySet()) {
@@ -70,8 +70,8 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			}
 			Collections.sort(result, new DomainValueSortByDescription());
 		}
-		
-		if(DataMaintenance.auditModuleNamePropertyName.equals(attributeName)){
+		else if(DataMaintenance.auditModuleNamePropertyName.equals(attributeName)){
+			result = new ArrayList<>();
 			Customer c = CORE.getUser().getCustomer();
 			for (Module m : c.getModules()) {
 				result.add(new DomainValue(m.getName(), m.getTitle()));
@@ -81,7 +81,6 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 		return result;
 	}
-
 
 	@Override
 	public void preRerender(String source, DataMaintenance bean, WebContext webContext) throws Exception {
