@@ -65,6 +65,7 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
@@ -193,6 +194,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.bizKey = bizKey;
 	}
 
+	// Keep this in sync with ViewModelMetaData
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "attributes", required = true)
 	@XmlElementRefs({@XmlElementRef(type = Text.class),
 						@XmlElementRef(type = Date.class),
@@ -583,6 +585,12 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							}
 						}
 						enumeration.setOwningDocument(result);
+						
+						// check to see if there is an overridden domain type set,
+						// otherwise set it to constant
+						if (enumeration.getDomainType() == null) {
+							enumeration.setDomainType(DomainType.constant);
+						}
 					}
 
 					result.putAttribute(attribute);

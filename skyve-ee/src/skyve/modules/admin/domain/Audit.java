@@ -77,11 +77,15 @@ public class Audit extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private Operation(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -92,6 +96,11 @@ public class Audit extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static Operation fromCode(String code) {
@@ -125,7 +134,7 @@ public class Audit extends AbstractPersistentBean {
 				Operation[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (Operation value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

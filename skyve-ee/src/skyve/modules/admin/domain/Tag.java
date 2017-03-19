@@ -102,11 +102,15 @@ public class Tag extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private CombinationsOperator(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -117,6 +121,11 @@ public class Tag extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static CombinationsOperator fromCode(String code) {
@@ -150,7 +159,7 @@ public class Tag extends AbstractPersistentBean {
 				CombinationsOperator[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (CombinationsOperator value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 
@@ -171,11 +180,15 @@ public class Tag extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private FilterOperator(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -186,6 +199,11 @@ public class Tag extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static FilterOperator fromCode(String code) {
@@ -219,7 +237,7 @@ public class Tag extends AbstractPersistentBean {
 				FilterOperator[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (FilterOperator value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 
@@ -239,11 +257,15 @@ public class Tag extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private FilterAction(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -254,6 +276,11 @@ public class Tag extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static FilterAction fromCode(String code) {
@@ -287,7 +314,7 @@ public class Tag extends AbstractPersistentBean {
 				FilterAction[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (FilterAction value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

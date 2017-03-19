@@ -95,16 +95,18 @@ public class JobScheduleBizlet extends Bizlet<JobSchedule> {
 	@Override
 	public List<DomainValue> getConstantDomainValues(String attributeName)
 	throws Exception {
-		List<DomainValue> result = new ArrayList<>();
+		List<DomainValue> result = null;
 		
 		if (JobSchedule.allMinutesPropertyName.equals(attributeName) ||
 				JobSchedule.allHoursPropertyName.equals(attributeName) ||
 				JobSchedule.allMonthsPropertyName.equals(attributeName) ||
 				JobSchedule.allWeekdaysPropertyName.equals(attributeName)) {
+			result = new ArrayList<>(2);
 			result.add(new DomainValue(ALL_CODE, "All"));
 			result.add(new DomainValue(SELECTED_CODE, "Selected"));
 		}
 		else if (JobSchedule.allDaysPropertyName.equals(attributeName)) {
+			result = new ArrayList<>(4);
 			result.add(new DomainValue(ALL_CODE, "All"));
 			result.add(new DomainValue(LAST_DAY_CODE, "Last Day"));
 			result.add(new DomainValue(LAST_WEEK_DAY_CODE, "Last Week Day"));

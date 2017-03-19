@@ -470,16 +470,18 @@ public class CustomerImpl implements Customer {
 		if (! vetoed) {
 			String key = documentName + '.' + attributeName;
 			result = domainValueCache.get(key);
-			if (attribute instanceof Enumeration) {
-				Class<org.skyve.domain.types.Enumeration> domainEnum = AbstractRepository.get().getEnum((Enumeration) attribute);
-				result = (List<DomainValue>) domainEnum.getMethod("toDomainValues").invoke(null);
-				domainValueCache.put(key, result);
-			}
-			else if ((bizlet != null) && (result == null)) {
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
-				result = bizlet.getConstantDomainValues(attributeName);
-				if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
-				domainValueCache.put(key, result);
+			if (result == null) {
+				if (bizlet != null) {
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Entering " + bizlet.getClass().getName() + ".getConstantDomainValues: " + attributeName);
+					result = bizlet.getConstantDomainValues(attributeName);
+					if (UtilImpl.BIZLET_TRACE) UtilImpl.LOGGER.logp(Level.INFO, bizlet.getClass().getName(), "getConstantDomainValues", "Exiting " + bizlet.getClass().getName() + ".getConstantDomainValues: " + result);
+					domainValueCache.put(key, result);
+				}
+				if ((result == null) && (attribute instanceof Enumeration)) {
+					Class<org.skyve.domain.types.Enumeration> domainEnum = AbstractRepository.get().getEnum((Enumeration) attribute);
+					result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
+					domainValueCache.put(key, result);
+				}
 			}
 
 			interceptAfterGetConstantDomainValues(attributeName, result);

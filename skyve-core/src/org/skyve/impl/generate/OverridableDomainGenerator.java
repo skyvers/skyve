@@ -1477,12 +1477,15 @@ joined tables
 //		enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate String description;\n\n");
 		enums.append("\t\t/** @hidden */\n");
+		enums.append("\t\tprivate DomainValue domainValue;\n\n");
+		enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate static List<DomainValue> domainValues;\n\n");
 		
 		// constructor
 		enums.append("\t\tprivate ").append(typeName).append("(String code, String description) {\n");
 		enums.append("\t\t\tthis.code = code;\n");
 		enums.append("\t\t\tthis.description = description;\n");
+		enums.append("\t\t\tthis.domainValue = new DomainValue(code, description);\n");
 		enums.append("\t\t}\n\n");
 		
 		// toCode()
@@ -1495,6 +1498,12 @@ joined tables
 		enums.append("\t\t@Override\n");
 		enums.append("\t\tpublic String toDescription() {\n");
 		enums.append("\t\t\treturn description;\n");
+		enums.append("\t\t}\n\n");
+
+		// toDomainValue()
+		enums.append("\t\t@Override\n");
+		enums.append("\t\tpublic DomainValue toDomainValue() {\n");
+		enums.append("\t\t\treturn domainValue;\n");
 		enums.append("\t\t}\n\n");
 		
 		// fromCode
@@ -1526,7 +1535,7 @@ joined tables
 		enums.append("\t\t\t\t").append(typeName).append("[] values = values();\n");
 		enums.append("\t\t\t\tdomainValues = new ArrayList<>(values.length);\n");
 		enums.append("\t\t\t\tfor (").append(typeName).append(" value : values) {\n");
-		enums.append("\t\t\t\t\tdomainValues.add(new DomainValue(value.code, value.description));\n");
+		enums.append("\t\t\t\t\tdomainValues.add(value.domainValue);\n");
 		enums.append("\t\t\t\t}\n");
 		enums.append("\t\t\t}\n\n");
 		enums.append("\t\t\treturn domainValues;\n");

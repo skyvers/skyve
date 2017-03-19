@@ -55,11 +55,15 @@ public class Contact extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private ContactType(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -70,6 +74,11 @@ public class Contact extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static ContactType fromCode(String code) {
@@ -103,7 +112,7 @@ public class Contact extends AbstractPersistentBean {
 				ContactType[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (ContactType value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

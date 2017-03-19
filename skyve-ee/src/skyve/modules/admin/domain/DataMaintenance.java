@@ -110,11 +110,15 @@ public class DataMaintenance extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private RestorePreProcess(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -125,6 +129,11 @@ public class DataMaintenance extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static RestorePreProcess fromCode(String code) {
@@ -158,7 +167,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 				RestorePreProcess[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (RestorePreProcess value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 
@@ -178,11 +187,15 @@ public class DataMaintenance extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private RefreshOption(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -193,6 +206,11 @@ public class DataMaintenance extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static RefreshOption fromCode(String code) {
@@ -226,7 +244,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 				RefreshOption[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (RefreshOption value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

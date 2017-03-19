@@ -103,11 +103,15 @@ public class User extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private WizardState(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -118,6 +122,11 @@ public class User extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static WizardState fromCode(String code) {
@@ -151,7 +160,7 @@ public class User extends AbstractPersistentBean {
 				WizardState[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (WizardState value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 

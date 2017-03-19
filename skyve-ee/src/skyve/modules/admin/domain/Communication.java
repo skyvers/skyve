@@ -118,11 +118,15 @@ public class Communication extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private ActionType(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -133,6 +137,11 @@ public class Communication extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static ActionType fromCode(String code) {
@@ -166,7 +175,7 @@ public class Communication extends AbstractPersistentBean {
 				ActionType[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (ActionType value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 
@@ -185,11 +194,15 @@ public class Communication extends AbstractPersistentBean {
 		private String description;
 
 		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
 		private static List<DomainValue> domainValues;
 
 		private FormatType(String code, String description) {
 			this.code = code;
 			this.description = description;
+			this.domainValue = new DomainValue(code, description);
 		}
 
 		@Override
@@ -200,6 +213,11 @@ public class Communication extends AbstractPersistentBean {
 		@Override
 		public String toDescription() {
 			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
 		}
 
 		public static FormatType fromCode(String code) {
@@ -233,7 +251,7 @@ public class Communication extends AbstractPersistentBean {
 				FormatType[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (FormatType value : values) {
-					domainValues.add(new DomainValue(value.code, value.description));
+					domainValues.add(value.domainValue);
 				}
 			}
 
