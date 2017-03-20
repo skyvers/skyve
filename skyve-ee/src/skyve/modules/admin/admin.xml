@@ -189,6 +189,7 @@
 					<action name="Create" />
 					<action name="Drop" />
 					<action name="Sync" />
+					<action name="UploadBackup" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
 				<document name="SystemDashboard" permission="_____" />
