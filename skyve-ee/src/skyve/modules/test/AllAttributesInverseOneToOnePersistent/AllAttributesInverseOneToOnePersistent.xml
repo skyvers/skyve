@@ -57,7 +57,7 @@
 		<id name="id">
 			<displayName>Id</displayName>
 		</id>
-		<integer name="integer">
+		<integer name="normalInteger">
 			<displayName>Integer</displayName>
 		</integer>
 		<inverseOne name="inverseAggregatedAssociation">

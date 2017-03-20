@@ -72,7 +72,7 @@ public class MappedBase extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String idPropertyName = "id";
 	/** @hidden */
-	public static final String integerPropertyName = "integer";
+	public static final String normalIntegerPropertyName = "normalInteger";
 	/** @hidden */
 	public static final String longIntegerPropertyName = "longInteger";
 	/** @hidden */
@@ -178,7 +178,7 @@ public class MappedBase extends AbstractPersistentBean {
 	private Enum3 enum3;
 	private Geometry geometry;
 	private String id;
-	private Integer integer;
+	private Integer normalInteger;
 	private Long longInteger;
 	private String markup;
 	private String memo;
@@ -412,21 +412,21 @@ public class MappedBase extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #integer} accessor.
+	 * {@link #normalInteger} accessor.
 	 **/
-	public Integer getInteger() {
-		return integer;
+	public Integer getNormalInteger() {
+		return normalInteger;
 	}
 
 	/**
-	 * {@link #integer} mutator.
+	 * {@link #normalInteger} mutator.
 	 * 
-	 * @param integer	The new value to set.
+	 * @param normalInteger	The new value to set.
 	 **/
 	@XmlElement
-	public void setInteger(Integer integer) {
-		preset(integerPropertyName, integer);
-		this.integer = integer;
+	public void setNormalInteger(Integer normalInteger) {
+		preset(normalIntegerPropertyName, normalInteger);
+		this.normalInteger = normalInteger;
 	}
 
 	/**

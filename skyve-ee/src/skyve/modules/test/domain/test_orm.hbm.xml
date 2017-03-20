@@ -41,7 +41,7 @@
 		</property>
 		<property name="geometry" type="Geometry" />
 		<property name="id" length="36" />
-		<property name="integer" />
+		<property name="normalInteger" />
 		<one-to-one name="inverseAggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggregatedAssociation" />
 		<property name="longInteger" />
 		<property name="markup" type="text" />
@@ -83,7 +83,7 @@
 		</property>
 		<property name="geometry" type="Geometry" />
 		<property name="id" length="36" />
-		<property name="integer" />
+		<property name="normalInteger" />
 		<bag name="inverseAggregatedAssociation" inverse="true">
 			<key column="aggregatedAssociation_id" />
 			<one-to-many entity-name="testAllAttributesPersistent" />
@@ -128,7 +128,7 @@
 		</property>
 		<property name="geometry" type="Geometry" />
 		<property name="id" length="36" />
-		<property name="integer" />
+		<property name="normalInteger" />
 		<bag name="inverseAggregatedAssociation" inverse="true">
 			<key column="aggregatedAssociation_id" />
 			<one-to-many entity-name="testAllAttributesRequiredPersistent" />
@@ -265,7 +265,7 @@
 			</property>
 			<property name="geometry" type="Geometry" />
 			<property name="id" length="36" />
-			<property name="integer" />
+			<property name="normalInteger" />
 			<property name="longInteger" />
 			<property name="markup" type="text" />
 			<property name="memo" type="text" />
@@ -318,7 +318,7 @@
 			</property>
 			<property name="geometry" type="Geometry" />
 			<property name="id" length="36" />
-			<property name="integer" />
+			<property name="normalInteger" />
 			<property name="longInteger" />
 			<property name="markup" type="text" />
 			<property name="memo" type="text" />
