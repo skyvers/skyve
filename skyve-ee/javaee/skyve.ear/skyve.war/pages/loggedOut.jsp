@@ -30,14 +30,11 @@
 		<% } %>
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
+		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
 	</head>
 	<body>
-		<table class="logo" align="center">
-			<tr height="150px">
-				<td><img src="images/skyve.png" alt="Skyve" /></td>
-			</tr>
-		</table>
 		<%
 			request.logout();
 
@@ -57,33 +54,35 @@
 				}
 			}
 		%>
-		<form>
-			<table align="center">
-				<tr>
-					<td>
-						<div class="loginTable">
-							<table align="center" style="border-spacing: 10px;">
-								<tr>
-									<td style=";text-align:center">
-										<div style="font-size:28px;"><%=Util.i18n("page.logout.banner", locale)%></div>
-									</td>
-								</tr>
-								<tr>
-									<td style="text-align: center;">
-										<div class="buttonDiv">
-											<% if (referer == null) { %>
-												<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
-											<% } else { %>
-												<a href="<%=referer%>"><%=Util.i18n("page.login.banner", locale)%></a>
-											<% } %>
-										</div>
-									</td>
-								</tr>
-							</table>
+		
+		<div class="container">
+			<%@include file="fragments/logo.html" %>
+			<div class="row">
+				<div class="col-4 col-2-sm"></div>
+				<div class="col-4 col-8-sm">
+					<form>
+						<div class="loginTable" style="width:100%;">
+							<div class="row">
+								<div class="col-12 center">
+									<span style="font-size: 28px;"><%=Util.i18n("page.logout.banner", locale)%></span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-2 col-3-sm"></div>
+								<div class="col-8 col-6-sm center">
+									<div class="buttonDiv">
+										<% if (referer == null) { %>
+											<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
+										<% } else { %>
+											<a href="<%=referer%>"><%=Util.i18n("page.login.banner", locale)%></a>
+										<% } %>
+									</div>
+								</div>
+							</div>
 						</div>
-					</td>
-				</tr>
-			</table>
-		</form>
+					</form>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
