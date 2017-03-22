@@ -6,41 +6,41 @@
 	<uxui name="desktop">
 		<route outcome="/desktop/home.xhtml" />
 	</uxui>
-	<uxui name="public">
-		<route outcome="/public/list.xhtml">
+	<uxui name="external">
+		<route outcome="/external/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/public/edit.xhtml">
+		<route outcome="/external/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/public/calendar.xhtml">
+		<route outcome="/external/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/public/map.xhtml">
+		<route outcome="/external/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/public/tree.xhtml">
+		<route outcome="/external/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/public/home.xhtml" />
+		<route outcome="/external/home.xhtml" />
 	</uxui>
 	<uxui name="tablet">
-		<route outcome="/tablet/list.xhtml">
+		<route outcome="/external/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/tablet/edit.xhtml">
+		<route outcome="/external/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/tablet/calendar.xhtml">
+		<route outcome="/external/calendar.xhtml">
 			<criteria webAction="c" />
 		</route>
-		<route outcome="/tablet/map.xhtml">
+		<route outcome="/external/map.xhtml">
 			<criteria webAction="m" />
 		</route>
-		<route outcome="/tablet/tree.xhtml">
+		<route outcome="/external/tree.xhtml">
 			<criteria webAction="t" />
 		</route>
-		<route outcome="/tablet/home.xhtml" />
+		<route outcome="/external/home.xhtml" />
 	</uxui>
 	<uxui name="phone">
 		<route outcome="/whosinIntegrate/inout.xhtml">
@@ -49,12 +49,12 @@
 		<route outcome="/whosinIntegrate/mystatus.xhtml">
 			<criteria webAction="e" module="whosinIntegrate" document="MyStatus" />
 		</route>
-		<route outcome="/phone/list.xhtml">
+		<route outcome="/mobile/list.xhtml">
 			<criteria webAction="l" />
 		</route>
-		<route outcome="/phone/edit.xhtml">
+		<route outcome="/mobile/edit.xhtml">
 			<criteria webAction="e" />
 		</route>
-		<route outcome="/phone/menu.xhtml" />
+		<route outcome="/mobile/menu.xhtml" />
 	</uxui>
 </router>
