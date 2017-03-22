@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.util.Util;
@@ -31,8 +32,9 @@ public class UploadBackup extends UploadAction<DataMaintenance> {
 		
 		// check that a backup with this filename doesn't already exist
 		if(backup.exists()) {
-			throw new ValidationException(new Message(
-					String.format("A backup with the name %s already exists.", file.getFileName())));
+			exception.addError(new Problem(
+					String.format("A backup with the name %s already exists.", file.getFileName()), null));
+			throw exception;
 		}
 		
 		// copy the input file to the backup location		
