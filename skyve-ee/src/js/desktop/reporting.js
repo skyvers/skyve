@@ -648,14 +648,15 @@ isc.ReportDialog.addClassProperties({
 			if (params) {
 				for (var name in params) {
 					var binding = params[name];
-					src += '&' + name + '=' + view.toDisplay(binding, instance);
+					// encodeURI and then encode '?' and '&' chars which are not encoded by encodeURI().
+					src += '&' + name + '=' + encodeURI(view.toDisplay(binding, instance)).replaceAll('?', '%3F').replaceAll('&', '%26');
 				}
 			}
 			if ((format === 'html') || (format === 'xhtml')) {
-				window.open(encodeURI(src), 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
+				window.open(src, 'report', 'location=0,status=0,scrollbars=1,resizable=1,width=800,height=600');
 			}
 			else {
-				window.location = encodeURI(src);
+				window.location = src;
 			}
 		}
 	}
