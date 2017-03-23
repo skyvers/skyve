@@ -128,16 +128,16 @@
 			<%@include file="fragments/logo.html" %>
 			<%@include file="fragments/noscript.html" %>
 			<div class="row">
-				<div class="col-3 hidden-sm"></div>
-				<div class="col-6 col-12-sm">
+				<div class="col-3 col-2-md hidden-sm"></div>
+				<div class="col-6 col-8-md col-12-sm">
 					<form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)">
 						<div class="loginTable" style="width:100%;">
 							<div class="row">
 								<div class="col-12 center">
 									<% if (request.getUserPrincipal() != null) { %>
-										<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
+										<span class="subhead"><%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%></span>
 									<% } else { %>
-										<div style="font-size:28px;"><%=Util.i18n("page.login.banner", locale)%></div>
+										<span class="subhead"><%=Util.i18n("page.login.banner", locale)%></span>
 									<% } %>
 								</div>
 							</div>

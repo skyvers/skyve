@@ -58,13 +58,13 @@
 		<div class="container">
 			<%@include file="fragments/logo.html" %>
 			<div class="row">
-				<div class="col-4 col-2-sm"></div>
-				<div class="col-4 col-8-sm">
+				<div class="col-4 col-2-md col-2-sm"></div>
+				<div class="col-4 col-8-md col-8-sm">
 					<form>
 						<div class="loginTable" style="width:100%;">
 							<div class="row">
 								<div class="col-12 center">
-									<span style="font-size: 28px;"><%=Util.i18n("page.logout.banner", locale)%></span>
+									<span class="subhead"><%=Util.i18n("page.logout.banner", locale)%></span>
 								</div>
 							</div>
 							<div class="row">

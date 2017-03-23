@@ -98,6 +98,21 @@ p {
   width: 96%;
 }
 
+.col-1-md,
+.col-2-md,
+.col-3-md,
+.col-4-md,
+.col-5-md,
+.col-6-md,
+.col-7-md,
+.col-8-md,
+.col-9-md,
+.col-10-md,
+.col-11-md,
+.col-12-md {
+  width: 96%;
+}
+
 .col-1-sm {
   width: 4.33%;
 }
@@ -152,17 +167,100 @@ p {
 	clear: both;
 }
 
-.hidden-sm {
+.hidden-sm, .hidden-md, hidden-lg {
   display: none;
 }
+
+.loginTable input, label {
+	font-size: 0.9rem;	
+}
+
+.loginTable .subhead {
+  	font-size: 1.2rem;
+ }
 
 @media only screen and (min-width: 33.75em) {  /* 540px */
   .container {
     width: 80%;
   }
+  
+  .loginTable input, label {
+	font-size: 1rem;	
+  }
+  
+  .loginTable .subhead {
+  	font-size: 1.3rem;
+  }
 }
 
 @media only screen and (min-width: 45em) {  /* 720px */
+  .col-1-md {
+    width: 4.33%;
+  }
+
+  .col-2-md {
+    width: 12.66%;
+  }
+
+  .col-3-md {
+    width: 21%;
+  }
+
+  .col-4-md {
+    width: 29.33%;
+  }
+
+  .col-5-md {
+    width: 37.66%;
+  }
+
+  .col-6-md {
+    width: 46%;
+  }
+
+  .col-7-md {
+    width: 54.33%;
+  }
+
+  .col-8-md {
+    width: 62.66%;
+  }
+
+  .col-9-md {
+    width: 71%;
+  }
+
+  .col-10-md {
+    width: 79.33%;
+  }
+
+  .col-11-md {
+    width: 87.66%;
+  }
+
+  .col-12-md {
+    width: 96%;
+  }
+
+  .hidden-sm {
+    display: block;
+  }
+  
+  .loginTable input, label {
+	font-size: 1.1rem;	
+  }
+  
+  .loginTable .subhead {
+  	font-size: 1.5rem;
+  }
+}
+
+@media only screen and (min-width: 60em) { /* 960px */
+  .container {
+    width: 75%;
+    max-width: 60rem;
+  }
+  
   .col-1 {
     width: 4.33%;
   }
@@ -210,15 +308,16 @@ p {
   .col-12 {
     width: 96%;
   }
-
-  .hidden-sm {
+  
+  .hidden-md {
     display: block;
   }
-}
-
-@media only screen and (min-width: 60em) { /* 960px */
-  .container {
-    width: 75%;
-    max-width: 60rem;
+ 
+  .loginTable input, label {
+	font-size: 1.2rem;	
+  }
+  
+  .loginTable .subhead {
+  	font-size: 1.7rem;
   }
 }

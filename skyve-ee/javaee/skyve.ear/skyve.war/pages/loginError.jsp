@@ -34,13 +34,13 @@
 		<div class="container">
 			<%@include file="fragments/logo.html" %>
 			<div class="row">
-				<div class="col-3 hidden-sm"></div>
-				<div class="col-6 col-12-sm">
+				<div class="col-3 col-2-md hidden-sm"></div>
+				<div class="col-6 col-8-md col-12-sm">
 					<form>
 						<div class="loginTable" style="width:100%;">
 							<div class="row">
 								<div class="col-12 center">
-									<span style="font-size: 28px;"><%=Util.i18n("page.loginError.banner", locale)%></span>
+									<span class="subhead"><%=Util.i18n("page.loginError.banner", locale)%></span>
 								</div>
 							</div>
 							<div class="row">
