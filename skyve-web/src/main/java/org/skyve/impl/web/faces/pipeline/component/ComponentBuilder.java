@@ -179,12 +179,19 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		return result;
 	}
 	
-	public AjaxBehavior ajax(String listBinding, String actionName) {
+	public AjaxBehavior ajax(String listBinding, 
+								String actionName, 
+								String rerenderSource,
+								boolean rerenderValidate) {
 		AjaxBehavior result = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 		result.setProcess(process);
 		result.setUpdate(update);
 		if (actionName != null) {
 			MethodExpression me = methodExpressionForAction(null, actionName, listBinding, false);
+			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+		}
+		else {
+			MethodExpression me = methodExpressionForRerender(rerenderSource, rerenderValidate);
 			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
 
@@ -200,6 +207,25 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										ImplicitActionName name, 
 										String title);
 	
+	private static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
+	private static final Class<?>[] STRING_STRING_STRING = new Class<?>[] {String.class, String.class, String.class};
+	private static final Class<?>[] STRING_BOOLEAN = new Class<?>[] {String.class, Boolean.class};
+	private static final Class<?>[] NONE = new Class[0];
+	
+	protected MethodExpression methodExpressionForRerender(String source, boolean validate) {
+		StringBuilder expression = new StringBuilder(64);
+		expression.append("#{").append(managedBeanName).append(".rerender(");
+		if (source == null) {
+			expression.append("null");
+		}
+		else {
+			expression.append('\'').append(source).append('\'');
+		}
+		expression.append(',').append(validate).append(")}");
+
+		return ef.createMethodExpression(elc, expression.toString(), null, STRING_BOOLEAN);
+	}
+	
 	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
 															String actionName,
 															String collectionName, 
@@ -211,39 +237,38 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			expression.append(implicitActionName.toString().toLowerCase());
 			if (collectionName != null) {
 				if (ImplicitActionName.Add.equals(implicitActionName)) {
-					parameterTypes = new Class[] {String.class, Boolean.class};
+					parameterTypes = STRING_BOOLEAN;
 					expression.append("('").append(collectionName).append("',").append(inline).append(")");
 				} 
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
-					parameterTypes = new Class[] {String.class, String.class};
+					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionName).append("',");
 					expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				} 
 				else {
-					parameterTypes = new Class[] {String.class, String.class};
+					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionName).append("', ");
 					expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 			} 
 			else {
 				if (ImplicitActionName.Remove.equals(implicitActionName)) {
-					parameterTypes = new Class[] {String.class, String.class};
+					parameterTypes = STRING_STRING;
 					expression.append("(null,null)");
 				} 
 				else {
-					parameterTypes = new Class[0];
+					parameterTypes = NONE;
 				}
 			}
 		}
 		else {
-			parameterTypes = new Class[] {String.class, String.class, String.class};
+			parameterTypes = STRING_STRING_STRING;
 			expression.append("action('").append(actionName).append('\'');
 			if (collectionName != null) {
 				expression.append(", '").append(collectionName).append("', ");
 				expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
 			} 
 			else {
-				parameterTypes = new Class[] { String.class };
 				expression.append(", null, null)");
 			}
 		}

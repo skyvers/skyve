@@ -24,6 +24,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	private String actionName;
 	private String collectionName;
 	private String elementBizId;
+	
 	public ExecuteActionAction(FacesView<T> facesView,
 								String actionName,
 								String collectionName,
@@ -53,24 +54,18 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
-	    if (Boolean.FALSE.equals(action.getClientValidation())) {
-	    	ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, facesView.getWebContext());
-	    	ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
-	    }
-	    else {
-			if (FacesAction.validateRequiredFields()) {
-				CustomerImpl internalCustomer = (CustomerImpl) customer;
-				WebContext webContext = facesView.getWebContext();
-				boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
-																					actionName,
-																					targetBean,
-																					webContext);
-				if (! vetoed) {
-					ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
-					internalCustomer.interceptAfterServerSideAction(targetDocument, actionName, result, webContext);
-					ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
-				}
-			}	    	
+	    if (Boolean.FALSE.equals(action.getClientValidation()) || FacesAction.validateRequiredFields()) {
+			CustomerImpl internalCustomer = (CustomerImpl) customer;
+			WebContext webContext = facesView.getWebContext();
+			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
+																				actionName,
+																				targetBean,
+																				webContext);
+			if (! vetoed) {
+				ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
+				internalCustomer.interceptAfterServerSideAction(targetDocument, actionName, result, webContext);
+				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
+			}
 		}
 
 	    return null;

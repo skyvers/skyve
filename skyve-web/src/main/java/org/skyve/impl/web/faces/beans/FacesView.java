@@ -30,6 +30,7 @@ import org.skyve.impl.web.faces.actions.GetBeansAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
+import org.skyve.impl.web.faces.actions.RerenderAction;
 import org.skyve.impl.web.faces.actions.SaveAction;
 import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
@@ -230,7 +231,12 @@ public class FacesView<T extends Bean> extends Harness {
 									UtilImpl.processStringValue(listBinding),
 									UtilImpl.processStringValue(bizId)).execute();
 	}
-	
+
+	public void rerender(String source, boolean validate) {
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - EXECUTE RERENDER with source " + source);
+		new RerenderAction<>(this, source, validate).execute();
+	}
+
 	public SkyveLazyDataModel getModel(String moduleName, 
 										String documentName, 
 										String queryName,

@@ -139,6 +139,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -1594,26 +1595,32 @@ public class FacesViewVisitor extends ViewVisitor {
 		current = lb.addedToContainer(currentContainer, current);
 	}
 	
-	private void addAjaxBehavior(String eventName, List<EventAction> actions) {
+	private void addAjaxBehavior(String eventName, String rerenderSource, List<EventAction> actions) {
 		String actionName = null;
+		boolean rerenderValidate = true;
 		for (EventAction action : actions) {
 			if (action instanceof ServerSideActionEventAction) {
 				actionName = ((ServerSideActionEventAction) action).getActionName();
 				break;
 			}
+			else if (action instanceof RerenderEventAction) {
+				rerenderValidate = ! Boolean.FALSE.equals(((RerenderEventAction) action).getClientValidation());
+				break;
+			}
 		}
 		
-		eventSource.addClientBehavior(eventName, cb.ajax(listBinding, actionName));
+		eventSource.addClientBehavior(eventName, cb.ajax(listBinding, actionName, rerenderSource, rerenderValidate));
 	}
 	
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("change", changeable.getChangedActions());
+		String binding = changeable.getBinding();
+		addAjaxBehavior("change", binding, changeable.getChangedActions());
 		// Add this special event for date selection on calendar as "changed" doesn't fire on select
 		if (eventSource instanceof Calendar) {
-			addAjaxBehavior("dateSelect", changeable.getChangedActions());
+			addAjaxBehavior("dateSelect", binding, changeable.getChangedActions());
 		}
 	}
 
@@ -1628,7 +1635,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnFocusEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("focus", blurable.getFocusActions());
+		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		addAjaxBehavior("focus", binding, blurable.getFocusActions());
 	}
 
 	@Override
@@ -1642,7 +1650,8 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnBlurEventHandler(Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("blur", blurable.getFocusActions());
+		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
+		addAjaxBehavior("blur", binding, blurable.getFocusActions());
 	}
 
 	@Override
@@ -1718,7 +1727,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnPickedEventHandler(Lookup lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("itemSelect", lookup.getPickedActions());
+		addAjaxBehavior("itemSelect", lookup.getBinding(), lookup.getPickedActions());
 	}
 
 	@Override
@@ -1732,7 +1741,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnClearedEventHandler(Lookup lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("itemUnselect", lookup.getClearedActions());
+		addAjaxBehavior("itemUnselect", lookup.getBinding(), lookup.getClearedActions());
 	}
 
 	@Override
