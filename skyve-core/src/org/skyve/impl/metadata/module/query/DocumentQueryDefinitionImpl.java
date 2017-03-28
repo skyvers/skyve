@@ -120,7 +120,6 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 		}
 		
 		if (summaryType == null) {
-			result.addThisProjection();
 			result.addBoundProjection(Bean.DOCUMENT_ID);
 			result.addBoundProjection(PersistentBean.LOCK_NAME);
 			result.addBoundProjection(Bean.BIZ_KEY);
@@ -137,17 +136,18 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			result.addBoundProjection(PersistentBean.FLAG_COMMENT_NAME);
 		}
 
+		// This is used to determine if we need to add the "this" projection to the query or not
+		// If we have any transient binding, then we need to load the bean too to resolve the value.
+		boolean anyTransientBindingInQuery = false;
+		
 		for (QueryColumn column : getColumns()) {
 			Attribute attribute = null;
 			String binding = column.getBinding();
 			String expression = column.getExpression();
 			String alias = column.getName();
-			if (alias != null) {
-				alias = alias.replace('.', '_');
-			}
 			if (binding != null) {
 				if (alias == null) {
-					alias = binding.replace('.', '_');
+					alias = binding;
 				}
 	
 				// Find the attribute
@@ -175,6 +175,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						if (attribute != null) {
 							if (! attribute.isPersistent()) {
 								transientBinding = true;
+								anyTransientBindingInQuery = true;
 							}
 							Relation relation = (Relation) attribute;
 							if (! relation.isRequired()) {
@@ -200,6 +201,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					attribute = target.getAttribute();
 					if (attribute != null) {
 						if (transientBinding || (! attribute.isPersistent())) {
+							anyTransientBindingInQuery = true;
 							continue;
 						}
 						// If we have a reference directly to a mapped document, don't process it coz it can't be joined.
@@ -214,10 +216,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 								Persistent associatedPersistent = associatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {
+									anyTransientBindingInQuery = true;
 									continue;
 								}
 								// Not a proper database relation, its just mapped so it can't be resolved in a query
 								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
+									anyTransientBindingInQuery = true;
 									continue;
 								}
 							}
@@ -230,10 +234,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 						Persistent targetPersistent = targetDocument.getPersistent();
 						// Not a persistent document
 						if (targetPersistent == null) {
+							anyTransientBindingInQuery = true;
 							continue;
 						}
 						// Not a proper relation, its just mapped so it can't be resolved
 						if (ExtensionStrategy.mapped.equals(targetPersistent.getStrategy())) {
+							anyTransientBindingInQuery = true;
 							continue;
 						}
 					}
@@ -249,6 +255,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					attribute = target.getAttribute();
 					if (attribute != null) {
 						if (! attribute.isPersistent()) {
+							anyTransientBindingInQuery = true;
 							continue;
 						}
 
@@ -260,10 +267,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 								Persistent associatedPersistent = associatedDocument.getPersistent();
 								// Not a persistent document
 								if (associatedPersistent == null) {
+									anyTransientBindingInQuery = true;
 									continue;
 								}
 								// Not a proper database relation, its just mapped so it can't be resolved in a query
 								if (ExtensionStrategy.mapped.equals(associatedPersistent.getStrategy())) {
+									anyTransientBindingInQuery = true;
 									continue;
 								}
 							}
@@ -461,6 +470,12 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					}
 				}
 			}
+		}
+		
+		// only add the "this" projection if we have transient column bindings to load
+		// and this is not a summary query
+		if (anyTransientBindingInQuery && (summaryType == null)) {
+			result.addThisProjection();
 		}
 
 		return result;

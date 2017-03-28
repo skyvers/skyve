@@ -131,7 +131,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			projectionClause.append(", ");
 		}
 		projectionClause.append(THIS_ALIAS).append('.').append(binding);
-		projectionClause.append(" as ").append(alias);
+		projectionClause.append(" as ").append(alias.replace('.', '_'));
 		return this;
 	}
 
