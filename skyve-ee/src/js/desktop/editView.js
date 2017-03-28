@@ -1858,14 +1858,39 @@ isc.BizComparison.addMethods({
 			var required = properties[i].required;
 			var allowEmptyValue = properties[i].allowEmptyValue;
 			
-			var field = {name: name, title: title, type: type, width: '*', canEdit: this.editable, defaultValue: properties[i].newValue};
-			var oldField = {name: "_old_" + name, type: type, width: '*', showTitle: false, canEdit: false, defaultValue: properties[i].oldValue};
+			var field = {name: name, 
+							title: title, 
+							showTitle: true,
+							type: type, 
+							width: '*',
+							startRow: true,
+							endRow: false, 
+							canEdit: this.editable, 
+							defaultValue: properties[i].newValue
+			};
+			var oldField = {name: "_old_" + name, 
+					showTitle: false, 
+								type: type, 
+								width: '*',
+								startRow: false,
+								endRow: false, 
+								canEdit: false, 
+								defaultValue: properties[i].oldValue
+			};
+			// remove toolbars from rich text editor and set colSpan
+			if ((type == 'richText') || (editorType == 'richText')) {
+				field.controlGroups = [];
+				field.colSpan = 1;
+				oldField.controlGroups = [];
+				oldField.colSpan = 1;
+			}
 			if (editorType) {
 				field.editorType = editorType;
 				oldField.editorType = editorType;
 			}
 			if (length) {
 				field.length = length;
+				oldField.length = length;
 			}
 			if (valueMap) {
 				field.valueMap = valueMap;

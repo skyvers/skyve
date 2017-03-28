@@ -225,6 +225,7 @@ public class SmartClientGenerateUtils {
 		protected String title;
 		protected String type = "text";
 		protected String editorType;
+		protected String filterEditorType;
 		protected Integer length;
 		protected String mask;
 		protected String textBoxStyle;
@@ -447,6 +448,7 @@ public class SmartClientGenerateUtils {
 					break;
 				case markup:
 					type = "richText";
+					filterEditorType = "text";
 					break;
 				case bool:
 					type = "boolean";
@@ -1008,7 +1010,7 @@ public class SmartClientGenerateUtils {
 			if (attribute != null) {
 				DomainType domainType = attribute.getDomainType();
 				if (domainType != null) {
-					onlyEqualsFilterOperators = true;
+						onlyEqualsFilterOperators = true;
 					
 					if (DomainType.variant.equals(domainType) || 
 							DomainType.dynamic.equals(domainType)) {
@@ -1123,6 +1125,9 @@ public class SmartClientGenerateUtils {
 			result.append(type);
 			if (editorType != null) {
 				result.append("',editorType:'").append(editorType);
+			}
+			if (filterEditorType != null) {
+				result.append("',filterEditorType:'").append(filterEditorType);
 			}
 			if (length != null) {
 				result.append("',length:").append(length);
