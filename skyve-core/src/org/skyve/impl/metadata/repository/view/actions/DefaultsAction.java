@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "defaults")
-public final class DefaultsAction extends Action {
+public final class DefaultsAction extends ActionMetaData {
 	public DefaultsAction() {
 		implicitName = ImplicitActionName.DEFAULTS;
 	}

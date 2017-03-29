@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
 import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
@@ -43,6 +44,7 @@ public class ActionImpl implements Action {
 	private String displayName;
 	private String toolTip;
 	private String relativeIconFileName;
+	private String iconStyleClass;
 	private String confirmationText;
 	private Boolean inActionPanel = Boolean.TRUE;
 	private RenderHint renderHint;
@@ -115,6 +117,15 @@ public class ActionImpl implements Action {
 
 	public void setRelativeIconFileName(String relativeIconFileName) {
 		this.relativeIconFileName = relativeIconFileName;
+	}
+
+	@Override
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = iconStyleClass;
 	}
 
 	@Override
@@ -204,8 +215,8 @@ public class ActionImpl implements Action {
 		this.disabledConditionName = BindUtil.negateCondition(enabledConditionName);
 	}
 
-	public org.skyve.impl.metadata.repository.view.actions.Action toRepositoryAction() {
-		org.skyve.impl.metadata.repository.view.actions.Action result = null;
+	public ActionMetaData toRepositoryAction() {
+		ActionMetaData result = null;
 		if (implicitName == null) { // custom action
 			result = new CustomAction();
 			((CustomAction) result).setClientValidation(getClientValidation());
@@ -276,6 +287,7 @@ public class ActionImpl implements Action {
 		result.setDisplayName(getDisplayName());
 		result.setInvisibleConditionName(getInvisibleConditionName());
 		result.setRelativeIconFileName(getRelativeIconFileName());
+		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
 
 		if (Boolean.FALSE.equals(inActionPanel) && (result instanceof PositionableAction)) {

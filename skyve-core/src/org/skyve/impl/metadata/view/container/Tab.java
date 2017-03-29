@@ -15,19 +15,18 @@ import org.skyve.metadata.view.Invisible;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			propOrder = {"title", 
 							"icon16x16RelativeFileName", 
+							"iconStyleClass", 
 							"disabledConditionName", 
 							"enabledConditionName", 
 							"invisibleConditionName", 
 							"visibleConditionName", 
 							"selectedConditionName"})
 public final class Tab extends Container implements Disableable, Invisible {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -3216551162394859248L;
 
 	private String title;
 	private String icon16x16RelativeFileName;
+	private String iconStyleClass;
 	private String disabledConditionName;
 	private String invisibleConditionName;
 	private String selectedConditionName;
@@ -48,6 +47,15 @@ public final class Tab extends Container implements Disableable, Invisible {
 	@XmlAttribute(name = "icon16x16RelativeFileName")
 	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
 		this.icon16x16RelativeFileName = UtilImpl.processStringValue(icon16x16RelativeFileName);
+	}
+
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlAttribute(name = "iconStyleClass")
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
 	@Override

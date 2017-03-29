@@ -59,6 +59,12 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * 
 	 * @return
 	 */
+	public String getIconStyleClass();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public String getConfirmationText();
 	
 	/**

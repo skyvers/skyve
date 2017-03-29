@@ -22,7 +22,7 @@
 				<spacer />
 			</item>
 			<item>
-				<button actionName="MakePasswordChange" pixelWidth="150" />
+				<button actionName="MakePasswordChange" pixelWidth="190" />
 			</item>
 		</row>
 		<row>
@@ -36,6 +36,6 @@
 	</form>
 	<actions>
 		<action className="MakePasswordChange" displayName="Change Password" toolTip="Change password"
-			relativeIconFileName="icons/document/password16.png" inActionPanel="false" />
+			relativeIconFileName="icons/document/password16.png" iconStyleClass="fa fa-lock" inActionPanel="false" />
 	</actions>
 </view>

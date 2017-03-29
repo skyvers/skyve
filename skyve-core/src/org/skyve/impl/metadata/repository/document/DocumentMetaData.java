@@ -80,7 +80,9 @@ import org.skyve.metadata.model.document.Relation;
 							"pluralAlias",
 							"audited",
 							"icon16x16RelativeFilePath",
+							"iconStyleClass",
 							"icon32x32RelativeFilePath",
+							"iconLargeStyleClass",
 							"description",
 							"parentDocument", 
 							"bizKey", 
@@ -90,13 +92,17 @@ import org.skyve.metadata.model.document.Relation;
 public class DocumentMetaData extends NamedMetaData implements PersistentMetaData<Document> {
 	private static final String DEFAULT_DOCUMENT_ICON_16_PATH = "shared/icons/DefaultDocument16x16.png";
 	private static final String DEFAULT_DOCUMENT_ICON_32_PATH = "shared/icons/DefaultDocument32x32.png";
+	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
+	private static final String DEFAULT_DOCUMENT_ICON_LARGE_STYLE_CLASS = "fa fa-file-o fa-2x";
 
 	private Extends inherits;
 	private Persistent persistent;
 	private String singularAlias;
 	private String pluralAlias;
 	private String icon16x16RelativeFilePath;
+	private String iconStyleClass;
 	private String icon32x32RelativeFilePath;
+	private String iconLargeStyleClass;
 	private java.lang.Boolean audited;
 	private String description;
 	private String parentDocument;
@@ -151,6 +157,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
 
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
+	}
+
 	public String getIcon32x32RelativeFilePath() {
 		return icon32x32RelativeFilePath;
 	}
@@ -158,6 +173,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
+	}
+
+	public String getIconLargeStyleClass() {
+		return iconLargeStyleClass;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setIconLargeStyleClass(String iconLargeStyleClass) {
+		this.iconLargeStyleClass = UtilImpl.processStringValue(iconLargeStyleClass);
 	}
 
 	public java.lang.Boolean getAudited() {
@@ -285,7 +309,19 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 		result.setIcon16x16RelativeFileName(icon16);
 		result.setIcon32x32RelativeFileName(icon32);
-		
+
+		String icon = getIconStyleClass();
+		String iconLarge = getIconLargeStyleClass();
+		if (icon == null) {
+			icon = DEFAULT_DOCUMENT_ICON_STYLE_CLASS;
+		}
+		if (iconLarge == null) {
+			iconLarge = DEFAULT_DOCUMENT_ICON_LARGE_STYLE_CLASS;
+		}
+
+		result.setIconStyleClass(icon);
+		result.setIconLargeStyleClass(iconLarge);
+
 		// audited defaults to true when not present
 		result.setAudited(java.lang.Boolean.FALSE.equals(getAudited()) ? false : true);
 		

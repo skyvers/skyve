@@ -7,7 +7,7 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public abstract class PositionableAction extends Action {
+public abstract class PositionableAction extends ActionMetaData {
 	private Boolean inActionPanel;
 
 	public Boolean isInActionPanel() {

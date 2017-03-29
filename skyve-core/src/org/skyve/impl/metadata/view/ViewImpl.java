@@ -18,6 +18,7 @@ public class ViewImpl extends Container implements View {
 
 	private ViewType type;
 	private String icon32x32RelativeFileName;
+	private String iconLargeStyleClass;
 	private String title;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
 	private Integer refreshTimeInSeconds;
@@ -69,6 +70,15 @@ public class ViewImpl extends Container implements View {
 
 	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
+	}
+
+	@Override
+	public String getIconLargeStyleClass() {
+		return iconLargeStyleClass;
+	}
+
+	public void setIconLargeStyleClass(String iconLargeStyleClass) {
+		this.iconLargeStyleClass = iconLargeStyleClass;
 	}
 
 	@Override

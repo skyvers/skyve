@@ -92,6 +92,7 @@ public class ViewGenerator {
 		result.setType(ViewType.pick);
 		result.setTitle("Pick a " + document.getSingularAlias());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
+		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
 
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.Cancel);
@@ -162,7 +163,8 @@ public class ViewGenerator {
 		}
 		result.setTitle(title.toString());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-
+		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
+		
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
@@ -189,7 +191,8 @@ public class ViewGenerator {
 
 		result.setTitle(document.getSingularAlias());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-
+		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
+		
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
@@ -435,6 +438,7 @@ public class ViewGenerator {
 		repositoryView.setType(ViewType.edit);
 		repositoryView.setTitle(view.getTitle());
 		repositoryView.setIcon32x32RelativeFileName(view.getIcon32x32RelativeFileName());
+		repositoryView.setIconLargeStyleClass(view.getIconLargeStyleClass());
 
 		repositoryView.getContained().addAll(view.getContained());
 
