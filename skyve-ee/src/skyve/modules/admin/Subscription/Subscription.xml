@@ -20,7 +20,9 @@
 	<singularAlias>Subscription</singularAlias>
 	<pluralAlias>Subscriptions</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
+	<iconStyleClass>fa fa-envelope</iconStyleClass>
 	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
+	<iconLargeStyleClass>fa fa-envelope fa-2x</iconLargeStyleClass>
 	<bizKey expression="{communication.description} for {receiverIdentifier}" />
 	<attributes>
 		<association name="communication" type="aggregation">

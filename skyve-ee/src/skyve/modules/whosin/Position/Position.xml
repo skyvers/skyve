@@ -10,7 +10,9 @@
 	<singularAlias>Position</singularAlias>
 	<pluralAlias>Organisational Structure</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/hierarchy16.png</icon16x16RelativeFilePath>
+	<iconStyleClass>fa fa-share-alt-square</iconStyleClass>
 	<icon32x32RelativeFilePath>icons/document/hierarchy32.png</icon32x32RelativeFilePath>
+	<iconLargeStyleClass>fa fa-share-alt-square fa-2x</iconLargeStyleClass>
 	<parentDocument>Position</parentDocument>
 	<bizKey expression="{positionTitle} ({staff.contact.name} {staff.contact.mobile})"/>
 	<attributes>

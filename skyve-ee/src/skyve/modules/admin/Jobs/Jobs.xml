@@ -6,7 +6,9 @@
 	<singularAlias>Jobs</singularAlias>
 	<pluralAlias>Jobs</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
+	<iconStyleClass>fa fa-cogs</iconStyleClass>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
+	<iconLargeStyleClass>fa fa-cogs fa-2x</iconLargeStyleClass>
 	<attributes>
 		<collection name="runningJobs" type="aggregation">
 			<displayName>Running Jobs</displayName>

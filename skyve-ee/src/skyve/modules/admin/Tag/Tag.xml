@@ -7,7 +7,9 @@
 	<singularAlias>Tag</singularAlias>
 	<pluralAlias>Tags</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/tag16.png</icon16x16RelativeFilePath>
+	<iconStyleClass>fa fa-tag</iconStyleClass>
 	<icon32x32RelativeFilePath>icons/document/tag32.png</icon32x32RelativeFilePath>
+	<iconLargeStyleClass>fa fa-tag</iconLargeStyleClass>
 	<bizKey expression="{name}"/>
 	<attributes>
 		<text name="name" >

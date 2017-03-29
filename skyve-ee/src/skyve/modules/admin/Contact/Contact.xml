@@ -7,7 +7,9 @@
 	<singularAlias>Contact</singularAlias>
 	<pluralAlias>Contacts</pluralAlias>
 	<icon16x16RelativeFilePath>icons/document/contact16.png</icon16x16RelativeFilePath>
+	<iconStyleClass>fa fa-user</iconStyleClass>
 	<icon32x32RelativeFilePath>icons/document/contact32.png</icon32x32RelativeFilePath>
+	<iconLargeStyleClass>fa fa-user fa-2x</iconLargeStyleClass>
 	<bizKey>
 		<![CDATA[
 		  	return modules.admin.Contact.ContactBizlet.bizKey(this);

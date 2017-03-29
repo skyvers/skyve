@@ -51,7 +51,15 @@
 			</form>
 		</hbox>
 		<hbox horizontalAlignment="centre">
-			<button actionName="UpdateMyDetails" pixelWidth="100" />
+			<form>
+				<column/>
+				<row>
+					<item>
+						<button actionName="UpdateMyDetails" pixelWidth="150" />
+					</item>
+				</row>
+			</form>
+			
 		</hbox>
 	</vbox>
 	<hbox>
@@ -80,6 +88,7 @@
 	</tabPane>
 	<actions>
 		<action className="UpdateMyDetails" displayName="Save" toolTip="Save" relativeIconFileName="actions/Save.gif"
+			iconStyleClass="fa fa-save"
 			inActionPanel="false" />
 	</actions>
 </view>

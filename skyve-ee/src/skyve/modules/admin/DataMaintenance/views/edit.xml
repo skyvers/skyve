@@ -275,38 +275,38 @@
 		<defaults />
 		<export className="DataMaintenanceExportAction" displayName="Export Data" inActionPanel="false" />
 		<import className="DataMaintenanceImportAction" displayName="Import Data" inActionPanel="false" />
-		<action className="Backup" displayName="Backup" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif"/>
+		<action className="Backup" displayName="Backup" inActionPanel="false" relativeIconFileName="shared/icons/Backup.gif"  iconStyleClass="fa fa-toggle-right"/>
 		<action className="BackupSelected" displayName="BackupSelected" inActionPanel="false" />
 		<action className="ContentSelected" displayName="ContentSelected" inActionPanel="false" />
 		<action className="DeleteBackup" displayName="Delete" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to delete this backup folder from the server filesystem?" 
-			relativeIconFileName="shared/icons/Clear.gif"/>
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete"/>
 		<action className="Reindex" displayName="Reindex" inActionPanel="false" 
-			relativeIconFileName="shared/icons/Wizard.gif"/>
+			relativeIconFileName="shared/icons/Wizard.gif" iconStyleClass="fa fa-sort-amount-asc"/>
 		<action className="Restore" displayName="Restore" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to restore the data and content contained in this backup folder from the server filesystem?" 
-			relativeIconFileName="shared/icons/Exclamation.gif"/>
+			relativeIconFileName="shared/icons/Exclamation.gif" iconStyleClass="fa fa-toggle-left" />
 		<action className="Truncate" displayName="Truncate" inActionPanel="false"
 			confirm="WARNING: Schema will be truncated (all data deleted) - there is no undo for this action. Ensure you have a backup of all data. OK to continue?" 
-			relativeIconFileName="shared/icons/Clear.gif"/>
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete"/>
 		<action className="TruncateAuditLog" displayName="Truncate Log (Job)" inActionPanel="false"
 			confirm="OK to truncate audit log? (There is no undo - a prior backup recommended.)" 
-			relativeIconFileName="shared/icons/Clear.gif" disabled="jobCommenced" />
-		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" />
+			relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete" disabled="jobCommenced" />
+		<action className="CheckAuditMatches" displayName="Check Affected" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif" iconStyleClass="fa fa-search"/>
 		<action className="RefreshDocumentTuples" displayName="Refresh Persisted Document Data" inActionPanel="false"
-			confirm="OK to start the Refresh Job? (There is no undo.)" relativeIconFileName="shared/icons/Job.gif" />
+			confirm="OK to start the Refresh Job? (There is no undo.)" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs"/>
 
 		<download className="DownloadBackup" displayName="Download Backup" inActionPanel="false" disabled="notBackupSelected"
 			confirm="Are you sure you want to download a zip of this backup folder from the server filesystem?" />
 		<action className="Create" displayName="Script Create DB" inActionPanel="false"
 			toolTip="Generate a script to create the SQL DB" 
-			relativeIconFileName="shared/icons/Script.gif"/>
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil"/>
 		<action className="Drop" displayName="Script Drop DB" inActionPanel="false"
 			toolTip="Generate a script to drop the SQL DB" 
-			relativeIconFileName="shared/icons/Script.gif"/>
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-pencil"/>
 		<action className="Sync" displayName="Script Synchronise DB" inActionPanel="false"
 			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
-			relativeIconFileName="shared/icons/Script.gif"/>
+			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh"/>
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
 	</actions>
 </view>
