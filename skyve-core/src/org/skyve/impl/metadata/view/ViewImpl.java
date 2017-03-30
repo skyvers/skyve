@@ -11,14 +11,11 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 public class ViewImpl extends Container implements View {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -2621201277538515637L;
 
 	private ViewType type;
 	private String icon32x32RelativeFileName;
-	private String iconLargeStyleClass;
+	private String iconStyleClass;
 	private String title;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
 	private Integer refreshTimeInSeconds;
@@ -73,12 +70,12 @@ public class ViewImpl extends Container implements View {
 	}
 
 	@Override
-	public String getIconLargeStyleClass() {
-		return iconLargeStyleClass;
+	public String getIconStyleClass() {
+		return iconStyleClass;
 	}
 
-	public void setIconLargeStyleClass(String iconLargeStyleClass) {
-		this.iconLargeStyleClass = iconLargeStyleClass;
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = iconStyleClass;
 	}
 
 	@Override

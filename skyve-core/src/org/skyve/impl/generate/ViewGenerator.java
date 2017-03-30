@@ -91,8 +91,8 @@ public class ViewGenerator {
 		ViewImpl result = new ViewImpl();
 		result.setType(ViewType.pick);
 		result.setTitle("Pick a " + document.getSingularAlias());
+		result.setIconStyleClass(document.getIconStyleClass());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
 
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.Cancel);
@@ -162,8 +162,8 @@ public class ViewGenerator {
 			title.append(finalDescription);
 		}
 		result.setTitle(title.toString());
+		result.setIconStyleClass(document.getIconStyleClass());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
 		
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
@@ -190,8 +190,8 @@ public class ViewGenerator {
 		result.setType(ViewType.edit);
 
 		result.setTitle(document.getSingularAlias());
+		result.setIconStyleClass(document.getIconStyleClass());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-		result.setIconLargeStyleClass(document.getIconLargeStyleClass());
 		
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
@@ -437,8 +437,8 @@ public class ViewGenerator {
 		ViewMetaData repositoryView = new ViewMetaData();
 		repositoryView.setType(ViewType.edit);
 		repositoryView.setTitle(view.getTitle());
+		repositoryView.setIconStyleClass(view.getIconStyleClass());
 		repositoryView.setIcon32x32RelativeFileName(view.getIcon32x32RelativeFileName());
-		repositoryView.setIconLargeStyleClass(view.getIconLargeStyleClass());
 
 		repositoryView.getContained().addAll(view.getContained());
 

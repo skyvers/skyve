@@ -75,6 +75,4 @@ public interface Model extends NamedMetaData {
 	public String getIcon32x32RelativeFileName();
 
 	public String getIconStyleClass();
-
-	public String getIconLargeStyleClass();
 }

@@ -65,7 +65,7 @@ public class TextSearchServlet extends HttpServlet {
 		
 		            Iterator<SearchResult> resultIterator = results.getResults().iterator();
 		            StringBuilder url = new StringBuilder(128);
-		            StringBuilder icon = new StringBuilder(64);
+		            StringBuilder iconMarkup = new StringBuilder(64);
 		            while (resultIterator.hasNext()) {
 						SearchResult result = resultIterator.next();
 						try {
@@ -80,10 +80,18 @@ public class TextSearchServlet extends HttpServlet {
 							// Use JSONUtil here to ensure that everything is escaped properly
 							
 				            Map<String, Object> row = new TreeMap<>();
-				            icon.setLength(0);
-				            icon.append("?_doc=").append(moduleName).append('.').append(documentName);
-				            icon.append("&_n=").append(document.getIcon16x16RelativeFileName());
-				            row.put("icon", icon.toString());
+				            String icon16 = document.getIcon16x16RelativeFileName();
+				            String icon = document.getIconStyleClass();
+				            iconMarkup.setLength(0);
+				            if (icon != null) {
+				            	iconMarkup.append("<i class=\"bizhubFontIcon ").append(icon).append("\"></i>");
+				            }
+				            else if (icon16 != null) {
+					            iconMarkup.append("<img style=\"width:16px;height:16px\" src=\"resources?_doc=");
+					            iconMarkup.append(moduleName).append('.').append(documentName);
+					            iconMarkup.append("&_n=").append(icon16).append("\"/>");
+				            }
+				            row.put("icon", iconMarkup.toString());
 				            row.put("doc", document.getSingularAlias());
 				            row.put(Bean.BIZ_KEY, (bean != null) ? bean.getBizKey() : null);
 				            row.put("excerpt", result.getExcerpt());

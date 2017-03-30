@@ -129,6 +129,12 @@ html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
 	font-weight: bold;
 }
 
+.bizhubFontIcon {
+	font-size: 18px;
+	vertical-align: middle;
+	padding-right: 8px;
+}
+
 /*
 **************************************
 FORM styles

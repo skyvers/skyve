@@ -7,7 +7,6 @@
 	<singularAlias>Document Number</singularAlias>
 	<pluralAlias>Document Numbers</pluralAlias>
 	<iconStyleClass>fa fa-file-o</iconStyleClass>
-	<iconLargeStyleClass>fa fa-file-o fa-2x</iconLargeStyleClass>
 	<bizKey expression="{moduleName}.{documentName}.{sequenceName}"/>
 	<attributes>
 		<text name="moduleName" required="true">

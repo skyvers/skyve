@@ -47,8 +47,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"actions", 
 							"type", 
 							"title",
+							"iconStyleClass",
 							"icon32x32RelativeFileName",
-							"iconLargeStyleClass",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
@@ -58,8 +58,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 
 	private ViewType type;
 	private String title;
+	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
-	private String iconLargeStyleClass;
 	private List<ActionMetaData> actions = new ArrayList<>();
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -94,13 +94,13 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		this.icon32x32RelativeFileName = UtilImpl.processStringValue(icon32x32RelativeFileName);
 	}
 
-	public String getIconLargeStyleClass() {
-		return iconLargeStyleClass;
+	public String getIconStyleClass() {
+		return iconStyleClass;
 	}
 
-	@XmlAttribute(name = "iconLargeStyleClass")
-	public void setIconLargeStyleClass(String iconLargeStyleClass) {
-		this.iconLargeStyleClass = UtilImpl.processStringValue(iconLargeStyleClass);
+	@XmlAttribute(name = "iconStyleClass")
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
@@ -181,8 +181,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		}
 		result.setTitle(value);
 
+		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
-		result.setIconLargeStyleClass(getIconLargeStyleClass());
 		
 		ViewType theType = getType();
 		if (theType == null) {
