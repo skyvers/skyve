@@ -11,12 +11,13 @@ import org.skyve.metadata.model.document.Association;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "association")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "association", 
-			propOrder = {"requiredBool", "type"})
+			propOrder = {"requiredBool", "type", "allowCascadeMerge"})
 public class AssociationImpl extends ReferenceImpl implements Association {
 	private static final long serialVersionUID = -2839713495173145591L;
 
 	private boolean required;
 	private AssociationType type;
+	private Boolean allowCascadeMerge;
 
 	public AssociationImpl() {
 		setAttributeType(AttributeType.association);
@@ -45,5 +46,15 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	@XmlAttribute(name = "required", required = false)
 	public void setRequiredBool(Boolean required) {
 		this.required = required.booleanValue();
+	}
+	
+	@Override
+	public Boolean getAllowCascadeMerge() {
+		return allowCascadeMerge;
+	}
+
+	@XmlAttribute
+	public void setAllowCascadeMerge(Boolean allowCascadeMerge) {
+		this.allowCascadeMerge = allowCascadeMerge;
 	}
 }

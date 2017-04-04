@@ -987,7 +987,11 @@ joined tables
 					// all groups are up-revved, even though the collection is not dirty,
 					// causing optimistic lock when Staff are saved.
 					// So if lots of Staff use the same user, we're screwed.
-					if (ALLOW_CASCADE_MERGE) {
+					Boolean allowCascadeMerge = association.getAllowCascadeMerge();
+					if ((allowCascadeMerge == null) && ALLOW_CASCADE_MERGE) {
+						fw.append(",merge");
+					}
+					else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 						fw.append(",merge");
 					}
 					fw.append("\" />\n");

@@ -32,7 +32,7 @@ public abstract class DomainGenerator {
 	// all groups are up-revved, even though the collection is not dirty,
 	// causing optimistic lock when Staff are saved.
 	// So if lots of Staff use the same user, we're screwed.
-	protected static boolean ALLOW_CASCADE_MERGE = true; // for now
+	protected static boolean ALLOW_CASCADE_MERGE = true;
 
 	public static final void validate(String customerName) throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
