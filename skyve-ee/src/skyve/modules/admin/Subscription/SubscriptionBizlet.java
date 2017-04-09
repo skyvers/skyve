@@ -176,13 +176,12 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 
 				sqlInsContact.execute();
 
-				// insert a public user with no password so that they cannot log
-				// in
+				// insert a public user with no password so that they cannot log in
 				StringBuilder sqlInsUserString = new StringBuilder(256);
 				sqlInsUserString.append("insert into ADM_SecurityUser (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId");
-				sqlInsUserString.append(", userName, generated, contact_id)");
+				sqlInsUserString.append(", userName, contact_id)");
 				sqlInsUserString.append(" values (:bizId, :bizVersion, :bizLock, :bizKey, :bizCustomer, :bizUserId");
-				sqlInsUserString.append(", :userName, :generated, :contact)");
+				sqlInsUserString.append(", :userName, :contact)");
 
 				SQL sqlInsUser = persistence.newSQL(sqlInsUserString.toString());
 
@@ -201,8 +200,6 @@ public class SubscriptionBizlet extends Bizlet<Subscription> {
 				sqlInsUser.putParameter(Bean.USER_ID, bizUserId, false);
 				sqlInsUser.putParameter(modules.admin.domain.User.userNamePropertyName, SUBSCRIPTION_PUBLIC_USERNAME, false);
 				sqlInsUser.putParameter(modules.admin.domain.User.contactPropertyName, PUBLIC_USER_CONTACT_ID, false);
-				sqlInsUser.putParameter(modules.admin.domain.User.generatedPropertyName, Boolean.TRUE);
-
 				sqlInsUser.execute();
 
 				persistence.commit(false);

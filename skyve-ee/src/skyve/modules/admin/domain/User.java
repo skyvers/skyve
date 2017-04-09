@@ -56,8 +56,6 @@ public class User extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String confirmPasswordPropertyName = "confirmPassword";
 	/** @hidden */
-	public static final String generatedPropertyName = "generated";
-	/** @hidden */
 	public static final String legacyIdPropertyName = "legacyId";
 	/** @hidden */
 	public static final String passwordExpiredPropertyName = "passwordExpired";
@@ -196,10 +194,6 @@ public class User extends AbstractPersistentBean {
 	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String confirmPassword;
-	/**
-	 * Whether the User was generated or manually entered.
-	 **/
-	private Boolean generated;
 	/**
 	 * Legacy ID value when imported from legacy System using the conversion tool.
 	 **/
@@ -409,24 +403,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setConfirmPassword(String confirmPassword) {
 		preset(confirmPasswordPropertyName, confirmPassword);
 		this.confirmPassword = confirmPassword;
-	}
-
-	/**
-	 * {@link #generated} accessor.
-	 **/
-	public Boolean getGenerated() {
-		return generated;
-	}
-
-	/**
-	 * {@link #generated} mutator.
-	 * 
-	 * @param generated	The new value to set.
-	 **/
-	@XmlElement
-	public void setGenerated(Boolean generated) {
-		preset(generatedPropertyName, generated);
-		this.generated = generated;
 	}
 
 	/**

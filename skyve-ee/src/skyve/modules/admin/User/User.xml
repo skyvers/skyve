@@ -53,10 +53,6 @@
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
 		</text>
-		<boolean  name="generated">
-			<displayName>Generated</displayName>
-			<description>Whether the User was generated or manually entered.</description>
-		</boolean >
 		<text name="legacyId" >
 			<displayName>Legacy Id</displayName>
 			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>
