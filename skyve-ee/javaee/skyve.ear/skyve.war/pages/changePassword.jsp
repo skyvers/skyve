@@ -114,7 +114,7 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-5-sm right">
+								<div class="col-4-sm right">
 									<label for="newPassword"><%=Util.i18n("page.changePassword.newPassword.label", locale)%></label>
 								</div>
 								<div class="col-6-sm">
@@ -122,7 +122,7 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-5-sm right">
+								<div class="col-4-sm right">
 									<label for="confirmPassword"><%=Util.i18n("page.changePassword.confirmPassword.label", locale)%></label>
 								</div>
 								<div class="col-6-sm">

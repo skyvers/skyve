@@ -58,8 +58,8 @@
 		<div class="container">
 			<%@include file="fragments/logo.html" %>
 			<div class="row">
-				<div class="col-4 col-2-md col-2-sm"></div>
-				<div class="col-4 col-8-md col-8-sm">
+				<div class="col-4 col-2-md col-1-sm"></div>
+				<div class="col-4 col-8-md col-10-sm">
 					<form>
 						<div class="loginTable" style="width:100%;">
 							<div class="row">
@@ -68,8 +68,8 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-2 col-3-sm"></div>
-								<div class="col-8 col-6-sm center">
+								<div class="col-2 col-2-sm"></div>
+								<div class="col-8 col-8-sm center">
 									<div class="buttonDiv">
 										<% if (referer == null) { %>
 											<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%><%=(user == null) ? "" : (String.format("home?customer=%s", user.getCustomerName()))%>"><%=Util.i18n("page.login.submit.label", locale)%></a>
