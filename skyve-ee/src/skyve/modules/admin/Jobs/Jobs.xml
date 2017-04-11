@@ -5,6 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Jobs</singularAlias>
 	<pluralAlias>Jobs</pluralAlias>
+	<iconStyleClass>fa fa-cogs</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/job16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/job32.png</icon32x32RelativeFilePath>
 	<attributes>

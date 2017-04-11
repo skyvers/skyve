@@ -1,44 +1,45 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.9.4
+Ant-Version: Apache Ant 1.9.6
 Created-By: 1.7.0_60-b19 (Oracle Corporation)
 Class-Path: lib/skyve-core.jar lib/skyve-ext.jar lib/UserAgentUtils-1.
- 19.jar lib/antlr-2.7.6.jar lib/apache-mime4j-core-0.7.2.jar lib/apach
- e-mime4j-dom-0.7.2.jar lib/asm-4.1.jar lib/asm-commons-4.1.jar lib/as
- pectjrt-1.6.11.jar lib/bcmail-jdk15-1.45.jar lib/bcprov-jdk15-1.45.ja
- r lib/boilerpipe-1.1.0.jar lib/bsh-2.0b4.jar lib/cglib-3.1.jar lib/co
- mmons-beanutils.jar lib/commons-codec-1.5.jar lib/commons-collections
- -3.2.jar lib/commons-compress-1.5.jar lib/commons-digester-1.8.jar li
- b/commons-io-2.3.jar lib/commons-javaflow-20060411.jar lib/commons-la
- ng3-3.1.jar lib/commons-logging-1.1.1.jar lib/commons-validator-1.4.0
- .jar lib/concurrent-1.3.4.jar lib/dom4j-1.6.1.jar lib/ehcache-core-2.
- 0.1.jar lib/ejb3-persistence.jar lib/elasticsearch-1.4.2.jar lib/font
- box-1.8.4.jar lib/geodb-0.7.jar lib/geodb-app-0.7.jar lib/geodb_commo
- ns-cli-1.2.jar lib/geodb_hatbox-1.0.b7.jar lib/geodb_henplus-0.9.8.ja
- r lib/geodb_libreadline-java-0.8.0.jar lib/geronimo-stax-api_1.0_spec
- -1.0.1.jar lib/groovy-all-2.3.2.jar lib/h2-1.3.173.jar lib/hibernate-
- annotations.jar lib/hibernate-commons-annotations.jar lib/hibernate-e
- ntitymanager.jar lib/hibernate-validator.jar lib/hibernate3.jar lib/i
- Text-2.1.7.jar lib/isoparser-1.0-RC-1.jar lib/jackson-core-2.5.2.jar 
- lib/jackson-databind-2.5.2.jar lib/jasperreports-javaflow-4.7.0.jar l
- ib/javassist-3.12.0.GA.jar lib/jcommon-1.0.15.jar lib/jdom-1.0.jar li
- b/jempbox-1.8.4.jar lib/jfreechart-1.0.12.jar lib/jhighlight-1.0.jar 
- lib/jna-4.1.0.jar lib/jsr173_1.0_api.jar lib/jts-1.13.jar lib/juniver
- salchardet-1.0.3.jar lib/jxl-2.6.10.jar lib/log4j-1.2.17.jar lib/luce
- ne-analyzers-common-4.10.2.jar lib/lucene-core-4.10.2.jar lib/lucene-
- expressions-4.10.2.jar lib/lucene-grouping-4.10.2.jar lib/lucene-high
- lighter-4.10.2.jar lib/lucene-join-4.10.2.jar lib/lucene-memory-4.10.
- 2.jar lib/lucene-misc-4.10.2.jar lib/lucene-queries-4.10.2.jar lib/lu
- cene-queryparser-4.10.2.jar lib/lucene-sandbox-4.10.2.jar lib/lucene-
- spatial-4.10.2.jar lib/lucene-suggest-4.10.2.jar lib/metadata-extract
- or-2.6.2.jar lib/neethi-3.0.1.jar lib/nekohtml-1.9.7.jar lib/pdfbox-1
- .8.4.jar lib/poi-3.10.1.jar lib/poi-ooxml-3.10.1.jar lib/poi-ooxml-sc
- hemas-3.10.1.jar lib/poi-scratchpad-3.10.1.jar lib/quality-check-1.3.
- jar lib/quartz-1.6.0.jar lib/rome-0.9.jar lib/slf4j-api-1.7.7.jar lib
- /slf4j-simple-1.7.7.jar lib/spatial4j-0.4.1.jar lib/stax-api-1.0.1.ja
- r lib/super-csv-2.4.0.jar lib/tagsoup-1.2.1.jar lib/thumbnailator-0.4
- .8.jar lib/tika-core-1.5.jar lib/tika-parsers-1.5.jar lib/vorbis-java
- -core-0.1-tests.jar lib/vorbis-java-core-0.1.jar lib/vorbis-java-tika
- -0.1.jar lib/wsdl4j-1.6.2.jar lib/xercesImpl-2.8.1.jar lib/xml-apis-1
- .3.03.jar lib/xmlbeans-2.6.0.jar lib/xmlschema-core-2.0.1.jar lib/xmp
- core-5.1.2.jar lib/xz-1.2.jar
+ 20.jar lib/antlr-2.7.6.jar lib/antlr-runtime-3.5.jar lib/apache-mime4
+ j-core-0.7.2.jar lib/apache-mime4j-dom-0.7.2.jar lib/asm-5.0.4.jar li
+ b/asm-commons-5.0.4.jar lib/aspectjrt-1.6.11.jar lib/bcmail-jdk15-1.4
+ 5.jar lib/bcprov-jdk15-1.45.jar lib/boilerpipe-1.1.0.jar lib/cglib-3.
+ 1.jar lib/commons-beanutils-1.9.2.jar lib/commons-codec-1.5.jar lib/c
+ ommons-collections-3.2.2.jar lib/commons-compress-1.5.jar lib/commons
+ -digester-1.8.1.jar lib/commons-io-2.2.jar lib/commons-lang3-3.1.jar 
+ lib/commons-logging-1.2.jar lib/commons-validator-1.5.1.jar lib/concu
+ rrent-1.3.4.jar lib/core-3.2.1.jar lib/dom4j-1.6.1.jar lib/ecj-4.3.1.
+ jar lib/ehcache-core-2.0.1.jar lib/ejb3-persistence-1.0.1.GA.jar lib/
+ elasticsearch-1.4.2.jar lib/fontbox-1.8.4.jar lib/geodb-0.7.jar lib/g
+ eronimo-stax-api_1.0_spec-1.0.1.jar lib/groovy-all-2.3.2.jar lib/h2-1
+ .1.118.jar lib/hatbox-1.0.b7.jar lib/hibernate-3.2.6.ga.jar lib/hiber
+ nate-annotations-3.3.1.GA.jar lib/hibernate-commons-annotations-3.0.0
+ .ga.jar lib/hibernate-entitymanager-3.3.2.GA.jar lib/hibernate-valida
+ tor-3.0.0.GA.jar lib/icu4j-57.1.jar lib/isoparser-1.0-RC-1.jar lib/it
+ ext-2.1.7.js5.jar lib/jackson-annotations-2.1.4.jar lib/jackson-core-
+ 2.1.4.jar lib/jackson-databind-2.1.4.jar lib/jasperreports-6.3.1.jar 
+ lib/javassist-3.20.0-GA.jar lib/jcommon-1.0.23.jar lib/jdom-1.0.jar l
+ ib/jempbox-1.8.4.jar lib/jfreechart-1.0.19.jar lib/jhighlight-1.0.jar
+  lib/jna-4.1.0.jar lib/jsr305-2.0.1.jar lib/jts-1.13.jar lib/junivers
+ alchardet-1.0.3.jar lib/jxl-2.6.10.jar lib/log4j-1.2.14.jar lib/lucen
+ e-analyzers-common-4.10.2.jar lib/lucene-core-4.10.2.jar lib/lucene-e
+ xpressions-4.10.2.jar lib/lucene-grouping-4.10.2.jar lib/lucene-highl
+ ighter-4.10.2.jar lib/lucene-join-4.10.2.jar lib/lucene-memory-4.10.2
+ .jar lib/lucene-misc-4.10.2.jar lib/lucene-queries-4.10.2.jar lib/luc
+ ene-queryparser-4.10.2.jar lib/lucene-sandbox-4.10.2.jar lib/lucene-s
+ patial-4.10.2.jar lib/lucene-suggest-4.10.2.jar lib/metadata-extracto
+ r-2.6.2.jar lib/neethi-3.0.1.jar lib/nekohtml-1.9.7.jar lib/olap4j-0.
+ 9.7.309-JS-3.jar lib/pdfbox-1.8.4.jar lib/persistence-api-1.0.2.jar l
+ ib/poi-3.10.1.jar lib/poi-ooxml-3.10.1.jar lib/poi-ooxml-schemas-3.10
+ .1.jar lib/poi-scratchpad-3.10.1.jar lib/quality-check-1.3.jar lib/qu
+ artz-1.7.2.jar lib/rome-0.9.jar lib/slf4j-api-1.5.8.jar lib/slf4j-log
+ 4j12-1.5.6.jar lib/spatial4j-0.4.1.jar lib/stax-api-1.0.1.jar lib/sup
+ er-csv-2.4.0.jar lib/tagsoup-1.2.1.jar lib/thumbnailator-0.4.8.jar li
+ b/tika-core-1.5.jar lib/tika-parsers-1.5.jar lib/vorbis-java-core-0.1
+ -tests.jar lib/vorbis-java-core-0.1.jar lib/vorbis-java-tika-0.1.jar 
+ lib/wsdl4j-1.6.2.jar lib/xercesImpl-2.8.1.jar lib/xml-apis-1.0.b2.jar
+  lib/xmlbeans-2.6.0.jar lib/xmlschema-core-2.0.1.jar lib/xmpcore-5.1.
+ 2.jar lib/xz-1.2.jar
 

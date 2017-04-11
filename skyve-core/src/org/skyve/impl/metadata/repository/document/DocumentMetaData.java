@@ -79,6 +79,7 @@ import org.skyve.metadata.model.document.Relation;
 							"singularAlias", 
 							"pluralAlias",
 							"audited",
+							"iconStyleClass",
 							"icon16x16RelativeFilePath",
 							"icon32x32RelativeFilePath",
 							"description",
@@ -88,13 +89,13 @@ import org.skyve.metadata.model.document.Relation;
 							"conditions", 
 							"uniqueConstraints"})
 public class DocumentMetaData extends NamedMetaData implements PersistentMetaData<Document> {
-	private static final String DEFAULT_DOCUMENT_ICON_16_PATH = "shared/icons/DefaultDocument16x16.png";
-	private static final String DEFAULT_DOCUMENT_ICON_32_PATH = "shared/icons/DefaultDocument32x32.png";
+	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;
 	private Persistent persistent;
 	private String singularAlias;
 	private String pluralAlias;
+	private String iconStyleClass;
 	private String icon16x16RelativeFilePath;
 	private String icon32x32RelativeFilePath;
 	private java.lang.Boolean audited;
@@ -149,6 +150,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
+	}
+
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
 	public String getIcon32x32RelativeFilePath() {
@@ -270,22 +280,24 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 		String icon16 = getIcon16x16RelativeFilePath();
 		String icon32 = getIcon32x32RelativeFilePath();
-		if ((icon16 == null) && (icon32 == null)) {
-			icon16 = DEFAULT_DOCUMENT_ICON_16_PATH;
-			icon32 = DEFAULT_DOCUMENT_ICON_32_PATH;
+		String icon = getIconStyleClass();
+
+		if ((icon16 == null) && (icon32 == null) && (icon == null)) {
+			icon = DEFAULT_DOCUMENT_ICON_STYLE_CLASS;
 		}
 		else {
 			if (icon16 == null) {
 				icon16 = icon32;
 			}
-			else if (icon32 == null) {
+			if (icon32 == null) {
 				icon32 = icon16;
 			}
 		}
 
 		result.setIcon16x16RelativeFileName(icon16);
 		result.setIcon32x32RelativeFileName(icon32);
-		
+		result.setIconStyleClass(icon);
+
 		// audited defaults to true when not present
 		result.setAudited(java.lang.Boolean.FALSE.equals(getAudited()) ? false : true);
 		

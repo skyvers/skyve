@@ -9,6 +9,7 @@
 	<persistent name="WHO_Position" />
 	<singularAlias>Position</singularAlias>
 	<pluralAlias>Organisational Structure</pluralAlias>
+	<iconStyleClass>fa fa-share-alt-square</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/hierarchy16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/hierarchy32.png</icon32x32RelativeFilePath>
 	<parentDocument>Position</parentDocument>

@@ -22,6 +22,7 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 	 */
 	@Override
 	protected CommandButton actionButton(String title, 
+											String iconStyleClass,
 											String tooltip, 
 											ImplicitActionName implicitActionName,
 											String actionName, 
@@ -35,6 +36,7 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 											String invisible) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return super.actionButton(title, 
+										iconStyleClass,
 										tooltip, 
 										implicitActionName, 
 										actionName, 
@@ -49,6 +51,7 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 		}
 
 		return super.actionButton(title, 
+									iconStyleClass,
 									tooltip, 
 									implicitActionName, 
 									actionName, 

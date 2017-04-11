@@ -644,7 +644,14 @@ isc.EditView.addMethods({
 		}
 		
 		var header = isc.BizUtil.headerTemplate;
-		header = header.replace('{modoc}', this._mod + '.' + this._doc).replace('{icon}', this._icon).replace('{title}', values._title).replace('{link}', link);
+		var icon = '';
+		if (this._icon) {
+			icon = '<img style="width:32px;height:32px" src="resources?_doc=' + this._mod + '.' + this._doc + '&_n=' + this._icon + '&v=' + isc.BizUtil.version + '"/>';
+		}
+		else if (this._fontIcon) {
+			icon = '<i style="padding-left:5px;font-size:32px" class="titleBar bizhubFontIcon ' + this._fontIcon + '"></i>';
+		}
+		header = header.replace('{icon}', icon).replace('{title}', values._title).replace('{link}', link);
 		this._heading.setContents(header);
 
 		// remove the form title so it is not subsequently posted
@@ -1858,14 +1865,39 @@ isc.BizComparison.addMethods({
 			var required = properties[i].required;
 			var allowEmptyValue = properties[i].allowEmptyValue;
 			
-			var field = {name: name, title: title, type: type, width: '*', canEdit: this.editable, defaultValue: properties[i].newValue};
-			var oldField = {name: "_old_" + name, type: type, width: '*', showTitle: false, canEdit: false, defaultValue: properties[i].oldValue};
+			var field = {name: name, 
+							title: title, 
+							showTitle: true,
+							type: type, 
+							width: '*',
+							startRow: true,
+							endRow: false, 
+							canEdit: this.editable, 
+							defaultValue: properties[i].newValue
+			};
+			var oldField = {name: "_old_" + name, 
+					showTitle: false, 
+								type: type, 
+								width: '*',
+								startRow: false,
+								endRow: false, 
+								canEdit: false, 
+								defaultValue: properties[i].oldValue
+			};
+			// remove toolbars from rich text editor and set colSpan
+			if ((type == 'richText') || (editorType == 'richText')) {
+				field.controlGroups = [];
+				field.colSpan = 1;
+				oldField.controlGroups = [];
+				oldField.colSpan = 1;
+			}
 			if (editorType) {
 				field.editorType = editorType;
 				oldField.editorType = editorType;
 			}
 			if (length) {
 				field.length = length;
+				oldField.length = length;
 			}
 			if (valueMap) {
 				field.valueMap = valueMap;

@@ -15,6 +15,8 @@ import org.primefaces.model.menu.DefaultSubMenu;
 import org.primefaces.model.menu.MenuModel;
 import org.primefaces.model.menu.Submenu;
 import org.skyve.CORE;
+import org.skyve.impl.metadata.module.menu.AbstractDocumentMenuItem;
+import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -31,6 +33,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 import org.skyve.util.Util;
@@ -125,17 +128,40 @@ public class Menu extends Harness {
 			if (item instanceof MenuGroup) {
 				menu.getElements().add(createSubMenu((MenuGroup) item, customer, module, uxui));
 			}
+			else if (item instanceof AbstractDocumentMenuItem) {
+				String documentName = ((AbstractDocumentMenuItem) item).getDocumentName();
+				// determine the document name from the query if it is not provided
+				if (documentName == null) {
+					if (item instanceof AbstractDocumentOrQueryOrModelMenuItem) {
+						AbstractDocumentOrQueryOrModelMenuItem aggregateItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+						DocumentQueryDefinition query = deriveDocumentQuery(customer, 
+																				module, 
+																				aggregateItem, 
+																				aggregateItem.getQueryName(), 
+																				null);
+						if (query != null) {
+							documentName = query.getDocumentName();
+						}
+					}
+				}
+				// if we have a document name, use it's icon for the menu item	
+				if (documentName != null) {
+					String iconStyleClass = module.getDocument(customer, documentName).getIconStyleClass();
+					menu.getElements().add(createMenuItem(item, iconStyleClass, customer, module));
+				}
+			}
 			else {
-				menu.getElements().add(createMenuItem(item, customer, module));
+				createMenuItem(item, null, customer, module);
 			}
 		}
 	}
 
 	private static org.primefaces.model.menu.MenuItem createMenuItem(MenuItem item,
+																		String iconStyleClass,
 																		Customer customer,
 																		Module module) {
 		String url = createMenuItemUrl(customer, module, item);
-		DefaultMenuItem result = new DefaultMenuItem(item.getName(), null, url);
+		DefaultMenuItem result = new DefaultMenuItem(item.getName(), iconStyleClass, url);
 		result.setAjax(false);
 		result.setHref(url);
 		return result;

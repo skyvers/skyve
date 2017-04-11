@@ -175,6 +175,7 @@ isc.BizUtil.addClassProperties({
 										title: item.title,
 										modoc: item.modoc,
 										icon: item.icon,
+										fontIcon: item.fontIcon,
 										canCreate: item.canCreate,
 										canUpdate: item.canUpdate,
 										canDelete: item.canDelete,
@@ -355,7 +356,7 @@ var eventData = [
 		    canPickFields: false,
 		    canSort: false,
 		    fields:[
-				{name: 'icon', type: 'image', align: 'center', imageURLPrefix: '../resources', width: 30},
+				{name: 'icon', align: 'center', width: 30},
 				{name: 'doc', width: '15%'},
 				{name: 'bizKey', width: '30%'},
 				{name: 'excerpt', width: '55%'},

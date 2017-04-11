@@ -831,12 +831,13 @@ public final class BindUtil {
 
 	@SuppressWarnings("unchecked")
 	public static Object get(Map<String, Object> map, String binding) {
+		String alias = binding.replace('.', '_');
 		Object result = null;
 		if (map.containsKey(binding)) {
 			result = map.get(binding);
 		}
-		else if (map.containsKey(binding.replace('.', '_'))) {
-			result = map.get(binding.replace('.', '_'));
+		else if (map.containsKey(alias)) {
+			result = map.get(alias);
 		}
 		else {
 			Object currentMap = map;

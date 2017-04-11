@@ -1781,7 +1781,7 @@ isc.BizDataGrid.addMethods({
 			},
 			rowDoubleClick: function(record, rowNum, colNum) {
 				if (config.editable) { // editable grid
-					if (record.isFolder) {} else { // group by folder row - so ignore
+					if ((! record) || record.isFolder) {} else { // group by folder row - so ignore
 						me._eventRecord = record;
 						me._eventRowNum = rowNum;
 						me._eventColNum = colNum;

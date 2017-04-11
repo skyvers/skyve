@@ -90,16 +90,18 @@
 		<delete dir="${war-path}/ckeditor456" includes="**" />
 		<delete dir="${war-path}/css" includes="*-min.css" />
 		<delete dir="${war-path}/desktop" includes="**" />
+		<delete dir="${war-path}/external" includes="**" />
 		<delete dir="${war-path}/images" includes="**" />
 		<delete dir="${war-path}/isomorphic110" includes="**" />
+		<delete dir="${war-path}/mobile" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
-		<delete dir="${war-path}/phone" includes="**" />
-		<delete dir="${war-path}/public" includes="**" />
-		<delete dir="${war-path}/tablet" includes="**" />
+		<delete dir="${war-path}/ultima" includes="**" />
 		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
-		<delete dir="${war-path}/WEB-INF/resources" includes="**" />
+		<delete dir="${war-path}/WEB-INF/resources/primefaces-water" includes="**" />
+		<delete dir="${war-path}/WEB-INF/resources/skyve" includes="**" />
 		<delete dir="${war-path}/wicket" includes="**" />
 		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp,unsubscribe.xhtml" />
+		<delete dir="${war-path}/pages" includes="**" />
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
@@ -128,23 +130,23 @@
 		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/desktop" includes="**.xhtml,**-min.js,diff_match_patch.js" />
 		</copy>
+		<copy todir="${war-path}/external" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/external" includes="**" />
+		</copy>
 		<copy todir="${war-path}/images" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/images" includes="**" />
 		</copy>
 		<copy todir="${war-path}/isomorphic110" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/isomorphic110" includes="**" />
 		</copy>
+		<copy todir="${war-path}/mobile" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/mobile" includes="**" />
+		</copy>
 		<copy todir="${war-path}/pages" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/pages" includes="**" />
 		</copy>
-		<copy todir="${war-path}/phone" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/phone" includes="**" />
-		</copy>
-		<copy todir="${war-path}/public" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/public" includes="**" />
-		</copy>
-		<copy todir="${war-path}/tablet" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/tablet" includes="**" />
+		<copy todir="${war-path}/ultima" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/ultima" includes="**" />
 		</copy>
 		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
@@ -152,8 +154,11 @@
 		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/lib/" includes="**" />
 		</copy>
-		<copy todir="${war-path}/WEB-INF/resources" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/WEB-INF/resources/" includes="**" />
+		<copy todir="${war-path}/WEB-INF/resources/primefaces-water/" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/WEB-INF/resources/primefaces-water/" includes="**" />
+		</copy>
+		<copy todir="${war-path}/WEB-INF/resources/skyve/" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-war-path}/WEB-INF/resources/skyve/" includes="**" />
 		</copy>
 		<copy todir="${war-path}/wicket" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/wicket" includes="**" />

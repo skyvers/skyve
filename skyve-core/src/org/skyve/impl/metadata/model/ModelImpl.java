@@ -29,6 +29,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private String pluralAlias;
 	private String icon16x16RelativeFileName;
 	private String icon32x32RelativeFileName;
+	private String iconStyleClass;
 	private boolean audited = true;
 	private String name;
 	private String description;
@@ -99,6 +100,15 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
 		this.icon16x16RelativeFileName = icon16x16RelativeFileName;
+	}
+
+	@Override
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = iconStyleClass;
 	}
 
 	@Override

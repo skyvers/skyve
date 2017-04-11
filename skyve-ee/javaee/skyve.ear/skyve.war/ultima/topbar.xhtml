@@ -1,0 +1,36 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:f="http://java.sun.com/jsf/core"
+					xmlns:h="http://java.sun.com/jsf/html"
+					xmlns:ui="http://java.sun.com/jsf/facelets"
+					xmlns:p="http://primefaces.org/ui"
+					xmlns:pu="http://primefaces.org/ultima"
+					xmlns:c="http://java.sun.com/jsp/jstl/core">
+	<div class="topbar clearfix">
+		<div class="topbar-left" style="padding: 1px !important">
+			<div>
+				<h:graphicImage name="images/skyve.png" library="skyve" style="width:200px;height:68px" />
+			</div>
+		</div>
+		<div class="topbar-right">
+			<c:if test="#{leftMenu}">
+				<a id="menu-button" href="#">
+					<i></i>
+				</a>
+			</c:if>
+			<span class="topbar-title">#{title}</span>
+			<c:if test="#{topMenu}">
+				<a id="topbar-menu-button" href="#">
+					<i class="material-icons">menu</i>
+				</a>
+				<ul class="topbar-items fadeInDown animated">
+					<li>
+						<a href="#" onclick="window.location = 'loggedOut'">
+							<i class="topbar-icon material-icons">&#xE8AC;</i>
+							<span class="topbar-item-name">Logout</span>
+						</a>
+					</li>
+				</ul>
+			</c:if>
+		</div>
+	</div>
+</ui:composition>

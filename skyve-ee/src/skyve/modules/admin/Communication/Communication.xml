@@ -4,6 +4,7 @@
 	<persistent name="ADM_Communication" />
 	<singularAlias>Communication</singularAlias>
 	<pluralAlias>Communications</pluralAlias>
+	<iconStyleClass>fa fa-envelope</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/communication16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/communication32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{description}" />

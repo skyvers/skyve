@@ -295,32 +295,32 @@
 	<actions>
 		<defaults />
 		<action className="PrepareExplanation" displayName="Explain" inActionPanel="false" relativeIconFileName="shared/icons/Search.gif"
-			clientValidation="false" />
+			clientValidation="false" iconStyleClass="fa fa-search"/>
 		<action className="PerformCombination" displayName="Perform Combination" inActionPanel="false"
 			clientValidation="false" toolTip="Perform the selected combination operation." confirm="Ok to perform the combination?"
-			relativeIconFileName="shared/icons/Job.gif" />
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-cogs"/>
 		<action className="CopyTagToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
-			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" />
+			toolTip="Create a copy of this tag for another user." confirm="Ok to copy?" relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
 
 		<action className="ExceptTag" displayName="Except" inActionPanel="false" toolTip="Exclude records in the action Tag."
-			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" />
+			confirm="Ok to except the action Tag records?" relativeIconFileName="icons/Except.gif" iconStyleClass="fa fa-minus"/>
 		<action className="IntersectTag" displayName="Intersect" inActionPanel="false"
-			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" />
+			toolTip="Exclude records which aren't in both tags." confirm="Ok to intersect the Tags?" relativeIconFileName="icons/Intersect.gif" iconStyleClass="fa fa-cut"/>
 		<action className="UnionTag" displayName="Union" inActionPanel="false" toolTip="Add records from the action Tag."
-			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" />
+			confirm="Ok to union the Tags?" relativeIconFileName="icons/Union.gif" iconStyleClass="fa fa-share-alt"/>
 
 		<action className="UpdateUploadModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateUploadDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 		<action className="Clear" displayName="Clear Tag" inActionPanel="false" toolTip="Clear tagged records."
-			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" />
+			confirm="Ok to clear all records from the tag?" relativeIconFileName="shared/icons/Clear.gif" iconStyleClass="fa fa-delete" />
 		<action className="TagAll" displayName="Tag All" inActionPanel="false" toolTip="Tag all instances of this document."
-			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" />
+			confirm="Ok to tag all?" relativeIconFileName="shared/icons/Finished.gif" iconStyleClass="fa fa-step-forward"/>
 		<upload className="UploadTagCriteria" displayName="Upload Tag Criteria" inActionPanel="false"
 			toolTip="Upload criteria for tagging records" disabled="notAttributeSet" />
 
 		<action className="BulkDocumentAction" displayName="Run Tag Action Job" inActionPanel="false"
 			toolTip="Perform the selected document action for all applicable tagged records." confirm="Ok to perform the action for this document type?"
-			relativeIconFileName="shared/icons/Job.gif" />
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-delete"/>
 		<action className="UpdateActionModule" displayName="Update Module" inActionPanel="false" clientValidation="false" />
 		<action className="UpdateActionDocument" displayName="Update Document" inActionPanel="false" clientValidation="false" />
 

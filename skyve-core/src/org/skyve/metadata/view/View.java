@@ -82,6 +82,12 @@ public interface View extends MetaData, Parameterizable {
 	
 	/**
 	 * 
+	 * @return
+	 */
+	public String getIconStyleClass();
+	
+	/**
+	 * 
 	 * @param actionName
 	 * @return
 	 */

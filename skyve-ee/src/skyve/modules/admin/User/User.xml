@@ -6,6 +6,7 @@
 	<persistent name="ADM_SecurityUser" />
 	<singularAlias>User</singularAlias>
 	<pluralAlias>Users</pluralAlias>
+	<iconStyleClass>fa fa-user</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
 	<bizKey >
@@ -52,10 +53,6 @@
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<length>30</length>
 		</text>
-		<boolean  name="generated">
-			<displayName>Generated</displayName>
-			<description>Whether the User was generated or manually entered.</description>
-		</boolean >
 		<text name="legacyId" >
 			<displayName>Legacy Id</displayName>
 			<description>Legacy ID value when imported from legacy System using the conversion tool.</description>

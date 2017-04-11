@@ -119,6 +119,7 @@ public class Desktop extends Harness {
         }
 	}
 
+	@SuppressWarnings("static-method")
 	public String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(128);
 		
@@ -126,8 +127,8 @@ public class Desktop extends Harness {
 		result.append("<div>");
     	result.append("<table style=\"");
 		result.append("width:100%;background:url(images/skyve_bar.png) repeat-x 0 0;");
-    	result.append("\"><tr height=\"46px\"><td width=\"1%\"><img style=\"width:32px;height:32px\" src=\"resources?_doc={modoc}&_n={icon}&v=").append(getJavascriptFileVersion());
-    	result.append("\"/></td><td><div class=\"titleBar\">{title}</div></td>");
+    	result.append("\"><tr height=\"46px\"><td width=\"1%\">{icon}</td>");
+    	result.append("<td><div class=\"titleBar\">{title}</div></td>");
     	result.append("<td width=\"10%\" align=\"right\">");
     	result.append("<img src=\"images/skyve_inv.png\" alt=\"Skyve\"/></td>");
     	result.append("<td width=\"1%\" align=\"right\"><div class=\"skyveDocumentLink\">{link}</div></td>");
@@ -437,6 +438,7 @@ public class Desktop extends Harness {
 					result.append("{name:'");
 					String ref = null;
 					String icon16 = null;
+					String iconStyleClass = null;
 					Module itemModule = null;
 					String itemDocumentName = null;
 	                if (item instanceof TreeItem) {
@@ -458,7 +460,9 @@ public class Desktop extends Harness {
 							result.append(query.getName());
 							itemModule = query.getDocumentModule(customer);
 						}
-						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						icon16 = itemDocument.getIcon16x16RelativeFileName();
+						iconStyleClass = itemDocument.getIconStyleClass();
 	                    ref = "tree";
 	                }
 	                else if (item instanceof ListItem) {
@@ -480,7 +484,9 @@ public class Desktop extends Harness {
 							result.append(query.getName());
 							itemModule = query.getDocumentModule(customer);
 						}
-						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						icon16 = itemDocument.getIcon16x16RelativeFileName();
+						iconStyleClass = itemDocument.getIconStyleClass();
 						ref = "grid";
 					}
 					else if (item instanceof CalendarItem) {
@@ -494,7 +500,9 @@ public class Desktop extends Harness {
 						itemDocumentName = query.getDocumentName();
 						result.append(query.getName());
 						itemModule = query.getDocumentModule(customer);
-						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						icon16 = itemDocument.getIcon16x16RelativeFileName();
+						iconStyleClass = itemDocument.getIconStyleClass();
 	                    ref = "cal";
 	                }
 	                else if (item instanceof MapItem) {
@@ -517,14 +525,18 @@ public class Desktop extends Harness {
 		                    result.append('_').append(mapItem.getGeometryBinding());
 							itemModule = query.getDocumentModule(customer);
 						}
-						icon16 = itemModule.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						icon16 = itemDocument.getIcon16x16RelativeFileName();
+						iconStyleClass = itemDocument.getIconStyleClass();
 	                    ref = "map";
 	                }
 					else if (item instanceof EditItem) {
 						itemDocumentName = ((EditItem) item).getDocumentName();
 						result.append(itemDocumentName);
 						itemModule = module;
-						icon16 = module.getDocument(customer, itemDocumentName).getIcon16x16RelativeFileName();
+						Document itemDocument = itemModule.getDocument(customer, itemDocumentName);
+						icon16 = itemDocument.getIcon16x16RelativeFileName();
+						iconStyleClass = itemDocument.getIconStyleClass();
 						ref = "edit";
 					}
 					else if (item instanceof LinkItem) {
@@ -549,6 +561,9 @@ public class Desktop extends Harness {
 						}
 					}
 					result.append("',desc:'");
+					if ((icon16 == null) && (iconStyleClass != null)) {
+						result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
+					}
 					result.append(SmartClientGenerateUtils.processString(Util.i18n(item.getName(), locale)));
 					result.append("',ref:'");
 					result.append(ref);

@@ -68,7 +68,7 @@
 		<copy tofile="javaee/skyve.ear/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
 		<copy tofile="javaee/skyve.ear/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
 		<copy tofile="javaee/skyve.ear/skyve.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/phone/skyve-min.js" file="src/js/phone/skyve.js" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
@@ -92,7 +92,7 @@
 			<arg line="-o javaee/skyve.ear/skyve.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/phone/skyve-min.js src/js/phone/skyve.js"/>
+			<arg line="-o javaee/skyve.ear/skyve.war/mobile/skyve-min.js src/js/mobile/skyve.js"/>
 		</java>
 	</target>
 	<target name="mavenLibs" xmlns:artifact="urn:maven-artifact-ant">

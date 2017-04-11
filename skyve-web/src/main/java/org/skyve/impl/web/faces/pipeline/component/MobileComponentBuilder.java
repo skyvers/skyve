@@ -54,6 +54,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public CommandButton actionButton(String title, 
+										String iconStyleClass,
 										String tooltip, 
 										ImplicitActionName implicitActionName,
 										String actionName, 
@@ -65,18 +66,21 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										String confirmationText, 
 										String disabled, 
 										String invisible) {
-		return super.actionButton(title, 
-									tooltip, 
-									implicitActionName, 
-									actionName, 
-									inline, 
-									listBinding, 
-									pixelWidth, 
-									pixelHeight,
-									clientValidation, 
-									null, // confirmation dialogs don't work in mobile
-									disabled, 
-									invisible);
+		CommandButton result = super.actionButton(title,
+													iconStyleClass,
+													tooltip, 
+													implicitActionName, 
+													actionName, 
+													inline, 
+													listBinding, 
+													pixelWidth, 
+													pixelHeight,
+													clientValidation, 
+													null, // confirmation dialogs don't work in mobile
+													disabled, 
+													invisible);
+		result.setIcon(null); // fa is not compatible with PF mobile
+		return result;
 	}
 	
 	@Override

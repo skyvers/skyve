@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:ui="http://java.sun.com/jsf/facelets"
+		xmlns:f="http://java.sun.com/jsf/core"
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:pe="http://primefaces.org/ui/extensions"
+		xmlns:pu="http://primefaces.org/ultima"
+		dir="#{bean.dir}">
+	<f:view contentType="text/html" encoding="UTF-8">
+		<h:head>
+			<f:facet name="first">
+				<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+				<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+				<meta name="apple-mobile-web-app-capable" content="yes" />
+			</f:facet>
+	
+			<meta http-equiv="pragma" content="no-cache" />
+			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
+			<meta http-equiv="expires" content="0" />
+	
+			<base href="#{bean.baseHref}" />
+			<link rel="icon" type="image/png" href="#{bean.baseHref}/images/window/skyve_fav.png" />
+			<link type="text/css" rel="stylesheet" href="#{bean.baseHref}/css/prime-min.css?v=#{bean.javascriptFileVersion}" />
+			<h:outputStylesheet name="css/ultima.css" library="skyve" />
+			<title>#{title}</title>
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
+	
+			<h:outputScript name="js/nanoscroller.js" library="ultima-layout" />
+			<h:outputScript name="js/layout.js" library="ultima-layout" />
+			<h:outputScript name="js/ripple.js" library="ultima-layout" />
+			<h:outputScript name="js/swipe.js" library="ultima-layout" />
+	
+			<ui:insert name="head" />
+		</h:head>
+	
+		<h:body styleClass="main-body layout-compact">
+			<div class="#{leftMenu ? 'layout-wrapper menu-layout-static' : 'layout-wrapper'}">
+	
+				<ui:include src="./topbar.xhtml">
+					<ui:param name="leftMenu" value="#{leftMenu}" />
+					<ui:param name="topMenu" value="#{topMenu}" />
+				</ui:include>
+	
+				<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
+					<div class="layout-menu layout-menu-dark">
+						<div class="nano">
+							<div class="nano-content menu-scroll-content">
+								<pu:menu widgetVar="leftMenu" id="leftMenu" model="#{menu.menu}" />
+							</div>
+						</div>
+					</div>
+				</h:form>
+				<div class="layout-main">
+					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
+					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
+					<p:confirmDialog global="true">
+						<p:commandButton value="Cancel" 
+											type="button"
+											styleClass="ui-confirmdialog-no" 
+											style="float:right;"
+											icon="ui-icon-close" />
+						<p:commandButton value="OK" 
+											type="button"
+											styleClass="ui-confirmdialog-yes" 
+											style="float:right;"
+											icon="ui-icon-check" />
+					</p:confirmDialog>
+					
+					<ui:insert name="body" />
+					
+					<div class="ui-g">
+						<div class="ui-g-12">
+							<div class="footer" style="padding: 0px; margin: 0px">
+								<div class="card clearfix">
+									<span class="footer-text-left">
+										<h:graphicImage name="images/skyve_inv.png" library="skyve" />
+									</span>
+									<span class="footer-text-right">
+										<span class="ui-icon ui-icon-copyright"></span>
+										<span>All Rights Reserved</span>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	
+			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+				<f:facet name="start">
+					<i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
+	
+			<h:outputStylesheet name="css/nanoscroller.css" library="ultima-layout" />
+			<h:outputStylesheet name="css/animate.css" library="ultima-layout" />
+			<h:outputStylesheet name="css/ripple.css" library="ultima-layout" />
+			<h:outputStylesheet name="css/layout-indigo.css" library="ultima-layout" />
+		</h:body>
+	</f:view>
+</html>

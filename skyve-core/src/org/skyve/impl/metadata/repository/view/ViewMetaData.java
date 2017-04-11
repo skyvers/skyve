@@ -13,7 +13,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
-import org.skyve.impl.metadata.repository.view.actions.Action;
+import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
 import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
@@ -47,21 +47,20 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"actions", 
 							"type", 
 							"title",
+							"iconStyleClass",
 							"icon32x32RelativeFileName",
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
 							"parameters"})
 public class ViewMetaData extends Container implements PersistentMetaData<View>, Parameterizable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private ViewType type;
 	private String title;
+	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
-	private List<Action> actions = new ArrayList<>();
+	private List<ActionMetaData> actions = new ArrayList<>();
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
 	private String refreshActionName;
@@ -95,6 +94,15 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		this.icon32x32RelativeFileName = UtilImpl.processStringValue(icon32x32RelativeFileName);
 	}
 
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlAttribute(name = "iconStyleClass")
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
+	}
+
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
 	@XmlElementRefs({@XmlElementRef(type = AddAction.class),
 						@XmlElementRef(type = BizExportAction.class),
@@ -111,7 +119,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 						@XmlElementRef(type = DownloadAction.class),
 						@XmlElementRef(type = UploadAction.class),
 						@XmlElementRef(type = ZoomOutAction.class)})
-	public List<Action> getActions() {
+	public List<ActionMetaData> getActions() {
 		return actions;
 	}
 
@@ -173,8 +181,9 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		}
 		result.setTitle(value);
 
+		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
-
+		
 		ViewType theType = getType();
 		if (theType == null) {
 			throw new MetaDataException(metaDataName + " : The view [type] is required for view " + metaDataName);
@@ -184,7 +193,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		result.getContained().addAll(getContained());
 
 		if (actions != null) {
-			for (Action actionMetaData : actions) {
+			for (ActionMetaData actionMetaData : actions) {
 				org.skyve.metadata.view.Action action = actionMetaData.toMetaDataAction();
 				ImplicitActionName implicitName = action.getImplicitName();
 				if (action.getResourceName() == null) {

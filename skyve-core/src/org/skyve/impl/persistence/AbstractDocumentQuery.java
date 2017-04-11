@@ -131,7 +131,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			projectionClause.append(", ");
 		}
 		projectionClause.append(THIS_ALIAS).append('.').append(binding);
-		projectionClause.append(" as ").append(alias);
+		projectionClause.append(" as ").append(alias.replace('.', '_'));
 		return this;
 	}
 
@@ -140,7 +140,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(expression).append(" as ").append(alias);
+		projectionClause.append(expression).append(" as ").append(alias.replace('.', '_'));
 		return this;
 	}
 
@@ -159,7 +159,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		else {
 			projectionClause.append(THIS_ALIAS).append('.').append(binding);
 		}
-		projectionClause.append(") as ").append(alias);
+		projectionClause.append(") as ").append(alias.replace('.', '_'));
 		return this;
 	}
 

@@ -104,9 +104,16 @@ isc.ListView.addClassProperties({
 	    }
 	}),
 	
-	_setHeading: function(title, icon, modoc) {
+	_setHeading: function(title, icon, fontIcon, modoc) {
+		var iconMarkup = '';
+		if (icon) {
+			iconMarkup = '<img style="width:32px;height:32px" src="resources?_doc=' + modoc + '&_n=' + icon + '&v=' + isc.BizUtil.version + '"/>';
+		}
+		else if (fontIcon) {
+			iconMarkup = '<i style="padding-left:5px;font-size:32px" class="titleBar bizhubFontIcon ' + fontIcon + '"></i>';
+		}
 		var header = isc.BizUtil.headerTemplate;
-		header = header.replace('{modoc}', modoc).replace('{icon}', icon).replace('{title}', title).replace('{link}', '');
+		header = header.replace('{icon}', iconMarkup).replace('{title}', title).replace('{link}', '');
 		isc.ListView._heading.setContents(header);
 	},
 	
@@ -128,7 +135,7 @@ isc.ListView.addClassProperties({
 		isc.ListView.contents.hideMember(isc.ListView._portal);
 		isc.ListView.contents.showMember(isc.ListView._grid);
 		var ds = eval(ID);
-		isc.ListView._setHeading(isc.ListView._grid.setDataSource(ds), ds.icon, ds.modoc);
+		isc.ListView._setHeading(isc.ListView._grid.setDataSource(ds), ds.icon, ds.fontIcon, ds.modoc);
 	},
 	
 	// set the data source for the list view calendar
@@ -151,7 +158,7 @@ isc.ListView.addClassProperties({
 
 		var ds = eval(ID);
 		isc.ListView._calendar.setDataSource(ds);
-		isc.ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.modoc);
+		isc.ListView._setHeading("NOT IMPLEMENTED", ds.icon, ds.fontIcon, ds.modoc);
 	},
 	
 	// set the data source for the list view tree
@@ -173,7 +180,7 @@ isc.ListView.addClassProperties({
 		isc.ListView.contents.showMember(isc.ListView._tree);
 
 		var ds = eval(ID);
-		isc.ListView._setHeading(isc.ListView._tree.setDataSource(ds), ds.icon, ds.modoc);
+		isc.ListView._setHeading(isc.ListView._tree.setDataSource(ds), ds.icon, ds.fontIcon, ds.modoc);
 	},
 
 	// set the data source for the list view map
@@ -196,9 +203,9 @@ isc.ListView.addClassProperties({
 
 //		var ds = eval(ID);
 //		isc.ListView._map.setDataSource(ds);
-//		isc.ListView._setHeading("MAP", ds.icon, ds.modoc);
+//		isc.ListView._setHeading("MAP", ds.icon, ds.fontIcon, ds.modoc);
 		isc.ListView._map.setDataSource(ID);
-		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', '');
+		isc.ListView._setHeading('MAP', 'shared/icons/Home.png', 'fa fa-globe fa-2x', '');
 	},
 	
 	showPortal: function() {
@@ -216,7 +223,7 @@ isc.ListView.addClassProperties({
 		}
 		isc.ListView.contents.showMember(isc.ListView._portal);
 
-		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", '');
+		isc.ListView._setHeading("DASHBOARD", "shared/icons/Home.png", 'fa fa-home fa-2x', '');
 	}
 });
 isc.ListView.contents.addMember(isc.ListView._heading);

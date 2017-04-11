@@ -3,6 +3,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>System Dashboard</singularAlias>
 	<pluralAlias>System Dashboard</pluralAlias>
+	<iconStyleClass>fa fa-area-chart</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/chart16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/chart32.png</icon32x32RelativeFilePath>
 	<attributes>

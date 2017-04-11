@@ -5,8 +5,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>User Dashboard</singularAlias>
 	<pluralAlias>User Dashboards</pluralAlias>
-	<icon16x16RelativeFilePath>icons/document/user16.png</icon16x16RelativeFilePath>
-	<icon32x32RelativeFilePath>icons/document/user32.png</icon32x32RelativeFilePath>
+	<iconStyleClass>fa fa-area-chart</iconStyleClass>
+	<icon16x16RelativeFilePath>icons/document/chart16.png</icon16x16RelativeFilePath>
+	<icon32x32RelativeFilePath>icons/document/chart32.png</icon32x32RelativeFilePath>
 	<bizKey expression="User Dashboard"/>
 	<attributes>
 		<association type="aggregation" name="currentUser" >

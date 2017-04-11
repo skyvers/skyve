@@ -6,6 +6,7 @@
 	<persistent name="ADM_Snapshot" />
 	<singularAlias>Snapshot</singularAlias>
 	<pluralAlias>Snapshots</pluralAlias>
+	<iconStyleClass>fa fa-camera</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/snapshot16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/snapshot32.png</icon32x32RelativeFilePath>
 	<bizKey expression="{name} for {queryName} in module {moduleName}"/>

@@ -9,6 +9,7 @@
 	<persistent name="WHO_Office" />
 	<singularAlias>Office</singularAlias>
 	<pluralAlias>Offices</pluralAlias>
+	<iconStyleClass>fa fa-building</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/office16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/office32.png</icon32x32RelativeFilePath>
 	<bizKey>

@@ -144,6 +144,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										org.skyve.impl.metadata.view.widget.Button button, 
 										org.skyve.metadata.view.Action action) {
 		return actionButton(action.getDisplayName(),
+								action.getIconStyleClass(),
 				                action.getToolTip(),
 				                action.getImplicitName(),
 				                action.getName(),
@@ -832,6 +833,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								ImplicitActionName name,
 								String title) {
 		return actionButton(title,
+								action.getIconStyleClass(),
 								action.getToolTip(),
 								name,
 								null,
@@ -1079,6 +1081,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	protected CommandButton actionButton(String title, 
+											String iconStyleClass,
 											String tooltip, 
 											ImplicitActionName implicitActionName,
 											String actionName, 
@@ -1093,6 +1096,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(title);
+		result.setIcon(iconStyleClass);
 		result.setTitle(tooltip);
 
 		action(result, implicitActionName, actionName, listBinding, inline);
@@ -1101,8 +1105,55 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setConfirmation(result, confirmationText);
 		setId(result);
 
-		// show/hide the implicit buttons - TODO base this also on security
-		// privileges.
+		// set a default icon if not already set
+		if ((iconStyleClass == null) && (implicitActionName != null)) {
+			switch (implicitActionName) {
+				case OK:
+					result.setIcon("fa fa-check");
+					break;
+				case Save:
+					result.setIcon("fa fa-save");
+					break;
+				case Delete:
+					result.setIcon("fa fa-trash-o");
+					break;
+				case Add:
+				case New:
+					result.setIcon("fa fa-plus");
+					break;
+				case ZoomOut:
+					result.setIcon("fa fa-reply");
+					break;
+				case Cancel:
+					result.setIcon("fa fa-chevron-left");
+					break;
+				case Remove:
+					result.setIcon("fa fa-minus");
+					break;
+				case Edit:
+					result.setIcon("fa fa-mail-forward");
+					break;
+				case Report:
+					result.setIcon("fa fa-newspaper");
+					break;
+				case BizImport:
+					result.setIcon("fa fa-cloud-download");
+					break;
+				case BizExport:
+					result.setIcon("fa fa-cloud-upload");
+					break;
+				case Download:
+					result.setIcon("fa fa-download");
+					break;
+				case Upload:
+					result.setIcon("fa fa-upload");
+					break;
+				default:
+					break;
+			}
+		}
+
+		// show/hide the implicit buttons - TODO base this also on security privileges.
 		if (ImplicitActionName.OK.equals(implicitActionName) || 
 				ImplicitActionName.Save.equals(implicitActionName) || 
 				ImplicitActionName.Cancel.equals(implicitActionName) || 
@@ -1156,7 +1207,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setUpdate(update); // update all forms
 			// Add the standard confirmation text if non exists
 			if (confirmationText == null) {
-				setConfirmation(result, "Do you want to delete this data?");
+				setConfirmation(result, String.format("Do you want to %s this data?", 
+														ImplicitActionName.Remove.equals(implicitActionName) ? "remove" : "delete"));
 			}
 		}
 		else {

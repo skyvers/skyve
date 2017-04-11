@@ -53,7 +53,7 @@
 		<defaults />
 		<action className="CopySnapshotToUser" displayName="Make Copy" inActionPanel="false" clientValidation="false"
 			toolTip="Create a copy of this snapshot for another user." confirm="Ok to copy?" 
-			relativeIconFileName="shared/icons/Job.gif" />
+			relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-copy"/>
 	</actions>
 	<newParameters />
 </view>

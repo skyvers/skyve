@@ -15,18 +15,20 @@ import org.skyve.metadata.controller.ImplicitActionName;
 							"displayName",
 							"toolTip", 
 							"relativeIconFileName", 
+							"iconStyleClass", 
 							"confirmationText",
 							"disabledConditionName",
 							"enabledConditionName",
 							"invisibleConditionName",
 							"visibleConditionName"})
-public abstract class Action {
+public abstract class ActionMetaData {
 	protected ImplicitActionName implicitName;
 
 	private String name;
 	private String displayName;
 	private String toolTip;
 	private String relativeIconFileName;
+	private String iconStyleClass;
 	private String confirmationText;
 	private String disabledConditionName;
 	private String invisibleConditionName;
@@ -60,6 +62,15 @@ public abstract class Action {
 	@XmlAttribute(required = false)
 	public void setRelativeIconFileName(String relativeIconFileName) {
 		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
+	}
+
+	public String getIconStyleClass() {
+		return iconStyleClass;
+	}
+
+	@XmlAttribute(required = false)
+	public void setIconStyleClass(String iconStyleClass) {
+		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
 	public String getToolTip() {
@@ -135,6 +146,7 @@ public abstract class Action {
 		}
 		result.setInvisibleConditionName(getInvisibleConditionName());
 		result.setRelativeIconFileName(getRelativeIconFileName());
+		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
 
 		return result;

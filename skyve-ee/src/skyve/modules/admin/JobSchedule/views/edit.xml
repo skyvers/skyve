@@ -637,7 +637,7 @@
 		<defaults />
 		<action className="RunJobNow" displayName="Schedule Job for Now" inActionPanel="true" 
 		confirm="OK to run the schedule the Job (as you) to run immediately? (Check Job history for results)"
-		relativeIconFileName="shared/icons/Job.gif"
+		relativeIconFileName="shared/icons/Job.gif" iconStyleClass="fa fa-clock-o"
 		clientValidation="false"
 		/>
 	</actions>
