@@ -231,3 +231,6 @@ WILDCAT depends upon the following libraries:
 	* Wicket
 		https://github.com/arthur-e/Wicket
 		See https://github.com/arthur-e/Wicket#license
+		
+	* SimpleGrid
+		http://www.simplegrid.io (MIT)

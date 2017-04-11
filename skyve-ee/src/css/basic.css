@@ -229,7 +229,11 @@ a.buttonlink {
 	border: 1px solid #cccccc;
 	box-shadow: 3px 3px 2px #dddddd;
 	background: white;
-	border-radius: 5px
+	border-radius: 5px;
+	padding: 10px 0 10px 5px;
+}
+.loginTable input, label {
+	width: 100%;
 }
 
 .buttonDiv {

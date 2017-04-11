@@ -60,7 +60,9 @@
 		<% } %>
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
+		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
 
 		<script type="text/javascript">
 			<!--
@@ -121,121 +123,63 @@
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
 		</SCRIPT>
-		<table class="logo" align="center">
-			<tr height="150px">
-				<td>
-					<img src="images/skyve.png" alt="Skyve" />
-				</td>
-			</tr>
-		</table>
 
-		<form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)">
-			<table align="center">
-				<tr>
-					<td>
+		<div class="container">
+			<%@include file="fragments/logo.html" %>
+			<%@include file="fragments/noscript.html" %>
+			<div class="row">
+				<div class="col-3 col-2-md hidden-sm"></div>
+				<div class="col-6 col-8-md col-12-sm">
+					<form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)">
 						<div class="loginTable" style="width:100%;">
-							<div >
-								<div >
-									<div >
-										&nbsp;
-									</div>
+							<div class="row">
+								<div class="col-12 center">
+									<% if (request.getUserPrincipal() != null) { %>
+										<span class="subhead"><%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%></span>
+									<% } else { %>
+										<span class="subhead"><%=Util.i18n("page.login.banner", locale)%></span>
+									<% } %>
 								</div>
 							</div>
-							<div >
-								<div >
-									<div >
-										<table style="border-spacing: 10px;">
-											<!-- warn user if javascript is not enabled -->
-											<noscript>
-											<tr>
-												<td>
-													<center>
-														<p>
-															<b><%=Util.i18n("page.login.javascriptDisabled", locale)%></b>
-														</p>
-													</center>
-												</td>
-											</tr>
-											</noscript>
-											<tr>
-												<td style="font-size:14px;text-align:center">
-													<% if (request.getUserPrincipal() != null) { %>
-														<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
-													<% } else { %>
-														<div style="font-size:28px;"><%=Util.i18n("page.login.banner", locale)%></div>
-													<% } %>
-												</td>
-											</tr>
-											<tr>
-												<td>
-													<table align="center">
-														<tr>
-															<% if (! mobile) { %>
-															<td>
-																&nbsp;
-															</td>
-															<% } %>
-															<td>
-																<table>
-																	<% if (customer == null) { %>
-																		<tr>
-																			<td style="font-size:18px">
-																				<%=Util.i18n("page.login.customer.label", locale)%>
-																			</td>
-																			<td>
-																				<input type="text" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" autocorrect="off" autocapitalize="off" name="customer">
-																			</td>
-																		</tr>
-																	<% } %>
-																	<tr>
-																		<td style="font-size:18px">
-																			<%=Util.i18n("page.login.user.label", locale)%>
-																		</td>
-																		<td>
-																			<% if (customer != null) { %>
-																				<input type="hidden" name="customer" value="<%=customer%>" />
-																			<% } %>
-																			<input type="text" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" autocorrect="off" autocapitalize="off" name="user">
-																		</td>
-																	</tr>
-																	<tr>
-																		<td style="font-size:18px">
-																			<%=Util.i18n("page.login.password.label", locale)%>
-																		</td>
-																		<td>
-																			<input type="password" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" name="j_password">
-																		</td>
-																	</tr>
-																</table>
-															</td>
-															<td>
-															</td>
-														</tr>
-														<tr>
-															<td colspan="2">
-																<br/>
-																<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" style="font-size:<%=fontSize%>" />
-															</td>
-														</tr>
-													</table>
-												</td>
-											</tr>
-										</table>
-										<div></div>
-									</div>
+							<% if (customer == null) { %>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="customer"><%=Util.i18n("page.login.customer.label", locale)%></label>
+								</div>
+								<div class="col-7-sm">
+									<input type="text" autocorrect="off" autocapitalize="off" name="customer">
 								</div>
 							</div>
-							<div>
-								<div>
-									<div>
-										&nbsp;
-									</div>
+							<% } %>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="user"><%=Util.i18n("page.login.user.label", locale)%></label>
+								</div>
+								<div class="col-7-sm">
+									<% if (customer != null) { %>
+										<input type="hidden" name="customer" value="<%=customer%>" />
+									<% } %>
+									<input type="text" autocorrect="off" autocapitalize="off" name="user">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="j_password"><%=Util.i18n("page.login.password.label", locale)%></label>
+								</div>
+								<div class="col-7-sm">
+									<input type="password" name="j_password">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-1 col-2-sm"></div>
+								<div class="col-10 col-8-sm center">
+									<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" />
 								</div>
 							</div>
 						</div>
-					</td>
-				</tr>
-			</table>
-		</form>
+					</form>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>

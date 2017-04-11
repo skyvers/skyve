@@ -66,7 +66,9 @@
 		<% } %>
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
+		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
 
 		<script type="text/javascript">
 			<!--
@@ -93,113 +95,50 @@
 		</script>
 	</head>
 	<% if (passwordChangeErrorMessage != null) { %>
-		<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
+	<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
 	<% } else { %>
-		<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
+	<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
 	<% } %>
-		<table class="logo" align="center">
-			<tr height="150px">
-				<td>
-					<img src="images/skyve.png" alt="Skyve" />
-				</td>
-			</tr>
-		</table>
-
-		<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)">
-			<table align="center">
-				<tr>
-					<td>
+	
+		<div class="container">
+			<%@include file="fragments/logo.html" %>
+			<%@include file="fragments/noscript.html" %>
+			<div class="row">
+				<div class="col-3 col-2-md hidden-sm"></div>
+				<div class="col-6 col-8-md col-12-sm">
+					<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)">
 						<div class="loginTable" style="width:100%;">
-							<div >
-								<div >
-									<div >
-										&nbsp;
-									</div>
+							<div class="row">
+								<div class="col-12 center">
+									<span class="subhead"><%=Util.i18n("page.changePassword.message", locale)%></span>
 								</div>
 							</div>
-							<div >
-								<div >
-									<div >
-										<table style="border-spacing: 10px;">
-											<!-- warn user if javascript is not enabled -->
-											<noscript>
-											<tr>
-												<td>
-													<center>
-														<p>
-															<b><%=Util.i18n("page.changePassword.javascriptDisabled", locale)%></b>
-														</p>
-													</center>
-												</td>
-											</tr>
-											</noscript>
-											<tr>
-												<td>
-													<table align="center">
-														<tr>
-															<% if (! mobile) { %>
-															<td>
-																&nbsp;
-															</td>
-															<% } %>
-															<td>
-																<table>
-																	<tr>
-																		<td style="font-size:18px" colspan="2">
-																			<b><%=Util.i18n("page.changePassword.message", locale)%></b>
-																		</td>
-																	</tr>
-																	<tr>
-																		<td>
-																			&nbsp;
-																		</td>																		
-																	</tr>																
-																	<tr>
-																		<td style="font-size:18px">
-																			<%=Util.i18n("page.changePassword.newPassword.label", locale)%>
-																		</td>
-																		<td>
-																			<input type="password" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" autocorrect="off" autocapitalize="off" name="<%=newPasswordFieldName%>">
-																		</td>
-																	</tr>
-																	<tr>
-																		<td style="font-size:18px">
-																			<%=Util.i18n("page.changePassword.confirmPassword.label", locale)%>
-																		</td>
-																		<td>
-																			<input type="password" style="font-size:<%=fontSize%>;width:<%=fieldWidth%>" name="<%=confirmPasswordFieldName%>">
-																		</td>
-																	</tr>
-																</table>
-															</td>
-															<td>
-															</td>
-														</tr>
-														<tr>
-															<td colspan="2">
-																<br/>
-																<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" style="font-size:<%=fontSize%>" />
-															</td>
-														</tr>
-													</table>
-												</td>
-											</tr>
-										</table>
-										<div></div>
-									</div>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="newPassword"><%=Util.i18n("page.changePassword.newPassword.label", locale)%></label>
+								</div>
+								<div class="col-6-sm">
+									<input type="password" name="<%=newPasswordFieldName%>">
 								</div>
 							</div>
-							<div>
-								<div>
-									<div>
-										&nbsp;
-									</div>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="confirmPassword"><%=Util.i18n("page.changePassword.confirmPassword.label", locale)%></label>
+								</div>
+								<div class="col-6-sm">
+									<input type="password" name="<%=confirmPasswordFieldName%>">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-1 col-2-sm"></div>
+								<div class="col-10 col-8-sm center">
+									<input type="submit" value="<%=Util.i18n("page.changePassword.submit.label", locale)%>" />
 								</div>
 							</div>
 						</div>
-					</td>
-				</tr>
-			</table>
-		</form>
+					</form>
+				</div>
+			</div>
+		</div>		
 	</body>
 </html>

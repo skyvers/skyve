@@ -46,50 +46,45 @@
 		<% } %>
 
 		<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
+		<link rel="apple-touch-icon" href="images/window/skyve_fav.png">
 		<link rel="stylesheet" type="text/css" href="css/basic-min.css" />
+		<link rel="stylesheet" type="text/css" href="css/simple-grid-min.css" />
 	</head>
 	<body>
-		<table class="logo" align="center">
-			<tr height="150px">
-				<td>
-					<img src="images/skyve.png" alt="Skyve" />
-				</td>
-			</tr>
-		</table>
-		<table align="center">
-			<tr>
-				<td>
-					<div class="loginTable">
-						<table style="text-align: center; border-spacing: 10px;">
-							<tr>
-								<td style="text-align:center">
-									<div style="font-size:28px;">
-										<%=Util.i18n("page.expired.banner", locale)%>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td >
-									<div style="font-size:18px;">
+		<div class="container">
+			<%@include file="fragments/logo.html" %>
+			<%@include file="fragments/noscript.html" %>
+			<div class="row">
+				<div class="col-3 col-2-md hidden-sm"></div>
+				<div class="col-6 col-8-md col-12-sm">
+					<form name="changeForm" method="post" onsubmit="return testMandatoryFields(this)">
+						<div class="loginTable" style="width:100%;">
+							<div class="row">
+								<div class="col-12 center">
+									<span class="subhead"><%=Util.i18n("page.expired.banner", locale)%></span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12 center">
 									<%=Util.i18n("page.expired.explanation", locale)%>
-									</div>
-								</td>
-							</tr>
-							<tr>
-								<td style="text-align: center">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-1 col-2-sm"></div>
+								<div class="col-10 col-8-sm center">
 									<div class="buttonDiv">
 									<% if (referer == null) { %>
-									<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
+										<a href="<%=request.getContextPath()%><%=org.skyve.util.Util.getHomeUri()%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } else { %>
 										<a href="<%=referer%>"><%=Util.i18n("page.loginError.retry", locale)%></a>
 									<% } %>
 									</div>
-								</td>
-							</tr>
-						</table>
-					</div>
-				</td>
-			</tr>
-		</table>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 	</body>
 </html>
