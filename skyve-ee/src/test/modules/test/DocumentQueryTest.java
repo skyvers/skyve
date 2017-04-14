@@ -24,6 +24,11 @@ public class DocumentQueryTest extends AbstractH2Test {
 	}
 
 	@Test
+	public void testHierarchicalPolymorphic() {
+		Assert.assertTrue((((AbstractQuery) m.getDocumentQuery("qHPoly").constructDocumentQuery(null, null)).toQueryString().contains("bean as bean")));
+	}
+
+	@Test
 	public void testDefaultMEJS() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, mejsd.getName()).constructDocumentQuery(null, null);
 		q.tupleResults();
@@ -38,6 +43,11 @@ public class DocumentQueryTest extends AbstractH2Test {
 	@Test
 	public void testMEJSPolymorphic() {
 		Assert.assertTrue((((AbstractQuery) m.getDocumentQuery("qMEJS").constructDocumentQuery(null, null)).toQueryString().contains("bean as bean")));
+	}
+
+	@Test
+	public void testMEJSNotPolymorphic() {
+		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMEJSNotPoly").constructDocumentQuery(null, null)).toQueryString().contains("bean as bean")));
 	}
 
 	@Test

@@ -50,6 +50,7 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private static final String DATETIME_EXPRESSION = "{DATETIME}";
 
 	private String documentName;
+	private Boolean polymorphic;
 
 	private String fromClause;
 
@@ -76,6 +77,15 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
+	}
+
+	@Override
+	public Boolean getPolymorphic() {
+		return polymorphic;
+	}
+
+	public void setPolymorphic(Boolean polymorphic) {
+		this.polymorphic = polymorphic;
 	}
 
 	@Override
@@ -480,19 +490,25 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			result.addThisProjection();
 		}
 		else {
-			// OR Add the "this" projection if we are dealing with a polymorphic persistent bean
-			try {
-				Class<?> beanClass = ((DocumentImpl) document).getBeanClass(customer);
-				// If we have an externsion class, look for it's base class to test for the annotation
-				if (beanClass.getSimpleName().endsWith("Extension")) {
-					beanClass = beanClass.getSuperclass();
+			if (polymorphic == null) {
+				// OR Add the "this" projection if we are dealing with a polymorphic persistent bean
+				try {
+					Class<?> beanClass = ((DocumentImpl) document).getBeanClass(customer);
+					// If we have an externsion class, look for it's base class to test for the annotation
+					if (beanClass.getSimpleName().endsWith("Extension")) {
+						beanClass = beanClass.getSuperclass();
+					}
+					if (beanClass.isAnnotationPresent(PolymorphicPersistentBean.class)) {
+						result.addThisProjection();
+					}
 				}
-				if (beanClass.isAnnotationPresent(PolymorphicPersistentBean.class)) {
-					result.addThisProjection();
+				catch (ClassNotFoundException e) {
+					throw new MetaDataException("Could not determine if the driving document is polymorphic", e);
 				}
 			}
-			catch (ClassNotFoundException e) {
-				throw new MetaDataException("Could not determine if the driving document is polymorphic", e);
+			 // OR add the "this" projection if it was explicitly set
+			else if (Boolean.TRUE.equals(polymorphic)) {
+				result.addThisProjection();
 			}
 		}
 		return result;

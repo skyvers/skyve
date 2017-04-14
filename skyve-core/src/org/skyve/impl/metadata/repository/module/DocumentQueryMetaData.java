@@ -15,9 +15,10 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documentQuery")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "documentQuery",
-			propOrder = {"documentName", "from", "filter", "columns"})
+			propOrder = {"documentName", "polymorphic", "from", "filter", "columns"})
 public class DocumentQueryMetaData extends QueryMetaData {
 	private String documentName;
+	private Boolean polymorphic;
 	private String from;
 	private String filter;
 	private List<Column> columns = new ArrayList<>();
@@ -29,6 +30,15 @@ public class DocumentQueryMetaData extends QueryMetaData {
 	@XmlAttribute(required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
+	}
+
+	public Boolean getPolymorphic() {
+		return polymorphic;
+	}
+
+	@XmlAttribute
+	public void setPolymorphic(Boolean polymorphic) {
+		this.polymorphic = polymorphic;
 	}
 
 	public String getFrom() {

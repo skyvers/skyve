@@ -27,6 +27,12 @@
 				<column binding="text" />
 			</columns>
 		</documentQuery>
+		<documentQuery name="qHPoly" documentName="Hierarchical" polymorphic="true">
+			<description>Test Hierarchical Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
 		<documentQuery name="qMB" documentName="MappedBase">
 			<description>Test MappedBase Document</description>
 			<columns>
@@ -34,6 +40,12 @@
 			</columns>
 		</documentQuery>
 		<documentQuery name="qMEJS" documentName="MappedExtensionJoinedStrategy">
+			<description>Test MappedExtensionJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMEJSNotPoly" documentName="MappedExtensionJoinedStrategy" polymorphic="false">
 			<description>Test MappedExtensionJoinedStrategy Document</description>
 			<columns>
 				<column binding="text" />

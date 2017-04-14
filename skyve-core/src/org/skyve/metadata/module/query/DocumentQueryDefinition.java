@@ -18,6 +18,13 @@ public interface DocumentQueryDefinition extends QueryDefinition {
 	public String getDocumentName();
 	
 	/**
+	 * Overrides the default skyve behaviour.
+	 * If true, the query will load the driving document's bean to enable polymorphic method calls.
+	 * @return
+	 */
+	public Boolean getPolymorphic();
+
+	/**
 	 * 
 	 * @param customer
 	 * @return
