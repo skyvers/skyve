@@ -20,4 +20,42 @@
 		<document ref="MappedSubclassedSingleStrategy" />
 	</documents>
 	<menu />
+	<queries>
+		<documentQuery name="qH" documentName="Hierarchical">
+			<description>Test Hierarchical Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMB" documentName="MappedBase">
+			<description>Test MappedBase Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMEJS" documentName="MappedExtensionJoinedStrategy">
+			<description>Test MappedExtensionJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMESS" documentName="MappedExtensionSingleStrategy">
+			<description>Test MappedExtensionSingleStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMSJS" documentName="MappedSubclassedJoinedStrategy">
+			<description>Test MappedSubclassedJoinedStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMSSS" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
+	</queries>
 </module>

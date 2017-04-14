@@ -7,10 +7,12 @@ import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.PolymorphicPersistentBean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -472,12 +474,27 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			}
 		}
 		
-		// only add the "this" projection if we have transient column bindings to load
+		// Add the "this" projection if we have transient column bindings to load
 		// and this is not a summary query
 		if (anyTransientBindingInQuery && (summaryType == null)) {
 			result.addThisProjection();
 		}
-
+		else {
+			// OR Add the "this" projection if we are dealing with a polymorphic persistent bean
+			try {
+				Class<?> beanClass = ((DocumentImpl) document).getBeanClass(customer);
+				// If we have an externsion class, look for it's base class to test for the annotation
+				if (beanClass.getSimpleName().endsWith("Extension")) {
+					beanClass = beanClass.getSuperclass();
+				}
+				if (beanClass.isAnnotationPresent(PolymorphicPersistentBean.class)) {
+					result.addThisProjection();
+				}
+			}
+			catch (ClassNotFoundException e) {
+				throw new MetaDataException("Could not determine if the driving document is polymorphic", e);
+			}
+		}
 		return result;
 	}
 	

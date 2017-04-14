@@ -2027,7 +2027,6 @@ joined tables
 		}
 
 		String parentDocumentName = document.getParentDocumentName();
-
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				imports.add("java.util.List");
@@ -2043,6 +2042,12 @@ joined tables
 				imports.add("org.skyve.domain.ChildBean");
 			}
 		}
+
+		boolean polymorphic = testPolymorphic(document);
+		if (polymorphic) {
+			imports.add("org.skyve.domain.PolymorphicPersistentBean");
+		}
+		
 		// indicates if the base document has <BaseDocument>Extension.java defined in the document folder.
 		boolean baseDocumentExtensionClassExists = false;
 		if (baseDocumentName != null) {
@@ -2280,6 +2285,9 @@ joined tables
 		// generate class body
 		fw.append("@XmlType");
 		fw.append("\n@XmlRootElement");
+		if (polymorphic) {
+			fw.append("\n@PolymorphicPersistentBean");
+		}
 		fw.append("\npublic ");
 		if (baseDocumentName == null) {
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());
@@ -2304,6 +2312,7 @@ joined tables
 		else {
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
+		
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
@@ -2328,6 +2337,40 @@ joined tables
 		fw.append(methods);
 
 		fw.append("}\n");
+	}
+	
+	private boolean testPolymorphic(Document document) {
+		// If this is a mapped document, its not polymorphic - it can't be queried and isn't really persistent
+		Persistent persistent = document.getPersistent();
+		if (persistent != null) {
+			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+
+		return testPolymorphicAllTheWayDown(document);
+	}
+
+	private boolean testPolymorphicAllTheWayDown(Document document) {
+		// If any sub-document down the tree is single or joined strategy, then this document is polymorphic
+		TreeMap<String, Document> derivations = modocDerivations.get(document.getOwningModuleName() + '.' + document.getName());
+		if (derivations != null) {
+			for (Document derivation : derivations.values()) {
+				Persistent derivationPersistent = derivation.getPersistent();
+				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
+				if (ExtensionStrategy.single.equals(derivationStrategy) ||
+						ExtensionStrategy.joined.equals(derivationStrategy)) {
+					return true;
+				}
+				if (testPolymorphic(derivation)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {

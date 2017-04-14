@@ -21,7 +21,7 @@ public class MapBean extends LazyDynaMap implements Bean {
 
 	@Override
 	public String getBizId() {
-		// Cannot cast the actual vaue to a string as in the summary line its the count (a long value)
+		// Cannot cast the actual value to a string as in the summary line its the count (a long value)
 		Object result = get(Bean.DOCUMENT_ID);
 		return (result == null) ? null : result.toString();
 	}

@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.test.domain.MappedBase;
 import org.skyve.CORE;
+import org.skyve.domain.PolymorphicPersistentBean;
 
 /**
  * Extension document.
@@ -19,6 +20,7 @@ import org.skyve.CORE;
  */
 @XmlType
 @XmlRootElement
+@PolymorphicPersistentBean
 public class MappedExtensionJoinedStrategy extends MappedBase {
 	/**
 	 * For Serialization
