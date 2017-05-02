@@ -71,27 +71,27 @@
 		<copy tofile="javaee/skyve.ear/skyve.war/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/desktop/skyve-min.js src/js/desktop/skyve.js"/>
 		</java>
 		<delete file="src/js/desktop/skyve.js" />
 		
 		<!-- minify css files -->
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/css/basic-min.css src/css/basic.css"/>
 		</java>
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/css/prime-min.css src/css/prime.css"/>
 		</java>
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/css/simple-grid-min.css src/css/simple-grid.css"/>
 		</java>
 
 		<!-- minify js files -->
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
 		</java>
-		<java jar="lib/yuicompressor-2.4.2.jar" fork="true">
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o javaee/skyve.ear/skyve.war/mobile/skyve-min.js src/js/mobile/skyve.js"/>
 		</java>
 	</target>
