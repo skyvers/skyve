@@ -206,6 +206,9 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString(null, "passwordHashingAlgorithm", properties, true);
 		UtilImpl.APPS_JAR_DIRECTORY = getString(null, "appsJarDirectory", properties, false);
 
+		Map<String, Object> api = getObject(null, "api", properties);
+		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
+
 		// ensure that the schema is created before trying to init the job scheduler
 		Persistence p = null;
 		try {

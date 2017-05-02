@@ -130,6 +130,9 @@ public class UtilImpl {
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 
+	// API Keys etc
+	public static String GOOGLE_MAPS_V3_API_KEY = null;
+	
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	

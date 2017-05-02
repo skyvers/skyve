@@ -24,7 +24,7 @@
 	// Content settings
 	content: {
 		// directory path
-		directory: "/Users/mike/_/skyve/skyve-ee/content/", 
+		directory: "/C:/_/skyve/skyve-ee/content/", 
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		gcCron: "0 7 0/1 1/1 * ? *", 
 		// Attachments stored on file system or inline
@@ -83,6 +83,10 @@
 		testBogusSend: false, 
 		// Test Recipient (all emails only sent to this email address)
 		testRecipient: "mike.sands@bizhub.com.au"},
+	// API Settings
+	api: {
+		googleMapsV3Key: ""
+	},
 	// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 	devMode: true,
 	// Customer Default

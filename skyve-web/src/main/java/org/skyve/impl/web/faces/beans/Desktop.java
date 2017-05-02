@@ -93,7 +93,8 @@ public class Desktop extends Harness {
 	
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
 					result.append("isc.BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
-
+					result.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
+					
 					WebAction a = Desktop.this.getWebActionParameter();
 					if (WebAction.l.equals(a)) { // we have a home ref that is a list view
 						result.append("details.showMember(isc.ListView.contents);");
