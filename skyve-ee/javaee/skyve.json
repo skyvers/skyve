@@ -85,7 +85,7 @@
 		testRecipient: "mike.sands@bizhub.com.au"},
 	// API Settings
 	api: {
-		googleMapsV3Key: ""
+		googleMapsV3Key: "AIzaSyDcDHNxHUVAF-CMqvI0TIAPlye9g4Wr4Dg"
 	},
 	// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
 	devMode: true,
