@@ -20,7 +20,6 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 /**
  * DataMaintenance
  * 
- * @depend - - - RestorePreProcess
  * @depend - - - Operation
  * @depend - - - RefreshOption
  * @navhas n auditUser 0..1 User
@@ -91,89 +90,6 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String auditResponsePropertyName = "auditResponse";
 	/** @hidden */
 	public static final String refreshOptionPropertyName = "refreshOption";
-
-	/**
-	 * Restore Pre-Process
-	 **/
-	@XmlEnum
-	public static enum RestorePreProcess implements Enumeration {
-		noProcessing("none", "No Processing"),
-		dropUsingMetadataAndCreateUsingBackup("dmcb", "Drop tables using metadata & recreate tables from backup create.sql"),
-		dropUsingBackupAndCreateUsingBackup("dbcb", "Drop tables using backup drop.sql & recreate tables from backup create.sql"),
-		dropUsingMetadataAndCreateUsingMetadata("dmcm", "Drop tables using metadata & recreate tables from metadata"),
-		dropUsingBackupAndCreateUsingMetadata("dbcm", "Drop tables using backup drop.sql & recreate tables from metadata"),
-		createUsingBackup("cb", "Create tables from backup"),
-		createUsingMetadata("cm", "Create tables from metadata"),
-		deleteData("dmc", "Delete existing table data using metadata");
-
-		private String code;
-		private String description;
-
-		/** @hidden */
-		private DomainValue domainValue;
-
-		/** @hidden */
-		private static List<DomainValue> domainValues;
-
-		private RestorePreProcess(String code, String description) {
-			this.code = code;
-			this.description = description;
-			this.domainValue = new DomainValue(code, description);
-		}
-
-		@Override
-		public String toCode() {
-			return code;
-		}
-
-		@Override
-		public String toDescription() {
-			return description;
-		}
-
-		@Override
-		public DomainValue toDomainValue() {
-			return domainValue;
-		}
-
-		public static RestorePreProcess fromCode(String code) {
-			RestorePreProcess result = null;
-
-			for (RestorePreProcess value : values()) {
-				if (value.code.equals(code)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static RestorePreProcess fromDescription(String description) {
-			RestorePreProcess result = null;
-
-			for (RestorePreProcess value : values()) {
-				if (value.description.equals(description)) {
-					result = value;
-					break;
-				}
-			}
-
-			return result;
-		}
-
-		public static List<DomainValue> toDomainValues() {
-			if (domainValues == null) {
-				RestorePreProcess[] values = values();
-				domainValues = new ArrayList<>(values.length);
-				for (RestorePreProcess value : values) {
-					domainValues.add(value.domainValue);
-				}
-			}
-
-			return domainValues;
-		}
-	}
 
 	/**
 	 * Option
@@ -261,7 +177,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	private Integer weeklyBackupRetention;
 	private Integer monthlyBackupRetention;
 	private Integer yearlyBackupRetention;
-	private RestorePreProcess restorePreProcess;
+	private String restorePreProcess;
 	private String selectedBackupName;
 	private String selectedContentId;
 	private Boolean refreshBackups = new Boolean(true);
@@ -486,7 +402,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	/**
 	 * {@link #restorePreProcess} accessor.
 	 **/
-	public RestorePreProcess getRestorePreProcess() {
+	public String getRestorePreProcess() {
 		return restorePreProcess;
 	}
 
@@ -496,7 +412,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * @param restorePreProcess	The new value to set.
 	 **/
 	@XmlElement
-	public void setRestorePreProcess(RestorePreProcess restorePreProcess) {
+	public void setRestorePreProcess(String restorePreProcess) {
 		preset(restorePreProcessPropertyName, restorePreProcess);
 		this.restorePreProcess = restorePreProcess;
 	}

@@ -166,11 +166,7 @@
 		<property name="weeklyBackupRetention" />
 		<property name="monthlyBackupRetention" />
 		<property name="yearlyBackupRetention" />
-		<property name="restorePreProcess" length="4">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.DataMaintenance$RestorePreProcess</param>
-			</type>
-		</property>
+		<property name="restorePreProcess" length="50" />
 		<property name="auditModuleName" length="128" />
 		<property name="auditDocumentName" length="128" />
 		<property name="auditOperation" length="1">

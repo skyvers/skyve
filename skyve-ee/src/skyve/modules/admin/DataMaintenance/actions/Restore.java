@@ -2,8 +2,8 @@ package modules.admin.DataMaintenance.actions;
 
 import java.io.File;
 
+import modules.admin.DataMaintenance.DataMaintenanceBizlet;
 import modules.admin.domain.DataMaintenance;
-import modules.admin.domain.DataMaintenance.RestorePreProcess;
 
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
@@ -62,8 +62,8 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		FileUtil.extractZipArchive(backup, extractDir);
 		Util.LOGGER.info("Extracted " + backup.getAbsolutePath() + " to " + extractDir.getAbsolutePath());
 
-		RestorePreProcess pre = bean.getRestorePreProcess();
-		boolean truncateDatabase = RestorePreProcess.deleteData.equals(pre);
+		DataMaintenanceBizlet.RestorePreProcess pre = DataMaintenanceBizlet.RestorePreProcess.valueOf(bean.getRestorePreProcess());
+		boolean truncateDatabase = DataMaintenanceBizlet.RestorePreProcess.deleteData.equals(pre);
 		String schemaName = bean.getSchemaName();
 		if (truncateDatabase) {
 			Util.LOGGER.info("Truncate " + ((schemaName == null) ? "default" : schemaName) + " schema");
@@ -72,33 +72,33 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 
 		boolean createUsingBackup = false;
 		boolean sync = false;
-		if (RestorePreProcess.createUsingBackup.equals(pre)) {
+		if (DataMaintenanceBizlet.RestorePreProcess.createUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.create(new File(extractDir, "create.sql"), true);
 			sync = true;
 		}
-		else if (RestorePreProcess.createUsingMetadata.equals(pre)) {
+		else if (DataMaintenanceBizlet.RestorePreProcess.createUsingMetadata.equals(pre)) {
 			DDL.create(null, true);
 			sync = true;
 		}
-		else if (RestorePreProcess.dropUsingBackupAndCreateUsingBackup.equals(pre)) {
+		else if (DataMaintenanceBizlet.RestorePreProcess.dropUsingBackupAndCreateUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.drop(new File(extractDir, "drop.sql"), true);
 			DDL.create(new File(extractDir, "create.sql"), true);
 			sync = true;
 		}
-		else if (RestorePreProcess.dropUsingBackupAndCreateUsingMetadata.equals(pre)) {
+		else if (DataMaintenanceBizlet.RestorePreProcess.dropUsingBackupAndCreateUsingMetadata.equals(pre)) {
 			DDL.drop(new File(extractDir, "drop.sql"), true);
 			DDL.create(null, true);
 			sync = true;
 		}
-		else if (RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.equals(pre)) {
+		else if (DataMaintenanceBizlet.RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.equals(pre)) {
 			createUsingBackup = true;
 			DDL.drop(null, true);
 			DDL.create(new File(extractDir, "create.sql"), true);
 			sync = true;
 		}
-		else if (RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(pre)) {
+		else if (DataMaintenanceBizlet.RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.equals(pre)) {
 			DDL.drop(null, true);
 			DDL.create(null, true);
 			sync = true;
