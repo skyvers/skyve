@@ -24,7 +24,7 @@
 			<description>The name of the field or sequence.</description>
 			<length>500</length>
 		</text>
-		<text name="number" required="true">
+		<text name="documentNumber" required="true">
 			<displayName>Number</displayName>
 			<description>The last used number for the document.</description>
 			<length>500</length>

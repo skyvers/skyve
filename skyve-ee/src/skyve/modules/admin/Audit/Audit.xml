@@ -46,7 +46,7 @@
 			<displayName>User</displayName>
 			<length>254</length>
 		</text>
-		<memo name="audit" required="true">
+		<memo name="auditDetail" required="true">
 			<displayName>Audit</displayName>
 			<index>none</index>
 		</memo>

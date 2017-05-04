@@ -33,7 +33,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String sequenceNamePropertyName = "sequenceName";
 	/** @hidden */
-	public static final String numberPropertyName = "number";
+	public static final String documentNumberPropertyName = "documentNumber";
 
 	/**
 	 * The name of the module.
@@ -50,7 +50,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 	/**
 	 * The last used number for the document.
 	 **/
-	private String number;
+	private String documentNumber;
 
 	@Override
 	@XmlTransient
@@ -142,20 +142,20 @@ public class DocumentNumber extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #number} accessor.
+	 * {@link #documentNumber} accessor.
 	 **/
-	public String getNumber() {
-		return number;
+	public String getDocumentNumber() {
+		return documentNumber;
 	}
 
 	/**
-	 * {@link #number} mutator.
+	 * {@link #documentNumber} mutator.
 	 * 
-	 * @param number	The new value to set.
+	 * @param documentNumber	The new value to set.
 	 **/
 	@XmlElement
-	public void setNumber(String number) {
-		preset(numberPropertyName, number);
-		this.number = number;
+	public void setDocumentNumber(String documentNumber) {
+		preset(documentNumberPropertyName, documentNumber);
+		this.documentNumber = documentNumber;
 	}
 }

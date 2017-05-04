@@ -661,11 +661,11 @@ public class ModulesUtil {
 				dN = pers.retrieve(document, dN.getBizId(), true); // issue a
 																	// row-level
 																	// lock
-				lastNumber = dN.getNumber();
+				lastNumber = dN.getDocumentNumber();
 			}
 			// just update from the document Number
 			nextNumber = incrementAlpha(prefix, lastNumber, numberLength);
-			dN.setNumber(nextNumber);
+			dN.setDocumentNumber(nextNumber);
 
 			pers.preFlush(document, dN);
 			pers.upsertBeanTuple(dN);

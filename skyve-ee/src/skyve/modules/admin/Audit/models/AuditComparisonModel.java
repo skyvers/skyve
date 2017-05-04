@@ -56,7 +56,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		
 		// Visit the source audit record
 		@SuppressWarnings("unchecked")
-		Map<String, Object> source = (Map<String, Object>) JSON.unmarshall(u, sourceVersion.getAudit());
+		Map<String, Object> source = (Map<String, Object>) JSON.unmarshall(u, sourceVersion.getAuditDetail());
 		for (String binding : source.keySet()) {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> sourceValues = (Map<String, Object>) source.get(binding);
@@ -84,7 +84,7 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 		// Visit the comparison audit record, if there is one
 		if (comparisonVersion != null) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> compare = (Map<String, Object>) JSON.unmarshall(u, comparisonVersion.getAudit());
+			Map<String, Object> compare = (Map<String, Object>) JSON.unmarshall(u, comparisonVersion.getAuditDetail());
 			for (String binding : compare.keySet()) {
 				ComparisonComposite node = bindingToNodes.get(binding);
 				@SuppressWarnings("unchecked")
