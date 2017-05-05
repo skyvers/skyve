@@ -162,7 +162,7 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 		else if(DataMaintenance.restorePreProcessPropertyName.equals(attributeName)){
 			result = new ArrayList<>();
 			result.add(new DomainValue(RestorePreProcess.noProcessing.toCode(), RestorePreProcess.noProcessing.toDescription()));
-			if(UtilImpl.CUSTOMER==null){
+			if(UtilImpl.CUSTOMER!=null){
 				result.add(new DomainValue(RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.toCode(), RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.toDescription()));
 				result.add(new DomainValue(RestorePreProcess.dropUsingBackupAndCreateUsingBackup.toCode(), RestorePreProcess.dropUsingBackupAndCreateUsingBackup.toDescription()));
 				result.add(new DomainValue(RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.toCode(), RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.toDescription()));
