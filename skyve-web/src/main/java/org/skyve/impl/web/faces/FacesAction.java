@@ -170,10 +170,12 @@ public abstract class FacesAction<T> {
 		findComponentsByBinding(base, binding, result);
 
 		// check the last part of a compound binding
-		int lastDotIndex = binding.lastIndexOf('.');
-		if (lastDotIndex > 0) { // compound binding
-			String simpleBinding = binding.substring(lastDotIndex);
-			findComponentsByBinding(base, simpleBinding, result);
+		if (result.isEmpty()) {
+			int lastDotIndex = binding.lastIndexOf('.');
+			if (lastDotIndex > 0) { // compound binding
+				String simpleBinding = binding.substring(lastDotIndex);
+				findComponentsByBinding(base, simpleBinding, result);
+			}
 		}
 		
 		return result;
