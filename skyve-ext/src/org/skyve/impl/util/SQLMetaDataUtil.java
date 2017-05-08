@@ -132,7 +132,7 @@ public class SQLMetaDataUtil {
 
 			StringBuilder sql = new StringBuilder(256);
 			sql.append("select s.*, u.userName from ").append(ADM_JobSchedule).append(" s inner join ");
-			sql.append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by bizCustomer");
+			sql.append(ADM_SecurityUser).append(" u on s.runAs_id = u.bizId order by u.bizCustomer");
 			
 			for (DynaBean jobScheduleRow : SQLUtil.retrieveListForSQL(null, null, sql.toString(), null, false, false)) {
 				StringBuilder userPrincipalBuilder = new StringBuilder(128);

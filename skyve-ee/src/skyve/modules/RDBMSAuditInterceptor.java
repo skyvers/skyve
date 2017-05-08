@@ -116,7 +116,7 @@ public class RDBMSAuditInterceptor extends Interceptor {
 
 			AuditJSONGenerator generator = new AuditJSONGenerator(c);
 			generator.visit(ad, bean, c);
-			a.setAudit(generator.toJSON());
+			a.setAuditDetail(generator.toJSON());
 			a.setAuditModuleName(bean.getBizModule());
 			a.setAuditDocumentName(bean.getBizDocument());
 			a.setAuditBizId(bean.getBizId());

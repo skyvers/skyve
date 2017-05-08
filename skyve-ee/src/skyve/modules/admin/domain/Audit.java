@@ -56,7 +56,7 @@ public class Audit extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String userNamePropertyName = "userName";
 	/** @hidden */
-	public static final String auditPropertyName = "audit";
+	public static final String auditDetailPropertyName = "auditDetail";
 	/** @hidden */
 	public static final String sourceVersionPropertyName = "sourceVersion";
 	/** @hidden */
@@ -150,7 +150,7 @@ public class Audit extends AbstractPersistentBean {
 	private Timestamp timestamp;
 	private Long millis;
 	private String userName;
-	private String audit;
+	private String auditDetail;
 	private Audit sourceVersion = null;
 	private Audit comparisonVersion = null;
 	private Audit me = null;
@@ -337,21 +337,21 @@ public class Audit extends AbstractPersistentBean {
 	}
 
 	/**
-	 * {@link #audit} accessor.
+	 * {@link #auditDetail} accessor.
 	 **/
-	public String getAudit() {
-		return audit;
+	public String getAuditDetail() {
+		return auditDetail;
 	}
 
 	/**
-	 * {@link #audit} mutator.
+	 * {@link #auditDetail} mutator.
 	 * 
-	 * @param audit	The new value to set.
+	 * @param auditDetail	The new value to set.
 	 **/
 	@XmlElement
-	public void setAudit(String audit) {
-		preset(auditPropertyName, audit);
-		this.audit = audit;
+	public void setAuditDetail(String auditDetail) {
+		preset(auditDetailPropertyName, auditDetail);
+		this.auditDetail = auditDetail;
 	}
 
 	/**

@@ -34,7 +34,7 @@
 		<property name="timestamp" type="Timestamp" />
 		<property name="millis" index="adminAuditmillis" />
 		<property name="userName" length="254" />
-		<property name="audit" type="text" />
+		<property name="auditDetail" type="text" />
 		<filter name="adminAuditNoneFilter" condition="1=0"/>
 		<filter name="adminAuditCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminAuditDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -166,11 +166,7 @@
 		<property name="weeklyBackupRetention" />
 		<property name="monthlyBackupRetention" />
 		<property name="yearlyBackupRetention" />
-		<property name="restorePreProcess" length="4">
-			<type name="Enum">
-				<param name="enumClass">modules.admin.domain.DataMaintenance$RestorePreProcess</param>
-			</type>
-		</property>
+		<property name="restorePreProcess" length="50" />
 		<property name="auditModuleName" length="128" />
 		<property name="auditDocumentName" length="128" />
 		<property name="auditOperation" length="1">
@@ -199,7 +195,7 @@
 		<property name="moduleName" length="500" />
 		<property name="documentName" length="500" />
 		<property name="sequenceName" length="500" />
-		<property name="number" length="500" />
+		<property name="documentNumber" length="500" />
 		<filter name="adminDocumentNumberNoneFilter" condition="1=0"/>
 		<filter name="adminDocumentNumberCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminDocumentNumberDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

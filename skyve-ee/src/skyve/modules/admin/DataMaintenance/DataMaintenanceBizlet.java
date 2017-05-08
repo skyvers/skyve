@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
@@ -24,7 +26,86 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_SUBJECT = "Perform Document Data Refresh - Complete";
 	public static final String SYSTEM_DATA_REFRESH_DEFAULT_BODY = "The document data refresh is complete. Check Job log for details.";
 
+	public static enum RestorePreProcess implements Enumeration {
+		noProcessing("noProcessing", "No Processing"),
+		dropUsingMetadataAndCreateUsingBackup("dropUsingMetadataAndCreateUsingBackup", "Drop tables using metadata & recreate tables from backup create.sql"),
+		dropUsingBackupAndCreateUsingBackup("dropUsingBackupAndCreateUsingBackup", "Drop tables using backup drop.sql & recreate tables from backup create.sql"),
+		dropUsingMetadataAndCreateUsingMetadata("dropUsingMetadataAndCreateUsingMetadata", "Drop tables using metadata & recreate tables from metadata"),
+		dropUsingBackupAndCreateUsingMetadata("dropUsingBackupAndCreateUsingMetadata", "Drop tables using backup drop.sql & recreate tables from metadata"),
+		createUsingBackup("createUsingBackup", "Create tables from backup"),
+		createUsingMetadata("createUsingMetadata", "Create tables from metadata"),
+		deleteData("deleteData", "Delete existing table data using metadata");
 
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private RestorePreProcess(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static RestorePreProcess fromCode(String code) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static RestorePreProcess fromDescription(String description) {
+			RestorePreProcess result = null;
+
+			for (RestorePreProcess value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				RestorePreProcess[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (RestorePreProcess value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	
 	@Override
 	public DataMaintenance newInstance(DataMaintenance bean) throws Exception {
 		Persistence persistence = CORE.getPersistence();
@@ -78,6 +159,19 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 			}
 			Collections.sort(result, new DomainValueSortByDescription());			
 		}
+		else if(DataMaintenance.restorePreProcessPropertyName.equals(attributeName)){
+			result = new ArrayList<>();
+			result.add(new DomainValue(RestorePreProcess.noProcessing.toCode(), RestorePreProcess.noProcessing.toDescription()));
+			if(UtilImpl.CUSTOMER!=null){
+				result.add(new DomainValue(RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.toCode(), RestorePreProcess.dropUsingMetadataAndCreateUsingBackup.toDescription()));
+				result.add(new DomainValue(RestorePreProcess.dropUsingBackupAndCreateUsingBackup.toCode(), RestorePreProcess.dropUsingBackupAndCreateUsingBackup.toDescription()));
+				result.add(new DomainValue(RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.toCode(), RestorePreProcess.dropUsingMetadataAndCreateUsingMetadata.toDescription()));
+				result.add(new DomainValue(RestorePreProcess.dropUsingBackupAndCreateUsingMetadata.toCode(), RestorePreProcess.dropUsingBackupAndCreateUsingMetadata.toDescription()));
+				result.add(new DomainValue(RestorePreProcess.createUsingBackup.toCode(), RestorePreProcess.createUsingBackup.toDescription()));
+				result.add(new DomainValue(RestorePreProcess.createUsingMetadata.toCode(), RestorePreProcess.createUsingMetadata.toDescription()));
+			}
+			result.add(new DomainValue(RestorePreProcess.deleteData.toCode(), RestorePreProcess.deleteData.toDescription()));
+		}
 
 		return result;
 	}
@@ -87,11 +181,11 @@ public class DataMaintenanceBizlet extends Bizlet<DataMaintenance> {
 
 		if(DataMaintenance.restorePreProcessPropertyName.equals(source)){
 			String instructionHint = null;
-			switch(bean.getRestorePreProcess()){
+			DataMaintenanceBizlet.RestorePreProcess pre = DataMaintenanceBizlet.RestorePreProcess.valueOf(bean.getRestorePreProcess());
+			switch(pre){
 			case noProcessing:
 				instructionHint="Use this option when you've created your database from scratch (or with the bootstrap) and you've let the Skyve create all DDL. You know the backup is from the same version and the schema is synchronised (matches the metadata).";	
 				break;
-
 			case createUsingBackup:
 				instructionHint="Use this option when you've created a empty schema (manually or scripted).";
 				break;
