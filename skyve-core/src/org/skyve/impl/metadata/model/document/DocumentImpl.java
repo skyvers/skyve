@@ -97,6 +97,15 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Class<T> beanClass = getBeanClass(customer);
 		T result = beanClass.newInstance();
 		
+		// Set implicit properties
+		// NB These properties need to be set before the bizlet.newInstance() is called.
+		// For singletons, if we were to set these after the bizlet call, 
+		// this could make the object dirty and cause it to be flushed to the datastore
+		// (and uprevved resulting in more contention and optimistic locks etc)
+		result.setBizCustomer(customer.getName());
+		result.setBizDataGroupId(user.getDataGroupId());
+		result.setBizUserId(user.getId());
+
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforeNewInstance(result);
 		if (! vetoed) {
@@ -116,11 +125,6 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		// clear the object's dirtiness
 		result.originalValues().clear();
-
-		// Set implicit properties
-		result.setBizCustomer(customer.getName());
-		result.setBizDataGroupId(user.getDataGroupId());
-		result.setBizUserId(user.getId());
 
 		return result;
 	}
