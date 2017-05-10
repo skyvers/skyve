@@ -78,6 +78,7 @@ public class SkyvePhaseListener implements PhaseListener {
 
 		// initialise the conversation
 		AbstractPersistence persistence = AbstractPersistence.get();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - CONNECT PERSISTENCE AND BEGIN TRANSACTION");
 		persistence.begin();
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
     	Principal userPrincipal = request.getUserPrincipal();
@@ -102,18 +103,30 @@ public class SkyvePhaseListener implements PhaseListener {
 	
 	private static void afterResponseRendered(PhaseEvent event)
 	throws Exception {
-		UIViewRoot vr = event.getFacesContext().getViewRoot();
-		if (vr != null) {
-			// Cache and dehydrate
-			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
-			if (managedBeanName != null) {
-				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
-				AbstractWebContext webContext = view.getWebContext();
-//				if (event.getFacesContext().getMaximumSeverity().getOrdinal() < FacesMessage.SEVERITY_ERROR) {
-					WebUtil.putConversationInCache(webContext);
-//				}
-				view.dehydrate();
+		try {
+			UIViewRoot vr = event.getFacesContext().getViewRoot();
+			if (vr != null) {
+				// Cache and dehydrate
+				String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
+				if (managedBeanName != null) {
+					FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+					AbstractWebContext webContext = view.getWebContext();
+//					if (event.getFacesContext().getMaximumSeverity().getOrdinal() < FacesMessage.SEVERITY_ERROR) {
+						WebUtil.putConversationInCache(webContext);
+//					}
+					view.dehydrate();
+				}
 			}
+		}
+		finally {
+			// We can't rely on the SkyveFacesFilter to disconnect persistence under every circumstance.
+			// If the web container forwards to an xhtml page (say through web.xml), the SkyveFacesFilter isn't invoked.
+			// The SkyveFacesFilter is the last line of defence but usually if the Faces lifecycle is successful
+			// the code below will do the disconnect.
+			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - COMMIT TRANSACTION AND DISCONNECT PERSISTENCE");
+			AbstractPersistence persistence = AbstractPersistence.get();
+			persistence.commit(true);
+			if (UtilImpl.FACES_TRACE) WebUtil.logConversationsStats();
 		}
 	}
 }

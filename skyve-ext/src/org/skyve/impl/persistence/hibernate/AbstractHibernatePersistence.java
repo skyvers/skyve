@@ -752,7 +752,7 @@ t.printStackTrace();
 	@Override
 	public final void commit(boolean close) {
 		try {
-			if (em != null) { // can happen after a relogin
+			if (em != null) { // can be null after a relogin
 				EntityTransaction et = em.getTransaction();
 				if ((et != null) && et.isActive()) {
 				    // FROM THE HIBERNATE_REFERENCE DOCS Page 190
@@ -775,7 +775,7 @@ t.printStackTrace();
 			}
 			finally {
 				if (close) {
-					if (em != null) { // can happen after a relogin
+					if (em != null) { // can be null after a relogin
 						em.close();
 					}
 					em = null;
