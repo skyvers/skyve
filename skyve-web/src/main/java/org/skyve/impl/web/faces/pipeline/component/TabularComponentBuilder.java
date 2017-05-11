@@ -398,13 +398,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
         setId(result);
     	result.setWidgetVar(result.getId());
         result.setSelectionMode("single");
-        result.setValueExpression("rowKey", ef.createValueExpression(elc, "#{row['bizId']}", String.class));
+        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
         
         AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
         StringBuilder start = new StringBuilder(64);
         start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
-		start.append("?a=").append(WebAction.e.toString());
-		start.append("&m=").append(moduleName).append("&d=").append(drivingDocumentName).append("&i='+s;return false;");
+		start.append("?a=").append(WebAction.e.toString()).append("'+s;return false;");
 		ajax.setOnstart(start.toString());
         result.addClientBehavior("rowSelect", ajax);
 
