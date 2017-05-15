@@ -484,33 +484,40 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			}
 		}
 		
-		// Add the "this" projection if we have transient column bindings to load
-		// and this is not a summary query
-		if (anyTransientBindingInQuery && (summaryType == null)) {
-			result.addThisProjection();
-		}
-		else {
-			if (polymorphic == null) {
-				// OR Add the "this" projection if we are dealing with a polymorphic persistent bean
-				try {
-					Class<?> beanClass = ((DocumentImpl) document).getBeanClass(customer);
-					// If we have an externsion class, look for it's base class to test for the annotation
-					if (beanClass.getSimpleName().endsWith("Extension")) {
-						beanClass = beanClass.getSuperclass();
-					}
-					if (beanClass.isAnnotationPresent(PolymorphicPersistentBean.class)) {
-						result.addThisProjection();
-					}
-				}
-				catch (ClassNotFoundException e) {
-					throw new MetaDataException("Could not determine if the driving document is polymorphic", e);
-				}
-			}
-			 // OR add the "this" projection if it was explicitly set
-			else if (Boolean.TRUE.equals(polymorphic)) {
+		// Add the "this" projection if this is not a summary query
+		// AND (
+		//		we have transient column bindings to load
+		// 	OR
+		//		The driving document is polymorphic or the query has been specifically declared polymorphic
+		// )
+		if (summaryType == null) {
+			if (anyTransientBindingInQuery) {
 				result.addThisProjection();
 			}
+			else {
+				if (polymorphic == null) {
+					// OR Add the "this" projection if we are dealing with a polymorphic persistent bean
+					try {
+						Class<?> beanClass = ((DocumentImpl) document).getBeanClass(customer);
+						// If we have an extension class, look for it's base class to test for the annotation
+						if (beanClass.getSimpleName().endsWith("Extension")) {
+							beanClass = beanClass.getSuperclass();
+						}
+						if (beanClass.isAnnotationPresent(PolymorphicPersistentBean.class)) {
+							result.addThisProjection();
+						}
+					}
+					catch (ClassNotFoundException e) {
+						throw new MetaDataException("Could not determine if the driving document is polymorphic", e);
+					}
+				}
+				 // OR add the "this" projection if it was explicitly set
+				else if (Boolean.TRUE.equals(polymorphic)) {
+					result.addThisProjection();
+				}
+			}
 		}
+		
 		return result;
 	}
 	
