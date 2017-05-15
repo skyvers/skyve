@@ -8,7 +8,9 @@ import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -533,5 +535,23 @@ public class PersistenceTests extends AbstractH2Test {
 		test = p.save(test);
 		p.evictCached(test);
 		p.refresh(test);
+	}
+	
+	@Test
+	public void testSaveOfMany() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+
+		List<AllAttributesPersistent> tests = new ArrayList<>();
+		tests.add(test1);
+		tests.add(test2);
+		tests = p.save(tests);
+		Assert.assertEquals(2, tests.size());
+		Assert.assertEquals(test1.getBizId(), tests.get(0).getBizId());
+		Assert.assertEquals(test2.getBizId(), tests.get(1).getBizId());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue()); 
+		for (AllAttributesPersistent test : tests) {
+			Assert.assertTrue(test.isPersisted());
+		}
 	}
 }

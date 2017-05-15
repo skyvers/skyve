@@ -1,6 +1,7 @@
 package org.skyve.persistence;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -79,6 +80,13 @@ public interface Persistence extends Serializable {
 	 * @return
 	 */
 	public <T extends PersistentBean> T save(T bean);
+
+	/**
+	 * 
+	 * @param bean
+	 * @return
+	 */
+	public <T extends PersistentBean> List<T> save(List<T> beans);
 
 	/**
 	 * 

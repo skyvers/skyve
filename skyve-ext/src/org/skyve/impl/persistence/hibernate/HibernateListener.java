@@ -4,8 +4,6 @@ import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.collection.PersistentCollection;
-import org.hibernate.event.FlushEntityEvent;
-import org.hibernate.event.FlushEntityEventListener;
 import org.hibernate.event.InitializeCollectionEvent;
 import org.hibernate.event.InitializeCollectionEventListener;
 import org.hibernate.event.PostInsertEvent;
@@ -32,8 +30,7 @@ import org.skyve.metadata.module.Module;
 public class HibernateListener implements PostUpdateEventListener,
 											PostInsertEventListener,
 											PreUpdateEventListener,
-											InitializeCollectionEventListener,
-											FlushEntityEventListener {
+											InitializeCollectionEventListener {
 	/**
 	 * For Serialization
 	 */
@@ -142,15 +139,5 @@ public class HibernateListener implements PostUpdateEventListener,
 		catch (Exception e) {
 			throw new HibernateException("Could not order the freshly loaded collection", e);
 		}
-	}
-
-	@Override
-	public void onFlushEntity(FlushEntityEvent evt) throws HibernateException {
-//		if (((Bean) evt.getEntity()).isChanged()) {
-//System.out.println("FLUSH ENTITY " + evt.getEntity());
-//for (String key : ((Bean) evt.getEntity()).originalValues().keySet()) {
-//	System.out.println("    " + key);
-//}
-//		}
 	}
 }

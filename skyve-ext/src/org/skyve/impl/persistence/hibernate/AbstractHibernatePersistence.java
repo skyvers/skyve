@@ -46,11 +46,9 @@ import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.hibernate.ejb.HibernateEntityManager;
 import org.hibernate.ejb.HibernateEntityManagerFactory;
-import org.hibernate.ejb.event.EJB3FlushEntityEventListener;
 import org.hibernate.ejb.event.EJB3PostInsertEventListener;
 import org.hibernate.ejb.event.EJB3PostUpdateEventListener;
 import org.hibernate.engine.Mapping;
-import org.hibernate.event.FlushEntityEventListener;
 import org.hibernate.event.InitializeCollectionEventListener;
 import org.hibernate.event.PostInsertEventListener;
 import org.hibernate.event.PostUpdateEventListener;
@@ -154,6 +152,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	protected abstract void commitContent() throws Exception;
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public final void disposeAllPersistenceInstances() {
 		// remove this instance - and hopefully the only instance running
 		commit(true);
@@ -213,9 +212,6 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		// For ordering collection elements when initialised
 		cfg.setListeners("load-collection", new InitializeCollectionEventListener[] {new DefaultInitializeCollectionEventListener(), hibernateListener});
 
-		// For flush callbacks
-		cfg.setListeners("flush-entity", new FlushEntityEventListener[] {hibernateListener, new EJB3FlushEntityEventListener()});
-		
 		// For collection mutation callbacks
 		// NB this didn't work - got the event name from the hibernate envers doco - maybe in a new version of hibernate
 //		cfg.setListeners("pre-collection-update", new PreCollectionUpdateEventListener[] {hibernateListener});
@@ -973,6 +969,83 @@ t.printStackTrace();
 		return result;
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends PersistentBean> List<T> save(List<T> beans) {
+		List<T> results = new ArrayList<>();
+		PersistentBean currentBean = null; // used in exception handling
+		
+		try {
+			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
+			boolean vetoed = false;
+			
+			// We need to replace transient properties before calling postFlush as
+			// Bizlet.postSave() implementations could manipulate these transients for display after save.
+			try {
+				// fire any interceptors before any other processing as these are being treated like a batch
+				for (PersistentBean bean : beans) {
+					currentBean = bean; // for exception handling
+					Module m = internalCustomer.getModule(bean.getBizModule());
+					Document d = m.getDocument(internalCustomer, bean.getBizDocument());
+					vetoed = internalCustomer.interceptBeforeSave(d, bean);
+					if (vetoed) {
+						break;
+					}
+				}
+				if (! vetoed) {
+					for (PersistentBean bean : beans) {
+						currentBean = bean; // for exception handling
+						Module m = internalCustomer.getModule(bean.getBizModule());
+						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
+						preFlush(d, bean);
+					}
+					
+					for (PersistentBean bean : beans) {
+						currentBean = bean; // for exception handling
+						Module m = internalCustomer.getModule(bean.getBizModule());
+						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
+
+						String entityName = getDocumentEntityName(d.getOwningModuleName(), d.getName());
+						results.add((T) session.merge(entityName, bean));
+					}
+					em.flush();
+				}
+			}
+			finally {
+				int i = 0;
+				for (PersistentBean result : results) {
+					currentBean = result; // for exception handling
+					if (result != null) { // only do if we got a result from the merge
+						PersistentBean bean = beans.get(i);
+						Module m = internalCustomer.getModule(bean.getBizModule());
+						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
+						replaceTransientProperties(d, result, bean);
+					}
+					i++;
+				}
+			}
+			if (! vetoed) {
+				for (PersistentBean result : results) {
+					currentBean = result; // for exception handling
+					Module m = internalCustomer.getModule(result.getBizModule());
+					Document d = m.getDocument(internalCustomer, result.getBizDocument());
+					postFlush(d, result);
+				}
+				for (PersistentBean result : results) {
+					currentBean = result; // for exception handling
+					Module m = internalCustomer.getModule(result.getBizModule());
+					Document d = m.getDocument(internalCustomer, result.getBizDocument());
+					internalCustomer.interceptAfterSave(d, result);
+				}
+			}
+		}
+		catch (Throwable t) {
+			treatPersistenceThrowable(t, OperationType.update, currentBean);
+		}
+
+		return results;
+	}
+	
 	@Override
 	public void postFlush(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
