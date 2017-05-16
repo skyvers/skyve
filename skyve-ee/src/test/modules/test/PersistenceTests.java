@@ -1,13 +1,5 @@
 package modules.test;
 
-import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
-import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
-import modules.test.domain.AllAttributesPersistent;
-import modules.test.domain.MappedExtensionJoinedStrategy;
-import modules.test.domain.MappedExtensionSingleStrategy;
-import modules.test.domain.MappedSubclassedJoinedStrategy;
-import modules.test.domain.MappedSubclassedSingleStrategy;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +14,25 @@ import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 
+import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
+import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
+import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedJoinedStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
+
 public class PersistenceTests extends AbstractH2Test {
+	@Test
+	public void testPersistenceOfObjectWithReferenceToAnotherObjectWithAggregatedCollectionWithCascadeMergeOn() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		test = p.save(test);
+		test = p.save(test);
+
+		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedCollection().get(0).getBizVersion());
+		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedCollection().get(1).getBizVersion());
+	}
+
 	@Test
 	public void testPersistBizLockEJS() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 3);
@@ -538,7 +548,7 @@ public class PersistenceTests extends AbstractH2Test {
 	}
 	
 	@Test
-	public void testSaveOfMany() throws Exception {
+	public void testSaveOfList() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
 		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
 
@@ -546,6 +556,21 @@ public class PersistenceTests extends AbstractH2Test {
 		tests.add(test1);
 		tests.add(test2);
 		tests = p.save(tests);
+		Assert.assertEquals(2, tests.size());
+		Assert.assertEquals(test1.getBizId(), tests.get(0).getBizId());
+		Assert.assertEquals(test2.getBizId(), tests.get(1).getBizId());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue()); 
+		for (AllAttributesPersistent test : tests) {
+			Assert.assertTrue(test.isPersisted());
+		}
+	}
+
+	@Test
+	public void testSaveOfVarargs() throws Exception {
+		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
+		AllAttributesPersistent test2 = Util.constructRandomInstance(u, m, aapd, 1);
+
+		List<AllAttributesPersistent> tests = p.save(test1, test2);
 		Assert.assertEquals(2, tests.size());
 		Assert.assertEquals(test1.getBizId(), tests.get(0).getBizId());
 		Assert.assertEquals(test2.getBizId(), tests.get(1).getBizId());

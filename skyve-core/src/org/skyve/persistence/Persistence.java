@@ -83,10 +83,17 @@ public interface Persistence extends Serializable {
 
 	/**
 	 * 
-	 * @param bean
+	 * @param beans
 	 * @return
 	 */
 	public <T extends PersistentBean> List<T> save(List<T> beans);
+
+	/**
+	 * 
+	 * @param beans
+	 * @return
+	 */
+	public <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans);
 
 	/**
 	 * 

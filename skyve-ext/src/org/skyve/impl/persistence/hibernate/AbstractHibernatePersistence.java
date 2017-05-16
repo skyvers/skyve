@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -967,6 +968,11 @@ t.printStackTrace();
 		}
 
 		return result;
+	}
+
+	@Override
+	public <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
+		return save(Arrays.asList(beans));
 	}
 
 	@Override

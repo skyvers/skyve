@@ -36,7 +36,7 @@
 		<documentQuery name="qMB" documentName="MappedBase">
 			<description>Test MappedBase Document</description>
 			<columns>
-				<column binding="text" />
+				<column binding="text" sortable="false" filterable="false" editable="false" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qMEJS" documentName="MappedExtensionJoinedStrategy">
