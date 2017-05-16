@@ -63,6 +63,18 @@ public interface Collection extends Reference {
 	public CollectionType getType();
 	
 	/**
+	 * Cascade type 'merge' makes many-many relationships within the association
+	 * target object update (without the collection being dirty)
+	 * and thus causes optimistic lock exceptions when the bizLock 
+	 * is up-revved from the update statement.
+	 * Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
+	 * all groups are up-revved, even though the collection is not dirty,
+	 * causing optimistic lock when Staff are saved.
+	 * So if lots of Staff use the same user, we're screwed.
+	 */
+	public Boolean getAllowCascadeMerge();
+
+	/**
 	 * 
 	 * @return
 	 */

@@ -19,7 +19,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "collection")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
-			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints"})
+			propOrder = {"type", "ordered", "allowCascadeMerge", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints"})
 public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
@@ -65,6 +65,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	 * Also allows grids to do DnD reordering and persists the bizOrdinal attribute in the ORM xml.
 	 */
 	private Boolean ordered;
+	private Boolean allowCascadeMerge;
 	private Integer minCardinality;
 	private Integer maxCardinality;
 	private List<org.skyve.metadata.model.document.Collection.Ordering> ordering = new ArrayList<>();
@@ -98,6 +99,16 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	@XmlAttribute(required = true)
 	public void setType(CollectionType type) {
 		this.type = type;
+	}
+
+	@Override
+	public Boolean getAllowCascadeMerge() {
+		return allowCascadeMerge;
+	}
+
+	@XmlAttribute
+	public void setAllowCascadeMerge(Boolean allowCascadeMerge) {
+		this.allowCascadeMerge = allowCascadeMerge;
 	}
 
 	@Override
