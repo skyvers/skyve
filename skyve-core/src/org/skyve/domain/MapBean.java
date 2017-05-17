@@ -28,32 +28,12 @@ public class MapBean extends LazyDynaMap implements Bean {
 
 	@Override
 	public String getBizModule() {
-		String result = null;
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
-		if (bean != null) {
-			// use the polymorphic method to return this
-			result = bean.getBizModule();
-		}
-		else {
-			// use what we were given in the constructor
-			result = (String) get(Bean.MODULE_KEY);
-		}
-		return result;
+		return (String) get(Bean.MODULE_KEY);
 	}
 
 	@Override
 	public String getBizDocument() {
-		String result = null;
-		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
-		if (bean != null) {
-			// use the polymorphic method to return this
-			result = bean.getBizDocument();
-		}
-		else {
-			// use what we were given in the constructor
-			result = (String) get(Bean.DOCUMENT_KEY);
-		}
-		return result;
+		return (String) get(Bean.DOCUMENT_KEY);
 	}
 
 	@Override
@@ -144,12 +124,20 @@ public class MapBean extends LazyDynaMap implements Bean {
 	@Override
 	public Object get(String propertyName) {
 		Object result = null;
+		Bean bean = (Bean) values.get(DocumentQuery.THIS_ALIAS);
 		
-		if (isDynaProperty(propertyName)) {
+		// Ensure "bizModule" returns the polymorphic value if appropriate
+		if ((bean != null) && Bean.MODULE_KEY.equals(propertyName)) {
+			result = bean.getBizModule();
+		}
+		// Ensure "bizDocument" returns the polymorphic value if appropriate
+		else if ((bean != null) && Bean.DOCUMENT_KEY.equals(propertyName)) {
+			result = bean.getBizDocument();
+		}
+		else if (isDynaProperty(propertyName)) {
 			result = values.get(propertyName);
 		}
 		else {
-			Object bean = values.get(DocumentQuery.THIS_ALIAS);
 			if (bean == null) {
 				throw new IllegalArgumentException("Property name does not exist - " + propertyName);
 			}
