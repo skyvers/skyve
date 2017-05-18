@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.List;
+
 import javax.el.MethodExpression;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIOutput;
@@ -41,6 +43,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	/**
@@ -102,6 +105,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent listGrid(String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model, 
+											List<FilterParameter> filterParameters,
 											boolean canCreate,
 											boolean showPaginator,
 											boolean stickyHeader);

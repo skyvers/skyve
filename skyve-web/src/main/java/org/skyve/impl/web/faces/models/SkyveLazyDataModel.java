@@ -20,6 +20,7 @@ import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private static final long serialVersionUID = -2161288261538038204L;
@@ -29,17 +30,20 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	private String documentName;
 	private String queryName;
 	private String modelName;
+	private List<FilterParameter> filterParameters;
 	
 	public SkyveLazyDataModel(FacesView<? extends Bean> view,
 								String moduleName, 
 								String documentName, 
 								String queryName,
-								String modelName) {
+								String modelName,
+								List<FilterParameter> filterParameters) {
 		this.view = view;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.queryName = queryName;
 		this.modelName = modelName;
+		this.filterParameters = filterParameters;
 	}
 	
 	@Override
@@ -53,25 +57,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 		DocumentQueryDefinition query = null;
 		ListModel<Bean> model = null;
 
-/*	TODO parameters	
-		if (parameters != null) {
-			StringBuilder substring = new StringBuilder(32);
-			DocumentFilter documentFilter = documentQuery.getFilter();
-			for (String parameterName : parameters.keySet()) {
-				substring.setLength(0);
-				substring.append('%').append(parameters.get(parameterName)).append('%');
-				documentFilter.addLike(parameterName, substring.toString());
-			}
-		}
-*/
-
 		// model type of request
 		if (modelName != null) {
 			model = CORE.getRepository().getListModel(c, d, modelName);
 			if (model == null) {
 				throw new MetaDataException(modelName + " is not a valid ListModel");
 			}
-			model.setBean(view.getCurrentBean().getBean());
 		}
 		// query type of request
 		else {
@@ -95,10 +86,21 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	        model = queryModel;
 		}
 
+		if (view != null) {
+			BeanMapAdapter<?> currentBean = view.getCurrentBean();
+			if (currentBean != null) {
+				model.setBean(currentBean.getBean());
+			}
+		}
+		
 		model.setStartRow(first);
 		model.setEndRow(first + pageSize);
+		
 		Page page;
 		try {
+			if (filterParameters != null) {
+				model.addFilterParameters(d, filterParameters);
+			}
 			page = model.fetch();
 		}
 		catch (Exception e) {

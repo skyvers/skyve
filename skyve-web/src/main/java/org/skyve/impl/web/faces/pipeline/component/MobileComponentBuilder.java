@@ -32,6 +32,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.web.WebAction;
 
 public class MobileComponentBuilder extends TabularComponentBuilder {
@@ -338,6 +339,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent listGrid(String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									List<FilterParameter> filterParameters,
 									boolean canCreate,
 									boolean showPaginator,
 									boolean stickyHeader) {

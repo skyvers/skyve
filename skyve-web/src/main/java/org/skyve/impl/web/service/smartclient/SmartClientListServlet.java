@@ -27,7 +27,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
@@ -589,7 +588,6 @@ public class SmartClientListServlet extends HttpServlet {
 		}
 	}
     
-	private static final String CHILD_PARENT_NAME_SUFFIX = "." + ChildBean.PARENT_NAME;
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
 	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
@@ -688,7 +686,7 @@ public class SmartClientListServlet extends HttpServlet {
 								filterOperator = transformWildcardFilterOperator(filterOperator);
 	    					}
 	    				}
-		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(CHILD_PARENT_NAME_SUFFIX)) {
+		    			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ListModel.CHILD_PARENT_NAME_SUFFIX)) {
 		    				type = String.class;
 		    				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
 		    			}
@@ -953,7 +951,7 @@ public class SmartClientListServlet extends HttpServlet {
     			}
     		}
     		else if (value != null) {
-    			addEquals(filter, binding, value);
+    			ListModel.addEquals(filter, binding, value);
     		}
     	}
     	else {
@@ -1013,7 +1011,7 @@ public class SmartClientListServlet extends HttpServlet {
 	    		case equals:
 	    		case exact:
 	    			if (value != null) {
-	    				addEquals(filter, binding, value);
+	    				ListModel.addEquals(filter, binding, value);
 	    			}
 	    			break;
 	    		case iEquals:
@@ -1023,7 +1021,7 @@ public class SmartClientListServlet extends HttpServlet {
 	    			break;
 	    		case notEqual:
 	    			if (value != null) {
-	    				addNotEquals(filter, binding, value);
+	    				ListModel.addNotEquals(filter, binding, value);
 	    			}
 	    			break;
 	    		case iNotEqual:
@@ -1033,34 +1031,34 @@ public class SmartClientListServlet extends HttpServlet {
 	    			break;
 	    		case greaterThan:
 	    			if (value != null) {
-	    				addGreaterThan(filter, binding, value);
+	    				ListModel.addGreaterThan(filter, binding, value);
 	    			}
 	    			break;
 	    		case greaterOrEqual:
 	    			if (value != null) {
-	    				addGreaterThanOrEqualTo(filter, binding, value);
+	    				ListModel.addGreaterThanOrEqualTo(filter, binding, value);
 	    			}
 	    			break;
 	    		case lessThan:
 	    			if (value != null) {
-	    				addLessThan(filter, binding, value);
+	    				ListModel.addLessThan(filter, binding, value);
 	    			}
 	    			break;
 	    		case lessOrEqual:
 	    			if (value != null) {
-	    				addLessThanOrEqualTo(filter, binding, value);
+	    				ListModel.addLessThanOrEqualTo(filter, binding, value);
 	    			}
 	    			break;
 	    		case iBetweenInclusive:
 	    		case betweenInclusive:
 	    			if ((start != null) && (end != null)) {
-	    				addBetween(filter, binding, start, end);
+	    				ListModel.addBetween(filter, binding, start, end);
 	    			}
 	    			else if (start != null) {
-	    				addGreaterThanOrEqualTo(filter, binding, start);
+	    				ListModel.addGreaterThanOrEqualTo(filter, binding, start);
 	    			}
 	    			else if (end != null) {
-	    				addLessThanOrEqualTo(filter, binding, end);
+	    				ListModel.addLessThanOrEqualTo(filter, binding, end);
 	    			}
 	    			break;
 	    		case isNull:
@@ -1144,170 +1142,6 @@ public class SmartClientListServlet extends HttpServlet {
     	}
     }
     
-    private static void addEquals(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addEquals(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addEquals(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addEquals(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addEquals(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addEquals(binding, (Decimal) value);
-    	}
-    	else if (value instanceof Boolean) {
-    		filter.addEquals(binding, (Boolean) value);
-    	}
-    	else if (value instanceof Enum) {
-    		filter.addEquals(binding, (Enum<?>) value);
-    	}
-    	else if (value instanceof Geometry) {
-    		filter.addEquals(binding, (Geometry) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addNotEquals(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addNotEquals(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addNotEquals(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addNotEquals(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addNotEquals(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addNotEquals(binding, (Decimal) value);
-    	}
-    	else if (value instanceof Boolean) {
-    		filter.addNotEquals(binding, (Boolean) value);
-    	}
-    	else if (value instanceof Enum) {
-    		filter.addNotEquals(binding, (Enum<?>) value);
-    	}
-    	else if (value instanceof Geometry) {
-    		filter.addNotEquals(binding, (Geometry) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addGreaterThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThan(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThan(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThan(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThan(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThan(binding, (Decimal) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addGreaterThanOrEqualTo(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addGreaterThanOrEqualTo(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addGreaterThanOrEqualTo(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addGreaterThanOrEqualTo(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addGreaterThanOrEqualTo(binding, (Decimal) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addLessThan(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addLessThan(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addLessThan(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThan(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addLessThan(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThan(binding, (Decimal) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
-    	if (value instanceof String) {
-    		filter.addLessThanOrEqualTo(binding, (String) value);
-    	}
-    	else if (value instanceof Date) {
-    		filter.addLessThanOrEqualTo(binding, (Date) value);
-    	}
-    	else if (value instanceof Integer) {
-    		filter.addLessThanOrEqualTo(binding, (Integer) value);
-    	}
-    	else if (value instanceof Long) {
-    		filter.addLessThanOrEqualTo(binding, (Long) value);
-    	}
-    	else if (value instanceof Decimal) {
-    		filter.addLessThanOrEqualTo(binding, (Decimal) value);
-    	}
-    	else {
-    		throw new IllegalArgumentException(value + " is not catered for in filtering");
-    	}
-    }
-    
-    private static void addBetween(Filter filter, String binding, Object start, Object end) {
-    	if (start instanceof String) {
-    		filter.addBetween(binding, (String) start, (String) end);
-    	}
-    	else if (start instanceof Date) {
-    		filter.addBetween(binding, (Date) start, (Date) end);
-    	}
-    	else if (start instanceof Integer) {
-    		filter.addBetween(binding, (Integer) start, (Integer) end);
-    	}
-    	else if (start instanceof Long) {
-    		filter.addBetween(binding, (Long) start, (Long) end);
-    	}
-    	else if (start instanceof Decimal) {
-    		filter.addBetween(binding, (Decimal) start, (Decimal) end);
-    	}
-    	else {
-    		throw new IllegalArgumentException(start + " or " + end + " is not catered for in filtering");
-    	}
-    }
 /*
 	@SuppressWarnings("unchecked")
     private void add(String matrixType, 

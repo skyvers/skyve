@@ -18,6 +18,7 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
@@ -38,8 +39,10 @@ import org.skyve.impl.web.faces.actions.ZoomOutAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 @ViewScoped
 @ManagedBean(name = "skyve")
@@ -240,7 +243,8 @@ public class FacesView<T extends Bean> extends Harness {
 	public SkyveLazyDataModel getModel(String moduleName, 
 										String documentName, 
 										String queryName,
-										String modelName) {
+										String modelName,
+										List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
 			key = String.format("%s.%s", moduleName, queryName);
@@ -256,7 +260,20 @@ public class FacesView<T extends Bean> extends Harness {
 		SkyveLazyDataModel result = models.get(key);
 
 		if (result == null) {
-			result = new SkyveLazyDataModel(this, moduleName, documentName, queryName, modelName);
+			// Collect the filter parameters from the criteria sent
+			List<FilterParameter> filterParameters = null;
+			if (filterCriteria != null) {
+				filterParameters = new ArrayList<>(filterCriteria.size());
+				for (List<String> filterCriterium : filterCriteria) {
+					FilterParameterImpl param = new FilterParameterImpl();
+					param.setName(filterCriterium.get(0));
+					param.setOperator(FilterOperator.valueOf(filterCriterium.get(1)));
+					param.setValue(filterCriterium.get(2));
+					filterParameters.add(param);
+				}
+			}
+			
+			result = new SkyveLazyDataModel(this, moduleName, documentName, queryName, modelName, filterParameters);
 			models.put(key, result);
 		}
  		

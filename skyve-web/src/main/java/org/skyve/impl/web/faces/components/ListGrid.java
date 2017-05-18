@@ -88,6 +88,7 @@ public class ListGrid extends HtmlPanelGroup {
 				    UIComponent grid = componentBuilder.listGrid(documentName, 
 				    												name, 
 				    												model, 
+				    												null,
 				    												canCreate, 
 				    												paginator, 
 				    												true);

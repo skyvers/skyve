@@ -91,6 +91,7 @@ import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder.TargetMetaData;
@@ -376,6 +377,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent listGrid(String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
+									List<FilterParameter> filterParameters,
 									boolean canCreate,
 									boolean showPaginator,
 									boolean stickyHeader) {
@@ -407,28 +409,38 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		ajax.setOnstart(start.toString());
         result.addClientBehavior("rowSelect", ajax);
 
-// TEMPORARY STUFF BELOW - uncomment one day when list models are introduced.
-/*
-        StringBuilder value = new StringBuilder(128);
-        value.append("#{").append(managedBeanName).append(".getBeans('").append(moduleName).append("', '");
-        value.append(query.getName()).append("', null)}");
-        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), List.class));
-*/
-/* Temporarily commented out but should be reinstated when we use the list model.
-*/
-        String value = (model instanceof DocumentQueryListModel) ?
-    						String.format("#{%s.getModel('%s','%s','%s',null)}", 
-    										managedBeanName, 
-    										moduleName, 
-    										drivingDocumentName,
-    										modelName) : 
-							String.format("#{%s.getModel('%s','%s',null,'%s')}", 
-    										managedBeanName, 
-    										moduleName, 
-    										modelDocumentName, 
-    										modelName);
-        result.setValueExpression("value", ef.createValueExpression(elc, value, SkyveLazyDataModel.class));
-/**/
+        // Write out getModel call as the value
+        StringBuilder value = new StringBuilder(64);
+		value.append("#{").append(managedBeanName).append(".getModel('").append(moduleName).append("','");
+		if (model instanceof DocumentQueryListModel) {
+			value.append(drivingDocumentName).append("','").append(modelName).append("',null,");
+		}
+		else {
+			value.append(modelDocumentName).append("',null,'").append(modelName).append("',");
+		}
+
+		// Add filter parameters to getModel call
+		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
+			value.append('[');
+			for (FilterParameter param : filterParameters) {
+				value.append("['").append(param.getName()).append("','");
+				value.append(param.getOperator()).append("','");
+				String binding = param.getBinding();
+				if (binding != null) {
+					value.append('{').append(binding).append("}'],");
+				}
+				else {
+					value.append(param.getValue()).append("'],");
+				}
+			}
+			value.setLength(value.length() - 1); // remove last comma
+			value.append("])}");
+		}
+		else {
+			value.append("null)}");
+		}
+		
+		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
 
         addListGridHeader(model, result);
         List<UIComponent> children = result.getChildren();

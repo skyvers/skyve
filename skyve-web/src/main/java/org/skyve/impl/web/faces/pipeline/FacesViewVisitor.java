@@ -852,8 +852,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			modelName = queryName;
 	        model = queryModel;
 		}
-		
-		UIComponent l = cb.listGrid(modelDocumentName, modelName, model, true, true, false);
+		UIComponent l = cb.listGrid(modelDocumentName, modelName, model, grid.getParameters(), true, true, false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 	}
