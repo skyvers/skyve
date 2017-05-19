@@ -40,6 +40,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 
 		setInvisible(result, invisibleConditionName, null);
 		setId(result);
+		result.setStyleClass("ui-g-12");
 		return result;
 	}
 
