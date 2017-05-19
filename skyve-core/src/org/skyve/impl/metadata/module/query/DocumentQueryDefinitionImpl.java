@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.PolymorphicPersistentBean;
@@ -386,6 +387,21 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 					else if (filterExpression.equals(DATETIME_EXPRESSION)) {
 						operand = new DateTime();
 					}
+					else if (filterExpression.startsWith("{") && filterExpression.endsWith("}")) {
+						// Remove '{' and '}'
+						String key = filterExpression.substring(1, filterExpression.length() - 1);
+						Map<String, Object> stash = CORE.getStash();
+						if (stash.containsKey(key)) {
+							operand = stash.get(key);
+						}
+						else {
+							operand = user.getAttributes().get(key);
+						}
+						// If there is no operand to filter on, don't add a filter criteria
+						if (operand == null) {
+							continue;
+						}
+					}
 					else {
 						try {
 							Converter<?> converter = ((attribute instanceof ConvertableField) ? 
@@ -572,6 +588,29 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			parametersToAddTo.put(paramName, new DateTime());
 		}
 		
+		int openCurlyIndex = result.indexOf("{");
+		int closedCurlyIndex = result.indexOf("}", openCurlyIndex);
+		while ((openCurlyIndex > -1) && (closedCurlyIndex > -1)) { // have a match
+			// Check to see we haven't detected a {module.Document} expression
+			int dotIndex = result.indexOf(".", openCurlyIndex);
+			if ((dotIndex < openCurlyIndex) || (dotIndex > closedCurlyIndex)) {
+				String key = result.substring(openCurlyIndex + 1, closedCurlyIndex);
+				Object value = null;
+				Map<String, Object> stash = CORE.getStash();
+				if (stash.containsKey(key)) {
+					value = stash.get(key);
+				}
+				else {
+					value = user.getAttributes().get(key);
+				}
+				String paramName = "stashedParam" + paramIndex++;
+				result = result.replace(openCurlyIndex, closedCurlyIndex + 1, ":" + paramName);
+				parametersToAddTo.put(paramName, value);
+			}
+
+			openCurlyIndex = result.indexOf("{", closedCurlyIndex);
+			closedCurlyIndex = result.indexOf("}", openCurlyIndex);
+		}
 		return result.toString();
 	}
 }

@@ -69,5 +69,24 @@
 				<column binding="text" />
 			</columns>
 		</documentQuery>
+		<documentQuery name="qMetaDataQueryColumnBinding" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<columns>
+				<column binding="text">
+					<filterOperator>equal</filterOperator>
+					<filterExpression>{TEST}</filterExpression>
+				</column>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qMetaDataQueryFromAndFilterBinding" documentName="MappedSubclassedSingleStrategy">
+			<description>Test MappedSubclassedSingleStrategy Document</description>
+			<from>{test.MappedSubclassedSingleStrategy} as bean</from>
+			<filter>
+				bean.text = {TEST}
+			</filter>
+			<columns>
+				<column binding="text" />
+			</columns>
+		</documentQuery>
 	</queries>
 </module>

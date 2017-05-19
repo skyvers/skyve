@@ -2,9 +2,13 @@ package modules.test;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.CORE;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.Util;
+
+import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class DocumentQueryTest extends AbstractH2Test {
 	@Test
@@ -135,5 +139,63 @@ public class DocumentQueryTest extends AbstractH2Test {
 	@Test
 	public void testAggregateMSSSNotPolymorphic() {
 		Assert.assertFalse((((AbstractQuery) m.getDocumentQuery("qMSSS").constructDocumentQuery(AggregateFunction.Count, null)).toQueryString().contains("bean as bean")));
+	}
+	
+	@Test
+	public void testQueryColumnBindingToNeither() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test = p.save(test);
+
+		// If binding evaluates to null, then no filter criteria is added
+		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+	}
+
+	@Test
+	public void testQueryColumnBindingToStash() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test.setText("ICAL");
+		test = p.save(test);
+
+		CORE.getStash().put("TEST", "ICAL");
+		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+	}
+
+	@Test
+	public void testQueryColumnBindingToUserAttributes() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test.setText("ICAL");
+		test = p.save(test);
+
+		CORE.getUser().getAttributes().put("TEST", "ICAL");
+		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryColumnBinding").constructDocumentQuery(null, null).projectedResults().size());
+	}
+	
+	@Test
+	public void testQueryFromAndFilterBindingToNeither() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test = p.save(test);
+
+		// If binding evaluates to null, null is bound to a query parameter
+		Assert.assertEquals(0, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null).projectedResults().size());
+	}
+
+	@Test
+	public void testQueryFromAndFilterBindingToStash() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test.setText("ICAL");
+		test = p.save(test);
+
+		CORE.getStash().put("TEST", "ICAL");
+		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null).projectedResults().size());
+	}
+
+	@Test
+	public void testQueryFromAndFilterBindingToUserAttributes() throws Exception {
+		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 1);
+		test.setText("ICAL");
+		test = p.save(test);
+
+		CORE.getUser().getAttributes().put("TEST", "ICAL");
+		Assert.assertEquals(1, m.getDocumentQuery("qMetaDataQueryFromAndFilterBinding").constructDocumentQuery(null, null).projectedResults().size());
 	}
 }
