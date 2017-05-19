@@ -227,7 +227,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return dataTable(grid.getBinding(),
 							grid.getTitle(),
 							grid.getInvisibleConditionName(),
-							Boolean.TRUE.equals(grid.getInline()));
+							((! Boolean.TRUE.equals(grid.getInline())) && 
+								(! Boolean.FALSE.equals(grid.getShowZoom())) &&
+								(! Boolean.FALSE.equals(grid.getEditable()))));
 	}
 	
 	@Override
@@ -1607,7 +1609,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private DataTable dataTable(String binding, 
 									String title, 
 									String invisible, 
-									boolean inline) {
+									boolean clickToZoom) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result);
 		setInvisible(result, invisible, null);
@@ -1616,7 +1618,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setVar(binding.replace('.',  '_'));
 		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
 
-		if (! inline) {
+		if (clickToZoom) {
 			String id = result.getId();
 			result.setWidgetVar(id);
 			result.setSelectionMode("single");
