@@ -888,7 +888,7 @@ joined tables
 						else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 							fw.append(",merge");
 						}
-						fw.append("\" />\n");
+						fw.append("\">\n");
 					}
 					else if (type == CollectionType.composition) {
 						fw.append("\" cascade=\"all-delete-orphan\">\n");
