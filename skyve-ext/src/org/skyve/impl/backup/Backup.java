@@ -267,7 +267,10 @@ public class Backup {
 																	fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
 																}
 																else {
+																	// remove the path
 																	fileName = FilenameUtils.getName(fileName);
+																	// remove any invalid chars on all OSs (restricted by windows)
+																	fileName = fileName.replaceAll("[\u0001-\u001f<>:\"/\\\\|?*\u007f]+", "").trim();
 																}
 																try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
 																													File.separator + fileName)) {
