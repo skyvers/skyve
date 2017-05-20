@@ -292,7 +292,12 @@ input[type=submit] {
 	font-weight: normal
 }
 
-/* Primefaces style overrides */
+/* PrimeFaces style overrides */
 .ui-growl {
 	z-index: 2147483647 !important;
+}
+
+/* SmartClient style overrides */
+.textItemDisabled, .selectItemTextDisabled {
+    color: #898989 !important;
 }

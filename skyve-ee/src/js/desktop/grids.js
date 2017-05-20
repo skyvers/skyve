@@ -422,58 +422,84 @@ isc.BizListGrid.addMethods({
 				me.refresh();
 			}
 		};
-		var refreshItem = {title: "Refresh", 
-							icon: "../images/icons/refresh.png",
-							click: function() {
-								me.refresh();
-							}};
-		var exportItem = {title: "Export Data...", 
-							icon: "../images/icons/export.png",
-							click: function() {
-								// Make the selected and unselected field lists
-								var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
-								var unselectedFields = [{name: "bizFlagComment", title: 'Flag', line: 1, width: 100}];
-								var selectedFields = [];
-								// fieldNames[0] is bizTagged
-								// fieldNames[1] is "bizFlagComment"
-								var fieldState = me.getFieldState();
-								for (var i = 0, l = fieldNames.length; i < l; i++) {
-									var fieldName = fieldNames[i];
-									if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
-										var field = me._dataSource.getField(fieldName);
-										var dataGridField = me.grid.getField(fieldName);
-										var align = dataGridField ? dataGridField.align : "center";
-										if (fieldState[i] && 
-											((fieldState[i].visible === undefined) ||
-												(fieldState[i].visible == null) ||
-												(fieldState[i].visible))) {
-											selectedFields.add({name: fieldName,
-																	title: field.title,
-																	line: 1,
-																	width: fieldState[i].width,
-																	align: align});
-										}
-										else {
-											unselectedFields.add({name: fieldName,
-																	title: field.title,
-																	line: 1,
-																	width: 100,
-																	align: align});
-										}
-									}
-								}
-								
-								// Put the filter parameters into this call also
-								var allCriteria = getAllCriteria();
+		var refreshItem = {
+			title: "Refresh", 
+			icon: "../images/icons/refresh.png",
+			click: function() {
+				me.refresh();
+			}
+		};
 
-								// Make the call
-								isc.ReportDialog.popupExport(me._dataSource.ID,
-																me._view ? me._view.gather(false)._c : null,
-																allCriteria,
-																me.tagId,
-																unselectedFields, 
-																selectedFields);
-							}
+		var exportData = function() {
+			// Make the selected and unselected field lists
+			var fieldNames = me._dataSource.getFieldNames(true); // no hidden fields
+			var unselectedFields = [{name: "bizFlagComment", title: 'Flag', line: 1, width: 100}];
+			var selectedFields = [];
+			// fieldNames[0] is bizTagged
+			// fieldNames[1] is "bizFlagComment"
+			var fieldState = me.getFieldState();
+			for (var i = 0, l = fieldNames.length; i < l; i++) {
+				var fieldName = fieldNames[i];
+				if ((fieldName != 'bizTagged') && (fieldName != 'bizFlagComment')) {
+					var field = me._dataSource.getField(fieldName);
+					var dataGridField = me.grid.getField(fieldName);
+					var align = dataGridField ? dataGridField.align : "center";
+					if (fieldState[i] && 
+						((fieldState[i].visible === undefined) ||
+							(fieldState[i].visible == null) ||
+							(fieldState[i].visible))) {
+						selectedFields.add({name: fieldName,
+												title: field.title,
+												line: 1,
+												width: fieldState[i].width,
+												align: align});
+					}
+					else {
+						unselectedFields.add({name: fieldName,
+												title: field.title,
+												line: 1,
+												width: 100,
+												align: align});
+					}
+				}
+			}
+			
+			// Put the filter parameters into this call also
+			var allCriteria = getAllCriteria();
+
+			// Make the call
+			isc.ReportDialog.popupExport(me._dataSource.ID,
+											me._view ? me._view.gather(false)._c : null,
+											allCriteria,
+											me.tagId,
+											unselectedFields, 
+											selectedFields);
+		};
+		var exportItem = {
+			title: "Export Data...", 
+			icon: "../images/icons/export.png",
+			click: function() {
+				var count = me.grid.getTotalRows();
+				if (count > 10000) {
+					isc.ask('There are ' + count + ' rows in this list to export which could take more than 1 minute!  Do you want to continue?',
+								function(value) {
+									if (value) {
+										exportData();
+									}
+								});
+				}
+				else if (count > 1000) {
+					isc.ask('There are ' + count + ' rows to export which may take a few seconds.  Do you want to continue?',
+								function(value) {
+									if (value) {
+										exportData();
+									}
+								});
+				}
+				else {
+					exportData();
+				}
+			}
         };
 /*
 		var printItem = {title: "Print", 

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.usertype.UserType;
 import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
@@ -264,6 +265,9 @@ public class Backup {
 																String fileName = content.getFileName();
 																if (fileName == null) {
 																	fileName = "attachment." + content.getMimeType().getStandardFileSuffix();
+																}
+																else {
+																	fileName = FilenameUtils.getName(fileName);
 																}
 																try (FileOutputStream cos = new FileOutputStream(contentDirectory.getAbsolutePath() +
 																													File.separator + fileName)) {

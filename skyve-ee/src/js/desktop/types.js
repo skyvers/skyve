@@ -1264,7 +1264,11 @@ isc.BizContentImageItem.addMethods({
 			width: (config.width ? config.width : '100%'),
 			height: (config.height ? config.height : '100%'),
 			imageType: 'center',
-			showEdges: true,
+			isGroup: true,
+			styleName: 'bizhubRoundedBorder',
+			groupBorderCSS: '1px solid #bfbfbf',
+			margin: 1,
+			groupLabelBackgroundColor:'transparent',
 			showDisabled: false,
 		    src: "[SKIN]blank.gif"
 		});
@@ -1690,7 +1694,11 @@ isc.BizHTMLItem.addMethods({
 		this._pane = isc.HTMLPane.create({
 			width: config.width,
 			height: config.height,
-			showEdges: true,
+			isGroup: true,
+			styleName: 'bizhubRoundedBorder',
+			groupBorderCSS: '1px solid #bfbfbf',
+			margin: 1,
+			groupLabelBackgroundColor:'transparent',
 		    contents: 'Empty'
 		});
 		

@@ -13,6 +13,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
@@ -159,7 +160,7 @@ public class FileUpload extends Localisable {
 			}
 			try{
 				UploadAction.UploadedFile bizFile = 
-						new UploadAction.UploadedFile(file.getFileName(),
+						new UploadAction.UploadedFile(FilenameUtils.getName(file.getFileName()),
 														file.getInputstream(),
 														mimeType);
 				boolean vetoed = customer.interceptBeforeUploadAction(document, action, bean, bizFile, webContext);

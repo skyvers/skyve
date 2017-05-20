@@ -9,6 +9,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
@@ -131,7 +132,7 @@ public class ContentUpload extends Localisable {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
 
-			String fileName = file.getFileName();
+			String fileName = FilenameUtils.getName(file.getFileName());
 			String customerName = customer.getName();
 			Bean contentOwner = bean;
 			String contentAttributeName = contentBinding;
