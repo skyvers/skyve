@@ -1699,6 +1699,7 @@ isc.BizHTMLItem.addMethods({
 			groupBorderCSS: '1px solid #bfbfbf',
 			margin: 1,
 			groupLabelBackgroundColor:'transparent',
+			padding: 10,
 		    contents: 'Empty'
 		});
 		
