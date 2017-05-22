@@ -13,11 +13,7 @@ import org.skyve.util.StateUtil;
 import org.skyve.util.Util;
 
 /**
-<<<<<<< HEAD
  * This class is used to expose the content server via JDBC to another skyve server.
-=======
- * This class is used to expose the content server via JDBC to another bizhub server.
->>>>>>> branch 'master' of https://github.com/skyvers/skyve.git
  * To use this, the contentManager property of the factories property 
  * in the JSON file should be set to this class name and a "CONTENT" data store should be defined
  * as a local in-memory database.
