@@ -1,9 +1,12 @@
 package org.skyve.content;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SearchResults {
+public final class SearchResults implements Serializable {
+	private static final long serialVersionUID = -3737028074877187674L;
+
 	private String searchTimeInSecs;
 	private String suggestion;
 

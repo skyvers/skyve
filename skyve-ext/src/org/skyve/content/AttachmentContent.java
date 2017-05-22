@@ -3,6 +3,8 @@ package org.skyve.content;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InvalidObjectException;
+import java.io.ObjectStreamException;
 import java.util.Date;
 
 import org.skyve.content.MimeType;
@@ -16,7 +18,7 @@ public class AttachmentContent extends Content {
 	private String fileName;
 	private MimeType mimeType = MimeType.plain;
 	protected Date lastModified;
-	private InputStream stream;
+	private transient InputStream stream;
 	private byte[] bytes;
 
 	private AttachmentContent(String bizCustomer, 
@@ -174,5 +176,25 @@ public class AttachmentContent extends Content {
 		}
 		
 		return bytes;
+	}
+	
+	/**
+	 * Ensure that a stream is converted to a self contained byte[] before serializing.
+	 * 
+	 * @return this
+	 * @throws ObjectStreamException
+	 */
+	private Object writeReplace() throws ObjectStreamException {
+		if (stream != null) {
+			try {
+				getContentBytes();
+				stream = null;
+			} 
+			catch (IOException e) {
+				e.printStackTrace();
+				throw new InvalidObjectException(e.getLocalizedMessage());
+			}
+		}
+		return this;
 	}
 }

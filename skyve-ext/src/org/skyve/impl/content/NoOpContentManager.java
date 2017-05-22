@@ -12,11 +12,6 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 
 	@Override
-	public void put(AttachmentContent content) throws Exception {
-		// no-op
-	}
-
-	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
 		// no-op
 	}
