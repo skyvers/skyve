@@ -14,7 +14,11 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.StateUtil;
 
 /**
+<<<<<<< HEAD
  * This class is used to talk to another skyve server's content server via JDBC.
+=======
+ * This class is used to talk to another bizhub server's content server via JDBC.
+>>>>>>> branch 'master' of https://github.com/skyvers/skyve.git
  * To use this, the contentManager property of the factories property 
  * in the JSON file should be set to this class name and a "CONTENT" data store should be defined
  * as an in-memory database.
