@@ -154,12 +154,6 @@ public class ESClient extends AbstractContentManager {
 	}
 	
 	@Override
-	public void put(AttachmentContent attachment) 
-	throws Exception {
-		put(attachment, true);
-	}
-	
-	@Override
 	public void put(AttachmentContent attachment, boolean index)
 	throws Exception {
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {

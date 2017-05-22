@@ -1,5 +1,6 @@
 package org.skyve.impl.content;
 
+import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -24,6 +25,12 @@ public abstract class AbstractContentManager implements ContentManager {
 	
 	public abstract void init() throws Exception;
 	public abstract void dispose() throws Exception;
+	
+	@Override
+	public final void put(AttachmentContent attachment) 
+	throws Exception {
+		put(attachment, true);
+	}
 	
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.

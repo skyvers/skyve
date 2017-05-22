@@ -1,8 +1,11 @@
 package org.skyve.content;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public final class SearchResult {
+public final class SearchResult implements Serializable {
+	private static final long serialVersionUID = -5096781261044743153L;
+
 	private String contentId;
 	private String excerpt;
 	private int score;
