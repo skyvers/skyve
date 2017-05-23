@@ -37,7 +37,7 @@ import org.skyve.util.StateUtil;
  *
  * ds-xml URL
  * 
- * 		<connection-url>jdbc:h2:tcp://&lt;server-name&gt;/mem:content;IFEXISTS=TRUE;IGNORECASE=TRUE;DB_CLOSE_DELAY=-1</connection-url>
+ * 		<connection-url>jdbc:h2:tcp://&lt;server-name&gt;/mem:content;IGNORECASE=TRUE;DB_CLOSE_DELAY=-1</connection-url>
  * 		...
  *		<validation>
  *			<check-valid-connection-sql>select 1</check-valid-connection-sql>
