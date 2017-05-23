@@ -38,7 +38,14 @@ import org.skyve.util.StateUtil;
  * ds-xml URL
  * 
  * 		<connection-url>jdbc:h2:tcp://&lt;server-name&gt;/mem:content;IFEXISTS=TRUE;IGNORECASE=TRUE;DB_CLOSE_DELAY=-1</connection-url>
- * 
+ * 		...
+ *		<validation>
+ *			<check-valid-connection-sql>select 1</check-valid-connection-sql>
+ *			<validate-on-match>true</validate-on-match>
+ *			<background-validation>false</background-validation>
+ *			<background-validation-millis>0</background-validation-millis>
+ *		</validation>
+ *
  * @author mike
  */
 public class JDBCRemoteContentManagerClient extends AbstractContentManager {
@@ -70,10 +77,13 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	@Override
 	public void put(AttachmentContent content, boolean index) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME))) {
-			try (CallableStatement s = c.prepareCall(String.format("CALL %s(?,?)", JDBCRemoteContentManagerServer.PUT_ATTACHMENT_FUNCTION_NAME))) {
-				s.setString(1, StateUtil.encode64(content));
-				s.setBoolean(2, index);
+			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteContentManagerServer.PUT_ATTACHMENT_FUNCTION_NAME))) {
+				s.registerOutParameter(1, Types.VARCHAR);
+				s.setString(2, StateUtil.encode64(content));
+				s.setBoolean(3, index);
 				s.execute();
+				
+				content.setContentId(s.getString(1));
 			}
 		}
 	}
@@ -88,7 +98,10 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 				s.setString(2, id);
 				s.execute();
 				
-				result = StateUtil.decode64(s.getString(1));
+				String payload = s.getString(1);
+				if (payload != null) {
+					result = StateUtil.decode64(payload);
+				}
 			}
 		}
 		

@@ -3,6 +3,7 @@ package org.skyve.impl.content.jdbc;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 
+import org.h2.tools.Server;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
@@ -48,11 +49,16 @@ public class JDBCRemoteContentManagerServer extends ESClient {
 	static final String REMOVE_BEAN_FUNCTION_NAME = "REMOVE_BEAN";
 	static final String REMOVE_ATTACHMENT_FUNCTION_NAME = "REMOVE_ATTACHMENT";
 	static final String GOOGLE_SEARCH_FUNCTION_NAME = "GOOGLE_SEARCH";
-	
+
+	private static Server server = null;
+
 	@Override
 	public void init() throws Exception {
 		super.init();
 
+		// Start TCP server
+		server = Server.createTcpServer("-tcpPort", "9092", "-tcpAllowOthers", "-ifExists").start();
+		
 		// register the database functions
 		Util.LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(CONTENT_DATA_STORE_NAME))) {
@@ -119,6 +125,10 @@ public class JDBCRemoteContentManagerServer extends ESClient {
 		super.dispose();
 
 		// close the database if it wont automatically close
+		if (server != null) {
+			server.stop();
+			server = null;
+		}
 	}
 
 	/*
@@ -131,9 +141,18 @@ public class JDBCRemoteContentManagerServer extends ESClient {
 		}
 	}
 	
-	public static void putAttachment(String content, boolean index) throws Exception {
+	/**
+	 * 
+	 * @param content The base64 serialized versions of the AttachmentContent to put.
+	 * @param index	whether to index of not
+	 * @return	The contentId.
+	 * @throws Exception
+	 */
+	public static String putAttachment(String content, boolean index) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
-			cm.put((AttachmentContent) StateUtil.decode64(content), index);
+			AttachmentContent attachment = (AttachmentContent) StateUtil.decode64(content);
+			cm.put(attachment, index);
+			return attachment.getContentId();
 		}
 	}
 
