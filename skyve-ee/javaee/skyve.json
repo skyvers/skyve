@@ -20,7 +20,8 @@
 		// bizlet callbacks
 		bizlet: false, 
 		// mutations in domain objects
-		dirty: false},
+		dirty: false
+	},
 	// Content settings
 	content: {
 		// directory path
@@ -28,7 +29,8 @@
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		gcCron: "0 7 0/1 1/1 * ? *", 
 		// Attachments stored on file system or inline
-		fileStorage: true},
+		fileStorage: true
+	},
 	// URL settings - various SKYVE URL/URI fragments - useful for linking and mailing
 	url: {
 		// server URL
@@ -36,21 +38,25 @@
 		// web context path
 		context: "/skyve", 
 		// home path
-		home: "/"},
+		home: "/"
+	},
 	// Conversation cache settings
 	conversations: {
 		// Max conversations allowed in memory before being spooled to disk
 		maxInMemory: 1000, 
 		// Number of seconds to wait until evicting a conversation from the cache
-		evictionTimeMinutes: 60},
+		evictionTimeMinutes: 60
+	},
 	// Datastore definitions
 	dataStores: {
-		// Managed Data data store
+		// Skyve data store
 		"skyve": {
 			// JNDI name
 			jndi: "java:/H2Demo", 
 			// Dialect
-			dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect"}},
+			dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect"
+		}
+	},
 	// Hibernate settings
 	hibernate: {
 		// Datastore hibernate uses
@@ -58,7 +64,8 @@
 		// Issue DDL on startup to synchronise the database schema
 		ddlSync: true, 
 		// Format the SQL statements when logged
-		prettySql: false},
+		prettySql: false
+	},
 	// Factory settings
 	factories: {
 		// Skyve persistence class
@@ -66,7 +73,8 @@
 		// Skyve repository class
 		repositoryClass: null,
 		// Skyve content manager class
-		contentManagerClass: null},
+		contentManagerClass: null
+	},
 	// SMTP Settings
 	smtp: {
 		// Mail Server URL
@@ -82,14 +90,23 @@
 		// Set true so emails are never sent, they are logged
 		testBogusSend: false, 
 		// Test Recipient (all emails only sent to this email address)
-		testRecipient: "mike.sands@bizhub.com.au"},
+		testRecipient: "mike.sands@bizhub.com.au"
+	},
 	// API Settings
 	api: {
 		googleMapsV3Key: "AIzaSyDcDHNxHUVAF-CMqvI0TIAPlye9g4Wr4Dg"
 	},
-	// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
-	devMode: true,
-	// Customer Default
-	customer: null,
-	// Password hashing algorithm - usually MD5 (obsolete) or SHA1 etc
-	passwordHashingAlgorithm: "SHA1"}
+	// Environment settings
+	environment: {
+		// test, sit, uat, dev etc: null = prod
+		identifier: null,
+		// Dev Mode does not cache the view metadata allowing the effects of view changes to be observed without redeploying
+		devMode: true,
+		// Customer Default
+		customer: null,
+		// Run the jobs scheduled in the data store or not - set false for slave skyve instances
+		jobScheduler: true,
+		// Password hashing algorithm - usually MD5 (obsolete) or SHA1 etc
+		passwordHashingAlgorithm: "SHA1"
+	}
+}

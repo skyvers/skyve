@@ -97,6 +97,7 @@ public class SkyveContextListener implements ServletContextListener {
 			testFile.delete();
 		}
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
+		UtilImpl.CONTENT_SERVER_ARGS = getString("content", "serverArgs", content, false);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean("content", "fileStorage", content);
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
@@ -201,10 +202,13 @@ public class SkyveContextListener implements ServletContextListener {
 			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
 		}
 
-		UtilImpl.DEV_MODE = getBoolean(null, "devMode", properties);
-		UtilImpl.CUSTOMER = getString(null, "customer", properties, false);
-		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString(null, "passwordHashingAlgorithm", properties, true);
-		UtilImpl.APPS_JAR_DIRECTORY = getString(null, "appsJarDirectory", properties, false);
+		Map<String, Object> environment = getObject(null, "environment", properties);
+		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
+		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
+		UtilImpl.CUSTOMER = getString("environment", "customer", environment, false);
+		UtilImpl.JOB_SCHEDULER = getBoolean("environment", "jobScheduler", environment);
+		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString("environment", "passwordHashingAlgorithm", environment, true);
+		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);
 
 		Map<String, Object> api = getObject(null, "api", properties);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);

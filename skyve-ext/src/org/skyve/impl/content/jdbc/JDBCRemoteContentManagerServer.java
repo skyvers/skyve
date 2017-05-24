@@ -21,18 +21,27 @@ import org.skyve.util.Util;
  * 
  *  JSON
  *  		...
+ *			// Content settings
+ *			content: {
+ *				// The arguments to send to the TCP server when running the content manager in server mode.
+ *				serverArgs: "-tcpPort 9092 -tcpAllowOthers -ifExists"
+ *			}
+ *			...
  *			// Factory settings
  *			factories: {
  *			...
- *			// Skyve content manager class
- *			contentManagerClass: "org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer"},
+ *				// Skyve content manager class
+ *				contentManagerClass: "org.skyve.impl.content.jdbc.JDBCRemoteContentManagerServer"},
  *
  *			...
- *  		"CONTENT": {
- *				// JNDI name
- *				jndi: "java:/&lt;blahblah&gt;", 
- *				// Dialect
- *				dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect"}
+ *			// Datastore definitions
+ *			dataStores: {
+ *			...
+ *				"CONTENT": {
+ *					// JNDI name
+ *					jndi: "java:/&lt;blahblah&gt;", 
+ *					// Dialect
+ *					dialect: "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect"}
  *			...
  *
  * ds-xml URL
@@ -57,7 +66,11 @@ public class JDBCRemoteContentManagerServer extends ESClient {
 		super.init();
 
 		// Start TCP server
-		server = Server.createTcpServer("-tcpPort", "9092", "-tcpAllowOthers", "-ifExists").start();
+		if (UtilImpl.CONTENT_SERVER_ARGS == null) {
+			throw new IllegalStateException("JDBCRemoteContentManagerServer is configured for the contentManager in the factories section of the json config but there are no server arguments defined in the content section.");
+		}
+
+		server = Server.createTcpServer(UtilImpl.CONTENT_SERVER_ARGS.split("\\s+")).start();
 		
 		// register the database functions
 		Util.LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");

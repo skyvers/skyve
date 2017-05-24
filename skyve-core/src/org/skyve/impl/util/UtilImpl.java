@@ -79,6 +79,9 @@ public class UtilImpl {
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
 	
+	// The arguments to send to the TCP server when running the content management in server mode.
+	public static String CONTENT_SERVER_ARGS = null;
+	
 	// This is set in web.xml and should only be used when the APP server in use
 	// doesn't allow us to get the absolute path of a resource - jboss 4.0.5.GA, WebLogic or any zipped deployment
 	public static String APPS_JAR_DIRECTORY;
@@ -132,6 +135,12 @@ public class UtilImpl {
 
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
+	
+	// null = prod, could be dev, test, uat or another arbitrary environment
+	public static String ENVIRONMENT_IDENTIFIER = null;
+	
+	// Should scheduled jobs be manipulated by the database.
+	public static boolean JOB_SCHEDULER = true;
 	
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 

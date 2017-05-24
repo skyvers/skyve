@@ -51,19 +51,21 @@ public class JobScheduler {
 		}
 		
 		try {
-			// Add metadata jobs
-			AbstractRepository repository = AbstractRepository.get();
-			for (String moduleName : repository.getAllVanillaModuleNames()) {
-				Module module = repository.getModule(null, moduleName);
-				addJobs(module);
+			if (UtilImpl.JOB_SCHEDULER) {
+				// Add metadata jobs
+				AbstractRepository repository = AbstractRepository.get();
+				for (String moduleName : repository.getAllVanillaModuleNames()) {
+					Module module = repository.getModule(null, moduleName);
+					addJobs(module);
+				}
+	
+				// Add triggers
+				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers();
+				for (Bean jobSchedule : jobSchedules) {
+					scheduleJob(jobSchedule, (User) BindUtil.get(jobSchedule, "user"));
+				}
 			}
-
-			// Add triggers
-			List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers();
-			for (Bean jobSchedule : jobSchedules) {
-				scheduleJob(jobSchedule, (User) BindUtil.get(jobSchedule, "user"));
-			}
-
+			
 			scheduleInternalJobs();
 		}
 		catch (Exception e) {
@@ -136,12 +138,14 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user)
 	throws Exception {
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-		trigger.setGroup(user.getCustomer().getName());
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
-		scheduleJob(job, parameter, user, trigger, null);
+		if (UtilImpl.JOB_SCHEDULER) {
+			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+			trigger.setGroup(user.getCustomer().getName());
+			trigger.setJobGroup(job.getOwningModuleName());
+			trigger.setJobName(job.getName());
+	
+			scheduleJob(job, parameter, user, trigger, null);
+		}
 	}
 
 	/**
@@ -155,12 +159,14 @@ public class JobScheduler {
 	 */
 	public static void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds)
 	throws Exception {
-		Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
-		trigger.setGroup(user.getCustomer().getName());
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
-		scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
+		if (UtilImpl.JOB_SCHEDULER) {
+			Trigger trigger = TriggerUtils.makeImmediateTrigger(UUID.randomUUID().toString(), 0, 0);
+			trigger.setGroup(user.getCustomer().getName());
+			trigger.setJobGroup(job.getOwningModuleName());
+			trigger.setJobName(job.getName());
+	
+			scheduleJob(job, parameter, user, trigger, new Integer(sleepAtEndInSeconds));
+		}
 	}
 	
 	/**
@@ -177,15 +183,21 @@ public class JobScheduler {
 	 */
 	public static void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when)
 	throws Exception {
-		SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
-		trigger.setJobGroup(job.getOwningModuleName());
-		trigger.setJobName(job.getName());
-
-		scheduleJob(job, parameter, user, trigger, null);
+		if (UtilImpl.JOB_SCHEDULER) {
+			SimpleTrigger trigger = new SimpleTrigger(UUID.randomUUID().toString(), user.getCustomer().getName(), when);
+			trigger.setJobGroup(job.getOwningModuleName());
+			trigger.setJobName(job.getName());
+	
+			scheduleJob(job, parameter, user, trigger, null);
+		}
 	}
 	
 	public static void scheduleJob(Bean jobSchedule, User user)
 	throws Exception {
+		if (! UtilImpl.JOB_SCHEDULER) {
+			return;
+		}
+		
 		String bizId = (String) BindUtil.get(jobSchedule, Bean.DOCUMENT_ID);
 		String jobName = (String) BindUtil.get(jobSchedule, "jobName");
 		
@@ -276,7 +288,9 @@ public class JobScheduler {
 
 	public static void unscheduleJob(Bean jobSchedule, Customer customer)
 	throws Exception {
-		JOB_SCHEDULER.unscheduleJob(jobSchedule.getBizId(), customer.getName());
+		if (UtilImpl.JOB_SCHEDULER) {
+			JOB_SCHEDULER.unscheduleJob(jobSchedule.getBizId(), customer.getName());
+		}
 	}
 
 	public static List<JobDescription> getCustomerRunningJobs()
