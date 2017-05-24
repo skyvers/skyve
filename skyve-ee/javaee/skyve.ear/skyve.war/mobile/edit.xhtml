@@ -21,9 +21,7 @@
 		</f:metadata>
 		<s:conversation managedBean="skyve" />
 		<ui:composition template="./template.xhtml">
-			<ui:param name="baseHref" value="#{skyve.baseHref}" />
-			<ui:param name="skyveVersionComment" value="#{skyve.skyveVersionComment}" />
-			<ui:param name="javascriptFileVersion" value="#{skyve.javascriptFileVersion}" />
+			<ui:param name="bean" value="#{skyve}" />
 			<ui:define name="pages">
 				<pm:page id="edit">
 					<pm:header title="#{skyve.title}" fixed="true">

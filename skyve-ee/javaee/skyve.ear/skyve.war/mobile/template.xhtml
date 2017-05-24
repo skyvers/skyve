@@ -7,8 +7,7 @@
 		xmlns:pm="http://primefaces.org/mobile"
 		xmlns:s="http://skyve.org/xml/ui"
 		xmlns:pe="http://primefaces.org/ui/extensions"
-		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-		dir="#{dir}">
+		xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
     <f:view renderKitId="PRIMEFACES_MOBILE" encoding="UTF-8">
 		<h:head>
 	        <f:facet name="first">
@@ -21,14 +20,17 @@
 			<meta http-equiv="cache-control" content="private,no-cache,no-store" />
 			<meta http-equiv="expires" content="0" />
 
-			<base href="#{baseHref}" />
+			<base href="#{bean.baseHref}" />
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
-			<h:outputText value="#{skyveVersionComment}" escape="false" />
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.javascriptFileVersion}" />
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 
-			<script type="text/javascript" src="mobile/skyve-min.js?v=#{javascriptFileVersion}"></script>
+			<script type="text/javascript" src="mobile/skyve-min.js?v=#{bean.javascriptFileVersion}"></script>
 			<ui:insert name="head" />
 		</h:head>
 		<h:body>
+			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<p:growl id="growl" widgetVar="growl" globalOnly="true" showDetail="false" autoUpdate="true" />
 			<ui:insert name="pages" />
 		</h:body>

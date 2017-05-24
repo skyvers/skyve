@@ -132,4 +132,13 @@ public abstract class Localisable implements Serializable {
 		dir = (locale != null) ? (Util.isRTL(locale) ? "rtl" : "ltr") : "ltr";
 		i18n.setLocale(locale);
 	}
+	
+	/**
+	 * Return the environment identifier string for this skyve instance.
+	 * @return	The string as defined in the json configuration.
+	 */
+	@SuppressWarnings("static-method")
+	public final String getEnvironmentIdentifier() {
+		return UtilImpl.ENVIRONMENT_IDENTIFIER;
+	}
 }

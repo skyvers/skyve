@@ -4,8 +4,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:h="http://java.sun.com/jsf/html"
 		xmlns:p="http://primefaces.org/ui"
-		xmlns:pe="http://primefaces.org/ui/extensions"
-		dir="#{dir}">
+		xmlns:pe="http://primefaces.org/ui/extensions">
 	<f:view contentType="text/html" encoding="UTF-8">
 		<h:head>
 	        <f:facet name="first">
@@ -19,15 +18,17 @@
 			<meta name="format-detection" content="telephone=no" />
 			<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" />
 		
-			<base href="#{baseHref}" />
+			<base href="#{bean.baseHref}" />
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
-			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{javascriptFileVersion}" />
-			<title>#{title}</title>
-			<h:outputText value="#{skyveVersionComment}" escape="false" />
+			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.javascriptFileVersion}" />
+			<title>#{bean.title}</title>
+			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 
 			<ui:insert name="head" />
 		</h:head>
 		<h:body>
+			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<p:ajaxStatus onstart="$('#busy').css({display:'block',top:$(window).scrollTop()+($(window).height()/2)-25});" oncomplete="$('#busy').css({display:'none'})"/>
 			<div id="busy">
 				<p:graphicImage style="padding-top: 8px;" value="images/busy.gif" />
@@ -41,7 +42,7 @@
 						<td style="width:70%">
 							<div id="formHeader">
 								<div>
-									<h3 class="ui-widget" style="color: steelblue;">#{title}</h3>
+									<h3 class="ui-widget" style="color: steelblue;">#{bean.title}</h3>
 								</div>
 							</div>
 						</td>
@@ -53,7 +54,7 @@
 					</tr>
 					<tr>
 						<td style="height:100%;vertical-align:top">
-							<div style="text-align:center;overflow:hidden"><img src="#{logoRelativeFileNameUrl}" /></div>
+							<div style="text-align:center;overflow:hidden"><img src="#{bean.logoRelativeFileNameUrl}" /></div>
 							<h:form id="menuform" prependId="false"> 
 								<p:panelMenu model="#{menu.menu}" />
 							</h:form>

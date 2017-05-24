@@ -114,6 +114,13 @@ public class Desktop extends Harness {
 						}
 					}
 					
+					if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
+						result.append("$('body').append('<div class=\"skyveEnvBanner skyveTopEnvBanner\">");
+						result.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
+						result.append("$('body').append('<div class=\"skyveEnvBanner skyveBottomEnvBanner\">");
+						result.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
+					}
+					
 					return result.toString();
 				}
 			}.execute();
