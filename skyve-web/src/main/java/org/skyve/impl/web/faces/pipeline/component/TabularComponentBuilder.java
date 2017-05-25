@@ -335,6 +335,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");
+		    	button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
 				action(button, ImplicitActionName.Remove, null, gridBinding, true);
 				children.add(button);
 			}
