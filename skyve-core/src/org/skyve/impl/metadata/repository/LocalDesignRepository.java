@@ -24,7 +24,6 @@ import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
-import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
@@ -731,70 +730,54 @@ public class LocalDesignRepository extends AbstractRepository {
 		return result;
 	}
 
+	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName) {
+		return getJavaCode(customer, String.format("%s.%s.models.%s", document.getOwningModuleName(), document.getName(), modelName), true);
+	}
+
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, 
 																						Document document, 
 																						String modelName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".models.").append(modelName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getModel(customer, document, modelName);
 	}
 
 	@Override
 	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".models.").append(modelName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getModel(customer, document, modelName);
 	}
 
 	@Override
 	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".models.").append(modelName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getModel(customer, document, modelName);
 	}
 
+	private <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence) {
+		return getJavaCode(customer, String.format("%s.%s.actions.%s", document.getOwningModuleName(), document.getName(), actionName), assertExistence);
+	}
+	
 	@Override
-	public ServerSideAction<Bean> getAction(Customer customer, Document document, String actionName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".actions.").append(actionName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName) {
+		return getAction(customer, document, actionName, true);
 	}
 
 	@Override
 	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".actions.").append(exportActionName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getAction(customer, document, exportActionName, true);
 	}
 
 	@Override
 	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".actions.").append(importActionName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getAction(customer, document, importActionName, true);
 	}
 
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String uploadActionName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".actions.").append(uploadActionName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName) {
+		return getAction(customer, document, downloadActionName, true);
 	}
 
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName) {
-		StringBuilder fullyQualifiedActionName = new StringBuilder(128);
-		fullyQualifiedActionName.append(document.getOwningModuleName()).append('.').append(document.getName());
-		fullyQualifiedActionName.append(".actions.").append(uploadActionName);
-		return getJavaCode(customer, fullyQualifiedActionName.toString(), true);
+		return getAction(customer, document, uploadActionName, true);
 	}
 
 	@Override
@@ -903,30 +886,8 @@ public class LocalDesignRepository extends AbstractRepository {
 				if (privilege instanceof ActionPrivilege) {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();
-					Document actionDocument = null;
-
-					List<View> views = new ArrayList<>(2);
-					try {
-						actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
-
-						Router router = getRouter();
-						for (UxUiMetadata uxui : router.getUxUis()) {
-							views.add(actionDocument.getView(uxui.getName(), customer, ViewType.edit));
-							views.add(actionDocument.getView(uxui.getName(), customer, ViewType.create));
-						}
-					}
-					catch (MetaDataException e) {
-						throw new MetaDataException("Could not get view for document " + actionPrivilege.getDocumentName(), e);
-					}
-					// if the action is not in any defined view, chuck a wobbly
-					boolean found = false;
-					for (View view : views) {
-						if ((view != null) && (view.getAction(actionPrivilegeName) != null)) {
-							found = true;
-							break;
-						}
-					}
-					if (! found) {
+					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
+					if (getAction(customer, actionDocument, actionPrivilegeName, false) == null) {
 						throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
 														" for customer " + customer.getName() + 
 														" in module " + module.getName() +

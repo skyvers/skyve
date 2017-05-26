@@ -22,6 +22,7 @@ import org.skyve.web.WebContext;
 public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	private FacesView<T> facesView;
 	private String actionName;
+	
 	private String collectionName;
 	private String elementBizId;
 	
@@ -46,24 +47,25 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
-
-		if (! user.canExecuteAction(targetDocument, actionName)) {
-			throw new SecurityException(actionName, user.getName());
-		}
-
 		View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
+    	String resourceName = action.getResourceName();
+    	
+		if (! user.canExecuteAction(targetDocument, resourceName)) {
+			throw new SecurityException(resourceName, user.getName());
+		}
+
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
 	    if (Boolean.FALSE.equals(action.getClientValidation()) || FacesAction.validateRequiredFields()) {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
 			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
-																				actionName,
+																				resourceName,
 																				targetBean,
 																				webContext);
 			if (! vetoed) {
 				ServerSideActionResult<Bean> result = serverSideAction.execute(targetBean, webContext);
-				internalCustomer.interceptAfterServerSideAction(targetDocument, actionName, result, webContext);
+				internalCustomer.interceptAfterServerSideAction(targetDocument, resourceName, result, webContext);
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, (T) result.getBean());
 			}
 		}

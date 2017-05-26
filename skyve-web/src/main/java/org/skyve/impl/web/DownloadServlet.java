@@ -56,23 +56,23 @@ public class DownloadServlet extends HttpServlet {
 					documentName = documentName.substring(dotIndex + 1);
 					Module module = customer.getModule(moduleName);
 					Document document = module.getDocument(customer, documentName);
-					String actionName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
-					if (! user.canExecuteAction(document, actionName)) {
-						throw new SecurityException(actionName, user.getName());
+					String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+					if (! user.canExecuteAction(document, resourceName)) {
+						throw new SecurityException(resourceName, user.getName());
 					}
 					DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
 																						document, 
-																						actionName);
+																						resourceName);
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
 		        	Bean bean = context.getCurrentBean();
 		        	
-					boolean vetoed = customer.interceptBeforeDownloadAction(document, actionName, bean, context);
+					boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, context);
 					Download result = null;
 		        	byte[] bytes = null;
 					if (! vetoed) {
 						result = downloadAction.download(bean, context);
-						customer.interceptAfterDownloadAction(document, actionName, bean, result, context);
+						customer.interceptAfterDownloadAction(document, resourceName, bean, result, context);
 
 						try (BufferedInputStream bis = new BufferedInputStream(result.getInputStream())) {
 							try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {

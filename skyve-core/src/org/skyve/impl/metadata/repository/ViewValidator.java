@@ -1536,106 +1536,105 @@ class ViewValidator extends ViewVisitor {
 
 	private void validateAction(ActionImpl action) {
 		String actionIdentifier = "Action " + action.getName();
+		
 		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
 		validateConditionName(action.getInvisibleConditionName(), actionIdentifier);
 		validateParameterBindings(action.getParameters(), actionIdentifier);
 	}
 	
-	// TODO if an action has a class name, ensure we can load the class
+	// validate the resource name which represents the class to load for ClassActions
+	private void validateClassAction(String resourceName) {
+		String fullyQualifiedJavaCodeName = String.format("%s.%s.actions.%s", 
+															document.getOwningModuleName(),
+															document.getName(),
+															resourceName);
+		if (AbstractRepository.get().getJavaClass(customer, fullyQualifiedJavaCodeName) == null) {
+			throw new MetaDataException(fullyQualifiedJavaCodeName + " not found.");
+		}
+	}
 	
 	@Override
-	public void visitAction(ActionImpl action) {
-		// TODO
+	public void visitCustomAction(ActionImpl action) {
+		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
 	public void visitAddAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitBizExportAction(ActionImpl action) {
-		// TODO
+		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
 	public void visitBizImportAction(ActionImpl action) {
-		// TODO
+		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
 	public void visitDownloadAction(ActionImpl action) {
-		// TODO
+		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
 	public void visitUploadAction(ActionImpl action) {
-		// TODO
+		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
 	public void visitCancelAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitDeleteAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitEditAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitNavigateAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitNewAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitOKAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitRemoveAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitReportAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitSaveAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 
 	@Override
 	public void visitZoomOutAction(ActionImpl action) {
-		// TODO
 		validateAction(action);
 	}
 

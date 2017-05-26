@@ -2155,7 +2155,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitAction(ActionImpl action) {
+	public void visitCustomAction(ActionImpl action) {
 		visitActionInternal(action);
 	}
 

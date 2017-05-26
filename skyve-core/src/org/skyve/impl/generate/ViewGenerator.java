@@ -203,7 +203,7 @@ public class ViewGenerator {
 		for (String actionName : ((DocumentImpl) document).getDefinedActionNames()) {
 			action = new ActionImpl();
 			try {
-				repository.getAction(customer, document, actionName);
+				repository.getServerSideAction(customer, document, actionName);
 			}
 			catch (Exception e) {
 				try {

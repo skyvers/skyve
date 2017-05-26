@@ -781,7 +781,7 @@ class GenerateViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitAction(ActionImpl action) {
+	public void visitCustomAction(ActionImpl action) {
 		// TODO Auto-generated method stub
 		
 	}

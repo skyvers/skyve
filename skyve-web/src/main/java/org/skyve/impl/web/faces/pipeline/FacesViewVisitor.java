@@ -1794,7 +1794,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitAction(ActionImpl action) {
+	public void visitCustomAction(ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
 		}
@@ -1806,7 +1806,11 @@ public class FacesViewVisitor extends ViewVisitor {
 				toolbarLayout.getChildren().add(cb.report(action));
 			}
 			else {
-				toolbarLayout.getChildren().add(cb.action(listBinding, action, name, name.getDisplayName()));
+				String displayName = action.getDisplayName();
+				if (displayName == null) {
+					displayName = name.getDisplayName();
+				}
+				toolbarLayout.getChildren().add(cb.action(listBinding, action, name, displayName));
 			}
 		}
 	}

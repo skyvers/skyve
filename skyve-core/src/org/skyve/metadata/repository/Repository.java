@@ -94,7 +94,7 @@ public interface Repository {
 	 * @param className
 	 * @return
 	 */
-	public ServerSideAction<Bean> getAction(Customer customer, Document document, String className);
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className);
 
 	/**
 	 * 

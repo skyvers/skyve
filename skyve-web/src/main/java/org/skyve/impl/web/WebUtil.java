@@ -224,7 +224,7 @@ public class WebUtil {
 		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			r.getAction(c, changePassword, "MakePasswordChange").execute(bean, null);
+			r.getServerSideAction(c, changePassword, "MakePasswordChange").execute(bean, null);
 		}
 		catch (ValidationException e) {
 			persistence.rollback();

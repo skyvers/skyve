@@ -42,7 +42,7 @@ public abstract class ActionVisitor {
 		}
 	}
 
-	public abstract void visitAction(ActionImpl action);
+	public abstract void visitCustomAction(ActionImpl action);
 	public abstract void visitAddAction(ActionImpl action);
 	public abstract void visitRemoveAction(ActionImpl action);
 	public abstract void visitZoomOutAction(ActionImpl action);
@@ -71,7 +71,7 @@ public abstract class ActionVisitor {
 			visit(viewType, implicitName, action);
 		}
 		else {
-			visitAction(action);
+			visitCustomAction(action);
 		}
 	}
 

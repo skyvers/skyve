@@ -811,7 +811,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 				// execute an action
 				AbstractRepository repository = AbstractRepository.get();
-				ServerSideAction<Bean> customAction = repository.getAction(customer, processDocument, mutableCustomActionName);
+				ServerSideAction<Bean> customAction = repository.getServerSideAction(customer, processDocument, mutableCustomActionName);
 				CustomerImpl internalCustomer = (CustomerImpl) customer;
 				boolean vetoed = internalCustomer.interceptBeforeServerSideAction(processDocument,
 																					mutableCustomActionName,

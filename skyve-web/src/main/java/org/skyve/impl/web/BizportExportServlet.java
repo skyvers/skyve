@@ -54,23 +54,23 @@ public class BizportExportServlet extends HttpServlet {
 					Module module = customer.getModule(moduleName);
 					Document document = module.getDocument(customer, documentName);
 
-					String actionName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
-					if (! user.canExecuteAction(document, actionName)) {
-						throw new SecurityException(actionName, user.getName());
+					String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+					if (! user.canExecuteAction(document, resourceName)) {
+						throw new SecurityException(resourceName, user.getName());
 					}
 
 					BizExportAction bizPortAction = repository.getBizExportAction(customer, 
 																					document, 
-																					actionName);
+																					resourceName);
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-					boolean vetoed = customer.interceptBeforeBizExportAction(document, actionName, context);
+					boolean vetoed = customer.interceptBeforeBizExportAction(document, resourceName, context);
 					BizPortWorkbook result = null;
 					if (! vetoed) {
 						result = bizPortAction.bizExport(context);
-						customer.interceptAfterBizExportAction(document, actionName, result, context);
+						customer.interceptAfterBizExportAction(document, resourceName, result, context);
 						if (result != null) {
 							result.write(baos);
 						}

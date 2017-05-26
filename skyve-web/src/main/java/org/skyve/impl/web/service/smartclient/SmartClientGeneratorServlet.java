@@ -558,8 +558,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 									boolean parentEnabled) {
 			Action action = view.getAction(button.getActionName());
 
-			String buttonCode = generateButton(action.getName(), 
-												action.getResourceName(),
+			String buttonCode = generateButton(action.getResourceName(),
 												action.getImplicitName(),
 												action.getDisplayName(),
 												action.getClientValidation(),
@@ -1960,9 +1959,8 @@ pickListFields:[{name:'value'}],
 		}
 
 		@Override
-		public void visitAction(ActionImpl action) {
-			addAction(action.getName(),
-						action.getResourceName(), 
+		public void visitCustomAction(ActionImpl action) {
+			addAction(action.getResourceName(), 
 						null, 
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -1979,7 +1977,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitAddAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Add,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -1996,7 +1993,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitRemoveAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Remove,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2013,7 +2009,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitZoomOutAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.ZoomOut,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2030,7 +2025,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitNavigateAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Navigate,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2047,7 +2041,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitOKAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.OK,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2064,7 +2057,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitSaveAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Save,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2081,7 +2073,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitCancelAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Cancel,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2098,7 +2089,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitDeleteAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Delete,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2115,7 +2105,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitReportAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Report,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2131,8 +2120,7 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitBizExportAction(ActionImpl action) {
-			addAction(action.getName(),
-						action.getResourceName(),
+			addAction(action.getResourceName(),
 						ImplicitActionName.BizExport,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2148,8 +2136,7 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitBizImportAction(ActionImpl action) {
-			addAction(action.getName(),
-						action.getResourceName(),
+			addAction(action.getResourceName(),
 						ImplicitActionName.BizImport,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2165,8 +2152,7 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitDownloadAction(ActionImpl action) {
-			addAction(action.getName(),
-						action.getResourceName(),
+			addAction(action.getResourceName(),
 						ImplicitActionName.Download,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2182,8 +2168,7 @@ pickListFields:[{name:'value'}],
 
 		@Override
 		public void visitUploadAction(ActionImpl action) {
-			addAction(action.getName(),
-						action.getResourceName(),
+			addAction(action.getResourceName(),
 						ImplicitActionName.Upload,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2200,7 +2185,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitNewAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.New,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2217,7 +2201,6 @@ pickListFields:[{name:'value'}],
 		@Override
 		public void visitEditAction(ActionImpl action) {
 			addAction(null,
-						null,
 						ImplicitActionName.Edit,
 						action.getDisplayName(),
 						action.getInActionPanel(),
@@ -2681,8 +2664,7 @@ pickListFields:[{name:'value'}],
 			}
 		}
 
-		private void addAction(String actionName,
-								String resourceName,
+		private void addAction(String resourceName,
 								ImplicitActionName implicitName,
 								String displayName,
 								Boolean inActionPanel,
@@ -2697,8 +2679,7 @@ pickListFields:[{name:'value'}],
 			if (! Boolean.FALSE.equals(inActionPanel) && 
 					(! ImplicitActionName.Add.equals(implicitName)) &&
 					(! ImplicitActionName.Edit.equals(implicitName))) {
-				String buttonCode = generateButton(actionName,
-													resourceName,
+				String buttonCode = generateButton(resourceName,
 													implicitName,
 													displayName,
 													clientValidation,
@@ -2723,8 +2704,7 @@ pickListFields:[{name:'value'}],
 		}
 
 		// return null if the button should NOT be added
-		private String generateButton(String actionName,
-										String resourceName,
+		private String generateButton(String resourceName,
 										ImplicitActionName implicitName,
 										String displayName,
 										Boolean clientValidation,
@@ -2740,7 +2720,7 @@ pickListFields:[{name:'value'}],
 			String revisedRelativeIconFileName = relativeIconFileName;
 			char actionType = ' ';
 			if (implicitName == null) {
-				if (! user.canExecuteAction(document, actionName)) {
+				if (! user.canExecuteAction(document, resourceName)) {
 					return null; // cannot execute this action
 				}
 				result.append("isc.BizButton.create({validate:");
@@ -2761,44 +2741,44 @@ pickListFields:[{name:'value'}],
 					result.append(implicitName);
 					break;
 				case BizExport:
-					if (! user.canExecuteAction(document, actionName)) {
+					if (! user.canExecuteAction(document, resourceName)) {
 						return null;
 					}
 					if (revisedRelativeIconFileName == null) {
 						revisedRelativeIconFileName = "actions/BizExport.png";
 					}
 					actionType = 'X';
-					result.append(actionName);
+					result.append(resourceName);
 					break;
 				case BizImport:
-					if (! user.canExecuteAction(document, actionName)) {
+					if (! user.canExecuteAction(document, resourceName)) {
 						return null;
 					}
 					if (revisedRelativeIconFileName == null) {
 						revisedRelativeIconFileName = "actions/BizImport.png";
 					}
 					actionType = 'I';
-					result.append(actionName);
+					result.append(resourceName);
 					break;
 				case Download:
-					if (! user.canExecuteAction(document, actionName)) {
+					if (! user.canExecuteAction(document, resourceName)) {
 						return null; // cannot execute this action
 					}
 					if (revisedRelativeIconFileName == null) {
 						revisedRelativeIconFileName = "actions/Download.png";
 					}
 					actionType = 'L';
-					result.append(actionName);
+					result.append(resourceName);
 					break;
 				case Upload:
-					if (! user.canExecuteAction(document, actionName)) {
+					if (! user.canExecuteAction(document, resourceName)) {
 						return null; // cannot execute this action
 					}
 					if (revisedRelativeIconFileName == null) {
 						revisedRelativeIconFileName = "actions/Upload.png";
 					}
 					actionType = 'U';
-					result.append(actionName);
+					result.append(resourceName);
 					break;
 				case Cancel:
 					if (revisedRelativeIconFileName == null) {

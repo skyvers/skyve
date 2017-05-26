@@ -56,7 +56,7 @@ public class PerformDocumentActionForTagJob extends Job {
 
 			// retrieve action for non-default actions only
 			if (!TagDefaultAction.isDefaultTagAction(tag.getDocumentAction())) {
-				act = rep.getAction(customer, document, tag.getDocumentAction());
+				act = rep.getServerSideAction(customer, document, tag.getDocumentAction());
 			}
 
 			List<Bean> beans = TagBizlet.getTaggedItemsForDocument(tag, tag.getActionModuleName(), tag.getActionDocumentName());
