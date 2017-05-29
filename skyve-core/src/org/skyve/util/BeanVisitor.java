@@ -116,6 +116,8 @@ public abstract class BeanVisitor {
 		StringBuilder sb = new StringBuilder(64);
 		try {
 			if (accept(binding, document, owningDocument, owningRelation, bean)) {
+				Module owningModule = customer.getModule(document.getOwningModuleName());
+
 				// NB visit relations in the order they are defined in the documents.
 				for (Attribute attribute : document.getAllAttributes()) {
 					if (attribute instanceof Relation) {
@@ -124,7 +126,6 @@ public abstract class BeanVisitor {
 						}
 
 						String relationName = attribute.getName();
-						Module owningModule = customer.getModule(document.getOwningModuleName());
 						Document relatedDocument = owningModule.getDocument(customer, ((Relation) attribute).getDocumentName());
 						Relation childRelation = (Relation) attribute;
 						// association or one to one inverse
@@ -133,6 +134,16 @@ public abstract class BeanVisitor {
 									InverseCardinality.one.equals(((Inverse) childRelation).getCardinality()))) {
 							Bean child = (bean == null) ? null : (Bean) Binder.get(bean, relationName);
 							if ((child != null) || visitNulls) {
+								// If we have a child bean instance, check for a polymorphic reference
+								if (child != null) {
+									String childBizModule = child.getBizModule();
+									String childBizDocument = child.getBizDocument();
+									if (! (relatedDocument.getOwningModuleName().equals(childBizModule) &&
+											relatedDocument.getName().equals(childBizDocument))) {
+										relatedDocument = customer.getModule(childBizModule).getDocument(customer, childBizDocument);
+									}
+								}
+								
 								sb.setLength(0);
 								if (binding.length() != 0) {
 									sb.append(binding).append('.');
@@ -154,6 +165,14 @@ public abstract class BeanVisitor {
 								int i = 0;
 								for (Bean child : children) {
 									if (child != null) {
+										// Check for a polymorphic child reference
+										String childBizModule = child.getBizModule();
+										String childBizDocument = child.getBizDocument();
+										if (! (relatedDocument.getOwningModuleName().equals(childBizModule) &&
+												relatedDocument.getName().equals(childBizDocument))) {
+											relatedDocument = customer.getModule(childBizModule).getDocument(customer, childBizDocument);
+										}
+										
 										sb.setLength(0);
 										if (binding.length() != 0) {
 											sb.append(binding).append('.');
@@ -208,6 +227,16 @@ public abstract class BeanVisitor {
 						(! document.getName().equals(parentDocument.getName()))) {
 					Bean parent = (bean == null) ? null : (Bean) Binder.get(bean, ChildBean.PARENT_NAME);
 					if ((parent != null) || visitNulls) {
+						// If we have a parent bean instance, check for a polymorphic reference
+						if (parent != null) {
+							String parentBizModule = parent.getBizModule();
+							String parentBizDocument = parent.getBizDocument();
+							if (! (parentDocument.getOwningModuleName().equals(parentBizModule) &&
+									parentDocument.getName().equals(parentBizDocument))) {
+								parentDocument = customer.getModule(parentBizModule).getDocument(customer, parentBizDocument);
+							}
+						}
+						
 						sb.setLength(0);
 						if (binding.length() != 0) {
 							sb.append(binding).append('.');
