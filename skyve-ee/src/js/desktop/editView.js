@@ -44,7 +44,7 @@ isc.EditView.addClassProperties({
 // _mod: null - The name of the module this view belongs to
 // _doc: null - The document name this view belongs to
 // _b: null - The binding within the document this view is bound to
-// _saved - whether the [Save] button has been pressed
+// _saved - whether the [Save] button has been pressed or any other action including rerender has occurred
 // _source - the source of a rerender event
 // _openedFromDataGrid - whether this view was opened from a data grid record or not
 // _grids: {} - a map of grids by their binding
@@ -272,7 +272,7 @@ isc.EditView.addMethods({
 							parentContext, // the parent context - can be null
 							openedFromDataGrid, // true if this view was opened from a data grid row
 							successCallback) { // a function to call back on when the operation is successful
-		this._saved = false; // [Save] button has not been pressed yet - also any server side action has not been fired
+		this._saved = false; // [Save] button has not been pressed yet - also any server side action including rerender has not been fired
 		this._editInstance(null, bizId, formBinding, parentContext, openedFromDataGrid, successCallback);
 	},
 
@@ -368,6 +368,7 @@ isc.EditView.addMethods({
 	rerenderAction: function(validate, source) {
 		this._source = source;
 		this.saveInstance(validate, null);
+		this._saved = true;
 	},
 	
 	// action - sent to server and use to determine whether to popoff the window on the window stack
@@ -1307,13 +1308,19 @@ isc.BizButton.addMethods({
 			else if (this.type == "A") { // Add on child edit view
 			}
 			else if (this.type == "Z") { // Change on child edit view
-				var apply = this._view.gather(false)._apply;
-				if (apply || this._view._vm.valuesHaveChanged()) {
+				// So we check whether the form is dirty and whether it needs applying,
+				// but also whether the child bean has changes - this is because
+				// Bizlet.preExecute(ImplicitActionName.ZoomOut) needs to be called if there
+				// has been any change to this child during this conversation.
+				var instance = this._view.gather(false);
+				var apply = instance._apply;
+				var changedOnServer = instance._changed;
+				if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
 					this._view.saveInstance(true, this.actionName);
 				}
 				else {
 					var opener = isc.WindowStack.getOpener();
-					isc.WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action was taken
+					isc.WindowStack.popoff(this._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
 					opener._source = null;
 				}
 			}
@@ -1325,7 +1332,7 @@ isc.BizButton.addMethods({
 					isc.ask('There are unsaved changes in the ' + this._view._singular + '.  Do you wish to cancel?',
 							function(value) {
 								if (value) {
-									isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+									isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
 									opener._source = null;
 								}
 							},
@@ -1333,7 +1340,7 @@ isc.BizButton.addMethods({
 					);
 				}
 				else {
-					isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action was taken
+					isc.WindowStack.popoff(me._view._saved); // dont rerender the opener view unless save or an action or rerender was performed
 					opener._source = null;
 				}
 			}
