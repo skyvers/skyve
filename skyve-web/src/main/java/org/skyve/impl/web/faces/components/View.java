@@ -51,7 +51,7 @@ public class View extends HtmlPanelGroup {
 	    	try {
 	    		tempComponentBuilder = (classString != null) ? 
 	    								(ComponentBuilder) Class.forName(classString).newInstance() :
-									new SkyveComponentBuilder();
+    									new SkyveComponentBuilder();
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);

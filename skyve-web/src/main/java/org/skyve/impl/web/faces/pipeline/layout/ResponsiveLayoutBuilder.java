@@ -214,15 +214,15 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				setInvisible(div, widgetInvisible, null);
 				// style="<repsonsive column calc method call>"
                 String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
-				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} "+alignment, 
+				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} %s", 
 													managedBeanName,
-													Integer.toString(formIndex));
+													Integer.toString(formIndex),
+													alignment);
 				div.setValueExpression("styleClass", 
 										ef.createValueExpression(elc, expression, String.class));
 				formOrRowLayout.getChildren().add(div);
 				HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
 				div.getChildren().add(l);
-				
 			}
 		}
 		

@@ -706,7 +706,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent c = cb.blurb(listBinding, value, binding, blurb);
 		addComponent(null, 
 						false, 
-						null, 
+						blurb.getInvisibleConditionName(), 
 						blurb.showsLabelByDefault(),
 						c, 
 						blurb.getPixelWidth(), 
@@ -819,7 +819,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    UIComponent p = cb.label("progressBar"); // TODO progress bar
 	    addComponent(null, 
 	    				false, 
-	    				null, 
+	    				progressBar.getInvisibleConditionName(), 
 	    				progressBar.showsLabelByDefault(),
 	    				p, 
 	    				progressBar.getPixelWidth(), 
@@ -1231,7 +1231,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		UIComponent c = cb.label("lookup"); // TODO lookup
 		addComponent(null, 
 						false, 
-						null, 
+						lookup.getInvisibleConditionName(), 
 						lookup.showsLabelByDefault(),
 						c, 
 						null, 
