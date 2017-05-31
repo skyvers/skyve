@@ -141,6 +141,7 @@ public abstract class BeanVisitor {
 									if (! (relatedDocument.getOwningModuleName().equals(childBizModule) &&
 											relatedDocument.getName().equals(childBizDocument))) {
 										relatedDocument = customer.getModule(childBizModule).getDocument(customer, childBizDocument);
+										child = Util.deproxy(child);
 									}
 								}
 								
@@ -171,6 +172,7 @@ public abstract class BeanVisitor {
 										if (! (relatedDocument.getOwningModuleName().equals(childBizModule) &&
 												relatedDocument.getName().equals(childBizDocument))) {
 											relatedDocument = customer.getModule(childBizModule).getDocument(customer, childBizDocument);
+											child = Util.deproxy(child);
 										}
 										
 										sb.setLength(0);
@@ -234,6 +236,7 @@ public abstract class BeanVisitor {
 							if (! (parentDocument.getOwningModuleName().equals(parentBizModule) &&
 									parentDocument.getName().equals(parentBizDocument))) {
 								parentDocument = customer.getModule(parentBizModule).getDocument(customer, parentBizDocument);
+								parent = Util.deproxy(parent);
 							}
 						}
 						
