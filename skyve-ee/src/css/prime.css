@@ -85,3 +85,17 @@ span.right {
 .skyveBottomEnvBanner {
 	bottom: 0px;
 }
+
+/* Table style for those that combine an error message and input field */
+table.inputComponent {
+	width:100%;
+	border-collapse:collapse
+}
+/* Shrink style for error message so it only takes up as much space as necessary */
+table td.shrink {
+	width:1px;
+}
+/* Don't put a margin to the left for error message in form */
+.formMessageStyle {
+	margin-left:0
+}

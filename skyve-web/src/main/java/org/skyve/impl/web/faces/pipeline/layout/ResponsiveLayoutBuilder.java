@@ -213,29 +213,38 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				HtmlPanelGroup div = panelGroup(false, false, true, null);
 				setInvisible(div, widgetInvisible, null);
 				// style="<repsonsive column calc method call>"
-				String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
-				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)}", 
+                String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
+				String expression = String.format("#{%s.getResponsiveFormStyle(%s, null, 1)} "+alignment, 
 													managedBeanName,
 													Integer.toString(formIndex));
 				div.setValueExpression("styleClass", 
 										ef.createValueExpression(elc, expression, String.class));
 				formOrRowLayout.getChildren().add(div);
-				HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-				setId(pg);
-				pg.setStyle("width:100%");
-				pg.setColumns(2);
-				pg.setColumnClasses(alignment); // set first column style only
-				div.getChildren().add(pg);
 				HtmlOutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
-				pg.getChildren().add(l);
-				Message m = message(formItemComponent.getId());
-				pg.getChildren().add(m);
+				div.getChildren().add(l);
+				
 			}
 		}
+		
 		// The field
 		Integer colspan = currentFormItem.getColspan();
 		HtmlPanelGroup div = panelGroup(false, false, true, null);
 		setInvisible(div, widgetInvisible, null);
+		
+		//Create a grid
+		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(pg);
+		pg.setCellpadding("0"); //Don't pad cells
+		pg.setStyleClass("inputComponent");
+		pg.setColumns(2);
+		pg.setColumnClasses("shrink"); //First column should shrink
+		div.getChildren().add(pg);
+		Message m = message(formItemComponent.getId());
+		m.setStyleClass("formMessageStyle");
+		pg.getChildren().add(m);
+		pg.getChildren().add(formItemComponent);
+
+		// Update div's style
 		// colspan should be 1.
 		if ((colspan == null) || (colspan.intValue() <= 1)) {
 			// style="<repsonsive column calc method call>"
@@ -257,7 +266,6 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 									ef.createValueExpression(elc, expression, String.class));
 		}
 		formOrRowLayout.getChildren().add(div);
-		div.getChildren().add(formItemComponent);
 	}
 	
 	private static String alignment(HorizontalAlignment alignment, boolean forFormLabel) {
