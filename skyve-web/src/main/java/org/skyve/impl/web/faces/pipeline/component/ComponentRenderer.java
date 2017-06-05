@@ -64,7 +64,7 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
-import org.primefaces.extensions.component.tristatecheckbox.TriStateCheckbox;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.mobile.component.field.Field;
 
 public class ComponentRenderer {
@@ -439,7 +439,7 @@ public class ComponentRenderer {
 			putValue(attributes, "styleClass", tools.getStyleClass());
 		}
 		else if (component instanceof TriStateCheckbox) {
-			tagName = "pe:triStateCheckbox";
+			tagName = "p:triStateCheckbox";
 			
 			TriStateCheckbox check = (TriStateCheckbox) component;
 			putValue(attributes, "style", check.getStyle());

@@ -14,7 +14,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/skyve-core.jar"/>
@@ -25,5 +24,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.1.jar"/>
 	<classpathentry kind="output" path="javaee/skyve.ear/apps.jar"/>
 </classpath>
