@@ -25,7 +25,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
-public abstract class InMemoryListModel extends ListModel<Bean> {
+public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	private static final long serialVersionUID = -4488883647065013017L;
 
 	private Customer customer;
