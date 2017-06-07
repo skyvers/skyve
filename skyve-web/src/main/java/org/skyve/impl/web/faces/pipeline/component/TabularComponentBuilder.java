@@ -1119,48 +1119,93 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setConfirmation(result, confirmationText);
 		setId(result);
 
-		// set a default icon if not already set
-		if ((iconStyleClass == null) && (implicitActionName != null)) {
+		// set a default icon if not already set and client Validation (immediate)
+		if (implicitActionName != null) {
 			switch (implicitActionName) {
 				case OK:
-					result.setIcon("fa fa-check");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-check");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Save:
-					result.setIcon("fa fa-save");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-save");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Delete:
-					result.setIcon("fa fa-trash-o");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-trash-o");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
+					// Add the standard confirmation text if none exists
+					if (confirmationText == null) {
+						setConfirmation(result, "Do you want to delete this data?");
+					}
 					break;
 				case Add:
 				case New:
-					result.setIcon("fa fa-plus");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-plus");
+					}
 					break;
 				case ZoomOut:
-					result.setIcon("fa fa-reply");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-reply");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Cancel:
-					result.setIcon("fa fa-chevron-left");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-chevron-left");
+					}
+					result.setImmediate(true); // no validation
+					result.setAjax(false); // normal request - which is slightly faster
 					break;
 				case Remove:
-					result.setIcon("fa fa-minus");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-minus");
+					}
+					result.setImmediate(true);
+					// Add the standard confirmation text if none exists
+					if (confirmationText == null) {
+						setConfirmation(result, "Do you want to remove this data?");
+					}
 					break;
 				case Edit:
-					result.setIcon("fa fa-mail-forward");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-mail-forward");
+					}
 					break;
 				case Report:
-					result.setIcon("fa fa-newspaper");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-newspaper");
+					}
 					break;
 				case BizImport:
-					result.setIcon("fa fa-cloud-download");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-cloud-download");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case BizExport:
-					result.setIcon("fa fa-cloud-upload");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-cloud-upload");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Download:
-					result.setIcon("fa fa-download");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-download");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				case Upload:
-					result.setIcon("fa fa-upload");
+					if (iconStyleClass == null) { 
+						result.setIcon("fa fa-upload");
+					}
+					result.setImmediate(Boolean.FALSE.equals(clientValidation)); // switch validation
 					break;
 				default:
 					break;
@@ -1210,24 +1255,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setInvisible(result, invisible, null);
 		}
 
-		if (ImplicitActionName.Cancel.equals(implicitActionName)) {
-			result.setImmediate(true); // no validation
-			result.setAjax(false); // normal request - which is slightly faster
-		} 
-		else if (ImplicitActionName.Remove.equals(implicitActionName) || 
-					ImplicitActionName.Delete.equals(implicitActionName)) {
-			result.setImmediate(true); // no validation
-			result.setProcess(process); // process the current form
-			result.setUpdate(update); // update all forms
-			// Add the standard confirmation text if non exists
-			if (confirmationText == null) {
-				setConfirmation(result, String.format("Do you want to %s this data?", 
-														ImplicitActionName.Remove.equals(implicitActionName) ? "remove" : "delete"));
-			}
-		}
-		else {
-			result.setProcess(process); // process the current form
-			result.setUpdate(update); // update all forms
+		if (! ImplicitActionName.Cancel.equals(implicitActionName)) { // cancel is not ajax
+			result.setProcess(process); // process the current form (by default)
+			result.setUpdate(update); // update all forms (by default)
 		}
 
 		return result;

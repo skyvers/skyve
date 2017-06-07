@@ -2728,7 +2728,9 @@ pickListFields:[{name:'value'}],
 				result.append(",actionName:'").append(resourceName);
 			}
 			else {
-				result.append("isc.BizButton.create({actionName:'");
+				result.append("isc.BizButton.create({validate:");
+				result.append(! Boolean.FALSE.equals(clientValidation));
+				result.append(",actionName:'");
 				switch (implicitName) {
 				case Add:
 					if (! user.canCreateDocument(document)) {

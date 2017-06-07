@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "delete")
-public class DeleteAction extends PositionableAction {
+public class DeleteAction extends ValidatableAction {
 	public DeleteAction() {
 		implicitName = ImplicitActionName.Delete;
 	}

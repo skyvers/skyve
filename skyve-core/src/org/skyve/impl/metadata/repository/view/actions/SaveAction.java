@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "save")
-public class SaveAction extends PositionableAction {
+public class SaveAction extends ValidatableAction {
 	public SaveAction() {
 		implicitName = ImplicitActionName.Save;
 	}

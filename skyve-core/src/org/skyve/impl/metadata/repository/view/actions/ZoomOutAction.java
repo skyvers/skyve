@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "zoomOut")
-public class ZoomOutAction extends PositionableAction {
+public class ZoomOutAction extends ValidatableAction {
 	public ZoomOutAction() {
 		implicitName = ImplicitActionName.ZoomOut;
 	}

@@ -543,8 +543,8 @@ isc.EditView.addMethods({
 		}
 	},
 
-	deleteInstance: function(successCallback) { // a function  to callback on when the operation is successful
-		var instance = this.gather(true); // validate
+	deleteInstance: function(validate, successCallback) { // a function  to callback on when the operation is successful
+		var instance = this.gather(validate); // validate
 		if (instance) {
 			isc.EditView._DATA_SOURCE.removeData(
 				instance,
@@ -1294,14 +1294,19 @@ isc.BizButton.addMethods({
 		},
 		
 		this._click = function() {
+			var validate = this.validate;
+			if (validate === undefined) {
+				validate = true;
+			}
+
 			// New and Edit are list view actions
 			if (this.type == "O") { // OK on edit view
-				this._view.saveInstance(true, this.actionName, function() {
+				this._view.saveInstance(validate, this.actionName, function() {
 //					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
 				});
 			}
 			else if (this.type == "S") { // Save on edit view
-				this._view.saveInstance(true, this.actionName, function() {
+				this._view.saveInstance(validate, this.actionName, function() {
 //					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
 				});
 			}
@@ -1316,7 +1321,7 @@ isc.BizButton.addMethods({
 				var apply = instance._apply;
 				var changedOnServer = instance._changed;
 				if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
-					this._view.saveInstance(true, this.actionName);
+					this._view.saveInstance(validate, this.actionName);
 				}
 				else {
 					var opener = isc.WindowStack.getOpener();
@@ -1349,7 +1354,7 @@ isc.BizButton.addMethods({
 				isc.ask('Do you want to delete this ' + this._view._singular + '?',
 							function(value) {
 								if (value) {
-									me._view.deleteInstance();
+									me._view.deleteInstance(validate);
 								}
 							},
 							{title: 'Delete?'}
@@ -1391,7 +1396,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before exporting
-					this._view.saveInstance(true, null, function() {
+					this._view.saveInstance(validate, null, function() {
 						window.location.assign('bizexport.xls?_n=' + me.actionName + 
 												'&_doc=' + me._view._mod + '.' + me._view._doc + 
 												'&_c=' + instance._c +
@@ -1404,7 +1409,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before importing
-					this._view.saveInstance(true, null, function() {
+					this._view.saveInstance(validate, null, function() {
 						var url = 'bizImport.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {
@@ -1426,7 +1431,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before exporting
-					this._view.saveInstance(true, null, function() {
+					this._view.saveInstance(validate, null, function() {
 						window.location.assign('download?_n=' + me.actionName + 
 												'&_doc=' + me._view._mod + '.' + me._view._doc + 
 												'&_c=' + instance._c +
@@ -1439,7 +1444,7 @@ isc.BizButton.addMethods({
 				if (instance) {
 					var me = this;
 					// apply changes to current form before uploading
-					this._view.saveInstance(true, null, function() {
+					this._view.saveInstance(validate, null, function() {
 						var url = 'fileUpload.xhtml?_a=' + me.actionName + 
 									'&_c=' + instance._c;
 						if (me._view._b) {
@@ -1459,10 +1464,6 @@ isc.BizButton.addMethods({
 			else if (this.type == "M") { // Navigate to a binding within a conversation
 			}
 			else {
-				var validate = this.validate;
-				if (validate === undefined) {
-					validate = true;
-				}
 				this._view.doAction(this.actionName, validate);
 			}
 		};

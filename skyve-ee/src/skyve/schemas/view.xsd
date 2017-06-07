@@ -687,9 +687,18 @@
 
   <xs:complexType name="classAction" abstract="true">
     <xs:complexContent>
-      <xs:extension base="tns:positionableAction">
+      <xs:extension base="tns:validatableAction">
         <xs:sequence/>
         <xs:attribute name="className" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="validatableAction">
+    <xs:complexContent>
+      <xs:extension base="tns:positionableAction">
+        <xs:sequence/>
+        <xs:attribute name="clientValidation" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -714,7 +723,6 @@
     <xs:complexContent>
       <xs:extension base="tns:classAction">
         <xs:sequence/>
-        <xs:attribute name="clientValidation" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -729,7 +737,7 @@
 
   <xs:complexType name="deleteAction">
     <xs:complexContent>
-      <xs:extension base="tns:positionableAction">
+      <xs:extension base="tns:validatableAction">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -745,7 +753,7 @@
 
   <xs:complexType name="okAction">
     <xs:complexContent>
-      <xs:extension base="tns:positionableAction">
+      <xs:extension base="tns:validatableAction">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -783,7 +791,7 @@
 
   <xs:complexType name="saveAction">
     <xs:complexContent>
-      <xs:extension base="tns:positionableAction">
+      <xs:extension base="tns:validatableAction">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -807,7 +815,7 @@
 
   <xs:complexType name="zoomOutAction">
     <xs:complexContent>
-      <xs:extension base="tns:positionableAction">
+      <xs:extension base="tns:validatableAction">
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
@@ -1538,65 +1546,65 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="list"/>
-      <xs:enumeration value="create"/>
       <xs:enumeration value="params"/>
+      <xs:enumeration value="create"/>
       <xs:enumeration value="pick"/>
+      <xs:enumeration value="list"/>
       <xs:enumeration value="edit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="right"/>
       <xs:enumeration value="left"/>
       <xs:enumeration value="centre"/>
-      <xs:enumeration value="right"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="both"/>
-      <xs:enumeration value="height"/>
       <xs:enumeration value="width"/>
+      <xs:enumeration value="height"/>
+      <xs:enumeration value="both"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="verticalAlignment">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="top"/>
       <xs:enumeration value="bottom"/>
       <xs:enumeration value="middle"/>
-      <xs:enumeration value="top"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
       <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="New"/>
-      <xs:enumeration value="Edit"/>
-      <xs:enumeration value="BizImport"/>
       <xs:enumeration value="Report"/>
-      <xs:enumeration value="OK"/>
-      <xs:enumeration value="BizExport"/>
-      <xs:enumeration value="Download"/>
-      <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Add"/>
+      <xs:enumeration value="BizImport"/>
+      <xs:enumeration value="Cancel"/>
       <xs:enumeration value="Save"/>
+      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="Upload"/>
-      <xs:enumeration value="Delete"/>
+      <xs:enumeration value="DEFAULTS"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="Download"/>
+      <xs:enumeration value="Add"/>
       <xs:enumeration value="Remove"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Delete"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="self"/>
       <xs:enumeration value="namedFame"/>
-      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="self"/>
+      <xs:enumeration value="blankFrame"/>
       <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
     </xs:restriction>
   </xs:simpleType>

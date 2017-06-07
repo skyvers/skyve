@@ -8,7 +8,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "ok")
-public class OKAction extends PositionableAction {
+public class OKAction extends ValidatableAction {
 	public OKAction() {
 		implicitName = ImplicitActionName.OK;
 	}
