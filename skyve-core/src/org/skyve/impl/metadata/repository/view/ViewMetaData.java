@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -14,21 +12,6 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
-import org.skyve.impl.metadata.repository.view.actions.AddAction;
-import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
-import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
-import org.skyve.impl.metadata.repository.view.actions.CancelAction;
-import org.skyve.impl.metadata.repository.view.actions.CustomAction;
-import org.skyve.impl.metadata.repository.view.actions.DefaultsAction;
-import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
-import org.skyve.impl.metadata.repository.view.actions.DownloadAction;
-import org.skyve.impl.metadata.repository.view.actions.NewAction;
-import org.skyve.impl.metadata.repository.view.actions.OKAction;
-import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
-import org.skyve.impl.metadata.repository.view.actions.ReportAction;
-import org.skyve.impl.metadata.repository.view.actions.SaveAction;
-import org.skyve.impl.metadata.repository.view.actions.UploadAction;
-import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -60,7 +43,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	private String title;
 	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
-	private List<ActionMetaData> actions = new ArrayList<>();
+	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
 	private String refreshActionName;
@@ -103,24 +86,13 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
-	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
-	@XmlElementRefs({@XmlElementRef(type = AddAction.class),
-						@XmlElementRef(type = BizExportAction.class),
-						@XmlElementRef(type = BizImportAction.class),
-						@XmlElementRef(type = CancelAction.class),
-						@XmlElementRef(type = CustomAction.class),
-						@XmlElementRef(type = DefaultsAction.class),
-						@XmlElementRef(type = DeleteAction.class),
-						@XmlElementRef(type = NewAction.class),
-						@XmlElementRef(type = OKAction.class),
-						@XmlElementRef(type = RemoveAction.class),
-						@XmlElementRef(type = ReportAction.class),
-						@XmlElementRef(type = SaveAction.class),
-						@XmlElementRef(type = DownloadAction.class),
-						@XmlElementRef(type = UploadAction.class),
-						@XmlElementRef(type = ZoomOutAction.class)})
-	public List<ActionMetaData> getActions() {
+	public Actions getActions() {
 		return actions;
+	}
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false, nillable = false)
+	public void setActions(Actions actions) {
+		this.actions = actions;
 	}
 
 	public Integer getRefreshTimeInSeconds() {
@@ -193,7 +165,8 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		result.getContained().addAll(getContained());
 
 		if (actions != null) {
-			for (ActionMetaData actionMetaData : actions) {
+			result.setActionsWidgetId(actions.getWidgetId());
+			for (ActionMetaData actionMetaData : actions.getActions()) {
 				org.skyve.metadata.view.Action action = actionMetaData.toMetaDataAction();
 				ImplicitActionName implicitName = action.getImplicitName();
 				if (action.getResourceName() == null) {

@@ -204,17 +204,21 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitedView() {
         currentContainers.pop();
 
-        // Add the toolbar if this is a full view render and the toolbar has contents
-        if ((widgetId == null) && (! toolbarLayout.getChildren().isEmpty())) {
-        	// If we get a toolbar back, add the toolbar layout to it
-        	UIComponent toolbar = cb.toolbar();
-        	if (toolbar != null) {
-            	facesView.getChildren().add(0, toolbar);
-            	lb.addToolbarLayout(toolbar, toolbarLayout);
-        	}
-        	else {
-            	facesView.getChildren().add(0, toolbarLayout);
-        	}
+        // Add the toolbar if this is a full view render or
+        // a view with a widgetId = actions widgetId
+        if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
+			// Add the toolbar if it has contents
+        	if (! toolbarLayout.getChildren().isEmpty()) {
+				// If we get a toolbar back, add the toolbar layout to it
+				UIComponent toolbar = cb.toolbar();
+				if (toolbar != null) {
+					facesView.getChildren().add(0, toolbar);
+					lb.addToolbarLayout(toolbar, toolbarLayout);
+				}
+				else {
+					facesView.getChildren().add(0, toolbarLayout);
+				}
+			}
     	}
 	}
 

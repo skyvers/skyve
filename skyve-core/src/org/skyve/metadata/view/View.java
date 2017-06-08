@@ -87,6 +87,13 @@ public interface View extends MetaData, Parameterizable {
 	public String getIconStyleClass();
 	
 	/**
+	 * The widgetId of the actions panel for the renderer to point at if needed in isolation.
+	 * 
+	 * @return
+	 */
+	public String getActionsWidgetId();
+
+	/**
 	 * 
 	 * @param actionName
 	 * @return

@@ -17,6 +17,7 @@ public class ViewImpl extends Container implements View {
 	private String icon32x32RelativeFileName;
 	private String iconStyleClass;
 	private String title;
+	private String actionsWidgetId;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
 	private Integer refreshTimeInSeconds;
 	private String refreshConditionName;
@@ -85,6 +86,15 @@ public class ViewImpl extends Container implements View {
 
 	public void setTitle(String title) {
 		this.title = title;
+	}
+
+	@Override
+	public String getActionsWidgetId() {
+		return actionsWidgetId;
+	}
+
+	public void setActionsWidgetId(String actionsWidgetId) {
+		this.actionsWidgetId = actionsWidgetId;
 	}
 
 	@Override

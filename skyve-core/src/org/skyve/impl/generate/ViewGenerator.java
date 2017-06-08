@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
+import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -441,10 +442,11 @@ public class ViewGenerator {
 		repositoryView.setIcon32x32RelativeFileName(view.getIcon32x32RelativeFileName());
 
 		repositoryView.getContained().addAll(view.getContained());
-
+		Actions actions = new Actions();
 		for (Action action : view.getActions()) {
-			repositoryView.getActions().add(((ActionImpl) action).toRepositoryAction());
+			actions.getActions().add(((ActionImpl) action).toRepositoryAction());
 		}
+		repositoryView.setActions(actions);
 
 		return XMLMetaData.marshalView(repositoryView, customerOverridden, uxuiOverridden);
 	}

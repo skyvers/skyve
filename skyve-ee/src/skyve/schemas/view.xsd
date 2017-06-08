@@ -7,6 +7,8 @@
 
   <xs:element name="actionReference" type="tns:actionReference"/>
 
+  <xs:element name="actions" type="tns:actions"/>
+
   <xs:element name="add" type="tns:addAction"/>
 
   <xs:element name="blurb" type="tns:blurb"/>
@@ -571,79 +573,27 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="view">
-    <xs:complexContent>
-      <xs:extension base="tns:container">
-        <xs:sequence>
-          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="actions" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:choice minOccurs="0" maxOccurs="unbounded">
-                  <xs:element ref="tns:add"/>
-                  <xs:element ref="tns:export"/>
-                  <xs:element ref="tns:import"/>
-                  <xs:element ref="tns:cancel"/>
-                  <xs:element ref="tns:action"/>
-                  <xs:element ref="tns:defaults"/>
-                  <xs:element ref="tns:delete"/>
-                  <xs:element ref="tns:new"/>
-                  <xs:element ref="tns:ok"/>
-                  <xs:element ref="tns:remove"/>
-                  <xs:element ref="tns:report"/>
-                  <xs:element ref="tns:save"/>
-                  <xs:element ref="tns:download"/>
-                  <xs:element ref="tns:upload"/>
-                  <xs:element ref="tns:zoomOut"/>
-                </xs:choice>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="newParameters" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-        </xs:sequence>
-        <xs:attribute name="type" type="tns:viewType" use="required"/>
-        <xs:attribute name="title" type="xs:string" use="required"/>
-        <xs:attribute name="iconStyleClass" type="xs:string"/>
-        <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
-        <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
-        <xs:attribute name="refreshIf" type="xs:string"/>
-        <xs:attribute name="refreshAction" type="xs:string"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-
-  <xs:complexType name="container" abstract="true">
+  <xs:complexType name="actions">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:staticImage"/>
-        <xs:element ref="tns:vbox"/>
-        <xs:element ref="tns:hbox"/>
-        <xs:element ref="tns:form"/>
-        <xs:element ref="tns:tabPane"/>
-        <xs:element ref="tns:button"/>
-        <xs:element ref="tns:geoLocator"/>
-        <xs:element ref="tns:map"/>
-        <xs:element ref="tns:dynamicImage"/>
-        <xs:element ref="tns:dialogButton"/>
-        <xs:element ref="tns:label"/>
-        <xs:element ref="tns:blurb"/>
-        <xs:element ref="tns:link"/>
-        <xs:element ref="tns:spacer"/>
-        <xs:element ref="tns:listMembership"/>
-        <xs:element ref="tns:checkMembership"/>
-        <xs:element ref="tns:comparison"/>
-        <xs:element ref="tns:dataGrid"/>
-        <xs:element ref="tns:listGrid"/>
-        <xs:element ref="tns:treeGrid"/>
-        <xs:element ref="tns:inject"/>
+        <xs:element ref="tns:add"/>
+        <xs:element ref="tns:export"/>
+        <xs:element ref="tns:import"/>
+        <xs:element ref="tns:cancel"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:defaults"/>
+        <xs:element ref="tns:delete"/>
+        <xs:element ref="tns:new"/>
+        <xs:element ref="tns:ok"/>
+        <xs:element ref="tns:remove"/>
+        <xs:element ref="tns:report"/>
+        <xs:element ref="tns:save"/>
+        <xs:element ref="tns:download"/>
+        <xs:element ref="tns:upload"/>
+        <xs:element ref="tns:zoomOut"/>
       </xs:choice>
     </xs:sequence>
+    <xs:attribute name="widgetId" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="addAction">
@@ -819,6 +769,59 @@
         <xs:sequence/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="view">
+    <xs:complexContent>
+      <xs:extension base="tns:container">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element ref="tns:actions" minOccurs="0"/>
+          <xs:element name="newParameters" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="parameter" type="tns:parameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:viewType" use="required"/>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+        <xs:attribute name="iconStyleClass" type="xs:string"/>
+        <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
+        <xs:attribute name="refreshTimeInSeconds" type="xs:int"/>
+        <xs:attribute name="refreshIf" type="xs:string"/>
+        <xs:attribute name="refreshAction" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="container" abstract="true">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:staticImage"/>
+        <xs:element ref="tns:vbox"/>
+        <xs:element ref="tns:hbox"/>
+        <xs:element ref="tns:form"/>
+        <xs:element ref="tns:tabPane"/>
+        <xs:element ref="tns:button"/>
+        <xs:element ref="tns:geoLocator"/>
+        <xs:element ref="tns:map"/>
+        <xs:element ref="tns:dynamicImage"/>
+        <xs:element ref="tns:dialogButton"/>
+        <xs:element ref="tns:label"/>
+        <xs:element ref="tns:blurb"/>
+        <xs:element ref="tns:link"/>
+        <xs:element ref="tns:spacer"/>
+        <xs:element ref="tns:listMembership"/>
+        <xs:element ref="tns:checkMembership"/>
+        <xs:element ref="tns:comparison"/>
+        <xs:element ref="tns:dataGrid"/>
+        <xs:element ref="tns:listGrid"/>
+        <xs:element ref="tns:treeGrid"/>
+        <xs:element ref="tns:inject"/>
+      </xs:choice>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="staticImage">
@@ -1546,66 +1549,66 @@
 
   <xs:simpleType name="viewType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="params"/>
-      <xs:enumeration value="create"/>
-      <xs:enumeration value="pick"/>
-      <xs:enumeration value="list"/>
       <xs:enumeration value="edit"/>
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="create"/>
+      <xs:enumeration value="params"/>
+      <xs:enumeration value="pick"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="horizontalAlignment">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="centre"/>
       <xs:enumeration value="right"/>
       <xs:enumeration value="left"/>
-      <xs:enumeration value="centre"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="shrinkWrap">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="both"/>
       <xs:enumeration value="width"/>
       <xs:enumeration value="height"/>
-      <xs:enumeration value="both"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="verticalAlignment">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="top"/>
       <xs:enumeration value="bottom"/>
+      <xs:enumeration value="top"/>
       <xs:enumeration value="middle"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="implicitActionName">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ZoomOut"/>
-      <xs:enumeration value="Report"/>
-      <xs:enumeration value="BizImport"/>
-      <xs:enumeration value="Cancel"/>
-      <xs:enumeration value="Save"/>
-      <xs:enumeration value="Navigate"/>
-      <xs:enumeration value="Upload"/>
       <xs:enumeration value="DEFAULTS"/>
-      <xs:enumeration value="Edit"/>
-      <xs:enumeration value="OK"/>
-      <xs:enumeration value="Download"/>
-      <xs:enumeration value="Add"/>
-      <xs:enumeration value="Remove"/>
-      <xs:enumeration value="New"/>
+      <xs:enumeration value="Navigate"/>
       <xs:enumeration value="BizExport"/>
+      <xs:enumeration value="Report"/>
+      <xs:enumeration value="Download"/>
+      <xs:enumeration value="Edit"/>
+      <xs:enumeration value="Remove"/>
+      <xs:enumeration value="BizImport"/>
       <xs:enumeration value="Delete"/>
+      <xs:enumeration value="OK"/>
+      <xs:enumeration value="New"/>
+      <xs:enumeration value="ZoomOut"/>
+      <xs:enumeration value="Cancel"/>
+      <xs:enumeration value="Add"/>
+      <xs:enumeration value="Save"/>
+      <xs:enumeration value="Upload"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="referenceTargetType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="namedFame"/>
       <xs:enumeration value="modalWindow"/>
+      <xs:enumeration value="namedFame"/>
+      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
       <xs:enumeration value="self"/>
       <xs:enumeration value="blankFrame"/>
-      <xs:enumeration value="modalWindowWithEmbeddedFrame"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
