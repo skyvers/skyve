@@ -136,7 +136,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 								String widgetLabel,
 								boolean widgetRequired,
 								String widgetInvisible,
-								boolean widgetShowsLabelByDefault) {
+								boolean widgetShowsLabelByDefault,
+								String widgetHelpText) {
 		int mutableCurrentFormColumn = currentFormColumn;
 		UIComponent columnOrField = null;
 

@@ -14,6 +14,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
+import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientLookupDefinition;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -521,6 +522,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean widgetRequired,
 								String widgetInvisible,
 								boolean showsLabelByDefault,
+								String helpText,
 								UIComponent component,
 								Integer pixelWidth,
 								Integer responsiveWidth,
@@ -561,7 +563,8 @@ public class FacesViewVisitor extends ViewVisitor {
 									widgetLabel,
 									widgetRequired,
 									widgetInvisible,
-									showsLabelByDefault);
+									showsLabelByDefault,
+									helpText);
 			}
 		}
 	}
@@ -583,6 +586,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				action.getInvisibleConditionName(), 
 	    				button.showsLabelByDefault(), 
+	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
 	    				null, 
@@ -598,6 +602,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				locator.getInvisibleConditionName(), 
 	    				locator.showsLabelByDefault(), 
+	    				null,
 	    				l, 
 	    				null, 
 	    				null, 
@@ -613,6 +618,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				geometry.getInvisibleConditionName(), 
 	    				geometry.showsLabelByDefault(), 
+	    				null,
 	    				l, 
 	    				geometry.getPixelWidth(), 
 	    				null, 
@@ -628,6 +634,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				map.getInvisibleConditionName(), 
 	    				false,
+	    				null,
 	    				l, 
 	    				map.getPixelWidth(), 
 	    				map.getResponsiveWidth(),
@@ -643,6 +650,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				button.getInvisibleConditionName(), 
 	    				button.showsLabelByDefault(),
+	    				null,
 	    				bn, 
 	    				null, 
 	    				null, 
@@ -658,6 +666,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						false, 
 						image.getInvisibleConditionName(), 
 						false,
+						null,
 						i, 
 						image.getPixelWidth(), 
 						image.getResponsiveWidth(),
@@ -672,6 +681,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							false, 
 							null, 
 							spacer.showsLabelByDefault(),
+							null,
 							component, 
 							spacer.getPixelWidth(), 
 							null, 
@@ -688,6 +698,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						false, 
 						image.getInvisibleConditionName(), 
 						image.showsLabelByDefault(),
+						null,
 						i, 
 						image.getPixelWidth(), 
 						image.getResponsiveWidth(),
@@ -712,6 +723,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						false, 
 						blurb.getInvisibleConditionName(), 
 						blurb.showsLabelByDefault(),
+						null,
 						c, 
 						blurb.getPixelWidth(), 
 						null, 
@@ -789,6 +801,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						false, 
 						link.getInvisibleConditionName(), 
 						link.showsLabelByDefault(),
+						null,
 						c.get(), 
 						link.getPixelWidth(), 
 						null, 
@@ -810,6 +823,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				label.getInvisibleConditionName(), 
 	    				label.showsLabelByDefault(),
+	    				null,
 	    				c, 
 	    				label.getPixelWidth(), 
 	    				null, 
@@ -825,6 +839,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    				false, 
 	    				progressBar.getInvisibleConditionName(), 
 	    				progressBar.showsLabelByDefault(),
+	    				null,
 	    				p, 
 	    				progressBar.getPixelWidth(), 
 	    				null, 
@@ -1025,12 +1040,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(checkBox);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponentBase c = (UIComponentBase) cb.checkBox(listBinding, checkBox, title, required);
 		eventSource = c;
 		addComponent(title,
 						required,
 						checkBox.getInvisibleConditionName(), 
 						checkBox.showsLabelByDefault(),
+						helpText,
 						c, 
 						checkBox.getPixelWidth(), 
 						null,
@@ -1069,12 +1088,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(colour);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponentBase c = (UIComponentBase) cb.colourPicker(listBinding, colour, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
 						colour.getInvisibleConditionName(), 
 						colour.showsLabelByDefault(),
+						helpText,
 						c, 
 						colour.getPixelWidth(), 
 						null, 
@@ -1095,12 +1118,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(combo);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponentBase s = (UIComponentBase) cb.combo(listBinding, combo, title, required);
 		eventSource = s;
 		addComponent(title, 
 						required, 
 						combo.getInvisibleConditionName(), 
 						combo.showsLabelByDefault(),
+						helpText,
 						s, 
 						combo.getPixelWidth(), 
 						null, 
@@ -1121,11 +1148,15 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(image);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponent c = cb.contentImage(listBinding, image, title, required);
         addComponent(title, 
         				false, 
         				image.getInvisibleConditionName(), 
         				image.showsLabelByDefault(),
+        				helpText,
         				c, 
         				image.getPixelWidth(), 
         				null, 
@@ -1139,11 +1170,15 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(link);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponent c = cb.contentLink(listBinding, link, title, required);
 		addComponent(title, 
 						required, 
 						link.getInvisibleConditionName(), 
 						link.showsLabelByDefault(),
+						helpText,
 						c, 
 						link.getPixelWidth(), 
 						null, 
@@ -1157,11 +1192,15 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(html);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponent c = cb.html(listBinding, html, title, required);
         addComponent(title, 
         				required, 
         				html.getInvisibleConditionName(), 
         				html.showsLabelByDefault(),
+        				helpText,
         				c, 
         				html.getPixelWidth(), 
         				null, 
@@ -1203,6 +1242,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientLookupDefinition ldef = def.getLookup();
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponentBase c = (UIComponentBase) cb.lookupDescription(listBinding, 
 																	lookup, 
 																	title, 
@@ -1215,6 +1257,7 @@ public class FacesViewVisitor extends ViewVisitor {
         				required, 
         				lookup.getInvisibleConditionName(), 
         				lookup.showsLabelByDefault(),
+        				helpText,
         				c, 
         				lookup.getPixelWidth(), 
         				null, 
@@ -1237,6 +1280,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						false, 
 						lookup.getInvisibleConditionName(), 
 						lookup.showsLabelByDefault(),
+						null,
 						c, 
 						null, 
 						null, 
@@ -1257,12 +1301,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(password);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
         UIComponentBase c = (UIComponentBase) cb.password(listBinding, password, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				password.getInvisibleConditionName(), 
         				password.showsLabelByDefault(),
+        				helpText,
         				c, 
         				password.getPixelWidth(), 
         				null, 
@@ -1282,6 +1330,9 @@ public class FacesViewVisitor extends ViewVisitor {
                             boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(radio);
 		String title = def.getTitle();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		boolean required = def.isRequired();
         UIComponentBase c = (UIComponentBase) cb.radio(listBinding, radio, title, required);
 		eventSource = c;
@@ -1289,6 +1340,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						required, 
 						radio.getInvisibleConditionName(), 
 						radio.showsLabelByDefault(),
+						helpText,
 						c, 
 						radio.getPixelWidth(), 
 						null, 
@@ -1309,12 +1361,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(richText);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
         UIComponentBase c = (UIComponentBase) cb.richText(listBinding, richText, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				richText.getInvisibleConditionName(), 
         				richText.showsLabelByDefault(),
+        				helpText,
         				c, 
         				richText.getPixelWidth(), 
         				null, 
@@ -1333,12 +1389,16 @@ public class FacesViewVisitor extends ViewVisitor {
 	                            boolean parentVisible,
 	                            boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(slider);
-        UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
+       UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
         eventSource = c;
         addComponent(def.getTitle(), 
         				def.isRequired(), 
         				slider.getInvisibleConditionName(), 
         				slider.showsLabelByDefault(),
+        				helpText,
         				c, 
         				slider.getPixelWidth(), 
         				null, 
@@ -1359,12 +1419,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(spinner);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
         UIComponentBase c = (UIComponentBase) cb.spinner(listBinding, spinner, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
         				spinner.getInvisibleConditionName(), 
         				spinner.showsLabelByDefault(),
+        				helpText,
         				c, 
         				spinner.getPixelWidth(), 
         				null, 
@@ -1385,12 +1449,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		UIComponentBase c = (UIComponentBase) cb.textArea(listBinding, text, title, required, def.getLength());
         eventSource = c;
         addComponent(title, 
         				required, 
         				text.getInvisibleConditionName(), 
         				text.showsLabelByDefault(),
+        				helpText,
         				c, 
         				text.getPixelWidth(), 
         				null, 
@@ -1411,6 +1479,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		SmartClientDataGridFieldDefinition def = getFieldDef(text);
 		String title = def.getTitle();
 		boolean required = def.isRequired();
+		String helpText = (def instanceof SmartClientFieldDefinition) ?
+							((SmartClientFieldDefinition) def).getHelpText() :
+							null;
 		Attribute attribute = def.getTarget().getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
 		TextFormat textFormat = (attribute instanceof Text) ? ((Text) attribute).getFormat() : null;
@@ -1453,6 +1524,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						required, 
 						text.getInvisibleConditionName(), 
 						text.showsLabelByDefault(),
+						helpText,
 						c, 
 						text.getPixelWidth(), 
 						null, 
@@ -1917,14 +1989,11 @@ public class FacesViewVisitor extends ViewVisitor {
 	private SmartClientDataGridFieldDefinition getFieldDef(InputWidget inputWidget) {
 		SmartClientDataGridFieldDefinition result = null;
 
+		// Document is already set to the child document when instantiating a FacesViewVisitor
+		// so there is no need to resolve the view binding within the conversation bean.
 		DocumentImpl targetDocument = document;
 		ModuleImpl targetModule = module;
-// Document is already set to the child document when instantiating a FacesViewVisitor so there is no need to resolve the view binding
-//		if (viewBinding != null) {
-//			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, viewBinding);
-//			targetDocument = (Document) target.getDocument();
-//			targetModule = (Module) customer.getModule(targetDocument.getOwningModuleName());
-//		}
+
 		if (listBinding == null) {
 			result = SmartClientGenerateUtils.getField(user, customer, targetModule, targetDocument, inputWidget);
 		}

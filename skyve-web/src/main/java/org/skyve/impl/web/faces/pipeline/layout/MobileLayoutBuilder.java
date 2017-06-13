@@ -70,7 +70,8 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 								String widgetLabel,
 								boolean widgetRequired,
 								String widgetInvisible,
-								boolean widgetShowsLabelByDefault) {
+								boolean widgetShowsLabelByDefault,
+								String widgetHelpText) {
 		UIComponent field = null;
 
 		// The label

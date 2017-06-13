@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlOutputLabel;
+import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
@@ -197,7 +198,8 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 								String widgetLabel, 
 								boolean widgetRequired,
 								String widgetInvisible,
-								boolean widgetShowsLabelByDefault) {
+								boolean widgetShowsLabelByDefault,
+								String widgetHelpText) {
 		// The label
 		boolean showLabel = widgetShowsLabelByDefault;
 		Boolean itemShowLabel = currentFormItem.getShowLabel();
@@ -231,19 +233,28 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		HtmlPanelGroup div = panelGroup(false, false, true, null);
 		setInvisible(div, widgetInvisible, null);
 		
-		//Create a grid
+		// Create a grid
+		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
 		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(pg);
 		pg.setCellpadding("0"); //Don't pad cells
 		pg.setStyleClass("inputComponent");
-		pg.setColumns(2);
-		pg.setColumnClasses("shrink"); //First column should shrink
+		pg.setColumns((helpText != null) ? 3 : 2);
+		// First (and possibly 3rd if there is help defined) column(s) should shrink
+		pg.setColumnClasses((helpText != null) ? "shrink,,shrink" : "shrink");
 		div.getChildren().add(pg);
 		Message m = message(formItemComponent.getId());
 		m.setStyleClass("formMessageStyle");
 		pg.getChildren().add(m);
 		pg.getChildren().add(formItemComponent);
-
+		if (helpText != null) {
+			HtmlOutputText output = new HtmlOutputText();
+			output.setEscape(false);
+			output.setValue(String.format("<i class=\"fa fa-info-circle help\" data-tooltip=\"%s\"></i>",
+											helpText));
+			pg.getChildren().add(output);
+		}
+		
 		// Update div's style
 		// colspan should be 1.
 		if ((colspan == null) || (colspan.intValue() <= 1)) {

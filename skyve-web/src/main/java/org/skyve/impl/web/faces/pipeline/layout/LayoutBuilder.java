@@ -47,7 +47,8 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 											String widgetLabel,
 											boolean widgetRequired,
 											String widgetInvisible,
-											boolean widgetShowsLabelByDefault);
+											boolean widgetShowsLabelByDefault,
+											String widgetHelpText);
 	
 	/**
 	 * 
