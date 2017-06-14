@@ -88,8 +88,8 @@ public abstract class Harness extends Localisable {
 	}
 	
 	@SuppressWarnings("static-method")
-	public final String getJavascriptFileVersion() {
-		return UtilImpl.JAVASCRIPT_FILE_VERSION;
+	public final String getWebResourceFileVersion() {
+		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
 	}
 	
 	@SuppressWarnings("static-method")
@@ -157,7 +157,7 @@ public abstract class Harness extends Localisable {
 		}
 		else {
 			sb.setLength(0);
-			sb.append("css/basic-min.css?v=").append(UtilImpl.JAVASCRIPT_FILE_VERSION);
+			sb.append("css/basic-min.css?v=").append(UtilImpl.WEB_RESOURCE_FILE_VERSION);
 			cssRelativeFileNameUrl = sb.toString();
 		}
 	}
