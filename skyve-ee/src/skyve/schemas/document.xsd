@@ -102,7 +102,7 @@
           <xs:element name="icon16x16RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="icon32x32RelativeFilePath" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="parentDocument" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="parentDocument" type="tns:parentDocument" form="qualified" minOccurs="0"/>
           <xs:element name="bizKey" type="tns:bizKey" form="qualified" minOccurs="0"/>
           <xs:element name="attributes" form="qualified" minOccurs="0">
             <xs:complexType>
@@ -168,6 +168,14 @@
         <xs:attribute name="discriminator" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="parentDocument">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="databaseIndex" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="text">
@@ -456,10 +464,12 @@
   <xs:complexType name="association">
     <xs:complexContent>
       <xs:extension base="tns:referenceImpl">
-        <xs:sequence/>
+        <xs:sequence>
+          <xs:element name="databaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="allowCascadeMerge" type="xs:boolean" form="qualified" minOccurs="0"/>
+        </xs:sequence>
         <xs:attribute name="required" type="xs:boolean"/>
         <xs:attribute name="type" type="tns:associationType" use="required"/>
-        <xs:attribute name="allowCascadeMerge" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -491,10 +501,12 @@
             </xs:complexType>
           </xs:element>
           <xs:element name="unique" type="tns:CollectionUniqueConstraint" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="ownerDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="elementDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
+          <xs:element name="allowCascadeMerge" type="xs:boolean" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="type" type="tns:collectionType" use="required"/>
         <xs:attribute name="ordered" type="xs:boolean"/>
-        <xs:attribute name="allowCascadeMerge" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -590,49 +602,49 @@
 
   <xs:simpleType name="usageType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="view"/>
       <xs:enumeration value="domain"/>
+      <xs:enumeration value="view"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="extensionStrategy">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="mapped"/>
       <xs:enumeration value="joined"/>
       <xs:enumeration value="single"/>
+      <xs:enumeration value="mapped"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="textCase">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="upper"/>
-      <xs:enumeration value="lower"/>
       <xs:enumeration value="capital"/>
+      <xs:enumeration value="lower"/>
+      <xs:enumeration value="upper"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="validatorType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="luhnCheckDigit"/>
-      <xs:enumeration value="isbnCheckDigit"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
-      <xs:enumeration value="isinCheckDigit"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="email"/>
+      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="ipAddress"/>
+      <xs:enumeration value="ipv4Address"/>
       <xs:enumeration value="ibanCheckDigit"/>
       <xs:enumeration value="url"/>
+      <xs:enumeration value="isbnCheckDigit"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="domainType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="dynamic"/>
       <xs:enumeration value="variant"/>
       <xs:enumeration value="constant"/>
+      <xs:enumeration value="dynamic"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -647,25 +659,25 @@
 
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="composition"/>
       <xs:enumeration value="aggregation"/>
+      <xs:enumeration value="composition"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="collectionType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="child"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="customer"/>
       <xs:enumeration value="dataGroup"/>
-      <xs:enumeration value="global"/>
       <xs:enumeration value="user"/>
+      <xs:enumeration value="global"/>
+      <xs:enumeration value="customer"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

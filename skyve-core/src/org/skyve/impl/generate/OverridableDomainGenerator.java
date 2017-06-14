@@ -669,7 +669,11 @@ joined tables
 				Document parentDocument = document.getParentDocument(null);
 				if (parentDocument.getPersistent() != null) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
-						fw.append(indent).append("\t\t<property name=\"bizParentId\" length=\"36\" index=\"bizParentIdIndex\" />\n");
+						fw.append(indent).append("\t\t<property name=\"bizParentId\" length=\"36\"");
+						if (((DocumentImpl) document).getParentDatabaseIndex()) {
+							fw.append(" index=\"bizParentIdIndex\"");
+						}
+						fw.append(" />\n");
 					}
 					else {
 						// Add bizOrdinal ORM
@@ -685,7 +689,11 @@ joined tables
 							fw.append(customerName);
 						}
 						fw.append(parentModuleName).append(parentDocumentName);
-						fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\" />\n");
+						fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\"");
+						if (((DocumentImpl) document).getParentDatabaseIndex()) {
+							fw.append(" index=\"parentIndex\"");
+						}
+						fw.append(" />\n");
 					}
 				}
 			}
@@ -896,7 +904,15 @@ joined tables
 					else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
-					fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME).append("\" />\n");
+					if (Boolean.TRUE.equals(collection.getOwnerDatabaseIndex())) {
+						fw.append(indentation).append("\t\t\t<key>\n");
+						fw.append("\t\t\t\t<column name=\"").append(PersistentBean.OWNER_COLUMN_NAME);
+						fw.append("\" index=\"").append("ownerIndex\" />\n");
+						fw.append(indentation).append("\t\t\t</key>\n");
+					}
+					else {
+						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME).append("\" />\n");
+					}
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
 					}
@@ -919,10 +935,19 @@ joined tables
 							fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 						}
 						
+						// bizId first in the index as it's values will vary the most
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_type\" />\n");
+						fw.append(collection.getName()).append("_id\" length=\"36\"");
+						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
+							fw.append(" index=\"elementIndex\"");
+						}
+						fw.append(" />\n");
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_id\" length=\"36\" />\n");
+						fw.append(collection.getName()).append("_type\"");
+						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
+							fw.append(" index=\"elementIndex\"");
+						}
+						fw.append(" />\n");
 						fw.append(indentation).append("\t\t</many-to-any>\n");
 					}
 					else {
@@ -932,7 +957,16 @@ joined tables
 							fw.append(customerName);
 						}
 						fw.append(referencedModuleName).append(referencedDocumentName);
-						fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME).append("\" />\n");
+						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
+							fw.append("\">\n");
+							fw.append("\t\t\t\t<column name=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
+							fw.append("\" index=\"").append("elementIndex\" />\n");
+							fw.append("\t\t\t</many-to-many>\n");
+						}
+						else {
+							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
+							fw.append("\" />\n");
+						}
 					}
 					
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
@@ -971,10 +1005,21 @@ joined tables
 						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
 					
+					// bizId first in the index as it's values will vary the most
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_type\" />\n");
+					fw.append(association.getName()).append("_id\" length=\"36");
+					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+						fw.append("\" index=\"");
+						fw.append(moduleName).append(documentName).append(association.getName());
+					}
+					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_id\" length=\"36\" />\n");
+					fw.append(association.getName()).append("_type");
+					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+						fw.append("\" index=\"");
+						fw.append(moduleName).append(documentName).append(association.getName());
+					}
+					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</any>\n");
 				}
 				else {
@@ -1009,6 +1054,10 @@ joined tables
 					}
 					else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 						fw.append(",merge");
+					}
+					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+						fw.append("\" index=\"");
+						fw.append(moduleName).append(documentName).append(association.getName());
 					}
 					fw.append("\" />\n");
 				}

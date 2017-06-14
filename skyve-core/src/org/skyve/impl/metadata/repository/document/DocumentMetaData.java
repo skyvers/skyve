@@ -65,6 +65,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
@@ -100,7 +101,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String icon32x32RelativeFilePath;
 	private java.lang.Boolean audited;
 	private String description;
-	private String parentDocument;
+	private ParentDocument parentDocument;
 	private BizKey bizKey;
 	private List<Attribute> attributes = new ArrayList<>();
 	private List<ConditionMetaData> conditions = new ArrayList<>();
@@ -188,13 +189,13 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.description = UtilImpl.processStringValue(description);
 	}
 
-	public String getParentDocument() {
+	public ParentDocument getParentDocument() {
 		return parentDocument;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setParentDocument(String parentDocument) {
-		this.parentDocument = UtilImpl.processStringValue(parentDocument);
+	public void setParentDocument(ParentDocument parentDocument) {
+		this.parentDocument = parentDocument;
 	}
 
 	public BizKey getBizKey() {
@@ -303,13 +304,18 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		
 		result.setDescription(getDescription());
 		
-		result.setParentDocumentName(getParentDocument());
+		ParentDocument parent = getParentDocument();
+		if (parent != null) {
+			result.setParentDocumentName(parent.getParentDocumentName());
+			result.setParentDatabaseIndex(java.lang.Boolean.TRUE.equals(parent.getDatabaseIndex()));
+		}
 
 		Persistent resultPersistent = result.getPersistent();
 		if (resultPersistent != null) {
 			if (bizKey == null) {
 				throw new MetaDataException(metaDataName + " : The document [bizKey] is required for a persistent or mapped document");
 			}
+
 			String expression = bizKey.getExpression();
 			String code = bizKey.getCode();
 			if (code != null) {
@@ -335,6 +341,9 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 
 		if ((resultPersistent == null) && (result.getBizKeyMethodCode() != null)) {
 			throw new MetaDataException(metaDataName + " : The document [bizKey] is NOT required for a transient document");
+		}
+		if ((resultPersistent == null) && result.getParentDatabaseIndex()) {
+			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();
 
@@ -631,6 +640,10 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							throw new MetaDataException(metaDataName + " : The association [type] is required for association " +
 															relation.getName());
 						}
+						if ((! association.isPersistent()) && (association.getDatabaseIndex() != null)) {
+							throw new MetaDataException(metaDataName + " : The association [databaseIndex] is NOT required for transient association " +
+															relation.getName());
+						}
 					}
 					else if (relation instanceof Collection) {
 						Collection collection = (Collection) relation;
@@ -638,6 +651,9 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 							throw new MetaDataException(metaDataName + " : The collection [minCardinality] is required for collection " + 
 															relation.getName());
 						}
+
+						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
+						java.lang.Boolean elementDatabaseIndex = collection.getElementDatabaseIndex();
 
 						// Check for compound bindings.
 						// Hibernate defines collection sort order in terms of SQL columns in the ORM.
@@ -653,6 +669,27 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 										break;
 									}
 								}
+							}
+						}
+						else {
+							if (ownerDatabaseIndex != null) {
+								throw new MetaDataException(metaDataName + " : The collection [ownerDatabaseIndex] is NOT required for transient collection " +
+																relation.getName());
+							}
+							if (elementDatabaseIndex != null) {
+								throw new MetaDataException(metaDataName + " : The collection [elementDatabaseIndex] is NOT required for transient collection " +
+																relation.getName());
+							}
+						}
+						
+						if (CollectionType.child.equals(collection.getType())) {
+							if (ownerDatabaseIndex != null) {
+								throw new MetaDataException(metaDataName + " : The collection [ownerDatabaseIndex] is NOT applicable to child collection " +
+																relation.getName());
+							}
+							if (elementDatabaseIndex != null) {
+								throw new MetaDataException(metaDataName + " : The collection [elementDatabaseIndex] is NOT applicable to child collection " +
+																relation.getName());
 							}
 						}
 					}
