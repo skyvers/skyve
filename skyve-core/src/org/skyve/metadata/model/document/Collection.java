@@ -63,6 +63,18 @@ public interface Collection extends Reference {
 	public CollectionType getType();
 	
 	/**
+	 * This determines whether to create an index on the collection owner foreign key column.
+	 * Set to true if the database does not implement foreign keys with indexes - ie SQLServer.
+	 */
+	public Boolean getOwnerDatabaseIndex();
+
+	/**
+	 * This determines whether to create an index on the collection element foreign key column.
+	 * Set to true if the database does not implement foreign keys with indexes - ie SQLServer.
+	 */
+	public Boolean getElementDatabaseIndex();
+
+	/**
 	 * Cascade type 'merge' makes many-many relationships within the association
 	 * target object update (without the collection being dirty)
 	 * and thus causes optimistic lock exceptions when the bizLock 

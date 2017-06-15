@@ -15,9 +15,7 @@
 			<f:event type="preRenderView" listener="#{unsubscribe.preRender}" />
 		</f:metadata>
 		<ui:composition template="mobile/template.xhtml">
-			<ui:param name="baseHref" value="#{unsubscribe.baseHref}" />
-			<ui:param name="skyveVersionComment" value="#{unsubscribe.skyveVersionComment}" />
-			<ui:param name="javascriptFileVersion" value="#{unsubscribe.javascriptFileVersion}" />
+			<ui:param name="bean" value="#{unsubscribe}" />
 			<ui:define name="pages">
 				<pm:page id="main">
 					<pm:header fixed="true" pt:data-tap-toggle="false" title="#{unsubscribe.i18n['page.unsubscribe.title']}" />

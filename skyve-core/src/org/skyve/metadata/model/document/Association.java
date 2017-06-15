@@ -37,6 +37,12 @@ public interface Association extends Reference {
 	public boolean isRequired();
 	
 	/**
+	 * This determines whether to create an index on the association foreign key column.
+	 * Set to true if the database does not implement foreign keys with indexes - ie SQLServer.
+	 */
+	public Boolean getDatabaseIndex();
+
+	/**
 	 * Cascade type 'merge' makes many-many relationships within the association
 	 * target object update (without the collection being dirty)
 	 * and thus causes optimistic lock exceptions when the bizLock 

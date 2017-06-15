@@ -45,7 +45,7 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<property name="bizParentId" length="36" index="bizParentIdIndex" />
+		<property name="bizParentId" length="36" />
 		<property name="positionTitle" length="200" />
 		<many-to-one name="staff" entity-name="whosinStaff" column="staff_id" cascade="persist,save-update,refresh,merge" />
 		<property name="demoData" />

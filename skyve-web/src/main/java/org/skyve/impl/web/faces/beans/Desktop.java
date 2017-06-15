@@ -92,7 +92,7 @@ public class Desktop extends Harness {
 					listDataSources(customer, user, result);
 	
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
-					result.append("isc.BizUtil.version='").append(UtilImpl.JAVASCRIPT_FILE_VERSION).append("';");
+					result.append("isc.BizUtil.version='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
 					result.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
 					
 					WebAction a = Desktop.this.getWebActionParameter();

@@ -66,7 +66,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	 * This is this document's master or parent document name. This can be <code>null</code> if no parent document exists.
 	 */
 	private String parentDocumentName;
-
+	
+	/**
+	 * This indicates whether a database index should be created on the "parent_id" foreign key column.
+	 */
+	private boolean parentDatabaseIndex;
+	
 	private String bizKeyMethodCode;
 	// Although this is code generated into the domain class, we need it here
 	// so that it can be checked by the repository implementor, as only then
@@ -303,6 +308,14 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	public void setParentDocumentName(String parentDocumentName) {
 		this.parentDocumentName = parentDocumentName;
+	}
+	
+	public boolean getParentDatabaseIndex() {
+		return parentDatabaseIndex;
+	}
+
+	public void setParentDatabaseIndex(boolean parentDatabaseIndex) {
+		this.parentDatabaseIndex = parentDatabaseIndex;
 	}
 
 	public String getBizKeyMethodCode() {

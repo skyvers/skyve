@@ -193,8 +193,8 @@
 		<many-to-any meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
 			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
-			<column name="arcs_type" />
 			<column name="arcs_id" length="36" />
+			<column name="arcs_type" />
 		</many-to-any>
 		</bag>
 		<filter name="testArcOneToManyNoneFilter" condition="1=0"/>
@@ -215,8 +215,8 @@
 		<any name="arc" meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
 			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
-			<column name="arc_type" />
 			<column name="arc_id" length="36" />
+			<column name="arc_type" />
 		</any>
 		<filter name="testArcOneToOneNoneFilter" condition="1=0"/>
 		<filter name="testArcOneToOneCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -233,7 +233,7 @@
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<property name="bizParentId" length="36" index="bizParentIdIndex" />
+		<property name="bizParentId" length="36" />
 		<property name="text" length="20" />
 		<filter name="testHierarchicalNoneFilter" condition="1=0"/>
 		<filter name="testHierarchicalCustomerFilter" condition="bizCustomer=:customerParam"/>
