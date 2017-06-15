@@ -47,6 +47,7 @@
 <html dir="<%=Util.isRTL(locale) ? "rtl" : "ltr"%>">
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+		<meta http-equiv="refresh" content="300; url=<%=basePath%>loggedOut" />
 		<title><%=Util.i18n("page.login.title", locale)%></title>
 		<base href="<%=basePath%>" />
 		
