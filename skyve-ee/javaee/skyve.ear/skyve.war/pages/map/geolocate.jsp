@@ -93,7 +93,7 @@
 <%--
 		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&region=AU&key=<%=UtilImpl.GOOGLE_MAPS_V3_API_KEY%>"></script> 
 --%>
-		<script language="javascript" type="text/javascript" src="<%=path%>/desktop/geolocate-min.js?v=<%=UtilImpl.JAVASCRIPT_FILE_VERSION%>"></script>
+		<script language="javascript" type="text/javascript" src="<%=path%>/desktop/geolocate-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		<script type="text/javascript">
 			Map.pick = function() {
 				var opener = window.parent.isc.WindowStack.getOpener();
