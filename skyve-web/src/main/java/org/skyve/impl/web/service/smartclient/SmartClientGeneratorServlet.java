@@ -2237,7 +2237,8 @@ pickListFields:[{name:'value'}],
 		public void visitOnFocusEventHandler(Focusable blurable,
 												boolean parentVisible,
 												boolean parentEnabled) {
-			code.append("editorEnter:function(form,item,value){if(item.validate()){var view=form._view;");
+			// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
+			code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 		}
 
 		@Override
@@ -2258,9 +2259,11 @@ pickListFields:[{name:'value'}],
 			visitingOnBlur = true;
 			
 			// This fires before the BizButton action() method if a button was clicked
-			code.append("blur:function(form,item){form._view._blurry=item;},");
+			// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
+			code.append("blur:function(form,item){if(!isc.RPCManager.requestsArePending()){form._view._blurry=item;}},");
 			// This is called before or after the BizButton action depending on the browser.
-			code.append("editorExit:function(form,item,value){if(item.validate()){var view=form._view;");
+			// Note the test to short circuit blur event processing whilst requests are pending to stop loops with multiple fields.
+			code.append("editorExit:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 		}
 
 		@Override
