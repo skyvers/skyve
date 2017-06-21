@@ -2247,11 +2247,20 @@ pickListFields:[{name:'value'}],
 			code.append("}},");
 		}
 
+		// indicates that we are blurring and we need to call special methods
+		// to potentially serialize calls to button actions after editorExit.
+		private boolean visitingOnBlur = false;
+		
 		@Override
 		public void visitOnBlurEventHandler(Focusable blurable,
 												boolean parentVisible,
 												boolean parentEnabled) {
-			code.append("editorExit:function(form,item,value){if(item.validate()){var view=form._view;");
+			visitingOnBlur = true;
+			
+			// This fires before the BizButton action() method if a button was clicked
+			code.append("blur:function(form,item){form._view._blurry=item;},");
+			// This is called before or after the BizButton action depending on the browser.
+			code.append("editorExit:function(form,item,value){if(item.validate()){console.log('blur ' + isc.timeStamp());var view=form._view;");
 		}
 
 		@Override
@@ -2259,6 +2268,7 @@ pickListFields:[{name:'value'}],
 												boolean parentVisible,
 												boolean parentEnabled) {
 			code.append("}},");
+			visitingOnBlur = false;
 		}
 
 		// Used to sort out server-side events into the bizEditedForServer() method.
@@ -2415,7 +2425,7 @@ pickListFields:[{name:'value'}],
 			if (! eventsWithNoForm) {
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
-			code.append("view.rerenderAction(");
+			code.append(visitingOnBlur ? "view.rerenderBlurryAction(" : "view.rerenderAction(");
 			code.append(Boolean.FALSE.equals(rerender.getClientValidation()) ? "false,'" : "true,'");
 			code.append(source.getSource()).append("');");
 		}
@@ -2428,7 +2438,8 @@ pickListFields:[{name:'value'}],
 				writeOutServerSideCallbackMethodIfNecessary();
 			}
 			Action action = view.getAction(server.getActionName());
-			code.append("view.doAction('").append(server.getActionName()).append("',");
+			code.append(visitingOnBlur ? "view.doBlurryAction('" : "view.doAction('");
+			code.append(server.getActionName()).append("',");
 			code.append(! Boolean.FALSE.equals(action.getClientValidation())).append(");");
 		}
 
