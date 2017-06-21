@@ -2260,7 +2260,7 @@ pickListFields:[{name:'value'}],
 			// This fires before the BizButton action() method if a button was clicked
 			code.append("blur:function(form,item){form._view._blurry=item;},");
 			// This is called before or after the BizButton action depending on the browser.
-			code.append("editorExit:function(form,item,value){if(item.validate()){console.log('blur ' + isc.timeStamp());var view=form._view;");
+			code.append("editorExit:function(form,item,value){if(item.validate()){var view=form._view;");
 		}
 
 		@Override
