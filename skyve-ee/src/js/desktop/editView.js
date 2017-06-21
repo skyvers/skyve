@@ -374,7 +374,7 @@ isc.EditView.addMethods({
 
 	// called on the server-side code generation for rerender actions from a blur event
 	rerenderBlurryAction: function(validate, source) {
-		this.delayCall('_rerenderBlurryAction', [validate, source], 50);
+		this.delayCall('_rerenderBlurryAction', [validate, source], 100);
 	},
 	_rerenderBlurryAction: function(validate, source) {
 		this._source = source;
@@ -655,7 +655,7 @@ isc.EditView.addMethods({
 
 	// called on the server-side code generation for server-side actions from a blur event
 	doBlurryAction: function(action, validate) {
-		this.delayCall('_doBlurryAction', [action, validate], 50);
+		this.delayCall('_doBlurryAction', [action, validate], 100);
 	},
 	_doBlurryAction: function(action, validate) {
 		var me = this;
