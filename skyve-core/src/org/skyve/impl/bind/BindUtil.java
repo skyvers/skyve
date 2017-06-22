@@ -40,6 +40,7 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.util.NullTolerantBeanComparator;
 import org.skyve.impl.util.ThreadSafeFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -816,6 +817,12 @@ public final class BindUtil {
 				result = PropertyUtils.getProperty(currentBean, simplePropertyName);
 			}
 			catch (Exception e) {
+				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + fullyQualifiedPropertyName + ")!");
+				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simplePropertyName + " from " + currentBean);
+				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simplePropertyName + 
+										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
+										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
+				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
 				throw new MetaDataException(e);
 			}
 
