@@ -381,11 +381,12 @@ isc.EditView.addMethods({
 		var me = this;
 		this.saveInstance(validate, null, function() {
 			if (me._blurry) {
-				var action = me._blurry;
+				var blurry = me._blurry;
 				me._blurry = null;
 				// test for a BizButton as this could just be the form item that was blurred
-				if (action.action) {
-					action.action();
+				if (blurry.action) {
+					// delay the call, otherwise the _vm.saveData() callback function is not invoked
+					blurry.delayCall('action');
 				}
 			}
 		});
@@ -661,11 +662,12 @@ isc.EditView.addMethods({
 		var me = this;
 		this.doAction(action, validate, null, null, null, null, function() {
 			if (me._blurry) {
-				var action = me._blurry;
+				var blurry = me._blurry;
 				me._blurry = null;
 				// test for a BizButton as this could just be the form item that was blurred
-				if (action.action) {
-					action.action();
+				if (blurry.action) {
+					// delay the call, otherwise the _vm.saveData() callback function is not invoked
+					blurry.delayCall('action');
 				}
 			}
 		});
