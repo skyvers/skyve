@@ -1318,7 +1318,7 @@ isc.BizButton.addMethods({
 		}
 		
 		this.action = function() {
-			if (this._view._blurry) {
+			if (this._view && this._view._blurry) {
 				this._view._blurry = this;
 				return;
 			}
