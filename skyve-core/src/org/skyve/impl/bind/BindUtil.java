@@ -814,6 +814,7 @@ public final class BindUtil {
 		while (tokenizer.hasMoreTokens()) {
 			String simplePropertyName = tokenizer.nextToken();
 			try {
+				currentBean = UtilImpl.deproxy(currentBean);
 				result = PropertyUtils.getProperty(currentBean, simplePropertyName);
 			}
 			catch (Exception e) {

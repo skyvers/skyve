@@ -251,15 +251,6 @@ public class UtilImpl {
 										Relation owningRelation,
 										Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
-				try {
-					if (beanAccepted != bean) {
-						if (beanAccepted instanceof HibernateProxy) {
-							BindUtil.set(bean, binding, ((HibernateProxy) beanAccepted).getHibernateLazyInitializer().getImplementation());
-						}
-					}
-				} catch (Exception e) {
-					throw new DomainException(e);
-				}
 				return true;
 			}
 		}.visit(document, bean, customer);
