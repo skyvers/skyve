@@ -1400,31 +1400,36 @@ t.printStackTrace();
 				queryString.append(getDocumentEntityName(referenceDocument.getOwningModuleName(), referenceDocument.getName()));
 				queryString.append(" as bean");
 				if (ref.isCollection()) {
-					queryString.append(" where :referencedBean member of bean.");
+					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+					queryString.append(" where :referencedBeanId member of bean.");
 					queryString.append(ref.getReferenceFieldName());
 				}
 				else {
 					queryString.append(" where bean.");
 					queryString.append(ref.getReferenceFieldName());
-					queryString.append(" = :referencedBean");
+					// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+					queryString.append(".bizId = :referencedBeanId");
 				}
 				
 				Set<Bean> theseBeansToBeCascaded = beansToBeCascaded.get(entityName);
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (@SuppressWarnings("unused") Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-						queryString.append(" and bean != :deletedBean").append(i++);
+						// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+						queryString.append(" and bean.bizId != :deletedBeanId").append(i++);
 					}
 				}
 				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
 	
 				Query query = session.createQuery(queryString.toString());
 				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-				query.setEntity("referencedBean", beanToDelete);
+				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+				query.setString("referencedBeanId", beanToDelete.getBizId());
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-						query.setEntity("deletedBean" + i++, thisBeanToBeCascaded);
+						// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
+						query.setString("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId());
 					}
 				}
 	
