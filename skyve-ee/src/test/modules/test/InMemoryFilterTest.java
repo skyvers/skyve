@@ -11,6 +11,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
+import util.AbstractH2Test;
+
 public class InMemoryFilterTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
@@ -44,7 +46,7 @@ public class InMemoryFilterTest extends AbstractH2Test {
 
 		InMemoryFilter f = new InMemoryFilter();
 		f.addStartsWith("name", "Je");
-		
+
 		f.filter(beans);
 		Assert.assertEquals("Filter result is wrong", 1, beans.size());
 	}

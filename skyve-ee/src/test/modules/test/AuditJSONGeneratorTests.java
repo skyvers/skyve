@@ -1,5 +1,8 @@
 package modules.test;
 
+import org.junit.Test;
+import org.skyve.util.Util;
+
 import modules.AuditJSONGenerator;
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
@@ -9,9 +12,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-
-import org.junit.Test;
-import org.skyve.util.Util;
+import util.AbstractH2Test;
 
 public class AuditJSONGeneratorTests extends AbstractH2Test {
 	@Test

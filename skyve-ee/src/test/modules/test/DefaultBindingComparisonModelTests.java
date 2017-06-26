@@ -1,10 +1,11 @@
 package modules.test;
 
-import modules.test.domain.AllAttributesPersistent;
-
 import org.junit.Test;
 import org.skyve.metadata.view.model.comparison.DefaultBindingComparisonModel;
 import org.skyve.util.Util;
+
+import modules.test.domain.AllAttributesPersistent;
+import util.AbstractH2Test;
 
 public class DefaultBindingComparisonModelTests extends AbstractH2Test {
 	@Test
