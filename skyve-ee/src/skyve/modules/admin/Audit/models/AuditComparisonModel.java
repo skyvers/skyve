@@ -71,7 +71,8 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 					if ((am != null) && (ad != null)) {
 						TargetMetaData target = Binder.getMetaDataForBinding(c, am, ad, binding);
 						reference = (Reference) target.getAttribute();
-						referenceDocument = (reference == null) ? null : am.getDocument(c, reference.getDocumentName());
+						Module targetModule = c.getModule(target.getDocument().getOwningModuleName());
+						referenceDocument = (reference == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
 					}
 				}
 				catch (MetaDataException e) {
@@ -104,7 +105,8 @@ public class AuditComparisonModel extends ComparisonModel<Audit, Audit> {
 						try {
 							target = Binder.getMetaDataForBinding(c, am, ad, binding);
 							Reference reference = (Reference) target.getAttribute();
-							Document referenceDocument = (am == null) ? null : am.getDocument(c, reference.getDocumentName());
+							Module targetModule = c.getModule(target.getDocument().getOwningModuleName());
+							Document referenceDocument = (am == null) ? null : targetModule.getDocument(c, reference.getDocumentName());
 							bindingToNodes.put(binding, createNode(c, reference, referenceDocument, compareValues, true));
 						}
 						catch (MetaDataException e) {
