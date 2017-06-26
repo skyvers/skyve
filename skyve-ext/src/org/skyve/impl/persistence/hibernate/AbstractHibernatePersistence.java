@@ -1499,7 +1499,7 @@ t.printStackTrace();
 			if (theseBeansToBeCascaded != null) {
 				int i = 0;
 				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-					query.setEntity("deleted_id" + i++, thisBeanToBeCascaded.getBizId());
+					query.setString("deleted_id" + i++, thisBeanToBeCascaded.getBizId());
 				}
 			}
 	
