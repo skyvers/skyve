@@ -252,7 +252,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 	 */
 	@XmlTransient
 	public boolean isAllowUpdate() {
-		return ((CORE.getPersistence().getUser().getContactId().equals(this.getBizId())
+		return ((CORE.getPersistence().getUser().getContactId() != null 
+					&& CORE.getPersistence().getUser().getContactId().equals(this.getBizId())
 					|| isUserInRole("admin","ContactManager")
 					|| isUserInRole("admin","SecurityAdministrator")?true:false));
 	}

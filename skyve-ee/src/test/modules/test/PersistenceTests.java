@@ -21,6 +21,7 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import util.AbstractH2Test;
 
 public class PersistenceTests extends AbstractH2Test {
 	@Test
@@ -41,7 +42,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertNull(test.getAggregatedCollection().get(0).getBizLock());
 
 		test = p.save(test);
-		
+
 		Assert.assertNotNull(test.getBizLock());
 		Assert.assertNotNull(test.getAggregatedAssociation().getBizLock());
 		Assert.assertNotNull(test.getAggregatedCollection().get(0).getBizLock());
@@ -55,12 +56,12 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertNull(test.getAggregatedCollection().get(0).getBizLock());
 
 		test = p.save(test);
-		
+
 		Assert.assertNotNull(test.getBizLock());
 		Assert.assertNotNull(test.getAggregatedAssociation().getBizLock());
 		Assert.assertNotNull(test.getAggregatedCollection().get(0).getBizLock());
 	}
-	
+
 	@Test
 	public void testPersistBizLockSJS() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 3);
@@ -69,7 +70,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertNull(test.getAggregatedCollection().get(0).getBizLock());
 
 		test = p.save(test);
-		
+
 		Assert.assertNotNull(test.getBizLock());
 		Assert.assertNotNull(test.getAggregatedAssociation().getBizLock());
 		Assert.assertNotNull(test.getAggregatedCollection().get(0).getBizLock());
@@ -83,7 +84,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertNull(test.getAggregatedCollection().get(0).getBizLock());
 
 		test = p.save(test);
-		
+
 		Assert.assertNotNull(test.getBizLock());
 		Assert.assertNotNull(test.getAggregatedAssociation().getBizLock());
 		Assert.assertNotNull(test.getAggregatedCollection().get(0).getBizLock());
@@ -92,7 +93,7 @@ public class PersistenceTests extends AbstractH2Test {
 	@Test
 	public void testPreAndPostSaveNoBaseESS() throws Exception {
 		MappedExtensionSingleStrategyExtension test = Util.constructRandomInstance(u, m, messd, 3);
-		
+
 		Assert.assertFalse(test.isPreSaveCalled());
 		Assert.assertFalse(test.isPostSaveCalled());
 		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
@@ -104,7 +105,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 		// Don't assign this coz we wanna test the old transient bean for evidence of bizlet calls
 		MappedExtensionSingleStrategyExtension persistedTest = p.save(test);
-		
+
 		Assert.assertTrue(test.isPreSaveCalled());
 		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
 		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
@@ -112,15 +113,17 @@ public class PersistenceTests extends AbstractH2Test {
 
 		// Post save is called on the now managed persistent version
 		Assert.assertTrue(persistedTest.isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
+		Assert.assertTrue(
+				((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
 		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertTrue(
+				((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
 	}
-	
+
 	@Test
 	public void testPreAndPostSaveNoBaseEJS() throws Exception {
 		MappedExtensionJoinedStrategyExtension test = Util.constructRandomInstance(u, m, mejsd, 3);
-		
+
 		Assert.assertFalse(test.isPreSaveCalled());
 		Assert.assertFalse(test.isPostSaveCalled());
 		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
@@ -132,7 +135,7 @@ public class PersistenceTests extends AbstractH2Test {
 
 		// Don't assign this coz we wanna test the old transient bean for evidence of bizlet calls
 		MappedExtensionJoinedStrategyExtension persistedTest = p.save(test);
-		
+
 		Assert.assertTrue(test.isPreSaveCalled());
 		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
 		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
@@ -140,9 +143,11 @@ public class PersistenceTests extends AbstractH2Test {
 
 		// Post save is called on the now managed persistent version
 		Assert.assertTrue(persistedTest.isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
+		Assert.assertTrue(
+				((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
 		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertTrue(
+				((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
 	}
 
 	@Test
@@ -157,22 +162,22 @@ public class PersistenceTests extends AbstractH2Test {
 		testDerivedPropertiesAvailableAfterSave(test);
 	}
 
-	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionSingleStrategyExtension test) 
-	throws Exception {
-		Integer[] values = new Integer[] {test.getBaseDerivedInteger(),
-											test.getDerivedInteger(),
-											test.getAggregatedAssociation().getBaseDerivedInteger(),
-											test.getAggregatedAssociation().getDerivedInteger(),
-											test.getAggregatedCollection().get(0).getBaseDerivedInteger(),
-											test.getAggregatedCollection().get(0).getDerivedInteger(),
-											test.getAggregatedCollection().get(1).getBaseDerivedInteger(),
-											test.getAggregatedCollection().get(1).getDerivedInteger()};
+	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionSingleStrategyExtension test)
+			throws Exception {
+		Integer[] values = new Integer[] { test.getBaseDerivedInteger(),
+				test.getDerivedInteger(),
+				test.getAggregatedAssociation().getBaseDerivedInteger(),
+				test.getAggregatedAssociation().getDerivedInteger(),
+				test.getAggregatedCollection().get(0).getBaseDerivedInteger(),
+				test.getAggregatedCollection().get(0).getDerivedInteger(),
+				test.getAggregatedCollection().get(1).getBaseDerivedInteger(),
+				test.getAggregatedCollection().get(1).getDerivedInteger() };
 		for (Integer value : values) {
 			Assert.assertNotNull(value);
 		}
-		
+
 		MappedExtensionSingleStrategyExtension persistedTest = p.save(test);
-		
+
 		Assert.assertEquals(values[0], persistedTest.getBaseDerivedInteger());
 		Assert.assertEquals(values[1], persistedTest.getDerivedInteger());
 		Assert.assertEquals(values[2], persistedTest.getAggregatedAssociation().getBaseDerivedInteger());
@@ -182,7 +187,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertEquals(values[6], persistedTest.getAggregatedCollection().get(1).getBaseDerivedInteger());
 		Assert.assertEquals(values[7], persistedTest.getAggregatedCollection().get(1).getDerivedInteger());
 	}
-	
+
 	@Test
 	public void testDerivedPropertiesAvailableAfterSaveEJS() throws Exception {
 		MappedExtensionJoinedStrategyExtension test = Util.constructRandomInstance(u, m, mejsd, 4);
@@ -195,22 +200,22 @@ public class PersistenceTests extends AbstractH2Test {
 		testDerivedPropertiesAvailableAfterSave(test);
 	}
 
-	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionJoinedStrategyExtension test) 
-	throws Exception {
-		Integer[] values = new Integer[] {test.getBaseDerivedInteger(),
-											test.getDerivedInteger(),
-											test.getAggregatedAssociation().getBaseDerivedInteger(),
-											test.getAggregatedAssociation().getDerivedInteger(),
-											test.getAggregatedCollection().get(0).getBaseDerivedInteger(),
-											test.getAggregatedCollection().get(0).getDerivedInteger(),
-											test.getAggregatedCollection().get(1).getBaseDerivedInteger(),
-											test.getAggregatedCollection().get(1).getDerivedInteger()};
+	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionJoinedStrategyExtension test)
+			throws Exception {
+		Integer[] values = new Integer[] { test.getBaseDerivedInteger(),
+				test.getDerivedInteger(),
+				test.getAggregatedAssociation().getBaseDerivedInteger(),
+				test.getAggregatedAssociation().getDerivedInteger(),
+				test.getAggregatedCollection().get(0).getBaseDerivedInteger(),
+				test.getAggregatedCollection().get(0).getDerivedInteger(),
+				test.getAggregatedCollection().get(1).getBaseDerivedInteger(),
+				test.getAggregatedCollection().get(1).getDerivedInteger() };
 		for (Integer value : values) {
 			Assert.assertNotNull(value);
 		}
-		
+
 		MappedExtensionJoinedStrategyExtension persistedTest = p.save(test);
-		
+
 		Assert.assertEquals(values[0], persistedTest.getBaseDerivedInteger());
 		Assert.assertEquals(values[1], persistedTest.getDerivedInteger());
 		Assert.assertEquals(values[2], persistedTest.getAggregatedAssociation().getBaseDerivedInteger());
@@ -227,32 +232,40 @@ public class PersistenceTests extends AbstractH2Test {
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().clear();
 		test = p.save(test);
-		
-		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(4,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be no TEST_MappedExtension rows in the database since they cascade
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
 	}
-	
+
 	@Test
 	public void testComposedCascadeDeleteSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 2);
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().clear();
 		test = p.save(test);
-		
-		Assert.assertEquals(4, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(4,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be no TEST_MappedExtension rows in the database since they cascade
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
@@ -261,15 +274,19 @@ public class PersistenceTests extends AbstractH2Test {
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().clear();
 		test = p.save(test);
-		
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be no TEST_MappedExtension rows in the database since they cascade
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
@@ -278,98 +295,130 @@ public class PersistenceTests extends AbstractH2Test {
 		test.setAggregatedAssociation(null);
 		test.getAggregatedCollection().clear();
 		test = p.save(test);
-		
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be no TEST_MappedExtension rows in the database since they cascade
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
 	public void testAggregatedCascadeDeleteExtensionSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(7, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(7,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be 3 TEST_MappedExtension rows in the database since they cascade
 		// but the aggregated ones (2 in collections and 1 associations) are left behind
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
 	public void testAggregatedCascadeDeleteSubclassedSingleStrategy() throws Exception {
 		MappedSubclassedSingleStrategy test = Util.constructRandomInstance(u, m, msssd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(7, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(7,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be 3 TEST_MappedExtension rows in the database since they cascade
 		// but the aggregated ones (2 in collections and 1 associations) are left behind
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
 	public void testAggregatedCascadeDeleteExtensionJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(6,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be 3 TEST_MappedExtension rows in the database since they cascade
 		// but the aggregated ones (2 in collections and 1 associations) are left behind
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test
 	public void testAggregatedCascadeDeleteSubclassedJoinedStrategy() throws Exception {
 		MappedSubclassedJoinedStrategy test = Util.constructRandomInstance(u, m, msjsd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(6,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 		p.delete(test);
 
 		// There should be 3 TEST_MappedExtension rows in the database since they cascade
 		// but the aggregated ones (2 in collections and 1 associations) are left behind
-		Assert.assertEquals(3, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(3,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
 	}
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegritySingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getAggregatedAssociation());
 	}
 
@@ -377,7 +426,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testAggregatedCollectionReferentialIntegritySingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getAggregatedCollection().get(0));
 	}
 
@@ -385,7 +434,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedAssociationReferentialIntegritySingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getComposedAssociation());
 	}
 
@@ -393,7 +442,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedCollectionReferentialIntegritySingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getComposedCollection().get(0));
 	}
 
@@ -401,27 +450,33 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedCollectionRemoveMemberSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(7, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
+
+		Assert.assertEquals(7,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
 
 		test.getComposedCollection().remove(0);
-		
+
 		test = p.save(test);
-		
+
 		// Check the composed collection element got cascaded with no referential integrity troubles
-		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+		Assert.assertEquals(6,
+				p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionSingleStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 	}
 
 	@Test(expected = ReferentialConstraintViolationException.class)
 	public void testAggregatedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getAggregatedAssociation());
 	}
 
@@ -429,7 +484,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testAggregatedCollectionReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getAggregatedCollection().get(0));
 	}
 
@@ -437,7 +492,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedAssociationReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getComposedAssociation());
 	}
 
@@ -445,7 +500,7 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedCollectionReferentialIntegrityJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
+
 		p.delete(test.getComposedCollection().get(0));
 	}
 
@@ -453,34 +508,42 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testComposedCollectionRemoveMemberJoinedStrategy() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 2);
 		test = p.save(test);
-		
-		Assert.assertEquals(6, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+
+		Assert.assertEquals(6,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 		test.getComposedCollection().remove(0);
-		
+
 		test = p.save(test);
-		
+
 		// Check the composed collection element got cascaded with no referential integrity troubles
-		Assert.assertEquals(5, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection").scalarResult(Number.class).intValue()); 
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection").scalarResult(Number.class).intValue()); 
-		
+		Assert.assertEquals(5,
+				p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(0,
+				p.newSQL("select count(1) from TEST_MappedSubclassedJoinedStrategy").scalarResult(Number.class).intValue());
+		Assert.assertEquals(1, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_composedCollection")
+				.scalarResult(Number.class).intValue());
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_MappedExtensionJoinedStrategy_aggregatedCollection")
+				.scalarResult(Number.class).intValue());
+
 	}
 
 	@Test(expected = OptimisticLockException.class)
 	public void testOptimisticLockException() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
-		SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s", 
-											aapd.getPersistent().getPersistentIdentifier(), 
-											PersistentBean.LOCK_NAME, 
-											PersistentBean.LOCK_NAME, 
-											PersistentBean.VERSION_NAME, 
-											PersistentBean.VERSION_NAME));
+		SQL sql = p.newSQL(String.format("update %s set %s = :%s, %s = :%s",
+				aapd.getPersistent().getPersistentIdentifier(),
+				PersistentBean.LOCK_NAME,
+				PersistentBean.LOCK_NAME,
+				PersistentBean.VERSION_NAME,
+				PersistentBean.VERSION_NAME));
 		sql.putParameter(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()).toString(), false);
 		sql.putParameter(PersistentBean.VERSION_NAME, Integer.valueOf(2));
 		sql.execute();
@@ -488,7 +551,7 @@ public class PersistenceTests extends AbstractH2Test {
 		test.setText("optimistic lock test");
 		p.save(test);
 	}
-	
+
 	@Test(expected = OptimisticLockException.class)
 	public void testTransientStaleObjectStateExceptionOptimisticLock() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
@@ -500,9 +563,9 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testDetachedStaleObjectStateExceptionOptimisticLock() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
-		
+
 		p.evictCached(test);
-		
+
 		test.setText("optimistic lock test");
 		p.save(test); // NB not returned
 
@@ -514,16 +577,16 @@ public class PersistenceTests extends AbstractH2Test {
 	public void testClonedStaleObjectStateExceptionOptimisticLock() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		test = p.save(test);
-		
+
 		test = Util.cloneToTransientBySerialization(test);
-		
+
 		test.setText("optimistic lock test");
 		p.save(test); // NB not returned
-		
+
 		test.setText("optimistic lock test take 2");
 		p.save(test);
 	}
-	
+
 	@Test
 	public void testRefresh() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
@@ -538,7 +601,7 @@ public class PersistenceTests extends AbstractH2Test {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
 		p.refresh(test);
 	}
-	
+
 	@Test(expected = DomainException.class)
 	public void testRefreshDetached() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
@@ -546,7 +609,7 @@ public class PersistenceTests extends AbstractH2Test {
 		p.evictCached(test);
 		p.refresh(test);
 	}
-	
+
 	@Test
 	public void testSaveOfList() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);
@@ -559,7 +622,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertEquals(2, tests.size());
 		Assert.assertEquals(test1.getBizId(), tests.get(0).getBizId());
 		Assert.assertEquals(test2.getBizId(), tests.get(1).getBizId());
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
 		for (AllAttributesPersistent test : tests) {
 			Assert.assertTrue(test.isPersisted());
 		}
@@ -574,7 +637,7 @@ public class PersistenceTests extends AbstractH2Test {
 		Assert.assertEquals(2, tests.size());
 		Assert.assertEquals(test1.getBizId(), tests.get(0).getBizId());
 		Assert.assertEquals(test2.getBizId(), tests.get(1).getBizId());
-		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue()); 
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
 		for (AllAttributesPersistent test : tests) {
 			Assert.assertTrue(test.isPersisted());
 		}

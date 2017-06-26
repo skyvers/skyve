@@ -1,26 +1,7 @@
-package modules.test;
-
-import modules.test.domain.AllAttributesInverseOneToOnePersistent;
-import modules.test.domain.AllAttributesPersistent;
-import modules.test.domain.AllAttributesRequiredPersistent;
-import modules.test.domain.AnyDerived1;
-import modules.test.domain.AnyDerived2;
-import modules.test.domain.ArcOneToMany;
-import modules.test.domain.ArcOneToOne;
-import modules.test.domain.Hierarchical;
-import modules.test.domain.MappedBase;
-import modules.test.domain.MappedExtensionJoinedStrategy;
-import modules.test.domain.MappedExtensionSingleStrategy;
-import modules.test.domain.MappedSubclassedJoinedStrategy;
-import modules.test.domain.MappedSubclassedSingleStrategy;
+package util;
 
 import org.junit.After;
 import org.junit.Before;
-//import org.mockito.Mock;
-//import org.powermock.api.mockito.PowerMockito;
-//import org.powermock.core.classloader.annotations.PowerMockIgnore;
-//import org.powermock.core.classloader.annotations.PrepareForTest;
-//import org.powermock.modules.junit4.PowerMockRunner;
 import org.skyve.CORE;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -37,15 +18,20 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
 
-/**
- * Invoke the JUnit test with PowerMockRunner. 
- * This will allow us to use PowerMock to mock static/final methods if required.
- * 
- * @see https://github.com/jayway/powermock/wiki
- */
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest({SetupBizlet.class, HealthAuditInterceptor.class})
-//@PowerMockIgnore("org.apache.log4j.*") 
+import modules.test.domain.AllAttributesInverseOneToOnePersistent;
+import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.AllAttributesRequiredPersistent;
+import modules.test.domain.AnyDerived1;
+import modules.test.domain.AnyDerived2;
+import modules.test.domain.ArcOneToMany;
+import modules.test.domain.ArcOneToOne;
+import modules.test.domain.Hierarchical;
+import modules.test.domain.MappedBase;
+import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedJoinedStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
+
 public abstract class AbstractH2Test {
 	protected static final String USER = "TestUser";
 	protected static final String CUSTOMER = "bizhub";
@@ -53,16 +39,14 @@ public abstract class AbstractH2Test {
 	private static final String DB_DIALECT = "org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect";
 	private static final String DB_DRIVER = "org.h2.Driver";
 	private static final String DB_URL = "jdbc:h2:mem:test";
-	//private static final String DB_URL = "jdbc:h2:mem:test;DB_CLOSE_ON_EXIT=FALSE";
-	//private static final String DB_URL = "jdbc:h2:file:./target/test/db/H2;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE";
 	private static final String DB_UNAME = "user";
 	private static final String DB_PWD = "password";
 	private static final String CONTENT_DIRECTORY = "content/";
-	
+
 	// Add common mocks here
-//	@Mock
-//	protected WebContext webContext;
-	
+	// @Mock
+	// protected WebContext webContext;
+
 	protected Persistence p;
 	protected User u;
 	protected Customer c;
@@ -80,7 +64,7 @@ public abstract class AbstractH2Test {
 	protected Document messd;
 	protected Document msjsd;
 	protected Document msssd;
-	
+
 	@Before
 	public void beforeBase() {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
@@ -101,7 +85,7 @@ public abstract class AbstractH2Test {
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 		persistence.begin();
-		
+
 		p = CORE.getPersistence();
 		u = p.getUser();
 		c = u.getCustomer();
@@ -113,28 +97,28 @@ public abstract class AbstractH2Test {
 		ad2 = m.getDocument(c, AnyDerived2.DOCUMENT_NAME);
 		ao2m = m.getDocument(c, ArcOneToMany.DOCUMENT_NAME);
 		ao2o = m.getDocument(c, ArcOneToOne.DOCUMENT_NAME);
-		hd = m.getDocument(c,  Hierarchical.DOCUMENT_NAME);
+		hd = m.getDocument(c, Hierarchical.DOCUMENT_NAME);
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
 		mejsd = m.getDocument(c, MappedExtensionJoinedStrategy.DOCUMENT_NAME);
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
 	}
-	
+
 	@After
 	public void afterBase() {
 		// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
-		// For H2 by default, closing the last connection to a database closes the database. 
+		// For H2 by default, closing the last connection to a database closes the database.
 		// For an in-memory database, this means the content is lost.
 		// See http://www.h2database.com/html/features.html (In-Memory Databases)
 		p.commit(true);
 		((AbstractPersistence) p).disposeAllPersistenceInstances();
 	}
-	
-/*
-	@AfterClass
-	public static void shutDown() throws Exception {
-		Util.LOGGER.fine("SHUT DOWN");
-	}
-*/
+
+	/*
+		@AfterClass
+		public static void shutDown() throws Exception {
+			Util.LOGGER.fine("SHUT DOWN");
+		}
+	*/
 }

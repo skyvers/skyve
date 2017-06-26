@@ -12,13 +12,13 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.view.View;
 import org.skyve.util.Util;
 
-import modules.test.AbstractH2Test;
 import modules.test.domain.AllAttributesPersistent;
+import util.AbstractH2Test;
 
 public class ViewJSONManipulatorTest extends AbstractH2Test {
 	@Test
-	public void testAllFormatsVisible() 
-	throws Exception {
+	public void testAllFormatsVisible()
+			throws Exception {
 		View view = createView();
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
@@ -27,62 +27,62 @@ public class ViewJSONManipulatorTest extends AbstractH2Test {
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx);
-		Assert.assertTrue("There should be 2 formats in the payload - " + json, 
-							json.contains("_0") && json.contains("_1"));
+		Assert.assertTrue("There should be 2 formats in the payload - " + json,
+				json.contains("_0") && json.contains("_1"));
 	}
-	
+
 	@Test
-	public void testFirstFormatVisible() 
-	throws Exception {
+	public void testFirstFormatVisible()
+			throws Exception {
 		ViewImpl view = createView();
 		Blurb b2 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(1).getItems().get(0).getWidget();
 		b2.setInvisibleConditionName("true");
-		
+
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx);
-		Assert.assertTrue("There should be 2 formats in the payload - " + json, 
-							json.contains("_0") && (! json.contains("_1")));
+		Assert.assertTrue("There should be 2 formats in the payload - " + json,
+				json.contains("_0") && (!json.contains("_1")));
 	}
 
 	@Test
-	public void testSecondFormatVisible() 
-	throws Exception {
+	public void testSecondFormatVisible()
+			throws Exception {
 		ViewImpl view = createView();
 		Blurb b1 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(0).getItems().get(0).getWidget();
 		b1.setInvisibleConditionName("true");
-		
+
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx);
-		Assert.assertTrue("There should be 2 formats in the payload - " + json, 
-							(! json.contains("_0")) && json.contains("_1"));
+		Assert.assertTrue("There should be 2 formats in the payload - " + json,
+				(!json.contains("_0")) && json.contains("_1"));
 	}
 
 	@Test
-	public void testFirstFormFormatsInvisible() 
-	throws Exception {
+	public void testFirstFormFormatsInvisible()
+			throws Exception {
 		ViewImpl view = createView();
 		((Form) view.getContained().get(0)).setInvisibleConditionName("true");
 		view.getContained().add(createForm());
-		
+
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, bean, 0, 0, false);
 		vjm.visit();
 		AbstractWebContext ctx = new SmartClientWebContext("key", null, null);
 		ctx.setCurrentBean(bean);
 		String json = vjm.toJSON(ctx);
-		Assert.assertTrue("There should be 2 formats in the payload - " + json, 
-							(! json.contains("_0")) && (! json.contains("_1") && 
-							json.contains("_2") && json.contains("_3")));
+		Assert.assertTrue("There should be 2 formats in the payload - " + json,
+				(!json.contains("_0")) && (!json.contains("_1") &&
+						json.contains("_2") && json.contains("_3")));
 	}
-	
+
 	private static ViewImpl createView() {
 		ViewImpl result = new ViewImpl();
 		result.setTitle("TEST");
@@ -91,12 +91,12 @@ public class ViewJSONManipulatorTest extends AbstractH2Test {
 
 		return result;
 	}
-	
+
 	private static Form createForm() {
 		Form f = new Form();
 		f.getColumns().add(new FormColumn());
 		f.getColumns().add(new FormColumn());
-		
+
 		FormRow r = new FormRow();
 		FormItem i = new FormItem();
 		Blurb b = new Blurb();
@@ -104,7 +104,7 @@ public class ViewJSONManipulatorTest extends AbstractH2Test {
 		i.setWidget(b);
 		r.getItems().add(i);
 		f.getRows().add(r);
-		
+
 		r = new FormRow();
 		i = new FormItem();
 		b = new Blurb();

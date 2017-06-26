@@ -15,10 +15,11 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import util.AbstractH2Test;
 
 public class GenerationTests extends AbstractH2Test {
 	@Test
-	@SuppressWarnings({"cast", "static-method"})
+	@SuppressWarnings({ "cast", "static-method" })
 	public void testGenerateExtensionHierarchy() {
 		MappedBase mb = new MappedBase();
 		MappedExtensionSingleStrategy mess = new MappedExtensionSingleStrategy();

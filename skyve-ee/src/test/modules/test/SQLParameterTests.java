@@ -3,9 +3,6 @@ package modules.test;
 import java.util.Collections;
 import java.util.List;
 
-import modules.test.domain.AllAttributesPersistent;
-import modules.test.domain.AllAttributesPersistent.Enum3;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.types.DateOnly;
@@ -23,14 +20,18 @@ import org.skyve.util.Util;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+import modules.test.domain.AllAttributesPersistent;
+import modules.test.domain.AllAttributesPersistent.Enum3;
+import util.AbstractH2Test;
+
 public class SQLParameterTests extends AbstractH2Test {
 	@Test
 	public void testBeanParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where bizId = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where bizId = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap);
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -41,7 +42,7 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testObjectBeanAssociationParam() throws Exception {
 		testBeanObject(AttributeType.association);
 	}
-	
+
 	@Test
 	public void testObjectBeanIdParam() throws Exception {
 		testBeanObject(AttributeType.id);
@@ -50,48 +51,46 @@ public class SQLParameterTests extends AbstractH2Test {
 	private void testBeanObject(AttributeType type) throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
+
 		// test scalar
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where bizId = :param", 
-													aapd.getPersistent().getPersistentIdentifier()));
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where bizId = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap, type);
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 
 		// test null
-		sql = p.newSQL(aapd, String.format("select * from %s where bizid = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+		sql = p.newSQL(aapd, String.format("select * from %s where bizid = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", null, type);
 		results = sql.beanResults();
 		Assert.assertEquals(0, results.size());
 
 		// test array
-		sql = p.newSQL(aapd, String.format("select * from %s where bizid in (:param)", 
-												aapd.getPersistent().getPersistentIdentifier()));
-		sql.putParameter("param", new Object[] {aap}, type);
+		sql = p.newSQL(aapd, String.format("select * from %s where bizid in (:param)",
+				aapd.getPersistent().getPersistentIdentifier()));
+		sql.putParameter("param", new Object[] { aap }, type);
 		results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 
 		// test collection
-		sql = p.newSQL(aapd, String.format("select * from %s where bizId in (:param)", 
-												aapd.getPersistent().getPersistentIdentifier()));
+		sql = p.newSQL(aapd, String.format("select * from %s where bizId in (:param)",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", Collections.singletonList(aap), type);
 		results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 	}
-	
-	
 
 	@Test
 	public void testBooleanParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where booleanFlag = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where booleanFlag = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getBooleanFlag());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -107,9 +106,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testDateOnlyParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where date = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where date = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getDate());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -125,15 +124,15 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testDateTimeParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where dateTime = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where dateTime = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getDateTime());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 	}
-	
+
 	@Test
 	public void testObjectDateTimeParam() throws Exception {
 		testObject(AllAttributesPersistent.dateTimePropertyName, new DateTime(), AttributeType.dateTime);
@@ -143,15 +142,15 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testDecimal2Param() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal2 = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal2 = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getDecimal2());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 	}
-	
+
 	@Test
 	public void testObjectDecimal2Param() throws Exception {
 		testObject(AllAttributesPersistent.decimal2PropertyName, new Decimal2(0), AttributeType.decimal2);
@@ -161,9 +160,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testDecimal5Param() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal5 = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal5 = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getDecimal5());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -179,9 +178,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testDecimal10Param() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal10 = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where decimal10 = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getDecimal10());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -198,9 +197,9 @@ public class SQLParameterTests extends AbstractH2Test {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap.setEnum3(Enum3.one);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where enum3 = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where enum3 = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getEnum3());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -216,9 +215,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testGeometryParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where geometry = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where geometry = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getGeometry());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -227,17 +226,18 @@ public class SQLParameterTests extends AbstractH2Test {
 
 	@Test
 	public void testObjectGeometryParam() throws Exception {
-		testObject(AllAttributesPersistent.geometryPropertyName, new GeometryFactory().createPoint(new Coordinate(0, 0)), AttributeType.geometry);
+		testObject(AllAttributesPersistent.geometryPropertyName, new GeometryFactory().createPoint(new Coordinate(0, 0)),
+				AttributeType.geometry);
 	}
 
 	@Test
 	public void testIntegerParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where %s = :param", 
-												aapd.getPersistent().getPersistentIdentifier(),
-												AllAttributesPersistent.normalIntegerPropertyName));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where %s = :param",
+				aapd.getPersistent().getPersistentIdentifier(),
+				AllAttributesPersistent.normalIntegerPropertyName));
 		sql.putParameter("param", aap.getNormalInteger());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -253,9 +253,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testLongParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where longInteger = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where longInteger = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getLongInteger());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -271,9 +271,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testTimeOnlyParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where time = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where time = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getTime());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -289,9 +289,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testTimestampParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where timestamp = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where timestamp = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getTimestamp());
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -307,9 +307,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testTextParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where text = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where text = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getText(), false);
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -325,9 +325,9 @@ public class SQLParameterTests extends AbstractH2Test {
 	public void testMemoParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		aap = p.save(aap);
-		
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where memo = :param", 
-												aapd.getPersistent().getPersistentIdentifier()));
+
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where memo = :param",
+				aapd.getPersistent().getPersistentIdentifier()));
 		sql.putParameter("param", aap.getMemo(), true);
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
@@ -343,37 +343,37 @@ public class SQLParameterTests extends AbstractH2Test {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);
 		Binder.set(aap, binding, value);
 		aap = p.save(aap);
-		
+
 		// test scalar
-		SQL sql = p.newSQL(aapd, String.format("select * from %s where %s = :param", 
-													aapd.getPersistent().getPersistentIdentifier(), 
-													binding));
+		SQL sql = p.newSQL(aapd, String.format("select * from %s where %s = :param",
+				aapd.getPersistent().getPersistentIdentifier(),
+				binding));
 		sql.putParameter("param", value, type);
 		List<AllAttributesPersistent> results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 
 		// test null
-		sql = p.newSQL(aapd, String.format("select * from %s where %s = :param", 
-												aapd.getPersistent().getPersistentIdentifier(), 
-												binding));
+		sql = p.newSQL(aapd, String.format("select * from %s where %s = :param",
+				aapd.getPersistent().getPersistentIdentifier(),
+				binding));
 		sql.putParameter("param", null, type);
 		results = sql.beanResults();
 		Assert.assertEquals(0, results.size());
 
 		// test array
-		sql = p.newSQL(aapd, String.format("select * from %s where %s in (:param)", 
-												aapd.getPersistent().getPersistentIdentifier(), 
-												binding));
-		sql.putParameter("param", new Object[] {value}, type);
+		sql = p.newSQL(aapd, String.format("select * from %s where %s in (:param)",
+				aapd.getPersistent().getPersistentIdentifier(),
+				binding));
+		sql.putParameter("param", new Object[] { value }, type);
 		results = sql.beanResults();
 		Assert.assertEquals(1, results.size());
 		Assert.assertEquals(aap.getBizId(), results.get(0).getBizId());
 
 		// test collection
-		sql = p.newSQL(aapd, String.format("select * from %s where %s in (:param)", 
-												aapd.getPersistent().getPersistentIdentifier(), 
-												binding));
+		sql = p.newSQL(aapd, String.format("select * from %s where %s in (:param)",
+				aapd.getPersistent().getPersistentIdentifier(),
+				binding));
 		sql.putParameter("param", Collections.singletonList(value), type);
 		results = sql.beanResults();
 		Assert.assertEquals(1, results.size());

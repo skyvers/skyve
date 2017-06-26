@@ -1,16 +1,17 @@
 package modules.test;
 
-import modules.ModulesUtil;
-import modules.test.domain.MappedExtensionJoinedStrategy;
-import modules.test.domain.MappedExtensionSingleStrategy;
-import modules.test.domain.MappedSubclassedJoinedStrategy;
-import modules.test.domain.MappedSubclassedSingleStrategy;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.util.Util;
+
+import modules.ModulesUtil;
+import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.domain.MappedExtensionSingleStrategy;
+import modules.test.domain.MappedSubclassedJoinedStrategy;
+import modules.test.domain.MappedSubclassedSingleStrategy;
+import util.AbstractH2Test;
 
 public class BizPortTest extends AbstractH2Test {
 	@Test
