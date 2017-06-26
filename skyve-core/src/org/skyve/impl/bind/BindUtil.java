@@ -40,6 +40,7 @@ import org.skyve.impl.metadata.model.document.field.ConvertableField;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.util.NullTolerantBeanComparator;
 import org.skyve.impl.util.ThreadSafeFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -66,7 +67,8 @@ import com.vividsolutions.jts.io.WKTReader;
  */
 public final class BindUtil {
 	private static final String DEFAULT_DISPLAY_DATE_FORMAT = "dd/MM/yyyy";
-
+	private static final DeproxyingPropertyUtilsBean PROPERTY_UTILS = new DeproxyingPropertyUtilsBean();
+	
 	public static String formatMessage(Customer customer, String message, Bean... beans) {
 		StringBuilder result = new StringBuilder(message);
 		int openCurlyBraceIndex = result.indexOf("{");
@@ -813,9 +815,15 @@ public final class BindUtil {
 		while (tokenizer.hasMoreTokens()) {
 			String simplePropertyName = tokenizer.nextToken();
 			try {
-				result = PropertyUtils.getProperty(currentBean, simplePropertyName);
+				result = PROPERTY_UTILS.getProperty(currentBean, simplePropertyName);
 			}
 			catch (Exception e) {
+				UtilImpl.LOGGER.severe("Could not BindUtil.get(" + bean + ", " + fullyQualifiedPropertyName + ")!");
+				UtilImpl.LOGGER.severe("The subsequent stack trace relates to obtaining bean property " + simplePropertyName + " from " + currentBean);
+				UtilImpl.LOGGER.severe("If the stack trace contains something like \"Unknown property '" + simplePropertyName + 
+										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
+										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
+				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
 				throw new MetaDataException(e);
 			}
 
@@ -899,7 +907,7 @@ public final class BindUtil {
 					valueToSet = valueToSet.toString();
 				} // if (we have a String property)
 			}
-			PropertyUtils.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
+			PROPERTY_UTILS.setProperty(bean, fullyQualifiedPropertyName, valueToSet);
 		}
 		catch (Exception e) {
 			if (e instanceof SkyveException) {
@@ -912,7 +920,7 @@ public final class BindUtil {
 
 	public static Class<?> getPropertyType(Object bean, String propertyName) {
 		try {
-			return PropertyUtils.getPropertyType(bean, propertyName);
+			return PROPERTY_UTILS.getPropertyType(bean, propertyName);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
@@ -921,7 +929,7 @@ public final class BindUtil {
 
 	public static boolean isWriteable(Object bean, String propertyName) {
 		try {
-			return (PropertyUtils.getWriteMethod(PropertyUtils.getPropertyDescriptor(bean, propertyName)) != null);
+			return (PROPERTY_UTILS.getWriteMethod(PROPERTY_UTILS.getPropertyDescriptor(bean, propertyName)) != null);
 		}
 		catch (Exception e) {
 			throw new MetaDataException(e);
@@ -1155,10 +1163,10 @@ public final class BindUtil {
 		// Invoke the setter method
 		try {
 			if (index >= 0) {
-				PropertyUtils.setIndexedProperty(target, propName, index, newValue);
+				PROPERTY_UTILS.setIndexedProperty(target, propName, index, newValue);
 			}
 			else if (key != null) {
-				PropertyUtils.setMappedProperty(target, propName, key, newValue);
+				PROPERTY_UTILS.setMappedProperty(target, propName, key, newValue);
 			}
 			else {
 				convertAndSet(target, propName, newValue);

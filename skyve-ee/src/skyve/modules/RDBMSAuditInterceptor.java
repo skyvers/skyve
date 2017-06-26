@@ -4,6 +4,9 @@ import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
 import modules.admin.domain.UserLoginRecord;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -21,7 +24,7 @@ import org.skyve.persistence.SQL;
 public class RDBMSAuditInterceptor extends Interceptor {
 	private static final long serialVersionUID = 8133933539853560711L;
 
-	private static final ThreadLocal<Operation> OPERATION = new ThreadLocal<>();
+	private static final ThreadLocal<Map<String, Operation>> BIZ_ID_TO_OPERATION = new ThreadLocal<>();
 
 	@Override
 	public boolean beforeSave(Document document, PersistentBean bean) throws Exception {
@@ -29,10 +32,10 @@ public class RDBMSAuditInterceptor extends Interceptor {
 				UserLoginRecord.MODULE_NAME.equals(document.getOwningModuleName()))) {
 			if (bean.isPersisted()) {
 				ensureOriginalInsertAuditExists(bean);
-				OPERATION.set(Operation.update);
+				setThreadLocalOperation(bean.getBizId(), Operation.update);
 			}
 			else {
-				OPERATION.set(Operation.insert);
+				setThreadLocalOperation(bean.getBizId(), Operation.insert);
 			}
 		}
 		
@@ -41,18 +44,19 @@ public class RDBMSAuditInterceptor extends Interceptor {
 
 	@Override
 	public void afterSave(Document document, final PersistentBean result) throws Exception {
-		Operation operation = OPERATION.get();
+		Operation operation = getThreadLocalOperation(result.getBizId());
 		if (operation != null) {
 			audit(result, operation, false);
 		}
-		OPERATION.remove();
+		removeThreadLocalOperation(result.getBizId());
 	}
 
 	@Override
 	public void afterDelete(Document document, PersistentBean bean) throws Exception {
-		if(bean instanceof Audit){
-			//do not audit removal of audits
-		} else {
+		if (bean instanceof Audit){
+			// do not audit removal of audits
+		}
+		else {
 			audit(bean, Operation.delete, false);
 		}
 	}
@@ -144,5 +148,30 @@ public class RDBMSAuditInterceptor extends Interceptor {
 	throws Exception {
 		ensureOriginalInsertAuditExists(bean);
 		audit(bean, operation, false);
+	}
+	
+	private static void setThreadLocalOperation(String bizId, Operation operation) {
+		Map<String, Operation> map = BIZ_ID_TO_OPERATION.get();
+		if (map == null) {
+			map = new HashMap<>();
+			BIZ_ID_TO_OPERATION.set(map);
+		}
+		map.put(bizId, operation);
+	}
+	
+	
+	private static Operation getThreadLocalOperation(String bizId) {
+		Map<String, Operation> map = BIZ_ID_TO_OPERATION.get();
+		return (map == null) ? null : map.get(bizId);
+	}
+	
+	private static void removeThreadLocalOperation(String bizId) {
+		Map<String, Operation> map = BIZ_ID_TO_OPERATION.get();
+		if (map != null) {
+			map.remove(bizId);
+			if (map.isEmpty()) {
+				BIZ_ID_TO_OPERATION.remove();
+			}
+		}
 	}
 }

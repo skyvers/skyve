@@ -18,7 +18,6 @@ import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.util.SerializationHelper;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
@@ -146,8 +145,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20170614";
-	public static final String SKYVE_VERSION = "20170614";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20170625";
+	public static final String SKYVE_VERSION = "20170625";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 	
 	private static String absoluteBasePath;
@@ -251,15 +250,6 @@ public class UtilImpl {
 										Relation owningRelation,
 										Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
-				try {
-					if (beanAccepted != bean) {
-						if (beanAccepted instanceof HibernateProxy) {
-							BindUtil.set(bean, binding, ((HibernateProxy) beanAccepted).getHibernateLazyInitializer().getImplementation());
-						}
-					}
-				} catch (Exception e) {
-					throw new DomainException(e);
-				}
 				return true;
 			}
 		}.visit(document, bean, customer);

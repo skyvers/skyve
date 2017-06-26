@@ -161,7 +161,8 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 				String binding = column.getBinding();
 				Number sum = (Number) summaryData.get(binding);
 				if (sum != null) {
-					summaryData.put(binding, Double.valueOf(sum.doubleValue() / rows.size()));
+					// round to 5dp
+					summaryData.put(binding, Double.valueOf(Math.round(sum.doubleValue() / rows.size() * 100000d) / 100000d));
 				}
 			}
 		}
@@ -203,6 +204,14 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 					sum = (sum == null) ? Double.valueOf(number) : Double.valueOf(sum.doubleValue() + number);
 					summaryData.put(binding, sum);
 				}
+			}
+		}
+		// Round to 5dp
+		for (QueryColumn column : getColumns()) {
+			String binding = column.getBinding();
+			Object value = Binder.get(summaryData, binding);
+			if (value instanceof Number) {
+				summaryData.put(binding, Double.valueOf(Math.round(((Number) value).doubleValue() * 100000d) / 100000d));
 			}
 		}
 	}

@@ -48,6 +48,7 @@ isc.EditView.addClassProperties({
 // _source - the source of a rerender event
 // _openedFromDataGrid - whether this view was opened from a data grid record or not
 // _grids: {} - a map of grids by their binding
+// _blurry - if a blur event occurred (requires detection just before an action click)
 isc.EditView.addMethods({
 	initWidget: function () {
 		this.overflow = 'hidden';
@@ -370,6 +371,27 @@ isc.EditView.addMethods({
 		this.saveInstance(validate, null);
 		this._saved = true;
 	},
+
+	// called on the server-side code generation for rerender actions from a blur event
+	rerenderBlurryAction: function(validate, source) {
+		this.delayCall('_rerenderBlurryAction', [validate, source], 100);
+	},
+	_rerenderBlurryAction: function(validate, source) {
+		this._source = source;
+		var me = this;
+		this.saveInstance(validate, null, function() {
+			if (me._blurry) {
+				var blurry = me._blurry;
+				me._blurry = null;
+				// test for a BizButton as this could just be the form item that was blurred
+				if (blurry.action) {
+					// delay the call, otherwise the _vm.saveData() callback function is not invoked
+					blurry.delayCall('action');
+				}
+			}
+		});
+		this._saved = true;
+	},
 	
 	// action - sent to server and use to determine whether to popoff the window on the window stack
 	// successCallback - successCallback(instance) called on successful save
@@ -632,6 +654,25 @@ isc.EditView.addMethods({
 		}
 	},
 
+	// called on the server-side code generation for server-side actions from a blur event
+	doBlurryAction: function(action, validate) {
+		this.delayCall('_doBlurryAction', [action, validate], 100);
+	},
+	_doBlurryAction: function(action, validate) {
+		var me = this;
+		this.doAction(action, validate, null, null, null, null, function() {
+			if (me._blurry) {
+				var blurry = me._blurry;
+				me._blurry = null;
+				// test for a BizButton as this could just be the form item that was blurred
+				if (blurry.action) {
+					// delay the call, otherwise the _vm.saveData() callback function is not invoked
+					blurry.delayCall('action');
+				}
+			}
+		});
+	},
+	
 	// method to place values into view controls from the instance
 	scatter: function(values) { // values to scatter
 		// clear error markings from the form
@@ -1276,24 +1317,28 @@ isc.BizButton.addMethods({
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
 		
-		this.click = function() {
+		this.action = function() {
+			if (this._view && this._view._blurry) {
+				this._view._blurry = this;
+				return;
+			}
 			if (this.confirm) {
 				var me = this;
 				isc.ask(this.confirm,
 							function(value) {
 								if (value) {
-									me._click();
+									me._action();
 								}
 							},
 							{title: 'Confirm'}
 				);
 			}
 			else {
-				this._click();
+				this._action();
 			}
 		},
 		
-		this._click = function() {
+		this._action = function() {
 			var validate = this.validate;
 			if (validate === undefined) {
 				validate = true;
