@@ -22,6 +22,8 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
+import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -53,7 +55,7 @@ public class UtilImpl {
 	 * The raw configuration data from reading the JSON.
 	 */
 	public static Map<String, Object> CONFIGURATION = null;
-	
+
 	public static boolean XML_TRACE = true;
 	public static boolean HTTP_TRACE = false;
 	public static boolean QUERY_TRACE = false;
@@ -66,7 +68,7 @@ public class UtilImpl {
 	public static boolean DIRTY_TRACE = false;
 	public static boolean PRETTY_SQL_OUTPUT = false;
 	public static final Logger LOGGER = Logger.getLogger("SKYVE");
-	
+
 	// This is set in the web.xml but defaults to windows
 	// as a dev environment for design time and generation gear
 	public static String CONTENT_DIRECTORY = "/_/Apps/content/";
@@ -74,24 +76,24 @@ public class UtilImpl {
 	// The cron expression to use to fire off the content garbage collection
 	// Defaults to run at 7 past the hour every hour.
 	public static String CONTENT_GC_CRON = "0 7 0/1 1/1 * ? *";
-	
+
 	// Should the attachments be stored on the file system or inline.
 	public static boolean CONTENT_FILE_STORAGE = true;
-	
+
 	// The arguments to send to the TCP server when running the content management in server mode.
 	public static String CONTENT_SERVER_ARGS = null;
-	
+
 	// This is set in web.xml and should only be used when the APP server in use
 	// doesn't allow us to get the absolute path of a resource - jboss 4.0.5.GA, WebLogic or any zipped deployment
 	public static String APPS_JAR_DIRECTORY;
 
 	public static boolean DEV_MODE = false;
-	
+
 	// If it is null, then the login infrastructure will prompt for the customer name.
 	// If it is set, the customer will be set to that value always.
 	// This property is also used for single sign on purposes.
 	public static String CUSTOMER = null;
-	
+
 	// eg https://www.bizhub.com.au
 	public static String SERVER_URL = null;
 	// eg /bizhub/web
@@ -101,17 +103,17 @@ public class UtilImpl {
 
 	// This is the path on the server file system of the web context root
 	public static String SKYVE_CONTEXT_REAL_PATH = null;
-	
+
 	// Implementations of Key SKYVE classes
 	public static String SKYVE_REPOSITORY_CLASS = null;
 	public static String SKYVE_PERSISTENCE_CLASS = null;
 	public static String SKYVE_CONTENT_MANAGER_CLASS = null;
-	
+
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
-	
+
 	public static boolean USING_JPA = false;
-	
+
 	// For conversations cache
 	public static int MAX_CONVERSATIONS_IN_MEMORY = 1000;
 	public static int CONVERSATION_EVICTION_TIME_MINUTES = 60;
@@ -120,7 +122,7 @@ public class UtilImpl {
 	public static Map<String, DataStore> DATA_STORES = new TreeMap<>();
 	public static DataStore DATA_STORE = null;
 	public static boolean DDL_SYNC = true;
-	
+
 	// For E-Mail
 	public static String SMTP = null;
 	public static String SMTP_PORT = null;
@@ -134,53 +136,51 @@ public class UtilImpl {
 
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
-	
+
 	// null = prod, could be dev, test, uat or another arbitrary environment
 	public static String ENVIRONMENT_IDENTIFIER = null;
-	
+
 	// Should scheduled jobs be manipulated by the database.
 	public static boolean JOB_SCHEDULER = true;
-	
+
 	// Password hash algorithm
-	public static String PASSWORD_HASHING_ALGORITHM = "MD5"; 
-	
+	public static String PASSWORD_HASHING_ALGORITHM = "MD5";
+
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "20170626";
 	public static final String SKYVE_VERSION = "20170626";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
-	
+
 	private static String absoluteBasePath;
+
 	public static String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
-			}
-			else {
+			} else {
 				URL url = Thread.currentThread().getContextClassLoader().getResource("schemas/common.xsd");
 				if (url == null) {
-		        	UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
+					UtilImpl.LOGGER.severe("Cannot determine absolute base path. Where is schemas/common.xsd?");
 					ClassLoader cl = Thread.currentThread().getContextClassLoader();
 					if (cl instanceof URLClassLoader) {
 						UtilImpl.LOGGER.severe("The context classloader paths are:-");
 						for (URL entry : ((URLClassLoader) cl).getURLs()) {
-				        	UtilImpl.LOGGER.severe(entry.getFile());
-				        }
-					}
-					else {
+							UtilImpl.LOGGER.severe(entry.getFile());
+						}
+					} else {
 						UtilImpl.LOGGER.severe("Cannot determine the context classloader paths...");
 					}
-				}
-				else {
+				} else {
 					absoluteBasePath = url.getPath();
 					absoluteBasePath = absoluteBasePath.substring(0, absoluteBasePath.length() - 18); // remove schemas/common.xsd
 					absoluteBasePath = absoluteBasePath.replace('\\', '/');
 				}
 			}
 		}
-		
+
 		return absoluteBasePath;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> readJSONConfig(InputStream inputStream) throws Exception {
 		String json = null;
@@ -192,34 +192,33 @@ public class UtilImpl {
 		final Pattern pattern = Pattern.compile(commentsPattern, Pattern.MULTILINE);
 		final Matcher m = pattern.matcher(json);
 		json = m.replaceAll("");
-		
+
 		return (Map<String, Object>) JSON.unmarshall(null, json);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
 		return (T) SerializationHelper.clone(object);
-//		try {
-//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//			new ObjectOutputStream(baos).writeObject(object);
-//			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-//			return (T) ois.readObject();
-//		}
-//		catch (Exception e) {
-//			throw new IllegalArgumentException(e);
-//		}
+		// try {
+		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// new ObjectOutputStream(baos).writeObject(object);
+		// ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		// return (T) ois.readObject();
+		// }
+		// catch (Exception e) {
+		// throw new IllegalArgumentException(e);
+		// }
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) 
-	throws Exception {
+	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
+			throws Exception {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
 				if (element instanceof AbstractPersistentBean) {
 					populateFully((AbstractPersistentBean) object);
 				}
 			}
-		}
-		else if (object instanceof AbstractPersistentBean) {
+		} else if (object instanceof AbstractPersistentBean) {
 			populateFully((AbstractPersistentBean) object);
 		}
 
@@ -245,10 +244,10 @@ public class UtilImpl {
 		new BeanVisitor(false, true, false) {
 			@Override
 			protected boolean accept(String binding,
-										Document documentAccepted,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean beanAccepted) {
+					Document documentAccepted,
+					Document owningDocument,
+					Relation owningRelation,
+					Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				return true;
 			}
@@ -268,30 +267,32 @@ public class UtilImpl {
 
 		@Override
 		protected boolean accept(String binding,
-									Document documentAccepted,
-									Document owningDocument,
-									Relation owningRelation,
-									Bean beanAccepted) {
+				Document documentAccepted,
+				Document owningDocument,
+				Relation owningRelation,
+				Bean beanAccepted) {
 			if (beanAccepted.isChanged()) {
 				changed = true;
-				if (UtilImpl.DIRTY_TRACE) UtilImpl.LOGGER.info("UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
+				if (UtilImpl.DIRTY_TRACE)
+					UtilImpl.LOGGER.info(
+							"UtilImpl.hasChanged(): Bean " + beanAccepted.toString() + " with binding " + binding + " is DIRTY");
 				return false;
 			}
 			return true;
 		}
-		
+
 		boolean isChanged() {
 			return changed;
 		}
 	}
-	
+
 	/**
 	 * Recurse the bean to determine if anything has changed.
 	 * 
 	 * @param bean The bean to test.
 	 * @return if the bean, its collections or its aggregated beans have mutated or not
 	 */
-	public static boolean hasChanged(Bean bean)  {
+	public static boolean hasChanged(Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -305,10 +306,10 @@ public class UtilImpl {
 	}
 
 	/**
-	 * Utility method that tries to properly initialise the persistence layer proxies used by lazy loading. 
+	 * Utility method that tries to properly initialise the persistence layer proxies used by lazy loading.
 	 * 
 	 * @param <T>
-	 * @param possibleProxy	The possible proxy
+	 * @param possibleProxy The possible proxy
 	 * @return the resolved proxy or possibleProxy
 	 */
 	@SuppressWarnings("unchecked")
@@ -326,8 +327,7 @@ public class UtilImpl {
 			for (Object element : list) {
 				setTransient(element);
 			}
-		}
-		else if (object instanceof AbstractPersistentBean) {
+		} else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizId(UUID.randomUUID().toString());
 			bean.setBizLock(null);
@@ -346,8 +346,7 @@ public class UtilImpl {
 						if (association.getType() == AssociationType.composition) {
 							setTransient(BindUtil.get(bean, referenceName));
 						}
-					}
-					else if (reference instanceof Collection) {
+					} else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
@@ -366,8 +365,7 @@ public class UtilImpl {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
 			}
-		}
-		else if (object instanceof AbstractPersistentBean) {
+		} else if (object instanceof AbstractPersistentBean) {
 			AbstractPersistentBean bean = (AbstractPersistentBean) object;
 			bean.setBizDataGroupId(bizDataGroupId);
 
@@ -384,8 +382,7 @@ public class UtilImpl {
 						if (association.getType() == AssociationType.composition) {
 							setDataGroup(BindUtil.get(bean, referenceName), bizDataGroupId);
 						}
-					}
-					else if (reference instanceof Collection) {
+					} else if (reference instanceof Collection) {
 						Collection collection = (Collection) reference;
 						if (collection.getType() != CollectionType.aggregation) {
 							// set each element of the collection transient
@@ -399,7 +396,8 @@ public class UtilImpl {
 
 	/**
 	 * Process and transform empty Strings.
-	 * @param value	The String.
+	 * 
+	 * @param value The String.
 	 * @return null, if the trimmed value is empty, otherwise value.
 	 */
 	public static String processStringValue(String value) {
@@ -418,123 +416,155 @@ public class UtilImpl {
 	/**
 	 * Make an instance of a document bean with random values for its properties.
 	 * 
-	 * @param <T>	The type of Document bean to produce.
+	 * @param <T> The type of Document bean to produce.
 	 * @param user
 	 * @param module
-	 * @param document	The document (corresponds to type T)
-	 * @param depth	How far to traverse the object graph - through associations and collections.
-	 * 				There are relationships that are never ending - ie Contact has Interactions which has User which has COntact
-	 * @return	The randomly constructed bean.
+	 * @param document The document (corresponds to type T)
+	 * @param depth How far to traverse the object graph - through associations and collections.
+	 *        There are relationships that are never ending - ie Contact has Interactions which has User which has COntact
+	 * @return The randomly constructed bean.
 	 * @throws Exception
 	 */
-	public static <T extends Bean> T constructRandomInstance(User user, 
-																Module module,
-																Document document,
-																int depth)
-	throws Exception {
+	public static <T extends Bean> T constructRandomInstance(User user,
+			Module module,
+			Document document,
+			int depth)
+			throws Exception {
 		return UtilImpl.constructRandomInstance(user, module, document, 1, depth);
 	}
-	
+
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
-	private static <T extends Bean> T constructRandomInstance(User user, 
-																Module module,
-																Document document,
-																int currentDepth,
-																int maxDepth)
-	throws Exception {
+	private static <T extends Bean> T constructRandomInstance(User user,
+			Module module,
+			Document document,
+			int currentDepth,
+			int maxDepth)
+			throws Exception {
 		T result = document.newInstance(user);
-		
+
 		for (Attribute attribute : document.getAllAttributes()) {
-			String name = attribute.getName(); 
+			String name = attribute.getName();
 			AttributeType type = attribute.getAttributeType();
 
 			switch (type) {
-			case association:
-				if (currentDepth < maxDepth) {
-					AssociationImpl association = (AssociationImpl) attribute;
-					Module associationModule = module;
-					String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
-					if (associationModuleRef != null) {
-						associationModule = user.getCustomer().getModule(associationModuleRef);
+				case association:
+					if (currentDepth < maxDepth) {
+						AssociationImpl association = (AssociationImpl) attribute;
+						Module associationModule = module;
+						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName())
+								.getReferencedModuleName();
+						if (associationModuleRef != null) {
+							associationModule = user.getCustomer().getModule(associationModuleRef);
+						}
+						Document associationDocument = associationModule.getDocument(user.getCustomer(),
+								association.getDocumentName());
+						BindUtil.set(result,
+								name,
+								UtilImpl.constructRandomInstance(user,
+										associationModule,
+										associationDocument,
+										currentDepth + 1,
+										maxDepth));
 					}
-					Document associationDocument = associationModule.getDocument(user.getCustomer(), association.getDocumentName());
-					BindUtil.set(result, 
-									name, 
-									UtilImpl.constructRandomInstance(user, 
-																	associationModule, 
-																	associationDocument, 
-																	currentDepth + 1, 
-																	maxDepth));
-				}
-				break;
-			case bool:
-				BindUtil.set(result, name, Boolean.FALSE);
-				break;
-			case collection:
-				if (currentDepth < maxDepth) {
-					Collection collection = (Collection) attribute;
-					Module collectionModule = module;
-					String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
-					if (collectionModuleRef != null) {
-						collectionModule = user.getCustomer().getModule(collectionModuleRef);
+					break;
+				case bool:
+					BindUtil.set(result, name, Boolean.FALSE);
+					break;
+				case collection:
+					if (currentDepth < maxDepth) {
+						Collection collection = (Collection) attribute;
+						Module collectionModule = module;
+						String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName())
+								.getReferencedModuleName();
+						if (collectionModuleRef != null) {
+							collectionModule = user.getCustomer().getModule(collectionModuleRef);
+						}
+						Document collectionDocument = collectionModule.getDocument(user.getCustomer(),
+								collection.getDocumentName());
+						@SuppressWarnings("unchecked")
+						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
+						list.add(UtilImpl.constructRandomInstance(user,
+								collectionModule,
+								collectionDocument,
+								currentDepth + 1,
+								maxDepth));
+						list.add(UtilImpl.constructRandomInstance(user,
+								collectionModule,
+								collectionDocument,
+								currentDepth + 1,
+								maxDepth));
 					}
-					Document collectionDocument = collectionModule.getDocument(user.getCustomer(), collection.getDocumentName());
-					@SuppressWarnings("unchecked")
-					List<Bean> list = (List<Bean>) BindUtil.get(result, name);
-					list.add(UtilImpl.constructRandomInstance(user, 
-															collectionModule, 
-															collectionDocument,
-															currentDepth + 1,
-															maxDepth));
-					list.add(UtilImpl.constructRandomInstance(user, 
-															collectionModule, 
-															collectionDocument,
-															currentDepth + 1,
-															maxDepth));
-				}
-				break;
-			case colour:
-				BindUtil.set(result, name, "#FFFFFF");
-				break;
-			case date:
-			case dateTime:
-			case time:
-			case timestamp:
-				BindUtil.convertAndSet(result, name, new Date());
-				break;
-			case decimal10:
-			case decimal2:
-			case decimal5:
-			case integer:
-			case longInteger:
-				BindUtil.convertAndSet(result, name, new Integer((int) Math.random() * 10000));
-				break;
-			case enumeration:
-				// TODO work out how to set an enum value here
-				break;
-			case geometry:
-				BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
-				break;
-			case id:
-				BindUtil.set(result, name, UUID.randomUUID().toString());
-				break;
-			case markup:
-			case memo:
-				BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
-				break;
-			case text:
-				BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
+					break;
+				case colour:
+					BindUtil.set(result, name, "#FFFFFF");
+					break;
+				case date:
+				case dateTime:
+				case time:
+				case timestamp:
+					BindUtil.convertAndSet(result, name, new Date());
+					break;
+				case decimal10:
+				case decimal2:
+				case decimal5:
+				case integer:
+				case longInteger:
+					BindUtil.convertAndSet(result, name, new Integer((int) Math.random() * 10000));
+					break;
+				case enumeration:
+					// TODO work out how to set an enum value here
+					break;
+				case geometry:
+					BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
+					break;
+				case id:
+					BindUtil.set(result, name, UUID.randomUUID().toString());
+					break;
+				case markup:
+				case memo:
+					BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
+					break;
+				case text:
+					// check if this is an email address
+					Text text = (Text) attribute;
+					if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
+						BindUtil.set(result, name, randomEmail(((LengthField) attribute).getLength()));
+					} else {
+						BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
+					}
 			}
 		}
 		return result;
 	}
-	
+
+	private static String randomEmail(int length) {
+		int addressLength = (int) Math.floor((length - 2) / 2);
+		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
+
+		char[] address = new char[addressLength];
+		for (int i = 0; i < addressLength; i++) {
+			address[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		char[] domain = new char[domainLength];
+		for (int i = 0; i < domainLength; i++) {
+			domain[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		char[] code = new char[2];
+		for (int i = 0; i < 2; i++) {
+			code[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		return String.valueOf(address) + "@" + String.valueOf(domain) + "." + String.valueOf(code);
+	}
+
 	private static String randomString(int length) {
 		char[] guts = new char[length];
 		for (int i = 0; i < length; i++) {
 			guts[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
 		}
-		
+
 		return String.valueOf(guts);
 	}
 }

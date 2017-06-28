@@ -22,11 +22,15 @@ public abstract class DomainGenerator {
 	protected static final String TIME_ONLY = "TimeOnly";
 	protected static final String TIMESTAMP = "Timestamp";
 	protected static final String GEOMETRY = "Geometry";
-	
+
 	protected static String SRC_PATH;
+	protected static String TEST_PATH;
+	protected static String GENERATED_TEST_PATH;
+	protected static String[] EXCLUDED_MODULES;
+
 	// Cascade type 'merge' makes many-many relationships within the association
 	// target object update (without the collection being dirty)
-	// and thus causes optimistic lock exceptions when the bizLock 
+	// and thus causes optimistic lock exceptions when the bizLock
 	// is up-revved from the update statement.
 	// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
 	// all groups are up-revved, even though the collection is not dirty,
@@ -69,13 +73,34 @@ public abstract class DomainGenerator {
 	public abstract void generate() throws Exception;
 
 	/**
-	 * Usage :- src/skyve, src/skyve true, src/skyve false Debug! 
+	 * Usage :-
+	 * <dl>
+	 * <dt>sourcePath</dt>
+	 * <dd>path to source files where modules are located</dd>
+	 * <dt>testPath</dt>
+	 * <dd>path to test files</dd>
+	 * <dt>generatedTestPath</dt>
+	 * <dd>path to place generated tests</dd>
+	 * <dt>allowCascadeMerge</dt>
+	 * <dd>optional, true or false</dd>
+	 * <dt>debug</dt>
+	 * <dd>optional, true or false to enable debug mode</dd>
+	 * <dt>excludedModules</dt>
+	 * <dd>optional, comma separated list of modules not to generate unit tests for</dd>
+	 * </dl>
+	 * 
+	 * E.g. src/skyve src/test src/generatedTest,
+	 * src/skyve src/test src/generatedTest true,
+	 * src/skyve src/test src/generatedTest false false test,whosin
+	 * src/skyve src/test src/generatedTest false true whosin
+	 * 
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length == 0) {
-			System.err.println("You must have at least the src path as an argument - usually \"src/skyve/\"");
+		if (args.length == 0 || args.length < 3) {
+			System.err.println("You must have at least the src path, test path and generated test path as arguments"
+					+ " - usually \"src/skyve/ src/test/ src/generatedTest/\"");
 			System.exit(1);
 		}
 
@@ -89,30 +114,46 @@ public abstract class DomainGenerator {
 		UtilImpl.XML_TRACE = false;
 
 		SRC_PATH = args[0];
-		if (args.length >= 2) {
-			if ("true".equalsIgnoreCase(args[1]) || "false".equalsIgnoreCase(args[1])) {
-				ALLOW_CASCADE_MERGE = Boolean.parseBoolean(args[1]);
-			}
-			else {
-				System.err.println("The second argument ALLOW_CASCADE_MERGE should be true or false");
+		TEST_PATH = args[1];// "src/test/";
+		GENERATED_TEST_PATH = args[2];// "src/generatedTest/";
+
+		if (args.length >= 4) {
+			if ("true".equalsIgnoreCase(args[3]) || "false".equalsIgnoreCase(args[3])) {
+				ALLOW_CASCADE_MERGE = Boolean.parseBoolean(args[3]);
+			} else {
+				System.err.println("The fourth argument ALLOW_CASCADE_MERGE should be true or false");
 				System.exit(1);
 			}
 		}
 
-		if (args.length == 3) { // allow for debug mode if there are only 3 arguments
-			UtilImpl.COMMAND_TRACE = true;
-			UtilImpl.CONTENT_TRACE = true;
-			UtilImpl.HTTP_TRACE = true;
-			UtilImpl.QUERY_TRACE = true;
-			UtilImpl.SECURITY_TRACE = true;
-			UtilImpl.BIZLET_TRACE = true;
-			UtilImpl.SQL_TRACE = true;
-			UtilImpl.XML_TRACE = true;
+		if (args.length >= 5) {
+			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
+				if (Boolean.parseBoolean(args[4])) {
+					UtilImpl.COMMAND_TRACE = true;
+					UtilImpl.CONTENT_TRACE = true;
+					UtilImpl.HTTP_TRACE = true;
+					UtilImpl.QUERY_TRACE = true;
+					UtilImpl.SECURITY_TRACE = true;
+					UtilImpl.BIZLET_TRACE = true;
+					UtilImpl.SQL_TRACE = true;
+					UtilImpl.XML_TRACE = true;
+				}
+			} else {
+				System.err.println("The fifth argument DEBUG should be true or false");
+				System.exit(1);
+			}
+		}
+
+		if (args.length == 6) { // allow for debug mode if there are 5 arguments
+			EXCLUDED_MODULES = args[5].toLowerCase().split(",");
 		}
 
 		System.out.println("SRC_PATH=" + SRC_PATH);
+		System.out.println("TEST_PATH=" + TEST_PATH);
+		System.out.println("GENERATED_TEST_PATH=" + GENERATED_TEST_PATH);
 		System.out.println("ALLOW_CASCADE_MERGE=" + ALLOW_CASCADE_MERGE);
-		System.out.println("DEBUG=" + (args.length == 3));
+		System.out.println("DEBUG=" + (args.length >= 5 ? args[4] : "false"));
+		System.out.println("EXCLUDED_MODULES=" + (args.length == 6 ? args[5] : ""));
 
 		DomainGenerator foo = UtilImpl.USING_JPA ? new JPADomainGenerator() : new OverridableDomainGenerator();
 		AbstractRepository repository = new LocalDesignRepository();

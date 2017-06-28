@@ -21,9 +21,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class PersistenceTests extends AbstractH2Test {
+public class PersistenceTests extends AbstractSkyveTest {
 	@Test
 	public void testPersistenceOfObjectWithReferenceToAnotherObjectWithAggregatedCollectionWithCascadeMergeOn() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);

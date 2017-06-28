@@ -12,9 +12,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class AuditJSONGeneratorTests extends AbstractH2Test {
+public class AuditJSONGeneratorTests extends AbstractSkyveTest {
 	@Test
 	public void testAllAttributesPersistent() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);

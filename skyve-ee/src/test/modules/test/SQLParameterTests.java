@@ -22,9 +22,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class SQLParameterTests extends AbstractH2Test {
+public class SQLParameterTests extends AbstractSkyveTest {
 	@Test
 	public void testBeanParam() throws Exception {
 		AllAttributesPersistent aap = Util.constructRandomInstance(u, m, aapd, 1);

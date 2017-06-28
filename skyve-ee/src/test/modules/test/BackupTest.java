@@ -10,9 +10,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class BackupTest extends AbstractH2Test {
+public class BackupTest extends AbstractSkyveTest {
 	@Test
 	public void testBackup() throws Exception {
 		MappedExtensionJoinedStrategy mejs = Util.constructRandomInstance(u, m, mejsd, 3);

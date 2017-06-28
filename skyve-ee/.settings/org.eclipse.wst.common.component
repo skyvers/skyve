@@ -3,6 +3,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/skyve"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/web"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/generatedTest"/>
         <property name="java-output-path" value="/skyve-ee/bin"/>
         <property name="context-root" value="skyve-ee"/>
     </wb-module>

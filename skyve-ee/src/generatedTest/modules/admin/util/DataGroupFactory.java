@@ -1,0 +1,23 @@
+package modules.admin.util;
+
+import modules.admin.domain.DataGroup;
+import org.skyve.CORE;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.util.Util;
+import util.AbstractDomainFactory;
+
+public class DataGroupFactory extends AbstractDomainFactory<DataGroup> {
+
+	@Override
+	public DataGroup getInstance() throws Exception {
+		Customer customer = CORE.getUser().getCustomer();
+		Module module = customer.getModule(DataGroup.MODULE_NAME);
+		Document document = module.getDocument(customer, DataGroup.DOCUMENT_NAME);
+
+		DataGroup dataGroup = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);
+
+		return dataGroup;
+	}
+}

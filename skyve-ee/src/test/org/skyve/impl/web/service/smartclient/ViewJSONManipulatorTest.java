@@ -13,9 +13,9 @@ import org.skyve.metadata.view.View;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class ViewJSONManipulatorTest extends AbstractH2Test {
+public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	@Test
 	public void testAllFormatsVisible()
 			throws Exception {

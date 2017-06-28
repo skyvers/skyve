@@ -15,9 +15,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class GenerationTests extends AbstractH2Test {
+public class GenerationTests extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings({ "cast", "static-method" })
 	public void testGenerateExtensionHierarchy() {

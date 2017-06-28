@@ -11,9 +11,9 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class BizPortTest extends AbstractH2Test {
+public class BizPortTest extends AbstractSkyveTest {
 	@Test
 	public void testStandardExportSingleStrategy() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 3);

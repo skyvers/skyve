@@ -11,9 +11,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class InMemoryFilterTest extends AbstractH2Test {
+public class InMemoryFilterTest extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	public void testFilterStrings() throws Exception {

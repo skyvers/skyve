@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="javaee/skyve.ear/apps.jar" path="src/skyve"/>
+	<classpathentry kind="src" path="src/generatedTest"/>
 	<classpathentry kind="src" output="javaee/skyve.ear/skyve.war/WEB-INF/classes" path="src/web"/>
 	<classpathentry kind="src" path="src/test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
