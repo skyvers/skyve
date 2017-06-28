@@ -1,6 +1,7 @@
 package modules.admin.util;
 
 import modules.admin.domain.Tagged;
+import modules.admin.util.TagFactory;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;

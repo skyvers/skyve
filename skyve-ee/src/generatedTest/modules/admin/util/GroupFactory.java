@@ -2,6 +2,7 @@ package modules.admin.util;
 
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
+import modules.admin.util.GroupRoleFactory;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -19,7 +20,7 @@ public class GroupFactory extends AbstractDomainFactory<Group> {
 
 		Group group = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);
 		GroupRole groupRole = new GroupRoleFactory().getInstance();
-		group.getRoles().add(new GroupRoleFactory().getInstance());
+		group.getRoles().add(groupRole);
 		groupRole.setParent(group);
 
 		return group;

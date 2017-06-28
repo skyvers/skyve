@@ -372,7 +372,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						factoryPath.mkdirs();
 						factoryFile.createNewFile();
 						try (FileWriter fw = new FileWriter(factoryFile)) {
-							generateFactory(document, fw, modulePath, modulePath.replace('/', '.'), documentName);
+							generateFactory(module, document, fw, modulePath, modulePath.replace('/', '.'), documentName);
 						}
 
 						// generate domain test for persistent documents
@@ -1884,7 +1884,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("boxing")
-	private static void generateFactory(Document document, FileWriter fw, String modulePath, String packagePath,
+	private static void generateFactory(Module module, Document document, FileWriter fw, String modulePath, String packagePath,
 			String documentName) throws IOException {
 		System.out.println("Generate factory class for " + packagePath + '.' + documentName);
 		final String variableName = getVariableNameForDocument(documentName);
@@ -1912,15 +1912,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			AttributeType type = attribute.getAttributeType();
 
 			if (attribute instanceof Reference) {
+				Reference reference = (Reference) attribute;
+				String referenceClassName = reference.getDocumentName();
+				Document relatedDocument = module.getDocument(null, referenceClassName);
+				Module relatedModule = AbstractRepository.get().getModule(null, relatedDocument.getOwningModuleName());
+				String relatedModuleName = relatedModule.getName();
+
 				if (AttributeType.collection.equals(type)) {
 					// check the minCardinality
-					Collection reference = (Collection) attribute;
-					if (reference.getMinCardinality() > 0) {
+					Collection collection = (Collection) attribute;
+					if (collection.getMinCardinality() > 0) {
 						// call the collection Document's factory
-						String referenceClassName = reference.getDocumentName();
 
 						// check if there is an extension class for this Document
 						boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+
+						// add an import for the reference factory
+						imports.add(String.format("%s%s.util.%sFactory%s",
+								AbstractRepository.get().MODULES_NAMESPACE,
+								relatedModuleName,
+								referenceClassName,
+								extensionFactoryExists ? "Extension" : "").replace('/', '.'));
 
 						// check the collection type, if child, add a parent reference
 						if (CollectionType.child.equals(reference.getType())) {
@@ -1935,9 +1947,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									.append(extensionFactoryExists ? "Extension" : "")
 									.append("().getInstance();");
 							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
-									.append("().add(new ")
-									.append(referenceClassName)
-									.append("Factory().getInstance());");
+									.append("().add(")
+									.append(childVariableName)
+									.append(");");
 
 							collections.append("\n\t\t").append(childVariableName).append(".setParent(")
 									.append(variableName)
@@ -1953,11 +1965,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 				} else {
 					if (attribute.isRequired()) {
-						Association reference = (Association) attribute;
-						String referenceClassName = reference.getDocumentName();
 
 						// check if there is an extension class for this Document
 						boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+
+						// add an import for the reference factory
+						imports.add(String.format("%s%s.util.%sFactory%s",
+								AbstractRepository.get().MODULES_NAMESPACE,
+								relatedModuleName,
+								referenceClassName,
+								extensionFactoryExists ? "Extension" : "").replace('/', '.'));
 
 						// this is a required association, call association Document's factory
 						String propertyClassName = ((Reference) attribute).getDocumentName();

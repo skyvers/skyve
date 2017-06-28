@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
+import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -152,6 +154,7 @@ public class UtilImpl {
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	private static String absoluteBasePath;
+	private static final SecureRandom random = new SecureRandom();
 
 	public static String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
@@ -509,10 +512,13 @@ public class UtilImpl {
 				case decimal5:
 				case integer:
 				case longInteger:
-					BindUtil.convertAndSet(result, name, new Integer((int) Math.random() * 10000));
+					BindUtil.convertAndSet(result, name, new Integer(random.nextInt(10000)));
 					break;
 				case enumeration:
-					// TODO work out how to set an enum value here
+					// pick a random value from the enum
+					@SuppressWarnings("unchecked")
+					Class<Enum<?>> clazz = (Class<Enum<?>>) Binder.getPropertyType(result, name);
+					BindUtil.set(result, name, randomEnum(clazz, null));
 					break;
 				case geometry:
 					BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
@@ -535,6 +541,27 @@ public class UtilImpl {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Returns a random value from the enum class
+	 * 
+	 * @param clazz The enum class
+	 * @param currentValue The current int value of the enum so that it is not chosen again
+	 * @return A random enum constant
+	 */
+	@SuppressWarnings("boxing")
+	private static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
+		int x;
+		if (currentValue != null) {
+			do {
+				x = random.nextInt(clazz.getEnumConstants().length);
+			} while (x == currentValue);
+		} else {
+			x = random.nextInt(clazz.getEnumConstants().length);
+		}
+
+		return clazz.getEnumConstants()[x];
 	}
 
 	private static String randomEmail(int length) {

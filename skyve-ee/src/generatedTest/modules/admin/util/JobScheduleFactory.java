@@ -1,6 +1,7 @@
 package modules.admin.util;
 
 import modules.admin.domain.JobSchedule;
+import modules.admin.util.UserFactoryExtension;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
