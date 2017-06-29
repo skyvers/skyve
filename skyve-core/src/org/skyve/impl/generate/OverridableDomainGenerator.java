@@ -3,7 +3,9 @@ package org.skyve.impl.generate;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1905,7 +1907,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add(String.format("%s.domain.%s", packagePath, documentName));
 
 		// determine if this document has an associations or collections to add to the factory
-		for (Attribute attribute : document.getAttributes()) {
+		for (Attribute attribute : getAllAttributes(document)) {
 
 			String name = attribute.getName();
 			String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
@@ -1917,15 +1919,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Document relatedDocument = module.getDocument(null, referenceClassName);
 				Module relatedModule = AbstractRepository.get().getModule(null, relatedDocument.getOwningModuleName());
 				String relatedModuleName = relatedModule.getName();
+				String relatedModulePath = new String(AbstractRepository.get().MODULES_NAMESPACE + relatedModuleName);
 
 				if (AttributeType.collection.equals(type)) {
 					// check the minCardinality
 					Collection collection = (Collection) attribute;
 					if (collection.getMinCardinality() > 0) {
-						// call the collection Document's factory
-
 						// check if there is an extension class for this Document
-						boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
 
 						// add an import for the reference factory
 						imports.add(String.format("%s%s.util.%sFactory%s",
@@ -1955,6 +1956,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									.append(variableName)
 									.append(");");
 						} else {
+							// call the collection Document's factory
 							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
 									.append("().add(new ")
 									.append(referenceClassName)
@@ -1967,7 +1969,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (attribute.isRequired()) {
 
 						// check if there is an extension class for this Document
-						boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+						// boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
 
 						// add an import for the reference factory
 						imports.add(String.format("%s%s.util.%sFactory%s",
@@ -2664,6 +2667,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (factoryExtensionFile.exists()) {
 			baseDocumentExtensionFactoryExists = true;
 		}
+		System.out.println(String.format("Looking for %s in %s. Found: %s", documentName, factoryExtensionFile.getPath(),
+				baseDocumentExtensionFactoryExists));
 		return baseDocumentExtensionFactoryExists;
 	}
 
@@ -2676,5 +2681,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private static String getVariableNameForDocument(final String documentName) {
 		return Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
+	}
+
+	/**
+	 * Return all vanilla attributes for the specified document.
+	 */
+	private static List<? extends Attribute> getAllAttributes(Document document) {
+		List<Attribute> result = new ArrayList<>(document.getAttributes());
+		Extends currentInherits = document.getExtends();
+		if (currentInherits != null) {
+			while (currentInherits != null) {
+				Module module = AbstractRepository.get().getModule(null, document.getOwningModuleName());
+				Document baseDocument = module.getDocument(null, currentInherits.getDocumentName());
+				result.addAll(baseDocument.getAttributes());
+				currentInherits = baseDocument.getExtends();
+			}
+		}
+
+		return Collections.unmodifiableList(result);
 	}
 }

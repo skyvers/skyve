@@ -24,6 +24,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -155,6 +156,10 @@ public class UtilImpl {
 
 	private static String absoluteBasePath;
 	private static final SecureRandom random = new SecureRandom();
+
+	private static final String NUMBERS = "0123456789";
+	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
+	private static final String ALPHA_NUMERIC = LETTERS + NUMBERS;
 
 	public static String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
@@ -531,16 +536,58 @@ public class UtilImpl {
 					BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
 					break;
 				case text:
-					// check if this is an email address
+					// check if this string has a format mask
 					Text text = (Text) attribute;
-					if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
-						BindUtil.set(result, name, randomEmail(((LengthField) attribute).getLength()));
+					if (text.getFormat() != null) {
+						// return text matching the format mask
+						BindUtil.set(result, name, randomFormat(text.getFormat()));
 					} else {
-						BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
+						// check if this is an email address
+						if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
+							BindUtil.set(result, name, randomEmail(((LengthField) attribute).getLength()));
+						} else {
+							// return random text
+							BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
+						}
 					}
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Returns a random string which complies to the format mask
+	 * of the text attribute
+	 * 
+	 * @param textFormat The format to comply to
+	 * @return A format compliant random string
+	 */
+	private static String randomFormat(TextFormat textFormat) {
+
+		String mask = textFormat.getMask();
+		String out = new String();
+
+		for (int i = 0; i < mask.length(); i++) {
+			char c = mask.charAt(i);
+			switch (c) {
+				case '#':
+					out += NUMBERS.charAt(random.nextInt(NUMBERS.length()));
+					break;
+				case 'A':
+					out += ALPHA_NUMERIC.charAt(random.nextInt(ALPHA_NUMERIC.length()));
+					break;
+				case 'L':
+					out += LETTERS.charAt(random.nextInt(LETTERS.length()));
+					break;
+				default:
+					out += c;
+					break;
+			}
+		}
+
+		System.out.println(String.format("Generated %s for mask %s", out, mask));
+
+		return out;
 	}
 
 	/**

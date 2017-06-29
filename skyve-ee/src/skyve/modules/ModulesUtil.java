@@ -7,18 +7,15 @@ import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import modules.admin.domain.Contact;
-import modules.admin.domain.DocumentNumber;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
@@ -37,6 +34,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Time;
+
+import modules.admin.domain.Contact;
+import modules.admin.domain.DocumentNumber;
 
 /**
  * Utility methods applicable across application modules.
@@ -64,7 +64,6 @@ public class ModulesUtil {
 		}
 	}
 
-
 	/** general types of time-based frequencies */
 	public static enum OccurenceFrequency {
 		OneOff, EverySecond, EveryMinute, Hourly, Daily, Weekly, Fortnightly, Monthly, Quarterly, HalfYearly, Yearly, Irregularly, DuringHolidays, NotDuringHolidays, WeekDays, Weekends;
@@ -85,7 +84,6 @@ public class ModulesUtil {
 		OCCURRENCE_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
 	}
 
-
 	/** subset of frequencies relevant for use as terms */
 	public static final List<DomainValue> TERM_FREQUENCIES = new ArrayList<>();
 
@@ -98,7 +96,6 @@ public class ModulesUtil {
 		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.HalfYearly.toString()));
 		TERM_FREQUENCIES.add(new DomainValue(OccurenceFrequency.Yearly.toString()));
 	}
-
 
 	/** normal days of the week */
 	public static enum DayOfWeek {
@@ -121,7 +118,7 @@ public class ModulesUtil {
 	 * Returns a calendar day of the week
 	 * 
 	 * @param weekDay
-	 *            - the day of the week (DayOfWeek)
+	 *        - the day of the week (DayOfWeek)
 	 * @return - the day of the week as a Calendar.day (int)
 	 */
 	public static final int dayOfWeekToCalendar(DayOfWeek weekDay) {
@@ -156,7 +153,7 @@ public class ModulesUtil {
 	 * Returns a day of the week from a Calendar day
 	 * 
 	 * @param calendarDay
-	 *            - the number of the day (int)
+	 *        - the number of the day (int)
 	 * @return - the DayOfWeek (DayOfWeek)
 	 */
 	public static final DayOfWeek calendarToDayOfWeek(int calendarDay) {
@@ -209,7 +206,7 @@ public class ModulesUtil {
 	 * calendar year.
 	 * 
 	 * @param frequency
-	 *            - the specified frequency (OccurrenceFrequency)
+	 *        - the specified frequency (OccurrenceFrequency)
 	 * @return - the number of times the specified frequency occurs in a
 	 *         calendar year
 	 */
@@ -239,7 +236,7 @@ public class ModulesUtil {
 	 * Returns the number of periods which occur in a calendar year.
 	 * 
 	 * @param period
-	 *            - the time period (OccurrencePeriod)
+	 *        - the time period (OccurrencePeriod)
 	 * @return - the number of times the period occurs within a calendar year
 	 *         (int)
 	 */
@@ -264,11 +261,11 @@ public class ModulesUtil {
 	 * Adds a time frequency to a given date.
 	 * 
 	 * @param frequency
-	 *            - the frequency to add
+	 *        - the frequency to add
 	 * @param date
-	 *            - the date to add to
+	 *        - the date to add to
 	 * @param numberOfFrequencies
-	 *            - the number of frequencies to add
+	 *        - the number of frequencies to add
 	 * @return - the resulting date
 	 */
 	public static final DateOnly addFrequency(OccurenceFrequency frequency, DateOnly date, int numberOfFrequencies) {
@@ -315,7 +312,7 @@ public class ModulesUtil {
 	 * Returns the last day of the month in which the specified date occurs.
 	 * 
 	 * @param date
-	 *            - the specified date
+	 *        - the specified date
 	 * @return - the date of the last day of the month in which the specified
 	 *         date occurs
 	 */
@@ -348,7 +345,7 @@ public class ModulesUtil {
 	 * Returns the last day of the year in which the specified date occurs.
 	 * 
 	 * @param date
-	 *            - the specified date
+	 *        - the specified date
 	 * @return - the date of the last day of the year in which the specified
 	 *         date occurs
 	 */
@@ -378,13 +375,12 @@ public class ModulesUtil {
 		return null;
 	}
 
-
 	/**
 	 * Returns the date of the first day of the month in which the specified
 	 * date occurs.
 	 * 
 	 * @param date
-	 *            - the specified date
+	 *        - the specified date
 	 * @return - the date of the first day of that month
 	 */
 	@SuppressWarnings("deprecation")
@@ -411,7 +407,7 @@ public class ModulesUtil {
 	 * occurs.
 	 * 
 	 * @param date
-	 *            - the specified date
+	 *        - the specified date
 	 * @return - the date of the first day of that year
 	 */
 	public static DateOnly firstDayOfYear(DateOnly date) {
@@ -437,9 +433,9 @@ public class ModulesUtil {
 	 * of days to add.
 	 * 
 	 * @param date
-	 *            - the specified date
+	 *        - the specified date
 	 * @param daysToAdd
-	 *            - the number of days to add to that date
+	 *        - the number of days to add to that date
 	 * @return - the resulting date
 	 */
 	public static DateOnly addDaysDateOnly(DateOnly date, int daysToAdd) {
@@ -543,7 +539,11 @@ public class ModulesUtil {
 		}
 	}
 
-	/** Returns the current session/conversation user as a Amin module User */
+	/**
+	 * Returns the current session/conversation user as an Admin module User
+	 * 
+	 * @return The current {@link modules.admin.domain.User}
+	 */
 	public static modules.admin.domain.User currentAdminUser() {
 		modules.admin.domain.User user = null;
 		try {
@@ -570,7 +570,7 @@ public class ModulesUtil {
 
 		return contact;
 	}
-	
+
 	public static void addValidationError(ValidationException e, String fieldName, String messageString) {
 		Message vM = new Message(messageString);
 		vM.addBinding(fieldName);
@@ -587,21 +587,22 @@ public class ModulesUtil {
 	 * updated DocumentNumber value for the specified combination.
 	 * 
 	 * @param prefix
-	 *            - if the sequence value has a known prefix before the number,
-	 *            eg INV0001 has a prefix of "INV"
+	 *        - if the sequence value has a known prefix before the number,
+	 *        eg INV0001 has a prefix of "INV"
 	 * @param moduleName
-	 *            - the application module
+	 *        - the application module
 	 * @param documentName
-	 *            - the application document
+	 *        - the application document
 	 * @param fieldName
-	 *            - the fieldName/columnName in which the value is held
+	 *        - the fieldName/columnName in which the value is held
 	 * @param numberLength
-	 *            - the minimum length of the number when specified as a string
+	 *        - the minimum length of the number when specified as a string
 	 * @return - the next sequence number
 	 * @throws Exception
-	 *             general Exception for persistence failure
+	 *         general Exception for persistence failure
 	 */
-	public static String getNextDocumentNumber(String prefix, String moduleName, String documentName, String fieldName, int numberLength) throws Exception {
+	public static String getNextDocumentNumber(String prefix, String moduleName, String documentName, String fieldName,
+			int numberLength) throws Exception {
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -694,64 +695,66 @@ public class ModulesUtil {
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
 	 * 
 	 * @param prefix
-	 *            - if the sequence value has a known prefix before the number,
-	 *            eg INV0001 has a prefix of "INV"
+	 *        - if the sequence value has a known prefix before the number,
+	 *        eg INV0001 has a prefix of "INV"
 	 * @param numberLength
-	 *            - the minimum length of the number when specified as a string
+	 *        - the minimum length of the number when specified as a string
 	 * @param lastNumber
-	 *            - the number to increment
+	 *        - the number to increment
 	 * @return - the next number
 	 * @throws Exception
-	 *             general Exception
+	 *         general Exception
 	 */
 	public static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) throws Exception {
 
-	     String newNumber = "";
-	     String nonNumeric = lastNumber;
-	     Integer value = new Integer(1);
-	     String prefix;
-	     if(suppliedPrefix!=null){
-	    	 prefix = suppliedPrefix;
-	     } else {
-	    	 prefix="";
-	     }
-	     
-	     if (lastNumber != null) {
-	         String[] parts = (new StringBuilder(" ").append(lastNumber)).toString().split("\\D\\d+$");
+		String newNumber = "";
+		String nonNumeric = lastNumber;
+		Integer value = new Integer(1);
+		String prefix;
+		if (suppliedPrefix != null) {
+			prefix = suppliedPrefix;
+		} else {
+			prefix = "";
+		}
 
-	         //cater for alpha prefix
-	         if (parts.length > 0 && parts[0].length() < lastNumber.length()) {
-	             String numberPart = lastNumber.substring(parts[0].length(),lastNumber.length());
-	             nonNumeric = lastNumber.substring(0, parts[0].length());
+		if (lastNumber != null) {
+			String[] parts = (new StringBuilder(" ").append(lastNumber)).toString().split("\\D\\d+$");
 
-	             value = new Integer(Integer.parseInt(numberPart) + 1);
-	            
-	          //cater for purely numeric prefix
-	         } else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$")  && !"0".equals(lastNumber)) {
-	             int len = prefix.length();
-	             value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
-	             nonNumeric = prefix;
-	             
-	         //cater for numeric only
-	         } else if (lastNumber.matches("^\\d+$")) {
-	             nonNumeric = prefix;
-	             value = new Integer(Integer.parseInt(lastNumber) + 1);
-	         }
-	     } else {
-	         nonNumeric = prefix;
-	     }
+			// cater for alpha prefix
+			if (parts.length > 0 && parts[0].length() < lastNumber.length()) {
+				String numberPart = lastNumber.substring(parts[0].length(), lastNumber.length());
+				nonNumeric = lastNumber.substring(0, parts[0].length());
 
-	     // now put prefix and value together
-	     int newLength = (nonNumeric.length() + value.toString().length() > numberLength ? nonNumeric.length() + value.toString().length() : numberLength);
+				value = new Integer(Integer.parseInt(numberPart) + 1);
 
-	     StringBuilder sb = new StringBuilder(newLength + 1);
-	     try (Formatter f = new Formatter(sb)) {
-	         newNumber = nonNumeric + f.format(new StringBuilder("%1$").append(newLength - nonNumeric.length()).append("s").toString(), value.toString()).toString().replace(" ", "0");
-	     }
+				// cater for purely numeric prefix
+			} else if (prefix.matches("^\\d+$") && lastNumber.matches("^\\d+$") && !"0".equals(lastNumber)) {
+				int len = prefix.length();
+				value = new Integer(Integer.parseInt(lastNumber.substring(len)) + 1);
+				nonNumeric = prefix;
 
-	     return newNumber;
+				// cater for numeric only
+			} else if (lastNumber.matches("^\\d+$")) {
+				nonNumeric = prefix;
+				value = new Integer(Integer.parseInt(lastNumber) + 1);
+			}
+		} else {
+			nonNumeric = prefix;
+		}
+
+		// now put prefix and value together
+		int newLength = (nonNumeric.length() + value.toString().length() > numberLength
+				? nonNumeric.length() + value.toString().length() : numberLength);
+
+		StringBuilder sb = new StringBuilder(newLength + 1);
+		try (Formatter f = new Formatter(sb)) {
+			newNumber = nonNumeric
+					+ f.format(new StringBuilder("%1$").append(newLength - nonNumeric.length()).append("s").toString(),
+							value.toString()).toString().replace(" ", "0");
+		}
+
+		return newNumber;
 	}
-	
 
 	/** returns a fomatted string representing the condition */
 	public static String getConditionName(String conditionCode) {
@@ -808,13 +811,13 @@ public class ModulesUtil {
 	 * of that binding from the bean provided.
 	 * 
 	 * @param bean
-	 *            - the bean relevant for the binding
+	 *        - the bean relevant for the binding
 	 * @param replacementString
-	 *            - the string representing the displayName form of the binding
+	 *        - the string representing the displayName form of the binding
 	 * @return - the value from the bean
 	 * @throws Exception
-	 *             general Exception for metadata exception or string
-	 *             manipulation failure etc
+	 *         general Exception for metadata exception or string
+	 *         manipulation failure etc
 	 */
 	public static String replaceBindingsInString(Bean bean, String replacementString) throws Exception {
 
@@ -938,7 +941,6 @@ public class ModulesUtil {
 		return concatWithDelim("", l, concatWithDelim("", s, r));
 	}
 
-
 	/**
 	 * Returns whether the user has access to the specified module
 	 * 
@@ -962,14 +964,14 @@ public class ModulesUtil {
 	 * Generic bizport export method.
 	 * 
 	 * @param moduleName
-	 *            - the module to be exported
+	 *        - the module to be exported
 	 * @param documentName
-	 *            - the document to be exported
+	 *        - the document to be exported
 	 * @param b
-	 *            - the top-level bean to export
+	 *        - the top-level bean to export
 	 * @return - the reference to the Bizportable
 	 * @throws Exception
-	 *             general Exception
+	 *         general Exception
 	 */
 	public static BizPortWorkbook standardBeanBizExport(String modName, String docName, Bean b) throws Exception {
 
@@ -1018,8 +1020,7 @@ public class ModulesUtil {
 
 			try {
 				persistence.preFlush(document, bean);
-			}
-			catch (DomainException e) {
+			} catch (DomainException e) {
 				loader.addError(customer, bean, e);
 			}
 		}
@@ -1036,8 +1037,7 @@ public class ModulesUtil {
 				pb = (PersistentBean) b;
 				pb = persistence.save(pb);
 			}
-		}
-		catch (DomainException e) {
+		} catch (DomainException e) {
 			if (pb != null) {
 				loader.addError(customer, pb, e);
 			}
