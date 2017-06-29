@@ -1127,8 +1127,12 @@ isc.BizListGrid.addMethods({
 				if (me.showTag) {
 					requestProperties.params._tagId = me.tagId;
 				}
-				if (me._view) { // required for ListModel.setBean() on server side
+				if (me._view) {
+					// both of these are required (if defined) for ListModel.setBean() on server side
 					requestProperties.params._c = me._view.gather(false)._c;
+					if (me._view._b) {
+						requestProperties.params._b = me._view._b;
+					}
 				}
 				if (config && config.contConv) { // indicates that the conversation is to be continued
 					requestProperties.params._cc = '';
