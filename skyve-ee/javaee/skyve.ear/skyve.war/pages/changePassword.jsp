@@ -118,7 +118,7 @@
 									<label for="newPassword"><%=Util.i18n("page.changePassword.newPassword.label", locale)%></label>
 								</div>
 								<div class="col-6-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="none" autocorrect="none" name="<%=newPasswordFieldName%>">
+									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="<%=newPasswordFieldName%>">
 								</div>
 							</div>
 							<div class="row">
@@ -126,7 +126,7 @@
 									<label for="confirmPassword"><%=Util.i18n("page.changePassword.confirmPassword.label", locale)%></label>
 								</div>
 								<div class="col-6-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="none" autocorrect="none" name="<%=confirmPasswordFieldName%>">
+									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="<%=confirmPasswordFieldName%>">
 								</div>
 							</div>
 							<div class="row">
