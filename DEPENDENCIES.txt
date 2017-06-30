@@ -234,3 +234,7 @@ WILDCAT depends upon the following libraries:
 		
 	* SimpleGrid
 		http://www.simplegrid.io (MIT)
+		
+	* Generex
+		https://github.com/mifmif/Generex
+		See https://www.apache.org/licenses/LICENSE-2.0

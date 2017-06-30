@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Set of moduleName.documentName documents that should be overridden
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
+
+	/**
+	 * Array or Java reserved words. When determining variable names for generated tests,
+	 * checks this array to see if the variable could be a reserved word. E.g. a Return document.
+	 */
+	private static final Set<String> RESERVED_WORDS;
+	static {
+		String reserved[] = {
+				"abstract", "assert", "boolean", "break", "byte", "case",
+				"catch", "char", "class", "const", "continue",
+				"default", "do", "double", "else", "extends",
+				"false", "final", "finally", "float", "for",
+				"goto", "if", "implements", "import", "instanceof",
+				"int", "interface", "long", "native", "new",
+				"null", "package", "private", "protected", "public",
+				"return", "short", "static", "strictfp", "super",
+				"switch", "synchronized", "this", "throw", "throws",
+				"transient", "true", "try", "void", "volatile",
+				"while"
+		};
+		RESERVED_WORDS = new HashSet<>(Arrays.asList(reserved));
+	}
 
 	OverridableDomainGenerator() {
 		// reduce visibility
@@ -304,6 +327,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			domainFolder.mkdir();
 		}
 
+		// clear out the generated test folder
+		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
+		final File factoryPath = new File(GENERATED_TEST_PATH + modulePath + "/util/");
+		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
+		if (factoryPath.exists()) {
+			for (File testFile : factoryPath.listFiles()) {
+				testFile.delete();
+			}
+		}
+		if (domainTestPath.exists()) {
+			for (File testFile : domainTestPath.listFiles()) {
+				testFile.delete();
+			}
+		}
+
 		// Make a orm.hbm.xml file
 		File mappingFile = new File(SRC_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
 		if (UtilImpl.XML_TRACE) {
@@ -367,23 +405,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					// if this is not an excluded module, generate tests
 					if (EXCLUDED_MODULES == null || !Arrays.asList(EXCLUDED_MODULES).contains(moduleName.toLowerCase())) {
 						// generate test factory
-						final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-						File factoryPath = new File(GENERATED_TEST_PATH + modulePath + "/util/");
 						File factoryFile = new File(
 								factoryPath.getPath() + File.separator + documentName + "Factory.java");
 						factoryPath.mkdirs();
 						factoryFile.createNewFile();
 						try (FileWriter fw = new FileWriter(factoryFile)) {
-							generateFactory(module, document, fw, modulePath, modulePath.replace('/', '.'), documentName);
+							generateFactory(module, document, fw, modulePath.replace('/', '.'), documentName);
 						}
 
-						// generate domain test for persistent documents
+						// generate domain test for persistent documents that are not mapped, or not children
 						Persistent persistent = document.getPersistent();
-						if (persistent != null) {
-							File testPath = new File(GENERATED_TEST_PATH + packagePath);
+						if (persistent != null && !ExtensionStrategy.mapped.equals(persistent.getStrategy())
+								&& document.getParentDocumentName() == null) {
 							File testFile = new File(
-									testPath.getPath() + File.separator + documentName + "Test.java");
-							testPath.mkdirs();
+									domainTestPath.getPath() + File.separator + documentName + "Test.java");
+							domainTestPath.mkdirs();
 							testFile.createNewFile();
 							try (FileWriter fw = new FileWriter(testFile)) {
 								generateDomainTest(fw, modulePath, packagePath.replace('/', '.'), documentName);
@@ -1886,7 +1922,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("boxing")
-	private static void generateFactory(Module module, Document document, FileWriter fw, String modulePath, String packagePath,
+	private static void generateFactory(Module module, Document document, FileWriter fw, String packagePath,
 			String documentName) throws IOException {
 		System.out.println("Generate factory class for " + packagePath + '.' + documentName);
 		final String variableName = getVariableNameForDocument(documentName);
@@ -1995,6 +2031,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		for (String importClassName : imports) {
 			fw.append("import ").append(importClassName).append(";\n");
 		}
+
+		String factoryExtensionPath = new String(
+				TEST_PATH + packagePath.replace('.', '/') + "/util/" + documentName + "FactoryExtension.java");
+
+		// generate javadoc
+		fw.append("\n").append("/**");
+		fw.append("\n").append(" * Generated - local changes will be overwritten.");
+		fw.append("\n").append(" * Create class ").append(factoryExtensionPath);
+		fw.append("\n").append(" * to extend this class and customise specific values for this document.");
+		fw.append("\n").append(" */");
 
 		fw.append("\n").append("public class ").append(documentName).append("Factory");
 		fw.append(" extends AbstractDomainFactory<").append(documentName).append("> {");
@@ -2667,20 +2713,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (factoryExtensionFile.exists()) {
 			baseDocumentExtensionFactoryExists = true;
 		}
-		System.out.println(String.format("Looking for %s in %s. Found: %s", documentName, factoryExtensionFile.getPath(),
-				baseDocumentExtensionFactoryExists));
-		return baseDocumentExtensionFactoryExists;
-	}
 
-	/**
-	 * Creates a "variable" name for a document. E.g. Audit will return audit. Lowercases
-	 * the first letter of the document name.
-	 * 
-	 * @param documentName The name of the document to generate a variable name for
-	 * @return The variable name from the document.
-	 */
-	private static String getVariableNameForDocument(final String documentName) {
-		return Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
+		return baseDocumentExtensionFactoryExists;
 	}
 
 	/**
@@ -2699,5 +2733,24 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Creates a "variable" name for a document. E.g. Audit will return audit. Lowercases
+	 * the first letter of the document name. Also checks if the variable name is
+	 * a Java reserved word, and prefixes it with an underscore if it is.
+	 * 
+	 * @param documentName The name of the document to generate a variable name for
+	 * @return The variable name from the document.
+	 */
+	private static String getVariableNameForDocument(final String documentName) {
+		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
+
+		// check this is not a Java reserved word
+		if (RESERVED_WORDS.contains(variableName)) {
+			return "_" + variableName;
+		}
+
+		return variableName;
 	}
 }

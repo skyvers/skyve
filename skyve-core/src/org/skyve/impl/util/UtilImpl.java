@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.proxy.HibernateProxy;
 import org.hibernate.util.SerializationHelper;
 import org.skyve.CORE;
@@ -42,7 +43,9 @@ import org.skyve.persistence.DataStore;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.JSON;
+import org.skyve.util.Util;
 
+import com.mifmif.common.regex.Generex;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
@@ -536,15 +539,42 @@ public class UtilImpl {
 					BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
 					break;
 				case text:
-					// check if this string has a format mask
 					Text text = (Text) attribute;
+
+					// check if this string has a format mask
 					if (text.getFormat() != null) {
+						// check if it has a format mask and a regex, if so, prefer the regex
+						if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+								&& text.getValidator().getType() == null) {
+							// return text matching the regex
+							String xeger = randomRegex(text.getValidator().getRegularExpression());
+							if (xeger != null) {
+								BindUtil.set(result, name, xeger);
+								continue;
+							}
+						}
+
 						// return text matching the format mask
 						BindUtil.set(result, name, randomFormat(text.getFormat()));
+					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+							&& text.getValidator().getType() == null) {
+						// check if this string has a regex and no validator type
+						String xeger = randomRegex(text.getValidator().getRegularExpression());
+						if (xeger != null) {
+							BindUtil.set(result, name, xeger);
+							continue;
+						}
 					} else {
 						// check if this is an email address
 						if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
 							BindUtil.set(result, name, randomEmail(((LengthField) attribute).getLength()));
+						} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
+							// check if this string has a regex via a validator type
+							String xeger = randomRegex(text.getValidator().getRegularExpression());
+							if (xeger != null) {
+								BindUtil.set(result, name, xeger);
+								continue;
+							}
 						} else {
 							// return random text
 							BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
@@ -553,6 +583,49 @@ public class UtilImpl {
 			}
 		}
 		return result;
+	}
+
+	private static String randomEmail(int length) {
+		int addressLength = (int) Math.floor((length - 2) / 2);
+		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
+
+		char[] address = new char[addressLength];
+		for (int i = 0; i < addressLength; i++) {
+			address[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		char[] domain = new char[domainLength];
+		for (int i = 0; i < domainLength; i++) {
+			domain[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		char[] code = new char[2];
+		for (int i = 0; i < 2; i++) {
+			code[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
+		}
+
+		return String.valueOf(address) + "@" + String.valueOf(domain) + "." + String.valueOf(code);
+	}
+
+	/**
+	 * Returns a random value from the enum class
+	 * 
+	 * @param clazz The enum class
+	 * @param currentValue The current int value of the enum so that it is not chosen again
+	 * @return A random enum constant
+	 */
+	@SuppressWarnings("boxing")
+	private static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
+		int x;
+		if (currentValue != null) {
+			do {
+				x = random.nextInt(clazz.getEnumConstants().length);
+			} while (x == currentValue);
+		} else {
+			x = random.nextInt(clazz.getEnumConstants().length);
+		}
+
+		return clazz.getEnumConstants()[x];
 	}
 
 	/**
@@ -585,52 +658,31 @@ public class UtilImpl {
 			}
 		}
 
-		System.out.println(String.format("Generated %s for mask %s", out, mask));
-
 		return out;
 	}
 
 	/**
-	 * Returns a random value from the enum class
+	 * Returns a random string which complies to the regular
+	 * expression of the text attribute. Returns null if this
+	 * cannot be achieved.
 	 * 
-	 * @param clazz The enum class
-	 * @param currentValue The current int value of the enum so that it is not chosen again
-	 * @return A random enum constant
+	 * @param regularExpression The regular expression to comply to
+	 * @return A regex compliant random string, or null
 	 */
-	@SuppressWarnings("boxing")
-	private static <T extends Enum<?>> T randomEnum(Class<T> clazz, Integer currentValue) {
-		int x;
-		if (currentValue != null) {
-			do {
-				x = random.nextInt(clazz.getEnumConstants().length);
-			} while (x == currentValue);
-		} else {
-			x = random.nextInt(clazz.getEnumConstants().length);
+	private static String randomRegex(String regularExpression) {
+		Generex generex = new Generex(regularExpression);
+		// Generate random String matching the regex
+		try {
+			String result = generex.random();
+			// strip boundaries
+			if (result.startsWith("^") && result.endsWith("$")) {
+				return StringUtils.substringBetween(result, "^", "$");
+			}
+			return result;
+		} catch (Exception e) {
+			Util.LOGGER.warning("Couldnt generate compliant string for expression " + regularExpression);
 		}
-
-		return clazz.getEnumConstants()[x];
-	}
-
-	private static String randomEmail(int length) {
-		int addressLength = (int) Math.floor((length - 2) / 2);
-		int domainLength = (int) Math.floor((length - 2) / 2) - 2;
-
-		char[] address = new char[addressLength];
-		for (int i = 0; i < addressLength; i++) {
-			address[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
-		}
-
-		char[] domain = new char[domainLength];
-		for (int i = 0; i < domainLength; i++) {
-			domain[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
-		}
-
-		char[] code = new char[2];
-		for (int i = 0; i < 2; i++) {
-			code[i] = Character.toChars(65 + (int) (Math.random() * 26))[0];
-		}
-
-		return String.valueOf(address) + "@" + String.valueOf(domain) + "." + String.valueOf(code);
+		return null;
 	}
 
 	private static String randomString(int length) {

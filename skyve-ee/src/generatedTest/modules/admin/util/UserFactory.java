@@ -9,6 +9,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 import util.AbstractDomainFactory;
 
+/**
+ * Generated - local changes will be overwritten.
+ * Create class src/test/modules/admin/util/UserFactoryExtension.java
+ * to extend this class and customise specific values for this document.
+ */
 public class UserFactory extends AbstractDomainFactory<User> {
 
 	@Override

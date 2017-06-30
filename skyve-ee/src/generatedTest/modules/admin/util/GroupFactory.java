@@ -10,6 +10,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 import util.AbstractDomainFactory;
 
+/**
+ * Generated - local changes will be overwritten.
+ * Create class src/test/modules/admin/util/GroupFactoryExtension.java
+ * to extend this class and customise specific values for this document.
+ */
 public class GroupFactory extends AbstractDomainFactory<Group> {
 
 	@Override

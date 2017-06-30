@@ -55,5 +55,11 @@
 			<artifactId>commons-validator</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+		    <groupId>com.github.mifmif</groupId>
+		    <artifactId>generex</artifactId>
+		    <version>${generex.version}</version>
+		    <scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>
