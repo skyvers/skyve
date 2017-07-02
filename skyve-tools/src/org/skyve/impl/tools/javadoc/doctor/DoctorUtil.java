@@ -25,8 +25,10 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.BizQLDefinition;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
@@ -264,13 +266,19 @@ public class DoctorUtil {
 					DocList valueList = new DocList(false);
 					if(AttributeType.enumeration.equals(attribute.getAttributeType())
 							|| DomainType.constant.equals(attribute.getDomainType())){
-						for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null) ){
-							StringBuilder sb = new StringBuilder();
-							sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
-							valueList.getItems().add(sb.toString());
-							if(val.getCode().length()>fieldLen){
-								fieldLen = val.getCode().length();
+						try {
+							for(DomainValue val: ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, attribute.getDomainType(), attribute, null) ){
+								StringBuilder sb = new StringBuilder();
+								sb.append(val.getDescription()).append(" (").append(val.getCode()).append(")");
+								valueList.getItems().add(sb.toString());
+								if(val.getCode().length()>fieldLen){
+									fieldLen = val.getCode().length();
+								}
 							}
+						}
+						catch (Exception e) {
+							System.out.println(String.format("cannot get domain values for module %s, document %s & attribute %s. This can occur when a database is required to determine the values. ",
+																module.getName(), document.getName(), attribute.getName()));
 						}
 					}
 					
@@ -380,8 +388,17 @@ public class DoctorUtil {
 	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) throws Exception {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
-		section.setSectionTitle("Query " + q.getDescription());
 		section.setSectionType(SectionType.SubChapter);
+		if (q instanceof DocumentQueryDefinition) {
+			section.setSectionTitle("Document Query " + q.getName());
+		}
+		else if (q instanceof SQLDefinition) {
+			section.setSectionTitle("SQL Query " + q.getName());
+		}
+		else if (q instanceof BizQLDefinition) {
+			section.setSectionTitle("BizQL Query " + q.getName());
+		}
+		section.getHtmlContent().add(q.getDescription());
 		section.getHtmlContent().add(q.getDocumentation());
 		out.println(section.toHTML());
 
@@ -396,11 +413,15 @@ public class DoctorUtil {
 				// See if we can find the document binding
 				String binding = null;
 				Document d = module.getDocument(customer, dq.getDocumentName());
-				Attribute a = getAttributeFromFieldName(d, c.getBinding());
+				String name = c.getBinding();
+				if (name == null) {
+					name = c.getName();
+				}
+				Attribute a = getAttributeFromFieldName(d, name);
 				if (a != null) {
 					binding = a.getDisplayName();
 				} else {
-					binding = c.getBinding();
+					binding = name;
 				}
 	
 				table.setRowValues(binding, c.getDisplayName(), c.getExpression(), c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));

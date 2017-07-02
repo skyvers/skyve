@@ -148,7 +148,7 @@
 									<label for="customer"><%=Util.i18n("page.login.customer.label", locale)%></label>
 								</div>
 								<div class="col-7-sm">
-									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="none" autocorrect="none" name="customer">
+									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="customer">
 								</div>
 							</div>
 							<% } %>
@@ -160,7 +160,7 @@
 									<% if (customer != null) { %>
 										<input type="hidden" name="customer" value="<%=customer%>" />
 									<% } %>
-									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="none" autocorrect="none" name="user">
+									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="user">
 								</div>
 							</div>
 							<div class="row">
