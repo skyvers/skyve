@@ -50,6 +50,7 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.util.test.SkyveFactory;
 
 /**
  * Run through all vanilla modules and create the base class data structure and the extensions (if required).
@@ -417,12 +418,54 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						Persistent persistent = document.getPersistent();
 						if (persistent != null && !ExtensionStrategy.mapped.equals(persistent.getStrategy())
 								&& document.getParentDocumentName() == null) {
-							File testFile = new File(
-									domainTestPath.getPath() + File.separator + documentName + "Test.java");
-							domainTestPath.mkdirs();
-							testFile.createNewFile();
-							try (FileWriter fw = new FileWriter(testFile)) {
-								generateDomainTest(fw, modulePath, packagePath.replace('/', '.'), documentName);
+							// check if this document is annotated to skip domain tests
+							File factoryExtensionPath = new File(TEST_PATH + modulePath + "/util/");
+							File factoryExtensionFile = new File(
+									factoryExtensionPath.getPath() + File.separator + documentName + "FactoryExtension.java");
+							boolean skipGeneration = false;
+
+							if (factoryExtensionFile.exists()) {
+								String className = factoryExtensionFile.getPath().replace(TEST_PATH, "").replace('/', '.');
+								System.out.println("Found factory extension " + className);
+								className = className.replaceFirst("[.][^.]+$", "");
+								System.out.println(className);
+
+								// scan the classpath for the class
+								/*System.out.println(
+										"Scanning for annotations in: "
+												+ className.replace(documentName, ".*")
+														.replace("FactoryExtension", ""));*/
+
+								try {
+									Class<?> c = Class.forName(className);
+									if (c.isAnnotationPresent(SkyveFactory.class)) {
+										SkyveFactory sf = c.getAnnotation(SkyveFactory.class);
+										System.out.println("Test action: " + sf.testAction());
+										System.out.println("Test domain: " + sf.testDomain());
+
+										if (!sf.testDomain()) {
+											skipGeneration = true;
+										}
+									}
+								} catch (Exception e) {
+									System.err.println(e.getMessage());
+								}
+								// List<Class<?>> classes = CPScanner.scanClasses(new
+								// ClassFilter().packageName(packagePath.replace('/', '.')));
+
+							}
+
+							if (!skipGeneration) {
+								File testFile = new File(
+										domainTestPath.getPath() + File.separator + documentName + "Test.java");
+								domainTestPath.mkdirs();
+								testFile.createNewFile();
+								try (FileWriter fw = new FileWriter(testFile)) {
+									generateDomainTest(fw, modulePath, packagePath.replace('/', '.'), documentName);
+								}
+							} else {
+								System.out.println(String.format("Skipping domain test generation for %s.%s",
+										packagePath.replace('/', '.'), documentName));
 							}
 						}
 					}
@@ -1872,7 +1915,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 
-		// imports.add(String.format("modules.admin.util.%s%s", documentName, "Factory"));
 		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
 		imports.add("util.AbstractDomainTest");
 		imports.add("util.AbstractH2Test");
@@ -1937,8 +1979,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add("org.skyve.metadata.customer.Customer");
 		imports.add("org.skyve.metadata.model.document.Document");
 		imports.add("org.skyve.metadata.module.Module");
-		imports.add("util.AbstractDomainFactory");
+		imports.add("org.skyve.util.test.SkyveFactory");
 		imports.add("org.skyve.util.Util");
+		imports.add("util.AbstractDomainFactory");
 
 		imports.add(String.format("%s.domain.%s", packagePath, documentName));
 
@@ -2042,6 +2085,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n").append(" * to extend this class and customise specific values for this document.");
 		fw.append("\n").append(" */");
 
+		// generate class
+		fw.append("\n").append("@SkyveFactory");
 		fw.append("\n").append("public class ").append(documentName).append("Factory");
 		fw.append(" extends AbstractDomainFactory<").append(documentName).append("> {");
 		fw.append("\n");

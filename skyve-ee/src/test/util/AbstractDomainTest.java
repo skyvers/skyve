@@ -67,6 +67,8 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		T b1 = getBean();
 		T b2 = getBean();
 
+		int beanCount = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults().size();
+
 		CORE.getPersistence().save(b1);
 		CORE.getPersistence().save(b2);
 
@@ -74,7 +76,7 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		List<T> results = CORE.getPersistence().newDocumentQuery(b1.getBizModule(), b1.getBizDocument()).beanResults();
 
 		// verify the results
-		assertThat(results.size(), is(2));
+		assertThat(results.size(), is(beanCount + 2));
 	}
 
 	@Test
