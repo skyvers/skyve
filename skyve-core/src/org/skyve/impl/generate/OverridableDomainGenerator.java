@@ -1619,22 +1619,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param enumeration
 	 * @param enums
 	 */
-	private static void appendEnumDefinition(Enumeration enumeration,
-			String typeName,
-			StringBuilder enums) {
-		String doc = enumeration.getDocumentation();
-		if (doc == null) {
-			doc = enumeration.getDescription();
-		}
-		if (doc == null) {
-			doc = enumeration.getDisplayName();
-		}
-		if (doc == null) {
-			doc = enumeration.getName();
-		}
-		enums.append("\t/**\n");
-		enums.append("\t * ").append(doc).append('\n');
-		enums.append("\t **/\n");
+	private static void appendEnumDefinition(Enumeration enumeration, String typeName, StringBuilder enums) {
+		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
 		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
 		for (EnumeratedValue value : enumeration.getValues()) {
@@ -2189,16 +2175,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	@SuppressWarnings("synthetic-access")
-	private void generateJava(AbstractRepository repository,
-			Customer customer,
-			Module module,
-			Document document,
-			FileWriter fw,
-			String packagePath,
-			String documentName,
-			String baseDocumentName,
-			boolean overridden)
-			throws IOException {
+	private void generateJava(AbstractRepository repository, Customer customer, Module module, Document document, FileWriter fw,
+			String packagePath, String documentName, String baseDocumentName, boolean overridden) throws IOException {
 		System.out.println("Generate class for " + packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
@@ -2785,23 +2763,29 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {
-		String description = attribute.getDocumentation();
-		if (description == null) {
-			description = attribute.getDescription();
+		toAppendTo.append("\t/**\n");
+		toAppendTo.append("\t * ").append(attribute.getDisplayName()).append('\n');
+		String doc = attribute.getDescription();
+		if (doc != null) {
+			toAppendTo.append("\t * <br/>\n");
+			toAppendTo.append("\t * ").append(doc).append("\n");
 		}
-		if (description != null) {
-			toAppendTo.append("\t/**\n");
-			toAppendTo.append("\t * ").append(description).append("\n");
-			toAppendTo.append("\t **/\n");
+		doc = attribute.getDocumentation();
+		if (doc != null) {
+			toAppendTo.append("\t * <br/>\n");
+			toAppendTo.append("\t * ").append(doc).append("\n");
 		}
+		toAppendTo.append("\t **/\n");
 	}
 
 	private static void accessorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} accessor.\n");
 		if (mapped) {
-			toAppendTo.append("\t * \n");
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
+			toAppendTo.append("\t * @return\tThe value of the element in the list.\n");
+		} else {
+			toAppendTo.append("\t * @return\tThe value.\n");
 		}
 		toAppendTo.append("\t **/");
 	}
@@ -2809,11 +2793,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private static void mutatorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} mutator.\n");
-		toAppendTo.append("\t * \n");
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
+			toAppendTo.append("\t * @param element\tThe new value of the element in the list.\n");
+		} else {
+			toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value.\n");
 		}
-		toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value to set.\n");
 		toAppendTo.append("\t **/");
 	}
 
