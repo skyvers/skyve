@@ -42,10 +42,21 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
 
+	/**
+	 * Position Title
+	 **/
 	private String positionTitle;
+	/**
+	 * Staff Person
+	 **/
 	private Staff staff = null;
+	/**
+	 * Reports To
+	 **/
 	private Position reportsTo = null;
 	/**
+	 * Demonstration Data
+	 * <br/>
 	 * If this is set, the data was created by the demo data job and can safely be deleted.
 	 **/
 	private Boolean demoData;
@@ -89,6 +100,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #positionTitle} accessor.
+	 * @return	The value.
 	 **/
 	public String getPositionTitle() {
 		return positionTitle;
@@ -96,8 +108,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #positionTitle} mutator.
-	 * 
-	 * @param positionTitle	The new value to set.
+	 * @param positionTitle	The new value.
 	 **/
 	@XmlElement
 	public void setPositionTitle(String positionTitle) {
@@ -107,6 +118,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #staff} accessor.
+	 * @return	The value.
 	 **/
 	public Staff getStaff() {
 		return staff;
@@ -114,8 +126,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #staff} mutator.
-	 * 
-	 * @param staff	The new value to set.
+	 * @param staff	The new value.
 	 **/
 	@XmlElement
 	public void setStaff(Staff staff) {
@@ -125,6 +136,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #reportsTo} accessor.
+	 * @return	The value.
 	 **/
 	public Position getReportsTo() {
 		return reportsTo;
@@ -132,8 +144,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #reportsTo} mutator.
-	 * 
-	 * @param reportsTo	The new value to set.
+	 * @param reportsTo	The new value.
 	 **/
 	@XmlElement
 	public void setReportsTo(Position reportsTo) {
@@ -142,6 +153,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #demoData} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getDemoData() {
 		return demoData;
@@ -149,8 +161,7 @@ public class Position extends AbstractPersistentBean implements HierarchicalBean
 
 	/**
 	 * {@link #demoData} mutator.
-	 * 
-	 * @param demoData	The new value to set.
+	 * @param demoData	The new value.
 	 **/
 	@XmlElement
 	public void setDemoData(Boolean demoData) {

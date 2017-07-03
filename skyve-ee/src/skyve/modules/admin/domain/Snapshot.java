@@ -40,11 +40,29 @@ public class Snapshot extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String copyToUserSnapshotNamePropertyName = "copyToUserSnapshotName";
 
+	/**
+	 * Module
+	 **/
 	private String moduleName;
+	/**
+	 * Query
+	 **/
 	private String queryName;
+	/**
+	 * Name
+	 **/
 	private String name;
+	/**
+	 * Snapshot Code
+	 **/
 	private String snapshot;
+	/**
+	 * Copy to user
+	 **/
 	private User copyToUser = null;
+	/**
+	 * Snapshot Name for Copy
+	 **/
 	private String copyToUserSnapshotName;
 
 	@Override
@@ -84,6 +102,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModuleName() {
 		return moduleName;
@@ -91,8 +110,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} mutator.
-	 * 
-	 * @param moduleName	The new value to set.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -102,6 +120,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #queryName} accessor.
+	 * @return	The value.
 	 **/
 	public String getQueryName() {
 		return queryName;
@@ -109,8 +128,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #queryName} mutator.
-	 * 
-	 * @param queryName	The new value to set.
+	 * @param queryName	The new value.
 	 **/
 	@XmlElement
 	public void setQueryName(String queryName) {
@@ -120,6 +138,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -127,8 +146,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -138,6 +156,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #snapshot} accessor.
+	 * @return	The value.
 	 **/
 	public String getSnapshot() {
 		return snapshot;
@@ -145,8 +164,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #snapshot} mutator.
-	 * 
-	 * @param snapshot	The new value to set.
+	 * @param snapshot	The new value.
 	 **/
 	@XmlElement
 	public void setSnapshot(String snapshot) {
@@ -156,6 +174,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUser} accessor.
+	 * @return	The value.
 	 **/
 	public User getCopyToUser() {
 		return copyToUser;
@@ -163,8 +182,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUser} mutator.
-	 * 
-	 * @param copyToUser	The new value to set.
+	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
 	public void setCopyToUser(User copyToUser) {
@@ -173,6 +191,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUserSnapshotName} accessor.
+	 * @return	The value.
 	 **/
 	public String getCopyToUserSnapshotName() {
 		return copyToUserSnapshotName;
@@ -180,8 +199,7 @@ public class Snapshot extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUserSnapshotName} mutator.
-	 * 
-	 * @param copyToUserSnapshotName	The new value to set.
+	 * @param copyToUserSnapshotName	The new value.
 	 **/
 	@XmlElement
 	public void setCopyToUserSnapshotName(String copyToUserSnapshotName) {

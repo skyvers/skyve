@@ -30,6 +30,9 @@ public class MyStatus extends AbstractTransientBean {
 	/** @hidden */
 	public static final String myStaffPropertyName = "myStaff";
 
+	/**
+	 * My Staff
+	 **/
 	private Staff myStaff = null;
 
 	@Override
@@ -56,6 +59,7 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * {@link #myStaff} accessor.
+	 * @return	The value.
 	 **/
 	public Staff getMyStaff() {
 		return myStaff;
@@ -63,8 +67,7 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * {@link #myStaff} mutator.
-	 * 
-	 * @param myStaff	The new value to set.
+	 * @param myStaff	The new value.
 	 **/
 	@XmlElement
 	public void setMyStaff(Staff myStaff) {

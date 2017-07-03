@@ -29,6 +29,9 @@ public class AnyBase extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String textPropertyName = "text";
 
+	/**
+	 * Text
+	 **/
 	private String text;
 
 	@Override
@@ -68,6 +71,7 @@ public class AnyBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #text} accessor.
+	 * @return	The value.
 	 **/
 	public String getText() {
 		return text;
@@ -75,8 +79,7 @@ public class AnyBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #text} mutator.
-	 * 
-	 * @param text	The new value to set.
+	 * @param text	The new value.
 	 **/
 	@XmlElement
 	public void setText(String text) {

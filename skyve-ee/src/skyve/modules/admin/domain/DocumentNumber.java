@@ -36,18 +36,26 @@ public class DocumentNumber extends AbstractPersistentBean {
 	public static final String documentNumberPropertyName = "documentNumber";
 
 	/**
+	 * Module Name
+	 * <br/>
 	 * The name of the module.
 	 **/
 	private String moduleName;
 	/**
+	 * Document Name
+	 * <br/>
 	 * The name of the document.
 	 **/
 	private String documentName;
 	/**
+	 * Sequence
+	 * <br/>
 	 * The name of the field or sequence.
 	 **/
 	private String sequenceName;
 	/**
+	 * Number
+	 * <br/>
 	 * The last used number for the document.
 	 **/
 	private String documentNumber;
@@ -89,6 +97,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModuleName() {
 		return moduleName;
@@ -96,8 +105,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} mutator.
-	 * 
-	 * @param moduleName	The new value to set.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -107,6 +115,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentName() {
 		return documentName;
@@ -114,8 +123,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentName} mutator.
-	 * 
-	 * @param documentName	The new value to set.
+	 * @param documentName	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -125,6 +133,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sequenceName} accessor.
+	 * @return	The value.
 	 **/
 	public String getSequenceName() {
 		return sequenceName;
@@ -132,8 +141,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sequenceName} mutator.
-	 * 
-	 * @param sequenceName	The new value to set.
+	 * @param sequenceName	The new value.
 	 **/
 	@XmlElement
 	public void setSequenceName(String sequenceName) {
@@ -143,6 +151,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentNumber} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentNumber() {
 		return documentNumber;
@@ -150,8 +159,7 @@ public class DocumentNumber extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentNumber} mutator.
-	 * 
-	 * @param documentNumber	The new value to set.
+	 * @param documentNumber	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentNumber(String documentNumber) {

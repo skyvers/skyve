@@ -29,6 +29,9 @@ public class DownloadFolder extends AbstractTransientBean {
 	/** @hidden */
 	public static final String namePropertyName = "name";
 
+	/**
+	 * Name
+	 **/
 	private String name;
 
 	@Override
@@ -55,6 +58,7 @@ public class DownloadFolder extends AbstractTransientBean {
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -62,8 +66,7 @@ public class DownloadFolder extends AbstractTransientBean {
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {

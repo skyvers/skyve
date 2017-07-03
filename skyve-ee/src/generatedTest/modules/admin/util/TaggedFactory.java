@@ -1,7 +1,7 @@
 package modules.admin.util;
 
 import modules.admin.domain.Tagged;
-import modules.admin.util.TagFactory;
+import modules.admin.util.TagFactoryExtension;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -25,7 +25,7 @@ public class TaggedFactory extends AbstractDomainFactory<Tagged> {
 		Document document = module.getDocument(customer, Tagged.DOCUMENT_NAME);
 
 		Tagged tagged = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);
-		tagged.setTag(new TagFactory().getInstance());
+		tagged.setTag(new TagFactoryExtension().getInstance());
 
 		return tagged;
 	}

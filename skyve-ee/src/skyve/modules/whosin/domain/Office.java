@@ -46,17 +46,39 @@ public class Office extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String demoDataPropertyName = "demoData";
 
+	/**
+	 * Level/Unit
+	 **/
 	private String levelUnit;
+	/**
+	 * Building Name
+	 **/
 	private String buildingName;
+	/**
+	 * Street Address
+	 **/
 	private String streetAddress;
+	/**
+	 * Suburb
+	 **/
 	private String suburb;
+	/**
+	 * Post Code
+	 **/
 	private String postCode;
+	/**
+	 * Phone
+	 **/
 	private String phone;
 	/**
+	 * Boundary
+	 * <br/>
 	 * The boundary around the office.
 	 **/
 	private Geometry boundary;
 	/**
+	 * Demonstration Data
+	 * <br/>
 	 * If this is set, the data was created by the <em>demo data job</em> and can safely be deleted.
 	 **/
 	private Boolean demoData;
@@ -98,6 +120,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #levelUnit} accessor.
+	 * @return	The value.
 	 **/
 	public String getLevelUnit() {
 		return levelUnit;
@@ -105,8 +128,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #levelUnit} mutator.
-	 * 
-	 * @param levelUnit	The new value to set.
+	 * @param levelUnit	The new value.
 	 **/
 	@XmlElement
 	public void setLevelUnit(String levelUnit) {
@@ -116,6 +138,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #buildingName} accessor.
+	 * @return	The value.
 	 **/
 	public String getBuildingName() {
 		return buildingName;
@@ -123,8 +146,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #buildingName} mutator.
-	 * 
-	 * @param buildingName	The new value to set.
+	 * @param buildingName	The new value.
 	 **/
 	@XmlElement
 	public void setBuildingName(String buildingName) {
@@ -134,6 +156,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #streetAddress} accessor.
+	 * @return	The value.
 	 **/
 	public String getStreetAddress() {
 		return streetAddress;
@@ -141,8 +164,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #streetAddress} mutator.
-	 * 
-	 * @param streetAddress	The new value to set.
+	 * @param streetAddress	The new value.
 	 **/
 	@XmlElement
 	public void setStreetAddress(String streetAddress) {
@@ -152,6 +174,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #suburb} accessor.
+	 * @return	The value.
 	 **/
 	public String getSuburb() {
 		return suburb;
@@ -159,8 +182,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #suburb} mutator.
-	 * 
-	 * @param suburb	The new value to set.
+	 * @param suburb	The new value.
 	 **/
 	@XmlElement
 	public void setSuburb(String suburb) {
@@ -170,6 +192,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #postCode} accessor.
+	 * @return	The value.
 	 **/
 	public String getPostCode() {
 		return postCode;
@@ -177,8 +200,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #postCode} mutator.
-	 * 
-	 * @param postCode	The new value to set.
+	 * @param postCode	The new value.
 	 **/
 	@XmlElement
 	public void setPostCode(String postCode) {
@@ -188,6 +210,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #phone} accessor.
+	 * @return	The value.
 	 **/
 	public String getPhone() {
 		return phone;
@@ -195,8 +218,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #phone} mutator.
-	 * 
-	 * @param phone	The new value to set.
+	 * @param phone	The new value.
 	 **/
 	@XmlElement
 	public void setPhone(String phone) {
@@ -206,6 +228,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #boundary} accessor.
+	 * @return	The value.
 	 **/
 	public Geometry getBoundary() {
 		return boundary;
@@ -213,8 +236,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #boundary} mutator.
-	 * 
-	 * @param boundary	The new value to set.
+	 * @param boundary	The new value.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -225,6 +247,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #demoData} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getDemoData() {
 		return demoData;
@@ -232,8 +255,7 @@ public class Office extends AbstractPersistentBean {
 
 	/**
 	 * {@link #demoData} mutator.
-	 * 
-	 * @param demoData	The new value to set.
+	 * @param demoData	The new value.
 	 **/
 	@XmlElement
 	public void setDemoData(Boolean demoData) {

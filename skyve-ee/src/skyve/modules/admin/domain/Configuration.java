@@ -36,6 +36,8 @@ public class Configuration extends AbstractPersistentBean {
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
 
 	/**
+	 * Password Complexity
+	 * <br/>
 	 * The security level/complexity model for user passwords
 	 **/
 	@XmlEnum
@@ -114,6 +116,8 @@ public class Configuration extends AbstractPersistentBean {
 	}
 
 	/**
+	 * Password Complexity
+	 * <br/>
 	 * The security level/complexity model for user passwords
 	 **/
 	private PasswordComplexityModel passwordComplexityModel;
@@ -155,6 +159,7 @@ public class Configuration extends AbstractPersistentBean {
 
 	/**
 	 * {@link #passwordComplexityModel} accessor.
+	 * @return	The value.
 	 **/
 	public PasswordComplexityModel getPasswordComplexityModel() {
 		return passwordComplexityModel;
@@ -162,8 +167,7 @@ public class Configuration extends AbstractPersistentBean {
 
 	/**
 	 * {@link #passwordComplexityModel} mutator.
-	 * 
-	 * @param passwordComplexityModel	The new value to set.
+	 * @param passwordComplexityModel	The new value.
 	 **/
 	@XmlElement
 	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {

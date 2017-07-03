@@ -1,12 +1,12 @@
 package modules.admin.domain;
 
 import modules.admin.util.TagFactory;
+import modules.admin.util.TagFactoryExtension;
 import util.AbstractDomainTest;
-import util.AbstractH2Test;
 
 /**
  * Generated - local changes will be overwritten.
- * Extend {@link AbstractH2Test} to create your own tests for this document.
+ * Extend {@link AbstractDomainTest} to create your own tests for this document.
  */
 public class TagTest extends AbstractDomainTest<Tag> {
 
@@ -14,7 +14,7 @@ public class TagTest extends AbstractDomainTest<Tag> {
 
 	@Override
 	public void setUp() throws Exception {
-		factory = new TagFactory();
+		factory = new TagFactoryExtension();
 	}
 
 	@Override

@@ -49,11 +49,29 @@ public class UserDashboard extends AbstractTransientBean {
 	/** @hidden */
 	public static final String jobsPropertyName = "jobs";
 
+	/**
+	 * Current User
+	 **/
 	private User currentUser = null;
+	/**
+	 * Group Membership
+	 **/
 	private String groupMembershipList;
+	/**
+	 * Last Login
+	 **/
 	private DateTime lastLogin;
+	/**
+	 * Groups
+	 **/
 	private List<Group> groups = new ArrayList<>();
+	/**
+	 * Roles
+	 **/
 	private List<UserRole> roles = new ArrayList<>();
+	/**
+	 * Jobs
+	 **/
 	private List<Job> jobs = new ArrayList<>();
 
 	@Override
@@ -80,6 +98,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #currentUser} accessor.
+	 * @return	The value.
 	 **/
 	public User getCurrentUser() {
 		return currentUser;
@@ -87,8 +106,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #currentUser} mutator.
-	 * 
-	 * @param currentUser	The new value to set.
+	 * @param currentUser	The new value.
 	 **/
 	@XmlElement
 	public void setCurrentUser(User currentUser) {
@@ -98,6 +116,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #groupMembershipList} accessor.
+	 * @return	The value.
 	 **/
 	public String getGroupMembershipList() {
 		return groupMembershipList;
@@ -105,8 +124,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #groupMembershipList} mutator.
-	 * 
-	 * @param groupMembershipList	The new value to set.
+	 * @param groupMembershipList	The new value.
 	 **/
 	@XmlElement
 	public void setGroupMembershipList(String groupMembershipList) {
@@ -116,6 +134,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #lastLogin} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getLastLogin() {
 		return lastLogin;
@@ -123,8 +142,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #lastLogin} mutator.
-	 * 
-	 * @param lastLogin	The new value to set.
+	 * @param lastLogin	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -136,6 +154,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #groups} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Group> getGroups() {
@@ -144,8 +163,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #groups} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Group getGroupsElementById(String bizId) {
 		return getElementById(groups, bizId);
@@ -153,9 +172,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #groups} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param groups	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
 		 setElementById(groups, element);
@@ -163,6 +181,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #roles} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<UserRole> getRoles() {
@@ -171,8 +190,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #roles} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public UserRole getRolesElementById(String bizId) {
 		return getElementById(roles, bizId);
@@ -180,9 +199,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #roles} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param roles	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
 		 setElementById(roles, element);
@@ -190,6 +208,7 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Job> getJobs() {
@@ -198,8 +217,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Job getJobsElementById(String bizId) {
 		return getElementById(jobs, bizId);
@@ -207,9 +226,8 @@ public class UserDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param jobs	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
 		 setElementById(jobs, element);

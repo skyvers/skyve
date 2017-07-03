@@ -168,30 +168,105 @@ public class DataMaintenance extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Module.Document
+	 **/
 	private String modDocName;
+	/**
+	 * Schema Name
+	 **/
 	private String schemaName;
+	/**
+	 * Refresh Documents
+	 **/
 	private List<DataMaintenanceModuleDocument> refreshDocuments = new ArrayList<>();
+	/**
+	 * Notify me on completion
+	 **/
 	private Boolean notification;
+	/**
+	 * Script
+	 **/
 	private String ddlScript;
+	/**
+	 * Daily Backup Retention
+	 **/
 	private Integer dailyBackupRetention;
+	/**
+	 * Weekly Backup Retention
+	 **/
 	private Integer weeklyBackupRetention;
+	/**
+	 * Monthly Backup Retention
+	 **/
 	private Integer monthlyBackupRetention;
+	/**
+	 * Yearly Backup Retention
+	 **/
 	private Integer yearlyBackupRetention;
+	/**
+	 * Restore Pre-Process
+	 **/
 	private String restorePreProcess;
+	/**
+	 * Selected Backup Name
+	 **/
 	private String selectedBackupName;
+	/**
+	 * Selected Content Id
+	 **/
 	private String selectedContentId;
+	/**
+	 * Refresh Backups
+	 **/
 	private Boolean refreshBackups = new Boolean(true);
+	/**
+	 * Hint
+	 **/
 	private String instructionHint;
+	/**
+	 * Refresh Content
+	 **/
 	private Boolean refreshContent = new Boolean(true);
+	/**
+	 * Content Link
+	 **/
 	private String contentLink;
+	/**
+	 * Module
+	 **/
 	private String auditModuleName;
+	/**
+	 * Document
+	 **/
 	private String auditDocumentName;
+	/**
+	 * Operation
+	 **/
 	private Operation auditOperation;
+	/**
+	 * From
+	 **/
 	private Timestamp auditTimestampStart;
+	/**
+	 * To
+	 **/
 	private Timestamp auditTimestampEnd;
+	/**
+	 * User
+	 **/
 	private User auditUser = null;
+	/**
+	 * Found
+	 **/
 	private Integer auditMatchCount;
+	/**
+	 * Status
+	 **/
 	private String auditResponse;
+	/**
+	 * Option
+	 **/
 	private RefreshOption refreshOption;
 
 	@Override
@@ -231,6 +306,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #modDocName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModDocName() {
 		return modDocName;
@@ -238,8 +314,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #modDocName} mutator.
-	 * 
-	 * @param modDocName	The new value to set.
+	 * @param modDocName	The new value.
 	 **/
 	@XmlElement
 	public void setModDocName(String modDocName) {
@@ -249,6 +324,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #schemaName} accessor.
+	 * @return	The value.
 	 **/
 	public String getSchemaName() {
 		return schemaName;
@@ -256,8 +332,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #schemaName} mutator.
-	 * 
-	 * @param schemaName	The new value to set.
+	 * @param schemaName	The new value.
 	 **/
 	@XmlElement
 	public void setSchemaName(String schemaName) {
@@ -267,6 +342,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshDocuments} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<DataMaintenanceModuleDocument> getRefreshDocuments() {
@@ -275,8 +351,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshDocuments} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public DataMaintenanceModuleDocument getRefreshDocumentsElementById(String bizId) {
 		return getElementById(refreshDocuments, bizId);
@@ -284,9 +360,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshDocuments} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param refreshDocuments	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRefreshDocumentsElementById(@SuppressWarnings("unused") String bizId, DataMaintenanceModuleDocument element) {
 		 setElementById(refreshDocuments, element);
@@ -294,6 +369,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #notification} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getNotification() {
 		return notification;
@@ -301,8 +377,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #notification} mutator.
-	 * 
-	 * @param notification	The new value to set.
+	 * @param notification	The new value.
 	 **/
 	@XmlElement
 	public void setNotification(Boolean notification) {
@@ -312,6 +387,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ddlScript} accessor.
+	 * @return	The value.
 	 **/
 	public String getDdlScript() {
 		return ddlScript;
@@ -319,8 +395,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ddlScript} mutator.
-	 * 
-	 * @param ddlScript	The new value to set.
+	 * @param ddlScript	The new value.
 	 **/
 	@XmlElement
 	public void setDdlScript(String ddlScript) {
@@ -329,6 +404,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dailyBackupRetention} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getDailyBackupRetention() {
 		return dailyBackupRetention;
@@ -336,8 +412,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dailyBackupRetention} mutator.
-	 * 
-	 * @param dailyBackupRetention	The new value to set.
+	 * @param dailyBackupRetention	The new value.
 	 **/
 	@XmlElement
 	public void setDailyBackupRetention(Integer dailyBackupRetention) {
@@ -347,6 +422,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #weeklyBackupRetention} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getWeeklyBackupRetention() {
 		return weeklyBackupRetention;
@@ -354,8 +430,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #weeklyBackupRetention} mutator.
-	 * 
-	 * @param weeklyBackupRetention	The new value to set.
+	 * @param weeklyBackupRetention	The new value.
 	 **/
 	@XmlElement
 	public void setWeeklyBackupRetention(Integer weeklyBackupRetention) {
@@ -365,6 +440,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #monthlyBackupRetention} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getMonthlyBackupRetention() {
 		return monthlyBackupRetention;
@@ -372,8 +448,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #monthlyBackupRetention} mutator.
-	 * 
-	 * @param monthlyBackupRetention	The new value to set.
+	 * @param monthlyBackupRetention	The new value.
 	 **/
 	@XmlElement
 	public void setMonthlyBackupRetention(Integer monthlyBackupRetention) {
@@ -383,6 +458,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #yearlyBackupRetention} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getYearlyBackupRetention() {
 		return yearlyBackupRetention;
@@ -390,8 +466,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #yearlyBackupRetention} mutator.
-	 * 
-	 * @param yearlyBackupRetention	The new value to set.
+	 * @param yearlyBackupRetention	The new value.
 	 **/
 	@XmlElement
 	public void setYearlyBackupRetention(Integer yearlyBackupRetention) {
@@ -401,6 +476,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #restorePreProcess} accessor.
+	 * @return	The value.
 	 **/
 	public String getRestorePreProcess() {
 		return restorePreProcess;
@@ -408,8 +484,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #restorePreProcess} mutator.
-	 * 
-	 * @param restorePreProcess	The new value to set.
+	 * @param restorePreProcess	The new value.
 	 **/
 	@XmlElement
 	public void setRestorePreProcess(String restorePreProcess) {
@@ -419,6 +494,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedBackupName} accessor.
+	 * @return	The value.
 	 **/
 	public String getSelectedBackupName() {
 		return selectedBackupName;
@@ -426,8 +502,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedBackupName} mutator.
-	 * 
-	 * @param selectedBackupName	The new value to set.
+	 * @param selectedBackupName	The new value.
 	 **/
 	@XmlElement
 	public void setSelectedBackupName(String selectedBackupName) {
@@ -436,6 +511,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedContentId} accessor.
+	 * @return	The value.
 	 **/
 	public String getSelectedContentId() {
 		return selectedContentId;
@@ -443,8 +519,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedContentId} mutator.
-	 * 
-	 * @param selectedContentId	The new value to set.
+	 * @param selectedContentId	The new value.
 	 **/
 	@XmlElement
 	public void setSelectedContentId(String selectedContentId) {
@@ -453,6 +528,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshBackups} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getRefreshBackups() {
 		return refreshBackups;
@@ -460,8 +536,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshBackups} mutator.
-	 * 
-	 * @param refreshBackups	The new value to set.
+	 * @param refreshBackups	The new value.
 	 **/
 	@XmlElement
 	public void setRefreshBackups(Boolean refreshBackups) {
@@ -470,6 +545,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #instructionHint} accessor.
+	 * @return	The value.
 	 **/
 	public String getInstructionHint() {
 		return instructionHint;
@@ -477,8 +553,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #instructionHint} mutator.
-	 * 
-	 * @param instructionHint	The new value to set.
+	 * @param instructionHint	The new value.
 	 **/
 	@XmlElement
 	public void setInstructionHint(String instructionHint) {
@@ -487,6 +562,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshContent} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getRefreshContent() {
 		return refreshContent;
@@ -494,8 +570,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshContent} mutator.
-	 * 
-	 * @param refreshContent	The new value to set.
+	 * @param refreshContent	The new value.
 	 **/
 	@XmlElement
 	public void setRefreshContent(Boolean refreshContent) {
@@ -504,6 +579,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #contentLink} accessor.
+	 * @return	The value.
 	 **/
 	public String getContentLink() {
 		return contentLink;
@@ -511,8 +587,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #contentLink} mutator.
-	 * 
-	 * @param contentLink	The new value to set.
+	 * @param contentLink	The new value.
 	 **/
 	@XmlElement
 	public void setContentLink(String contentLink) {
@@ -521,6 +596,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditModuleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditModuleName() {
 		return auditModuleName;
@@ -528,8 +604,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditModuleName} mutator.
-	 * 
-	 * @param auditModuleName	The new value to set.
+	 * @param auditModuleName	The new value.
 	 **/
 	@XmlElement
 	public void setAuditModuleName(String auditModuleName) {
@@ -539,6 +614,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDocumentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditDocumentName() {
 		return auditDocumentName;
@@ -546,8 +622,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDocumentName} mutator.
-	 * 
-	 * @param auditDocumentName	The new value to set.
+	 * @param auditDocumentName	The new value.
 	 **/
 	@XmlElement
 	public void setAuditDocumentName(String auditDocumentName) {
@@ -557,6 +632,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditOperation} accessor.
+	 * @return	The value.
 	 **/
 	public Operation getAuditOperation() {
 		return auditOperation;
@@ -564,8 +640,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditOperation} mutator.
-	 * 
-	 * @param auditOperation	The new value to set.
+	 * @param auditOperation	The new value.
 	 **/
 	@XmlElement
 	public void setAuditOperation(Operation auditOperation) {
@@ -575,6 +650,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditTimestampStart} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getAuditTimestampStart() {
 		return auditTimestampStart;
@@ -582,8 +658,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditTimestampStart} mutator.
-	 * 
-	 * @param auditTimestampStart	The new value to set.
+	 * @param auditTimestampStart	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -595,6 +670,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditTimestampEnd} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getAuditTimestampEnd() {
 		return auditTimestampEnd;
@@ -602,8 +678,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditTimestampEnd} mutator.
-	 * 
-	 * @param auditTimestampEnd	The new value to set.
+	 * @param auditTimestampEnd	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -615,6 +690,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditUser} accessor.
+	 * @return	The value.
 	 **/
 	public User getAuditUser() {
 		return auditUser;
@@ -622,8 +698,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditUser} mutator.
-	 * 
-	 * @param auditUser	The new value to set.
+	 * @param auditUser	The new value.
 	 **/
 	@XmlElement
 	public void setAuditUser(User auditUser) {
@@ -633,6 +708,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditMatchCount} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getAuditMatchCount() {
 		return auditMatchCount;
@@ -640,8 +716,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditMatchCount} mutator.
-	 * 
-	 * @param auditMatchCount	The new value to set.
+	 * @param auditMatchCount	The new value.
 	 **/
 	@XmlElement
 	public void setAuditMatchCount(Integer auditMatchCount) {
@@ -650,6 +725,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditResponse} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditResponse() {
 		return auditResponse;
@@ -657,8 +733,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditResponse} mutator.
-	 * 
-	 * @param auditResponse	The new value to set.
+	 * @param auditResponse	The new value.
 	 **/
 	@XmlElement
 	public void setAuditResponse(String auditResponse) {
@@ -667,6 +742,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshOption} accessor.
+	 * @return	The value.
 	 **/
 	public RefreshOption getRefreshOption() {
 		return refreshOption;
@@ -674,8 +750,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshOption} mutator.
-	 * 
-	 * @param refreshOption	The new value to set.
+	 * @param refreshOption	The new value.
 	 **/
 	@XmlElement
 	public void setRefreshOption(RefreshOption refreshOption) {

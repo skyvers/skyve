@@ -30,6 +30,9 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 	/** @hidden */
 	public static final String subclassIntegerPropertyName = "subclassInteger";
 
+	/**
+	 * Subclass Integer
+	 **/
 	private Integer subclassInteger;
 
 	@Override
@@ -69,6 +72,7 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 
 	/**
 	 * {@link #subclassInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getSubclassInteger() {
 		return subclassInteger;
@@ -76,8 +80,7 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 
 	/**
 	 * {@link #subclassInteger} mutator.
-	 * 
-	 * @param subclassInteger	The new value to set.
+	 * @param subclassInteger	The new value.
 	 **/
 	@XmlElement
 	public void setSubclassInteger(Integer subclassInteger) {

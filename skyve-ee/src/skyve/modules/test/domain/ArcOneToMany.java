@@ -32,6 +32,9 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String arcsPropertyName = "arcs";
 
+	/**
+	 * Arcs
+	 **/
 	private List<AnyBase> arcs = new ArrayList<>();
 
 	@Override
@@ -71,6 +74,7 @@ public class ArcOneToMany extends AbstractPersistentBean {
 
 	/**
 	 * {@link #arcs} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<AnyBase> getArcs() {
@@ -79,8 +83,8 @@ public class ArcOneToMany extends AbstractPersistentBean {
 
 	/**
 	 * {@link #arcs} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public AnyBase getArcsElementById(String bizId) {
 		return getElementById(arcs, bizId);
@@ -88,9 +92,8 @@ public class ArcOneToMany extends AbstractPersistentBean {
 
 	/**
 	 * {@link #arcs} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param arcs	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setArcsElementById(@SuppressWarnings("unused") String bizId, AnyBase element) {
 		 setElementById(arcs, element);

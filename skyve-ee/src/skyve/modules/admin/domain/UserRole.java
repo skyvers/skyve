@@ -32,6 +32,9 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 	/** @hidden */
 	public static final String roleNamePropertyName = "roleName";
 
+	/**
+	 * Role Name
+	 **/
 	private String roleName;
 	private User parent;
 
@@ -75,6 +78,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 
 	/**
 	 * {@link #roleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getRoleName() {
 		return roleName;
@@ -82,8 +86,7 @@ public class UserRole extends AbstractPersistentBean implements ChildBean<User> 
 
 	/**
 	 * {@link #roleName} mutator.
-	 * 
-	 * @param roleName	The new value to set.
+	 * @param roleName	The new value.
 	 **/
 	@XmlElement
 	public void setRoleName(String roleName) {

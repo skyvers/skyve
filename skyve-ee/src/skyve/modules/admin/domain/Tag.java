@@ -322,55 +322,125 @@ public class Tag extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Name
+	 **/
 	private String name;
+	/**
+	 * Visible
+	 **/
 	private Boolean visible;
+	/**
+	 * Operator
+	 **/
 	private CombinationsOperator combinationsOperator;
+	/**
+	 * Explanation
+	 **/
 	private String combinationExplanation;
+	/**
+	 * Current Tag Count
+	 **/
 	private Integer currentTagCount;
+	/**
+	 * Other Tag Count
+	 **/
 	private Integer actionTagCount;
+	/**
+	 * Copy to user
+	 **/
 	private User copyToUser = null;
+	/**
+	 * Tag Name
+	 **/
 	private String copyToUserTagName;
 	/**
+	 * Module
+	 * <br/>
 	 * The module to tag.
 	 **/
 	private String uploadModuleName;
 	/**
+	 * Document
+	 * <br/>
 	 * The document to tag.
 	 **/
 	private String uploadDocumentName;
 	/**
+	 * Attribute
+	 * <br/>
 	 * The name of the attribute to tag.
 	 **/
 	private String attributeName;
+	/**
+	 * Upload File has Column Headers
+	 **/
 	private Boolean fileHasHeaders;
+	/**
+	 * Number of loaded values
+	 **/
 	private Integer numberLoaded;
+	/**
+	 * Number of matching records
+	 **/
 	private Integer numberMatched;
+	/**
+	 * Number of tagged records
+	 **/
 	private Integer numberTagged;
+	/**
+	 * Filter Operator
+	 **/
 	private FilterOperator filterOperator;
+	/**
+	 * Filter Action
+	 **/
 	private FilterAction filterAction;
 	/**
+	 * Module
+	 * <br/>
 	 * The module for the tag Action.
 	 **/
 	private String actionModuleName;
 	/**
+	 * Document
+	 * <br/>
 	 * The document for the tag Action.
 	 **/
 	private String actionDocumentName;
+	/**
+	 * Untag successful documents
+	 **/
 	private Boolean unTagSuccessful;
+	/**
+	 * Notify when job is complete
+	 **/
 	private Boolean notification;
+	/**
+	 * Column (first column is 1))
+	 **/
 	private Integer filterColumn;
 	/**
+	 * Other Tag
+	 * <br/>
 	 * The other tag to use for the action to be performed on this tag.
 	 **/
 	private Tag actionTag = null;
 	/**
+	 * Condition
+	 * <br/>
 	 * The condition which must be satisfied for the tagged document, for the action to be executed.
 	 **/
 	private String documentCondition;
 	/**
+	 * Action
+	 * <br/>
 	 * The action to be executed on the tagged document (provided the specified condition is satisfied for that document).
 	 **/
 	private String documentAction;
+	/**
+	 * Request
+	 **/
 	private String documentActionResults;
 
 	@Override
@@ -410,6 +480,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -417,8 +488,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -428,6 +498,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #visible} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getVisible() {
 		return visible;
@@ -435,8 +506,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #visible} mutator.
-	 * 
-	 * @param visible	The new value to set.
+	 * @param visible	The new value.
 	 **/
 	@XmlElement
 	public void setVisible(Boolean visible) {
@@ -446,6 +516,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #combinationsOperator} accessor.
+	 * @return	The value.
 	 **/
 	public CombinationsOperator getCombinationsOperator() {
 		return combinationsOperator;
@@ -453,8 +524,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #combinationsOperator} mutator.
-	 * 
-	 * @param combinationsOperator	The new value to set.
+	 * @param combinationsOperator	The new value.
 	 **/
 	@XmlElement
 	public void setCombinationsOperator(CombinationsOperator combinationsOperator) {
@@ -463,6 +533,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #combinationExplanation} accessor.
+	 * @return	The value.
 	 **/
 	public String getCombinationExplanation() {
 		return combinationExplanation;
@@ -470,8 +541,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #combinationExplanation} mutator.
-	 * 
-	 * @param combinationExplanation	The new value to set.
+	 * @param combinationExplanation	The new value.
 	 **/
 	@XmlElement
 	public void setCombinationExplanation(String combinationExplanation) {
@@ -480,6 +550,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #currentTagCount} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getCurrentTagCount() {
 		return currentTagCount;
@@ -487,8 +558,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #currentTagCount} mutator.
-	 * 
-	 * @param currentTagCount	The new value to set.
+	 * @param currentTagCount	The new value.
 	 **/
 	@XmlElement
 	public void setCurrentTagCount(Integer currentTagCount) {
@@ -497,6 +567,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionTagCount} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getActionTagCount() {
 		return actionTagCount;
@@ -504,8 +575,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionTagCount} mutator.
-	 * 
-	 * @param actionTagCount	The new value to set.
+	 * @param actionTagCount	The new value.
 	 **/
 	@XmlElement
 	public void setActionTagCount(Integer actionTagCount) {
@@ -514,6 +584,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUser} accessor.
+	 * @return	The value.
 	 **/
 	public User getCopyToUser() {
 		return copyToUser;
@@ -521,8 +592,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUser} mutator.
-	 * 
-	 * @param copyToUser	The new value to set.
+	 * @param copyToUser	The new value.
 	 **/
 	@XmlElement
 	public void setCopyToUser(User copyToUser) {
@@ -531,6 +601,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUserTagName} accessor.
+	 * @return	The value.
 	 **/
 	public String getCopyToUserTagName() {
 		return copyToUserTagName;
@@ -538,8 +609,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #copyToUserTagName} mutator.
-	 * 
-	 * @param copyToUserTagName	The new value to set.
+	 * @param copyToUserTagName	The new value.
 	 **/
 	@XmlElement
 	public void setCopyToUserTagName(String copyToUserTagName) {
@@ -548,6 +618,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #uploadModuleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUploadModuleName() {
 		return uploadModuleName;
@@ -555,8 +626,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #uploadModuleName} mutator.
-	 * 
-	 * @param uploadModuleName	The new value to set.
+	 * @param uploadModuleName	The new value.
 	 **/
 	@XmlElement
 	public void setUploadModuleName(String uploadModuleName) {
@@ -566,6 +636,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #uploadDocumentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUploadDocumentName() {
 		return uploadDocumentName;
@@ -573,8 +644,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #uploadDocumentName} mutator.
-	 * 
-	 * @param uploadDocumentName	The new value to set.
+	 * @param uploadDocumentName	The new value.
 	 **/
 	@XmlElement
 	public void setUploadDocumentName(String uploadDocumentName) {
@@ -584,6 +654,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attributeName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttributeName() {
 		return attributeName;
@@ -591,8 +662,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attributeName} mutator.
-	 * 
-	 * @param attributeName	The new value to set.
+	 * @param attributeName	The new value.
 	 **/
 	@XmlElement
 	public void setAttributeName(String attributeName) {
@@ -602,6 +672,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #fileHasHeaders} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getFileHasHeaders() {
 		return fileHasHeaders;
@@ -609,8 +680,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #fileHasHeaders} mutator.
-	 * 
-	 * @param fileHasHeaders	The new value to set.
+	 * @param fileHasHeaders	The new value.
 	 **/
 	@XmlElement
 	public void setFileHasHeaders(Boolean fileHasHeaders) {
@@ -620,6 +690,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberLoaded} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getNumberLoaded() {
 		return numberLoaded;
@@ -627,8 +698,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberLoaded} mutator.
-	 * 
-	 * @param numberLoaded	The new value to set.
+	 * @param numberLoaded	The new value.
 	 **/
 	@XmlElement
 	public void setNumberLoaded(Integer numberLoaded) {
@@ -637,6 +707,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberMatched} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getNumberMatched() {
 		return numberMatched;
@@ -644,8 +715,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberMatched} mutator.
-	 * 
-	 * @param numberMatched	The new value to set.
+	 * @param numberMatched	The new value.
 	 **/
 	@XmlElement
 	public void setNumberMatched(Integer numberMatched) {
@@ -654,6 +724,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberTagged} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getNumberTagged() {
 		return numberTagged;
@@ -661,8 +732,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberTagged} mutator.
-	 * 
-	 * @param numberTagged	The new value to set.
+	 * @param numberTagged	The new value.
 	 **/
 	@XmlElement
 	public void setNumberTagged(Integer numberTagged) {
@@ -671,6 +741,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterOperator} accessor.
+	 * @return	The value.
 	 **/
 	public FilterOperator getFilterOperator() {
 		return filterOperator;
@@ -678,8 +749,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterOperator} mutator.
-	 * 
-	 * @param filterOperator	The new value to set.
+	 * @param filterOperator	The new value.
 	 **/
 	@XmlElement
 	public void setFilterOperator(FilterOperator filterOperator) {
@@ -689,6 +759,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterAction} accessor.
+	 * @return	The value.
 	 **/
 	public FilterAction getFilterAction() {
 		return filterAction;
@@ -696,8 +767,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterAction} mutator.
-	 * 
-	 * @param filterAction	The new value to set.
+	 * @param filterAction	The new value.
 	 **/
 	@XmlElement
 	public void setFilterAction(FilterAction filterAction) {
@@ -707,6 +777,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionModuleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getActionModuleName() {
 		return actionModuleName;
@@ -714,8 +785,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionModuleName} mutator.
-	 * 
-	 * @param actionModuleName	The new value to set.
+	 * @param actionModuleName	The new value.
 	 **/
 	@XmlElement
 	public void setActionModuleName(String actionModuleName) {
@@ -725,6 +795,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionDocumentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getActionDocumentName() {
 		return actionDocumentName;
@@ -732,8 +803,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionDocumentName} mutator.
-	 * 
-	 * @param actionDocumentName	The new value to set.
+	 * @param actionDocumentName	The new value.
 	 **/
 	@XmlElement
 	public void setActionDocumentName(String actionDocumentName) {
@@ -743,6 +813,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #unTagSuccessful} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getUnTagSuccessful() {
 		return unTagSuccessful;
@@ -750,8 +821,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #unTagSuccessful} mutator.
-	 * 
-	 * @param unTagSuccessful	The new value to set.
+	 * @param unTagSuccessful	The new value.
 	 **/
 	@XmlElement
 	public void setUnTagSuccessful(Boolean unTagSuccessful) {
@@ -761,6 +831,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #notification} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getNotification() {
 		return notification;
@@ -768,8 +839,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #notification} mutator.
-	 * 
-	 * @param notification	The new value to set.
+	 * @param notification	The new value.
 	 **/
 	@XmlElement
 	public void setNotification(Boolean notification) {
@@ -779,6 +849,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterColumn} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getFilterColumn() {
 		return filterColumn;
@@ -786,8 +857,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #filterColumn} mutator.
-	 * 
-	 * @param filterColumn	The new value to set.
+	 * @param filterColumn	The new value.
 	 **/
 	@XmlElement
 	public void setFilterColumn(Integer filterColumn) {
@@ -797,6 +867,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionTag} accessor.
+	 * @return	The value.
 	 **/
 	public Tag getActionTag() {
 		return actionTag;
@@ -804,8 +875,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionTag} mutator.
-	 * 
-	 * @param actionTag	The new value to set.
+	 * @param actionTag	The new value.
 	 **/
 	@XmlElement
 	public void setActionTag(Tag actionTag) {
@@ -814,6 +884,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentCondition} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentCondition() {
 		return documentCondition;
@@ -821,8 +892,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentCondition} mutator.
-	 * 
-	 * @param documentCondition	The new value to set.
+	 * @param documentCondition	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentCondition(String documentCondition) {
@@ -832,6 +902,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentAction} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentAction() {
 		return documentAction;
@@ -839,8 +910,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentAction} mutator.
-	 * 
-	 * @param documentAction	The new value to set.
+	 * @param documentAction	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentAction(String documentAction) {
@@ -850,6 +920,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentActionResults} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentActionResults() {
 		return documentActionResults;
@@ -857,8 +928,7 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentActionResults} mutator.
-	 * 
-	 * @param documentActionResults	The new value to set.
+	 * @param documentActionResults	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentActionResults(String documentActionResults) {

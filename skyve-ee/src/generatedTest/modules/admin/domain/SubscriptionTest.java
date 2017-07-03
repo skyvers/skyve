@@ -3,11 +3,10 @@ package modules.admin.domain;
 import modules.admin.util.SubscriptionFactory;
 import modules.admin.util.SubscriptionFactoryExtension;
 import util.AbstractDomainTest;
-import util.AbstractH2Test;
 
 /**
  * Generated - local changes will be overwritten.
- * Extend {@link AbstractH2Test} to create your own tests for this document.
+ * Extend {@link AbstractDomainTest} to create your own tests for this document.
  */
 public class SubscriptionTest extends AbstractDomainTest<Subscription> {
 

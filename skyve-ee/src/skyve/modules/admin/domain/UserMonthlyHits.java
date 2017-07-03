@@ -35,9 +35,21 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String numberOfHitsPropertyName = "numberOfHits";
 
+	/**
+	 * User Name
+	 **/
 	private String userName;
+	/**
+	 * Year
+	 **/
 	private Integer year;
+	/**
+	 * Month
+	 **/
 	private Integer month;
+	/**
+	 * Number Of Hits
+	 **/
 	private Integer numberOfHits;
 
 	@Override
@@ -77,6 +89,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUserName() {
 		return userName;
@@ -84,8 +97,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} mutator.
-	 * 
-	 * @param userName	The new value to set.
+	 * @param userName	The new value.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -95,6 +107,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #year} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getYear() {
 		return year;
@@ -102,8 +115,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #year} mutator.
-	 * 
-	 * @param year	The new value to set.
+	 * @param year	The new value.
 	 **/
 	@XmlElement
 	public void setYear(Integer year) {
@@ -113,6 +125,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #month} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getMonth() {
 		return month;
@@ -120,8 +133,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #month} mutator.
-	 * 
-	 * @param month	The new value to set.
+	 * @param month	The new value.
 	 **/
 	@XmlElement
 	public void setMonth(Integer month) {
@@ -131,6 +143,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberOfHits} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getNumberOfHits() {
 		return numberOfHits;
@@ -138,8 +151,7 @@ public class UserMonthlyHits extends AbstractPersistentBean {
 
 	/**
 	 * {@link #numberOfHits} mutator.
-	 * 
-	 * @param numberOfHits	The new value to set.
+	 * @param numberOfHits	The new value.
 	 **/
 	@XmlElement
 	public void setNumberOfHits(Integer numberOfHits) {

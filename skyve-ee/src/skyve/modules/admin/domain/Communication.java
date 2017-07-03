@@ -259,49 +259,77 @@ public class Communication extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Description
+	 **/
 	private String description;
+	/**
+	 * Tag
+	 **/
 	private Tag tag = null;
 	/**
+	 * Module
+	 * <br/>
 	 * Bindings used in the communication address, subject and body will be based on the selected module document.
 	 **/
 	private String moduleName;
 	/**
+	 * Document
+	 * <br/>
 	 * Bindings used in the communication address, subject and body will be based on the selected module document.
 	 **/
 	private String documentName;
 	/**
+	 * Send to
+	 * <br/>
 	 * Provide a binding which contains the email address to send to
 	 **/
 	private String toBinding;
 	/**
+	 * To
+	 * <br/>
 	 * The address to send to.
 	 **/
 	private String sendTo;
 	/**
+	 * CC To
+	 * <br/>
 	 * The address to send to.
 	 **/
 	private String ccTo;
 	/**
+	 * To (expression)
+	 * <br/>
 	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendToOverride;
 	/**
+	 * CC To (expression)
+	 * <br/>
 	 * The address to send to. Bindings are allowed relative to the above module document.
 	 **/
 	private String ccToOverride;
 	/**
+	 * From (expression)
+	 * <br/>
 	 * The address to send from.
 	 **/
 	private String sendFrom;
 	/**
+	 * BCC Me
+	 * <br/>
 	 * Monitor outgoing emails by including me in the Bcc
 	 **/
 	private Boolean monitorBcc;
 	/**
+	 * Subject (expression)
+	 * <br/>
 	 * The subject of the communication. Bindings are allowed relative to the above module document.
 	 **/
 	private String subject;
 	/**
+	 * Body (expression)
+	 * <br/>
 	 * The body of the communication.  
 			<p/>
 			Bindings are allowed relative to the above module document.
@@ -310,32 +338,69 @@ public class Communication extends AbstractPersistentBean {
 			http://www.freeformatter.com/base64-encoder.html
 	 **/
 	private String body;
+	/**
+	 * Results
+	 **/
 	private String results;
+	/**
+	 * Attachment 1
+	 **/
 	private String attachment1;
 	/**
+	 * Attachment File Name
+	 * <br/>
 	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName1;
+	/**
+	 * Attachment 2
+	 **/
 	private String attachment2;
 	/**
+	 * Attachment File Name
+	 * <br/>
 	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName2;
+	/**
+	 * Attachment 3
+	 **/
 	private String attachment3;
 	/**
+	 * Attachment File Name
+	 * <br/>
 	 * The file name for the attachment as it will appear to receivers.
 	 **/
 	private String attachmentFileName3;
+	/**
+	 * Action
+	 **/
 	private ActionType actionType;
+	/**
+	 * Format
+	 **/
 	private FormatType formatType;
+	/**
+	 * Selected Batch Timestamp Folder Name
+	 **/
 	private String selectedBatchTimestampFolderName;
+	/**
+	 * Refresh Batches
+	 **/
 	private Boolean refreshBatches = new Boolean(true);
 	/**
+	 * Used for System communications
+	 * <br/>
 	 * System communications can not be deleted unless the system flag is cleared first.
 	 **/
 	private Boolean system;
+	/**
+	 * UnsubscribeUrl
+	 **/
 	private String unsubscribeUrl;
 	/**
+	 * Include Calendar Item
+	 * <br/>
 	 * <b>Include Calendar Item</b>:
 				<br/>
 				Includes links for Google, Yahoo and .ics attachment for Outlook and iCal calendar events.
@@ -344,12 +409,22 @@ public class Communication extends AbstractPersistentBean {
 	 **/
 	private Boolean includeCalendar;
 	/**
+	 * Title (expression)
+	 * <br/>
 	 * Specify the title for the calendar item as a binding expression relative to the module document.
 	 **/
 	private String calendarTitleExpression;
+	/**
+	 * Start Time
+	 **/
 	private DateTime calendarStartTime;
+	/**
+	 * End Time
+	 **/
 	private DateTime calendarEndTime;
 	/**
+	 * Description (expression)
+	 * <br/>
 	 * <b>Description (expression)</b>
 			<br/>
 			Specify a description for the calendar item as a binding expression relative to the module document.
@@ -357,7 +432,13 @@ public class Communication extends AbstractPersistentBean {
 			NOTE: Google and Yahoo calendar links do not support multi-line descriptions.
 	 **/
 	private String calendarDescriptionExpression;
+	/**
+	 * Image
+	 **/
 	private String mailImage;
+	/**
+	 * Subscriptions
+	 **/
 	private List<Subscription> subscriptions = new ArrayList<>();
 
 	@Override
@@ -397,6 +478,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} accessor.
+	 * @return	The value.
 	 **/
 	public String getDescription() {
 		return description;
@@ -404,8 +486,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} mutator.
-	 * 
-	 * @param description	The new value to set.
+	 * @param description	The new value.
 	 **/
 	@XmlElement
 	public void setDescription(String description) {
@@ -415,6 +496,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #tag} accessor.
+	 * @return	The value.
 	 **/
 	public Tag getTag() {
 		return tag;
@@ -422,8 +504,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #tag} mutator.
-	 * 
-	 * @param tag	The new value to set.
+	 * @param tag	The new value.
 	 **/
 	@XmlElement
 	public void setTag(Tag tag) {
@@ -433,6 +514,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModuleName() {
 		return moduleName;
@@ -440,8 +522,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #moduleName} mutator.
-	 * 
-	 * @param moduleName	The new value to set.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -451,6 +532,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentName() {
 		return documentName;
@@ -458,8 +540,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #documentName} mutator.
-	 * 
-	 * @param documentName	The new value to set.
+	 * @param documentName	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -469,6 +550,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #toBinding} accessor.
+	 * @return	The value.
 	 **/
 	public String getToBinding() {
 		return toBinding;
@@ -476,8 +558,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #toBinding} mutator.
-	 * 
-	 * @param toBinding	The new value to set.
+	 * @param toBinding	The new value.
 	 **/
 	@XmlElement
 	public void setToBinding(String toBinding) {
@@ -487,6 +568,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendTo} accessor.
+	 * @return	The value.
 	 **/
 	public String getSendTo() {
 		return sendTo;
@@ -494,8 +576,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendTo} mutator.
-	 * 
-	 * @param sendTo	The new value to set.
+	 * @param sendTo	The new value.
 	 **/
 	@XmlElement
 	public void setSendTo(String sendTo) {
@@ -505,6 +586,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ccTo} accessor.
+	 * @return	The value.
 	 **/
 	public String getCcTo() {
 		return ccTo;
@@ -512,8 +594,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ccTo} mutator.
-	 * 
-	 * @param ccTo	The new value to set.
+	 * @param ccTo	The new value.
 	 **/
 	@XmlElement
 	public void setCcTo(String ccTo) {
@@ -523,6 +604,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendToOverride} accessor.
+	 * @return	The value.
 	 **/
 	public String getSendToOverride() {
 		return sendToOverride;
@@ -530,8 +612,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendToOverride} mutator.
-	 * 
-	 * @param sendToOverride	The new value to set.
+	 * @param sendToOverride	The new value.
 	 **/
 	@XmlElement
 	public void setSendToOverride(String sendToOverride) {
@@ -540,6 +621,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ccToOverride} accessor.
+	 * @return	The value.
 	 **/
 	public String getCcToOverride() {
 		return ccToOverride;
@@ -547,8 +629,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #ccToOverride} mutator.
-	 * 
-	 * @param ccToOverride	The new value to set.
+	 * @param ccToOverride	The new value.
 	 **/
 	@XmlElement
 	public void setCcToOverride(String ccToOverride) {
@@ -557,6 +638,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendFrom} accessor.
+	 * @return	The value.
 	 **/
 	public String getSendFrom() {
 		return sendFrom;
@@ -564,8 +646,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sendFrom} mutator.
-	 * 
-	 * @param sendFrom	The new value to set.
+	 * @param sendFrom	The new value.
 	 **/
 	@XmlElement
 	public void setSendFrom(String sendFrom) {
@@ -575,6 +656,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #monitorBcc} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getMonitorBcc() {
 		return monitorBcc;
@@ -582,8 +664,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #monitorBcc} mutator.
-	 * 
-	 * @param monitorBcc	The new value to set.
+	 * @param monitorBcc	The new value.
 	 **/
 	@XmlElement
 	public void setMonitorBcc(Boolean monitorBcc) {
@@ -593,6 +674,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #subject} accessor.
+	 * @return	The value.
 	 **/
 	public String getSubject() {
 		return subject;
@@ -600,8 +682,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #subject} mutator.
-	 * 
-	 * @param subject	The new value to set.
+	 * @param subject	The new value.
 	 **/
 	@XmlElement
 	public void setSubject(String subject) {
@@ -611,6 +692,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #body} accessor.
+	 * @return	The value.
 	 **/
 	public String getBody() {
 		return body;
@@ -618,8 +700,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #body} mutator.
-	 * 
-	 * @param body	The new value to set.
+	 * @param body	The new value.
 	 **/
 	@XmlElement
 	public void setBody(String body) {
@@ -629,6 +710,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #results} accessor.
+	 * @return	The value.
 	 **/
 	public String getResults() {
 		return results;
@@ -636,8 +718,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #results} mutator.
-	 * 
-	 * @param results	The new value to set.
+	 * @param results	The new value.
 	 **/
 	@XmlElement
 	public void setResults(String results) {
@@ -647,6 +728,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment1} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachment1() {
 		return attachment1;
@@ -654,8 +736,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment1} mutator.
-	 * 
-	 * @param attachment1	The new value to set.
+	 * @param attachment1	The new value.
 	 **/
 	@XmlElement
 	public void setAttachment1(String attachment1) {
@@ -665,6 +746,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName1} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachmentFileName1() {
 		return attachmentFileName1;
@@ -672,8 +754,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName1} mutator.
-	 * 
-	 * @param attachmentFileName1	The new value to set.
+	 * @param attachmentFileName1	The new value.
 	 **/
 	@XmlElement
 	public void setAttachmentFileName1(String attachmentFileName1) {
@@ -683,6 +764,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment2} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachment2() {
 		return attachment2;
@@ -690,8 +772,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment2} mutator.
-	 * 
-	 * @param attachment2	The new value to set.
+	 * @param attachment2	The new value.
 	 **/
 	@XmlElement
 	public void setAttachment2(String attachment2) {
@@ -701,6 +782,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName2} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachmentFileName2() {
 		return attachmentFileName2;
@@ -708,8 +790,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName2} mutator.
-	 * 
-	 * @param attachmentFileName2	The new value to set.
+	 * @param attachmentFileName2	The new value.
 	 **/
 	@XmlElement
 	public void setAttachmentFileName2(String attachmentFileName2) {
@@ -719,6 +800,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment3} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachment3() {
 		return attachment3;
@@ -726,8 +808,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachment3} mutator.
-	 * 
-	 * @param attachment3	The new value to set.
+	 * @param attachment3	The new value.
 	 **/
 	@XmlElement
 	public void setAttachment3(String attachment3) {
@@ -737,6 +818,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName3} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttachmentFileName3() {
 		return attachmentFileName3;
@@ -744,8 +826,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #attachmentFileName3} mutator.
-	 * 
-	 * @param attachmentFileName3	The new value to set.
+	 * @param attachmentFileName3	The new value.
 	 **/
 	@XmlElement
 	public void setAttachmentFileName3(String attachmentFileName3) {
@@ -755,6 +836,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionType} accessor.
+	 * @return	The value.
 	 **/
 	public ActionType getActionType() {
 		return actionType;
@@ -762,8 +844,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #actionType} mutator.
-	 * 
-	 * @param actionType	The new value to set.
+	 * @param actionType	The new value.
 	 **/
 	@XmlElement
 	public void setActionType(ActionType actionType) {
@@ -772,6 +853,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #formatType} accessor.
+	 * @return	The value.
 	 **/
 	public FormatType getFormatType() {
 		return formatType;
@@ -779,8 +861,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #formatType} mutator.
-	 * 
-	 * @param formatType	The new value to set.
+	 * @param formatType	The new value.
 	 **/
 	@XmlElement
 	public void setFormatType(FormatType formatType) {
@@ -790,6 +871,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedBatchTimestampFolderName} accessor.
+	 * @return	The value.
 	 **/
 	public String getSelectedBatchTimestampFolderName() {
 		return selectedBatchTimestampFolderName;
@@ -797,8 +879,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #selectedBatchTimestampFolderName} mutator.
-	 * 
-	 * @param selectedBatchTimestampFolderName	The new value to set.
+	 * @param selectedBatchTimestampFolderName	The new value.
 	 **/
 	@XmlElement
 	public void setSelectedBatchTimestampFolderName(String selectedBatchTimestampFolderName) {
@@ -807,6 +888,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshBatches} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getRefreshBatches() {
 		return refreshBatches;
@@ -814,8 +896,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #refreshBatches} mutator.
-	 * 
-	 * @param refreshBatches	The new value to set.
+	 * @param refreshBatches	The new value.
 	 **/
 	@XmlElement
 	public void setRefreshBatches(Boolean refreshBatches) {
@@ -824,6 +905,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #system} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getSystem() {
 		return system;
@@ -831,8 +913,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #system} mutator.
-	 * 
-	 * @param system	The new value to set.
+	 * @param system	The new value.
 	 **/
 	@XmlElement
 	public void setSystem(Boolean system) {
@@ -842,6 +923,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #unsubscribeUrl} accessor.
+	 * @return	The value.
 	 **/
 	public String getUnsubscribeUrl() {
 		return unsubscribeUrl;
@@ -849,8 +931,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #unsubscribeUrl} mutator.
-	 * 
-	 * @param unsubscribeUrl	The new value to set.
+	 * @param unsubscribeUrl	The new value.
 	 **/
 	@XmlElement
 	public void setUnsubscribeUrl(String unsubscribeUrl) {
@@ -859,6 +940,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #includeCalendar} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getIncludeCalendar() {
 		return includeCalendar;
@@ -866,8 +948,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #includeCalendar} mutator.
-	 * 
-	 * @param includeCalendar	The new value to set.
+	 * @param includeCalendar	The new value.
 	 **/
 	@XmlElement
 	public void setIncludeCalendar(Boolean includeCalendar) {
@@ -877,6 +958,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarTitleExpression} accessor.
+	 * @return	The value.
 	 **/
 	public String getCalendarTitleExpression() {
 		return calendarTitleExpression;
@@ -884,8 +966,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarTitleExpression} mutator.
-	 * 
-	 * @param calendarTitleExpression	The new value to set.
+	 * @param calendarTitleExpression	The new value.
 	 **/
 	@XmlElement
 	public void setCalendarTitleExpression(String calendarTitleExpression) {
@@ -895,6 +976,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarStartTime} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getCalendarStartTime() {
 		return calendarStartTime;
@@ -902,8 +984,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarStartTime} mutator.
-	 * 
-	 * @param calendarStartTime	The new value to set.
+	 * @param calendarStartTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -915,6 +996,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarEndTime} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getCalendarEndTime() {
 		return calendarEndTime;
@@ -922,8 +1004,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarEndTime} mutator.
-	 * 
-	 * @param calendarEndTime	The new value to set.
+	 * @param calendarEndTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -935,6 +1016,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarDescriptionExpression} accessor.
+	 * @return	The value.
 	 **/
 	public String getCalendarDescriptionExpression() {
 		return calendarDescriptionExpression;
@@ -942,8 +1024,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #calendarDescriptionExpression} mutator.
-	 * 
-	 * @param calendarDescriptionExpression	The new value to set.
+	 * @param calendarDescriptionExpression	The new value.
 	 **/
 	@XmlElement
 	public void setCalendarDescriptionExpression(String calendarDescriptionExpression) {
@@ -953,6 +1034,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #mailImage} accessor.
+	 * @return	The value.
 	 **/
 	public String getMailImage() {
 		return mailImage;
@@ -960,8 +1042,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #mailImage} mutator.
-	 * 
-	 * @param mailImage	The new value to set.
+	 * @param mailImage	The new value.
 	 **/
 	@XmlElement
 	public void setMailImage(String mailImage) {
@@ -971,6 +1052,7 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #subscriptions} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Subscription> getSubscriptions() {
@@ -979,8 +1061,8 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * {@link #subscriptions} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Subscription getSubscriptionsElementById(String bizId) {
 		return getElementById(subscriptions, bizId);

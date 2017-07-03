@@ -35,16 +35,25 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 	/** @hidden */
 	public static final String modDocNamePropertyName = "modDocName";
 
+	/**
+	 * Include
+	 **/
 	private Boolean include;
 	/**
+	 * Module Name
+	 * <br/>
 	 * The name of the module.
 	 **/
 	private String moduleName;
 	/**
+	 * Document Name
+	 * <br/>
 	 * The name of the document.
 	 **/
 	private String documentName;
 	/**
+	 * Document Name
+	 * <br/>
 	 * The name of the document.
 	 **/
 	private String modDocName;
@@ -73,6 +82,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #include} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getInclude() {
 		return include;
@@ -80,8 +90,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #include} mutator.
-	 * 
-	 * @param include	The new value to set.
+	 * @param include	The new value.
 	 **/
 	@XmlElement
 	public void setInclude(Boolean include) {
@@ -91,6 +100,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #moduleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModuleName() {
 		return moduleName;
@@ -98,8 +108,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #moduleName} mutator.
-	 * 
-	 * @param moduleName	The new value to set.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -109,6 +118,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #documentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentName() {
 		return documentName;
@@ -116,8 +126,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #documentName} mutator.
-	 * 
-	 * @param documentName	The new value to set.
+	 * @param documentName	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -127,6 +136,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #modDocName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModDocName() {
 		return modDocName;
@@ -134,8 +144,7 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 
 	/**
 	 * {@link #modDocName} mutator.
-	 * 
-	 * @param modDocName	The new value to set.
+	 * @param modDocName	The new value.
 	 **/
 	@XmlElement
 	public void setModDocName(String modDocName) {

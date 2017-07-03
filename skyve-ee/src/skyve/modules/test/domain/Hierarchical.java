@@ -34,6 +34,9 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 	/** @hidden */
 	public static final String textPropertyName = "text";
 
+	/**
+	 * Text
+	 **/
 	private String text;
 	private String bizParentId;
 
@@ -75,6 +78,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 	/**
 	 * {@link #text} accessor.
+	 * @return	The value.
 	 **/
 	public String getText() {
 		return text;
@@ -82,8 +86,7 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 
 	/**
 	 * {@link #text} mutator.
-	 * 
-	 * @param text	The new value to set.
+	 * @param text	The new value.
 	 **/
 	@XmlElement
 	public void setText(String text) {

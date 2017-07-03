@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -32,6 +33,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -336,11 +338,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			for (File testFile : factoryPath.listFiles()) {
 				testFile.delete();
 			}
+			factoryPath.delete();
 		}
 		if (domainTestPath.exists()) {
 			for (File testFile : domainTestPath.listFiles()) {
 				testFile.delete();
 			}
+			domainTestPath.delete();
 		}
 
 		// Make a orm.hbm.xml file
@@ -446,17 +450,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 
 						// generate action tests
-						/*for (String actionName : document.getDefinedActionNames()) {
-							boolean skipGeneration = false;
-						
-							if (annotation != null && !annotation.testAction()) {
-								skipGeneration = true;
-							}
-						
-							if (!skipGeneration) {
-								System.out.println("Action " + actionName);
-							}
-						}*/
+						generateActionTests(moduleName, packagePath, modulePath, document, documentName, annotation);
 					}
 				}
 			}.visit(null, module);
@@ -1915,17 +1909,81 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static void generateActionTest(FileWriter fw, String modulePath, String packagePath, String documentName,
+	private static void generateActionTests(final String moduleName,
+			final String packagePath, final String modulePath, Document document, String documentName,
+			SkyveFactory annotation) throws IOException {
+		final String actionPath = AbstractRepository.get().MODULES_NAMESPACE + moduleName + File.separator + documentName
+				+ File.separator + "actions";
+		final File actionTestPath = new File(GENERATED_TEST_PATH + actionPath);
+
+		if (actionTestPath.exists()) {
+			for (File testFile : actionTestPath.listFiles()) {
+				testFile.delete();
+			}
+			actionTestPath.delete();
+		}
+
+		for (String actionName : document.getDefinedActionNames()) {
+			boolean skipGeneration = false;
+
+			// check this is a ServerSideAction
+			String className = actionTestPath.getPath().replace(GENERATED_TEST_PATH, "").replace('/', '.') + "." + actionName;
+
+			try {
+				Class<?> c = Class.forName(className);
+				System.out.println("Superclass: " + c.getSuperclass());
+				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
+					System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
+					continue;
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+
+			if (annotation != null) {
+				// skip if all actions are excluded for this document
+				if (!annotation.testAction()) {
+					continue;
+				}
+
+				// skip if this action is excluded for this document
+				for (Class<?> c : annotation.excludedActions()) {
+					if (c.getName().equals(actionName)) {
+						skipGeneration = true;
+						break;
+					}
+				}
+			}
+
+			if (!skipGeneration) {
+				File actionFile = new File(actionTestPath + File.separator + actionName + "Test.java");
+				actionTestPath.mkdirs();
+				actionFile.createNewFile();
+				try (FileWriter fw = new FileWriter(actionFile)) {
+					generateActionTest(fw, modulePath, actionPath.replace('/', '.'), packagePath.replace('/', '.'),
+							documentName, actionName);
+				}
+			} else {
+				System.out.println(String.format("Skipping action test generation for %s.%s",
+						actionPath.replace('/', '.'), actionName));
+			}
+		}
+	}
+
+	private static void generateActionTest(FileWriter fw, String modulePath, String actionPath, String domainPath,
+			String documentName,
 			String actionName)
 			throws IOException {
-		System.out.println("Generate action test class for " + packagePath + '.' + actionName);
-		fw.append("package ").append(packagePath).append(";\n\n");
+		System.out.println("Generate action test class for " + actionPath + '.' + actionName);
+		fw.append("package ").append(actionPath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
 
 		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
-		imports.add("util.AbstractDomainTest");
-		imports.add("util.AbstractH2Test");
+		imports.add("util.AbstractActionTest");
+
+		// imports.add(String.format("%s.%s", actionPath, actionName));
+		imports.add(String.format("%s.%s", domainPath, documentName));
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
 		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
@@ -1943,12 +2001,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate javadoc
 		fw.append("\n").append("/**");
 		fw.append("\n").append(" * Generated - local changes will be overwritten.");
-		fw.append("\n").append(" * Extend {@link AbstractH2Test} to create your own tests for this document.");
+		fw.append("\n").append(" * Extend {@link AbstractActionTest} to create your own tests for this action.");
 		fw.append("\n").append(" */");
 
 		// generate class
-		fw.append("\n").append("public class ").append(documentName).append("Test");
-		fw.append(" extends AbstractDomainTest<").append(documentName).append("> {");
+		fw.append("\n").append("public class ").append(actionName).append("Test");
+		fw.append(" extends AbstractActionTest<").append(documentName).append(", ").append(actionName).append("> {");
 		fw.append("\n");
 
 		// generate test body
@@ -1962,6 +2020,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
 		fw.append("\n\t}");
 		fw.append("\n");
+
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
+		fw.append("\n\t\t").append("return new ").append(actionName).append("();");
+		fw.append("\n\t").append("}");
 
 		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
@@ -1980,7 +2043,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
 		imports.add("util.AbstractDomainTest");
-		imports.add("util.AbstractH2Test");
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
 		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
@@ -1998,7 +2060,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate javadoc
 		fw.append("\n").append("/**");
 		fw.append("\n").append(" * Generated - local changes will be overwritten.");
-		fw.append("\n").append(" * Extend {@link AbstractH2Test} to create your own tests for this document.");
+		fw.append("\n").append(" * Extend {@link AbstractDomainTest} to create your own tests for this document.");
 		fw.append("\n").append(" */");
 
 		// generate class

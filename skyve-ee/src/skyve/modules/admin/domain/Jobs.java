@@ -32,6 +32,9 @@ public class Jobs extends AbstractTransientBean {
 	/** @hidden */
 	public static final String runningJobsPropertyName = "runningJobs";
 
+	/**
+	 * Running Jobs
+	 **/
 	private List<Job> runningJobs = new ArrayList<>();
 
 	@Override
@@ -58,6 +61,7 @@ public class Jobs extends AbstractTransientBean {
 
 	/**
 	 * {@link #runningJobs} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Job> getRunningJobs() {
@@ -66,8 +70,8 @@ public class Jobs extends AbstractTransientBean {
 
 	/**
 	 * {@link #runningJobs} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Job getRunningJobsElementById(String bizId) {
 		return getElementById(runningJobs, bizId);
@@ -75,9 +79,8 @@ public class Jobs extends AbstractTransientBean {
 
 	/**
 	 * {@link #runningJobs} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param runningJobs	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRunningJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
 		 setElementById(runningJobs, element);

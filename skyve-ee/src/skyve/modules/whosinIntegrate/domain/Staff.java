@@ -139,20 +139,41 @@ public class Staff extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Contact
+	 **/
 	private Contact contact = null;
+	/**
+	 * Code
+	 **/
 	private String staffCode;
+	/**
+	 * Date of Birth
+	 **/
 	private DateOnly dateOfBirth;
 	/**
+	 * Role Title
+	 * <br/>
 	 * The person's organisational title or role
 	 **/
 	private String roleTitle;
 	/**
+	 * Base Office
+	 * <br/>
 	 * The office this person usually operates from.
 	 **/
 	private Office baseOffice = null;
+	/**
+	 * Location
+	 **/
 	private Geometry location;
+	/**
+	 * Status
+	 **/
 	private Status status;
 	/**
+	 * Due Back
+	 * <br/>
 	 * If not in the office, when the staff member is due back.
 	 **/
 	private DateTime dueBack;
@@ -187,6 +208,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #contact} accessor.
+	 * @return	The value.
 	 **/
 	public Contact getContact() {
 		return contact;
@@ -194,8 +216,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #contact} mutator.
-	 * 
-	 * @param contact	The new value to set.
+	 * @param contact	The new value.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -205,6 +226,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #staffCode} accessor.
+	 * @return	The value.
 	 **/
 	public String getStaffCode() {
 		return staffCode;
@@ -212,8 +234,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #staffCode} mutator.
-	 * 
-	 * @param staffCode	The new value to set.
+	 * @param staffCode	The new value.
 	 **/
 	@XmlElement
 	public void setStaffCode(String staffCode) {
@@ -223,6 +244,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #dateOfBirth} accessor.
+	 * @return	The value.
 	 **/
 	public DateOnly getDateOfBirth() {
 		return dateOfBirth;
@@ -230,8 +252,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #dateOfBirth} mutator.
-	 * 
-	 * @param dateOfBirth	The new value to set.
+	 * @param dateOfBirth	The new value.
 	 **/
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
@@ -243,6 +264,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #roleTitle} accessor.
+	 * @return	The value.
 	 **/
 	public String getRoleTitle() {
 		return roleTitle;
@@ -250,8 +272,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #roleTitle} mutator.
-	 * 
-	 * @param roleTitle	The new value to set.
+	 * @param roleTitle	The new value.
 	 **/
 	@XmlElement
 	public void setRoleTitle(String roleTitle) {
@@ -261,6 +282,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #baseOffice} accessor.
+	 * @return	The value.
 	 **/
 	public Office getBaseOffice() {
 		return baseOffice;
@@ -268,8 +290,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #baseOffice} mutator.
-	 * 
-	 * @param baseOffice	The new value to set.
+	 * @param baseOffice	The new value.
 	 **/
 	@XmlElement
 	public void setBaseOffice(Office baseOffice) {
@@ -279,6 +300,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #location} accessor.
+	 * @return	The value.
 	 **/
 	public Geometry getLocation() {
 		return location;
@@ -286,8 +308,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #location} mutator.
-	 * 
-	 * @param location	The new value to set.
+	 * @param location	The new value.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -298,6 +319,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #status} accessor.
+	 * @return	The value.
 	 **/
 	public Status getStatus() {
 		return status;
@@ -305,8 +327,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #status} mutator.
-	 * 
-	 * @param status	The new value to set.
+	 * @param status	The new value.
 	 **/
 	@XmlElement
 	public void setStatus(Status status) {
@@ -316,6 +337,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #dueBack} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getDueBack() {
 		return dueBack;
@@ -323,8 +345,7 @@ return getContact().getName();
 
 	/**
 	 * {@link #dueBack} mutator.
-	 * 
-	 * @param dueBack	The new value to set.
+	 * @param dueBack	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
