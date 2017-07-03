@@ -28,12 +28,12 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
-	protected abstract T getBean() throws Exception;
-
 	private static final SecureRandom random = new SecureRandom();
 
 	@Before
 	public abstract void setUp() throws Exception;
+
+	protected abstract T getBean() throws Exception;
 
 	@Test
 	@SuppressWarnings("boxing")

@@ -414,45 +414,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							generateFactory(module, document, fw, modulePath.replace('/', '.'), documentName);
 						}
 
+						// check if this document is annotated to skip domain tests
+						File factoryExtensionPath = new File(TEST_PATH + modulePath + "/util/");
+						File factoryExtensionFile = new File(
+								factoryExtensionPath.getPath() + File.separator + documentName + "FactoryExtension.java");
+
+						SkyveFactory annotation = retrieveFactoryExtensionAnnotation(factoryExtensionFile);
+
 						// generate domain test for persistent documents that are not mapped, or not children
 						Persistent persistent = document.getPersistent();
 						if (persistent != null && !ExtensionStrategy.mapped.equals(persistent.getStrategy())
 								&& document.getParentDocumentName() == null) {
-							// check if this document is annotated to skip domain tests
-							File factoryExtensionPath = new File(TEST_PATH + modulePath + "/util/");
-							File factoryExtensionFile = new File(
-									factoryExtensionPath.getPath() + File.separator + documentName + "FactoryExtension.java");
 							boolean skipGeneration = false;
 
-							if (factoryExtensionFile.exists()) {
-								String className = factoryExtensionFile.getPath().replace(TEST_PATH, "").replace('/', '.');
-								System.out.println("Found factory extension " + className);
-								className = className.replaceFirst("[.][^.]+$", "");
-								System.out.println(className);
-
-								// scan the classpath for the class
-								/*System.out.println(
-										"Scanning for annotations in: "
-												+ className.replace(documentName, ".*")
-														.replace("FactoryExtension", ""));*/
-
-								try {
-									Class<?> c = Class.forName(className);
-									if (c.isAnnotationPresent(SkyveFactory.class)) {
-										SkyveFactory sf = c.getAnnotation(SkyveFactory.class);
-										System.out.println("Test action: " + sf.testAction());
-										System.out.println("Test domain: " + sf.testDomain());
-
-										if (!sf.testDomain()) {
-											skipGeneration = true;
-										}
-									}
-								} catch (Exception e) {
-									System.err.println(e.getMessage());
-								}
-								// List<Class<?>> classes = CPScanner.scanClasses(new
-								// ClassFilter().packageName(packagePath.replace('/', '.')));
-
+							if (annotation != null && !annotation.testDomain()) {
+								skipGeneration = true;
 							}
 
 							if (!skipGeneration) {
@@ -468,12 +444,57 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										packagePath.replace('/', '.'), documentName));
 							}
 						}
+
+						// generate action tests
+						/*for (String actionName : document.getDefinedActionNames()) {
+							boolean skipGeneration = false;
+						
+							if (annotation != null && !annotation.testAction()) {
+								skipGeneration = true;
+							}
+						
+							if (!skipGeneration) {
+								System.out.println("Action " + actionName);
+							}
+						}*/
 					}
 				}
 			}.visit(null, module);
 
 			createMappingFileFooter(mappingFileWriter, filterDefinitions);
 		}
+	}
+
+	private SkyveFactory retrieveFactoryExtensionAnnotation(final File factoryExtensionFile) {
+		SkyveFactory annotation = null;
+
+		if (factoryExtensionFile.exists()) {
+			String className = factoryExtensionFile.getPath().replace(TEST_PATH, "").replace('/', '.');
+			// System.out.println("Found factory extension " + className);
+			className = className.replaceFirst("[.][^.]+$", "");
+			// System.out.println(className);
+
+			// scan the classpath for the class
+			/*System.out.println(
+					"Scanning for annotations in: "
+							+ className.replace(documentName, ".*")
+									.replace("FactoryExtension", ""));*/
+
+			try {
+				Class<?> c = Class.forName(className);
+				if (c.isAnnotationPresent(SkyveFactory.class)) {
+					annotation = c.getAnnotation(SkyveFactory.class);
+					System.out.println("Test action: " + annotation.testAction());
+					System.out.println("Test domain: " + annotation.testDomain());
+				}
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+			}
+			// List<Class<?>> classes = CPScanner.scanClasses(new
+			// ClassFilter().packageName(packagePath.replace('/', '.')));
+		}
+
+		return annotation;
 	}
 
 	@SuppressWarnings("synthetic-access")
@@ -1906,6 +1927,62 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 			methods.append("\t}\n");
 		}
+	}
+
+	private static void generateActionTest(FileWriter fw, String modulePath, String packagePath, String documentName,
+			String actionName)
+			throws IOException {
+		System.out.println("Generate action test class for " + packagePath + '.' + actionName);
+		fw.append("package ").append(packagePath).append(";\n\n");
+
+		Set<String> imports = new TreeSet<>();
+
+		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
+		imports.add("util.AbstractDomainTest");
+		imports.add("util.AbstractH2Test");
+
+		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
+		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
+
+		// customise imports if this is not a base class
+		if (baseDocumentExtensionFactoryExists) {
+			imports.add(String.format("%s.util.%s%s", modulePath.replace('/', '.'), documentName, "FactoryExtension"));
+		}
+
+		// generate imports
+		for (String importClassName : imports) {
+			fw.append("import ").append(importClassName).append(";\n");
+		}
+
+		// generate javadoc
+		fw.append("\n").append("/**");
+		fw.append("\n").append(" * Generated - local changes will be overwritten.");
+		fw.append("\n").append(" * Extend {@link AbstractH2Test} to create your own tests for this document.");
+		fw.append("\n").append(" */");
+
+		// generate class
+		fw.append("\n").append("public class ").append(documentName).append("Test");
+		fw.append(" extends AbstractDomainTest<").append(documentName).append("> {");
+		fw.append("\n");
+
+		// generate test body
+		fw.append("\n\t");
+		fw.append("private ").append(documentName).append("Factory factory;");
+		fw.append("\n");
+
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("public void setUp() throws Exception {");
+		fw.append("\n\t\t").append("factory = new ").append(documentName).append("Factory")
+				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
+		fw.append("\n\t}");
+		fw.append("\n");
+
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		fw.append("\n\t\t").append("return factory.getInstance();");
+		fw.append("\n\t").append("}");
+
+		fw.append("\n}");
 	}
 
 	private static void generateDomainTest(FileWriter fw, String modulePath, String packagePath, String documentName)
