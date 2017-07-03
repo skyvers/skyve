@@ -1513,19 +1513,7 @@ joined tables
 	private static void appendEnumDefinition(Enumeration enumeration,
 												String typeName,
 												StringBuilder enums) {
-		String doc = enumeration.getDocumentation();
-		if (doc == null) {
-			doc = enumeration.getDescription();
-		}
-		if (doc == null) {
-			doc = enumeration.getDisplayName();
-		}
-		if (doc == null) {
-			doc = enumeration.getName();
-		}
-		enums.append("\t/**\n");
-		enums.append("\t * ").append(doc).append('\n');
-		enums.append("\t **/\n");
+		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
 		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
 		for (EnumeratedValue value : enumeration.getValues()) {
@@ -2164,18 +2152,38 @@ joined tables
 						description = conditionName;
 					}
 					methods.append("\n\t/**");
-					methods.append("\n\t * ").append(description);
+					String doc = condition.getDescription();
+					boolean nothingDocumented = true;
+					if (doc != null) {
+						nothingDocumented = false;
+						methods.append("\n\t * ").append(doc);
+					}
+					doc = condition.getDocumentation();
+					if (doc != null) {
+						nothingDocumented = false;
+						methods.append("\n\t * ").append(doc);
+					}
+					if (nothingDocumented) {
+						methods.append("\n\t * ").append(conditionName);
+					}
+					methods.append("\n\t * @return\tThe condition\n");
 					methods.append("\n\t */");
 
 					methods.append("\n\t@XmlTransient");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
-					methods.append("\n\tpublic boolean is").append(Character.toUpperCase(conditionName.charAt(0)));
-					methods.append(conditionName.substring(1)).append("() {\n");
+					String methodName = String.format("is%s%s", 
+														String.valueOf(conditionName.charAt(0)).toUpperCase(),
+														conditionName.substring(1));
+					methods.append("\n\tpublic boolean ").append(methodName).append("() {\n");
 					methods.append("\t\treturn (").append(condition.getExpression()).append(");\n");
 					methods.append("\t}\n");
 
+					methods.append("\n\t/**");
+					methods.append("\t * {@link #").append(methodName).append("} negation.\n");
+					methods.append("\n\t * @return\tThe negated condition\n");
+					methods.append("\n\t */");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
@@ -2278,15 +2286,18 @@ joined tables
 		}
 
 		// Generate/Include UML doc
-		String description = document.getDocumentation();
-		if (description == null) {
-			description = document.getDescription();
-		}
-		if (description == null) {
-			description = document.getName();
-		}
 		fw.append("\n/**");
-		fw.append("\n * ").append(description);
+		fw.append("\n * ").append(document.getSingularAlias());
+		String doc = document.getDescription();
+		if (doc != null) {
+			fw.append("\n * <br/>");
+			fw.append("\n * ").append(doc);
+		}
+		doc = document.getDocumentation();
+		if (doc != null) {
+			fw.append("\n * <br/>");
+			fw.append("\n * ").append(doc);
+		}
 		fw.append("\n * \n");
 
 		for (Attribute attribute : document.getAttributes()) {
@@ -2439,23 +2450,30 @@ joined tables
 	}
 	
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {
-		String description = attribute.getDocumentation();
-		if (description == null) {
-			description = attribute.getDescription();
+		toAppendTo.append("\t/**\n");
+		toAppendTo.append("\t * ").append(attribute.getDisplayName()).append('\n');
+		String doc = attribute.getDescription();
+		if (doc != null) {
+			toAppendTo.append("\t * <br/>\n");
+			toAppendTo.append("\t * ").append(doc).append("\n");
 		}
-		if (description != null) {
-			toAppendTo.append("\t/**\n");
-			toAppendTo.append("\t * ").append(description).append("\n");
-			toAppendTo.append("\t **/\n");
+		doc = attribute.getDocumentation();
+		if (doc != null) {
+			toAppendTo.append("\t * <br/>\n");
+			toAppendTo.append("\t * ").append(doc).append("\n");
 		}
+		toAppendTo.append("\t **/\n");
 	}
 	
 	private static void accessorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} accessor.\n");
 		if (mapped) {
-			toAppendTo.append("\t * \n");
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
+			toAppendTo.append("\t * @return\tThe value of the element in the list.\n");
+		}
+		else {
+			toAppendTo.append("\t * @return\tThe value.\n");
 		}
 		toAppendTo.append("\t **/");
 	}
@@ -2463,11 +2481,13 @@ joined tables
 	private static void mutatorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} mutator.\n");
-		toAppendTo.append("\t * \n");
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
+			toAppendTo.append("\t * @param element\tThe new value of the element in the list.\n");
 		}
-		toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value to set.\n");
+		else {
+			toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value.\n");
+		}
 		toAppendTo.append("\t **/");
 	}
 }

@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
@@ -18,7 +19,9 @@ import org.skyve.impl.tools.javadoc.doctor.DocSection.SectionType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
@@ -130,12 +133,12 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfDocuments"));
 			table.setTitle("Module Documents");
 			table.getHtmlContent().add("The module " + module.getTitle() + " has the following documents defined:");
-			table.setHeaderValues("Document", "Description");
+			table.setHeaderValues("Document", "Description", "Documentation");
 
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
 				// document.getName()
-				table.setRowValues(document.getName(), document.getDescription());
+				table.setRowValues(document.getName(), document.getDescription(), document.getDocumentation());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -145,12 +148,13 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfQueries"));
 			table.setTitle("Queries");
 			table.getHtmlContent().add("The module " + module.getTitle() + " has the following queries defined:");
-			table.setHeaderValues("Query", "Driving Document", "Description");
+			table.setHeaderValues("Query", "Driving Document", "Description", "Documentation");
 
 			for (QueryDefinition q : module.getMetadataQueries()) {
 				table.setRowValues(q.getName(),
 									(q instanceof DocumentQueryDefinition) ? ((DocumentQueryDefinition) q).getDocumentName() : null, 
-									q.getDescription());
+									q.getDescription(),
+									q.getDocumentation());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -160,9 +164,9 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfRoles"));
 			table.setTitle("Roles");
 			table.getHtmlContent().add("The module " + module.getTitle() + " has the following roles defined:");
-			table.setHeaderValues("Field", "Description");
+			table.setHeaderValues("Field", "Description", "Doumentation");
 			for (Role r : module.getRoles()) {
-				table.setRowValues(r.getName(), r.getDescription());
+				table.setRowValues(r.getName(), r.getDescription(), r.getDocumentation());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -172,9 +176,9 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), "indexOfJobs"));
 			table.setTitle("Jobs");
 			table.getHtmlContent().add("The module " + module.getName() + " has the following off-line jobs defined.");
-			table.setHeaderValues("Job", "Class");
+			table.setHeaderValues("Name", "Job", "Class");
 			for (JobMetaData j : module.getJobs()) {
-				table.setRowValues(j.getDisplayName(), j.getClassName());
+				table.setRowValues(j.getName(), j.getDisplayName(), j.getClassName());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -243,7 +247,7 @@ public class DoctorUtil {
 			title.getHtmlContent().add(document.getName() + " is a child of " + document.getParentDocumentName());
 		}
 		out.println(title.toHTML());
-
+		
 		// doc
 		DocSection overview = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentOverview"));
 		overview.setSectionTitle("Overview");
@@ -255,10 +259,10 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "attributeList"));
 			table.setTitle("Attributes");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following attributes:");
-			table.setHeaderValues("Attribute Name", "Display Name" , "Type", "Size", "Required", "Persistent", "Description", "Values", "Deprecated");
+			table.setHeaderValues("Attribute Name", "Display Name" , "Type", "Size", "Required", "Persistent", "Description", "Documentation", "Values", "Usage", "Deprecated");
 
 			for (Attribute attribute : document.getAttributes()) {
-				if ("bizKey".equals(attribute.getName())) {
+				if (Bean.BIZ_KEY.equals(attribute.getName())) {
 					// do nothing
 				} else {
 					// get constant domain values
@@ -282,24 +286,23 @@ public class DoctorUtil {
 						}
 					}
 					
-					String description = attribute.getDocumentation();
-					if (description == null) {
-						description = attribute.getDescription();
-					}
 					if(attribute instanceof LengthField){
 						LengthField lengthField = (LengthField) attribute;
 						fieldLen = lengthField.getLength();
 					}
 					
 					String size = (fieldLen==0?"":Integer.toString(fieldLen));
+					UsageType usage = attribute.getUsage();
 					table.setRowValues(attribute.getName(), 
 										attribute.getDisplayName(),
 										attribute.getAttributeType().toString(),
 										size,
 										String.valueOf(attribute.isRequired()),
 										String.valueOf(attribute.isPersistent()),
-										description,
+										attribute.getDescription(),
+										attribute.getDocumentation(),
 										valueList.toHTML(),
+										(usage == null) ? null : usage.toString(),
 										String.valueOf(attribute.isDeprecated()));
 				}
 			}
@@ -311,10 +314,18 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "referenceList"));
 			table.setTitle("References");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following references to other documents:");
-			table.setHeaderValues("Reference", "Type", "Document", "Required", "Description");
+			table.setHeaderValues("Reference", "Type", "Document", "Required", "Description", "Documentation", "Usage", "Deprecated");
 			for (String referenceName : document.getReferenceNames()) {
 				Reference reference = document.getReferenceByName(referenceName);
-				table.setRowValues(reference.getDisplayName(), reference.getAttributeType().toString(), reference.getDocumentName(), String.valueOf(reference.isRequired()), reference.getDescription());
+				UsageType usage = reference.getUsage();
+				table.setRowValues(reference.getDisplayName(), 
+									reference.getAttributeType().toString(), 
+									reference.getDocumentName(), 
+									String.valueOf(reference.isRequired()), 
+									reference.getDescription(), 
+									reference.getDocumentation(), 
+									(usage == null) ? null : usage.toString(),
+									String.valueOf(reference.isDeprecated()));
 			}
 			out.println(table.toHTML(true));
 		}
@@ -324,20 +335,24 @@ public class DoctorUtil {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "conditionList"));
 			table.setTitle("Conditions");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following conditions specified:");
-			table.setHeaderValues("Name");
+			table.setHeaderValues("Name", "Description", "Documentation", "Usage");
 			for (String conditionName : document.getConditionNames()) {
-				table.setRowValues(conditionName);
+				Condition condition = document.getCondition(conditionName);
+				UsageType usage = condition.getUsage();
+				table.setRowValues(conditionName, 
+									condition.getDescription(), 
+									condition.getDocumentation(), 
+									(usage == null) ? null : usage.toString());
 			}
 			out.println(table.toHTML(true));
 		}
-		// TODO - How to do conditions - match condition names from javadoc
 
 		// List Constraints
 		if (!document.getUniqueConstraints().isEmpty()) {
 			DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), document.getName(), "uniqueConstraintList"));
 			table.setTitle("UniqueConstraints");
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following uniqueness constraints specified:");
-			table.setHeaderValues("Constraint", "Description", "Uniqueness");
+			table.setHeaderValues("Constraint", "Description", "Scope", "Uniqueness");
 			for (UniqueConstraint u : document.getUniqueConstraints()) {
 				StringBuilder s = new StringBuilder();
 				for (String r : u.getFieldNames()) {
@@ -351,7 +366,10 @@ public class DoctorUtil {
 						s.append(r);
 					}
 				}
-				table.setRowValues(u.getName(), u.getDescription(), s.toString());
+				table.setRowValues(u.getName(), 
+									u.getDescription(),
+									u.getScope().toString(),
+									s.toString());
 			}
 			out.println(table.toHTML(true));
 		}
@@ -451,6 +469,8 @@ public class DoctorUtil {
 		// Priveleges List
 		DocTable table = new DocTable(createIndentifier(customer.getName(), module.getName(), r.getName() + "roleDocumentList"));
 		table.setTitle("Document Priveleges");
+		table.getHtmlContent().add(r.getDescription());
+		table.getHtmlContent().add(r.getDocumentation());
 		table.getHtmlContent().add("The role " + r.getName() + " has the following privileges:");
 
 		table.setHeaderValues("Document", "Read", "Create", "Update", "Delete", "Actions");
