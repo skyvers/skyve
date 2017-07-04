@@ -56,7 +56,22 @@ public class SkyveFilter implements Filter {
 			Enumeration<String> parameterNames = request.getParameterNames();
 			while (parameterNames.hasMoreElements()) {
 				String parameterName = parameterNames.nextElement();
-				UtilImpl.LOGGER.info(parameterName + "=" + request.getParameter(parameterName));
+				if (parameterName != null) {
+					if (parameterName.toLowerCase().contains("password")) {
+						UtilImpl.LOGGER.info(parameterName + "=***PASSWORD***");
+					}
+					else {
+						String parameterValue = request.getParameter(parameterName);
+						if (parameterValue != null) {
+							if (parameterValue.toLowerCase().contains("password")) {
+								UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
+							}
+							else {
+								UtilImpl.LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
+							}
+						}
+					}
+				}
 			}
 			UtilImpl.LOGGER.info("************************** HEADERS ***************************");
 			Enumeration<String> headerNames = httpRequest.getHeaderNames();

@@ -824,6 +824,7 @@ public final class BindUtil {
 										"' on class 'class <blahblah>$$EnhancerByCGLIB$$$<blahblah>'\"" + 
 										" then you'll need to use Util.deproxy() before trying to bind to properties in the hibernate proxy.");
 				UtilImpl.LOGGER.severe("See https://github.com/skyvers/skyve-cookbook/blob/master/README.md#deproxy for details");
+				UtilImpl.LOGGER.severe("Exception message = " + e.getMessage());
 				throw new MetaDataException(e);
 			}
 
