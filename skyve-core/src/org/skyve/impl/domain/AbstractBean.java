@@ -88,6 +88,10 @@ public abstract class AbstractBean implements Bean {
 			Class<?> type = getClass();
 			for (PropertyDescriptor descriptor : PropertyUtils.getPropertyDescriptors(type)) {
 				Class<?> propertyType = descriptor.getPropertyType();
+				// malformed bean property in the code somehow (maybe in the extension class)
+				if (propertyType == null) {
+					continue;
+				}
 				if (Collection.class.isAssignableFrom(propertyType)) {
 					try {
 						String propertyName = descriptor.getName();

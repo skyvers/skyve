@@ -165,10 +165,6 @@ public class SmartClientEditServlet extends HttpServlet {
 						}
 					}
 					
-					for (String name : parameters.keySet()) {
-						UtilImpl.LOGGER.info(name + " = " + parameters.get(name));
-					}
-	
 					String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 					
 					// the bean in the web context - the conversation context
