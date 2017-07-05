@@ -1910,9 +1910,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static void generateActionTests(final String moduleName,
-			final String packagePath, final String modulePath, Document document, String documentName,
-			SkyveFactory annotation) throws IOException {
+	@SuppressWarnings("boxing")
+	private static void generateActionTests(final String moduleName, final String packagePath, final String modulePath,
+			Document document, String documentName, SkyveFactory annotation) throws IOException {
 		final String actionPath = AbstractRepository.get().MODULES_NAMESPACE + moduleName + File.separator + documentName
 				+ File.separator + "actions";
 		final File actionTestPath = new File(GENERATED_TEST_PATH + actionPath);
@@ -1944,13 +1944,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			if (annotation != null) {
 				// skip if all actions are excluded for this document
-				if (!annotation.testAction()) {
+				// System.out.println("Found annotation for class " + className + " with value " + annotation.testAction());
+				if (Boolean.FALSE.equals(annotation.testAction())) {
 					continue;
 				}
 
 				// skip if this action is excluded for this document
-				for (Class<?> c : annotation.excludedActions()) {
-					if (c.getName().equals(actionName)) {
+				for (int i = 0; i < annotation.excludedActions().length; i++) {
+					// System.out.println("Testing if " + annotation.excludedActions()[i].getName() + " equals " + actionName);
+					if (annotation.excludedActions()[i].getSimpleName().equals(actionName)) {
 						skipGeneration = true;
 						break;
 					}
