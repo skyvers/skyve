@@ -375,7 +375,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								module,
 								document,
 								fw,
-								packagePath.replace('/', '.'),
+								packagePath.replaceAll("\\\\|\\/", "."),
 								documentName,
 								(inherits != null) ? inherits.getDocumentName() : null,
 								false);
@@ -392,7 +392,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									module,
 									document,
 									fw,
-									packagePath.replace('/', '.'),
+									packagePath.replaceAll("\\\\|\\/", "."),
 									documentName,
 									documentName,
 									true);
@@ -415,7 +415,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						factoryPath.mkdirs();
 						factoryFile.createNewFile();
 						try (FileWriter fw = new FileWriter(factoryFile)) {
-							generateFactory(module, document, fw, modulePath.replace('/', '.'), documentName);
+							generateFactory(module, document, fw, modulePath.replaceAll("\\\\|\\/", "."), documentName);
 						}
 
 						// check if this document is annotated to skip domain tests
@@ -441,11 +441,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								domainTestPath.mkdirs();
 								testFile.createNewFile();
 								try (FileWriter fw = new FileWriter(testFile)) {
-									generateDomainTest(fw, modulePath, packagePath.replace('/', '.'), documentName);
+									generateDomainTest(fw, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
 								}
 							} else {
 								System.out.println(String.format("Skipping domain test generation for %s.%s",
-										packagePath.replace('/', '.'), documentName));
+										packagePath.replaceAll("\\\\|\\/", "."), documentName));
 							}
 						}
 
@@ -459,14 +459,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private SkyveFactory retrieveFactoryExtensionAnnotation(final File factoryExtensionFile) {
+	private static SkyveFactory retrieveFactoryExtensionAnnotation(final File factoryExtensionFile) {
 		SkyveFactory annotation = null;
 
 		if (factoryExtensionFile.exists()) {
-			String className = factoryExtensionFile.getPath().replace(TEST_PATH, "").replace('/', '.');
-			// System.out.println("Found factory extension " + className);
+			String className = factoryExtensionFile.getPath().replaceAll("\\\\|\\/", ".")
+					.replace(TEST_PATH.replaceAll("\\\\|\\/", "."), "");
+
+			System.out.println("Found factory extension " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
-			// System.out.println(className);
 
 			// scan the classpath for the class
 			/*System.out.println(
@@ -478,14 +479,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Class<?> c = Class.forName(className);
 				if (c.isAnnotationPresent(SkyveFactory.class)) {
 					annotation = c.getAnnotation(SkyveFactory.class);
-					System.out.println("Test action: " + annotation.testAction());
-					System.out.println("Test domain: " + annotation.testDomain());
+					// System.out.println("Test action: " + annotation.testAction());
+					// System.out.println("Test domain: " + annotation.testDomain());
 				}
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				System.err.println("Could not find factory class for: " + e.getMessage());
 			}
 			// List<Class<?>> classes = CPScanner.scanClasses(new
-			// ClassFilter().packageName(packagePath.replace('/', '.')));
+			// ClassFilter().packageName(packagePath.replaceAll("\\\\|\\/", ".")));
 		}
 
 		return annotation;
@@ -563,7 +564,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										module,
 										document,
 										fw,
-										packagePath.replace('/', '.'),
+										packagePath.replaceAll("\\\\|\\/", "."),
 										documentName,
 										vanillaDocumentName,
 										true);
@@ -1433,7 +1434,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				packagePathPrefix = repository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + packagePathPrefix;
 			}
 		}
-		packagePathPrefix = packagePathPrefix.replace('/', '.');
+		packagePathPrefix = packagePathPrefix.replaceAll("\\\\|\\/", ".");
 
 		if (!visitedOverriddenORMDocumentsPerCustomer.contains(moduleDotDocument)) {
 			visitedOverriddenORMDocumentsPerCustomer.add(moduleDotDocument);
@@ -1927,17 +1928,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			boolean skipGeneration = false;
 
 			// check this is a ServerSideAction
-			String className = actionTestPath.getPath().replace(GENERATED_TEST_PATH, "").replace('/', '.') + "." + actionName;
+			String className = actionTestPath.getPath().replaceAll("\\\\|\\/", ".")
+					.replace(GENERATED_TEST_PATH.replaceAll("\\\\|\\/", "."), "") + "."
+					+ actionName;
 
 			try {
 				Class<?> c = Class.forName(className);
-				System.out.println("Superclass: " + c.getSuperclass());
 				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
 					System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
 					continue;
 				}
 			} catch (Exception e) {
-				System.err.println(e.getMessage());
+				System.err.println("Could not find action class for: " + e.getMessage());
 			}
 
 			if (annotation != null) {
@@ -1960,12 +1962,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				actionTestPath.mkdirs();
 				actionFile.createNewFile();
 				try (FileWriter fw = new FileWriter(actionFile)) {
-					generateActionTest(fw, modulePath, actionPath.replace('/', '.'), packagePath.replace('/', '.'),
+					generateActionTest(fw, modulePath, actionPath.replaceAll("\\\\|\\/", "."),
+							packagePath.replaceAll("\\\\|\\/", "."),
 							documentName, actionName);
 				}
 			} else {
 				System.out.println(String.format("Skipping action test generation for %s.%s",
-						actionPath.replace('/', '.'), actionName));
+						actionPath.replaceAll("\\\\|\\/", "."), actionName));
 			}
 		}
 	}
@@ -1979,7 +1982,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 
-		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
+		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add("util.AbstractActionTest");
 
 		// imports.add(String.format("%s.%s", actionPath, actionName));
@@ -1990,7 +1993,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// customise imports if this is not a base class
 		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%s.util.%s%s", modulePath.replace('/', '.'), documentName, "FactoryExtension"));
+			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
 		}
 
 		// generate imports
@@ -2041,7 +2044,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 
-		imports.add(String.format("%s.util.%sFactory", modulePath.replace('/', '.'), documentName));
+		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add("util.AbstractDomainTest");
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
@@ -2049,7 +2052,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// customise imports if this is not a base class
 		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%s.util.%s%s", modulePath.replace('/', '.'), documentName, "FactoryExtension"));
+			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
 		}
 
 		// generate imports
@@ -2137,7 +2140,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								AbstractRepository.get().MODULES_NAMESPACE,
 								relatedModuleName,
 								referenceClassName,
-								extensionFactoryExists ? "Extension" : "").replace('/', '.'));
+								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
 
 						// check the collection type, if child, add a parent reference
 						if (CollectionType.child.equals(reference.getType())) {
@@ -2181,7 +2184,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								AbstractRepository.get().MODULES_NAMESPACE,
 								relatedModuleName,
 								referenceClassName,
-								extensionFactoryExists ? "Extension" : "").replace('/', '.'));
+								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
 
 						// this is a required association, call association Document's factory
 						String propertyClassName = ((Reference) attribute).getDocumentName();
