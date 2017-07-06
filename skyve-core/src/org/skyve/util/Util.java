@@ -184,6 +184,10 @@ public class Util {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}
 
+	public static boolean isSecureUrl() {
+		return (UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://");
+	}
+	
 	public static String getServerUrl() {
 		return UtilImpl.SERVER_URL;
 	}
