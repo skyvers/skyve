@@ -881,6 +881,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
+		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
