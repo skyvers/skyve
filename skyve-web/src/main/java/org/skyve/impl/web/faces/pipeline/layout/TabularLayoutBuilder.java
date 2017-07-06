@@ -22,14 +22,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	@Override
 	public UIComponent viewLayout() {
         // Add the panel grid layout for the view container aspect
-		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null);
+		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null, null);
 		result.setColumns(1);
     	return result;
 	}
 
 	@Override
 	public UIComponent toolbarLayout() {
-		return panelGroup(false, false, false, null);
+		return panelGroup(false, false, false, null, null);
 	}
 	
 	@Override
@@ -45,7 +45,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	
 	@Override
 	public UIComponent tabLayout() {
-		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null);
+		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null, null);
 		result.setColumns(1);
 		return result;
 	}
@@ -85,7 +85,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										null, // the parent container sets the percentage width
 										vbox.getPixelHeight(),
 										vbox.getPercentageHeight(),
-										vbox.getInvisibleConditionName());
+										vbox.getInvisibleConditionName(),
+										vbox.getWidgetId());
 		result.setColumns(1);
 		return result;
 	}
@@ -98,7 +99,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							hbox.getPixelHeight(),
 							hbox.getPercentageHeight(),
-							hbox.getInvisibleConditionName());
+							hbox.getInvisibleConditionName(),
+							hbox.getWidgetId());
 	}
 
 	@Override
@@ -108,7 +110,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							form.getPixelHeight(), 
 							form.getPercentageHeight(),
-							form.getInvisibleConditionName());
+							form.getInvisibleConditionName(),
+							form.getWidgetId());
 	}
 	
 	@Override
@@ -162,7 +165,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 											null,
 											null);
 				formOrRowLayout.getChildren().add(columnOrField);
-				HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible);
+				HtmlPanelGroup pg = panelGroup(true, true, false, widgetInvisible, null);
 				columnOrField.getChildren().add(pg);
 				OutputLabel l = label(label, formItemComponent.getId(), widgetRequired);
 				pg.getChildren().add(l);
@@ -239,14 +242,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
 		result.setValue(required ? value + "&nbsp;*:" : value + ":");
 		result.setEscape(false);
-		setId(result);
+		setId(result, null);
 		result.setFor(forId);
 		return result;
 	}
 
 	protected Message message(String forId) {
 		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
-		setId(message);
+		setId(message, null);
 		message.setFor(forId);
 		message.setShowDetail(true);
 		message.setShowSummary(false);
@@ -260,7 +263,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									Integer percentageWidth, 
 									Integer pixelHeight,
 									Integer percentageHeight,
-									String invisibleConditionName) {
+									String invisibleConditionName,
+									String widgetId) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
 		setInvisible(result, invisibleConditionName, null);
 		setSize(result, 
@@ -271,14 +275,14 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 					pixelHeight, 
 					percentageHeight, 
 					NINETY_EIGHT);
-		setId(result);
+		setId(result, widgetId);
 		result.setStyleClass("ui-panelgrid-blank");
 		return result;
 	}
 
 	private Row row() {
 		Row result = (Row) a.createComponent(Row.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 }

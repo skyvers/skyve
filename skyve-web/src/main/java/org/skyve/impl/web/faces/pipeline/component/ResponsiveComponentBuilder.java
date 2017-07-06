@@ -8,7 +8,7 @@ import org.primefaces.component.panel.Panel;
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
 	public HtmlPanelGroup view(String invisibleConditionName) {
-		HtmlPanelGroup result = panelGroup(false, false, true, invisibleConditionName);
+		HtmlPanelGroup result = panelGroup(false, false, true, invisibleConditionName, null);
 		result.setStyleClass("ui-g");
 		return result;
 	}
@@ -39,7 +39,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		}
 
 		setInvisible(result, invisibleConditionName, null);
-		setId(result);
+		setId(result, null);
 		result.setStyleClass("ui-g-12");
 		return result;
 	}
