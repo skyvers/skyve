@@ -126,6 +126,17 @@ public class WebUtil {
 		if (useSession) {
 			user = (UserImpl) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		}
+		
+		// If the user in the session is not the same as the security's user principal
+		// then the session user needs to be reset.
+		if ((user != null) && (userPrincipal != null)) {
+			UserImpl principalUser = AbstractRepository.setCustomerAndUserFromPrincipal(userPrincipal);
+			if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
+					user.getName().equals(principalUser.getName()))) {
+				user = null;
+			}
+		}
+		
 		if (user == null) {
 			// This can happen using SSO when the session expires as the servlets are not protected by normal Java EE security
 			if (userPrincipal != null) {
