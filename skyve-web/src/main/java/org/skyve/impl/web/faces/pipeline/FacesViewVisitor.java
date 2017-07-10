@@ -211,7 +211,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			// Add the toolbar if it has contents
         	if (! toolbarLayout.getChildren().isEmpty()) {
 				// If we get a toolbar back, add the toolbar layout to it
-				UIComponent toolbar = cb.toolbar();
+				UIComponent toolbar = cb.toolbar(view.getActionsWidgetId());
 				if (toolbar != null) {
 					facesView.getChildren().add(0, toolbar);
 					lb.addToolbarLayout(toolbar, toolbarLayout);

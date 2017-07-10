@@ -101,20 +101,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public HtmlPanelGroup view(String invisibleConditionName) {
-		return panelGroup(true, false, false, invisibleConditionName);
+		return panelGroup(true, false, false, invisibleConditionName, null);
 	}
 
 	@Override
-	public UIComponent toolbar() {
+	public UIComponent toolbar(String widgetId) {
 		Toolbar result = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
-		setId(result);
+		setId(result, widgetId);
 		result.setStyle("width:100%");
 		return result;
 	}
 
 	@Override
 	public UIComponent tabPane(TabPane tabPane) {
-		return tabView(tabPane.getInvisibleConditionName());
+		return tabView(tabPane.getInvisibleConditionName(), tabPane.getWidgetId());
 	}
 	
 	@Override
@@ -123,19 +123,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setTitle(tab.getTitle());
 		setDisabled(result, tab.getDisabledConditionName());
 		setInvisible(result, tab.getInvisibleConditionName(), null);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 
 	@Override
 	public UIComponent border(String borderTitle, String invisibleConditionName, Integer pixelWidth) {
-		return panel(borderTitle, invisibleConditionName, pixelWidth);
+		return panel(borderTitle, invisibleConditionName, pixelWidth, null);
 	}
 	
 	@Override
 	public UIComponent label(String value) {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		result.setValue(value);
 		return result;
 	}
@@ -172,7 +172,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent blurb(String listBinding, String value, String binding, Blurb blurb) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		if (value != null) {
 			result.setValue(value);
 		} 
@@ -207,7 +207,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent label(String listBinding, String value, String binding, Label label) {
 		HtmlOutputLabel result = (HtmlOutputLabel) a.createComponent(HtmlOutputLabel.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		if (value != null) {
 			result.setValue(value);
 		} 
@@ -229,7 +229,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							grid.getInvisibleConditionName(),
 							((! Boolean.TRUE.equals(grid.getInline())) && 
 								(! Boolean.FALSE.equals(grid.getShowZoom())) &&
-								(! Boolean.FALSE.equals(grid.getEditable()))));
+								(! Boolean.FALSE.equals(grid.getEditable()))),
+							grid.getWidgetId());
 	}
 	
 	@Override
@@ -400,7 +401,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.setEmptyMessage("No Items to show");
         result.setStickyHeader(stickyHeader);
         
-        setId(result);
+        setId(result, null);
     	result.setWidgetVar(result.getId());
         result.setSelectionMode("single");
         result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
@@ -580,12 +581,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String heading = membership.getCandidatesHeading();
 		UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		text.setValue((heading == null) ? "Candidates" : heading);
-		setId(text);
+		setId(text, null);
 		facets.put("sourceCaption", text);
 		heading = membership.getMembersHeading();
 		text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		text.setValue((heading == null) ? "Members" : heading);
-		setId(text);
+		setId(text, null);
 		facets.put("targetCaption", text);
 		return result;
 	}
@@ -639,7 +640,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent contentImage(String listBinding, ContentImage image, String title, boolean required) {
-		UIComponent result = panelGroup(true, true, false, null);
+		UIComponent result = panelGroup(true, true, false, null, null);
 		result.getChildren().add(contentGraphicImage(image.getPixelWidth(), 
 														null,
 														null, 
@@ -661,7 +662,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			text = "Content";
 		}
 
-		UIComponent result = panelGroup(true, true, false, null);
+		UIComponent result = panelGroup(true, true, false, null, null);
 		result.getChildren().add(contentLink(link.getPixelWidth(), text, link.getBinding()));
 		if (! Boolean.FALSE.equals(link.getEditable())) {
 			result.getChildren().add(label("Upload"));
@@ -861,7 +862,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								action.getInvisibleConditionName());
 	}
 	
-	private Panel panel(String title, String invisible, Integer pixelWidth) {
+	private Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		if (title != null) {
 			result.setHeader(title);
@@ -869,7 +870,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		setInvisible(result, invisible, null);
 		setSize(result, null, pixelWidth, null, null, null, null, NINETY_EIGHT);
-		setId(result);
+		setId(result, widgetId);
 		return result;
 	}
 
@@ -881,6 +882,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									Integer pixelWidth, 
 									boolean applyDefaultWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, bindingPrefix, binding, title, required, disabled);
+		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 		setSize(result, null, pixelWidth, null, null, null, null, applyDefaultWidth ? ONE_HUNDRED : null);
 		return result;
 	}
@@ -1086,10 +1088,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private TabView tabView(String invisible) {
+	private TabView tabView(String invisible, String widgetId) {
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		setInvisible(result, invisible, null);
-		setId(result);
+		setId(result, widgetId);
 		// result.setDynamic(true);
 		return result;
 	}
@@ -1117,7 +1119,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
 		setConfirmation(result, confirmationText);
-		setId(result);
+		setId(result, null);
 
 		// set a default icon if not already set and client Validation (immediate)
 		if (implicitActionName != null) {
@@ -1347,7 +1349,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setDisabled(result, disabled);
 		setInvisible(result, invisible, null);
 		setConfirmation(result, confirmationText);
-		setId(result);
+		setId(result, null);
 
 		if (ImplicitActionName.Cancel.equals(implicitActionName) || ImplicitActionName.OK.equals(implicitActionName)) {
 			result.setAjax(false);
@@ -1383,7 +1385,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("href", ef.createValueExpression(elc, href, String.class));
 		result.setTarget(target);
 
-		setId(result);
+		setId(result, null);
 		setDisabled(result, disabled);
 		setInvisible(result, invisible, null);
 
@@ -1394,7 +1396,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		ValueExpression ve = createValueExpressionFromBinding(listBinding, true, binding, true, null, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 
@@ -1402,7 +1404,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
-		setId(result);
+		setId(result, null);
 
 		return result;
 	}
@@ -1420,7 +1422,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					image.getPercentageHeight(), 
 					null);
 		setInvisible(result, image.getInvisibleConditionName(), null);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 
@@ -1454,7 +1456,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					image.getPercentageHeight(),
 					null);
 		setInvisible(result, image.getInvisibleConditionName(), null);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 	
@@ -1474,7 +1476,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 		setSize(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
 		setInvisible(result, invisible, null);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 
@@ -1494,7 +1496,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		result.setTarget("_blank");
 		setSize(result, null, pixelWidth, null, null, null, null, null);
-		setId(result);
+		setId(result, null);
 
 		return result;
 	}
@@ -1627,7 +1629,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (style != null) {
 			result.setStyle(style);
 		}
-		setId(result);
+		setId(result, null);
 
 		return result;
 	}
@@ -1640,9 +1642,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private DataTable dataTable(String binding, 
 									String title, 
 									String invisible, 
-									boolean clickToZoom) {
+									boolean clickToZoom,
+									String widgetId) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
-		setId(result);
+		setId(result, widgetId);
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
@@ -1673,9 +1676,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected DataList dataList(String binding, String title, String invisible) {
+	protected DataList dataList(String binding, String title, String invisible, String widgetId) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
-		setId(result);
+		setId(result, widgetId);
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
@@ -1690,7 +1693,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (title != null) {
 			UIOutput text = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 			text.setValue(title);
-			setId(text);
+			setId(text, null);
 			dataTableOrList.getFacets().put("header", text);
 		}
 /*
@@ -1725,9 +1728,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 */
 	}
 
-	protected AccordionPanel accordionPanel(String invisible) {
+	protected AccordionPanel accordionPanel(String invisible, String widgetId) {
 		AccordionPanel result = (AccordionPanel) a.createComponent(AccordionPanel.COMPONENT_TYPE);
-		setId(result);
+		setId(result, widgetId);
 		setInvisible(result, invisible, null);
 		return result;
 	}
@@ -1739,7 +1742,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							boolean noWrap, 
 							Integer pixelWidth) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 
 		result.setHeaderText(title);
 		if (sortBinding != null) {
@@ -1766,7 +1769,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	private UISelectItems selectItems(String listBinding, String binding, boolean includeEmptyItems) {
 		UISelectItems result = (UISelectItems) a.createComponent(UISelectItems.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		StringBuilder expression = new StringBuilder(32);
 		expression.append("getSelectItems('").append(binding).append("',").append(includeEmptyItems).append(')');
 		ValueExpression valueExpression = null;
@@ -1788,7 +1791,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							boolean required,
 							String disabled) {
 		UIInput result = (UIInput) a.createComponent(componentType);
-		setId(result);
+		setId(result, null);
 		if (listBinding != null) {
 			result.setValueExpression("value",
 										createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));

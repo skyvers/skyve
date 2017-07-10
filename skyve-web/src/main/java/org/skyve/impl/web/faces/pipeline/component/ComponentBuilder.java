@@ -57,7 +57,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * 
 	 * @return	The toolbar component, or null if there is no toolbar component required for this renderer.
 	 */
-	public abstract UIComponent toolbar();
+	public abstract UIComponent toolbar(String widgetId);
 	
 	/**
 	 * 

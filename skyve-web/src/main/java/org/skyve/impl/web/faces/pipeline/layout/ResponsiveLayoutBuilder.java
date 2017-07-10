@@ -43,17 +43,17 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	
 	@Override
 	public UIComponent tabLayout() {
-		return responsiveContainer(null);
+		return responsiveContainer(null, null);
 	}
 	
 	@Override
 	public UIComponent vboxLayout(VBox vbox) {
-		return responsiveContainer(vbox.getInvisibleConditionName());
+		return responsiveContainer(vbox.getInvisibleConditionName(), vbox.getWidgetId());
 	}
 	
 	@Override
 	public UIComponent hboxLayout(HBox hbox) {
-		return responsiveContainer(hbox.getInvisibleConditionName());
+		return responsiveContainer(hbox.getInvisibleConditionName(), hbox.getWidgetId());
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		ResponsiveFormGrid grid = new ResponsiveFormGrid(formColumnStyles);
 		addResponsiveStyles(grid);
 		
-		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName());
+		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName(), form.getWidgetId());
 		result.setStyleClass("ui-g ui-g-nopad ui-fluid");
 		return result;
 	}
@@ -156,7 +156,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	@Override
 	public UIComponent formRowLayout(FormRow row) {
-		HtmlPanelGroup result = panelGroup(false, false, true, null);
+		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		// style="<repsonsive column reset method call>"
 		String expression = String.format("#{%s.resetResponsiveFormStyle(%s)}", 
 											managedBeanName, 
@@ -212,7 +212,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 				label = widgetLabel;
 			}
 			if (label != null) {
-				HtmlPanelGroup div = panelGroup(false, false, true, null);
+				HtmlPanelGroup div = panelGroup(false, false, true, null, null);
 				setInvisible(div, widgetInvisible, null);
 				// style="<repsonsive column calc method call>"
                 String alignment = alignment(currentFormItem.getLabelHorizontalAlignment(), true);
@@ -230,13 +230,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		
 		// The field
 		Integer colspan = currentFormItem.getColspan();
-		HtmlPanelGroup div = panelGroup(false, false, true, null);
+		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
 		setInvisible(div, widgetInvisible, null);
 		
 		// Create a grid
 		String helpText = (Boolean.FALSE.equals(currentFormItem.getShowHelp()) ? null : widgetHelpText);
 		HtmlPanelGrid pg = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
-		setId(pg);
+		setId(pg, null);
 		pg.setCellpadding("0"); //Don't pad cells
 		pg.setStyleClass("inputComponent");
 		pg.setColumns((helpText != null) ? 3 : 2);
@@ -293,15 +293,15 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return (forFormLabel ? (result + "FormLabel") : result);
 	}
 	
-	private HtmlPanelGroup responsiveContainer(String invisibleConditionName) {
-		HtmlPanelGroup result = panelGroup(false, false, true, null);
+	private HtmlPanelGroup responsiveContainer(String invisibleConditionName, String widgetId) {
+		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleConditionName, null);
 		result.setStyleClass("ui-g");
 		return result;
 	}
 
 	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, Integer responsiveWidth, Integer percentageWidth, boolean nopad) {
-		HtmlPanelGroup result = panelGroup(false, false, true, null);
+		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
 		String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth);
 		if (responsiveGridStyleClasses != null) {

@@ -1127,17 +1127,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
-
-					// bizId first in the index as it's values will vary the most
+					
+					// Even though it would be better index wise to put the bizId column first
+					// This doesn't work - hibernate returns nulls for the association getter call.
+					// So sub-optimal but working if type column is first.
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_id\" length=\"36");
+					fw.append(association.getName()).append("_type");
 					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
 						fw.append(moduleName).append(documentName).append(association.getName());
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t\t<column name=\"");
-					fw.append(association.getName()).append("_type");
+					fw.append(association.getName()).append("_id\" length=\"36");
 					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
 						fw.append(moduleName).append(documentName).append(association.getName());

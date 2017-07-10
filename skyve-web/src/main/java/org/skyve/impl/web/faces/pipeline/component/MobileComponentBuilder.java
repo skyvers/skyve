@@ -38,13 +38,13 @@ import org.skyve.web.WebAction;
 public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
-	public UIComponent toolbar() {
+	public UIComponent toolbar(String widgetId) {
 		return null; // no toolbar for mobile
 	}
 
 	@Override
 	public UIComponent tabPane(TabPane tabPane) {
-		return accordionPanel(tabPane.getInvisibleConditionName());
+		return accordionPanel(tabPane.getInvisibleConditionName(), tabPane.getWidgetId());
 	}
 	
 	@Override
@@ -115,7 +115,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent dataGrid(DataGrid grid) {
 		DataList result = dataList(grid.getBinding(), 
 		                			grid.getTitle(),
-		                			grid.getInvisibleConditionName());
+		                			grid.getInvisibleConditionName(),
+		                			grid.getWidgetId());
 		result.getPassThroughAttributes().put("data-inset", createValueExpressionFromCondition("true", null));
 		return result;
 	}
@@ -201,7 +202,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		ValueExpression ve = ef.createValueExpression(elc, expression, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
-		setId(result);
+		setId(result, null);
 		return result;
 	}
 
@@ -244,7 +245,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										lookup.getPixelWidth(),
 										true);
 
-		UIComponent result = panelGroup(false, false, false, null);
+		UIComponent result = panelGroup(false, false, false, null, null);
 		List<UIComponent> children = result.getChildren();
 		children.add(c);
 		InputText text = textField(listBinding, 
@@ -344,6 +345,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									boolean showPaginator,
 									boolean stickyHeader) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
+		setId(result, null);
 		result.setVar("row");
 		result.setPaginator(showPaginator);
 		if (showPaginator) {

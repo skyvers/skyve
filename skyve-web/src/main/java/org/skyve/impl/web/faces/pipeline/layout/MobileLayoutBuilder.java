@@ -35,14 +35,15 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 										null, // the parent container sets the percentage width
 										hbox.getPixelHeight(),
 										hbox.getPercentageHeight(),
-										hbox.getInvisibleConditionName());
+										hbox.getInvisibleConditionName(),
+										hbox.getWidgetId());
 		result.setColumns(1);
 		return result;
 	}
 
 	@Override
 	public UIComponent formLayout(Form form) {
-		return panelGroup(false, false, true, form.getInvisibleConditionName());
+		return panelGroup(false, false, true, form.getInvisibleConditionName(), form.getWidgetId());
 	}
 	
 	@Override
@@ -113,7 +114,7 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 
 	private Field field(String invisibleConditionName) {
 		Field result = (Field) a.createComponent(Field.COMPONENT_TYPE);
-		setId(result);
+		setId(result, null);
 		setInvisible(result, invisibleConditionName, null);
 		return result;
 	}

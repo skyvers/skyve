@@ -50,8 +50,8 @@ public abstract class AbstractFacesBuilder {
 		this.userAgentType = userAgentType;
 	}
 	
-	protected void setId(UIComponent component) {
-		component.setId(managedBean.nextId());
+	protected void setId(UIComponent component, String widgetId) {
+		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
 	
 	protected void setDisabled(UIComponent component, String disabledConditionName) {
@@ -170,7 +170,8 @@ public abstract class AbstractFacesBuilder {
 	protected HtmlPanelGroup panelGroup(boolean nowrap, 
 											boolean middle, 
 											boolean blockLayout,
-											String invisibleConditionName) {
+											String invisibleConditionName,
+											String widgetId) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		StringBuilder style = new StringBuilder(32);
 		if (nowrap) {
@@ -183,7 +184,7 @@ public abstract class AbstractFacesBuilder {
 			result.setStyle(style.toString());
 		}
 		setInvisible(result, invisibleConditionName, null);
-		setId(result);
+		setId(result, widgetId);
 		if (blockLayout) {
 			result.setLayout("block");
 		}
@@ -200,7 +201,7 @@ public abstract class AbstractFacesBuilder {
 								Integer rowspan) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		setInvisible(result, invisible, null);
-		setId(result);
+		setId(result, null);
 		if (colspan != null) {
 			result.setColspan(colspan.intValue());
 		}

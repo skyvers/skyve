@@ -47,6 +47,8 @@ public class HomeServlet extends HttpServlet {
 		Cookie cookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, 
 									(customerName == null) ? "" : customerName);
 		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+		cookie.setSecure(Util.isSecureUrl());
 		if (customerName == null) {
 			cookie.setMaxAge(0); // remove the cookie
 		}
