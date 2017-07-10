@@ -47,13 +47,37 @@ public class Content extends AbstractTransientBean {
 	/** @hidden */
 	public static final String contentPropertyName = "content";
 
+	/**
+	 * Content Id
+	 **/
 	private String contentId;
+	/**
+	 * Customer Name
+	 **/
 	private String customerName;
+	/**
+	 * Module Name
+	 **/
 	private String moduleName;
+	/**
+	 * Document Name
+	 **/
 	private String documentName;
+	/**
+	 * Content Biz Id
+	 **/
 	private String contentBizId;
+	/**
+	 * Attribute Name
+	 **/
 	private String attributeName;
+	/**
+	 * Last Modified
+	 **/
 	private Timestamp lastModified;
+	/**
+	 * Content
+	 **/
 	private String content;
 
 	@Override
@@ -80,6 +104,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #contentId} accessor.
+	 * @return	The value.
 	 **/
 	public String getContentId() {
 		return contentId;
@@ -87,8 +112,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #contentId} mutator.
-	 * 
-	 * @param contentId	The new value to set.
+	 * @param contentId	The new value.
 	 **/
 	@XmlElement
 	public void setContentId(String contentId) {
@@ -98,6 +122,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #customerName} accessor.
+	 * @return	The value.
 	 **/
 	public String getCustomerName() {
 		return customerName;
@@ -105,8 +130,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #customerName} mutator.
-	 * 
-	 * @param customerName	The new value to set.
+	 * @param customerName	The new value.
 	 **/
 	@XmlElement
 	public void setCustomerName(String customerName) {
@@ -116,6 +140,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #moduleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getModuleName() {
 		return moduleName;
@@ -123,8 +148,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #moduleName} mutator.
-	 * 
-	 * @param moduleName	The new value to set.
+	 * @param moduleName	The new value.
 	 **/
 	@XmlElement
 	public void setModuleName(String moduleName) {
@@ -134,6 +158,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #documentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getDocumentName() {
 		return documentName;
@@ -141,8 +166,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #documentName} mutator.
-	 * 
-	 * @param documentName	The new value to set.
+	 * @param documentName	The new value.
 	 **/
 	@XmlElement
 	public void setDocumentName(String documentName) {
@@ -152,6 +176,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #contentBizId} accessor.
+	 * @return	The value.
 	 **/
 	public String getContentBizId() {
 		return contentBizId;
@@ -159,8 +184,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #contentBizId} mutator.
-	 * 
-	 * @param contentBizId	The new value to set.
+	 * @param contentBizId	The new value.
 	 **/
 	@XmlElement
 	public void setContentBizId(String contentBizId) {
@@ -170,6 +194,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #attributeName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAttributeName() {
 		return attributeName;
@@ -177,8 +202,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #attributeName} mutator.
-	 * 
-	 * @param attributeName	The new value to set.
+	 * @param attributeName	The new value.
 	 **/
 	@XmlElement
 	public void setAttributeName(String attributeName) {
@@ -188,6 +212,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #lastModified} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getLastModified() {
 		return lastModified;
@@ -195,8 +220,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #lastModified} mutator.
-	 * 
-	 * @param lastModified	The new value to set.
+	 * @param lastModified	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -208,6 +232,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #content} accessor.
+	 * @return	The value.
 	 **/
 	public String getContent() {
 		return content;
@@ -215,8 +240,7 @@ public class Content extends AbstractTransientBean {
 
 	/**
 	 * {@link #content} mutator.
-	 * 
-	 * @param content	The new value to set.
+	 * @param content	The new value.
 	 **/
 	@XmlElement
 	public void setContent(String content) {

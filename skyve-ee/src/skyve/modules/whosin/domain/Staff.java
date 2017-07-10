@@ -22,6 +22,8 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * Staff
+ * <br/>
  * Someone who works for this organisation
  * 
  * @depend - - - Status
@@ -146,28 +148,57 @@ public class Staff extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Contact
+	 **/
 	private Contact contact = null;
+	/**
+	 * Code
+	 **/
 	private String staffCode;
+	/**
+	 * Date of Birth
+	 **/
 	private DateOnly dateOfBirth;
 	/**
+	 * Role Title
+	 * <br/>
 	 * The person's organisational title or role
 	 **/
 	private String roleTitle;
 	/**
+	 * Base Office
+	 * <br/>
 	 * The office this person usually operates from.
 	 **/
 	private Office baseOffice = null;
+	/**
+	 * Location
+	 **/
 	private Geometry location;
+	/**
+	 * Status
+	 **/
 	private Status status;
 	/**
+	 * Due Back
+	 * <br/>
 	 * If not in the office, when the staff member is due back.
 	 **/
 	private DateTime dueBack;
 	/**
+	 * Demonstration Data
+	 * <br/>
 	 * If this is set, the data was created by the demo data job and can safely be deleted.
 	 **/
 	private Boolean demoData;
+	/**
+	 * Reports To
+	 **/
 	private Position reportsTo = null;
+	/**
+	 * Position
+	 **/
 	private Position position;
 
 	@Override
@@ -207,6 +238,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #contact} accessor.
+	 * @return	The value.
 	 **/
 	public Contact getContact() {
 		return contact;
@@ -214,8 +246,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #contact} mutator.
-	 * 
-	 * @param contact	The new value to set.
+	 * @param contact	The new value.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -225,6 +256,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #staffCode} accessor.
+	 * @return	The value.
 	 **/
 	public String getStaffCode() {
 		return staffCode;
@@ -232,8 +264,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #staffCode} mutator.
-	 * 
-	 * @param staffCode	The new value to set.
+	 * @param staffCode	The new value.
 	 **/
 	@XmlElement
 	public void setStaffCode(String staffCode) {
@@ -243,6 +274,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dateOfBirth} accessor.
+	 * @return	The value.
 	 **/
 	public DateOnly getDateOfBirth() {
 		return dateOfBirth;
@@ -250,8 +282,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dateOfBirth} mutator.
-	 * 
-	 * @param dateOfBirth	The new value to set.
+	 * @param dateOfBirth	The new value.
 	 **/
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
@@ -263,6 +294,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #roleTitle} accessor.
+	 * @return	The value.
 	 **/
 	public String getRoleTitle() {
 		return roleTitle;
@@ -270,8 +302,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #roleTitle} mutator.
-	 * 
-	 * @param roleTitle	The new value to set.
+	 * @param roleTitle	The new value.
 	 **/
 	@XmlElement
 	public void setRoleTitle(String roleTitle) {
@@ -281,6 +312,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #baseOffice} accessor.
+	 * @return	The value.
 	 **/
 	public Office getBaseOffice() {
 		return baseOffice;
@@ -288,8 +320,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #baseOffice} mutator.
-	 * 
-	 * @param baseOffice	The new value to set.
+	 * @param baseOffice	The new value.
 	 **/
 	@XmlElement
 	public void setBaseOffice(Office baseOffice) {
@@ -299,6 +330,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #location} accessor.
+	 * @return	The value.
 	 **/
 	public Geometry getLocation() {
 		return location;
@@ -306,8 +338,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #location} mutator.
-	 * 
-	 * @param location	The new value to set.
+	 * @param location	The new value.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -318,6 +349,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #status} accessor.
+	 * @return	The value.
 	 **/
 	public Status getStatus() {
 		return status;
@@ -325,8 +357,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #status} mutator.
-	 * 
-	 * @param status	The new value to set.
+	 * @param status	The new value.
 	 **/
 	@XmlElement
 	public void setStatus(Status status) {
@@ -336,6 +367,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dueBack} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getDueBack() {
 		return dueBack;
@@ -343,8 +375,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dueBack} mutator.
-	 * 
-	 * @param dueBack	The new value to set.
+	 * @param dueBack	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -356,6 +387,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #demoData} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getDemoData() {
 		return demoData;
@@ -363,8 +395,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #demoData} mutator.
-	 * 
-	 * @param demoData	The new value to set.
+	 * @param demoData	The new value.
 	 **/
 	@XmlElement
 	public void setDemoData(Boolean demoData) {
@@ -374,6 +405,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #reportsTo} accessor.
+	 * @return	The value.
 	 **/
 	public Position getReportsTo() {
 		return reportsTo;
@@ -381,8 +413,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #reportsTo} mutator.
-	 * 
-	 * @param reportsTo	The new value to set.
+	 * @param reportsTo	The new value.
 	 **/
 	@XmlElement
 	public void setReportsTo(Position reportsTo) {
@@ -392,6 +423,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #position} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public Position getPosition() {
@@ -400,8 +432,7 @@ public class Staff extends AbstractPersistentBean {
 
 	/**
 	 * {@link #position} mutator.
-	 * 
-	 * @param position	The new value to set.
+	 * @param position	The new value.
 	 **/
 	public void setPosition(Position position) {
 		this.position = position;

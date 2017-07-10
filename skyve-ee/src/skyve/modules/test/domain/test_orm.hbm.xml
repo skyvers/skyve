@@ -215,8 +215,8 @@
 		<any name="arc" meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
 			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
-			<column name="arc_id" length="36" />
 			<column name="arc_type" />
+			<column name="arc_id" length="36" />
 		</any>
 		<filter name="testArcOneToOneNoneFilter" condition="1=0"/>
 		<filter name="testArcOneToOneCustomerFilter" condition="bizCustomer=:customerParam"/>

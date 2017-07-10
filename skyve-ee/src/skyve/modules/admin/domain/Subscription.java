@@ -9,6 +9,8 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
+ * Subscription
+ * <br/>
  * A subscription Preference models the receiver's preference about how they wish to receive the communication type (or not).
 
 		If the subscription is declined, the format type is not required. If the format type is supplied, then the communication
@@ -50,14 +52,27 @@ public class Subscription extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String preferredReceiverIdentifierPropertyName = "preferredReceiverIdentifier";
 
+	/**
+	 * Communication
+	 **/
 	private Communication communication = null;
 	/**
+	 * Receiver
+	 * <br/>
 	 * This could be an email or sms number, or any other identifier for a delivery method
 	 **/
 	private String receiverIdentifier;
+	/**
+	 * Declined
+	 **/
 	private Boolean declined;
+	/**
+	 * Format
+	 **/
 	private FormatType formatType;
 	/**
+	 * Redirect to
+	 * <br/>
 	 * This could be an email or sms number, or any other identifier for a delivery method
 	 **/
 	private String preferredReceiverIdentifier;
@@ -99,6 +114,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #communication} accessor.
+	 * @return	The value.
 	 **/
 	public Communication getCommunication() {
 		return communication;
@@ -106,8 +122,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #communication} mutator.
-	 * 
-	 * @param communication	The new value to set.
+	 * @param communication	The new value.
 	 **/
 	@XmlElement
 	public void setCommunication(Communication communication) {
@@ -117,6 +132,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #receiverIdentifier} accessor.
+	 * @return	The value.
 	 **/
 	public String getReceiverIdentifier() {
 		return receiverIdentifier;
@@ -124,8 +140,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #receiverIdentifier} mutator.
-	 * 
-	 * @param receiverIdentifier	The new value to set.
+	 * @param receiverIdentifier	The new value.
 	 **/
 	@XmlElement
 	public void setReceiverIdentifier(String receiverIdentifier) {
@@ -135,6 +150,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #declined} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getDeclined() {
 		return declined;
@@ -142,8 +158,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #declined} mutator.
-	 * 
-	 * @param declined	The new value to set.
+	 * @param declined	The new value.
 	 **/
 	@XmlElement
 	public void setDeclined(Boolean declined) {
@@ -153,6 +168,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #formatType} accessor.
+	 * @return	The value.
 	 **/
 	public FormatType getFormatType() {
 		return formatType;
@@ -160,8 +176,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #formatType} mutator.
-	 * 
-	 * @param formatType	The new value to set.
+	 * @param formatType	The new value.
 	 **/
 	@XmlElement
 	public void setFormatType(FormatType formatType) {
@@ -171,6 +186,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #preferredReceiverIdentifier} accessor.
+	 * @return	The value.
 	 **/
 	public String getPreferredReceiverIdentifier() {
 		return preferredReceiverIdentifier;
@@ -178,8 +194,7 @@ public class Subscription extends AbstractPersistentBean {
 
 	/**
 	 * {@link #preferredReceiverIdentifier} mutator.
-	 * 
-	 * @param preferredReceiverIdentifier	The new value to set.
+	 * @param preferredReceiverIdentifier	The new value.
 	 **/
 	@XmlElement
 	public void setPreferredReceiverIdentifier(String preferredReceiverIdentifier) {

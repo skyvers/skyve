@@ -11,7 +11,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * GroupRole
+ * Group Role
  * 
  * @stereotype "persistent child"
  */
@@ -32,6 +32,9 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 	/** @hidden */
 	public static final String roleNamePropertyName = "roleName";
 
+	/**
+	 * Role Name
+	 **/
 	private String roleName;
 	private Group parent;
 
@@ -75,6 +78,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 
 	/**
 	 * {@link #roleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getRoleName() {
 		return roleName;
@@ -82,8 +86,7 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 
 	/**
 	 * {@link #roleName} mutator.
-	 * 
-	 * @param roleName	The new value to set.
+	 * @param roleName	The new value.
 	 **/
 	@XmlElement
 	public void setRoleName(String roleName) {

@@ -8,6 +8,8 @@ import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyE
 import org.skyve.CORE;
 
 /**
+ * Mapped Subclassed Single Strategy
+ * <br/>
  * Another Extension document to test that the generated class extends 
 			MappedExtensionExtension.java
  * 
@@ -30,6 +32,9 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 	/** @hidden */
 	public static final String subclassIntegerPropertyName = "subclassInteger";
 
+	/**
+	 * Subclass Integer
+	 **/
 	private Integer subclassInteger;
 
 	@Override
@@ -69,6 +74,7 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 
 	/**
 	 * {@link #subclassInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getSubclassInteger() {
 		return subclassInteger;
@@ -76,8 +82,7 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 
 	/**
 	 * {@link #subclassInteger} mutator.
-	 * 
-	 * @param subclassInteger	The new value to set.
+	 * @param subclassInteger	The new value.
 	 **/
 	@XmlElement
 	public void setSubclassInteger(Integer subclassInteger) {

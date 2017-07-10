@@ -142,17 +142,53 @@ public class Audit extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Module
+	 **/
 	private String auditModuleName;
+	/**
+	 * Document
+	 **/
 	private String auditDocumentName;
+	/**
+	 * BizId
+	 **/
 	private String auditBizId;
+	/**
+	 * Description
+	 **/
 	private String auditBizKey;
+	/**
+	 * Operation
+	 **/
 	private Operation operation;
+	/**
+	 * Timestamp
+	 **/
 	private Timestamp timestamp;
+	/**
+	 * Millis
+	 **/
 	private Long millis;
+	/**
+	 * User
+	 **/
 	private String userName;
+	/**
+	 * Audit
+	 **/
 	private String auditDetail;
+	/**
+	 * Source Version To Compare
+	 **/
 	private Audit sourceVersion = null;
+	/**
+	 * Other Version To Compare
+	 **/
 	private Audit comparisonVersion = null;
+	/**
+	 * Me
+	 **/
 	private Audit me = null;
 
 	@Override
@@ -192,6 +228,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditModuleName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditModuleName() {
 		return auditModuleName;
@@ -199,8 +236,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditModuleName} mutator.
-	 * 
-	 * @param auditModuleName	The new value to set.
+	 * @param auditModuleName	The new value.
 	 **/
 	@XmlElement
 	public void setAuditModuleName(String auditModuleName) {
@@ -210,6 +246,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDocumentName} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditDocumentName() {
 		return auditDocumentName;
@@ -217,8 +254,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDocumentName} mutator.
-	 * 
-	 * @param auditDocumentName	The new value to set.
+	 * @param auditDocumentName	The new value.
 	 **/
 	@XmlElement
 	public void setAuditDocumentName(String auditDocumentName) {
@@ -228,6 +264,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditBizId} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditBizId() {
 		return auditBizId;
@@ -235,8 +272,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditBizId} mutator.
-	 * 
-	 * @param auditBizId	The new value to set.
+	 * @param auditBizId	The new value.
 	 **/
 	@XmlElement
 	public void setAuditBizId(String auditBizId) {
@@ -246,6 +282,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditBizKey} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditBizKey() {
 		return auditBizKey;
@@ -253,8 +290,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditBizKey} mutator.
-	 * 
-	 * @param auditBizKey	The new value to set.
+	 * @param auditBizKey	The new value.
 	 **/
 	@XmlElement
 	public void setAuditBizKey(String auditBizKey) {
@@ -264,6 +300,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #operation} accessor.
+	 * @return	The value.
 	 **/
 	public Operation getOperation() {
 		return operation;
@@ -271,8 +308,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #operation} mutator.
-	 * 
-	 * @param operation	The new value to set.
+	 * @param operation	The new value.
 	 **/
 	@XmlElement
 	public void setOperation(Operation operation) {
@@ -282,6 +318,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #timestamp} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getTimestamp() {
 		return timestamp;
@@ -289,8 +326,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #timestamp} mutator.
-	 * 
-	 * @param timestamp	The new value to set.
+	 * @param timestamp	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -302,6 +338,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #millis} accessor.
+	 * @return	The value.
 	 **/
 	public Long getMillis() {
 		return millis;
@@ -309,8 +346,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #millis} mutator.
-	 * 
-	 * @param millis	The new value to set.
+	 * @param millis	The new value.
 	 **/
 	@XmlElement
 	public void setMillis(Long millis) {
@@ -320,6 +356,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUserName() {
 		return userName;
@@ -327,8 +364,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} mutator.
-	 * 
-	 * @param userName	The new value to set.
+	 * @param userName	The new value.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -338,6 +374,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDetail} accessor.
+	 * @return	The value.
 	 **/
 	public String getAuditDetail() {
 		return auditDetail;
@@ -345,8 +382,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #auditDetail} mutator.
-	 * 
-	 * @param auditDetail	The new value to set.
+	 * @param auditDetail	The new value.
 	 **/
 	@XmlElement
 	public void setAuditDetail(String auditDetail) {
@@ -356,6 +392,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sourceVersion} accessor.
+	 * @return	The value.
 	 **/
 	public Audit getSourceVersion() {
 		return sourceVersion;
@@ -363,8 +400,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #sourceVersion} mutator.
-	 * 
-	 * @param sourceVersion	The new value to set.
+	 * @param sourceVersion	The new value.
 	 **/
 	@XmlElement
 	public void setSourceVersion(Audit sourceVersion) {
@@ -374,6 +410,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #comparisonVersion} accessor.
+	 * @return	The value.
 	 **/
 	public Audit getComparisonVersion() {
 		return comparisonVersion;
@@ -381,8 +418,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #comparisonVersion} mutator.
-	 * 
-	 * @param comparisonVersion	The new value to set.
+	 * @param comparisonVersion	The new value.
 	 **/
 	@XmlElement
 	public void setComparisonVersion(Audit comparisonVersion) {
@@ -392,6 +428,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #me} accessor.
+	 * @return	The value.
 	 **/
 	public Audit getMe() {
 		return me;
@@ -399,8 +436,7 @@ public class Audit extends AbstractPersistentBean {
 
 	/**
 	 * {@link #me} mutator.
-	 * 
-	 * @param me	The new value to set.
+	 * @param me	The new value.
 	 **/
 	@XmlElement
 	public void setMe(Audit me) {

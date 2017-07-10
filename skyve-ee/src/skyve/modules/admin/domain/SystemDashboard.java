@@ -10,7 +10,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * SystemDashboard
+ * System Dashboard
  * 
  * @navhas n jobs 0..n Job
  * @stereotype "transient"
@@ -32,6 +32,9 @@ public class SystemDashboard extends AbstractTransientBean {
 	/** @hidden */
 	public static final String jobsPropertyName = "jobs";
 
+	/**
+	 * Jobs
+	 **/
 	private List<Job> jobs = new ArrayList<>();
 
 	@Override
@@ -58,6 +61,7 @@ public class SystemDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Job> getJobs() {
@@ -66,8 +70,8 @@ public class SystemDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Job getJobsElementById(String bizId) {
 		return getElementById(jobs, bizId);
@@ -75,9 +79,8 @@ public class SystemDashboard extends AbstractTransientBean {
 
 	/**
 	 * {@link #jobs} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param jobs	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
 		 setElementById(jobs, element);

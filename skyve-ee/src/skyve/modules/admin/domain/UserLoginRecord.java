@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
- * UserLoginRecord
+ * User Login Record
  * 
  * @stereotype "persistent"
  */
@@ -35,7 +35,13 @@ public class UserLoginRecord extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String loginDateTimePropertyName = "loginDateTime";
 
+	/**
+	 * User Name
+	 **/
 	private String userName;
+	/**
+	 * Login Date/Time
+	 **/
 	private DateTime loginDateTime;
 
 	@Override
@@ -75,6 +81,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUserName() {
 		return userName;
@@ -82,8 +89,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 
 	/**
 	 * {@link #userName} mutator.
-	 * 
-	 * @param userName	The new value to set.
+	 * @param userName	The new value.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -93,6 +99,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 
 	/**
 	 * {@link #loginDateTime} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getLoginDateTime() {
 		return loginDateTime;
@@ -100,8 +107,7 @@ public class UserLoginRecord extends AbstractPersistentBean {
 
 	/**
 	 * {@link #loginDateTime} mutator.
-	 * 
-	 * @param loginDateTime	The new value to set.
+	 * @param loginDateTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)

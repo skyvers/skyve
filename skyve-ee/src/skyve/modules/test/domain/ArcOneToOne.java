@@ -8,6 +8,8 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
+ * ArcOneToOne
+ * <br/>
  * A single Arc.
  * 
  * @navhas n arc 0..1 AnyBase
@@ -30,6 +32,9 @@ public class ArcOneToOne extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String arcPropertyName = "arc";
 
+	/**
+	 * Arc
+	 **/
 	private AnyBase arc = null;
 
 	@Override
@@ -69,6 +74,7 @@ public class ArcOneToOne extends AbstractPersistentBean {
 
 	/**
 	 * {@link #arc} accessor.
+	 * @return	The value.
 	 **/
 	public AnyBase getArc() {
 		return arc;
@@ -76,8 +82,7 @@ public class ArcOneToOne extends AbstractPersistentBean {
 
 	/**
 	 * {@link #arc} mutator.
-	 * 
-	 * @param arc	The new value to set.
+	 * @param arc	The new value.
 	 **/
 	@XmlElement
 	public void setArc(AnyBase arc) {

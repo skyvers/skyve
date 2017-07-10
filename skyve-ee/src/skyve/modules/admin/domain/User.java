@@ -83,6 +83,8 @@ public class User extends AbstractPersistentBean {
 	public static final String inactivePropertyName = "inactive";
 
 	/**
+	 * Wizard State
+	 * <br/>
 	 * The create user wizard is staged into the following states which roughly follow in order.
 			Either an existing contact is confirmed as that of the new user,
 			OR
@@ -167,58 +169,86 @@ public class User extends AbstractPersistentBean {
 	}
 
 	/**
+	 * User Name
+	 * <br/>
 	 * Length is derived from the maximum email address length from RFC 5321
 	 **/
 	private String userName;
 	/**
+	 * Password
+	 * <br/>
 	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String password;
 	/**
+	 * Generated Password
+	 * <br/>
 	 * Used to temporarily hold generated passwords for further processing.
 	 **/
 	private String generatedPassword;
 	/**
+	 * Created
+	 * <br/>
 	 * The time and date when this user account was created.
 	 **/
 	private DateTime createdDateTime;
 	/**
+	 * Home Module
+	 * <br/>
 	 * The module displayed when the user first logs in.
 	 **/
 	private String homeModule;
 	/**
+	 * New Password
+	 * <br/>
 	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String newPassword;
 	/**
+	 * Confirm Password
+	 * <br/>
 	 * Check Password Complexity settings for minimum required strength.
 	 **/
 	private String confirmPassword;
 	/**
+	 * Legacy Id
+	 * <br/>
 	 * Legacy ID value when imported from legacy System using the conversion tool.
 	 **/
 	private String legacyId;
 	/**
+	 * Must change password
+	 * <br/>
 	 * Whether the password must be changed
 	 **/
 	private Boolean passwordExpired;
 	/**
+	 * Last changed
+	 * <br/>
 	 * Date and Time the users password was last changed
 	 **/
 	private DateTime passwordLastChanged;
 	/**
+	 * Contact
+	 * <br/>
 	 * The contact details for the user.
 	 **/
 	private Contact contact = null;
 	/**
+	 * Data Group
+	 * <br/>
 	 * The group that constrains what information this user can see.
 	 **/
 	private DataGroup dataGroup = null;
 	/**
+	 * Groups
+	 * <br/>
 	 * The collection of groups that this user belongs to.
 	 **/
 	private List<Group> groups = new ArrayList<>();
 	/**
+	 * Roles
+	 * <br/>
 	 * Typically users are assigned membership of groups, which define sets of roles, 
 			corresponding to business roles within an organisation.
 			<br/>
@@ -227,6 +257,8 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private List<UserRole> roles = new ArrayList<>();
 	/**
+	 * Wizard State
+	 * <br/>
 	 * The create user wizard is staged into the following states which roughly follow in order.
 			Either an existing contact is confirmed as that of the new user,
 			OR
@@ -236,18 +268,30 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private WizardState wizardState;
 	/**
+	 * Full name
+	 * <br/>
 	 * This is used to determine if you are on the system already
 	 **/
 	private String searchContactName;
 	/**
+	 * Email
+	 * <br/>
 	 * The email address to use to search existing contacts.
 	 **/
 	private String searchEmail;
 	/**
+	 * Candidate Contacts
+	 * <br/>
 	 * The contacts who possibly match the search criteria.
 	 **/
 	private List<UserCandidateContact> candidateContacts = new ArrayList<>();
+	/**
+	 * The contact selected for this user.
+	 **/
 	private Boolean contactSelected = new Boolean(false);
+	/**
+	 * Inactive
+	 **/
 	private Boolean inactive;
 
 	@Override
@@ -280,6 +324,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #userName} accessor.
+	 * @return	The value.
 	 **/
 	public String getUserName() {
 		return userName;
@@ -287,8 +332,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #userName} mutator.
-	 * 
-	 * @param userName	The new value to set.
+	 * @param userName	The new value.
 	 **/
 	@XmlElement
 	public void setUserName(String userName) {
@@ -298,6 +342,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #password} accessor.
+	 * @return	The value.
 	 **/
 	public String getPassword() {
 		return password;
@@ -305,8 +350,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #password} mutator.
-	 * 
-	 * @param password	The new value to set.
+	 * @param password	The new value.
 	 **/
 	@XmlElement
 	public void setPassword(String password) {
@@ -316,6 +360,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #generatedPassword} accessor.
+	 * @return	The value.
 	 **/
 	public String getGeneratedPassword() {
 		return generatedPassword;
@@ -323,8 +368,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #generatedPassword} mutator.
-	 * 
-	 * @param generatedPassword	The new value to set.
+	 * @param generatedPassword	The new value.
 	 **/
 	@XmlElement
 	public void setGeneratedPassword(String generatedPassword) {
@@ -333,6 +377,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #createdDateTime} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getCreatedDateTime() {
 		return createdDateTime;
@@ -340,8 +385,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #createdDateTime} mutator.
-	 * 
-	 * @param createdDateTime	The new value to set.
+	 * @param createdDateTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -353,6 +397,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #homeModule} accessor.
+	 * @return	The value.
 	 **/
 	public String getHomeModule() {
 		return homeModule;
@@ -360,8 +405,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #homeModule} mutator.
-	 * 
-	 * @param homeModule	The new value to set.
+	 * @param homeModule	The new value.
 	 **/
 	@XmlElement
 	public void setHomeModule(String homeModule) {
@@ -371,6 +415,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #newPassword} accessor.
+	 * @return	The value.
 	 **/
 	public String getNewPassword() {
 		return newPassword;
@@ -378,8 +423,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #newPassword} mutator.
-	 * 
-	 * @param newPassword	The new value to set.
+	 * @param newPassword	The new value.
 	 **/
 	@XmlElement
 	public void setNewPassword(String newPassword) {
@@ -389,6 +433,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #confirmPassword} accessor.
+	 * @return	The value.
 	 **/
 	public String getConfirmPassword() {
 		return confirmPassword;
@@ -396,8 +441,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #confirmPassword} mutator.
-	 * 
-	 * @param confirmPassword	The new value to set.
+	 * @param confirmPassword	The new value.
 	 **/
 	@XmlElement
 	public void setConfirmPassword(String confirmPassword) {
@@ -407,6 +451,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #legacyId} accessor.
+	 * @return	The value.
 	 **/
 	public String getLegacyId() {
 		return legacyId;
@@ -414,8 +459,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #legacyId} mutator.
-	 * 
-	 * @param legacyId	The new value to set.
+	 * @param legacyId	The new value.
 	 **/
 	@XmlElement
 	public void setLegacyId(String legacyId) {
@@ -425,6 +469,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #passwordExpired} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getPasswordExpired() {
 		return passwordExpired;
@@ -432,8 +477,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #passwordExpired} mutator.
-	 * 
-	 * @param passwordExpired	The new value to set.
+	 * @param passwordExpired	The new value.
 	 **/
 	@XmlElement
 	public void setPasswordExpired(Boolean passwordExpired) {
@@ -443,6 +487,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #passwordLastChanged} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getPasswordLastChanged() {
 		return passwordLastChanged;
@@ -450,8 +495,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #passwordLastChanged} mutator.
-	 * 
-	 * @param passwordLastChanged	The new value to set.
+	 * @param passwordLastChanged	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -463,6 +507,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #contact} accessor.
+	 * @return	The value.
 	 **/
 	public Contact getContact() {
 		return contact;
@@ -470,8 +515,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #contact} mutator.
-	 * 
-	 * @param contact	The new value to set.
+	 * @param contact	The new value.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -481,6 +525,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #dataGroup} accessor.
+	 * @return	The value.
 	 **/
 	public DataGroup getDataGroup() {
 		return dataGroup;
@@ -488,8 +533,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #dataGroup} mutator.
-	 * 
-	 * @param dataGroup	The new value to set.
+	 * @param dataGroup	The new value.
 	 **/
 	@XmlElement
 	public void setDataGroup(DataGroup dataGroup) {
@@ -499,6 +543,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #groups} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<Group> getGroups() {
@@ -507,8 +552,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #groups} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public Group getGroupsElementById(String bizId) {
 		return getElementById(groups, bizId);
@@ -516,9 +561,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #groups} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param groups	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
 		 setElementById(groups, element);
@@ -526,6 +570,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #roles} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<UserRole> getRoles() {
@@ -534,8 +579,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #roles} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public UserRole getRolesElementById(String bizId) {
 		return getElementById(roles, bizId);
@@ -543,9 +588,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #roles} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param roles	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
 		 setElementById(roles, element);
@@ -553,6 +597,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #wizardState} accessor.
+	 * @return	The value.
 	 **/
 	public WizardState getWizardState() {
 		return wizardState;
@@ -560,8 +605,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #wizardState} mutator.
-	 * 
-	 * @param wizardState	The new value to set.
+	 * @param wizardState	The new value.
 	 **/
 	@XmlElement
 	public void setWizardState(WizardState wizardState) {
@@ -571,6 +615,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #searchContactName} accessor.
+	 * @return	The value.
 	 **/
 	public String getSearchContactName() {
 		return searchContactName;
@@ -578,8 +623,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #searchContactName} mutator.
-	 * 
-	 * @param searchContactName	The new value to set.
+	 * @param searchContactName	The new value.
 	 **/
 	@XmlElement
 	public void setSearchContactName(String searchContactName) {
@@ -589,6 +633,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #searchEmail} accessor.
+	 * @return	The value.
 	 **/
 	public String getSearchEmail() {
 		return searchEmail;
@@ -596,8 +641,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #searchEmail} mutator.
-	 * 
-	 * @param searchEmail	The new value to set.
+	 * @param searchEmail	The new value.
 	 **/
 	@XmlElement
 	public void setSearchEmail(String searchEmail) {
@@ -607,6 +651,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #candidateContacts} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<UserCandidateContact> getCandidateContacts() {
@@ -615,8 +660,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #candidateContacts} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public UserCandidateContact getCandidateContactsElementById(String bizId) {
 		return getElementById(candidateContacts, bizId);
@@ -624,9 +669,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #candidateContacts} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param candidateContacts	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setCandidateContactsElementById(@SuppressWarnings("unused") String bizId, UserCandidateContact element) {
 		 setElementById(candidateContacts, element);
@@ -634,6 +678,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #contactSelected} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getContactSelected() {
 		return contactSelected;
@@ -641,8 +686,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #contactSelected} mutator.
-	 * 
-	 * @param contactSelected	The new value to set.
+	 * @param contactSelected	The new value.
 	 **/
 	@XmlElement
 	public void setContactSelected(Boolean contactSelected) {
@@ -652,6 +696,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #inactive} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getInactive() {
 		return inactive;
@@ -659,8 +704,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * {@link #inactive} mutator.
-	 * 
-	 * @param inactive	The new value to set.
+	 * @param inactive	The new value.
 	 **/
 	@XmlElement
 	public void setInactive(Boolean inactive) {
@@ -670,66 +714,103 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Candidate Contacts is empty
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isCandidateContactsEmpty() {
 		return (candidateContacts.isEmpty());
 	}
 
+	/**	 * {@link #isCandidateContactsEmpty} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotCandidateContactsEmpty() {
 		return (! isCandidateContactsEmpty());
 	}
 
 	/**
 	 * Confirm Contact step
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isConfirmContact() {
 		return (WizardState.confirmContact.equals(getWizardState()));
 	}
 
+	/**	 * {@link #isConfirmContact} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotConfirmContact() {
 		return (! isConfirmContact());
 	}
 
 	/**
 	 * Confirm Group Memberships step
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isConfirmGroupMemberships() {
 		return (WizardState.confirmGroupMemberships.equals(getWizardState()));
 	}
 
+	/**	 * {@link #isConfirmGroupMemberships} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotConfirmGroupMemberships() {
 		return (! isConfirmGroupMemberships());
 	}
 
 	/**
 	 * Confirm User Name and Password step
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isConfirmUserNameAndPassword() {
 		return (WizardState.confirmUserNameAndPassword.equals(getWizardState()));
 	}
 
+	/**	 * {@link #isConfirmUserNameAndPassword} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotConfirmUserNameAndPassword() {
 		return (! isConfirmUserNameAndPassword());
 	}
 
 	/**
 	 * Create Contact step
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isCreateContact() {
 		return (WizardState.createContact.equals(getWizardState()));
 	}
 
+	/**	 * {@link #isCreateContact} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotCreateContact() {
 		return (! isCreateContact());
 	}
 
 	/**
 	 * Created
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	@Override
@@ -737,6 +818,11 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (isPersisted());
 	}
 
+	/**	 * {@link #isCreated} negation.
+
+	 * @return	The negated condition
+
+	 */
 	@Override
 	public boolean isNotCreated() {
 		return (! isCreated());
@@ -744,48 +830,76 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Designer
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isDesigner() {
 		return (isUserInRole("design", "BizHubDesigner"));
 	}
 
+	/**	 * {@link #isDesigner} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotDesigner() {
 		return (! isDesigner());
 	}
 
 	/**
 	 * In Data Group
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isInDataGroup() {
 		return (! isUserInDataGroup(null));
 	}
 
+	/**	 * {@link #isInDataGroup} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotInDataGroup() {
 		return (! isInDataGroup());
 	}
 
 	/**
 	 * Security Administrator
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isSecurityAdministrator() {
 		return (isUserInRole("admin","SecurityAdministrator"));
 	}
 
+	/**	 * {@link #isSecurityAdministrator} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotSecurityAdministrator() {
 		return (! isSecurityAdministrator());
 	}
 
 	/**
 	 * Show Next Button
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isShowNextButton() {
 		return (isCreateContact() || isConfirmUserNameAndPassword());
 	}
 
+	/**	 * {@link #isShowNextButton} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotShowNextButton() {
 		return (! isShowNextButton());
 	}

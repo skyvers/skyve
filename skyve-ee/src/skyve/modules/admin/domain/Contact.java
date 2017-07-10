@@ -44,6 +44,8 @@ public class Contact extends AbstractPersistentBean {
 	public static final String imagePropertyName = "image";
 
 	/**
+	 * Contact Type
+	 * <br/>
 	 * Whether this contact is a person or an organisation.
 	 **/
 	@XmlEnum
@@ -120,13 +122,27 @@ public class Contact extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Name
+	 **/
 	private String name;
 	/**
+	 * Contact Type
+	 * <br/>
 	 * Whether this contact is a person or an organisation.
 	 **/
 	private ContactType contactType;
+	/**
+	 * Email
+	 **/
 	private String email1;
+	/**
+	 * Mobile
+	 **/
 	private String mobile;
+	/**
+	 * Image
+	 **/
 	private String image;
 
 	@Override
@@ -159,6 +175,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -166,8 +183,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -177,6 +193,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #contactType} accessor.
+	 * @return	The value.
 	 **/
 	public ContactType getContactType() {
 		return contactType;
@@ -184,8 +201,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #contactType} mutator.
-	 * 
-	 * @param contactType	The new value to set.
+	 * @param contactType	The new value.
 	 **/
 	@XmlElement
 	public void setContactType(ContactType contactType) {
@@ -195,6 +211,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #email1} accessor.
+	 * @return	The value.
 	 **/
 	public String getEmail1() {
 		return email1;
@@ -202,8 +219,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #email1} mutator.
-	 * 
-	 * @param email1	The new value to set.
+	 * @param email1	The new value.
 	 **/
 	@XmlElement
 	public void setEmail1(String email1) {
@@ -213,6 +229,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #mobile} accessor.
+	 * @return	The value.
 	 **/
 	public String getMobile() {
 		return mobile;
@@ -220,8 +237,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #mobile} mutator.
-	 * 
-	 * @param mobile	The new value to set.
+	 * @param mobile	The new value.
 	 **/
 	@XmlElement
 	public void setMobile(String mobile) {
@@ -231,6 +247,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #image} accessor.
+	 * @return	The value.
 	 **/
 	public String getImage() {
 		return image;
@@ -238,8 +255,7 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * {@link #image} mutator.
-	 * 
-	 * @param image	The new value to set.
+	 * @param image	The new value.
 	 **/
 	@XmlElement
 	public void setImage(String image) {
@@ -249,6 +265,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * Updates to contact details is allowed
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isAllowUpdate() {
@@ -258,6 +276,11 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 					|| isUserInRole("admin","SecurityAdministrator")?true:false));
 	}
 
+	/**	 * {@link #isAllowUpdate} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotAllowUpdate() {
 		return (! isAllowUpdate());
 	}

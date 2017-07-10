@@ -11,6 +11,8 @@ import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
+ * User Candidate Contact
+ * <br/>
  * User Candidate Contact is a transient child of User, and holds the potential matching contacts
 			when a search is conducted during the Create User wizard.
 			<br/>
@@ -42,7 +44,13 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 	/** @hidden */
 	public static final String matchScorePropertyName = "matchScore";
 
+	/**
+	 * Contact
+	 **/
 	private Contact contact = null;
+	/**
+	 * Score
+	 **/
 	private Integer matchScore;
 	private User parent;
 
@@ -73,6 +81,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #contact} accessor.
+	 * @return	The value.
 	 **/
 	public Contact getContact() {
 		return contact;
@@ -80,8 +89,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #contact} mutator.
-	 * 
-	 * @param contact	The new value to set.
+	 * @param contact	The new value.
 	 **/
 	@XmlElement
 	public void setContact(Contact contact) {
@@ -91,6 +99,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #matchScore} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getMatchScore() {
 		return matchScore;
@@ -98,8 +107,7 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 
 	/**
 	 * {@link #matchScore} mutator.
-	 * 
-	 * @param matchScore	The new value to set.
+	 * @param matchScore	The new value.
 	 **/
 	@XmlElement
 	public void setMatchScore(Integer matchScore) {
