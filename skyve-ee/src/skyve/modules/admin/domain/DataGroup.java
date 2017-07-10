@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * DataGroup
+ * Data Group
  * 
  * @stereotype "persistent"
  */
@@ -31,7 +31,13 @@ public class DataGroup extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
 
+	/**
+	 * Name
+	 **/
 	private String name;
+	/**
+	 * Description
+	 **/
 	private String description;
 
 	@Override
@@ -71,6 +77,7 @@ public class DataGroup extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -78,8 +85,7 @@ public class DataGroup extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -89,6 +95,7 @@ public class DataGroup extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} accessor.
+	 * @return	The value.
 	 **/
 	public String getDescription() {
 		return description;
@@ -96,8 +103,7 @@ public class DataGroup extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} mutator.
-	 * 
-	 * @param description	The new value to set.
+	 * @param description	The new value.
 	 **/
 	@XmlElement
 	public void setDescription(String description) {

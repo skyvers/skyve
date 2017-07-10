@@ -36,10 +36,21 @@ public class Tagged extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String tagPropertyName = "tag";
 
+	/**
+	 * Tagged Module
+	 **/
 	private String taggedModule;
+	/**
+	 * Tagged Document
+	 **/
 	private String taggedDocument;
+	/**
+	 * Tagged BizId
+	 **/
 	private String taggedBizId;
 	/**
+	 * Tag
+	 * <br/>
 	 * The tag
 	 **/
 	private Tag tag = null;
@@ -81,6 +92,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedModule} accessor.
+	 * @return	The value.
 	 **/
 	public String getTaggedModule() {
 		return taggedModule;
@@ -88,8 +100,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedModule} mutator.
-	 * 
-	 * @param taggedModule	The new value to set.
+	 * @param taggedModule	The new value.
 	 **/
 	@XmlElement
 	public void setTaggedModule(String taggedModule) {
@@ -99,6 +110,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedDocument} accessor.
+	 * @return	The value.
 	 **/
 	public String getTaggedDocument() {
 		return taggedDocument;
@@ -106,8 +118,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedDocument} mutator.
-	 * 
-	 * @param taggedDocument	The new value to set.
+	 * @param taggedDocument	The new value.
 	 **/
 	@XmlElement
 	public void setTaggedDocument(String taggedDocument) {
@@ -117,6 +128,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedBizId} accessor.
+	 * @return	The value.
 	 **/
 	public String getTaggedBizId() {
 		return taggedBizId;
@@ -124,8 +136,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #taggedBizId} mutator.
-	 * 
-	 * @param taggedBizId	The new value to set.
+	 * @param taggedBizId	The new value.
 	 **/
 	@XmlElement
 	public void setTaggedBizId(String taggedBizId) {
@@ -135,6 +146,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #tag} accessor.
+	 * @return	The value.
 	 **/
 	public Tag getTag() {
 		return tag;
@@ -142,8 +154,7 @@ public class Tagged extends AbstractPersistentBean {
 
 	/**
 	 * {@link #tag} mutator.
-	 * 
-	 * @param tag	The new value to set.
+	 * @param tag	The new value.
 	 **/
 	@XmlElement
 	public void setTag(Tag tag) {

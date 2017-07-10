@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * ChangePassword
+ * Change Password
  * 
  * @stereotype "transient"
  */
@@ -34,13 +34,20 @@ public class ChangePassword extends AbstractTransientBean {
 	public static final String responsePropertyName = "response";
 
 	/**
+	 * New Password
+	 * <br/>
 	 * Enter your new password
 	 **/
 	private String newPassword;
 	/**
+	 * Confirm Password
+	 * <br/>
 	 * Re-enter your new password
 	 **/
 	private String confirmPassword;
+	/**
+	 * Response
+	 **/
 	private String response;
 
 	@Override
@@ -67,6 +74,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #newPassword} accessor.
+	 * @return	The value.
 	 **/
 	public String getNewPassword() {
 		return newPassword;
@@ -74,8 +82,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #newPassword} mutator.
-	 * 
-	 * @param newPassword	The new value to set.
+	 * @param newPassword	The new value.
 	 **/
 	@XmlElement
 	public void setNewPassword(String newPassword) {
@@ -85,6 +92,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #confirmPassword} accessor.
+	 * @return	The value.
 	 **/
 	public String getConfirmPassword() {
 		return confirmPassword;
@@ -92,8 +100,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #confirmPassword} mutator.
-	 * 
-	 * @param confirmPassword	The new value to set.
+	 * @param confirmPassword	The new value.
 	 **/
 	@XmlElement
 	public void setConfirmPassword(String confirmPassword) {
@@ -103,6 +110,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #response} accessor.
+	 * @return	The value.
 	 **/
 	public String getResponse() {
 		return response;
@@ -110,8 +118,7 @@ public class ChangePassword extends AbstractTransientBean {
 
 	/**
 	 * {@link #response} mutator.
-	 * 
-	 * @param response	The new value to set.
+	 * @param response	The new value.
 	 **/
 	@XmlElement
 	public void setResponse(String response) {

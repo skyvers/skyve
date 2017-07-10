@@ -43,11 +43,29 @@ public class Job extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String logPropertyName = "log";
 
+	/**
+	 * Start Time
+	 **/
 	private Timestamp startTime;
+	/**
+	 * End Time
+	 **/
 	private Timestamp endTime;
+	/**
+	 * Name
+	 **/
 	private String displayName;
+	/**
+	 * Percent Complete
+	 **/
 	private Integer percentComplete;
+	/**
+	 * Status
+	 **/
 	private String status;
+	/**
+	 * Log
+	 **/
 	private String log;
 
 	@Override
@@ -87,6 +105,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #startTime} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getStartTime() {
 		return startTime;
@@ -94,8 +113,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #startTime} mutator.
-	 * 
-	 * @param startTime	The new value to set.
+	 * @param startTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -107,6 +125,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #endTime} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getEndTime() {
 		return endTime;
@@ -114,8 +133,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #endTime} mutator.
-	 * 
-	 * @param endTime	The new value to set.
+	 * @param endTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -127,6 +145,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #displayName} accessor.
+	 * @return	The value.
 	 **/
 	public String getDisplayName() {
 		return displayName;
@@ -134,8 +153,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #displayName} mutator.
-	 * 
-	 * @param displayName	The new value to set.
+	 * @param displayName	The new value.
 	 **/
 	@XmlElement
 	public void setDisplayName(String displayName) {
@@ -145,6 +163,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #percentComplete} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getPercentComplete() {
 		return percentComplete;
@@ -152,8 +171,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #percentComplete} mutator.
-	 * 
-	 * @param percentComplete	The new value to set.
+	 * @param percentComplete	The new value.
 	 **/
 	@XmlElement
 	public void setPercentComplete(Integer percentComplete) {
@@ -163,6 +181,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #status} accessor.
+	 * @return	The value.
 	 **/
 	public String getStatus() {
 		return status;
@@ -170,8 +189,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #status} mutator.
-	 * 
-	 * @param status	The new value to set.
+	 * @param status	The new value.
 	 **/
 	@XmlElement
 	public void setStatus(String status) {
@@ -181,6 +199,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #log} accessor.
+	 * @return	The value.
 	 **/
 	public String getLog() {
 		return log;
@@ -188,8 +207,7 @@ public class Job extends AbstractPersistentBean {
 
 	/**
 	 * {@link #log} mutator.
-	 * 
-	 * @param log	The new value to set.
+	 * @param log	The new value.
 	 **/
 	@XmlElement
 	public void setLog(String log) {

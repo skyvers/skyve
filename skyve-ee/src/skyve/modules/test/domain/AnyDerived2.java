@@ -8,6 +8,8 @@ import modules.test.domain.AnyBase;
 import org.skyve.CORE;
 
 /**
+ * AnyDerived2
+ * <br/>
  * A document that extends AnyBase.
  * 
  * @stereotype "persistent"
@@ -29,6 +31,9 @@ public class AnyDerived2 extends AnyBase {
 	/** @hidden */
 	public static final String text2PropertyName = "text2";
 
+	/**
+	 * Text 2
+	 **/
 	private String text2;
 
 	@Override
@@ -68,6 +73,7 @@ public class AnyDerived2 extends AnyBase {
 
 	/**
 	 * {@link #text2} accessor.
+	 * @return	The value.
 	 **/
 	public String getText2() {
 		return text2;
@@ -75,8 +81,7 @@ public class AnyDerived2 extends AnyBase {
 
 	/**
 	 * {@link #text2} mutator.
-	 * 
-	 * @param text2	The new value to set.
+	 * @param text2	The new value.
 	 **/
 	@XmlElement
 	public void setText2(String text2) {

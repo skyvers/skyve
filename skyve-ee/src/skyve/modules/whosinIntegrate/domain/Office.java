@@ -11,6 +11,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 
 /**
+ * Office
+ * <br/>
  * An official location where staff operate.
  * 
  * @stereotype "persistent"
@@ -44,13 +46,33 @@ public class Office extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String boundaryPropertyName = "boundary";
 
+	/**
+	 * Level/Unit
+	 **/
 	private String levelUnit;
+	/**
+	 * Building Name
+	 **/
 	private String buildingName;
+	/**
+	 * Street Address
+	 **/
 	private String streetAddress;
+	/**
+	 * Suburb
+	 **/
 	private String suburb;
+	/**
+	 * Post Code
+	 **/
 	private String postCode;
+	/**
+	 * Phone
+	 **/
 	private String phone;
 	/**
+	 * Boundary
+	 * <br/>
 	 * The boundary around the office.
 	 **/
 	private Geometry boundary;
@@ -85,6 +107,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #levelUnit} accessor.
+	 * @return	The value.
 	 **/
 	public String getLevelUnit() {
 		return levelUnit;
@@ -92,8 +115,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #levelUnit} mutator.
-	 * 
-	 * @param levelUnit	The new value to set.
+	 * @param levelUnit	The new value.
 	 **/
 	@XmlElement
 	public void setLevelUnit(String levelUnit) {
@@ -103,6 +125,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #buildingName} accessor.
+	 * @return	The value.
 	 **/
 	public String getBuildingName() {
 		return buildingName;
@@ -110,8 +133,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #buildingName} mutator.
-	 * 
-	 * @param buildingName	The new value to set.
+	 * @param buildingName	The new value.
 	 **/
 	@XmlElement
 	public void setBuildingName(String buildingName) {
@@ -121,6 +143,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #streetAddress} accessor.
+	 * @return	The value.
 	 **/
 	public String getStreetAddress() {
 		return streetAddress;
@@ -128,8 +151,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #streetAddress} mutator.
-	 * 
-	 * @param streetAddress	The new value to set.
+	 * @param streetAddress	The new value.
 	 **/
 	@XmlElement
 	public void setStreetAddress(String streetAddress) {
@@ -139,6 +161,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #suburb} accessor.
+	 * @return	The value.
 	 **/
 	public String getSuburb() {
 		return suburb;
@@ -146,8 +169,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #suburb} mutator.
-	 * 
-	 * @param suburb	The new value to set.
+	 * @param suburb	The new value.
 	 **/
 	@XmlElement
 	public void setSuburb(String suburb) {
@@ -157,6 +179,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #postCode} accessor.
+	 * @return	The value.
 	 **/
 	public String getPostCode() {
 		return postCode;
@@ -164,8 +187,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #postCode} mutator.
-	 * 
-	 * @param postCode	The new value to set.
+	 * @param postCode	The new value.
 	 **/
 	@XmlElement
 	public void setPostCode(String postCode) {
@@ -175,6 +197,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #phone} accessor.
+	 * @return	The value.
 	 **/
 	public String getPhone() {
 		return phone;
@@ -182,8 +205,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #phone} mutator.
-	 * 
-	 * @param phone	The new value to set.
+	 * @param phone	The new value.
 	 **/
 	@XmlElement
 	public void setPhone(String phone) {
@@ -193,6 +215,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #boundary} accessor.
+	 * @return	The value.
 	 **/
 	public Geometry getBoundary() {
 		return boundary;
@@ -200,8 +223,7 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * {@link #boundary} mutator.
-	 * 
-	 * @param boundary	The new value to set.
+	 * @param boundary	The new value.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -212,6 +234,8 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * Created
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	@Override
@@ -219,6 +243,11 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 		return (isPersisted());
 	}
 
+	/**	 * {@link #isCreated} negation.
+
+	 * @return	The negated condition
+
+	 */
 	@Override
 	public boolean isNotCreated() {
 		return (! isCreated());
@@ -226,12 +255,19 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * Manager
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));
 	}
 
+	/**	 * {@link #isManager} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotManager() {
 		return (! isManager());
 	}

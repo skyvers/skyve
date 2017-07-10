@@ -36,8 +36,17 @@ public class Group extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
 
+	/**
+	 * Group Name
+	 **/
 	private String name;
+	/**
+	 * Description
+	 **/
 	private String description;
+	/**
+	 * Roles
+	 **/
 	private List<GroupRole> roles = new ArrayList<>();
 
 	@Override
@@ -77,6 +86,7 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} accessor.
+	 * @return	The value.
 	 **/
 	public String getName() {
 		return name;
@@ -84,8 +94,7 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #name} mutator.
-	 * 
-	 * @param name	The new value to set.
+	 * @param name	The new value.
 	 **/
 	@XmlElement
 	public void setName(String name) {
@@ -95,6 +104,7 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} accessor.
+	 * @return	The value.
 	 **/
 	public String getDescription() {
 		return description;
@@ -102,8 +112,7 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #description} mutator.
-	 * 
-	 * @param description	The new value to set.
+	 * @param description	The new value.
 	 **/
 	@XmlElement
 	public void setDescription(String description) {
@@ -113,6 +122,7 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #roles} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<GroupRole> getRoles() {
@@ -121,8 +131,8 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #roles} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public GroupRole getRolesElementById(String bizId) {
 		return getElementById(roles, bizId);
@@ -130,9 +140,8 @@ public class Group extends AbstractPersistentBean {
 
 	/**
 	 * {@link #roles} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param roles	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setRolesElementById(@SuppressWarnings("unused") String bizId, GroupRole element) {
 		 setElementById(roles, element);

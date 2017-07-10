@@ -11,6 +11,8 @@ import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
 
 /**
+ * Mapped Extension Single Strategy
+ * <br/>
  * Extension document.
  * 
  * @navhas n aggregatedCollection 0..n MappedExtensionSingleStrategy
@@ -44,10 +46,25 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 	/** @hidden */
 	public static final String derivedIntegerPropertyName = "derivedInteger";
 
+	/**
+	 * Aggregated Association
+	 **/
 	private MappedExtensionSingleStrategy aggregatedAssociation = null;
+	/**
+	 * Aggregated Collection
+	 **/
 	private List<MappedExtensionSingleStrategy> aggregatedCollection = new ArrayList<>();
+	/**
+	 * Composed Collection
+	 **/
 	private List<MappedExtensionSingleStrategy> composedCollection = new ArrayList<>();
+	/**
+	 * Inverse
+	 **/
 	private List<MappedExtensionSingleStrategy> inverseAggregatedAssociation = new ArrayList<>();
+	/**
+	 * Derived Integer
+	 **/
 	private Integer derivedInteger;
 
 	@Override
@@ -87,6 +104,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #aggregatedAssociation} accessor.
+	 * @return	The value.
 	 **/
 	public MappedExtensionSingleStrategy getAggregatedAssociation() {
 		return aggregatedAssociation;
@@ -94,8 +112,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #aggregatedAssociation} mutator.
-	 * 
-	 * @param aggregatedAssociation	The new value to set.
+	 * @param aggregatedAssociation	The new value.
 	 **/
 	@XmlElement
 	public void setAggregatedAssociation(MappedExtensionSingleStrategy aggregatedAssociation) {
@@ -105,6 +122,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #aggregatedCollection} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<MappedExtensionSingleStrategy> getAggregatedCollection() {
@@ -113,8 +131,8 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #aggregatedCollection} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public MappedExtensionSingleStrategy getAggregatedCollectionElementById(String bizId) {
 		return getElementById(aggregatedCollection, bizId);
@@ -122,9 +140,8 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #aggregatedCollection} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param aggregatedCollection	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setAggregatedCollectionElementById(@SuppressWarnings("unused") String bizId, MappedExtensionSingleStrategy element) {
 		 setElementById(aggregatedCollection, element);
@@ -132,6 +149,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #composedCollection} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<MappedExtensionSingleStrategy> getComposedCollection() {
@@ -140,8 +158,8 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #composedCollection} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public MappedExtensionSingleStrategy getComposedCollectionElementById(String bizId) {
 		return getElementById(composedCollection, bizId);
@@ -149,9 +167,8 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #composedCollection} mutator.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
-	 * @param composedCollection	The new value to set.
+	 * @param element	The new value of the element in the list.
 	 **/
 	public void setComposedCollectionElementById(@SuppressWarnings("unused") String bizId, MappedExtensionSingleStrategy element) {
 		 setElementById(composedCollection, element);
@@ -159,6 +176,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #inverseAggregatedAssociation} accessor.
+	 * @return	The value.
 	 **/
 	@XmlElement
 	public List<MappedExtensionSingleStrategy> getInverseAggregatedAssociation() {
@@ -167,8 +185,8 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #inverseAggregatedAssociation} accessor.
-	 * 
 	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
 	 **/
 	public MappedExtensionSingleStrategy getInverseAggregatedAssociationElementById(String bizId) {
 		return getElementById(inverseAggregatedAssociation, bizId);
@@ -176,6 +194,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #derivedInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getDerivedInteger() {
 		return derivedInteger;
@@ -183,8 +202,7 @@ public class MappedExtensionSingleStrategy extends MappedBase {
 
 	/**
 	 * {@link #derivedInteger} mutator.
-	 * 
-	 * @param derivedInteger	The new value to set.
+	 * @param derivedInteger	The new value.
 	 **/
 	@XmlElement
 	public void setDerivedInteger(Integer derivedInteger) {

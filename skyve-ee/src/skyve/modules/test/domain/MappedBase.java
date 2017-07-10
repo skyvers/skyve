@@ -31,6 +31,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * Mapped Base
+ * <br/>
  * A base document using the mapped strategy.
  * 
  * @depend - - - Enum3
@@ -168,24 +170,81 @@ public class MappedBase extends AbstractPersistentBean {
 		}
 	}
 
+	/**
+	 * Boolean Flag
+	 **/
 	private Boolean booleanFlag;
+	/**
+	 * Colour
+	 **/
 	private String colour;
+	/**
+	 * Date
+	 **/
 	private DateOnly date;
+	/**
+	 * Date Time
+	 **/
 	private DateTime dateTime;
+	/**
+	 * Decimal 10
+	 **/
 	private Decimal10 decimal10;
+	/**
+	 * Decimal 2
+	 **/
 	private Decimal2 decimal2;
+	/**
+	 * Decimal 5
+	 **/
 	private Decimal5 decimal5;
+	/**
+	 * Enum 3
+	 **/
 	private Enum3 enum3;
+	/**
+	 * Geometry
+	 **/
 	private Geometry geometry;
+	/**
+	 * Id
+	 **/
 	private String id;
+	/**
+	 * Integer
+	 **/
 	private Integer normalInteger;
+	/**
+	 * Long Integer
+	 **/
 	private Long longInteger;
+	/**
+	 * Markup
+	 **/
 	private String markup;
+	/**
+	 * Memo
+	 **/
 	private String memo;
+	/**
+	 * Text
+	 **/
 	private String text;
+	/**
+	 * Time
+	 **/
 	private TimeOnly time;
+	/**
+	 * Timestamp
+	 **/
 	private Timestamp timestamp;
+	/**
+	 * Base Derived Integer
+	 **/
 	private Integer baseDerivedInteger;
+	/**
+	 * Composed Association
+	 **/
 	private MappedExtensionSingleStrategy composedAssociation = null;
 
 	@Override
@@ -225,6 +284,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #booleanFlag} accessor.
+	 * @return	The value.
 	 **/
 	public Boolean getBooleanFlag() {
 		return booleanFlag;
@@ -232,8 +292,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #booleanFlag} mutator.
-	 * 
-	 * @param booleanFlag	The new value to set.
+	 * @param booleanFlag	The new value.
 	 **/
 	@XmlElement
 	public void setBooleanFlag(Boolean booleanFlag) {
@@ -243,6 +302,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #colour} accessor.
+	 * @return	The value.
 	 **/
 	public String getColour() {
 		return colour;
@@ -250,8 +310,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #colour} mutator.
-	 * 
-	 * @param colour	The new value to set.
+	 * @param colour	The new value.
 	 **/
 	@XmlElement
 	public void setColour(String colour) {
@@ -261,6 +320,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #date} accessor.
+	 * @return	The value.
 	 **/
 	public DateOnly getDate() {
 		return date;
@@ -268,8 +328,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #date} mutator.
-	 * 
-	 * @param date	The new value to set.
+	 * @param date	The new value.
 	 **/
 	@XmlSchemaType(name = "date")
 	@XmlJavaTypeAdapter(DateOnlyMapper.class)
@@ -281,6 +340,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dateTime} accessor.
+	 * @return	The value.
 	 **/
 	public DateTime getDateTime() {
 		return dateTime;
@@ -288,8 +348,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #dateTime} mutator.
-	 * 
-	 * @param dateTime	The new value to set.
+	 * @param dateTime	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)
@@ -301,6 +360,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal10} accessor.
+	 * @return	The value.
 	 **/
 	public Decimal10 getDecimal10() {
 		return decimal10;
@@ -308,8 +368,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal10} mutator.
-	 * 
-	 * @param decimal10	The new value to set.
+	 * @param decimal10	The new value.
 	 **/
 	@XmlJavaTypeAdapter(Decimal10Mapper.class)
 	@XmlElement
@@ -320,6 +379,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal2} accessor.
+	 * @return	The value.
 	 **/
 	public Decimal2 getDecimal2() {
 		return decimal2;
@@ -327,8 +387,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal2} mutator.
-	 * 
-	 * @param decimal2	The new value to set.
+	 * @param decimal2	The new value.
 	 **/
 	@XmlJavaTypeAdapter(Decimal2Mapper.class)
 	@XmlElement
@@ -339,6 +398,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal5} accessor.
+	 * @return	The value.
 	 **/
 	public Decimal5 getDecimal5() {
 		return decimal5;
@@ -346,8 +406,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #decimal5} mutator.
-	 * 
-	 * @param decimal5	The new value to set.
+	 * @param decimal5	The new value.
 	 **/
 	@XmlJavaTypeAdapter(Decimal5Mapper.class)
 	@XmlElement
@@ -358,6 +417,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #enum3} accessor.
+	 * @return	The value.
 	 **/
 	public Enum3 getEnum3() {
 		return enum3;
@@ -365,8 +425,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #enum3} mutator.
-	 * 
-	 * @param enum3	The new value to set.
+	 * @param enum3	The new value.
 	 **/
 	@XmlElement
 	public void setEnum3(Enum3 enum3) {
@@ -376,6 +435,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #geometry} accessor.
+	 * @return	The value.
 	 **/
 	public Geometry getGeometry() {
 		return geometry;
@@ -383,8 +443,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #geometry} mutator.
-	 * 
-	 * @param geometry	The new value to set.
+	 * @param geometry	The new value.
 	 **/
 	@XmlJavaTypeAdapter(GeometryMapper.class)
 	@XmlElement
@@ -395,6 +454,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #id} accessor.
+	 * @return	The value.
 	 **/
 	public String getId() {
 		return id;
@@ -402,8 +462,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #id} mutator.
-	 * 
-	 * @param id	The new value to set.
+	 * @param id	The new value.
 	 **/
 	@XmlElement
 	public void setId(String id) {
@@ -413,6 +472,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #normalInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getNormalInteger() {
 		return normalInteger;
@@ -420,8 +480,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #normalInteger} mutator.
-	 * 
-	 * @param normalInteger	The new value to set.
+	 * @param normalInteger	The new value.
 	 **/
 	@XmlElement
 	public void setNormalInteger(Integer normalInteger) {
@@ -431,6 +490,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #longInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Long getLongInteger() {
 		return longInteger;
@@ -438,8 +498,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #longInteger} mutator.
-	 * 
-	 * @param longInteger	The new value to set.
+	 * @param longInteger	The new value.
 	 **/
 	@XmlElement
 	public void setLongInteger(Long longInteger) {
@@ -449,6 +508,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #markup} accessor.
+	 * @return	The value.
 	 **/
 	public String getMarkup() {
 		return markup;
@@ -456,8 +516,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #markup} mutator.
-	 * 
-	 * @param markup	The new value to set.
+	 * @param markup	The new value.
 	 **/
 	@XmlElement
 	public void setMarkup(String markup) {
@@ -467,6 +526,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #memo} accessor.
+	 * @return	The value.
 	 **/
 	public String getMemo() {
 		return memo;
@@ -474,8 +534,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #memo} mutator.
-	 * 
-	 * @param memo	The new value to set.
+	 * @param memo	The new value.
 	 **/
 	@XmlElement
 	public void setMemo(String memo) {
@@ -485,6 +544,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #text} accessor.
+	 * @return	The value.
 	 **/
 	public String getText() {
 		return text;
@@ -492,8 +552,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #text} mutator.
-	 * 
-	 * @param text	The new value to set.
+	 * @param text	The new value.
 	 **/
 	@XmlElement
 	public void setText(String text) {
@@ -503,6 +562,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #time} accessor.
+	 * @return	The value.
 	 **/
 	public TimeOnly getTime() {
 		return time;
@@ -510,8 +570,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #time} mutator.
-	 * 
-	 * @param time	The new value to set.
+	 * @param time	The new value.
 	 **/
 	@XmlSchemaType(name = "time")
 	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
@@ -523,6 +582,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #timestamp} accessor.
+	 * @return	The value.
 	 **/
 	public Timestamp getTimestamp() {
 		return timestamp;
@@ -530,8 +590,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #timestamp} mutator.
-	 * 
-	 * @param timestamp	The new value to set.
+	 * @param timestamp	The new value.
 	 **/
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(TimestampMapper.class)
@@ -543,6 +602,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #baseDerivedInteger} accessor.
+	 * @return	The value.
 	 **/
 	public Integer getBaseDerivedInteger() {
 		return baseDerivedInteger;
@@ -550,8 +610,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #baseDerivedInteger} mutator.
-	 * 
-	 * @param baseDerivedInteger	The new value to set.
+	 * @param baseDerivedInteger	The new value.
 	 **/
 	@XmlElement
 	public void setBaseDerivedInteger(Integer baseDerivedInteger) {
@@ -560,6 +619,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #composedAssociation} accessor.
+	 * @return	The value.
 	 **/
 	public MappedExtensionSingleStrategy getComposedAssociation() {
 		return composedAssociation;
@@ -567,8 +627,7 @@ public class MappedBase extends AbstractPersistentBean {
 
 	/**
 	 * {@link #composedAssociation} mutator.
-	 * 
-	 * @param composedAssociation	The new value to set.
+	 * @param composedAssociation	The new value.
 	 **/
 	@XmlElement
 	public void setComposedAssociation(MappedExtensionSingleStrategy composedAssociation) {
