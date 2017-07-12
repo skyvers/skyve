@@ -13,6 +13,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
 /**
+ * Hierarchical
+ * <br/>
  * Hierarchical document.
  * 
  * @stereotype "persistent child"

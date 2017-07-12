@@ -3,6 +3,7 @@
 <%@ page import="javax.servlet.http.Cookie"%>
 <%@ page import="org.skyve.CORE"%>
 <%@ page import="org.skyve.metadata.user.User"%>
+<%@ page import="org.skyve.metadata.repository.Repository"%>
 <%@ page import="org.skyve.metadata.router.UxUi"%>
 <%@ page import="org.skyve.metadata.router.UxUiSelector"%>
 <%@ page import="org.skyve.metadata.view.View.ViewType"%>
@@ -19,7 +20,18 @@
 <%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 
 <%
+	// Stop cookie/request header injection by checking the customer name
+	Repository repository = CORE.getRepository();
 	String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
+	if (customerName != null) {
+		// This will throw if the customerName value ain't a customer name
+		try {
+			repository.getCustomer(customerName);
+		}
+		catch (Exception e) {
+			customerName = null;
+		}
+	}
 	Cookie cookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, 
 								(customerName == null) ? "" : customerName);
 	cookie.setPath("/");
@@ -83,7 +95,7 @@
 		// Set the UX/UI and user agent type
 		UserAgentType userAgentType = UserAgent.getType(request);
 		request.setAttribute(FacesUtil.USER_AGENT_TYPE_KEY, userAgentType);
-		Router router = CORE.getRepository().getRouter();
+		Router router = repository.getRouter();
 		UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);
 		request.setAttribute(FacesUtil.UX_UI_KEY, uxui);
 		

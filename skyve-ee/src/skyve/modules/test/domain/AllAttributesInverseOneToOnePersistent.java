@@ -31,6 +31,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * All Inverse 121 Persistent
+ * <br/>
  * All persistent attributes.
  * 
  * @depend - - - Enum3

@@ -168,7 +168,7 @@
 									<label for="j_password"><%=Util.i18n("page.login.password.label", locale)%></label>
 								</div>
 								<div class="col-7-sm">
-									<input type="password" name="j_password">
+									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="j_password">
 								</div>
 							</div>
 							<div class="row">

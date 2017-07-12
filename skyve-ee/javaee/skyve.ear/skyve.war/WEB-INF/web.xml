@@ -238,6 +238,10 @@
 			<param-name>X-Frame-Options</param-name>
 			<param-value>SAMEORIGIN</param-value>
 		</init-param>
+		<init-param>
+			<param-name>Referrer-Policy</param-name>
+			<param-value>same-origin</param-value>
+		</init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>FrameBustingAntiClickJackingFilter</filter-name>
@@ -569,6 +573,12 @@
 			<url-pattern>/pages/changePassword.jsp</url-pattern>
 			<url-pattern>/pages/htmlEdit/browseImages.jsp</url-pattern>
 			<url-pattern>/pages/map/geolocate.jsp</url-pattern>
+		</web-resource-collection>
+		<web-resource-collection>
+			<web-resource-name>NoTraceOrOptions</web-resource-name>
+			<url-pattern>/*</url-pattern>
+			<http-method>OPTIONS</http-method>
+			<http-method>TRACE</http-method>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>Nobody</role-name>
