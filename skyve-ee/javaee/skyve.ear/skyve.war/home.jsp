@@ -20,7 +20,7 @@
 <%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
 
 <%
-	// Stop cookie injection by checking the customer name
+	// Stop cookie/request header injection by checking the customer name
 	Repository repository = CORE.getRepository();
 	String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
 	if (customerName != null) {

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.util.Util;
@@ -43,7 +44,18 @@ public class HomeServlet extends HttpServlet {
 		response.setContentType(MimeType.html.toString());
 		response.setCharacterEncoding(Util.UTF8);
 		
+		// Stop cookie/request header injection by checking the customer name
 		String customerName = request.getParameter(AbstractWebContext.CUSTOMER_COOKIE_NAME);
+		if (customerName != null) {
+			// This will throw if the customerName value ain't a customer name
+			try {
+				CORE.getRepository().getCustomer(customerName);
+			}
+			catch (Exception e) {
+				customerName = null;
+			}
+		}
+
 		Cookie cookie = new Cookie(AbstractWebContext.CUSTOMER_COOKIE_NAME, 
 									(customerName == null) ? "" : customerName);
 		cookie.setPath("/");
