@@ -240,7 +240,7 @@
 		</init-param>
 		<init-param>
 			<param-name>Referrer-Policy</param-name>
-			<param-value>"same-origin"</param-value>
+			<param-value>same-origin</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>
