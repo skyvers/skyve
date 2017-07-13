@@ -1,11 +1,17 @@
 package org.skyve.impl.metadata.view.container.form;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -35,14 +41,12 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "item")
-public class FormItem implements MetaData {
-	/**
-	 * For Serialization
-	 */
+public class FormItem implements MetaData, DecoratedMetaData {
 	private static final long serialVersionUID = 8914657809022150728L;
 
 	private MetaData widget;
@@ -59,6 +63,10 @@ public class FormItem implements MetaData {
 	// is the field required or not - regardless of whether its required in data
 	private Boolean required;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	public MetaData getWidget() {
 		return widget;
 	}
@@ -165,5 +173,10 @@ public class FormItem implements MetaData {
 	@XmlAttribute(required = false)
 	public void setRequired(Boolean required) {
 		this.required = required;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

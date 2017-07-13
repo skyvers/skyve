@@ -21,6 +21,14 @@
 
   <xs:element name="testSuite" type="tns:testSuite"/>
 
+  <xs:complexType name="testSuite">
+    <xs:sequence>
+      <xs:element ref="tns:setup" minOccurs="0"/>
+      <xs:element ref="tns:testCase" maxOccurs="unbounded"/>
+      <xs:element ref="tns:tearDown" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="setup">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -59,19 +67,6 @@
     <xs:sequence/>
   </xs:complexType>
 
-  <xs:complexType name="tearDown">
-    <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:call"/>
-        <xs:element ref="tns:module"/>
-        <xs:element ref="tns:action"/>
-        <xs:element ref="tns:menu"/>
-        <xs:element ref="tns:navigate"/>
-        <xs:element ref="tns:reload"/>
-      </xs:choice>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="testCase">
     <xs:sequence>
       <xs:element ref="tns:setup" minOccurs="0"/>
@@ -94,11 +89,16 @@
     <xs:attribute name="identifier" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="testSuite">
+  <xs:complexType name="tearDown">
     <xs:sequence>
-      <xs:element ref="tns:setup" minOccurs="0"/>
-      <xs:element ref="tns:testCase" maxOccurs="unbounded"/>
-      <xs:element ref="tns:tearDown" minOccurs="0"/>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:call"/>
+        <xs:element ref="tns:module"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:menu"/>
+        <xs:element ref="tns:navigate"/>
+        <xs:element ref="tns:reload"/>
+      </xs:choice>
     </xs:sequence>
   </xs:complexType>
 </xs:schema>

@@ -1,9 +1,15 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.FormItemWidget;
@@ -20,7 +26,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 							"pixelWidth", 
 							"pixelHeight",
 							"minPixelHeight",
-							"maxPixelHeight"})
+							"maxPixelHeight",
+							"properties"})
 public class Slider extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -1215719151652616337L;
 
@@ -34,6 +41,10 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize, Const
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public boolean showsLabelByDefault() {
 		return true;
@@ -117,5 +128,10 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize, Const
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

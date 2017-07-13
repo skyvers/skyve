@@ -1,9 +1,15 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.FormItemWidget;
@@ -12,7 +18,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight"})
+			propOrder = {"pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "properties"})
 public class RichText extends ChangeableInputWidget implements AbsoluteSize, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -4873861225052464043L;
 
@@ -20,6 +26,10 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -68,5 +78,10 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	@XmlAttribute(required = true)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

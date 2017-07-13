@@ -2,19 +2,24 @@ package org.skyve.impl.metadata.view.container.form;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.Bordered;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
@@ -41,8 +46,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 							"invisibleConditionName", 
 							"visibleConditionName",
 							"columns", 
-							"rows"})
-public final class Form implements MetaData, Identifiable, RelativeSize, Disableable, Invisible, Bordered {
+							"rows",
+							"properties"})
+public final class Form implements MetaData, DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible, Bordered {
 	private static final long serialVersionUID = 8677483284773272582L;
 
 	private String widgetId;
@@ -68,6 +74,10 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 	
 	private List<FormColumn> columns = new ArrayList<>();
 	private List<FormRow> rows = new ArrayList<>();
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = true)
 	public List<FormColumn> getColumns() {
@@ -264,5 +274,10 @@ public final class Form implements MetaData, Identifiable, RelativeSize, Disable
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

@@ -1,15 +1,26 @@
 package org.skyve.impl.metadata.view.container.form;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import java.util.TreeMap;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class FormColumn {
+public class FormColumn implements DecoratedMetaData {
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
 	private Integer percentageWidth;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public Integer getPercentageWidth() {
 		return percentageWidth;
@@ -36,5 +47,10 @@ public class FormColumn {
 	@XmlAttribute(required = false)
 	public void setResponsiveWidth(Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

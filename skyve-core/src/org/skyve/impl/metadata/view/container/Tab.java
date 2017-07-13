@@ -1,13 +1,20 @@
 package org.skyve.impl.metadata.view.container;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
@@ -20,8 +27,9 @@ import org.skyve.metadata.view.Invisible;
 							"enabledConditionName", 
 							"invisibleConditionName", 
 							"visibleConditionName", 
-							"selectedConditionName"})
-public final class Tab extends Container implements Disableable, Invisible {
+							"selectedConditionName",
+							"properties"})
+public final class Tab extends Container implements Disableable, Invisible, DecoratedMetaData {
 	private static final long serialVersionUID = -3216551162394859248L;
 
 	private String title;
@@ -31,6 +39,10 @@ public final class Tab extends Container implements Disableable, Invisible {
 	private String invisibleConditionName;
 	private String selectedConditionName;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	public String getTitle() {
 		return title;
 	}
@@ -111,5 +123,10 @@ public final class Tab extends Container implements Disableable, Invisible {
 	@XmlAttribute(name = "selected", required = false)
 	public void setSelectedConditionName(String selectedConditionName) {
 		this.selectedConditionName = selectedConditionName;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

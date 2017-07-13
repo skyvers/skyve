@@ -1,10 +1,16 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -21,7 +27,8 @@ import org.skyve.metadata.view.Invisible;
 							"cityBinding",
 							"stateBinding",
 							"postcodeBinding",
-							"countryBinding"})
+							"countryBinding",
+							"properties"})
 public class GeoLocator implements MetaData, Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 7302870279072305100L;
 
@@ -35,6 +42,10 @@ public class GeoLocator implements MetaData, Disableable, Invisible, FormItemWid
 	private String countryBinding;
 	private String disabledConditionName;
 	private String invisibleConditionName;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -146,5 +157,10 @@ public class GeoLocator implements MetaData, Disableable, Invisible, FormItemWid
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

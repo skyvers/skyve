@@ -2,14 +2,18 @@ package org.skyve.impl.metadata.view.widget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -32,7 +36,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"visibleConditionName",
 							"disabledConditionName", 
 							"enabledConditionName",
-							"parameters"})
+							"parameters",
+							"properties"})
 public class DialogButton implements MetaData, Parameterizable, Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 4201233664827983726L;
 
@@ -45,6 +50,10 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	private String invisibleConditionName;
 	private String disabledConditionName;
 	private List<Parameter> parameters = new ArrayList<>();
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -159,5 +168,10 @@ public class DialogButton implements MetaData, Parameterizable, Disableable, Inv
 	@XmlAttribute(name = "enabled", required = false)
 	public void setEnabledConditionName(String enabledConditionName) {
 		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

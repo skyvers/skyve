@@ -2,14 +2,19 @@ package org.skyve.impl.metadata.view.widget.bound.input;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
@@ -24,7 +29,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.MembershipWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"changedActions", "membersHeading", "candidatesHeading", "listWidthInPixels"})
+			propOrder = {"changedActions", "membersHeading", "candidatesHeading", "listWidthInPixels", "properties"})
 public class ListMembership extends InputWidget implements MembershipWidget {
 	/**
 	 * For Serialization
@@ -36,6 +41,10 @@ public class ListMembership extends InputWidget implements MembershipWidget {
 	private String membersHeading = "Members";
 	private List<EventAction> changedActions = new ArrayList<>();
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "onChangedHandlers")
 	@XmlElementRefs({@XmlElementRef(type = RerenderEventAction.class), 
@@ -73,5 +82,10 @@ public class ListMembership extends InputWidget implements MembershipWidget {
 	@XmlAttribute(required = false)
 	public void setMembersHeading(String membersHeading) {
 		this.membersHeading = UtilImpl.processStringValue(membersHeading);
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

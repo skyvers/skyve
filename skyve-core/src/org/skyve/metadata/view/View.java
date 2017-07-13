@@ -6,13 +6,14 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 /**
  * 
  */
-public interface View extends MetaData, Parameterizable {
+public interface View extends MetaData, Parameterizable, DecoratedMetaData {
 	/**
 	 * 
 	 */

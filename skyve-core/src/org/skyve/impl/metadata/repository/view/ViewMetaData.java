@@ -2,20 +2,25 @@ package org.skyve.impl.metadata.repository.view;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.repository.PersistentMetaData;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Parameterizable;
@@ -35,8 +40,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"refreshTimeInSeconds",
 							"refreshConditionName", 
 							"refreshActionName",
-							"parameters"})
-public class ViewMetaData extends Container implements PersistentMetaData<View>, Parameterizable {
+							"parameters",
+							"properties"})
+public class ViewMetaData extends Container implements PersistentMetaData<View>, Parameterizable, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private ViewType type;
@@ -50,6 +56,10 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	private List<Parameter> parameters = new ArrayList<>();
 	private String documentation;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	public ViewType getType() {
 		return type;
 	}
@@ -232,7 +242,13 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 		}
 
 		result.setDocumentation(documentation);
-		
+		result.getProperties().putAll(properties);
+
 		return result;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

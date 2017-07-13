@@ -198,7 +198,11 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		p.delete(drivingDocument, bean);
 	}
 	
-	private void establishQueries() {
+	/**
+	 * For sub-classes to override to establish the internal queries, 
+	 * or call super.establishQueries() and manipulate the stanadard queries in some manner.
+	 */
+	protected void establishQueries() {
 		if (detailQuery == null) {
 			detailQuery = query.constructDocumentQuery(null, getSelectedTagId());
 		}
@@ -206,5 +210,19 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 			AggregateFunction summary = getSummary();
 			summaryQuery = query.constructDocumentQuery((summary == null) ? AggregateFunction.Count : summary, getSelectedTagId());
 		}
+	}
+	
+	/**
+	 * For Sub-classes to get hold of the internal detail query being used.
+	 */
+	protected DocumentQuery getDetailQuery() {
+		return detailQuery;
+	}
+	
+	/**
+	 * For Sub-classes to get hold of the internal summary query being used.
+	 */
+	protected DocumentQuery getSummaryQuery() {
+		return summaryQuery;
 	}
 }

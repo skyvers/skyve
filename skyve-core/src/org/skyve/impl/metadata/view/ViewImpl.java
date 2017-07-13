@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.impl.metadata.Container;
 import org.skyve.metadata.view.Action;
@@ -24,6 +26,7 @@ public class ViewImpl extends Container implements View {
 	private String refreshActionName;
 	private List<Parameter> parameters = new ArrayList<>();
 	private String documentation;
+	private Map<String, String> properties = new TreeMap<>();
 	
 	@Override
 	public String getRefreshConditionName() {
@@ -126,5 +129,10 @@ public class ViewImpl extends Container implements View {
 
 	public void setDocumentation(String documentation) {
 		this.documentation = documentation;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

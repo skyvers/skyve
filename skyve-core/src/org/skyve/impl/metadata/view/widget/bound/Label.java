@@ -1,10 +1,16 @@
 package org.skyve.impl.metadata.view.widget.bound;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
@@ -27,7 +33,8 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 						"pixelHeight", 
 						"invisibleConditionName", 
 						"visibleConditionName",
-						"formatted"})
+						"formatted",
+						"properties"})
 public class Label extends AbstractBound implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
 	private static final long serialVersionUID = -1713640318580531970L;
 
@@ -57,6 +64,10 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 */
 	private HorizontalAlignment textAlignment = null;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public boolean showsLabelByDefault() {
 		return false;
@@ -141,5 +152,10 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	@XmlAttribute(name = "textAlignment", required = false)
 	public void setTextAlignment(HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

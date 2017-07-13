@@ -1,9 +1,15 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
@@ -23,7 +29,8 @@ import org.skyve.metadata.MetaData;
 							"pixelWidth", 
 							"pixelHeight",
 							"minPixelHeight",
-							"maxPixelHeight"})
+							"maxPixelHeight",
+							"properties"})
 public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -2344473519207771461L;
 
@@ -32,6 +39,10 @@ public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, Co
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -89,5 +100,10 @@ public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, Co
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }
