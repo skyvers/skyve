@@ -23,7 +23,6 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.util.Util;
-import org.skyve.impl.util.UtilImpl;
 import org.xml.sax.SAXException;
 
 public class XMLMetaData {

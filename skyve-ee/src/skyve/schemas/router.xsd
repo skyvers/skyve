@@ -5,11 +5,14 @@
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
+  <xs:element name="route" type="tns:route"/>
+
   <xs:element name="router" type="tns:router"/>
 
   <xs:complexType name="route">
     <xs:sequence>
       <xs:element name="criteria" type="tns:routeCriteria" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="properties" type="ns2:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="outcome" type="xs:string" use="required"/>
   </xs:complexType>
@@ -37,7 +40,7 @@
     <xs:complexContent>
       <xs:extension base="ns2:namedMetaData">
         <xs:sequence>
-          <xs:element name="route" type="tns:route" form="qualified" maxOccurs="unbounded"/>
+          <xs:element ref="tns:route" maxOccurs="unbounded"/>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
