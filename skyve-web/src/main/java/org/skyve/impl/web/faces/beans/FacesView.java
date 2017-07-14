@@ -68,7 +68,7 @@ public class FacesView<T extends Bean> extends Harness {
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 
 	@PostConstruct
-	private void postConstruct() {
+	protected void postConstruct() {
 		this.uxui = (UxUi) FacesContext.getCurrentInstance().getExternalContext().getRequestMap().get(FacesUtil.UX_UI_KEY);
 	}
 	

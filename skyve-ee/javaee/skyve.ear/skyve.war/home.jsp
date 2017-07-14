@@ -115,7 +115,7 @@
 		if (WebAction.e.equals(webAction)) { // editing
 			criteria.setViewType((i == null) ? ViewType.create : ViewType.edit);
 		}
-		String outcomeUrl = router.getOutcomeUrl(uxui.getName(), criteria);
+		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
 		if (outcomeUrl == null) {
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
 		}

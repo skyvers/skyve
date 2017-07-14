@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/document" xmlns:tns="http://www.skyve.org/xml/document" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/document" xmlns:ns2="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/document" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -66,27 +66,6 @@
   <xs:element name="time" type="tns:time"/>
 
   <xs:element name="timestamp" type="tns:timestamp"/>
-
-  <xs:complexType name="bizKey">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="expression" type="xs:string"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-
-  <xs:complexType name="condition">
-    <xs:complexContent>
-      <xs:extension base="ns1:namedMetaData">
-        <xs:sequence>
-          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
-          <xs:element name="expression" type="xs:string" form="qualified"/>
-        </xs:sequence>
-        <xs:attribute name="usage" type="tns:usageType"/>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
 
   <xs:complexType name="document">
     <xs:complexContent>
@@ -174,6 +153,14 @@
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="databaseIndex" type="xs:boolean"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="bizKey">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="expression" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -577,6 +564,19 @@
     </xs:complexContent>
   </xs:complexType>
 
+  <xs:complexType name="condition">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="expression" type="xs:string" form="qualified"/>
+        </xs:sequence>
+        <xs:attribute name="usage" type="tns:usageType"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:complexType name="DocumentUniqueConstraint">
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
@@ -600,6 +600,56 @@
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
 
+  <xs:simpleType name="extensionStrategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="single"/>
+      <xs:enumeration value="joined"/>
+      <xs:enumeration value="mapped"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="textCase">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="upper"/>
+      <xs:enumeration value="lower"/>
+      <xs:enumeration value="capital"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="validatorType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="creditCard"/>
+      <xs:enumeration value="internetDomain"/>
+      <xs:enumeration value="ean13CheckDigit"/>
+      <xs:enumeration value="email"/>
+      <xs:enumeration value="ibanCheckDigit"/>
+      <xs:enumeration value="ipAddress"/>
+      <xs:enumeration value="ipv4Address"/>
+      <xs:enumeration value="isbnCheckDigit"/>
+      <xs:enumeration value="isinCheckDigit"/>
+      <xs:enumeration value="luhnCheckDigit"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="verhoeffCheckDigit"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="domainType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="constant"/>
+      <xs:enumeration value="variant"/>
+      <xs:enumeration value="dynamic"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="indexType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="database"/>
+      <xs:enumeration value="textual"/>
+      <xs:enumeration value="both"/>
+      <xs:enumeration value="none"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="usageType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="domain"/>
@@ -607,60 +657,10 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="extensionStrategy">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="joined"/>
-      <xs:enumeration value="single"/>
-      <xs:enumeration value="mapped"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="textCase">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="capital"/>
-      <xs:enumeration value="lower"/>
-      <xs:enumeration value="upper"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="validatorType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="email"/>
-      <xs:enumeration value="luhnCheckDigit"/>
-      <xs:enumeration value="verhoeffCheckDigit"/>
-      <xs:enumeration value="creditCard"/>
-      <xs:enumeration value="isinCheckDigit"/>
-      <xs:enumeration value="internetDomain"/>
-      <xs:enumeration value="ean13CheckDigit"/>
-      <xs:enumeration value="ipAddress"/>
-      <xs:enumeration value="ipv4Address"/>
-      <xs:enumeration value="ibanCheckDigit"/>
-      <xs:enumeration value="url"/>
-      <xs:enumeration value="isbnCheckDigit"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="domainType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="variant"/>
-      <xs:enumeration value="constant"/>
-      <xs:enumeration value="dynamic"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="indexType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="both"/>
-      <xs:enumeration value="database"/>
-      <xs:enumeration value="none"/>
-      <xs:enumeration value="textual"/>
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:simpleType name="associationType">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="aggregation"/>
       <xs:enumeration value="composition"/>
+      <xs:enumeration value="aggregation"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -674,10 +674,10 @@
 
   <xs:simpleType name="documentScope">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="dataGroup"/>
-      <xs:enumeration value="user"/>
       <xs:enumeration value="global"/>
       <xs:enumeration value="customer"/>
+      <xs:enumeration value="dataGroup"/>
+      <xs:enumeration value="user"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

@@ -1,12 +1,19 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 
@@ -22,8 +29,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 							"pixelHeight",
 							"percentageHeight",
 							"minPixelHeight",
-							"maxPixelHeight"})
-public class Comparison extends InputWidget implements Editable, RelativeSize {
+							"maxPixelHeight",
+							"properties"})
+public class Comparison extends InputWidget implements DecoratedMetaData, Editable, RelativeSize {
 	private static final long serialVersionUID = -8947146232520711674L;
 	
 	private String modelName;
@@ -39,6 +47,10 @@ public class Comparison extends InputWidget implements Editable, RelativeSize {
 	private Integer percentageHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public String getModelName() {
 		return modelName;
@@ -157,5 +169,10 @@ public class Comparison extends InputWidget implements Editable, RelativeSize {
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

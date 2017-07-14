@@ -1,10 +1,16 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
@@ -25,7 +31,8 @@ import org.skyve.metadata.view.Invisible;
 						"minPixelHeight", 
 						"maxPixelHeight", 
 						"invisibleConditionName",
-						"visibleConditionName"})
+						"visibleConditionName",
+						"properties"})
 public class StaticImage implements MetaData, RelativeSize, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 314857374179338882L;
 
@@ -43,6 +50,10 @@ public class StaticImage implements MetaData, RelativeSize, Invisible, FormItemW
 	private Integer maxPixelHeight;
 	
 	private String invisibleConditionName;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -178,5 +189,10 @@ public class StaticImage implements MetaData, RelativeSize, Invisible, FormItemW
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

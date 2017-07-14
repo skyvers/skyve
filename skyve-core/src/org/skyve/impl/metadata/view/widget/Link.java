@@ -1,13 +1,18 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.reference.ActionReference;
@@ -36,7 +41,8 @@ import org.skyve.metadata.view.Invisible;
 							"value",
 							"pixelWidth",
 							"invisibleConditionName",
-							"visibleConditionName"})
+							"visibleConditionName",
+							"properties"})
 public class Link implements MetaData, Invisible, AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = 2694545058785836920L;
 
@@ -47,6 +53,10 @@ public class Link implements MetaData, Invisible, AbsoluteWidth, FormItemWidget 
 	
 	private String invisibleConditionName;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public boolean showsLabelByDefault() {
 		return false;
@@ -119,5 +129,10 @@ public class Link implements MetaData, Invisible, AbsoluteWidth, FormItemWidget 
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

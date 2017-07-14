@@ -1,11 +1,17 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
@@ -28,6 +34,8 @@ import org.skyve.metadata.view.Invisible;
 							"textAlignment",
 							"invisibleConditionName",
 							"visibleConditionName"})
+							//"properties"})
+// Blurb markup value cant be an XML value and have properties.
 public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
 	private static final long serialVersionUID = -1234525506006033853L;
 
@@ -46,6 +54,10 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 	 */
 	private HorizontalAlignment textAlignment = null;
 	
+//	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+//	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public boolean showsLabelByDefault() {
 		return false;
@@ -112,5 +124,10 @@ public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifie
 	@XmlAttribute(name = "textAlignment", required = false)
 	public void setTextAlignment(HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
+	}
+	
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -11,8 +13,10 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.event.Editable;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -25,6 +29,7 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Filterable;
@@ -74,8 +79,10 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 							"editedActions",
 							"removedActions",
 							"selectedActions",
-							"parameters"})
+							"parameters",
+							"properties"})
 public class ListGrid implements MetaData,
+									DecoratedMetaData,
 									RelativeSize,
 									Disableable,
 									Invisible,
@@ -130,6 +137,10 @@ public class ListGrid implements MetaData,
 
 	private List<FilterParameter> parameters = new ArrayList<>();
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	public String getQueryName() {
 		return queryName;
 	}
@@ -559,5 +570,10 @@ public class ListGrid implements MetaData,
 	@XmlTransient
 	public String getSource() {
 		return (queryName == null) ? modelName : queryName;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

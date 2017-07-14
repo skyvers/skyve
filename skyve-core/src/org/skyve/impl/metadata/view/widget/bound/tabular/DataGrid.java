@@ -2,15 +2,20 @@ package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.EventAction;
@@ -22,6 +27,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
@@ -56,8 +62,10 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 							"addedActions",
 							"editedActions",
 							"removedActions",
-							"selectedActions"})
-public class DataGrid extends TabularWidget implements Identifiable,
+							"selectedActions",
+							"properties"})
+public class DataGrid extends TabularWidget implements DecoratedMetaData,
+														Identifiable,
 														Disableable,
 														Editable,
 														DisableableCRUDGrid, 
@@ -65,9 +73,6 @@ public class DataGrid extends TabularWidget implements Identifiable,
 														org.skyve.impl.metadata.view.event.Editable,
 														Removable,
 														Selectable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 5341133860997684429L;
 
 	private String widgetId;
@@ -99,6 +104,10 @@ public class DataGrid extends TabularWidget implements Identifiable,
 	private List<EventAction> editedActions = new ArrayList<>();
 	private List<EventAction> removedActions = new ArrayList<>();
 	private List<EventAction> selectedActions = new ArrayList<>();
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getWidgetId() {
@@ -355,5 +364,10 @@ public class DataGrid extends TabularWidget implements Identifiable,
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
 	public List<EventAction> getSelectedActions() {
 		return selectedActions;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

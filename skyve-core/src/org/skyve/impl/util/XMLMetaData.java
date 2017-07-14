@@ -6,13 +6,17 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -23,7 +27,6 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.util.Util;
-import org.skyve.impl.util.UtilImpl;
 import org.xml.sax.SAXException;
 
 public class XMLMetaData {
@@ -50,6 +53,7 @@ public class XMLMetaData {
 	private static final Schema VIEW_SCHEMA;
 
 	static {
+UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/pirsa/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
 		try {
 			ROUTER_CONTEXT = JAXBContext.newInstance(Router.class);
 			ROUTER_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/router.xsd");
@@ -270,5 +274,43 @@ public class XMLMetaData {
 			// this can only happen if there's a deployment error and the resource is missing.
 			throw new JAXBException("Could not find XML Schema for " + schemaFileName, se);
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
+															ModuleMetaData.class,
+															DocumentMetaData.class,
+															ViewMetaData.class,
+															Router.class);
+		jaxbContext.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+				File file = null;
+				if (namespaceUri.endsWith("/common")) {
+					file = new File("common.xsd");
+				}
+				else if (namespaceUri.endsWith("/customer")) {
+					file = new File("customer.xsd");
+				}
+				else if (namespaceUri.endsWith("/module")) {
+					file = new File("module.xsd");
+				}
+				else if (namespaceUri.endsWith("/document")) {
+					file = new File("document.xsd");
+				}
+				else if (namespaceUri.endsWith("/view")) {
+					file = new File("view.xsd");
+				}
+				else if (namespaceUri.endsWith("/router")) {
+					file = new File("router.xsd");
+				}
+				else {
+					throw new IllegalArgumentException(namespaceUri + " not catered for");
+				}
+		        StreamResult result = new StreamResult(file);
+		        result.setSystemId(file.toURI().toURL().toString());
+		        return result;
+			}
+		});
 	}
 }

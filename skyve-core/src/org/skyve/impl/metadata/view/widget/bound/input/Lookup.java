@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.widget.bound.input;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -10,8 +12,10 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.Editable;
@@ -43,7 +47,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.InputWidget;
 							"clearedActions",
 							"editedActions",
 							"addedActions",
-							"parameters"})
+							"parameters",
+							"properties"})
 public class Lookup extends InputWidget implements Filterable, Addable, Editable, FormItemWidget {
 	private static final long serialVersionUID = 7742358399386599267L;
 
@@ -61,6 +66,10 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 
 	private List<FilterParameter> parameters = new ArrayList<>();
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	@Override
 	public boolean showsLabelByDefault() {
 		return false;
@@ -200,5 +209,10 @@ public class Lookup extends InputWidget implements Filterable, Addable, Editable
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
 	public List<EventAction> getAddedActions() {
 		return addedActions;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

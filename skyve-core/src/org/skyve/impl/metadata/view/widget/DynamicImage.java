@@ -2,18 +2,23 @@ package org.skyve.impl.metadata.view.widget;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
@@ -35,8 +40,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"maxPixelHeight", 
 							"invisibleConditionName",
 							"visibleConditionName",
-							"parameters"})
-public class DynamicImage implements MetaData, RelativeSize, Invisible, Parameterizable {
+							"parameters",
+							"properties"})
+public class DynamicImage implements MetaData, DecoratedMetaData, RelativeSize, Invisible, Parameterizable {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String name;
@@ -58,6 +64,10 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	private String invisibleConditionName;
 	
 	private List<Parameter> parameters = new ArrayList<>();
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	public String getName() {
 		return name;
@@ -216,5 +226,10 @@ public class DynamicImage implements MetaData, RelativeSize, Invisible, Paramete
 	@XmlAttribute(required = false)
 	public void setMaxPixelHeight(Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

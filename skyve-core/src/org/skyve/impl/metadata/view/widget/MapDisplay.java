@@ -1,13 +1,20 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
@@ -27,8 +34,9 @@ import org.skyve.metadata.view.Invisible;
 							"minPixelHeight", 
 							"maxPixelHeight", 
 							"invisibleConditionName",
-							"visibleConditionName"})
-public class MapDisplay implements MetaData, RelativeSize, Invisible {
+							"visibleConditionName",
+							"properties"})
+public class MapDisplay implements MetaData, DecoratedMetaData, RelativeSize, Invisible {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String modelName;
@@ -48,6 +56,10 @@ public class MapDisplay implements MetaData, RelativeSize, Invisible {
 	
 	private String invisibleConditionName;
 	
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
+
 	public String getModelName() {
 		return modelName;
 	}
@@ -195,5 +207,10 @@ public class MapDisplay implements MetaData, RelativeSize, Invisible {
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

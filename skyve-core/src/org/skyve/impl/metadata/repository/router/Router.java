@@ -49,16 +49,21 @@ public class Router implements MetaData, PersistentMetaData<Router> {
 		return uxuis;
 	}
 
-	public String getOutcomeUrl(String uxui, RouteCriteria criteria) {
+	public String selectOutcomeUrl(String uxui, RouteCriteria criteria) {
+		Route route = selectRoute(uxui, criteria);
+		return (route == null) ? null : route.getOutcomeUrl();
+	}
+	
+	public Route selectRoute(String uxui, RouteCriteria criteria) {
 		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
 		for (Route route : selectedUxUi.getRoutes()) {
 			List<RouteCriteria> routeCriteria = route.getCriteria();
 			if (routeCriteria.isEmpty()) { // if no criteria defined then its a match
-				return route.getOutcomeUrl();
+				return route;
 			}
 			for (RouteCriteria routeCriterium : routeCriteria) {
 				if (routeCriterium.matches(criteria)) {
-					return route.getOutcomeUrl();
+					return route;
 				}
 			}
 		}
