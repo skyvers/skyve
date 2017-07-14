@@ -8,8 +8,6 @@ import modules.test.domain.AnyBase;
 import org.skyve.CORE;
 
 /**
- * AnyDerived1
- * <br/>
  * A document that extends AnyBase.
  * 
  * @stereotype "persistent"

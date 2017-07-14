@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * Data Group
+ * DataGroup
  * 
  * @stereotype "persistent"
  */

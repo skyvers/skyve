@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
 import modules.admin.util.CommunicationFactory;
+import modules.admin.util.CommunicationFactoryExtension;
 import util.AbstractDomainTest;
 
 /**
@@ -13,7 +14,7 @@ public class CommunicationTest extends AbstractDomainTest<Communication> {
 
 	@Override
 	public void setUp() throws Exception {
-		factory = new CommunicationFactory();
+		factory = new CommunicationFactoryExtension();
 	}
 
 	@Override

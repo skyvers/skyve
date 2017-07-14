@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * My Status
+ * MyStatus
  * 
  * @navhas n myStaff 0..1 Staff
  * @stereotype "transient"
@@ -77,38 +77,24 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * My Staff exists
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isExists() {
 		return (getMyStaff()!=null);
 	}
 
-	/**	 * {@link #isExists} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotExists() {
 		return (! isExists());
 	}
 
 	/**
 	 * Is a Staff Member
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isStaffMember() {
 		return (isUserInRole("whosinIntegrate","StaffMember"));
 	}
 
-	/**	 * {@link #isStaffMember} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotStaffMember() {
 		return (! isStaffMember());
 	}

@@ -11,8 +11,6 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 
 /**
- * Office
- * <br/>
  * An official location where staff operate.
  * 
  * @stereotype "persistent"
@@ -234,8 +232,6 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * Created
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	@Override
@@ -243,11 +239,6 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 		return (isPersisted());
 	}
 
-	/**	 * {@link #isCreated} negation.
-
-	 * @return	The negated condition
-
-	 */
 	@Override
 	public boolean isNotCreated() {
 		return (! isCreated());
@@ -255,19 +246,12 @@ return modules.whosinIntegrate.Office.OfficeBizlet.bizKey(this);
 
 	/**
 	 * Manager
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));
 	}
 
-	/**	 * {@link #isManager} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotManager() {
 		return (! isManager());
 	}

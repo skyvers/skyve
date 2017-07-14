@@ -8,8 +8,6 @@ import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyE
 import org.skyve.CORE;
 
 /**
- * Mapped Subclassed Single Strategy
- * <br/>
  * Another Extension document to test that the generated class extends 
 			MappedExtensionExtension.java
  * 

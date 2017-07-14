@@ -22,8 +22,6 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
- * Staff
- * <br/>
  * Someone who works for this organisation
  * 
  * @depend - - - Status

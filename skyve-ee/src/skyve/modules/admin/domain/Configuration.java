@@ -13,7 +13,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
- * Setup
+ * Configuration
  * 
  * @depend - - - PasswordComplexityModel
  * @stereotype "persistent"
