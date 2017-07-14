@@ -14,16 +14,16 @@ public class IntersectTagTest extends AbstractActionTest<Tag, IntersectTag> {
 	private TagFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TagFactoryExtension();
-	}
-
-	@Override
 	protected IntersectTag getAction() {
 		return new IntersectTag();
 	}
+
 	@Override
 	protected Tag getBean() throws Exception {
+		if (factory == null) {
+			factory = new TagFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

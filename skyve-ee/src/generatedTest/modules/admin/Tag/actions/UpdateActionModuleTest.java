@@ -14,16 +14,16 @@ public class UpdateActionModuleTest extends AbstractActionTest<Tag, UpdateAction
 	private TagFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TagFactoryExtension();
-	}
-
-	@Override
 	protected UpdateActionModule getAction() {
 		return new UpdateActionModule();
 	}
+
 	@Override
 	protected Tag getBean() throws Exception {
+		if (factory == null) {
+			factory = new TagFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

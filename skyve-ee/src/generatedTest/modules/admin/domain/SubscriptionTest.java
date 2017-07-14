@@ -13,12 +13,11 @@ public class SubscriptionTest extends AbstractDomainTest<Subscription> {
 	private SubscriptionFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new SubscriptionFactoryExtension();
-	}
-
-	@Override
 	protected Subscription getBean() throws Exception {
+		if (factory == null) {
+			factory = new SubscriptionFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

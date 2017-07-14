@@ -1986,10 +1986,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		Set<String> imports = new TreeSet<>();
 
-		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add("util.AbstractActionTest");
 
-		// imports.add(String.format("%s.%s", actionPath, actionName));
+		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add(String.format("%s.%s", domainPath, documentName));
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
@@ -2022,19 +2021,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n");
 
 		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("public void setUp() throws Exception {");
-		fw.append("\n\t\t").append("factory = new ").append(documentName).append("Factory")
-				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
-		fw.append("\n\t}");
-		fw.append("\n");
-
-		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
 		fw.append("\n\t\t").append("return new ").append(actionName).append("();");
 		fw.append("\n\t").append("}");
 
+		fw.append("\n");
 		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		fw.append("\n\t\tif (factory == null) {");
+		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
+				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
+		fw.append("\n\t\t}");
+		fw.append("\n");
 		fw.append("\n\t\t").append("return factory.getInstance();");
 		fw.append("\n\t").append("}");
 
@@ -2081,14 +2079,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n");
 
 		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("public void setUp() throws Exception {");
-		fw.append("\n\t\t").append("factory = new ").append(documentName).append("Factory")
-				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
-		fw.append("\n\t}");
-		fw.append("\n");
-
-		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		fw.append("\n\t\tif (factory == null) {");
+		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
+				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
+		fw.append("\n\t\t}");
+		fw.append("\n");
 		fw.append("\n\t\t").append("return factory.getInstance();");
 		fw.append("\n\t").append("}");
 

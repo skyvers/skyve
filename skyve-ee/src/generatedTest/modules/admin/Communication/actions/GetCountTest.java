@@ -14,16 +14,16 @@ public class GetCountTest extends AbstractActionTest<Communication, GetCount> {
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected GetCount getAction() {
 		return new GetCount();
 	}
+
 	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

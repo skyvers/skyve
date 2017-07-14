@@ -13,12 +13,11 @@ public class CommunicationTest extends AbstractDomainTest<Communication> {
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

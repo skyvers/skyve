@@ -14,16 +14,16 @@ public class BackTest extends AbstractActionTest<User, Back> {
 	private UserFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserFactoryExtension();
-	}
-
-	@Override
 	protected Back getAction() {
 		return new Back();
 	}
+
 	@Override
 	protected User getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

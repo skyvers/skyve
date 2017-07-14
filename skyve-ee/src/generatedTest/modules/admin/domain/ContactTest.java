@@ -12,12 +12,11 @@ public class ContactTest extends AbstractDomainTest<Contact> {
 	private ContactFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new ContactFactory();
-	}
-
-	@Override
 	protected Contact getBean() throws Exception {
+		if (factory == null) {
+			factory = new ContactFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

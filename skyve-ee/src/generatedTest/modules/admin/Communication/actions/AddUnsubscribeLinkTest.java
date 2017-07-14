@@ -14,16 +14,16 @@ public class AddUnsubscribeLinkTest extends AbstractActionTest<Communication, Ad
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected AddUnsubscribeLink getAction() {
 		return new AddUnsubscribeLink();
 	}
+
 	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

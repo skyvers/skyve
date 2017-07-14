@@ -12,12 +12,11 @@ public class GroupTest extends AbstractDomainTest<Group> {
 	private GroupFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new GroupFactory();
-	}
-
-	@Override
 	protected Group getBean() throws Exception {
+		if (factory == null) {
+			factory = new GroupFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

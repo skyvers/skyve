@@ -12,12 +12,11 @@ public class TaggedTest extends AbstractDomainTest<Tagged> {
 	private TaggedFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TaggedFactory();
-	}
-
-	@Override
 	protected Tagged getBean() throws Exception {
+		if (factory == null) {
+			factory = new TaggedFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

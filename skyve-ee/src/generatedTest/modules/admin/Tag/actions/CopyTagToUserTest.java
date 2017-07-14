@@ -14,16 +14,16 @@ public class CopyTagToUserTest extends AbstractActionTest<Tag, CopyTagToUser> {
 	private TagFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TagFactoryExtension();
-	}
-
-	@Override
 	protected CopyTagToUser getAction() {
 		return new CopyTagToUser();
 	}
+
 	@Override
 	protected Tag getBean() throws Exception {
+		if (factory == null) {
+			factory = new TagFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

@@ -12,12 +12,11 @@ public class JobTest extends AbstractDomainTest<Job> {
 	private JobFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new JobFactory();
-	}
-
-	@Override
 	protected Job getBean() throws Exception {
+		if (factory == null) {
+			factory = new JobFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

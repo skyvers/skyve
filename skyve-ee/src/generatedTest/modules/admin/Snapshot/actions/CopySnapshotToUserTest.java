@@ -13,16 +13,16 @@ public class CopySnapshotToUserTest extends AbstractActionTest<Snapshot, CopySna
 	private SnapshotFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new SnapshotFactory();
-	}
-
-	@Override
 	protected CopySnapshotToUser getAction() {
 		return new CopySnapshotToUser();
 	}
+
 	@Override
 	protected Snapshot getBean() throws Exception {
+		if (factory == null) {
+			factory = new SnapshotFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

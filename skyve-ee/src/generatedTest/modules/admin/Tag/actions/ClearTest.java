@@ -14,16 +14,16 @@ public class ClearTest extends AbstractActionTest<Tag, Clear> {
 	private TagFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TagFactoryExtension();
-	}
-
-	@Override
 	protected Clear getAction() {
 		return new Clear();
 	}
+
 	@Override
 	protected Tag getBean() throws Exception {
+		if (factory == null) {
+			factory = new TagFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

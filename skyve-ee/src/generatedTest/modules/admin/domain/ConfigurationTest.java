@@ -12,12 +12,11 @@ public class ConfigurationTest extends AbstractDomainTest<Configuration> {
 	private ConfigurationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new ConfigurationFactory();
-	}
-
-	@Override
 	protected Configuration getBean() throws Exception {
+		if (factory == null) {
+			factory = new ConfigurationFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

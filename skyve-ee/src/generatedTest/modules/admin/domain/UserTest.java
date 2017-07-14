@@ -13,12 +13,11 @@ public class UserTest extends AbstractDomainTest<User> {
 	private UserFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserFactoryExtension();
-	}
-
-	@Override
 	protected User getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

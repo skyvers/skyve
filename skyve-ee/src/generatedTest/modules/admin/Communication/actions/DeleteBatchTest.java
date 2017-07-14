@@ -14,16 +14,16 @@ public class DeleteBatchTest extends AbstractActionTest<Communication, DeleteBat
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected DeleteBatch getAction() {
 		return new DeleteBatch();
 	}
+
 	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

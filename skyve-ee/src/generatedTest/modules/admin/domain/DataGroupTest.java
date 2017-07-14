@@ -12,12 +12,11 @@ public class DataGroupTest extends AbstractDomainTest<DataGroup> {
 	private DataGroupFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new DataGroupFactory();
-	}
-
-	@Override
 	protected DataGroup getBean() throws Exception {
+		if (factory == null) {
+			factory = new DataGroupFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

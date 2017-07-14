@@ -12,12 +12,11 @@ public class UserLoginRecordTest extends AbstractDomainTest<UserLoginRecord> {
 	private UserLoginRecordFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserLoginRecordFactory();
-	}
-
-	@Override
 	protected UserLoginRecord getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserLoginRecordFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

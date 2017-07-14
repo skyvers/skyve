@@ -14,16 +14,16 @@ public class NewTest extends AbstractActionTest<User, New> {
 	private UserFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserFactoryExtension();
-	}
-
-	@Override
 	protected New getAction() {
 		return new New();
 	}
+
 	@Override
 	protected User getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

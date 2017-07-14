@@ -14,16 +14,16 @@ public class GenerateUniqueUserNameTest extends AbstractActionTest<User, Generat
 	private UserFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserFactoryExtension();
-	}
-
-	@Override
 	protected GenerateUniqueUserName getAction() {
 		return new GenerateUniqueUserName();
 	}
+
 	@Override
 	protected User getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

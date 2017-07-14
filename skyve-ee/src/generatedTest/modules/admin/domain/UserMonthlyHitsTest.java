@@ -12,12 +12,11 @@ public class UserMonthlyHitsTest extends AbstractDomainTest<UserMonthlyHits> {
 	private UserMonthlyHitsFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new UserMonthlyHitsFactory();
-	}
-
-	@Override
 	protected UserMonthlyHits getBean() throws Exception {
+		if (factory == null) {
+			factory = new UserMonthlyHitsFactory();
+		}
+
 		return factory.getInstance();
 	}
 }

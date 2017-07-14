@@ -13,12 +13,11 @@ public class DocumentNumberTest extends AbstractDomainTest<DocumentNumber> {
 	private DocumentNumberFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new DocumentNumberFactoryExtension();
-	}
-
-	@Override
 	protected DocumentNumber getBean() throws Exception {
+		if (factory == null) {
+			factory = new DocumentNumberFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

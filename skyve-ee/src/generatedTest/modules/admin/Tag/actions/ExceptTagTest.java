@@ -14,16 +14,16 @@ public class ExceptTagTest extends AbstractActionTest<Tag, ExceptTag> {
 	private TagFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new TagFactoryExtension();
-	}
-
-	@Override
 	protected ExceptTag getAction() {
 		return new ExceptTag();
 	}
+
 	@Override
 	protected Tag getBean() throws Exception {
+		if (factory == null) {
+			factory = new TagFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

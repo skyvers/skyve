@@ -14,16 +14,16 @@ public class BatchSelectedTest extends AbstractActionTest<Communication, BatchSe
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected BatchSelected getAction() {
 		return new BatchSelected();
 	}
+
 	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

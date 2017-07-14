@@ -13,12 +13,11 @@ public class AuditTest extends AbstractDomainTest<Audit> {
 	private AuditFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new AuditFactoryExtension();
-	}
-
-	@Override
 	protected Audit getBean() throws Exception {
+		if (factory == null) {
+			factory = new AuditFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

@@ -14,16 +14,16 @@ public class UpdateModuleTest extends AbstractActionTest<Communication, UpdateMo
 	private CommunicationFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new CommunicationFactoryExtension();
-	}
-
-	@Override
 	protected UpdateModule getAction() {
 		return new UpdateModule();
 	}
+
 	@Override
 	protected Communication getBean() throws Exception {
+		if (factory == null) {
+			factory = new CommunicationFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

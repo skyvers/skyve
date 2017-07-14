@@ -14,16 +14,16 @@ public class SourceVersionChangedTest extends AbstractActionTest<Audit, SourceVe
 	private AuditFactory factory;
 
 	@Override
-	public void setUp() throws Exception {
-		factory = new AuditFactoryExtension();
-	}
-
-	@Override
 	protected SourceVersionChanged getAction() {
 		return new SourceVersionChanged();
 	}
+
 	@Override
 	protected Audit getBean() throws Exception {
+		if (factory == null) {
+			factory = new AuditFactoryExtension();
+		}
+
 		return factory.getInstance();
 	}
 }

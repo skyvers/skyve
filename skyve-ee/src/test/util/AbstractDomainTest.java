@@ -5,7 +5,6 @@ import static org.junit.Assert.assertThat;
 
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
@@ -19,9 +18,6 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
-
-	@Before
-	public abstract void setUp() throws Exception;
 
 	protected abstract T getBean() throws Exception;
 
