@@ -1991,10 +1991,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add(String.format("%s.%s", domainPath, documentName));
 
-		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
+		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
+		boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
+
+		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder
 		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
 
 		// customise imports if this is not a base class
+		if (baseDocumentExtensionExists) {
+			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		}
 		if (baseDocumentExtensionFactoryExists) {
 			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
 		}
@@ -2012,7 +2018,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate class
 		fw.append("\n").append("public class ").append(actionName).append("Test");
-		fw.append(" extends AbstractActionTest<").append(documentName).append(", ").append(actionName).append("> {");
+		fw.append(" extends AbstractActionTest<").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(", ").append(actionName).append("> {");
 		fw.append("\n");
 
 		// generate test body
@@ -2027,7 +2034,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		fw.append("\n");
 		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		fw.append("\n\t").append("protected ").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(" getBean() throws Exception {");
 		fw.append("\n\t\tif (factory == null) {");
 		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
 				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
@@ -2112,6 +2120,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add("util.AbstractDomainFactory");
 
 		imports.add(String.format("%s.domain.%s", packagePath, documentName));
+
+		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
+		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + module.getName();
+		boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
+
+		// customise imports if this is not a base class
+		if (baseDocumentExtensionExists) {
+			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		}
 
 		// determine if this document has an associations or collections to add to the factory
 		for (Attribute attribute : getAllAttributes(document)) {
@@ -2221,13 +2238,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate getInstance method
 		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("public ").append(documentName).append(" getInstance() throws Exception {");
+		fw.append("\n\t").append("public ").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(" getInstance() throws Exception {");
 		fw.append("\n\t\t").append("Customer customer = CORE.getUser().getCustomer();");
 		fw.append("\n\t\t").append("Module module = customer.getModule(").append(documentName).append(".MODULE_NAME);");
 		fw.append("\n\t\t").append("Document document = module.getDocument(customer, ").append(documentName)
 				.append(".DOCUMENT_NAME);");
 		fw.append("\n");
-		fw.append("\n\t\t").append(documentName).append(" ").append(variableName)
+		fw.append("\n\t\t").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "").append(" ")
+				.append(variableName)
 				.append(" = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);");
 		// add any associations and collections
 		fw.append(associations);
@@ -2868,12 +2887,31 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
+	 * Checks if a domain extension class exists for the given document name in the specified package
+	 * and module path.
+	 * 
+	 * @param packagePathPrefix The package path prefix, e.g.
+	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param documentName The name of the document, e.g. Audit
+	 * @return true if the extension class exists in the expected location, false otherwise
+	 */
+	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
+		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/'
+				+ documentName + "Extension.java";
+		if (new File(extensionPath).exists()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Checks if a factory extension class exists for the given document name
 	 * in the specified module path.
 	 * 
-	 * @param modulePath the path to the modules; e.g. modules.admin
-	 * @param documentName The name of the document; e.g. Admin
-	 * @return true if the file exists in that location, false otherwise
+	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param documentName The name of the document; e.g. Audit
+	 * @return true if the factory extension class exists in the location, false otherwise
 	 */
 	private static boolean factoryExtensionClassExists(String modulePath, String documentName) {
 		boolean baseDocumentExtensionFactoryExists = false;
