@@ -3,6 +3,8 @@ package org.skyve.impl.generate;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1936,23 +1938,40 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		for (String actionName : document.getDefinedActionNames()) {
-			boolean skipGeneration = false;
+			boolean skipGeneration = false, useExtensionDocument = false;
 
 			// check this is a ServerSideAction
 			String className = actionTestPath.getPath().replaceAll("\\\\|\\/", ".")
 					.replace(GENERATED_TEST_PATH.replaceAll("\\\\|\\/", "."), "") + "."
 					+ actionName;
 
+			// check if this is a server side action, all other types are ignored
 			try {
 				Class<?> c = Class.forName(className);
 				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
 					// System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
 					continue;
 				}
+
+				// get the document type for this action, the base class or an extension
+				Type[] t = c.getGenericInterfaces();
+				for (Type type : t) {
+					if (type instanceof ParameterizedType) {
+						Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+						for (Type param : actualTypeArguments) {
+							// if the generic type for this server side action is the extension class, use that
+							if (param.getTypeName().endsWith(documentName + "Extension")) {
+								useExtensionDocument = true;
+								break;
+							}
+						}
+					}
+				}
 			} catch (Exception e) {
 				System.err.println("Could not find action class for: " + e.getMessage());
 			}
 
+			// check if there is a factory extension annotation which skips this test
 			if (annotation != null) {
 				// skip if all actions are excluded for this document
 				// System.out.println("Found annotation for class " + className + " with value " + annotation.testAction());
@@ -1985,7 +2004,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				try (FileWriter fw = new FileWriter(actionFile)) {
 					generateActionTest(fw, modulePath, actionPath.replaceAll("\\\\|\\/", "."),
 							packagePath.replaceAll("\\\\|\\/", "."),
-							documentName, actionName);
+							documentName, actionName, useExtensionDocument);
 				}
 			} else {
 				System.out.println(String.format("Skipping action test generation for %s.%s",
@@ -1995,9 +2014,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	private static void generateActionTest(FileWriter fw, String modulePath, String actionPath, String domainPath,
-			String documentName,
-			String actionName)
-			throws IOException {
+			String documentName, String actionName, boolean useExtensionDocument) throws IOException {
 		System.out.println("Generate action test class for " + actionPath + '.' + actionName);
 		fw.append("package ").append(actionPath).append(";\n\n");
 
@@ -2009,13 +2026,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add(String.format("%s.%s", domainPath, documentName));
 
 		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
-		boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
+		// boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder
 		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
 
 		// customise imports if this is not a base class
-		if (baseDocumentExtensionExists) {
+		if (useExtensionDocument) {
 			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		}
 		if (baseDocumentExtensionFactoryExists) {
@@ -2035,7 +2052,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// generate class
 		fw.append("\n").append("public class ").append(actionName).append("Test");
-		fw.append(" extends AbstractActionTest<").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+		fw.append(" extends AbstractActionTest<").append(documentName).append(useExtensionDocument ? "Extension" : "")
 				.append(", ").append(actionName).append("> {");
 		fw.append("\n");
 
@@ -2051,7 +2068,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		fw.append("\n");
 		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("protected ").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+		fw.append("\n\t").append("protected ").append(documentName).append(useExtensionDocument ? "Extension" : "")
 				.append(" getBean() throws Exception {");
 		fw.append("\n\t\tif (factory == null) {");
 		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
