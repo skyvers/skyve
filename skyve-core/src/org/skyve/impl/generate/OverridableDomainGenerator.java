@@ -438,10 +438,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							if (!skipGeneration) {
 								File testFile = new File(
 										domainTestPath.getPath() + File.separator + documentName + "Test.java");
-								domainTestPath.mkdirs();
-								testFile.createNewFile();
-								try (FileWriter fw = new FileWriter(testFile)) {
-									generateDomainTest(fw, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
+								// don't generate a test if the developer has created a domain test in this location in the test
+								// directory
+								if (testAlreadyExists(testFile)) {
+									System.out.println(
+											String.format("Skipping domain test generation for %s.%s, file already exists in %s",
+													packagePath.replaceAll("\\\\|\\/", "."), documentName, TEST_PATH));
+								} else {
+									// generate the domain test
+									domainTestPath.mkdirs();
+									testFile.createNewFile();
+									try (FileWriter fw = new FileWriter(testFile)) {
+										generateDomainTest(fw, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
+									}
 								}
 							} else {
 								System.out.println(String.format("Skipping domain test generation for %s.%s",
@@ -1127,7 +1136,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
-					
+
 					// Even though it would be better index wise to put the bizId column first
 					// This doesn't work - hibernate returns nulls for the association getter call.
 					// So sub-optimal but working if type column is first.
@@ -1937,7 +1946,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			try {
 				Class<?> c = Class.forName(className);
 				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
-					System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
+					// System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
 					continue;
 				}
 			} catch (Exception e) {
@@ -1963,6 +1972,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			if (!skipGeneration) {
 				File actionFile = new File(actionTestPath + File.separator + actionName + "Test.java");
+				// don't generate a test if the developer has created an action test in this location in the test directory
+				if (testAlreadyExists(actionFile)) {
+					System.out.println(String.format("Skipping action test generation for %s.%s, file already exists in %s",
+							actionPath.replaceAll("\\\\|\\/", "."), actionName, TEST_PATH));
+					continue;
+				}
+
+				// generate the action test
 				actionTestPath.mkdirs();
 				actionFile.createNewFile();
 				try (FileWriter fw = new FileWriter(actionFile)) {
@@ -2962,5 +2979,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		return variableName;
+	}
+
+	/**
+	 * Checks if a file in the TEST_PATH already exists for the test about
+	 * to be created in the GENERATED_TEST_PATH.
+	 * 
+	 * @param testToBeCreated The full file path to the test file about to be created
+	 * @return True if developer has already created a file with the name, false otherwise
+	 */
+	private static boolean testAlreadyExists(File testToBeCreated) {
+		File testFile = new File(testToBeCreated.getPath().replace("\\", "/").replace(
+				GENERATED_TEST_PATH.replace("\\", "/"),
+				TEST_PATH.replace("\\", "/")));
+		return testFile.exists();
 	}
 }
