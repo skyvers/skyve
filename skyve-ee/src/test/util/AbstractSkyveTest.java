@@ -18,6 +18,8 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
+import modules.test.domain.UniqueConstraintNonNullable;
+import modules.test.domain.UniqueConstraintNullable;
 
 public abstract class AbstractSkyveTest extends AbstractH2Test {
 
@@ -37,6 +39,8 @@ public abstract class AbstractSkyveTest extends AbstractH2Test {
 	protected Document messd;
 	protected Document msjsd;
 	protected Document msssd;
+	protected Document ucn;
+	protected Document ucnn;
 
 	@Override
 	public void beforeBase() {
@@ -58,5 +62,7 @@ public abstract class AbstractSkyveTest extends AbstractH2Test {
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);
 		msjsd = m.getDocument(c, MappedSubclassedJoinedStrategy.DOCUMENT_NAME);
 		msssd = m.getDocument(c, MappedSubclassedSingleStrategy.DOCUMENT_NAME);
+		ucn = m.getDocument(c, UniqueConstraintNullable.DOCUMENT_NAME);
+		ucnn = m.getDocument(c, UniqueConstraintNonNullable.DOCUMENT_NAME);
 	}
 }

@@ -43,7 +43,7 @@
 		<decimal5 name="decimal5" required="true">
 			<displayName>Decimal 5</displayName>
 		</decimal5>
-		<enum name="enum3">
+		<enum name="enum3" required="true">
 			<displayName>Enum 3</displayName>
 			<values>
 				<value code="one" />
