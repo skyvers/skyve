@@ -52,9 +52,9 @@ public class TestUtil {
 	 * @throws Exception
 	 */
 	public static <T extends Bean> T constructRandomInstance(User user,
-		Module module,
-		Document document,
-		int depth)
+			Module module,
+			Document document,
+			int depth)
 			throws Exception {
 		return TestUtil.constructRandomInstance(user, module, document, 1, depth);
 	}
@@ -68,6 +68,10 @@ public class TestUtil {
 	 */
 	@SuppressWarnings({ "unchecked", "boxing" })
 	public static <T extends PersistentBean> T updateAttribute(T bean, Attribute attribute) {
+		if (attribute == null) {
+			return bean;
+		}
+
 		final String name = attribute.getName();
 		final AttributeType type = attribute.getAttributeType();
 
@@ -139,10 +143,10 @@ public class TestUtil {
 
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
 	private static <T extends Bean> T constructRandomInstance(User user,
-		Module module,
-		Document document,
-		int currentDepth,
-		int maxDepth)
+			Module module,
+			Document document,
+			int currentDepth,
+			int maxDepth)
 			throws Exception {
 		T result = document.newInstance(user);
 

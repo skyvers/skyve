@@ -2023,10 +2023,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		imports.add("util.AbstractActionTest");
 
 		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
-		imports.add(String.format("%s.%s", domainPath, documentName));
-
-		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
-		// boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
 
 		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder
 		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
@@ -2034,6 +2030,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// customise imports if this is not a base class
 		if (useExtensionDocument) {
 			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		} else {
+			// import the domain class
+			imports.add(String.format("%s.%s", domainPath, documentName));
 		}
 		if (baseDocumentExtensionFactoryExists) {
 			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
@@ -2267,7 +2266,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate class
 		fw.append("\n").append("@SkyveFactory");
 		fw.append("\n").append("public class ").append(documentName).append("Factory");
-		fw.append(" extends AbstractDomainFactory<").append(documentName).append("> {");
+		fw.append(" extends AbstractDomainFactory<").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(" ").append("> {");
 		fw.append("\n");
 
 		// generate getInstance method
