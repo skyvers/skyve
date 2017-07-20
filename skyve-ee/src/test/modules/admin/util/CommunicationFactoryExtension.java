@@ -16,6 +16,7 @@ public class CommunicationFactoryExtension extends CommunicationFactory {
 		Communication comm = super.getInstance();
 
 		comm.setTag(new TagFactoryExtension().getInstance());
+		comm.setSystem(Boolean.FALSE);
 
 		return comm;
 	}

@@ -141,7 +141,7 @@ public class TestUtil {
 		return bean;
 	}
 
-	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
+	@SuppressWarnings({ "incomplete-switch", "boxing" }) // content type missing from switch statement
 	private static <T extends Bean> T constructRandomInstance(User user,
 			Module module,
 			Document document,
@@ -176,7 +176,7 @@ public class TestUtil {
 					}
 					break;
 				case bool:
-					BindUtil.set(result, name, Boolean.FALSE);
+					BindUtil.set(result, name, random.nextBoolean());
 					break;
 				case collection:
 					if (currentDepth < maxDepth) {
