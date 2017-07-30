@@ -15,7 +15,7 @@ public class CreateFiles implements ServerSideAction<Communication> {
 	private static final long serialVersionUID = 2886341074753936987L;
 
 	/**
-	 * Kick off the annual returns job.
+	 * Kick off the job to generate email files for bulk send.
 	 */
 	@Override
 	public ServerSideActionResult<Communication> execute(Communication communication, WebContext webContext) throws Exception {
