@@ -1960,7 +1960,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
 						for (Type param : actualTypeArguments) {
 							// if the generic type for this server side action is the extension class, use that
-							if (param.getTypeName().endsWith(documentName + "Extension")) {
+							// NB param.toString() can become param.getTypeName() from Java 8 onwards.
+							if (param.toString().endsWith(documentName + "Extension")) {
 								useExtensionDocument = true;
 								break;
 							}

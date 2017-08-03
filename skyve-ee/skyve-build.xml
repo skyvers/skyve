@@ -14,7 +14,6 @@
 		</fileset>
 
 		<!-- for generating xsds -->
-		<fileset dir="." includes="lib/jaxb-*.jar" />
 		<pathelement path="../skyve-core/src" />
 		<pathelement path="../skyve-tools/src" />
 		
@@ -155,27 +154,13 @@
 		</manifest>
 	</target>
 	
-	<taskdef name="schemagen" classname="com.sun.tools.jxc.SchemaGenTask">
-		<classpath refid="classpath" />
-	</taskdef>
-
 	<target name="buildXmlSchemas">
-		<schemagen destdir="src/skyve/schemas" includeantruntime="true" verbose="false" >
-			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/router" />
-			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/customer" />
-			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/module" />
-			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/document" />
-			<src path="../skyve-tools/src/org/skyve/impl/tools/test/wail/language" />
-			<src path="../skyve-core/src/org/skyve/impl/metadata/repository/view" />
+		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
 			<classpath refid="classpath" />
-			<schema namespace="http://www.skyve.org/xml/common" file="common.xsd" />
-			<schema namespace="http://www.skyve.org/xml/router" file="router.xsd" />
-			<schema namespace="http://www.skyve.org/xml/customer" file="customer.xsd" />
-			<schema namespace="http://www.skyve.org/xml/module" file="module.xsd" />
-			<schema namespace="http://www.skyve.org/xml/document" file="document.xsd" />
-			<schema namespace="http://www.skyve.org/xml/view" file="view.xsd" />
-			<schema namespace="http://www.skyve.org/xml/wail" file="wail.xsd" />
-		</schemagen>
+		</java>
+		<move todir="src/skyve/schemas" failonerror="true">
+			<fileset dir="." includes="*.xsd" />
+		</move>
 	</target>
 	
 	<property name="staging.dir" value="." />
