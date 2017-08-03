@@ -1,15 +1,15 @@
 package org.skyve.impl.tools.jasperreports;
 
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.query.JRQueryExecuter;
-
 import org.skyve.impl.jasperreports.SkyveDataSource;
-import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.TestUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.query.JRQueryExecuter;
 
 public class SkyveDocumentExecuter implements JRQueryExecuter {
 	private String moduleDotDocument;
@@ -41,7 +41,7 @@ public class SkyveDocumentExecuter implements JRQueryExecuter {
 			Module module = customer.getModule(moduleDotDocument.substring(0, dotIndex));
 			Document document = module.getDocument(customer, moduleDotDocument.substring(dotIndex + 1));
 			
-			return new SkyveDataSource(user, UtilImpl.constructRandomInstance(user, module, document, 5));
+			return new SkyveDataSource(user, TestUtil.constructRandomInstance(user, module, document, 5));
         }
         catch (Exception e) {
         	throw new JRException("Could not create a BizHubQueryDataSource for " + moduleDotDocument, e);

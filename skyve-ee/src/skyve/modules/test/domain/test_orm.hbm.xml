@@ -349,6 +349,50 @@
 			<filter name="testMappedExtensionJoinedStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
+	<class name="modules.test.domain.UniqueConstraintNonNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNonNullable">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="booleanFlag" />
+		<property name="enum3" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.UniqueConstraintNonNullable$Enum3</param>
+			</type>
+		</property>
+		<property name="text" length="255" />
+		<filter name="testUniqueConstraintNonNullableNoneFilter" condition="1=0"/>
+		<filter name="testUniqueConstraintNonNullableCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testUniqueConstraintNonNullableDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testUniqueConstraintNonNullableUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.UniqueConstraintNullable" table="TEST_UniqueConstraintNonNullable" entity-name="testUniqueConstraintNullable">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
+		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="booleanFlag" />
+		<property name="enum3" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.UniqueConstraintNullable$Enum3</param>
+			</type>
+		</property>
+		<property name="text" length="255" />
+		<filter name="testUniqueConstraintNullableNoneFilter" condition="1=0"/>
+		<filter name="testUniqueConstraintNullableCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testUniqueConstraintNullableDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testUniqueConstraintNullableUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<filter-def name="testAllAttributesInverseOneToOnePersistentNoneFilter" />
 	<filter-def name="testAllAttributesInverseOneToOnePersistentCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -447,6 +491,26 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionJoinedStrategyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNonNullableNoneFilter" />
+	<filter-def name="testUniqueConstraintNonNullableCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNonNullableDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNonNullableUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNullableNoneFilter" />
+	<filter-def name="testUniqueConstraintNullableCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNullableDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testUniqueConstraintNullableUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 </hibernate-mapping>

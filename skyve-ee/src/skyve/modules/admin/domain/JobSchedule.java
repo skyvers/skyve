@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
- * Job Schedule Entry
+ * JobSchedule
  * 
  * @navhas n runAs 1 User
  * @stereotype "persistent"

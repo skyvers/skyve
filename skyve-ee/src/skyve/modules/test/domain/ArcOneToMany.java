@@ -10,8 +10,6 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * ArcOneToMany
- * <br/>
  * A collection of arcs
  * 
  * @navhas n arcs 0..n AnyBase

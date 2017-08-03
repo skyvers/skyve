@@ -12,7 +12,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
- * User Login Record
+ * UserLoginRecord
  * 
  * @stereotype "persistent"
  */

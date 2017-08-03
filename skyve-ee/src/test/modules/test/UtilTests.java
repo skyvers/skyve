@@ -8,9 +8,9 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class UtilTests extends AbstractH2Test {
+public class UtilTests extends AbstractSkyveTest {
 	@Test
 	public void testPopulateFully() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 5);

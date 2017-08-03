@@ -11,8 +11,6 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 
 /**
- * Office
- * <br/>
  * An official location where staff operate.
  * 
  * @stereotype "persistent"

@@ -9,9 +9,9 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedExtensionSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class BeanValidatorTests extends AbstractH2Test {
+public class BeanValidatorTests extends AbstractSkyveTest {
 	@Test
 	public void testValidateBeanAgainstDocument() throws Exception {
 		MappedExtensionSingleStrategy test = Util.constructRandomInstance(u, m, messd, 2);

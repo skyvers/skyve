@@ -50,8 +50,11 @@
 		<java fork="true" classname="org.skyve.impl.generate.DomainGenerator">
 			<classpath refid="classpath" />
 			<arg value="src/skyve/" /> <!-- source path -->
+			<arg value="src/test/" /> <!-- test path -->
+			<arg value="src/generatedTest/" /> <!-- generated test path -->
 			<arg value="true" /> <!-- allow cascade merge -->
-			<arg value="debug!" />
+			<arg value="true" /> <!-- debug -->
+			<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
 		</java>
 	</target>
 

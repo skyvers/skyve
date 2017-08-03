@@ -18,7 +18,7 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
- * Data Maintenance
+ * DataMaintenance
  * 
  * @depend - - - Operation
  * @depend - - - RefreshOption
@@ -759,133 +759,84 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Attachment Selected
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isAttachmentSelected() {
 		return (contentLink != null);
 	}
 
-	/**	 * {@link #isAttachmentSelected} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotAttachmentSelected() {
 		return (! isAttachmentSelected());
 	}
 
 	/**
 	 * Current user is in the role "Audit Manager"
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isAuditManager() {
 		return (isUserInRole("admin","AuditManager"));
 	}
 
-	/**	 * {@link #isAuditManager} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotAuditManager() {
 		return (! isAuditManager());
 	}
 
 	/**
 	 * Backup Selected
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isBackupSelected() {
 		return (selectedBackupName != null);
 	}
 
-	/**	 * {@link #isBackupSelected} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotBackupSelected() {
 		return (! isBackupSelected());
 	}
 
 	/**
 	 * Refresh Backups
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isBackupsRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshBackups));
 	}
 
-	/**	 * {@link #isBackupsRefreshRequired} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotBackupsRefreshRequired() {
 		return (! isBackupsRefreshRequired());
 	}
 
 	/**
 	 * Content Refresh Required
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isContentRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshContent));
 	}
 
-	/**	 * {@link #isContentRefreshRequired} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotContentRefreshRequired() {
 		return (! isContentRefreshRequired());
 	}
 
 	/**
 	 * Content Selected
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isContentSelected() {
 		return (selectedContentId != null);
 	}
 
-	/**	 * {@link #isContentSelected} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotContentSelected() {
 		return (! isContentSelected());
 	}
 
 	/**
 	 * Truncation Job has commenced.
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isJobCommenced() {
 		return (auditResponse!=null);
 	}
 
-	/**	 * {@link #isJobCommenced} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotJobCommenced() {
 		return (! isJobCommenced());
 	}

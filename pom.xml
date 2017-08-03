@@ -61,6 +61,7 @@
 		<xercesImpl.version>2.8.1</xercesImpl.version>
 		<xmlbeans.version>2.6.0</xmlbeans.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
+		<generex.version>1.0.2</generex.version>
 	</properties>
 
 	<distributionManagement>

@@ -9,7 +9,7 @@ import modules.test.domain.AnyDerived1;
 import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
 /**
  * The arc tests fail as the class attributes of the any and many-to-any tags don't map correctly to
@@ -18,7 +18,7 @@ import util.AbstractH2Test;
  * @author mike
  *
  */
-public class ArcTests extends AbstractH2Test {
+public class ArcTests extends AbstractSkyveTest {
 	/**
 	 * This just wont work...
 	 * 

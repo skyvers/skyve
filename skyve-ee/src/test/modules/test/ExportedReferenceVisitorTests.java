@@ -8,9 +8,9 @@ import org.skyve.util.Util;
 import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class ExportedReferenceVisitorTests extends AbstractH2Test {
+public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 	@Test
 	public void testDereferencerOnHierarchical() throws Exception {
 		Hierarchical root = Util.constructRandomInstance(u, m, hd, 1);

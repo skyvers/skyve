@@ -8,8 +8,6 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * AnyBase
- * <br/>
  * Mapped base document.
  * 
  * @stereotype "persistent"

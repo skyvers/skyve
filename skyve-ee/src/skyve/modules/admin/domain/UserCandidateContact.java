@@ -11,8 +11,6 @@ import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * User Candidate Contact
- * <br/>
  * User Candidate Contact is a transient child of User, and holds the potential matching contacts
 			when a search is conducted during the Create User wizard.
 			<br/>

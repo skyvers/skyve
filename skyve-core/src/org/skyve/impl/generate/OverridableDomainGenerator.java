@@ -3,6 +3,12 @@ package org.skyve.impl.generate;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -28,6 +35,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -46,11 +54,12 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.util.test.SkyveFactory;
 
 /**
- * Run through all vanilla modules and create the base class data structure and the extensions (if required). 
- * Run through each customer and generate impls and package hibernate.cfg.xmls. 
- * Constrain base classes. 
+ * Run through all vanilla modules and create the base class data structure and the extensions (if required).
+ * Run through each customer and generate impls and package hibernate.cfg.xmls.
+ * Constrain base classes.
  * Generate base classes.
  */
 public final class OverridableDomainGenerator extends DomainGenerator {
@@ -59,7 +68,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// attribute name -> attribute type
 		private TreeMap<String, AttributeType> attributes = new TreeMap<>();
 	}
-	
+
 	/**
 	 * Map<persistentName, Map<propertyName, length>>>
 	 */
@@ -85,6 +94,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private Set<String> overriddenORMDocumentsPerCustomer = new TreeSet<>();
 
+	/**
+	 * Array or Java reserved words. When determining variable names for generated tests,
+	 * checks this array to see if the variable could be a reserved word. E.g. a Return document.
+	 */
+	private static final Set<String> RESERVED_WORDS;
+	static {
+		String reserved[] = {
+				"abstract", "assert", "boolean", "break", "byte", "case",
+				"catch", "char", "class", "const", "continue",
+				"default", "do", "double", "else", "extends",
+				"false", "final", "finally", "float", "for",
+				"goto", "if", "implements", "import", "instanceof",
+				"int", "interface", "long", "native", "new",
+				"null", "package", "private", "protected", "public",
+				"return", "short", "static", "strictfp", "super",
+				"switch", "synchronized", "this", "throw", "throws",
+				"transient", "true", "try", "void", "volatile",
+				"while"
+		};
+		RESERVED_WORDS = new HashSet<>(Arrays.asList(reserved));
+	}
+
 	OverridableDomainGenerator() {
 		// reduce visibility
 	}
@@ -104,8 +135,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate for customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
-			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE + 
-									customerName + '/' + repository.MODULES_NAME + '/';
+			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE +
+					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
 				generateOverridden(customer, modulesPath);
@@ -130,7 +161,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// Populate the properties map
 			final TreeMap<String, DomainClass> documentClasses = new TreeMap<>();
 			moduleDocumentVanillaClasses.put(moduleName, documentClasses);
-			
+
 			new ModuleDocumentVisitor() {
 				@Override
 				public void accept(Document document) throws Exception {
@@ -145,14 +176,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}.visit(null, module);
 		}
 
-		
 		// TODO how do I handle overridden extended documents?
-		
+
 		// Restrict the base class definitions based on customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			final Customer customer = repository.getCustomer(customerName);
-			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE + 
-									customerName + '/' + repository.MODULES_NAME + '/';
+			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE +
+					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
 				for (final Module module : customer.getModules()) {
@@ -160,6 +190,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					final TreeMap<String, DomainClass> vanillaDocumentClasses = moduleDocumentVanillaClasses.get(moduleName);
 
 					new ModuleDocumentVisitor() {
+
 						@Override
 						public void accept(Document document) throws Exception {
 							String documentName = document.getName();
@@ -169,15 +200,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								populatePropertyLengths(repository, customer, module, document, null);
 
 								// Refine the moduleDocumentProperties, if the vanilla class exists
-								// NB this will not exist if there is a customer document included that is not an override of a vanilla one
-								DomainClass vanillaDocumentClass = (vanillaDocumentClasses == null) ? null : vanillaDocumentClasses.get(documentName);
+								// NB this will not exist if there is a customer document included that is not an override of a
+								// vanilla one
+								DomainClass vanillaDocumentClass = (vanillaDocumentClasses == null) ? null
+										: vanillaDocumentClasses.get(documentName);
 								if (vanillaDocumentClass != null) {
 									TreeMap<String, AttributeType> vanillaDocumentProperties = vanillaDocumentClass.attributes;
 									TreeMap<String, AttributeType> thisDocumentProperties = generateDocumentPropertyNames(document);
 									Iterator<String> i = vanillaDocumentProperties.keySet().iterator();
 									while (i.hasNext()) {
 										String vanillaPropertyName = i.next();
-										if (! thisDocumentProperties.containsKey(vanillaPropertyName)) {
+										if (!thisDocumentProperties.containsKey(vanillaPropertyName)) {
 											i.remove();
 											vanillaDocumentClass.isAbstract = true;
 										}
@@ -185,46 +218,49 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								}
 							}
 						}
+
 					}.visit(customer, module);
 				}
 			}
 		}
 	}
-	
+
 	// create a map of derived classes for use by the ORM generator and ARC processing.
-	private void populateModocDerivations(AbstractRepository repository, 
-											Module module, 
-											Document document, 
-											ExtensionStrategy strategyToAssert) {
+	private void populateModocDerivations(AbstractRepository repository,
+			Module module,
+			Document document,
+			ExtensionStrategy strategyToAssert) {
 		Extends inherits = document.getExtends();
 		Persistent persistent = document.getPersistent();
 		ExtensionStrategy strategy = (persistent == null) ? null : persistent.getStrategy();
 		boolean mapped = (persistent == null) ? false : ExtensionStrategy.mapped.equals(strategy);
 		Document baseDocument = (inherits != null) ? module.getDocument(null, inherits.getDocumentName()) : null;
 		if (persistent != null) {
-			if ((strategyToAssert != null) && (! mapped) && (! strategyToAssert.equals(strategy))) {
-				throw new MetaDataException("Document " + document.getName() + 
-												((strategy == null) ? " has no extension strategy" : " uses extension strategy " + strategy) + 
-												" which conflicts with other extensions in the hierarchy using strategy " + strategyToAssert);
+			if ((strategyToAssert != null) && (!mapped) && (!strategyToAssert.equals(strategy))) {
+				throw new MetaDataException("Document " + document.getName() +
+						((strategy == null) ? " has no extension strategy" : " uses extension strategy " + strategy) +
+						" which conflicts with other extensions in the hierarchy using strategy " + strategyToAssert);
 			}
 		}
 
 		if ((inherits != null) && (persistent != null)) {
 			if (baseDocument == null) {
-				throw new MetaDataException("Document " + document.getName() + 
-												" extends document " + inherits.getDocumentName() +
-												" which does not exist in module " + module.getName());
+				throw new MetaDataException("Document " + document.getName() +
+						" extends document " + inherits.getDocumentName() +
+						" which does not exist in module " + module.getName());
 			}
 
 			Persistent basePersistent = baseDocument.getPersistent();
 			boolean baseMapped = (basePersistent == null) ? false : ExtensionStrategy.mapped.equals(basePersistent.getStrategy());
 
-			if ((persistent.getName() == null) && (! mapped)) {
-				throw new MetaDataException("Document " + document.getName() + " cannot be transient when it is extending document " + baseDocument.getName());
+			if ((persistent.getName() == null) && (!mapped)) {
+				throw new MetaDataException("Document " + document.getName() + " cannot be transient when it is extending document "
+						+ baseDocument.getName());
 			}
 			if ((basePersistent == null) || (basePersistent.getName() == null)) {
-				if (! baseMapped) {
-					throw new MetaDataException("Document " + document.getName() + " cannot extend transient document " + baseDocument.getName());
+				if (!baseMapped) {
+					throw new MetaDataException(
+							"Document " + document.getName() + " cannot extend transient document " + baseDocument.getName());
 				}
 			}
 
@@ -235,11 +271,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					baseUnmappedDocument = repository.findNearestPersistentUnmappedSuperDocument(null, module, document);
 					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
 				}
-				if ((baseUnmappedDocument != null) && 
+				if ((baseUnmappedDocument != null) &&
 						(persistent.getName() != null) &&
-						persistent.getPersistentIdentifier().equals((baseUnmappedPersistent == null) ? null : baseUnmappedPersistent.getPersistentIdentifier())) {
-					throw new MetaDataException("Document " + document.getName() + " extends document " + 
-													baseUnmappedDocument.getName() + " with a strategy of " + strategy + " but the persistent identifiers are the same.");
+						persistent.getPersistentIdentifier().equals(
+								(baseUnmappedPersistent == null) ? null : baseUnmappedPersistent.getPersistentIdentifier())) {
+					throw new MetaDataException("Document " + document.getName() + " extends document " +
+							baseUnmappedDocument.getName() + " with a strategy of " + strategy
+							+ " but the persistent identifiers are the same.");
 				}
 			}
 			if (ExtensionStrategy.single.equals(strategy)) {
@@ -249,28 +287,28 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					baseUnmappedDocument = repository.findNearestPersistentUnmappedSuperDocument(null, module, document);
 					baseUnmappedPersistent = (baseUnmappedDocument == null) ? null : baseUnmappedDocument.getPersistent();
 				}
-				if ((baseUnmappedDocument != null) && 
+				if ((baseUnmappedDocument != null) &&
 						(persistent.getName() != null) &&
-						(! persistent.getPersistentIdentifier().equals((baseUnmappedPersistent == null) ? null : baseUnmappedPersistent.getPersistentIdentifier()))) {
-					throw new MetaDataException("Document " + document.getName() + " extends document " + 
-													baseUnmappedDocument.getName() + " with a strategy of " + strategy + " but the persistent identifiers are different.");
+						(!persistent.getPersistentIdentifier().equals(
+								(baseUnmappedPersistent == null) ? null : baseUnmappedPersistent.getPersistentIdentifier()))) {
+					throw new MetaDataException("Document " + document.getName() + " extends document " +
+							baseUnmappedDocument.getName() + " with a strategy of " + strategy
+							+ " but the persistent identifiers are different.");
 				}
 			}
 
 			putModocDerivation(document, baseDocument);
 			Module baseModule = repository.getModule(null, baseDocument.getOwningModuleName());
 			populateModocDerivations(repository,
-										baseModule,
-										baseDocument,
-										(strategyToAssert != null) ? 
-											strategyToAssert : 
-											(ExtensionStrategy.mapped.equals(strategy) ? null : strategy));
+					baseModule,
+					baseDocument,
+					(strategyToAssert != null) ? strategyToAssert : (ExtensionStrategy.mapped.equals(strategy) ? null : strategy));
 		}
 	}
-	
+
 	private void putModocDerivation(Document document, Document baseDocument) {
 		String baseModoc = baseDocument.getOwningModuleName() + '.' + baseDocument.getName();
-		TreeMap<String, Document> derivations = modocDerivations.get(baseModoc); 
+		TreeMap<String, Document> derivations = modocDerivations.get(baseModoc);
 		if (derivations == null) {
 			derivations = new TreeMap<>();
 			modocDerivations.put(baseModoc, derivations);
@@ -290,9 +328,25 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			for (File domainFile : domainFolder.listFiles()) {
 				domainFile.delete();
 			}
-		}
-		else {
+		} else {
 			domainFolder.mkdir();
+		}
+
+		// clear out the generated test folder
+		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
+		final File factoryPath = new File(GENERATED_TEST_PATH + modulePath + "/util/");
+		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
+		if (factoryPath.exists()) {
+			for (File testFile : factoryPath.listFiles()) {
+				testFile.delete();
+			}
+			factoryPath.delete();
+		}
+		if (domainTestPath.exists()) {
+			for (File testFile : domainTestPath.listFiles()) {
+				testFile.delete();
+			}
+			domainTestPath.delete();
 		}
 
 		// Make a orm.hbm.xml file
@@ -311,7 +365,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String documentName = document.getName();
 					TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
 					DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
-					
+
 					// Generate base
 					File classFile = new File(SRC_PATH + packagePath + '/' + documentName + ".java");
 					classFile.createNewFile();
@@ -319,41 +373,96 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					try (FileWriter fw = new FileWriter(classFile)) {
 						Extends inherits = document.getExtends();
 						generateJava(repository,
-										null, 
-										module, 
-										document, 
-										fw, 
-										packagePath.replace('/', '.'),
-										documentName, 
-										(inherits != null) ? inherits.getDocumentName() : null,
-										false);
+								null,
+								module,
+								document,
+								fw,
+								packagePath.replaceAll("\\\\|\\/", "."),
+								documentName,
+								(inherits != null) ? inherits.getDocumentName() : null,
+								false);
 					}
 
 					if ((domainClass != null) && domainClass.isAbstract) {
 						// Generate extension
 						classFile = new File(SRC_PATH + packagePath + '/' + documentName + "Ext.java");
 						classFile.createNewFile();
-	
+
 						try (FileWriter fw = new FileWriter(classFile)) {
 							generateJava(repository,
-											null, 
-											module, 
-											document, 
-											fw, 
-											packagePath.replace('/', '.'),
-											documentName, 
-											documentName,
-											true);
+									null,
+									module,
+									document,
+									fw,
+									packagePath.replaceAll("\\\\|\\/", "."),
+									documentName,
+									documentName,
+									true);
 						}
 					}
-					
+
 					generateORM(mappingFileWriter,
-									module, 
-									document, 
-									repository.MODULES_NAME + '.', 
-									(domainClass != null) && domainClass.isAbstract,
-									null,
-									filterDefinitions);
+							module,
+							document,
+							repository.MODULES_NAME + '.',
+							(domainClass != null) && domainClass.isAbstract,
+							null,
+							filterDefinitions);
+
+					// if this is not an excluded module, generate tests
+					if (EXCLUDED_MODULES == null || !Arrays.asList(EXCLUDED_MODULES).contains(moduleName.toLowerCase())) {
+						// generate test factory
+						File factoryFile = new File(
+								factoryPath.getPath() + File.separator + documentName + "Factory.java");
+						factoryPath.mkdirs();
+						factoryFile.createNewFile();
+						try (FileWriter fw = new FileWriter(factoryFile)) {
+							generateFactory(module, document, fw, modulePath.replaceAll("\\\\|\\/", "."), documentName);
+						}
+
+						// check if this document is annotated to skip domain tests
+						File factoryExtensionPath = new File(TEST_PATH + modulePath + "/util/");
+						File factoryExtensionFile = new File(
+								factoryExtensionPath.getPath() + File.separator + documentName + "FactoryExtension.java");
+
+						SkyveFactory annotation = retrieveFactoryExtensionAnnotation(factoryExtensionFile);
+
+						// generate domain test for persistent documents that are not mapped, or not children
+						Persistent persistent = document.getPersistent();
+						if (persistent != null && !ExtensionStrategy.mapped.equals(persistent.getStrategy())
+								&& document.getParentDocumentName() == null) {
+							boolean skipGeneration = false;
+
+							if (annotation != null && !annotation.testDomain()) {
+								skipGeneration = true;
+							}
+
+							if (!skipGeneration) {
+								File testFile = new File(
+										domainTestPath.getPath() + File.separator + documentName + "Test.java");
+								// don't generate a test if the developer has created a domain test in this location in the test
+								// directory
+								if (testAlreadyExists(testFile)) {
+									System.out.println(
+											String.format("Skipping domain test generation for %s.%s, file already exists in %s",
+													packagePath.replaceAll("\\\\|\\/", "."), documentName, TEST_PATH));
+								} else {
+									// generate the domain test
+									domainTestPath.mkdirs();
+									testFile.createNewFile();
+									try (FileWriter fw = new FileWriter(testFile)) {
+										generateDomainTest(fw, modulePath, packagePath.replaceAll("\\\\|\\/", "."), documentName);
+									}
+								}
+							} else {
+								System.out.println(String.format("Skipping domain test generation for %s.%s",
+										packagePath.replaceAll("\\\\|\\/", "."), documentName));
+							}
+						}
+
+						// generate action tests
+						generateActionTests(moduleName, packagePath, modulePath, document, documentName, annotation);
+					}
 				}
 			}.visit(null, module);
 
@@ -361,10 +470,43 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	private static SkyveFactory retrieveFactoryExtensionAnnotation(final File factoryExtensionFile) {
+		SkyveFactory annotation = null;
+
+		if (factoryExtensionFile.exists()) {
+			String className = factoryExtensionFile.getPath().replaceAll("\\\\|\\/", ".")
+					.replace(TEST_PATH.replaceAll("\\\\|\\/", "."), "");
+
+			System.out.println("Found factory extension " + className);
+			className = className.replaceFirst("[.][^.]+$", "");
+
+			// scan the classpath for the class
+			/*System.out.println(
+					"Scanning for annotations in: "
+							+ className.replace(documentName, ".*")
+									.replace("FactoryExtension", ""));*/
+
+			try {
+				Class<?> c = Class.forName(className);
+				if (c.isAnnotationPresent(SkyveFactory.class)) {
+					annotation = c.getAnnotation(SkyveFactory.class);
+					// System.out.println("Test action: " + annotation.testAction());
+					// System.out.println("Test domain: " + annotation.testDomain());
+				}
+			} catch (Exception e) {
+				System.err.println("Could not find factory class for: " + e.getMessage());
+			}
+			// List<Class<?>> classes = CPScanner.scanClasses(new
+			// ClassFilter().packageName(packagePath.replaceAll("\\\\|\\/", ".")));
+		}
+
+		return annotation;
+	}
+
 	@SuppressWarnings("synthetic-access")
-	private void generateOverridden(final Customer customer, 
-										final String modulesPath)
-	throws Exception {
+	private void generateOverridden(final Customer customer,
+			final String modulesPath)
+			throws Exception {
 		// Make the orm.hbm.xml file
 		File mappingFile = new File(modulesPath + "orm.hbm.xml");
 		mappingFile.delete();
@@ -379,9 +521,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				System.out.println("Module " + moduleName);
 				// clear out the domain folder
 				final String packagePath = repository.CUSTOMERS_NAMESPACE +
-											customer.getName() + '/' + 
-											repository.MODULES_NAMESPACE +
-											moduleName + '/' + repository.DOMAIN_NAME;
+						customer.getName() + '/' +
+						repository.MODULES_NAMESPACE +
+						moduleName + '/' + repository.DOMAIN_NAME;
 				final File domainFolder = new File(SRC_PATH + packagePath + '/');
 				if (domainFolder.exists()) {
 					for (File domainFile : domainFolder.listFiles()) {
@@ -415,7 +557,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 
 							// Make domain folder if it does not exist yet - ie create the folder on demand
-							if (! domainFolder.exists()) {
+							if (!domainFolder.exists()) {
 								domainFolder.mkdir();
 							}
 
@@ -426,31 +568,32 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 							File classFile = new File(classFileName + ".java");
 							classFile.createNewFile();
-							
+
 							try (FileWriter fw = new FileWriter(classFile)) {
 								generateJava(repository,
-												customer, 
-												module, 
-												document, 
-												fw,
-												packagePath.replace('/', '.'), 
-												documentName,
-												vanillaDocumentName,
-												true);
+										customer,
+										module,
+										document,
+										fw,
+										packagePath.replaceAll("\\\\|\\/", "."),
+										documentName,
+										vanillaDocumentName,
+										true);
 							}
 							generateOverriddenORM(mappingFileWriter, customer, module, document, filterDefinitions);
 						}
 					}
 				}.visit(customer, module);
-			}			
-			
+			}
+
 			createMappingFileFooter(mappingFileWriter, filterDefinitions);
 		}
 	}
 
 	private TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(Document overriddenDocument) {
-		final TreeMap<String, DomainClass> vanillaDocumentClasses = moduleDocumentVanillaClasses.get(overriddenDocument.getOwningModuleName());
-		
+		final TreeMap<String, DomainClass> vanillaDocumentClasses = moduleDocumentVanillaClasses
+				.get(overriddenDocument.getOwningModuleName());
+
 		@SuppressWarnings("synthetic-access")
 		TreeMap<String, AttributeType> documentProperties = vanillaDocumentClasses.get(overriddenDocument.getName()).attributes;
 		TreeMap<String, AttributeType> extraProperties = generateDocumentPropertyNames(overriddenDocument);
@@ -461,15 +604,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				i.remove();
 			}
 		}
-		
+
 		return extraProperties;
 	}
-	
+
 	private static void createMappingFileHeader(FileWriter mappingFileWriter) throws IOException {
 		mappingFileWriter.append("<?xml version=\"1.0\"?>\n");
-		mappingFileWriter.append("<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd\">\n");
+		mappingFileWriter.append(
+				"<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd\">\n");
 		mappingFileWriter.append("<hibernate-mapping default-access=\"field\">\n\n");
-		mappingFileWriter.append("\t<typedef name=\"OptimisticLock\" class=\"org.skyve.impl.domain.types.OptimisticLockUserType\" />\n");
+		mappingFileWriter
+				.append("\t<typedef name=\"OptimisticLock\" class=\"org.skyve.impl.domain.types.OptimisticLockUserType\" />\n");
 		mappingFileWriter.append("\t<typedef name=\"Decimal2\" class=\"org.skyve.impl.domain.types.Decimal2UserType\" />\n");
 		mappingFileWriter.append("\t<typedef name=\"Decimal5\" class=\"org.skyve.impl.domain.types.Decimal5UserType\" />\n");
 		mappingFileWriter.append("\t<typedef name=\"Decimal10\" class=\"org.skyve.impl.domain.types.Decimal10UserType\" />\n");
@@ -485,77 +630,76 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		mappingFileWriter.append(filterDefinitions.toString());
 		mappingFileWriter.append("</hibernate-mapping>");
 	}
+
+	/*
+	For child indexed collection
 	
+	<class name="Parent">
+	<id name="id" column="parent_id"/>
+	....
+	<list name="children">
+	    <key column="parent_id" not-null="true"/>
+	    <list-index column="bizOrdinal"/>
+	    <one-to-many class="Child"/>
+	</list>
+	</class>
+	<class name="Child">
+	<id name="id" column="child_id"/>
+	<property name="ordinal" column="bizOrdinal">
+	....
+	<many-to-one name="parent" class="Parent" column="parent_id" insert="false" update="false" />
+	</class>
 	
-/*
-For child indexed collection
-
-<class name="Parent">
-    <id name="id" column="parent_id"/>
-    ....
-    <list name="children">
-        <key column="parent_id" not-null="true"/>
-        <list-index column="bizOrdinal"/>
-        <one-to-many class="Child"/>
-    </list>
-</class>
-<class name="Child">
-    <id name="id" column="child_id"/>
-    <property name="ordinal" column="bizOrdinal">
-    ....
-    <many-to-one name="parent" class="Parent" column="parent_id" insert="false" update="false" />
-</class>
-
-For aggregate or composition...
-
-<class name="Parent">
-    <id name="id" column="parent_id"/>
-    ....
-    <list name="children">
-        <key column="parent_id" not-null="true"/>
-        <list-index column="bizOrdinal"/>
-        <one-to-many class="Child"/>
-    </list>
-</class>
-<class name="Child">
-    <id name="id" column="child_id"/>
-    ....
-    <many-to-one name="parent" class="Parent" column="parent_id" insert="false" update="false" />
-</class>
-
-For subclasses
-
-1 table per hierarchy
-	<subclass name="modules.sdc.domain.Batch" entity-name="sdcBatch" discriminator-value="A">
-	</subclass>
-joined tables
-	<joined-subclass name="modules.sdc.domain.Bundle" table="SDC_Bundle" entity-name="sdcBundle">
-		<key column="bizId" />
-	</joined-subclass>
-*/
-	private void generateORM(FileWriter fw, 
-								Module module, 
-								Document document, 
-								String packagePathPrefix, 
-								boolean forExt,
-								Customer customer,
-								StringBuilder filterDefinitions)
-	throws Exception{
+	For aggregate or composition...
+	
+	<class name="Parent">
+	<id name="id" column="parent_id"/>
+	....
+	<list name="children">
+	    <key column="parent_id" not-null="true"/>
+	    <list-index column="bizOrdinal"/>
+	    <one-to-many class="Child"/>
+	</list>
+	</class>
+	<class name="Child">
+	<id name="id" column="child_id"/>
+	....
+	<many-to-one name="parent" class="Parent" column="parent_id" insert="false" update="false" />
+	</class>
+	
+	For subclasses
+	
+	1 table per hierarchy
+		<subclass name="modules.sdc.domain.Batch" entity-name="sdcBatch" discriminator-value="A">
+		</subclass>
+	joined tables
+		<joined-subclass name="modules.sdc.domain.Bundle" table="SDC_Bundle" entity-name="sdcBundle">
+			<key column="bizId" />
+		</joined-subclass>
+	*/
+	private void generateORM(FileWriter fw,
+			Module module,
+			Document document,
+			String packagePathPrefix,
+			boolean forExt,
+			Customer customer,
+			StringBuilder filterDefinitions)
+			throws Exception {
 		generateORM(fw, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
 	}
-	
-	private void generateORM(FileWriter fw, 
-								Module module, 
-								Document document, 
-								String packagePathPrefix, 
-								boolean forExt, // indicates if we are processing a customer override
-								boolean recursive,
-								Customer customer,
-								StringBuilder filterDefinitions,
-								String indentation) // indents subclass definitions within the class definition
-	throws Exception {
+
+	private void generateORM(FileWriter fw,
+			Module module,
+			Document document,
+			String packagePathPrefix,
+			boolean forExt, // indicates if we are processing a customer override
+			boolean recursive,
+			Customer customer,
+			StringBuilder filterDefinitions,
+			String indentation) // indents subclass definitions within the class definition
+			throws Exception {
 		Extends inherits = document.getExtends();
-		if ((! recursive) && // not a recursive call
+		if ((!recursive) && // not a recursive call
 				(inherits != null)) { // this is a sub-class
 			return;
 		}
@@ -574,62 +718,62 @@ joined tables
 		if (recursive && ExtensionStrategy.mapped.equals(strategy)) {
 			indent = indentation.substring(0, indentation.length() - 1);
 		}
-		
+
 		String entityName = null;
-		
-		System.out.println("Generate ORM for " + packagePathPrefix + moduleName + '.' + repository.DOMAIN_NAME + '.' + documentName);
+
+		System.out
+				.println("Generate ORM for " + packagePathPrefix + moduleName + '.' + repository.DOMAIN_NAME + '.' + documentName);
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
 					fw.append(indent).append("\t<joined-subclass name=\"");
-				}
-				else if (ExtensionStrategy.single.equals(strategy)) {
+				} else if (ExtensionStrategy.single.equals(strategy)) {
 					fw.append(indent).append("\t<subclass name=\"");
 				}
-			}
-			else {
+			} else {
 				fw.append(indent).append("\t<class name=\"");
 			}
-			String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/' + documentName + "Extension.java";
+			String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
+					+ documentName + "Extension.java";
 			if (new File(extensionPath).exists()) {
 				System.out.println("    Generate ORM using " + extensionPath);
-				fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName).append("Extension");
-			}
-			else {
-				fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.').append(documentName);
+				fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName)
+						.append("Extension");
+			} else {
+				fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.')
+						.append(documentName);
 				if (forExt) {
 					fw.append("Ext");
 				}
 			}
 			fw.append("\" ");
-	
+
 			if ((baseDocumentName == null) || ExtensionStrategy.joined.equals(strategy)) {
 				fw.append("table=\"").append(persistent.getName());
 				String schemaName = persistent.getSchema();
 				if (schemaName != null) {
-				    fw.append("\" schema=\"").append(schemaName);
+					fw.append("\" schema=\"").append(schemaName);
 				}
 				String catalogName = persistent.getCatalog();
 				if (catalogName != null) {
-				    fw.append("\" catalog=\"").append(catalogName);
+					fw.append("\" catalog=\"").append(catalogName);
 				}
 				fw.append("\" ");
 			}
-			
+
 			if (ExtensionStrategy.single.equals(strategy)) {
 				fw.append("discriminator-value=\"");
 				String discriminator = persistent.getDiscriminator();
 				if (discriminator == null) {
 					fw.append(moduleName).append(documentName);
-				}
-				else {
+				} else {
 					fw.append(discriminator);
 				}
 				fw.append("\" ");
 			}
-			
+
 			fw.append("entity-name=\"");
 			StringBuilder entityNameBuilder = new StringBuilder(64);
 			if (customerName != null) {
@@ -638,31 +782,34 @@ joined tables
 			entityNameBuilder.append(moduleName).append(documentName);
 			entityName = entityNameBuilder.toString();
 			fw.append(entityName).append("\">\n");
-			
+
 			if ((baseDocumentName != null) && ExtensionStrategy.joined.equals(strategy)) {
 				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
-			}
-			else if (baseDocumentName == null) {
+			} else if (baseDocumentName == null) {
 				// map inherited properties
 				fw.append(indent).append("\t\t<id name=\"bizId\" length=\"36\" />\n");
-	
+
 				if (ExtensionStrategy.single.equals(strategy)) {
 					fw.append(indent).append("\t\t<discriminator column=\"bizDiscriminator\" type=\"string\" />\n");
 				}
-				
+
 				fw.append(indent).append("\t\t<version name=\"bizVersion\" unsaved-value=\"null\" />\n");
 				// bizLock length of 271 is 17 for the timestamp (yyyyMMddHHmmssSSS) + 254 (email address max length from RFC 5321)
-				fw.append(indent).append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"271\" not-null=\"true\" />\n");
-				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before 
+				fw.append(indent)
+						.append("\t\t<property name=\"bizLock\" type=\"OptimisticLock\" length=\"271\" not-null=\"true\" />\n");
+				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
-				fw.append(indent).append("\t\t<property name=\"bizKey\" length=\"1024\" index=\"bizKeyIndex\" not-null=\"true\" />\n");
-				fw.append(indent).append("\t\t<property name=\"bizCustomer\" length=\"50\" index=\"bizCustomerIndex\" not-null=\"true\" />\n");
+				fw.append(indent)
+						.append("\t\t<property name=\"bizKey\" length=\"1024\" index=\"bizKeyIndex\" not-null=\"true\" />\n");
+				fw.append(indent).append(
+						"\t\t<property name=\"bizCustomer\" length=\"50\" index=\"bizCustomerIndex\" not-null=\"true\" />\n");
 				fw.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
 				fw.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
-				fw.append(indent).append("\t\t<property name=\"bizUserId\" length=\"36\" index=\"bizUserIdIndex\" not-null=\"true\" />\n");
+				fw.append(indent)
+						.append("\t\t<property name=\"bizUserId\" length=\"36\" index=\"bizUserIdIndex\" not-null=\"true\" />\n");
 			}
-			
+
 			// map the parent property, if parent document is persistent
 			String parentDocumentName = document.getParentDocumentName();
 			if (parentDocumentName != null) {
@@ -674,13 +821,12 @@ joined tables
 							fw.append(" index=\"bizParentIdIndex\"");
 						}
 						fw.append(" />\n");
-					}
-					else {
+					} else {
 						// Add bizOrdinal ORM
 						if (document.isOrdered()) {
 							fw.append(indent).append("\t\t<property name=\"bizOrdinal\" />\n");
 						}
-		
+
 						// Add parent reference ORM
 						String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
 						fw.append(indent).append("\t\t<many-to-one name=\"parent\" entity-name=\"");
@@ -697,10 +843,10 @@ joined tables
 					}
 				}
 			}
-	
+
 			generateAttributeMappings(fw, repository, customer, module, document, persistent, forExt, indent);
 		}
-		
+
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);
 		if (derivations != null) {
 			// Do subclasses before joined-subclasses
@@ -709,15 +855,15 @@ joined tables
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if (ExtensionStrategy.single.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw, 
-									derivedModule, 
-									derivation, 
-									packagePathPrefix, 
-									forExt, 
-									true, 
-									customer, 
-									filterDefinitions,
-									indent + "\t");
+					generateORM(fw,
+							derivedModule,
+							derivation,
+							packagePathPrefix,
+							forExt,
+							true,
+							customer,
+							filterDefinitions,
+							indent + "\t");
 				}
 			}
 			// Do joined-subclasses after subclasses
@@ -726,15 +872,15 @@ joined tables
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if (ExtensionStrategy.joined.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw, 
-									derivedModule, 
-									derivation, 
-									packagePathPrefix, 
-									forExt, 
-									true, 
-									customer, 
-									filterDefinitions,
-									indent + "\t");
+					generateORM(fw,
+							derivedModule,
+							derivation,
+							packagePathPrefix,
+							forExt,
+							true,
+							customer,
+							filterDefinitions,
+							indent + "\t");
 				}
 			}
 			// Take care of subclasses with no derivation strategy (persistent subclass with only mapped superclasses)
@@ -743,29 +889,27 @@ joined tables
 				ExtensionStrategy derivationStrategy = (derivationPersistent == null) ? null : derivationPersistent.getStrategy();
 				if ((derivationStrategy == null) || ExtensionStrategy.mapped.equals(derivationStrategy)) {
 					Module derivedModule = repository.getModule(customer, derivation.getOwningModuleName());
-					generateORM(fw, 
-									derivedModule, 
-									derivation, 
-									packagePathPrefix, 
-									forExt, 
-									true, 
-									customer, 
-									filterDefinitions,
-									indent + "\t");
+					generateORM(fw,
+							derivedModule,
+							derivation,
+							packagePathPrefix,
+							forExt,
+							true,
+							customer,
+							filterDefinitions,
+							indent + "\t");
 				}
 			}
 		}
-		
+
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
 					fw.append(indent).append("\t</joined-subclass>\n");
-				}
-				else if (ExtensionStrategy.single.equals(strategy)) {
+				} else if (ExtensionStrategy.single.equals(strategy)) {
 					fw.append(indent).append("\t</subclass>\n");
 				}
-			}
-			else {
+			} else {
 				generateFilterStuff(entityName, fw, filterDefinitions, indent);
 				fw.append(indent).append("\t</class>\n\n");
 			}
@@ -773,14 +917,14 @@ joined tables
 	}
 
 	private void generateAttributeMappings(FileWriter fw,
-											AbstractRepository repository,
-											Customer customer,
-											Module module,
-											Document document,
-											Persistent persistent,
-											boolean forExt,
-											String indentation)
-	throws IOException {
+			AbstractRepository repository,
+			Customer customer,
+			Module module,
+			Document document,
+			Persistent persistent,
+			boolean forExt,
+			String indentation)
+			throws IOException {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -790,14 +934,14 @@ joined tables
 				generateAttributeMappings(fw, repository, customer, baseModule, baseDocument, persistent, forExt, indentation);
 			}
 		}
-		
+
 		String customerName = (customer == null) ? null : customer.getName();
 		String moduleName = module.getName();
 		String documentName = document.getName();
-		
+
 		// map the document defined properties
 		for (Attribute attribute : document.getAttributes()) {
-			if (! attribute.isPersistent()) {
+			if (!attribute.isPersistent()) {
 				continue;
 			}
 
@@ -808,11 +952,11 @@ joined tables
 				Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 				Persistent referencedPersistent = referencedDocument.getPersistent();
 				String referencedModuleName = referencedDocument.getOwningModuleName();
-				
+
 				StringBuilder orderBy = null;
 				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
-				if ((! ((CollectionImpl) collection).isComplexOrdering()) && 
-						(! collection.getOrdering().isEmpty())) {
+				if ((!((CollectionImpl) collection).isComplexOrdering()) &&
+						(!collection.getOrdering().isEmpty())) {
 					orderBy = new StringBuilder(64);
 					for (Ordering ordering : collection.getOrdering()) {
 						String byBinding = ordering.getBy();
@@ -825,8 +969,7 @@ joined tables
 						orderBy.append(columnName);
 						if (SortDirection.descending.equals(ordering.getSort())) {
 							orderBy.append(" desc, ");
-						}
-						else {
+						} else {
 							orderBy.append(" asc, ");
 						}
 					}
@@ -834,20 +977,20 @@ joined tables
 				}
 
 				CollectionType type = collection.getType();
-				boolean mapped = (referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
+				boolean mapped = (referencedPersistent != null)
+						&& ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
 
 				if (type == CollectionType.child) {
 					if (mapped) {
-						throw new MetaDataException("Collection " + collection.getName() + " referencing document " + 
-														referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
-														" cannot be a child collection as the target document is a mapped document." +
-														" Use a composed collection instead.");
+						throw new MetaDataException("Collection " + collection.getName() + " referencing document " +
+								referencedDocument.getOwningModuleName() + '.' + referencedDocumentName +
+								" cannot be a child collection as the target document is a mapped document." +
+								" Use a composed collection instead.");
 					}
 					fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
-					}
-					else if (orderBy != null) {
+					} else if (orderBy != null) {
 						fw.append("\" order-by=\"").append(orderBy);
 					}
 					fw.append("\" cascade=\"all-delete-orphan\">\n");
@@ -860,12 +1003,10 @@ joined tables
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName).append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
-				}
-				else {
+				} else {
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t<list name=\"").append(collection.getName());
-					}
-					else {
+					} else {
 						fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					}
 
@@ -883,7 +1024,7 @@ joined tables
 						fw.append("\" cascade=\"persist,save-update,refresh");
 						// Cascade type 'merge' makes many-many relationships within the association
 						// target object update (without the collection being dirty)
-						// and thus causes optimistic lock exceptions when the bizLock 
+						// and thus causes optimistic lock exceptions when the bizLock
 						// is up-revved from the update statement.
 						// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
 						// all groups are up-revved, even though the collection is not dirty,
@@ -892,16 +1033,13 @@ joined tables
 						Boolean allowCascadeMerge = collection.getAllowCascadeMerge();
 						if ((allowCascadeMerge == null) && ALLOW_CASCADE_MERGE) {
 							fw.append(",merge");
-						}
-						else if (Boolean.TRUE.equals(allowCascadeMerge)) {
+						} else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 							fw.append(",merge");
 						}
 						fw.append("\">\n");
-					}
-					else if (type == CollectionType.composition) {
+					} else if (type == CollectionType.composition) {
 						fw.append("\" cascade=\"all-delete-orphan\">\n");
-					}
-					else {
+					} else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
 					if (Boolean.TRUE.equals(collection.getOwnerDatabaseIndex())) {
@@ -909,14 +1047,14 @@ joined tables
 						fw.append("\t\t\t\t<column name=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 						fw.append("\" index=\"").append("ownerIndex\" />\n");
 						fw.append(indentation).append("\t\t\t</key>\n");
-					}
-					else {
-						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME).append("\" />\n");
+					} else {
+						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME)
+								.append("\" />\n");
 					}
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
 					}
-					
+
 					if (mapped) {
 						fw.append(indentation).append("\t\t<many-to-any meta-type=\"string\" id-type=\"string\">\n");
 						Map<String, Document> arcs = new TreeMap<>();
@@ -925,7 +1063,7 @@ joined tables
 							Document derivedDocument = entry.getValue();
 							String derivedModuleName = derivedDocument.getOwningModuleName();
 							String derivedDocumentName = derivedDocument.getName();
-							
+
 							fw.append(indentation).append("\t\t\t<meta-value value=\"").append(entry.getKey());
 							fw.append("\" class=\"");
 							// reference overridden derived document if applicable
@@ -934,7 +1072,7 @@ joined tables
 							}
 							fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 						}
-						
+
 						// bizId first in the index as it's values will vary the most
 						fw.append(indentation).append("\t\t\t<column name=\"");
 						fw.append(collection.getName()).append("_id\" length=\"36\"");
@@ -949,8 +1087,7 @@ joined tables
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t</many-to-any>\n");
-					}
-					else {
+					} else {
 						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
@@ -962,22 +1099,19 @@ joined tables
 							fw.append("\t\t\t\t<column name=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
 							fw.append("\" index=\"").append("elementIndex\" />\n");
 							fw.append("\t\t\t</many-to-many>\n");
-						}
-						else {
+						} else {
 							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
 							fw.append("\" />\n");
 						}
 					}
-					
+
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t</list>\n");
-					}
-					else {
+					} else {
 						fw.append(indentation).append("\t\t</bag>\n");
 					}
 				}
-			}
-			else if (attribute instanceof Association) {
+			} else if (attribute instanceof Association) {
 				Association association = (Association) attribute;
 
 				String referencedDocumentName = association.getDocumentName();
@@ -1004,7 +1138,7 @@ joined tables
 						}
 						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
-					
+
 					// Even though it would be better index wise to put the bizId column first
 					// This doesn't work - hibernate returns nulls for the association getter call.
 					// So sub-optimal but working if type column is first.
@@ -1023,8 +1157,7 @@ joined tables
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</any>\n");
-				}
-				else {
+				} else {
 					fw.append(indentation).append("\t\t<many-to-one name=\"");
 					fw.append(association.getName()).append("\" entity-name=\"");
 					// reference overridden document if applicable
@@ -1035,16 +1168,14 @@ joined tables
 					fw.append("\" column=\"").append(association.getName());
 					if (type == AssociationType.composition) {
 						fw.append("_id\" cascade=\"persist,save-update,refresh,delete");
-					}
-					else if (type == AssociationType.aggregation) {
+					} else if (type == AssociationType.aggregation) {
 						fw.append("_id\" cascade=\"persist,save-update,refresh");
-					}
-					else {
+					} else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
 					}
 					// Cascade type 'merge' makes many-many relationships within the association
 					// target object update (without the collection being dirty)
-					// and thus causes optimistic lock exceptions when the bizLock 
+					// and thus causes optimistic lock exceptions when the bizLock
 					// is up-revved from the update statement.
 					// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
 					// all groups are up-revved, even though the collection is not dirty,
@@ -1053,8 +1184,7 @@ joined tables
 					Boolean allowCascadeMerge = association.getAllowCascadeMerge();
 					if ((allowCascadeMerge == null) && ALLOW_CASCADE_MERGE) {
 						fw.append(",merge");
-					}
-					else if (Boolean.TRUE.equals(allowCascadeMerge)) {
+					} else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 						fw.append(",merge");
 					}
 					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
@@ -1063,10 +1193,9 @@ joined tables
 					}
 					fw.append("\" />\n");
 				}
-			}
-			else if (attribute instanceof Enumeration) {
+			} else if (attribute instanceof Enumeration) {
 				Enumeration enumeration = (Enumeration) attribute;
-				
+
 				String enumerationName = enumeration.getName();
 				fw.append(indentation).append("\t\t<property name=\"").append(enumerationName);
 
@@ -1081,33 +1210,33 @@ joined tables
 					fw.append(moduleName).append(documentName).append(enumerationName);
 				}
 				fw.append("\">\n");
-				
+
 				fw.append(indentation).append("\t\t\t<type name=\"Enum\">\n");
 				fw.append(indentation).append("\t\t\t\t<param name=\"enumClass\">");
 
 				// for extension and the enumeration attribute doesn't exist in the vanilla document.
 				// NB - There a 2 scenarios here...
-				//		1) The enumeration is defined here - forExt is true and there is no enum in the vanilla document
-				//		2) The enumeration is a reference to a definition elsewhere - in this case, forExt is true
-				//			and the enumeration is not defined in the enumeration target vanilla document
+				// 1) The enumeration is defined here - forExt is true and there is no enum in the vanilla document
+				// 2) The enumeration is a reference to a definition elsewhere - in this case, forExt is true
+				// and the enumeration is not defined in the enumeration target vanilla document
 				Enumeration target = enumeration.getTarget();
 				Document targetDocument = target.getOwningDocument();
 				@SuppressWarnings("synthetic-access")
 				boolean requiresExtension = forExt &&
-												(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
-				if (requiresExtension)  {
+						(!moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName())
+								.get(targetDocument.getName()).attributes.containsKey(target.getName()));
+				if (requiresExtension) {
 					fw.append(repository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
 				}
 				fw.append(repository.getEncapsulatingClassNameForEnumeration(enumeration));
-				if (requiresExtension)  {
+				if (requiresExtension) {
 					fw.append("Ext");
 				}
 				fw.append('$').append(enumeration.toJavaIdentifier());
 				fw.append("</param>\n");
 				fw.append(indentation).append("\t\t\t</type>\n");
 				fw.append(indentation).append("\t\t</property>\n");
-			}
-			else if (attribute instanceof Inverse) {
+			} else if (attribute instanceof Inverse) {
 				AbstractInverse inverse = (AbstractInverse) attribute;
 
 				// determine the inverse target metadata
@@ -1118,7 +1247,7 @@ joined tables
 				String inverseModuleName = inverseDocument.getOwningModuleName();
 				InverseRelationship inverseRelationship = inverse.getRelationship();
 				Boolean cascade = inverse.getCascade();
-				
+
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
 					fw.append("\t\t<one-to-one name=\"").append(inverse.getName());
 
@@ -1128,16 +1257,15 @@ joined tables
 						fw.append(customerName);
 					}
 					fw.append(inverseModuleName).append(inverseDocumentName);
-					
+
 					fw.append("\" property-ref=\"").append(inverseReferenceName);
-					
+
 					if (Boolean.TRUE.equals(cascade)) {
 						fw.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
-					
+
 					fw.append("\" />\n");
-				}
-				else {
+				} else {
 					fw.append(indentation).append("\t\t<bag name=\"").append(inverse.getName());
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						String catalog = inversePersistent.getCatalog();
@@ -1150,42 +1278,39 @@ joined tables
 						}
 						fw.append("\" table=\"").append(inversePersistent.getName()).append('_').append(inverseReferenceName);
 					}
-					
+
 					if (Boolean.TRUE.equals(cascade)) {
 						fw.append("\" cascade=\"persist,save-update,refresh,merge");
 					}
 
 					fw.append("\" inverse=\"true\">\n");
-	
+
 					fw.append(indentation).append("\t\t\t<key column=\"");
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						fw.append("element");
-					}
-					else {
+					} else {
 						fw.append(inverseReferenceName);
 					}
 					fw.append("_id\" />\n");
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
-					}
-					else {
+					} else {
 						fw.append(indentation).append("\t\t\t<one-to-many entity-name=\"");
 					}
-	
+
 					// reference overridden document if applicable
 					if (overriddenORMDocumentsPerCustomer.contains(inverseModuleName + '.' + inverseDocumentName)) {
 						fw.append(customerName);
 					}
 					fw.append(inverseModuleName).append(inverseDocumentName);
-					
+
 					if (InverseRelationship.manyToMany.equals(inverseRelationship)) {
 						fw.append("\" column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
 				}
-			}
-			else {
+			} else {
 				Field field = (Field) attribute;
 				String fieldName = field.getName();
 				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
@@ -1198,53 +1323,44 @@ joined tables
 				AttributeType type = attribute.getAttributeType();
 				if (type == AttributeType.decimal2) {
 					fw.append("\" type=\"").append(DECIMAL2).append("\" precision=\"20\" scale=\"2");
-				}
-				else if (type == AttributeType.decimal5) {
+				} else if (type == AttributeType.decimal5) {
 					fw.append("\" type=\"").append(DECIMAL5).append("\" precision=\"23\" scale=\"5");
-				}
-				else if (type == AttributeType.decimal10) {
+				} else if (type == AttributeType.decimal10) {
 					fw.append("\" type=\"").append(DECIMAL10).append("\" precision=\"28\" scale=\"10");
-				}
-				else if (type == AttributeType.date) {
+				} else if (type == AttributeType.date) {
 					fw.append("\" type=\"").append(DATE_ONLY);
-				}
-				else if (type == AttributeType.dateTime) {
+				} else if (type == AttributeType.dateTime) {
 					fw.append("\" type=\"").append(DATE_TIME);
-				}
-				else if (type == AttributeType.time) {
+				} else if (type == AttributeType.time) {
 					fw.append("\" type=\"").append(TIME_ONLY);
-				}
-				else if (type == AttributeType.timestamp) {
+				} else if (type == AttributeType.timestamp) {
 					fw.append("\" type=\"").append(TIMESTAMP);
-				}
-				else if (type == AttributeType.geometry) {
+				} else if (type == AttributeType.geometry) {
 					fw.append("\" type=\"").append(GEOMETRY);
-				}
-				else if (type == AttributeType.id) {
+				} else if (type == AttributeType.id) {
+					fw.append("\" length=\"36");
+				} else if (type == AttributeType.content) {
 					fw.append("\" length=\"36");
 				}
-				else if (type == AttributeType.content) {
-					fw.append("\" length=\"36");
-				}
-/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
- * I don't think the JDBC recognizes CLOBs correctly as it
- * would insert through MySQL query browser.
- * This could be reproduced on linux on dev laptop and test environment on prod server.
- * Non-descript Error was
- * 15:54:10,829 WARN  [JDBCExceptionReporter] SQL Error: 1210, SQLState: HY000
- * 15:54:10,829 ERROR [JDBCExceptionReporter] Incorrect arguments to mysqld_stmt_execute
- * The net tells me that the problem is MySQL not linking surrogate UTF-16 chars in its fields
- * The following code is required if we hit the HY000 problem again
- * 
- * StringBuilder sb = new StringBuilder();
- * for (int i = 0; i < text.length(); i++) {
- *   char ch = text.charAt(i);
- *   if (!Character.isHighSurrogate(ch) && !Character.isLowSurrogate(ch)) {
- *     sb.append(ch);
- *   }
- * }
- * return sb.toString();
- */
+				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
+				 * I don't think the JDBC recognizes CLOBs correctly as it
+				 * would insert through MySQL query browser.
+				 * This could be reproduced on linux on dev laptop and test environment on prod server.
+				 * Non-descript Error was
+				 * 15:54:10,829 WARN  [JDBCExceptionReporter] SQL Error: 1210, SQLState: HY000
+				 * 15:54:10,829 ERROR [JDBCExceptionReporter] Incorrect arguments to mysqld_stmt_execute
+				 * The net tells me that the problem is MySQL not linking surrogate UTF-16 chars in its fields
+				 * The following code is required if we hit the HY000 problem again
+				 * 
+				 * StringBuilder sb = new StringBuilder();
+				 * for (int i = 0; i < text.length(); i++) {
+				 *   char ch = text.charAt(i);
+				 *   if (!Character.isHighSurrogate(ch) && !Character.isLowSurrogate(ch)) {
+				 *     sb.append(ch);
+				 *   }
+				 * }
+				 * return sb.toString();
+				 */
 				else if ((type == AttributeType.memo) || (type == AttributeType.markup)) {
 					fw.append("\" type=\"text");
 				}
@@ -1257,7 +1373,7 @@ joined tables
 			}
 		}
 	}
-	
+
 	private void populateArcs(Document document, Map<String, Document> result) {
 		String key = new StringBuilder(32).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
 		TreeMap<String, Document> derivations = modocDerivations.get(key);
@@ -1265,30 +1381,34 @@ joined tables
 			for (Document derivation : derivations.values()) {
 				Persistent derivationPersistent = derivation.getPersistent();
 				if ((derivationPersistent != null) && (derivationPersistent.getName() != null)) {
-					key = new StringBuilder(32).append(derivation.getOwningModuleName()).append('.').append(derivation.getName()).toString();
+					key = new StringBuilder(32).append(derivation.getOwningModuleName()).append('.').append(derivation.getName())
+							.toString();
 					result.put(key, derivation);
 				}
 				populateArcs(derivation, result);
 			}
 		}
 	}
-	
+
 	private static void generateFilterStuff(String entityName,
-												FileWriter fw,
-												StringBuilder filterDefinitions,
-												String indentation)
-	throws IOException {
+			FileWriter fw,
+			StringBuilder filterDefinitions,
+			String indentation)
+			throws IOException {
 		fw.append(indentation).append("\t\t<filter name=\"").append(entityName).append("NoneFilter\" condition=\"1=0\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName).append("CustomerFilter\" condition=\"bizCustomer=:customerParam\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName).append("DataGroupIdFilter\" condition=\"bizDataGroupId=:dataGroupIdParam\"/>\n");
-		fw.append(indentation).append("\t\t<filter name=\"").append(entityName).append("UserIdFilter\" condition=\"bizUserId=:userIdParam\"/>\n");
+		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
+				.append("CustomerFilter\" condition=\"bizCustomer=:customerParam\"/>\n");
+		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
+				.append("DataGroupIdFilter\" condition=\"bizDataGroupId=:dataGroupIdParam\"/>\n");
+		fw.append(indentation).append("\t\t<filter name=\"").append(entityName)
+				.append("UserIdFilter\" condition=\"bizUserId=:userIdParam\"/>\n");
 
 		filterDefinitions.append("\t<filter-def name=\"").append(entityName).append("NoneFilter\" />\n");
 
 		filterDefinitions.append("\t<filter-def name=\"").append(entityName).append("CustomerFilter\">\n");
 		filterDefinitions.append("\t\t<filter-param name=\"customerParam\" type=\"string\"/>\n");
 		filterDefinitions.append("\t</filter-def>\n");
-		
+
 		filterDefinitions.append("\t<filter-def name=\"").append(entityName).append("DataGroupIdFilter\">\n");
 		filterDefinitions.append("\t\t<filter-param name=\"dataGroupIdParam\" type=\"string\"/>\n");
 		filterDefinitions.append("\t</filter-def>\n");
@@ -1297,13 +1417,13 @@ joined tables
 		filterDefinitions.append("\t\t<filter-param name=\"userIdParam\" type=\"string\"/>\n");
 		filterDefinitions.append("\t</filter-def>\n");
 	}
-	
-	private void generateOverriddenORM(FileWriter fw, 
-										Customer customer, 
-										Module module, 
-										Document document,
-										StringBuilder filterDefinitions)
-	throws Exception {
+
+	private void generateOverriddenORM(FileWriter fw,
+			Customer customer,
+			Module module,
+			Document document,
+			StringBuilder filterDefinitions)
+			throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		String moduleName = module.getName();
@@ -1320,24 +1440,23 @@ joined tables
 			if (vanillaDocumentName != null) { // overridden document
 				// bug out if this document is an override but doesn't add any more properties
 				TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
-				if (! extraProperties.isEmpty()) { // there exists extra properties in override
+				if (!extraProperties.isEmpty()) { // there exists extra properties in override
 					packagePathPrefix = repository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + packagePathPrefix;
 				}
-			}
-			else { // totally new document defined as a customer override
+			} else { // totally new document defined as a customer override
 				packagePathPrefix = repository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + packagePathPrefix;
 			}
 		}
-		packagePathPrefix = packagePathPrefix.replace('/', '.');
-		
-		if (! visitedOverriddenORMDocumentsPerCustomer.contains(moduleDotDocument)) {
+		packagePathPrefix = packagePathPrefix.replaceAll("\\\\|\\/", ".");
+
+		if (!visitedOverriddenORMDocumentsPerCustomer.contains(moduleDotDocument)) {
 			visitedOverriddenORMDocumentsPerCustomer.add(moduleDotDocument);
 			overriddenORMDocumentsPerCustomer.add(moduleDotDocument);
 
 			// Propagate to parent document (if applicable)
 			Document parentDocument = document.getParentDocument(customer);
 			if (parentDocument != null) {
-				if (! parentDocument.getName().equals(documentName)) { // exclude hierarchical
+				if (!parentDocument.getName().equals(documentName)) { // exclude hierarchical
 					String parentModuleName = parentDocument.getOwningModuleName();
 					String parentDocumentName = parentDocument.getName();
 					String parentModuleDotDocument = parentModuleName + '.' + parentDocumentName;
@@ -1368,17 +1487,15 @@ joined tables
 								Module derivedModule = customer.getModule(derivedDocument.getOwningModuleName());
 								generateOverriddenORM(fw, customer, derivedModule, derivedDocument, filterDefinitions);
 							}
-						}
-						else {
+						} else {
 							generateOverriddenORM(fw, customer, refModule, refDocument, filterDefinitions);
 						}
-					}
-					else {
+					} else {
 						throw new IllegalStateException("Cannot generate ORM for a transient document");
 					}
 				}
 			}
-			
+
 			// Propagate to child collections
 			// Note:- these are not in the list of exported references
 			for (String referenceName : document.getReferenceNames()) {
@@ -1393,15 +1510,15 @@ joined tables
 			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
 			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 			generateORM(fw,
-							module,
-							document,
-							packagePathPrefix,
-							// extension class in use if this is a customer override of an existing domain class
-							(domainClass != null) && (packagePathPrefix.startsWith(repository.CUSTOMERS_NAME)),
-							true,
-							customer,
-							filterDefinitions,
-							"");
+					module,
+					document,
+					packagePathPrefix,
+					// extension class in use if this is a customer override of an existing domain class
+					(domainClass != null) && (packagePathPrefix.startsWith(repository.CUSTOMERS_NAME)),
+					true,
+					customer,
+					filterDefinitions,
+					"");
 		}
 	}
 
@@ -1409,11 +1526,11 @@ joined tables
 		TreeMap<String, AttributeType> result = new TreeMap<>();
 
 		for (Attribute attribute : document.getAttributes()) {
-			if (! attribute.getName().equals(Bean.BIZ_KEY)) {
+			if (!attribute.getName().equals(Bean.BIZ_KEY)) {
 				result.put(attribute.getName(), attribute.getAttributeType());
 			}
 		}
-		
+
 		for (String conditionName : ((DocumentImpl) document).getConditionNames()) {
 			result.put(conditionName, AttributeType.bool);
 		}
@@ -1421,11 +1538,11 @@ joined tables
 		return result;
 	}
 
-	private void populatePropertyLengths(AbstractRepository repository, 
-											Customer customer, 
-											Module module, 
-											Document document, 
-											String derivedPersistentIdentifier) {
+	private void populatePropertyLengths(AbstractRepository repository,
+			Customer customer,
+			Module module,
+			Document document,
+			String derivedPersistentIdentifier) {
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
 			String persistentIdentifier = null;
@@ -1433,8 +1550,7 @@ joined tables
 				if (derivedPersistentIdentifier != null) {
 					persistentIdentifier = derivedPersistentIdentifier;
 				}
-			}
-			else if (persistent.getName() != null) {
+			} else if (persistent.getName() != null) {
 				persistentIdentifier = persistent.getPersistentIdentifier();
 			}
 
@@ -1462,8 +1578,7 @@ joined tables
 				int length = Integer.MIN_VALUE;
 				if (attribute instanceof LengthField) {
 					length = ((LengthField) attribute).getLength();
-				}
-				else if (attribute instanceof Enumeration) {
+				} else if (attribute instanceof Enumeration) {
 					// Find the maximum code length
 					Enumeration enumeration = (Enumeration) attribute;
 					for (EnumeratedValue value : enumeration.getValues()) {
@@ -1512,9 +1627,7 @@ joined tables
 	 * @param enumeration
 	 * @param enums
 	 */
-	private static void appendEnumDefinition(Enumeration enumeration,
-												String typeName,
-												StringBuilder enums) {
+	private static void appendEnumDefinition(Enumeration enumeration, String typeName, StringBuilder enums) {
 		attributeJavadoc(enumeration, enums);
 		enums.append("\t@XmlEnum\n");
 		enums.append("\tpublic static enum ").append(typeName).append(" implements Enumeration {\n");
@@ -1527,32 +1640,32 @@ joined tables
 			enums.append("\t\t").append(value.toJavaIdentifier()).append("(\"").append(code);
 			enums.append("\", \"").append(description).append("\"),\n");
 		}
-		enums.setLength(enums.length() - 2);  // remove last '\n' and ','
-		
+		enums.setLength(enums.length() - 2); // remove last '\n' and ','
+
 		// members
 		enums.append(";\n\n");
-//		enums.append("\t\t/** @hidden */\n");
+		// enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate String code;\n");
-//		enums.append("\t\t/** @hidden */\n");
+		// enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate String description;\n\n");
 		enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate DomainValue domainValue;\n\n");
 		enums.append("\t\t/** @hidden */\n");
 		enums.append("\t\tprivate static List<DomainValue> domainValues;\n\n");
-		
+
 		// constructor
 		enums.append("\t\tprivate ").append(typeName).append("(String code, String description) {\n");
 		enums.append("\t\t\tthis.code = code;\n");
 		enums.append("\t\t\tthis.description = description;\n");
 		enums.append("\t\t\tthis.domainValue = new DomainValue(code, description);\n");
 		enums.append("\t\t}\n\n");
-		
+
 		// toCode()
 		enums.append("\t\t@Override\n");
 		enums.append("\t\tpublic String toCode() {\n");
 		enums.append("\t\t\treturn code;\n");
 		enums.append("\t\t}\n\n");
-		
+
 		// toDescription()
 		enums.append("\t\t@Override\n");
 		enums.append("\t\tpublic String toDescription() {\n");
@@ -1564,7 +1677,7 @@ joined tables
 		enums.append("\t\tpublic DomainValue toDomainValue() {\n");
 		enums.append("\t\t\treturn domainValue;\n");
 		enums.append("\t\t}\n\n");
-		
+
 		// fromCode
 		enums.append("\t\tpublic static ").append(typeName).append(" fromCode(String code) {\n");
 		enums.append("\t\t\t").append(typeName).append(" result = null;\n\n");
@@ -1576,7 +1689,7 @@ joined tables
 		enums.append("\t\t\t}\n\n");
 		enums.append("\t\t\treturn result;\n");
 		enums.append("\t\t}\n\n");
-		
+
 		// fromDescription
 		enums.append("\t\tpublic static ").append(typeName).append(" fromDescription(String description) {\n");
 		enums.append("\t\t\t").append(typeName).append(" result = null;\n\n");
@@ -1588,7 +1701,7 @@ joined tables
 		enums.append("\t\t\t}\n\n");
 		enums.append("\t\t\treturn result;\n");
 		enums.append("\t\t}\n\n");
-		
+
 		enums.append("\t\tpublic static List<DomainValue> toDomainValues() {\n");
 		enums.append("\t\t\tif (domainValues == null) {\n");
 		enums.append("\t\t\t\t").append(typeName).append("[] values = values();\n");
@@ -1603,20 +1716,20 @@ joined tables
 	}
 
 	private void addReference(Reference reference,
-								boolean overriddenReference,
-								Customer customer,
-								Module module,
-								String packagePath,
-								Set<String> imports,
-								StringBuilder attributes,
-								StringBuilder methods) {
+			boolean overriddenReference,
+			Customer customer,
+			Module module,
+			String packagePath,
+			Set<String> imports,
+			StringBuilder attributes,
+			StringBuilder methods) {
 		String propertyClassName = reference.getDocumentName();
 		Document propertyDocument = module.getDocument(customer, propertyClassName);
 		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = reference.getName();
 		boolean deprecated = reference.isDeprecated();
 
-		if (overriddenReference) { // overridden reference to concrete implementation 
+		if (overriddenReference) { // overridden reference to concrete implementation
 			return; // this already exists on the base class - don't override it.
 		}
 
@@ -1626,7 +1739,7 @@ joined tables
 		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(propertyClassName) == null)) {
 			propertyPackagePath = "customers." + customer.getName() + '.' + propertyPackagePath;
 		}
-		if (! propertyPackagePath.equals(packagePath)) {
+		if (!propertyPackagePath.equals(packagePath)) {
 			imports.add(propertyPackagePath + '.' + propertyClassName);
 		}
 
@@ -1655,7 +1768,7 @@ joined tables
 			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
 			methods.append("\t\treturn ").append(name).append(";\n");
 			methods.append("\t}\n");
-			
+
 			// Mapped Accessor method
 			accessorJavadoc(reference, methods, true);
 			if (overriddenReference) { // method in base class
@@ -1664,10 +1777,11 @@ joined tables
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName)
+					.append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
 			methods.append("\t}\n");
-			
+
 			// Mapped Mutator method
 			mutatorJavadoc(reference, methods, true);
 			if (overriddenReference) { // method in base class
@@ -1677,11 +1791,11 @@ joined tables
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void set").append(methodName);
-			methods.append("ElementById(@SuppressWarnings(\"unused\") String bizId, ").append(propertyClassName).append(" element) {\n");
+			methods.append("ElementById(@SuppressWarnings(\"unused\") String bizId, ").append(propertyClassName)
+					.append(" element) {\n");
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
-		}
-		else { // this is an association Attribute
+		} else { // this is an association Attribute
 			attributeJavadoc(reference, attributes);
 			if (deprecated) {
 				attributes.append("\t@Deprecated\n");
@@ -1719,19 +1833,19 @@ joined tables
 			methods.append("\t}\n");
 		}
 	}
-	
+
 	private void addInverse(AbstractInverse inverse,
-								boolean overriddenInverse,
-								Customer customer,
-								Module module,
-								String packagePath,
-								Set<String> imports,
-								StringBuilder attributes,
-								StringBuilder methods) {
+			boolean overriddenInverse,
+			Customer customer,
+			Module module,
+			String packagePath,
+			Set<String> imports,
+			StringBuilder attributes,
+			StringBuilder methods) {
 		String propertyClassName = inverse.getDocumentName();
 		String propertyPackageName = module.getDocument(customer, propertyClassName).getOwningModuleName();
 		String name = inverse.getName();
-		boolean many = (! InverseRelationship.oneToOne.equals(inverse.getRelationship()));
+		boolean many = (!InverseRelationship.oneToOne.equals(inverse.getRelationship()));
 		boolean deprecated = inverse.isDeprecated();
 
 		String propertyPackagePath = "modules." + propertyPackageName + ".domain";
@@ -1740,7 +1854,7 @@ joined tables
 		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(propertyClassName) == null)) {
 			propertyPackagePath = "customers." + customer.getName() + '.' + propertyPackagePath;
 		}
-		if (! propertyPackagePath.equals(packagePath)) {
+		if (!propertyPackagePath.equals(packagePath)) {
 			imports.add(propertyPackagePath + '.' + propertyClassName);
 		}
 
@@ -1750,7 +1864,7 @@ joined tables
 			imports.add("java.util.List");
 			imports.add("java.util.ArrayList");
 		}
-		
+
 		attributeJavadoc(inverse, attributes);
 		if (deprecated) {
 			attributes.append("\t@Deprecated\n");
@@ -1758,11 +1872,10 @@ joined tables
 		if (many) {
 			attributes.append("\tprivate List<").append(propertyClassName).append("> ").append(name);
 			attributes.append(" = new ArrayList<>();\n");
-		}
-		else {
+		} else {
 			attributes.append("\tprivate ").append(propertyClassName).append(" ").append(name).append(";\n");
 		}
-		
+
 		// Accessor method
 		accessorJavadoc(inverse, methods, false);
 		if (overriddenInverse) { // method in base class
@@ -1774,13 +1887,12 @@ joined tables
 		methods.append("\n\t@XmlElement");
 		if (many) {
 			methods.append("\n\tpublic List<").append(propertyClassName).append("> get").append(methodName).append("() {\n");
-		}
-		else {
+		} else {
 			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("() {\n");
 		}
 		methods.append("\t\treturn ").append(name).append(";\n");
 		methods.append("\t}\n");
-		
+
 		// Mapped Accessor method
 		if (many) {
 			accessorJavadoc(inverse, methods, true);
@@ -1790,7 +1902,8 @@ joined tables
 			if (deprecated) {
 				methods.append("\n\t@Deprecated");
 			}
-			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName).append("ElementById(String bizId) {\n");
+			methods.append("\n\tpublic ").append(propertyClassName).append(" get").append(methodName)
+					.append("ElementById(String bizId) {\n");
 			methods.append("\t\treturn getElementById(").append(name).append(", bizId);\n");
 			methods.append("\t}\n");
 		}
@@ -1809,18 +1922,379 @@ joined tables
 			methods.append("\t}\n");
 		}
 	}
-	
+
+	@SuppressWarnings("boxing")
+	private static void generateActionTests(final String moduleName, final String packagePath, final String modulePath,
+			Document document, String documentName, SkyveFactory annotation) throws IOException {
+		final String actionPath = AbstractRepository.get().MODULES_NAMESPACE + moduleName + File.separator + documentName
+				+ File.separator + "actions";
+		final File actionTestPath = new File(GENERATED_TEST_PATH + actionPath);
+
+		if (actionTestPath.exists()) {
+			for (File testFile : actionTestPath.listFiles()) {
+				testFile.delete();
+			}
+			actionTestPath.delete();
+		}
+
+		for (String actionName : document.getDefinedActionNames()) {
+			boolean skipGeneration = false, useExtensionDocument = false;
+
+			// check this is a ServerSideAction
+			String className = actionTestPath.getPath().replaceAll("\\\\|\\/", ".")
+					.replace(GENERATED_TEST_PATH.replaceAll("\\\\|\\/", "."), "") + "."
+					+ actionName;
+
+			// check if this is a server side action, all other types are ignored
+			try {
+				Class<?> c = Class.forName(className);
+				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
+					// System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
+					continue;
+				}
+
+				// get the document type for this action, the base class or an extension
+				Type[] t = c.getGenericInterfaces();
+				for (Type type : t) {
+					if (type instanceof ParameterizedType) {
+						Type[] actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
+						for (Type param : actualTypeArguments) {
+							// if the generic type for this server side action is the extension class, use that
+							if (param.getTypeName().endsWith(documentName + "Extension")) {
+								useExtensionDocument = true;
+								break;
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				System.err.println("Could not find action class for: " + e.getMessage());
+			}
+
+			// check if there is a factory extension annotation which skips this test
+			if (annotation != null) {
+				// skip if all actions are excluded for this document
+				// System.out.println("Found annotation for class " + className + " with value " + annotation.testAction());
+				if (Boolean.FALSE.equals(annotation.testAction())) {
+					continue;
+				}
+
+				// skip if this action is excluded for this document
+				for (int i = 0; i < annotation.excludedActions().length; i++) {
+					// System.out.println("Testing if " + annotation.excludedActions()[i].getName() + " equals " + actionName);
+					if (annotation.excludedActions()[i].getSimpleName().equals(actionName)) {
+						skipGeneration = true;
+						break;
+					}
+				}
+			}
+
+			if (!skipGeneration) {
+				File actionFile = new File(actionTestPath + File.separator + actionName + "Test.java");
+				// don't generate a test if the developer has created an action test in this location in the test directory
+				if (testAlreadyExists(actionFile)) {
+					System.out.println(String.format("Skipping action test generation for %s.%s, file already exists in %s",
+							actionPath.replaceAll("\\\\|\\/", "."), actionName, TEST_PATH));
+					continue;
+				}
+
+				// generate the action test
+				actionTestPath.mkdirs();
+				actionFile.createNewFile();
+				try (FileWriter fw = new FileWriter(actionFile)) {
+					generateActionTest(fw, modulePath, actionPath.replaceAll("\\\\|\\/", "."),
+							packagePath.replaceAll("\\\\|\\/", "."),
+							documentName, actionName, useExtensionDocument);
+				}
+			} else {
+				System.out.println(String.format("Skipping action test generation for %s.%s",
+						actionPath.replaceAll("\\\\|\\/", "."), actionName));
+			}
+		}
+	}
+
+	private static void generateActionTest(FileWriter fw, String modulePath, String actionPath, String domainPath,
+			String documentName, String actionName, boolean useExtensionDocument) throws IOException {
+		System.out.println("Generate action test class for " + actionPath + '.' + actionName);
+		fw.append("package ").append(actionPath).append(";\n\n");
+
+		Set<String> imports = new TreeSet<>();
+
+		imports.add("util.AbstractActionTest");
+
+		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+
+		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder
+		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
+
+		// customise imports if this is not a base class
+		if (useExtensionDocument) {
+			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		} else {
+			// import the domain class
+			imports.add(String.format("%s.%s", domainPath, documentName));
+		}
+		if (baseDocumentExtensionFactoryExists) {
+			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
+		}
+
+		// generate imports
+		for (String importClassName : imports) {
+			fw.append("import ").append(importClassName).append(";\n");
+		}
+
+		// generate javadoc
+		fw.append("\n").append("/**");
+		fw.append("\n").append(" * Generated - local changes will be overwritten.");
+		fw.append("\n").append(" * Extend {@link AbstractActionTest} to create your own tests for this action.");
+		fw.append("\n").append(" */");
+
+		// generate class
+		fw.append("\n").append("public class ").append(actionName).append("Test");
+		fw.append(" extends AbstractActionTest<").append(documentName).append(useExtensionDocument ? "Extension" : "")
+				.append(", ").append(actionName).append("> {");
+		fw.append("\n");
+
+		// generate test body
+		fw.append("\n\t");
+		fw.append("private ").append(documentName).append("Factory factory;");
+		fw.append("\n");
+
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
+		fw.append("\n\t\t").append("return new ").append(actionName).append("();");
+		fw.append("\n\t").append("}");
+
+		fw.append("\n");
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("protected ").append(documentName).append(useExtensionDocument ? "Extension" : "")
+				.append(" getBean() throws Exception {");
+		fw.append("\n\t\tif (factory == null) {");
+		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
+				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
+		fw.append("\n\t\t}");
+		fw.append("\n");
+		fw.append("\n\t\t").append("return factory.getInstance();");
+		fw.append("\n\t").append("}");
+
+		fw.append("\n}");
+	}
+
+	private static void generateDomainTest(FileWriter fw, String modulePath, String packagePath, String documentName)
+			throws IOException {
+		System.out.println("Generate domain test class for " + packagePath + '.' + documentName);
+		fw.append("package ").append(packagePath).append(";\n\n");
+
+		Set<String> imports = new TreeSet<>();
+
+		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		imports.add("util.AbstractDomainTest");
+
+		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
+		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
+
+		// customise imports if this is not a base class
+		if (baseDocumentExtensionFactoryExists) {
+			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
+		}
+
+		// generate imports
+		for (String importClassName : imports) {
+			fw.append("import ").append(importClassName).append(";\n");
+		}
+
+		// generate javadoc
+		fw.append("\n").append("/**");
+		fw.append("\n").append(" * Generated - local changes will be overwritten.");
+		fw.append("\n").append(" * Extend {@link AbstractDomainTest} to create your own tests for this document.");
+		fw.append("\n").append(" */");
+
+		// generate class
+		fw.append("\n").append("public class ").append(documentName).append("Test");
+		fw.append(" extends AbstractDomainTest<").append(documentName).append("> {");
+		fw.append("\n");
+
+		// generate test body
+		fw.append("\n\t");
+		fw.append("private ").append(documentName).append("Factory factory;");
+		fw.append("\n");
+
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
+		fw.append("\n\t\tif (factory == null) {");
+		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
+				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
+		fw.append("\n\t\t}");
+		fw.append("\n");
+		fw.append("\n\t\t").append("return factory.getInstance();");
+		fw.append("\n\t").append("}");
+
+		fw.append("\n}");
+	}
+
+	@SuppressWarnings("boxing")
+	private static void generateFactory(Module module, Document document, FileWriter fw, String packagePath,
+			String documentName) throws IOException {
+		System.out.println("Generate factory class for " + packagePath + '.' + documentName);
+		final String variableName = getVariableNameForDocument(documentName);
+		Set<String> imports = new TreeSet<>();
+		StringBuilder associations = new StringBuilder();
+		StringBuilder collections = new StringBuilder();
+
+		// Generate package
+		fw.append("package ").append(packagePath).append(".util").append(";\n\n");
+
+		imports.add("org.skyve.CORE");
+		imports.add("org.skyve.metadata.customer.Customer");
+		imports.add("org.skyve.metadata.model.document.Document");
+		imports.add("org.skyve.metadata.module.Module");
+		imports.add("org.skyve.util.test.SkyveFactory");
+		imports.add("org.skyve.util.Util");
+		imports.add("util.AbstractDomainFactory");
+
+		imports.add(String.format("%s.domain.%s", packagePath, documentName));
+
+		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
+		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + module.getName();
+		boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
+
+		// customise imports if this is not a base class
+		if (baseDocumentExtensionExists) {
+			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
+		}
+
+		// determine if this document has an associations or collections to add to the factory
+		for (Attribute attribute : getAllAttributes(document)) {
+
+			String name = attribute.getName();
+			String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
+			AttributeType type = attribute.getAttributeType();
+
+			if (attribute instanceof Reference) {
+				Reference reference = (Reference) attribute;
+				String referenceClassName = reference.getDocumentName();
+				Document relatedDocument = module.getDocument(null, referenceClassName);
+				Module relatedModule = AbstractRepository.get().getModule(null, relatedDocument.getOwningModuleName());
+				String relatedModuleName = relatedModule.getName();
+				String relatedModulePath = new String(AbstractRepository.get().MODULES_NAMESPACE + relatedModuleName);
+
+				if (AttributeType.collection.equals(type)) {
+					// check the minCardinality
+					Collection collection = (Collection) attribute;
+					if (collection.getMinCardinality() > 0) {
+						// check if there is an extension class for this Document
+						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
+
+						// add an import for the reference factory
+						imports.add(String.format("%s%s.util.%sFactory%s",
+								AbstractRepository.get().MODULES_NAMESPACE,
+								relatedModuleName,
+								referenceClassName,
+								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
+
+						// check the collection type, if child, add a parent reference
+						if (CollectionType.child.equals(reference.getType())) {
+							imports.add(String.format("%s.domain.%s", packagePath, referenceClassName));
+
+							String childVariableName = getVariableNameForDocument(referenceClassName);
+
+							collections.append("\n\t\t").append(referenceClassName).append(" ").append(childVariableName)
+									.append(" = new ")
+									.append(referenceClassName)
+									.append("Factory")
+									.append(extensionFactoryExists ? "Extension" : "")
+									.append("().getInstance();");
+							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
+									.append("().add(")
+									.append(childVariableName)
+									.append(");");
+
+							collections.append("\n\t\t").append(childVariableName).append(".setParent(")
+									.append(variableName)
+									.append(");");
+						} else {
+							// call the collection Document's factory
+							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
+									.append("().add(new ")
+									.append(referenceClassName)
+									.append("Factory")
+									.append(extensionFactoryExists ? "Extension" : "")
+									.append("().getInstance());");
+						}
+					}
+				} else {
+					if (attribute.isRequired()) {
+
+						// check if there is an extension class for this Document
+						// boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
+						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
+
+						// add an import for the reference factory
+						imports.add(String.format("%s%s.util.%sFactory%s",
+								AbstractRepository.get().MODULES_NAMESPACE,
+								relatedModuleName,
+								referenceClassName,
+								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
+
+						// this is a required association, call association Document's factory
+						String propertyClassName = ((Reference) attribute).getDocumentName();
+						associations.append("\n\t\t").append(variableName).append(".set").append(methodName).append("(new ")
+								.append(propertyClassName)
+								.append("Factory")
+								.append(extensionFactoryExists ? "Extension" : "")
+								.append("().getInstance());");
+					}
+				}
+			}
+		}
+
+		// generate imports
+		for (String importClassName : imports) {
+			fw.append("import ").append(importClassName).append(";\n");
+		}
+
+		String factoryExtensionPath = new String(
+				TEST_PATH + packagePath.replace('.', '/') + "/util/" + documentName + "FactoryExtension.java");
+
+		// generate javadoc
+		fw.append("\n").append("/**");
+		fw.append("\n").append(" * Generated - local changes will be overwritten.");
+		fw.append("\n").append(" * Create class ").append(factoryExtensionPath);
+		fw.append("\n").append(" * to extend this class and customise specific values for this document.");
+		fw.append("\n").append(" */");
+
+		// generate class
+		fw.append("\n").append("@SkyveFactory");
+		fw.append("\n").append("public class ").append(documentName).append("Factory");
+		fw.append(" extends AbstractDomainFactory<").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(" ").append("> {");
+		fw.append("\n");
+
+		// generate getInstance method
+		fw.append("\n\t").append("@Override");
+		fw.append("\n\t").append("public ").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
+				.append(" getInstance() throws Exception {");
+		fw.append("\n\t\t").append("Customer customer = CORE.getUser().getCustomer();");
+		fw.append("\n\t\t").append("Module module = customer.getModule(").append(documentName).append(".MODULE_NAME);");
+		fw.append("\n\t\t").append("Document document = module.getDocument(customer, ").append(documentName)
+				.append(".DOCUMENT_NAME);");
+		fw.append("\n");
+		fw.append("\n\t\t").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "").append(" ")
+				.append(variableName)
+				.append(" = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);");
+		// add any associations and collections
+		fw.append(associations);
+		fw.append(collections);
+		fw.append("\n");
+		fw.append("\n\t\t").append("return ").append(variableName).append(";");
+		fw.append("\n\t}");
+
+		fw.append("\n}");
+	}
+
 	@SuppressWarnings("synthetic-access")
-	private void generateJava(AbstractRepository repository,
-								Customer customer,
-								Module module,
-								Document document,
-								FileWriter fw,
-								String packagePath,
-								String documentName,
-								String baseDocumentName,
-								boolean overridden)
-	throws IOException {
+	private void generateJava(AbstractRepository repository, Customer customer, Module module, Document document, FileWriter fw,
+			String packagePath, String documentName, String baseDocumentName, boolean overridden) throws IOException {
 		System.out.println("Generate class for " + packagePath + '.' + documentName);
 		Persistent persistent = document.getPersistent();
 		fw.append("package ").append(packagePath).append(";\n\n");
@@ -1836,10 +2310,10 @@ joined tables
 
 		// Document and module names
 
-		if ((! overridden) || (baseDocumentName == null)) { // not an extension
+		if ((!overridden) || (baseDocumentName == null)) { // not an extension
 			imports.add("javax.xml.bind.annotation.XmlTransient");
 			imports.add("org.skyve.CORE");
-			
+
 			statics.append("\t/** @hidden */\n");
 			statics.append("\tpublic static final String MODULE_NAME = \"").append(module.getName()).append("\";\n");
 			statics.append("\t/** @hidden */\n");
@@ -1850,15 +2324,16 @@ joined tables
 			methods.append("\n\tpublic String getBizModule() {\n");
 			methods.append("\t\treturn ").append(documentName).append(".MODULE_NAME;\n");
 			methods.append("\t}\n");
-	
+
 			methods.append("\n\t@Override");
 			methods.append("\n\t@XmlTransient");
 			methods.append("\n\tpublic String getBizDocument() {\n");
 			methods.append("\t\treturn ").append(documentName).append(".DOCUMENT_NAME;\n");
 			methods.append("\t}\n");
-	
+
 			methods.append("\n\tpublic static ").append(documentName).append(" newInstance() throws Exception {\n");
-			methods.append("\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
+			methods.append(
+					"\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
 			methods.append("\t}\n");
 
 			String bizKeyMethodCode = ((DocumentImpl) document).getBizKeyMethodCode();
@@ -1877,7 +2352,7 @@ joined tables
 			methods.append(documentName).append(") o).getBizId()));\n");
 			methods.append("\t}\n");
 		}
-		
+
 		for (Attribute attribute : document.getAttributes()) {
 			imports.add("javax.xml.bind.annotation.XmlElement");
 
@@ -1889,9 +2364,10 @@ joined tables
 			// 2) We are creating the vanilla class AND the attribute should be present
 			// OR
 			// 3) Its an extension but the attribute DNE in the vanilla class OR its a customer class that is NOT an override
-			if ((! name.equals(Bean.BIZ_KEY)) && 
-					(((! overridden) && ((documentClass == null) || documentClass.attributes.containsKey(name))) || 
-						(overridden && (((documentClass != null) && (! documentClass.attributes.containsKey(name))) || (documentClass == null))))) {
+			if ((!name.equals(Bean.BIZ_KEY)) &&
+					(((!overridden) && ((documentClass == null) || documentClass.attributes.containsKey(name))) ||
+							(overridden && (((documentClass != null) && (!documentClass.attributes.containsKey(name)))
+									|| (documentClass == null))))) {
 				statics.append("\t/** @hidden */\n");
 				if (deprecated) {
 					statics.append("\t@Deprecated\n");
@@ -1900,107 +2376,101 @@ joined tables
 				statics.append(attribute.getName()).append("\";\n");
 
 				// Generate imports
-	
+
 				AttributeType type = attribute.getAttributeType();
 				String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
 				String propertySimpleClassName;
 				if (attribute instanceof Enumeration) {
 					Enumeration enumeration = (Enumeration) attribute;
 					propertySimpleClassName = enumeration.toJavaIdentifier();
-	
+
 					if (enumeration.getAttributeRef() != null) { // this is a reference
 						if (enumeration.getDocumentRef() != null) { // references a different document
 							StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
-							fullyQualifiedEnumName.append(AbstractRepository.get().getEncapsulatingClassNameForEnumeration(enumeration));
+							fullyQualifiedEnumName
+									.append(AbstractRepository.get().getEncapsulatingClassNameForEnumeration(enumeration));
 							fullyQualifiedEnumName.append('.').append(enumeration.toJavaIdentifier());
 							imports.add(fullyQualifiedEnumName.toString());
 						}
-					}
-					else {
+					} else {
 						imports.add("org.skyve.domain.types.Enumeration");
 						imports.add("org.skyve.metadata.model.document.Bizlet.DomainValue");
 						imports.add("java.util.List");
 						imports.add("java.util.ArrayList");
 						imports.add("javax.xml.bind.annotation.XmlEnum");
-						
+
 						appendEnumDefinition(enumeration, propertySimpleClassName, enums);
 					}
-				}
-				else if (attribute instanceof Reference) {
+				} else if (attribute instanceof Reference) {
 					addReference((Reference) attribute,
-									(overridden && // this is an extension class
-										// the reference is defined in the base class
-										(documentClass != null) && 
-										documentClass.attributes.containsKey(attribute.getName())),
-									customer,
-									module,
-									packagePath,
-									imports,
-									attributes,
-									methods);
+							(overridden && // this is an extension class
+							// the reference is defined in the base class
+									(documentClass != null) &&
+									documentClass.attributes.containsKey(attribute.getName())),
+							customer,
+							module,
+							packagePath,
+							imports,
+							attributes,
+							methods);
 					continue;
-				}
-				else if (attribute instanceof Inverse) {
+				} else if (attribute instanceof Inverse) {
 					addInverse((AbstractInverse) attribute,
-								(overridden && // this is an extension class
-										// the reference is defined in the base class
-										(documentClass != null) && 
-										documentClass.attributes.containsKey(attribute.getName())),
-								customer,
-								module,
-								packagePath,
-								imports,
-								attributes,
-								methods);
+							(overridden && // this is an extension class
+							// the reference is defined in the base class
+									(documentClass != null) &&
+									documentClass.attributes.containsKey(attribute.getName())),
+							customer,
+							module,
+							packagePath,
+							imports,
+							attributes,
+							methods);
 					continue;
-				}
-				else {
+				} else {
 					Class<?> propertyClass = type.getImplementingType();
 					String propertyClassName = propertyClass.getName();
 					propertySimpleClassName = propertyClass.getSimpleName();
-	
-					if (! propertyClassName.startsWith("java.lang")) {
+
+					if (!propertyClassName.startsWith("java.lang")) {
 						imports.add(propertyClassName);
 					}
 				}
-			
+
 				// attribute declaration
 				attributeJavadoc(attribute, attributes);
 				if (deprecated) {
 					attributes.append("\t@Deprecated\n");
 				}
 				attributes.append("\tprivate ").append(propertySimpleClassName).append(' ').append(name);
-	
+
 				// add attribute definition / default value if required
 				String defaultValue = ((Field) attribute).getDefaultValue();
 				if (defaultValue != null) {
-					if (AttributeType.bool.equals(type) || 
+					if (AttributeType.bool.equals(type) ||
 							AttributeType.integer.equals(type) ||
 							AttributeType.longInteger.equals(type)) {
 						attributes.append(" = new ").append(propertySimpleClassName);
 						attributes.append('(').append(defaultValue).append(')');
-					}
-					else if (AttributeType.colour.equals(type) || 
-								AttributeType.markup.equals(type) || 
-								AttributeType.memo.equals(type) || 
-								AttributeType.text.equals(type)) {
+					} else if (AttributeType.colour.equals(type) ||
+							AttributeType.markup.equals(type) ||
+							AttributeType.memo.equals(type) ||
+							AttributeType.text.equals(type)) {
 						attributes.append(" = \"").append(defaultValue).append('"');
-					}
-					else if (AttributeType.enumeration.equals(type)) {
+					} else if (AttributeType.enumeration.equals(type)) {
 						attributes.append(" = ").append(propertySimpleClassName).append('.').append(defaultValue);
-					}
-					else {
+					} else {
 						attributes.append(" = new ").append(propertySimpleClassName);
 						attributes.append("(\"").append(defaultValue).append("\")");
 					}
 				}
 				attributes.append(";\n");
-	
+
 				// Accessor method
 				accessorJavadoc(attribute, methods, false);
-				if (overridden && 
+				if (overridden &&
 						(baseDocumentName != null) && // base class exists
-						(documentClass != null) && 
+						(documentClass != null) &&
 						documentClass.attributes.containsKey(name)) { // method in base class
 					methods.append("\n\t@Override");
 				}
@@ -2010,12 +2480,12 @@ joined tables
 				methods.append("\n\tpublic ").append(propertySimpleClassName).append(" get").append(methodName).append("() {\n");
 				methods.append("\t\treturn ").append(name).append(";\n");
 				methods.append("\t}\n");
-	
+
 				// Mutator method
 				mutatorJavadoc(attribute, methods, false);
-				if (overridden && 
+				if (overridden &&
 						(baseDocumentName != null) && // base class exists
-						(documentClass != null) && 
+						(documentClass != null) &&
 						documentClass.attributes.containsKey(name)) { // method in base class
 					methods.append("\n\t@Override");
 				}
@@ -2028,44 +2498,37 @@ joined tables
 					imports.add("org.skyve.impl.domain.types.jaxb.DateOnlyMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"date\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(DateOnlyMapper.class)");
-				}
-				else if (AttributeType.time.equals(type)) {
+				} else if (AttributeType.time.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimeOnlyMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"time\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(TimeOnlyMapper.class)");
-				}
-				else if (AttributeType.dateTime.equals(type)) {
+				} else if (AttributeType.dateTime.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.DateTimeMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(DateTimeMapper.class)");
-				}
-				else if (AttributeType.timestamp.equals(type)) {
+				} else if (AttributeType.timestamp.equals(type)) {
 					imports.add("javax.xml.bind.annotation.XmlSchemaType");
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.TimestampMapper");
 					methods.append("\n\t@XmlSchemaType(name = \"dateTime\")");
 					methods.append("\n\t@XmlJavaTypeAdapter(TimestampMapper.class)");
-				}
-				else if (AttributeType.decimal2.equals(type)) {
+				} else if (AttributeType.decimal2.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal2Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal2Mapper.class)");
-				}
-				else if (AttributeType.decimal5.equals(type)) {
+				} else if (AttributeType.decimal5.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal5Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal5Mapper.class)");
-				}
-				else if (AttributeType.decimal10.equals(type)) {
+				} else if (AttributeType.decimal10.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.Decimal10Mapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(Decimal10Mapper.class)");
-				}
-				else if (AttributeType.geometry.equals(type)) {
+				} else if (AttributeType.geometry.equals(type)) {
 					imports.add("javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter");
 					imports.add("org.skyve.impl.domain.types.jaxb.GeometryMapper");
 					methods.append("\n\t@XmlJavaTypeAdapter(GeometryMapper.class)");
@@ -2091,8 +2554,7 @@ joined tables
 				imports.add("org.skyve.domain.HierarchicalBean");
 				imports.add("org.skyve.persistence.DocumentQuery");
 				imports.add("org.skyve.persistence.Persistence");
-			}
-			else {
+			} else {
 				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
 				imports.add("org.skyve.domain.ChildBean");
 			}
@@ -2102,22 +2564,22 @@ joined tables
 		if (polymorphic) {
 			imports.add("org.skyve.domain.PolymorphicPersistentBean");
 		}
-		
+
 		// indicates if the base document has <BaseDocument>Extension.java defined in the document folder.
 		boolean baseDocumentExtensionClassExists = false;
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
-			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java", 
-																SRC_PATH, 
-																repository.MODULES_NAMESPACE,
-																baseDocument.getOwningModuleName(),
-																baseDocumentName,
-																baseDocumentName);
+			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java",
+					SRC_PATH,
+					repository.MODULES_NAMESPACE,
+					baseDocument.getOwningModuleName(),
+					baseDocumentName,
+					baseDocumentName);
 			baseDocumentExtensionClassExists = new File(baseDocumentExtensionPath).exists();
 			if (baseDocumentExtensionClassExists) {
-				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName + "Extension");
-			}
-			else {
+				imports.add("modules." + baseDocument.getOwningModuleName() + '.' + baseDocumentName + '.' + baseDocumentName
+						+ "Extension");
+			} else {
 				imports.add("modules." + baseDocument.getOwningModuleName() + ".domain." + baseDocumentName);
 			}
 		}
@@ -2126,25 +2588,24 @@ joined tables
 		if (baseDocumentName == null) {
 			if (persistent != null) {
 				imports.add("org.skyve.impl.domain.AbstractPersistentBean");
-			}
-			else {
+			} else {
 				imports.add("org.skyve.impl.domain.AbstractTransientBean");
 			}
 		}
-		
+
 		// Add conditions
 		Map<String, Condition> conditions = ((DocumentImpl) document).getConditions();
 		if (conditions != null) {
 			for (String conditionName : conditions.keySet()) {
 				Condition condition = conditions.get(conditionName);
 
-				if ((! overridden) ||
+				if ((!overridden) ||
 						(documentClass == null) ||
-							(! documentClass.attributes.containsKey(conditionName))) {
+						(!documentClass.attributes.containsKey(conditionName))) {
 					imports.add("javax.xml.bind.annotation.XmlTransient");
-					
+
 					boolean overriddenCondition = "created".equals(conditionName);
-					
+
 					// Generate/Include UML doc
 					String description = condition.getDocumentation();
 					if (description == null) {
@@ -2154,38 +2615,18 @@ joined tables
 						description = conditionName;
 					}
 					methods.append("\n\t/**");
-					String doc = condition.getDescription();
-					boolean nothingDocumented = true;
-					if (doc != null) {
-						nothingDocumented = false;
-						methods.append("\n\t * ").append(doc);
-					}
-					doc = condition.getDocumentation();
-					if (doc != null) {
-						nothingDocumented = false;
-						methods.append("\n\t * ").append(doc);
-					}
-					if (nothingDocumented) {
-						methods.append("\n\t * ").append(conditionName);
-					}
-					methods.append("\n\t * @return\tThe condition\n");
+					methods.append("\n\t * ").append(description);
 					methods.append("\n\t */");
 
 					methods.append("\n\t@XmlTransient");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
-					String methodName = String.format("is%s%s", 
-														String.valueOf(conditionName.charAt(0)).toUpperCase(),
-														conditionName.substring(1));
-					methods.append("\n\tpublic boolean ").append(methodName).append("() {\n");
+					methods.append("\n\tpublic boolean is").append(Character.toUpperCase(conditionName.charAt(0)));
+					methods.append(conditionName.substring(1)).append("() {\n");
 					methods.append("\t\treturn (").append(condition.getExpression()).append(");\n");
 					methods.append("\t}\n");
 
-					methods.append("\n\t/**");
-					methods.append("\t * {@link #").append(methodName).append("} negation.\n");
-					methods.append("\n\t * @return\tThe negated condition\n");
-					methods.append("\n\t */");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
@@ -2201,19 +2642,19 @@ joined tables
 		imports.add("javax.xml.bind.annotation.XmlType");
 		imports.add("javax.xml.bind.annotation.XmlRootElement");
 
-		// Add parent reference and bizOrdinal property 
+		// Add parent reference and bizOrdinal property
 		// if this is a base class of a child document
-		if ((parentDocumentName != null) && 
-				((! overridden) || (baseDocumentName == null))) {
+		if ((parentDocumentName != null) &&
+				((!overridden) || (baseDocumentName == null))) {
 			if (parentDocumentName.equals(documentName)) {
 				attributes.append("\tprivate String bizParentId;\n\n");
-				
+
 				// Accessor method
 				methods.append("\n\t@Override\n");
 				methods.append("\tpublic String getBizParentId() {\n");
 				methods.append("\t\treturn bizParentId;\n");
 				methods.append("\t}\n");
-	
+
 				// Mutator method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
@@ -2228,32 +2669,33 @@ joined tables
 				methods.append("\t\t").append(documentName).append(" result = null;\n\n");
 				methods.append("\t\tif (bizParentId != null) {\n");
 				methods.append("\t\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ")
+						.append(documentName).append(".DOCUMENT_NAME);\n");
 				methods.append("\t\t\tq.getFilter().addEquals(Bean.DOCUMENT_ID, bizParentId);\n");
 				methods.append("\t\t\tresult = q.retrieveBean();\n");
 				methods.append("\t\t}\n\n");
 				methods.append("\t\treturn result;\n");
 				methods.append("\t}\n");
-				
+
 				// Traversal method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlTransient\n");
 				methods.append("\tpublic List<").append(documentName).append("> getChildren() {\n");
 				methods.append("\t\tPersistence p = CORE.getPersistence();\n");
-				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ").append(documentName).append(".DOCUMENT_NAME);\n");
+				methods.append("\t\tDocumentQuery q = p.newDocumentQuery(").append(documentName).append(".MODULE_NAME, ")
+						.append(documentName).append(".DOCUMENT_NAME);\n");
 				methods.append("\t\tq.getFilter().addEquals(HierarchicalBean.PARENT_ID, bizParentId);\n");
 				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n");
-			}
-			else {
+			} else {
 				attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
-	
+
 				// Accessor method
 				methods.append("\n\t@Override\n");
 				methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
 				methods.append("\t\treturn parent;\n");
 				methods.append("\t}\n");
-	
+
 				// Mutator method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
@@ -2262,17 +2704,17 @@ joined tables
 				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
 				methods.append("\t\tthis.parent = ").append(" parent;\n");
 				methods.append("\t}\n");
-	
+
 				// BizOrdinal property
 				imports.add("org.skyve.domain.Bean");
 				attributes.append("\tprivate Integer bizOrdinal;\n\n");
-	
+
 				// Accessor method
 				methods.append("\n\t@Override\n");
 				methods.append("\tpublic Integer getBizOrdinal() {\n");
 				methods.append("\t\treturn bizOrdinal;\n");
 				methods.append("\t}\n");
-	
+
 				// Mutator method
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
@@ -2288,18 +2730,15 @@ joined tables
 		}
 
 		// Generate/Include UML doc
+		String description = document.getDocumentation();
+		if (description == null) {
+			description = document.getDescription();
+		}
+		if (description == null) {
+			description = document.getName();
+		}
 		fw.append("\n/**");
-		fw.append("\n * ").append(document.getSingularAlias());
-		String doc = document.getDescription();
-		if (doc != null) {
-			fw.append("\n * <br/>");
-			fw.append("\n * ").append(doc);
-		}
-		doc = document.getDocumentation();
-		if (doc != null) {
-			fw.append("\n * <br/>");
-			fw.append("\n * ").append(doc);
-		}
+		fw.append("\n * ").append(description);
 		fw.append("\n * \n");
 
 		for (Attribute attribute : document.getAttributes()) {
@@ -2314,19 +2753,17 @@ joined tables
 			ReferenceType type = reference.getType();
 			boolean required = reference.isRequired();
 			if (AssociationType.aggregation.equals(type)) {
-				fw.append(" * @navhas n ").append(referenceName).append(required ? " 1 " : " 0..1 ").append(reference.getDocumentName()).append('\n');
-			}
-			else if (AssociationType.composition.equals(type)) {
-				fw.append(" * @navcomposed n ").append(referenceName).append(required ? " 1 " : " 0..1 ").append(reference.getDocumentName()).append('\n');
-			}
-			else {
+				fw.append(" * @navhas n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
+						.append(reference.getDocumentName()).append('\n');
+			} else if (AssociationType.composition.equals(type)) {
+				fw.append(" * @navcomposed n ").append(referenceName).append(required ? " 1 " : " 0..1 ")
+						.append(reference.getDocumentName()).append('\n');
+			} else {
 				if (CollectionType.aggregation.equals(type)) {
 					fw.append(" * @navhas n ");
-				}
-				else if (CollectionType.composition.equals(type)) {
+				} else if (CollectionType.composition.equals(type)) {
 					fw.append(" * @navcomposed n ");
-				}
-				else if (CollectionType.child.equals(type)) {
+				} else if (CollectionType.child.equals(type)) {
 					fw.append(" * @navcomposed 1 ");
 				}
 				fw.append(referenceName);
@@ -2336,8 +2773,7 @@ joined tables
 				Integer max = collection.getMaxCardinality();
 				if (max == null) {
 					fw.append("n ");
-				}
-				else {
+				} else {
 					fw.append(max.toString()).append(' ');
 				}
 				fw.append(reference.getDocumentName()).append('\n');
@@ -2345,21 +2781,18 @@ joined tables
 		}
 		if (persistent == null) {
 			fw.append(" * @stereotype \"transient");
-		}
-		else {
+		} else {
 			fw.append(" * @stereotype \"persistent");
 		}
 		if (parentDocumentName != null) {
 			fw.append(" child\"\n");
-//			fw.append(" * @navassoc 1 parent 1 ").append(parentDocumentName).append('\n');
-		}
-		else {
+			// fw.append(" * @navassoc 1 parent 1 ").append(parentDocumentName).append('\n');
+		} else {
 			fw.append("\"\n");
 		}
-		
+
 		fw.append(" */\n");
-		
-		
+
 		// generate class body
 		fw.append("@XmlType");
 		fw.append("\n@XmlRootElement");
@@ -2379,23 +2812,20 @@ joined tables
 			if (overridden) {
 				fw.append("Ext");
 			}
-			
+
 			if (baseDocumentExtensionClassExists) {
 				fw.append(" extends ").append(baseDocumentName).append("Extension");
-			}
-			else {
+			} else {
 				fw.append(" extends ").append(baseDocumentName);
 			}
-		}
-		else {
+		} else {
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
-		
+
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
-			}
-			else {
+			} else {
 				fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
 			}
 		}
@@ -2416,7 +2846,7 @@ joined tables
 
 		fw.append("}\n");
 	}
-	
+
 	private boolean testPolymorphic(Document document) {
 		// If this is a mapped document, its not polymorphic - it can't be queried and isn't really persistent
 		Persistent persistent = document.getPersistent();
@@ -2424,8 +2854,7 @@ joined tables
 			if (ExtensionStrategy.mapped.equals(persistent.getStrategy())) {
 				return false;
 			}
-		}
-		else {
+		} else {
 			return false;
 		}
 
@@ -2450,7 +2879,7 @@ joined tables
 		}
 		return false;
 	}
-	
+
 	private static void attributeJavadoc(Attribute attribute, StringBuilder toAppendTo) {
 		toAppendTo.append("\t/**\n");
 		toAppendTo.append("\t * ").append(attribute.getDisplayName()).append('\n');
@@ -2466,15 +2895,14 @@ joined tables
 		}
 		toAppendTo.append("\t **/\n");
 	}
-	
+
 	private static void accessorJavadoc(Attribute attribute, StringBuilder toAppendTo, boolean mapped) {
 		toAppendTo.append("\n\t/**\n");
 		toAppendTo.append("\t * {@link #").append(attribute.getName()).append("} accessor.\n");
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
 			toAppendTo.append("\t * @return\tThe value of the element in the list.\n");
-		}
-		else {
+		} else {
 			toAppendTo.append("\t * @return\tThe value.\n");
 		}
 		toAppendTo.append("\t **/");
@@ -2486,10 +2914,101 @@ joined tables
 		if (mapped) {
 			toAppendTo.append("\t * @param bizId\tThe bizId of the element in the list.\n");
 			toAppendTo.append("\t * @param element\tThe new value of the element in the list.\n");
-		}
-		else {
+		} else {
 			toAppendTo.append("\t * @param ").append(attribute.getName()).append("\tThe new value.\n");
 		}
 		toAppendTo.append("\t **/");
+	}
+
+	/**
+	 * Checks if a domain extension class exists for the given document name in the specified package
+	 * and module path.
+	 * 
+	 * @param packagePathPrefix The package path prefix, e.g.
+	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param documentName The name of the document, e.g. Audit
+	 * @return true if the extension class exists in the expected location, false otherwise
+	 */
+	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
+		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/'
+				+ documentName + "Extension.java";
+		if (new File(extensionPath).exists()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks if a factory extension class exists for the given document name
+	 * in the specified module path.
+	 * 
+	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param documentName The name of the document; e.g. Audit
+	 * @return true if the factory extension class exists in the location, false otherwise
+	 */
+	private static boolean factoryExtensionClassExists(String modulePath, String documentName) {
+		boolean baseDocumentExtensionFactoryExists = false;
+
+		File factoryPath = new File(TEST_PATH + modulePath + "/util/");
+		File factoryExtensionFile = new File(
+				factoryPath.getPath() + File.separator + documentName + "FactoryExtension.java");
+
+		if (factoryExtensionFile.exists()) {
+			baseDocumentExtensionFactoryExists = true;
+		}
+
+		return baseDocumentExtensionFactoryExists;
+	}
+
+	/**
+	 * Return all vanilla attributes for the specified document.
+	 */
+	private static List<? extends Attribute> getAllAttributes(Document document) {
+		List<Attribute> result = new ArrayList<>(document.getAttributes());
+		Extends currentInherits = document.getExtends();
+		if (currentInherits != null) {
+			while (currentInherits != null) {
+				Module module = AbstractRepository.get().getModule(null, document.getOwningModuleName());
+				Document baseDocument = module.getDocument(null, currentInherits.getDocumentName());
+				result.addAll(baseDocument.getAttributes());
+				currentInherits = baseDocument.getExtends();
+			}
+		}
+
+		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Creates a "variable" name for a document. E.g. Audit will return audit. Lowercases
+	 * the first letter of the document name. Also checks if the variable name is
+	 * a Java reserved word, and prefixes it with an underscore if it is.
+	 * 
+	 * @param documentName The name of the document to generate a variable name for
+	 * @return The variable name from the document.
+	 */
+	private static String getVariableNameForDocument(final String documentName) {
+		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
+
+		// check this is not a Java reserved word
+		if (RESERVED_WORDS.contains(variableName)) {
+			return "_" + variableName;
+		}
+
+		return variableName;
+	}
+
+	/**
+	 * Checks if a file in the TEST_PATH already exists for the test about
+	 * to be created in the GENERATED_TEST_PATH.
+	 * 
+	 * @param testToBeCreated The full file path to the test file about to be created
+	 * @return True if developer has already created a file with the name, false otherwise
+	 */
+	private static boolean testAlreadyExists(File testToBeCreated) {
+		File testFile = new File(testToBeCreated.getPath().replace("\\", "/").replace(
+				GENERATED_TEST_PATH.replace("\\", "/"),
+				TEST_PATH.replace("\\", "/")));
+		return testFile.exists();
 	}
 }

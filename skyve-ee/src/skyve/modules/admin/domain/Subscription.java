@@ -9,8 +9,6 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * Subscription
- * <br/>
  * A subscription Preference models the receiver's preference about how they wish to receive the communication type (or not).
 
 		If the subscription is declined, the format type is not required. If the format type is supplied, then the communication

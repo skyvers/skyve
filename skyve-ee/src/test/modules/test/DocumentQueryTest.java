@@ -9,9 +9,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class DocumentQueryTest extends AbstractH2Test {
+public class DocumentQueryTest extends AbstractSkyveTest {
 	@Test
 	public void testDefaultHierarchical() {
 		DocumentQuery q = m.getDocumentDefaultQuery(c, hd.getName()).constructDocumentQuery(null, null);

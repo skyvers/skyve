@@ -1070,114 +1070,72 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Batch Selected
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isBatchSelected() {
 		return (selectedBatchTimestampFolderName != null);
 	}
 
-	/**	 * {@link #isBatchSelected} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotBatchSelected() {
 		return (! isBatchSelected());
 	}
 
 	/**
 	 * Refresh Batches
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isBatchesRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshBatches));
 	}
 
-	/**	 * {@link #isBatchesRefreshRequired} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotBatchesRefreshRequired() {
 		return (! isBatchesRefreshRequired());
 	}
 
 	/**
 	 * Email type format
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isEmailType() {
 		return (FormatType.email.equals(this.getFormatType()));
 	}
 
-	/**	 * {@link #isEmailType} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotEmailType() {
 		return (! isEmailType());
 	}
 
 	/**
 	 * Includes Calendar
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isIncludesCalendar() {
 		return (Boolean.TRUE.equals(getIncludeCalendar()));
 	}
 
-	/**	 * {@link #isIncludesCalendar} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotIncludesCalendar() {
 		return (! isIncludesCalendar());
 	}
 
 	/**
 	 * Locked
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isLocked() {
 		return (isPersisted() && Boolean.TRUE.equals(getSystem()));
 	}
 
-	/**	 * {@link #isLocked} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotLocked() {
 		return (! isLocked());
 	}
 
 	/**
 	 * Save for Bulk Send
-	 * @return	The condition
-
 	 */
 	@XmlTransient
 	public boolean isSaveAction() {
 		return (ActionType.saveForBulkSend.equals(this.getActionType()));
 	}
 
-	/**	 * {@link #isSaveAction} negation.
-
-	 * @return	The negated condition
-
-	 */
 	public boolean isNotSaveAction() {
 		return (! isSaveAction());
 	}

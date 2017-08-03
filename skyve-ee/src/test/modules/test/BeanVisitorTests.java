@@ -14,9 +14,9 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class BeanVisitorTests extends AbstractH2Test {
+public class BeanVisitorTests extends AbstractSkyveTest {
 	@Test
 	public void testStandard() throws Exception {
 		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);

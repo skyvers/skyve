@@ -5,9 +5,9 @@ import org.skyve.metadata.view.model.comparison.DefaultBindingComparisonModel;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractH2Test;
+import util.AbstractSkyveTest;
 
-public class DefaultBindingComparisonModelTests extends AbstractH2Test {
+public class DefaultBindingComparisonModelTests extends AbstractSkyveTest {
 	@Test
 	public void testSimpleGeneration() throws Exception {
 		AllAttributesPersistent now = Util.constructRandomInstance(u, m, aapd, 1);
