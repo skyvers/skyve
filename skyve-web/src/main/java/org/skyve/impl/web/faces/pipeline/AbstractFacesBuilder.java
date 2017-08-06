@@ -60,10 +60,10 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
-	protected void setInvisible(UIComponent component, String invisibleConditionName, String extraELToAppend) {
+	protected void setInvisible(UIComponent component, String invisibleConditionName, String extraELToAnd) {
 		if (invisibleConditionName != null) {
 			String visible = BindUtil.negateCondition(invisibleConditionName);
-			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAppend));
+			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAnd));
 		}
 	}
 
@@ -114,7 +114,7 @@ public abstract class AbstractFacesBuilder {
 
 	protected ValueExpression createValueExpressionFromBinding(String binding, 
 																boolean map,
-																String extraELConditionToAppend, 
+																String extraELConditionToAnd, 
 																Class<?> typeReturned) {
 		StringBuilder expressionPrefix = new StringBuilder(64);
 		expressionPrefix.append(managedBeanName).append(".currentBean");
@@ -124,7 +124,7 @@ public abstract class AbstractFacesBuilder {
 													false,
 													fullBinding, 
 													map, 
-													extraELConditionToAppend,
+													extraELConditionToAnd,
 													typeReturned);
 	}
 
@@ -132,7 +132,7 @@ public abstract class AbstractFacesBuilder {
 																boolean listVar,
 																String binding, 
 																boolean map,
-																String extraELConditionToAppend, 
+																String extraELConditionToAnd, 
 																Class<?> typeReturned) {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
@@ -144,27 +144,63 @@ public abstract class AbstractFacesBuilder {
 		if (map && (expressionPrefix != null)) {
 			sb.append("']");
 		}
-		if (extraELConditionToAppend != null) {
-			sb.append(" and ").append(extraELConditionToAppend);
+		if (extraELConditionToAnd != null) {
+			sb.append(" and ").append(extraELConditionToAnd);
 		}
 		sb.append('}');
 
 		return ef.createValueExpression(elc, sb.toString(), typeReturned);
 	}
 
-	protected ValueExpression createValueExpressionFromCondition(String condition, String extraELConditionToAppend) {
-		if ("false".equals(condition)) {
+	protected ValueExpression createValueExpressionFromCondition(String condition, String extraELConditionToAnd) {
+		if (String.valueOf(false).equals(condition)) {
 			return ef.createValueExpression(condition, Boolean.class);
 		}
-		else if ("true".equals(condition)) {
-			if (extraELConditionToAppend == null) {
+		else if (String.valueOf(true).equals(condition)) {
+			if (extraELConditionToAnd == null) {
 				return ef.createValueExpression(condition, Boolean.class);
 			}
 
-			return createValueExpressionFromBinding(null, false, extraELConditionToAppend, false, null, Boolean.class);
+			return createValueExpressionFromBinding(null, false, extraELConditionToAnd, false, null, Boolean.class);
 		}
 
-		return createValueExpressionFromBinding(condition, true, extraELConditionToAppend, Boolean.class);
+		return createValueExpressionFromBinding(condition, true, extraELConditionToAnd, Boolean.class);
+	}
+	
+	protected String createAndedValueExpressionFragmentFromConditions(String[] conditions, boolean negate) {
+		StringBuilder result = new StringBuilder(64);
+		
+		if (negate) {
+			result.append("not (");
+		}
+		for (String condition : conditions) {
+			if (String.valueOf(true).equals(condition) || String.valueOf(false).equals(condition)) {
+				result.append(condition);
+			}
+			else {
+				result.append(managedBeanName).append(".currentBean['").append(condition).append("']");
+			}
+			result.append(" and ");
+		}
+		result.setLength(result.length() - 5); // remove last and
+		if (negate) {
+			result.append(")");
+		}
+
+		return result.toString();
+	}
+	
+	protected ValueExpression createAndedValueExpressionFromConditions(String[] conditions, boolean negate) {
+		if (conditions.length == 1) {
+			return createValueExpressionFromCondition(conditions[0], null);
+		}
+
+		return createValueExpressionFromBinding(null, 
+													false, 
+													createAndedValueExpressionFragmentFromConditions(conditions, negate), 
+													false, 
+													null, 
+													Boolean.class);
 	}
 	
 	protected HtmlPanelGroup panelGroup(boolean nowrap, 

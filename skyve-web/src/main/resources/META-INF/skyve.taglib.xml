@@ -173,8 +173,26 @@
 			<type>java.lang.String</type>
 		</attribute>
 		<attribute>
-			<description>Indicates whether this grid should allow creation of a new document bean (New Button).</description>
-			<name>canCreate</name>
+			<description>Indicates whether this grid should render creation of a new document bean (New Button).</description>
+			<name>createRendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should disable creation of a new document bean (New Button).</description>
+			<name>createDisabled</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should render zooming to a document bean (> button or click).</description>
+			<name>zoomRendered</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should disable zooming of a document bean (> button or click).</description>
+			<name>zoomDisabled</name>
 			<required>false</required>
 			<type>java.lang.Boolean</type>
 		</attribute>

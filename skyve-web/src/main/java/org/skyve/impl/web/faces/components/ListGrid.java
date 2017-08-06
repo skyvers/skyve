@@ -40,8 +40,20 @@ public class ListGrid extends HtmlPanelGroup {
 			final String documentName = (String) attributes.get("document");
 			final String modelName = (String) attributes.get("model");
 			final String managedBeanName = (String) attributes.get("managedBean");
-			Object canCreateAttribute = attributes.get("canCreate");
-			final boolean canCreate = (canCreateAttribute == null) || "true".equals(canCreateAttribute);
+			Object createRenderedAttribute = attributes.get("createRendered");
+			final boolean createRendered = (createRenderedAttribute == null) || 
+											String.valueOf(true).equals(createRenderedAttribute) || // literal "true"
+											Boolean.TRUE.equals(createRenderedAttribute); // evaluated EL expression
+			Object createDisabledAttribute = attributes.get("createDisabled");
+			final boolean createDisabled = String.valueOf(true).equals(createDisabledAttribute) || // literal true
+												Boolean.TRUE.equals(createDisabledAttribute); // evaluated EL Expression
+			Object zoomRenderedAttribute = attributes.get("zoomRendered");
+			final boolean zoomRendered = (zoomRenderedAttribute == null) ||
+											String.valueOf(true).equals(zoomRenderedAttribute) || // literal "true"
+											Boolean.TRUE.equals(zoomRenderedAttribute); // evaluated EL expression
+			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
+			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
+											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
 			final boolean paginator = "true".equals(attributes.get("paginator"));
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
@@ -89,7 +101,11 @@ public class ListGrid extends HtmlPanelGroup {
 				    												name, 
 				    												model, 
 				    												null,
-				    												canCreate, 
+				    												user.canCreateDocument(model.getDrivingDocument()),
+				    												createRendered,
+				    												new String[] {String.valueOf(createDisabled)},
+				    												zoomRendered,
+				    												new String[] {String.valueOf(zoomDisabled)},
 				    												paginator, 
 				    												true);
 				    ListGrid.this.getChildren().add(grid);

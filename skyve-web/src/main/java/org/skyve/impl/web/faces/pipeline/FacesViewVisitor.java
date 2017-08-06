@@ -133,6 +133,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -857,21 +858,39 @@ public class FacesViewVisitor extends ViewVisitor {
 		String modelDocumentName = null;
 		
 		ListModel<? extends Bean> model = null;
+		Document drivingDocument = null;
 		if ((queryName == null) && (modelName != null)) {
 			model = CORE.getRepository().getListModel(customer, document, modelName);
 			modelDocumentName = document.getName();
+			drivingDocument = model.getDrivingDocument();
 		}
 		else {
 			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
 			if (query == null) {
 				query = module.getDocumentDefaultQuery(customer, queryName);
 			}
+			drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
 	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
 	        queryModel.setQuery(query);
 			modelName = queryName;
 	        model = queryModel;
 		}
-		UIComponent l = cb.listGrid(modelDocumentName, modelName, model, grid.getParameters(), true, true, false);
+		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		String[] createDisabled = new String[] {grid.getDisableAddConditionName(), grid.getDisabledConditionName()};
+		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
+		String[] zoomDisabled = new String[] {grid.getDisabledConditionName(), grid.getDisableZoomConditionName()};
+		
+		UIComponent l = cb.listGrid(modelDocumentName, 
+										modelName, 
+										model, 
+										grid.getParameters(), 
+										user.canCreateDocument(drivingDocument),
+										createRendered,
+										createDisabled,
+										zoomRendered,
+										zoomDisabled,
+										true,
+										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
 		currentGrid = grid;
 	}

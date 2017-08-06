@@ -106,10 +106,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelName,
 											ListModel<? extends Bean> model, 
 											List<FilterParameter> filterParameters,
-											boolean canCreate,
+											boolean canCreateDocument,
+											boolean createRendered,
+											String[] createDisabledConditionNames,
+											boolean zoomRendered,
+											String[] zoomDisabledConditionNames,
 											boolean showPaginator,
 											boolean stickyHeader);
-	
+
 	public abstract UIComponent listMembership(ListMembership membership);
 	
 	public abstract UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required);

@@ -382,7 +382,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									List<FilterParameter> filterParameters,
-									boolean canCreate,
+									boolean canCreateDocument,
+									boolean createRendered,
+									String[] createDisabledConditionNames,
+									boolean zoomRendered,
+									String[] zoomDisabledConditionNames,
 									boolean showPaginator,
 									boolean stickyHeader) {
 		Document drivingDocument =  model.getDrivingDocument();
@@ -403,16 +407,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
         
         setId(result, null);
     	result.setWidgetVar(result.getId());
-        result.setSelectionMode("single");
-        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
+    	if (zoomRendered) {
+    		result.setValueExpression("selectionMode", 
+    									ef.createValueExpression(elc, String.format("#{(%s) ? '' : 'single'}", 
+    																					createAndedValueExpressionFragmentFromConditions(zoomDisabledConditionNames, false)),
+    																					String.class));
+	        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
         
-        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-        StringBuilder start = new StringBuilder(64);
-        start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
-		start.append("?a=").append(WebAction.e.toString()).append("'+s;return false;");
-		ajax.setOnstart(start.toString());
-        result.addClientBehavior("rowSelect", ajax);
-
+	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+	        StringBuilder start = new StringBuilder(64);
+	        start.append("var s=PF('").append(result.getId()).append("').selection[0];window.location='");
+			start.append("?a=").append(WebAction.e.toString()).append("'+s;return false;");
+			ajax.setOnstart(start.toString());
+	        result.addClientBehavior("rowSelect", ajax);
+    	}
+    	
         // Write out getModel call as the value
         StringBuilder value = new StringBuilder(64);
 		value.append("#{").append(managedBeanName).append(".getModel('").append(moduleName).append("','");
@@ -449,7 +458,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
         addListGridHeader(model, result);
         List<UIComponent> children = result.getChildren();
         addListGridBoundColumns(model, children);
-    	addListGridActionColumn(moduleName, drivingDocumentName, canCreate, children);
+        if ((canCreateDocument && createRendered) || zoomRendered) {
+        	addListGridActionColumn(moduleName, 
+        								drivingDocumentName, 
+        								canCreateDocument,
+        								createRendered, 
+        								createDisabledConditionNames, 
+        								zoomRendered,
+        								zoomDisabledConditionNames,
+        								children);
+        }
     	
     	return result;
 	}
@@ -518,17 +536,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	private void addListGridActionColumn(String moduleName,
 											String documentName,
-											boolean canCreate,
+											boolean canCreateDocument,
+											boolean createRendered,
+											String[] createDisabledConditionNames,
+											boolean zoomRendered,
+											String[] zoomDisabledConditionNames,
 											List<UIComponent> componentChildrenToAddTo) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
 		column.setWidth("40");
 		column.setStyle("text-align:center !important");
-        if (canCreate) {
+        if (canCreateDocument && createRendered) {
 	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 	    	button.setValue(null);
         	button.setTitle("New record");
 	    	button.setIcon("fa fa-plus");
+			button.setValueExpression("disabled",
+										createAndedValueExpressionFromConditions(createDisabledConditionNames, false));
         	StringBuilder value = new StringBuilder(128);
         	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
         	value.append("&d=").append(documentName);
@@ -539,17 +563,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
         else {
     		column.setHeaderText("");
         }
-
+        if (zoomRendered) {
 	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 	    	button.setValue(null);
 	    	button.setTitle("View Detail");
 	    	button.setIcon("fa fa-chevron-right");
+			button.setValueExpression("disabled",
+										createAndedValueExpressionFromConditions(zoomDisabledConditionNames, false));
 			StringBuilder value = new StringBuilder(128);
 			value.append("./?a=").append(WebAction.e.toString());
 			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
 			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
 			column.getChildren().add(button);
-			componentChildrenToAddTo.add(column);
+        }
+		componentChildrenToAddTo.add(column);
 	}
 	
 	@Override

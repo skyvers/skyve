@@ -341,7 +341,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									List<FilterParameter> filterParameters,
-									boolean canCreate,
+									boolean canCreateDocument,
+									boolean createRendered,
+									String[] createDisabledConditionNames,
+									boolean zoomRendered,
+									String[] zoomDisabledConditionNames,
 									boolean showPaginator,
 									boolean stickyHeader) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
@@ -379,20 +383,23 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
         								modelName);
         result.setValueExpression("value", ef.createValueExpression(elc, value, List.class));
 
-		if (canCreate) {
-        	addListGridHeader(result, moduleName, drivingDocumentName);
+		if (canCreateDocument && createRendered) {
+        	addListGridHeader(result, moduleName, drivingDocumentName, createDisabledConditionNames);
         }
-		addListGridBoundColumns(model, result.getChildren());
+		addListGridBoundColumns(model, result.getChildren(), zoomRendered, zoomDisabledConditionNames);
 		
 		return result;
 	}
 	
 	private void addListGridHeader(UIComponent componentToAddTo,
 							String moduleName,
-							String documentName) {
+							String documentName,
+							String[] createDisabledConditionNames) {
 		Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
     	button.setValue("New");
     	button.setTitle("New record");
+		button.setValueExpression("disabled",
+									createAndedValueExpressionFromConditions(createDisabledConditionNames, false));
     	StringBuilder value = new StringBuilder(128);
     	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
     	value.append("&d=").append(documentName);
@@ -404,7 +411,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	private void addListGridBoundColumns(ListModel<? extends Bean> model,
-											List<UIComponent> componentChildrenToAddTo) {
+											List<UIComponent> componentChildrenToAddTo,
+											boolean zoomRendered,
+											String[] zoomDisabledConditionNames) {
 		StringBuilder value = new StringBuilder(128);
 		
 		for (QueryColumn column : model.getColumns()) {
@@ -421,12 +430,19 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 		outputText.setValueExpression("value", ef.createValueExpression(elc, value.toString(), Object.class));
 
-		HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		value.setLength(0);
-		value.append("./?a=").append(WebAction.e.toString());
-		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
-		link.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
-		link.getChildren().add(outputText);
-		componentChildrenToAddTo.add(link);
+		if (zoomRendered) { // require a zoom link
+			HtmlOutputLink link = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
+			value.setLength(0);
+			value.append("./?a=").append(WebAction.e.toString());
+			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+			link.setValueExpression("value", ef.createValueExpression(elc, value.toString(), String.class));
+			link.getChildren().add(outputText);
+			link.setValueExpression("disabled",
+										createAndedValueExpressionFromConditions(zoomDisabledConditionNames, true));
+			componentChildrenToAddTo.add(link);
+		}
+		else { // no zoom link
+			componentChildrenToAddTo.add(outputText);
+		}
 	}
 }
