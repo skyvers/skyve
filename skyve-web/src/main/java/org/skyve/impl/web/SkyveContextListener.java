@@ -3,7 +3,9 @@ package org.skyve.impl.web;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -195,6 +197,17 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_PORT = Integer.toString(getInt("smtp", "port", smtp));
 		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
 		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
+		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp);
+		if (smtpProperties != null) {
+			UtilImpl.SMTP_PROPERTIES = new TreeMap<>();
+			for (Entry<String, Object> entry : smtpProperties.entrySet()) {
+				String key = entry.getKey();
+				Object value = entry.getValue();
+				if ((key != null) && (value != null)) {
+					UtilImpl.SMTP_PROPERTIES.put(key, value.toString());
+				}
+			}
+		}
 		UtilImpl.SMTP_SENDER = getString("smtp", "sender", smtp, true);
 		UtilImpl.SMTP_TEST_RECIPIENT = getString("smtp", "testRecipient", smtp, false);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = getBoolean("smtp", "testBogusSend", smtp);

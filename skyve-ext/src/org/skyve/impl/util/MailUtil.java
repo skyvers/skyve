@@ -1,6 +1,7 @@
 package org.skyve.impl.util;
 
 import java.io.OutputStream;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.logging.Level;
 
@@ -22,7 +23,6 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.MailAttachment;
 
 public class MailUtil {
@@ -139,19 +139,28 @@ public class MailUtil {
 		// Get system properties and add our mail server
 		Session session = null;
 		if (UtilImpl.processStringValue(UtilImpl.SMTP_UID) == null) {
-			Properties props = System.getProperties();
+			Properties props = new Properties();
 			props.setProperty("mail.smtp.auth", "false");
 			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
 			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
+			if (UtilImpl.SMTP_PROPERTIES != null) {
+				for (Entry<String, String> entry : UtilImpl.SMTP_PROPERTIES.entrySet()) {
+					props.setProperty(entry.getKey(), entry.getValue());
+				}
+			}
 			session = Session.getInstance(props);
 		}
 		else {
 			Authenticator authenticator = new Authenticator();
 			Properties props = System.getProperties();
-			props.setProperty("mail.smtp.submitter", authenticator.getPasswordAuthentication().getUserName());
 			props.setProperty("mail.smtp.auth", "true");
 			props.setProperty("mail.smtp.port", UtilImpl.SMTP_PORT);
 			props.setProperty("mail.smtp.host", UtilImpl.SMTP);
+			if (UtilImpl.SMTP_PROPERTIES != null) {
+				for (Entry<String, String> entry : UtilImpl.SMTP_PROPERTIES.entrySet()) {
+					props.setProperty(entry.getKey(), entry.getValue());
+				}
+			}
 			session = Session.getInstance(props, authenticator);
 		}
 
