@@ -66,7 +66,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		UtilImpl.CONFIGURATION = properties;
 		
-		Map<String, Object> trace = getObject(null, "trace", properties);
+		Map<String, Object> trace = getObject(null, "trace", properties, true);
 		UtilImpl.XML_TRACE = getBoolean("trace", "xml", trace);
 		UtilImpl.HTTP_TRACE = getBoolean("trace", "http", trace);
 		UtilImpl.COMMAND_TRACE = getBoolean("trace", "command", trace);
@@ -78,7 +78,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.BIZLET_TRACE = getBoolean("trace", "bizlet", trace);
 		UtilImpl.DIRTY_TRACE = getBoolean("trace", "dirty", trace);
 
-		Map<String, Object> content = getObject(null, "content", properties);
+		Map<String, Object> content = getObject(null, "content", properties, true);
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
 		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
 		if (! contentDirectory.exists()) {
@@ -104,19 +104,19 @@ public class SkyveContextListener implements ServletContextListener {
 
 		// The following URLs cannot be set from the web context (could be many URLs to reach the web server after all).
 		// There are container specific ways but we don't want that.
-		Map<String, Object> url = getObject(null, "url", properties);
+		Map<String, Object> url = getObject(null, "url", properties, true);
 		UtilImpl.SERVER_URL = getString("url", "server", url, true);
 		UtilImpl.SKYVE_CONTEXT = getString("url", "context", url, true);
 		UtilImpl.HOME_URI = getString("url", "home", url, true);
 		
-		Map<String, Object> conversations = getObject(null, "conversations", properties);
+		Map<String, Object> conversations = getObject(null, "conversations", properties, true);
 		UtilImpl.MAX_CONVERSATIONS_IN_MEMORY = getInt("conversations", "maxInMemory", conversations);
 		UtilImpl.CONVERSATION_EVICTION_TIME_MINUTES = getInt("conversations", "evictionTimeMinutes", conversations);
 
-		Map<String, Object> dataStores = getObject(null, "dataStores", properties);
+		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
 		// for each datastore defined
 		for (String dataStoreName : dataStores.keySet()) {
-			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores);
+			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores, true);
 			String prefix = String.format("dataStores.%s", dataStoreName);
 			String dialect = getString(prefix, "dialect", dataStore, true);
 			
@@ -134,7 +134,7 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-		Map<String, Object> hibernate = getObject(null, "hibernate", properties);
+		Map<String, Object> hibernate = getObject(null, "hibernate", properties, true);
 		UtilImpl.DATA_STORE = UtilImpl.DATA_STORES.get(getString("hibernate", "dataStore", hibernate, true));
 		if (UtilImpl.DATA_STORE == null) {
 			throw new IllegalStateException("hibernate.dataStore " + UtilImpl.DATA_STORE + " is not defined in dataStores");
@@ -142,7 +142,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.DDL_SYNC = getBoolean("hibernate", "ddlSync", hibernate);
 		UtilImpl.PRETTY_SQL_OUTPUT = getBoolean("hibernate", "prettySql", hibernate);
 
-		Map<String, Object> factories = getObject(null, "factories", properties);
+		Map<String, Object> factories = getObject(null, "factories", properties, true);
 
 		// NB Need the repository set before setting persistence
 		UtilImpl.SKYVE_REPOSITORY_CLASS = getString("factories", "repositoryClass", factories, false);
@@ -192,12 +192,12 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 		
-		Map<String, Object> smtp = getObject(null, "smtp", properties);
+		Map<String, Object> smtp = getObject(null, "smtp", properties, true);
 		UtilImpl.SMTP = getString("smtp", "server", smtp, true);
 		UtilImpl.SMTP_PORT = Integer.toString(getInt("smtp", "port", smtp));
 		UtilImpl.SMTP_UID = getString("smtp", "uid", smtp, false);
 		UtilImpl.SMTP_PWD = getString("smtp", "pwd", smtp, false);
-		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp);
+		Map<String, Object> smtpProperties = getObject("smtp", "properties", smtp, false);
 		if (smtpProperties != null) {
 			UtilImpl.SMTP_PROPERTIES = new TreeMap<>();
 			for (Entry<String, Object> entry : smtpProperties.entrySet()) {
@@ -215,7 +215,7 @@ public class SkyveContextListener implements ServletContextListener {
 			throw new IllegalStateException("smtp.testBogusSend is true but no smtp.testRecipient is defined");
 		}
 
-		Map<String, Object> environment = getObject(null, "environment", properties);
+		Map<String, Object> environment = getObject(null, "environment", properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString("environment", "identifier", environment, false);
 		UtilImpl.DEV_MODE = getBoolean("environment", "devMode", environment);
 		UtilImpl.CUSTOMER = getString("environment", "customer", environment, false);
@@ -223,7 +223,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString("environment", "passwordHashingAlgorithm", environment, true);
 		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);
 
-		Map<String, Object> api = getObject(null, "api", properties);
+		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
 
 		// ensure that the schema is created before trying to init the job scheduler
@@ -267,8 +267,8 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties) {
-		return (Map<String, Object>) get(prefix, key, properties, true);
+	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties, boolean required) {
+		return (Map<String, Object>) get(prefix, key, properties, required);
 	}
 	
 	@Override

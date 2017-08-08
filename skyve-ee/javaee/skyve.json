@@ -85,6 +85,8 @@
 		uid: null, 
 		// Mail server password
 		pwd: null, 
+		// Extra Java Mail properties {"k.e.y": "value"}
+		properties: null,
 		// Sender header value
 		sender: "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
