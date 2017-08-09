@@ -62,36 +62,36 @@
 		</concat>
 	</target>
 	<target name="copyJavascript" depends="concatSkyveJavascript">
-		<copy tofile="javaee/skyve.ear/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
 		<delete file="src/js/desktop/skyve.js" />
-		<copy tofile="javaee/skyve.ear/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
-		<copy tofile="javaee/skyve.ear/skyve.war/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
+		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
+		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/desktop/skyve-min.js src/js/desktop/skyve.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-min.js src/js/desktop/skyve.js"/>
 		</java>
 		<delete file="src/js/desktop/skyve.js" />
 		
 		<!-- minify css files -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/css/basic-min.css src/css/basic.css"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/basic-min.css src/css/basic.css"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/css/prime-min.css src/css/prime.css"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/prime-min.css src/css/prime.css"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/css/simple-grid-min.css src/css/simple-grid.css"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/css/simple-grid-min.css src/css/simple-grid.css"/>
 		</java>
 
 		<!-- minify js files -->
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/desktop/geolocate-min.js src/js/desktop/geolocate.js"/>
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
-			<arg line="-o javaee/skyve.ear/skyve.war/mobile/skyve-min.js src/js/mobile/skyve.js"/>
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/mobile/skyve-min.js src/js/mobile/skyve.js"/>
 		</java>
 	</target>
 	<target name="mavenLibs" xmlns:artifact="urn:maven-artifact-ant">
@@ -126,34 +126,6 @@
 -->
 	</target>
 
-	<target name="MANIFEST.MF">
-		<!-- create a property containing all .jar files, prefix lib/, and seperated with a space -->
-		<pathconvert property="libs.deploy" pathsep=" ">
-			<mapper>
-				<chainedmapper>
-					<!-- remove absolute path -->
-					<flattenmapper />
-					<!-- add lib/ prefix -->
-					<globmapper from="*" to="lib/*" />
-				</chainedmapper>
-			</mapper>
-			<path>
-				<fileset dir="javaee/skyve.ear/lib">
-					<include name="**/*skyve-core.jar" />
-					<include name="**/*skyve-ext.jar" />
-				</fileset>
-				<fileset dir="javaee/skyve.ear/lib">
-					<include name="**/*.jar" />
-					<exclude name="**/*skyve*.jar" />
-				</fileset>
-			</path>
-		</pathconvert>
-		<manifest file="javaee/skyve.ear/skyve.war/META-INF/MANIFEST.MF">
-			<!-- finally, use the magically generated libs path -->
-			<attribute name="Class-Path" value="${libs.deploy}" />
-		</manifest>
-	</target>
-	
 	<target name="buildXmlSchemas">
 		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
 			<classpath refid="classpath" />
