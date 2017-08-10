@@ -145,7 +145,9 @@ public abstract class DomainGenerator {
 		}
 
 		if (args.length == 6) { // allow for debug mode if there are 5 arguments
-			EXCLUDED_MODULES = args[5].toLowerCase().split(",");
+			if ((args[5] != null) && (! args[5].isEmpty())) {
+				EXCLUDED_MODULES = args[5].toLowerCase().split(",");
+			}
 		}
 
 		System.out.println("SRC_PATH=" + SRC_PATH);
