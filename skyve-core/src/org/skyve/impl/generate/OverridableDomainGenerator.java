@@ -2616,18 +2616,38 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						description = conditionName;
 					}
 					methods.append("\n\t/**");
-					methods.append("\n\t * ").append(description);
+					String doc = condition.getDescription();
+					boolean nothingDocumented = true;
+					if (doc != null) {
+						nothingDocumented = false;
+						methods.append("\n\t * ").append(doc);
+					}
+					doc = condition.getDocumentation();
+					if (doc != null) {
+						nothingDocumented = false;
+						methods.append("\n\t * ").append(doc);
+					}
+					if (nothingDocumented) {
+						methods.append("\n\t * ").append(conditionName);
+					}
+					methods.append("\n\t * @return\tThe condition\n");
 					methods.append("\n\t */");
 
 					methods.append("\n\t@XmlTransient");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
-					methods.append("\n\tpublic boolean is").append(Character.toUpperCase(conditionName.charAt(0)));
-					methods.append(conditionName.substring(1)).append("() {\n");
+					String methodName = String.format("is%s%s", 
+														String.valueOf(conditionName.charAt(0)).toUpperCase(),
+														conditionName.substring(1));
+					methods.append("\n\tpublic boolean ").append(methodName).append("() {\n");
 					methods.append("\t\treturn (").append(condition.getExpression()).append(");\n");
 					methods.append("\t}\n");
 
+					methods.append("\n\t/**");
+					methods.append("\t * {@link #").append(methodName).append("} negation.\n");
+					methods.append("\n\t * @return\tThe negated condition\n");
+					methods.append("\n\t */");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
@@ -2731,15 +2751,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		// Generate/Include UML doc
-		String description = document.getDocumentation();
-		if (description == null) {
-			description = document.getDescription();
-		}
-		if (description == null) {
-			description = document.getName();
-		}
 		fw.append("\n/**");
-		fw.append("\n * ").append(description);
+		fw.append("\n * ").append(document.getSingularAlias());
+		String doc = document.getDescription();
+		if (doc != null) {
+			fw.append("\n * <br/>");
+			fw.append("\n * ").append(doc);
+		}
+		doc = document.getDocumentation();
+		if (doc != null) {
+			fw.append("\n * <br/>");
+			fw.append("\n * ").append(doc);
+		}
 		fw.append("\n * \n");
 
 		for (Attribute attribute : document.getAttributes()) {
