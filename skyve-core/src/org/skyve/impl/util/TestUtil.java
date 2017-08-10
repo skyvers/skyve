@@ -141,7 +141,7 @@ public class TestUtil {
 		return bean;
 	}
 
-	@SuppressWarnings({ "incomplete-switch", "boxing" }) // content type missing from switch statement
+	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
 	private static <T extends Bean> T constructRandomInstance(User user,
 			Module module,
 			Document document,
