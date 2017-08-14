@@ -62,12 +62,12 @@
 		</concat>
 	</target>
 	<target name="copyJavascript" depends="concatSkyveJavascript">
-		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/desktop/skyve-min.js" file="src/js/desktop/skyve.js" overwrite="true"/>
 		<delete file="src/js/desktop/skyve.js" />
-		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
-		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
-		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
-		<copy tofile="../skyve-web/src/main/resources/META-INF/resources/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/css/basic-min.css" file="src/css/basic.css" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
