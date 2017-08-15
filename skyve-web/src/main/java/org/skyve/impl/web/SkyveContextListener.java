@@ -225,7 +225,11 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
-
+		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
+		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
+			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
+		}
+		
 		// ensure that the schema is created before trying to init the job scheduler
 		Persistence p = null;
 		try {

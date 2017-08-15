@@ -1728,29 +1728,30 @@ isc.BizHTMLItem.addMethods({
 				holder.setContents('<div style="width:100%;height:100%" id="_CKEditor"></div>');
 				holder.draw = function() {
 					this.Super('draw');
-					me._editor = CKEDITOR.replace(
-						'_CKEditor', 
-						{customConfig: '',
-							resize_enabled: false,
-							skin: 'moono',
-							autoUpdateElement: false,
-							baseFloatZIndex: 9000000,
-							filebrowserImageBrowseUrl: "pages/htmlEdit/browseImages.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
-							filebrowserBrowseUrl: "pages/htmlEdit/browseDocuments.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
-							toolbar: [
-								['Source', '-', 'NewPage', 'Preview'], 
-								['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Print', 'SpellChecker', 'Scayt'], 
-								['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], 
-								'/', 
-								['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], 
-								['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], 
-								['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], 
-								['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], 
-								'/', 
-								['Format', 'Font', 'FontSize'], 
-								['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks']
-							]
-						});
+					CKEDITOR.config.filebrowserImageBrowseUrl = "pages/htmlEdit/browseImages.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
+					CKEDITOR.config.filebrowserBrowseUrl = "pages/htmlEdit/browseDocuments.jsp?_doc=" + owningView._mod + '.' + owningView._doc + '&_id=' + formValues['bizId'],
+					CKEDITOR.config.resize_enabled = false;
+					CKEDITOR.config.skin = 'moono';
+					CKEDITOR.config.autoUpdateElement = false;
+					CKEDITOR.config.baseFloatZIndex = 9000000;
+					CKEDITOR.config.toolbar = [
+						['Source', '-', 'NewPage', 'Preview'], 
+						['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Print', 'SpellChecker', 'Scayt'], 
+						['Undo', 'Redo', '-', 'Find', 'Replace', '-', 'SelectAll', 'RemoveFormat'], 
+						'/', 
+						['Bold', 'Italic', 'Underline', 'Strike', '-', 'Subscript', 'Superscript'], 
+						['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'Blockquote', 'CreateDiv'], 
+						['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'], 
+						['Link', 'Unlink', 'Anchor'], ['Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'], 
+						'/', 
+						['Format', 'Font', 'FontSize'], 
+						['TextColor', 'BGColor'], ['Maximize', 'ShowBlocks']
+					];
+					// align with the "markup" styles supported in jasper reports
+					// and display more compatibly with varying style sheets
+					CKEDITOR.config.coreStyles_bold = {element: 'b', overrides: 'strong'};
+					CKEDITOR.config.coreStyles_italic = {element: 'i', overrides: 'em'};
+					me._editor = CKEDITOR.replace('_CKEditor', {customConfig: isc.BizUtil.ckEditorConfigFileUrl});
 					me._editor.setData(me.getValue());
 					return this;
 				};

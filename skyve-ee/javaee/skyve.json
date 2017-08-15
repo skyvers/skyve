@@ -96,7 +96,8 @@
 	},
 	// API Settings
 	api: {
-		googleMapsV3Key: "AIzaSyDcDHNxHUVAF-CMqvI0TIAPlye9g4Wr4Dg"
+		googleMapsV3Key: "AIzaSyDcDHNxHUVAF-CMqvI0TIAPlye9g4Wr4Dg",
+		ckEditorConfigFileUrl: null
 	},
 	// Environment settings
 	environment: {
