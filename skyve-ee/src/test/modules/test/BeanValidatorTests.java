@@ -9,7 +9,6 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesRequiredPersistent;
 import modules.test.domain.MappedExtensionSingleStrategy;
-import util.AbstractSkyveTest;
 
 public class BeanValidatorTests extends AbstractSkyveTest {
 	@Test

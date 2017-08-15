@@ -22,7 +22,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.AllAttributesPersistent.Enum3;
-import util.AbstractSkyveTest;
 
 public class SQLParameterTests extends AbstractSkyveTest {
 	@Test

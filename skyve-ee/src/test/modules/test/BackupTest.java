@@ -10,7 +10,6 @@ import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractSkyveTest;
 
 public class BackupTest extends AbstractSkyveTest {
 	@Test

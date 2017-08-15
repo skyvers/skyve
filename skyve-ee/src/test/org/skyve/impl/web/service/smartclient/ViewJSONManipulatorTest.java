@@ -12,8 +12,8 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.view.View;
 import org.skyve.util.Util;
 
+import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractSkyveTest;
 
 public class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	@Test

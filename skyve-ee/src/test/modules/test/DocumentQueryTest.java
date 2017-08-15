@@ -9,7 +9,6 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Util;
 
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractSkyveTest;
 
 public class DocumentQueryTest extends AbstractSkyveTest {
 	@Test

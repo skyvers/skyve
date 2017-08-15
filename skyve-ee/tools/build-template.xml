@@ -59,13 +59,11 @@
 	</target>
 	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
-		<delete dir="${ear-path}/lib" includes="**" />
 		<delete dir="${war-path}/desktop" includes="**" />
 		<delete dir="${war-path}/external" includes="**" />
 		<delete dir="${war-path}/mobile" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
 		<delete dir="${war-path}/ultima" includes="**" />
-		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/primefaces-water" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/skyve" includes="**" />
 		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp,unsubscribe.xhtml" />
@@ -74,13 +72,13 @@
 		<delete dir="src/modules/admin" includes="**" />
 		<delete dir="src/resources" includes="**" />
 		<delete dir="src/schemas" includes="**" />
+
+		<delete dir="src/test/modules/admin" />
+		<delete dir="src/test/util" />
 	</target>
 	
 	<target name="assemble" depends="clearBeforeAssemble">
 		<!-- Web App -->
-		<copy todir="lib" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-ee-path}/lib" includes="skyve*.jar" />
-		</copy>
 		<copy todir="${ear-path}/META-INF" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ear-path}/META-INF" includes="**" excludes="application.xml" />
 		</copy>
@@ -115,16 +113,24 @@
 
 		<!-- App -->
 		<copy todir="src/skyve/modules" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-ee-path}/src/skyve/modules" includes="*.java" excludes="**/*.class" />
+			<fileset dir="${skyve-ee-path}/src/skyve/modules" includes="*.java" />
 		</copy>
 		<copy todir="src/skyve/modules/admin" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-ee-path}/src/skyve/modules/admin" includes="**" excludes="**/*.class" />
+			<fileset dir="${skyve-ee-path}/src/skyve/modules/admin" includes="**" />
 		</copy>
 		<copy todir="src/skyve/resources" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ee-path}/src/skyve/resources" includes="**" />
 		</copy>
 		<copy todir="src/skyve/schemas" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ee-path}/src/skyve/schemas" includes="**" />
+		</copy>
+		
+		<!-- Test -->
+		<copy todir="src/test/modules/admin" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-ee-path}/src/test/modules/admin" includes="**" />
+		</copy>
+		<copy todir="src/test/util" overwrite="${assemble.overwrite}">
+			<fileset dir="${skyve-ee-path}/src/test/util" includes="**" />
 		</copy>
 	</target>
 	

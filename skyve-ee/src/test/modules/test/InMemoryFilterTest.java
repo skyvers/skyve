@@ -11,8 +11,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 
-import util.AbstractSkyveTest;
-
 public class InMemoryFilterTest extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")

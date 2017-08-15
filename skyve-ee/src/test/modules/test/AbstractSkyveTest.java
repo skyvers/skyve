@@ -1,4 +1,4 @@
-package util;
+package modules.test;
 
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -20,6 +20,7 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 import modules.test.domain.UniqueConstraintNonNullable;
 import modules.test.domain.UniqueConstraintNullable;
+import util.AbstractH2Test;
 
 public abstract class AbstractSkyveTest extends AbstractH2Test {
 

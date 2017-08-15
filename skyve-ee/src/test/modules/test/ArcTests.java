@@ -9,7 +9,6 @@ import modules.test.domain.AnyDerived1;
 import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
-import util.AbstractSkyveTest;
 
 /**
  * The arc tests fail as the class attributes of the any and many-to-any tags don't map correctly to

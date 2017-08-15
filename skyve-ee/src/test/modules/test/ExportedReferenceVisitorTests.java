@@ -8,7 +8,6 @@ import org.skyve.util.Util;
 import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedExtensionSingleStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
-import util.AbstractSkyveTest;
 
 public class ExportedReferenceVisitorTests extends AbstractSkyveTest {
 	@Test

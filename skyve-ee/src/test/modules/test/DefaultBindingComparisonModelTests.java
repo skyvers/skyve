@@ -5,7 +5,6 @@ import org.skyve.metadata.view.model.comparison.DefaultBindingComparisonModel;
 import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractSkyveTest;
 
 public class DefaultBindingComparisonModelTests extends AbstractSkyveTest {
 	@Test

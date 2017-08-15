@@ -10,7 +10,6 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.impl.util.TestUtil;
 
 import modules.test.domain.UniqueConstraintNullable;
-import util.AbstractSkyveTest;
 
 public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 

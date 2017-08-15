@@ -14,7 +14,6 @@ import org.skyve.util.Util;
 
 import modules.test.domain.AllAttributesInverseOneToOnePersistent;
 import modules.test.domain.AllAttributesPersistent;
-import util.AbstractSkyveTest;
 
 public class BeanVisitorTests extends AbstractSkyveTest {
 	@Test
