@@ -57,53 +57,18 @@
 			<arg value="" /> <!-- excluded modules -->
 		</java>
 	</target>
-
-	<target name="_wgetLibs" depends="clearBeforeAssemble" description="Retrieve skyve libs from skyve.org">
-		<get src="http://www.skyve.org/downloads/libs.zip" dest="libs.zip" verbose="true" usetimestamp="true" />
-		<unzip src="libs.zip" dest="${ear-path}/lib">
-			<patternset>
-				<include name="skyve-ee/javaee/skyve.ear/lib/*"/>
-				<exclude name="geodb*.jar" />
-			</patternset>
-			<flattenmapper/>
-		</unzip>
-		<unzip src="libs.zip" dest="${war-path}/WEB-INF/lib">
-			<patternset>
-				<include name="skyve-ee/javaee/skyve.ear/skyve.war/WEB-INF/lib/*"/>
-			</patternset>
-			<flattenmapper/>
-		</unzip>
-		<unzip src="libs.zip" dest="lib">
-			<patternset>
-				<include name="skyve-ee/lib/*"/>
-			</patternset>
-			<flattenmapper/>
-		</unzip>
-		<unzip src="libs.zip" dest="tools/lib">
-			<patternset>
-				<include name="skyve-ee/tools/lib/*"/>
-			</patternset>
-			<flattenmapper/>
-		</unzip>
-	</target>
 	
 	<target name="clearBeforeAssemble" if="${assemble.overwrite}">
 		<delete dir="${ear-path}/lib" includes="**" />
-		<delete dir="${war-path}/ckeditor456" includes="**" />
-		<delete dir="${war-path}/css" includes="*-min.css" />
 		<delete dir="${war-path}/desktop" includes="**" />
 		<delete dir="${war-path}/external" includes="**" />
-		<delete dir="${war-path}/images" includes="**" />
-		<delete dir="${war-path}/isomorphic110" includes="**" />
 		<delete dir="${war-path}/mobile" includes="**" />
 		<delete dir="${war-path}/pages" includes="**" />
 		<delete dir="${war-path}/ultima" includes="**" />
 		<delete dir="${war-path}/WEB-INF/lib" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/primefaces-water" includes="**" />
 		<delete dir="${war-path}/WEB-INF/resources/skyve" includes="**" />
-		<delete dir="${war-path}/wicket" includes="**" />
 		<delete dir="${war-path}" includes="bizImport.xhtml,contentUpload.xhtml,fileUpload.xhtml,home.jsp,unsubscribe.xhtml" />
-		<delete dir="${war-path}/pages" includes="**" />
 
 		<delete dir="src/modules" includes="*.java" />
 		<delete dir="src/modules/admin" includes="**" />
@@ -116,30 +81,15 @@
 		<copy todir="lib" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ee-path}/lib" includes="skyve*.jar" />
 		</copy>
-		<copy todir="${ear-path}/lib" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-ear-path}/lib" includes="**" excludes="geodb*.jar,h2*.jar" />
-		</copy>
 		<copy todir="${ear-path}/META-INF" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-ear-path}/META-INF" includes="**" excludes="application.xml" />
 		</copy>
 
-		<copy todir="${war-path}/ckeditor456" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/ckeditor456" includes="**" />
-		</copy>
-		<copy todir="${war-path}/css" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/css" includes="*-min.css" />
-		</copy>
 		<copy todir="${war-path}/desktop" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/desktop" includes="**.xhtml,**-min.js,diff_match_patch.js" />
+			<fileset dir="${skyve-war-path}/desktop" includes="**" />
 		</copy>
 		<copy todir="${war-path}/external" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/external" includes="**" />
-		</copy>
-		<copy todir="${war-path}/images" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/images" includes="**" />
-		</copy>
-		<copy todir="${war-path}/isomorphic110" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/isomorphic110" includes="**" />
 		</copy>
 		<copy todir="${war-path}/mobile" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/mobile" includes="**" />
@@ -153,17 +103,11 @@
 		<copy todir="${war-path}/WEB-INF/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/" includes="faces-config.xml,jboss-classloading.xml" />
 		</copy>
-		<copy todir="${war-path}/WEB-INF/lib" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/WEB-INF/lib/" includes="**" />
-		</copy>
 		<copy todir="${war-path}/WEB-INF/resources/primefaces-water/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/resources/primefaces-water/" includes="**" />
 		</copy>
 		<copy todir="${war-path}/WEB-INF/resources/skyve/" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}/WEB-INF/resources/skyve/" includes="**" />
-		</copy>
-		<copy todir="${war-path}/wicket" overwrite="${assemble.overwrite}">
-			<fileset dir="${skyve-war-path}/wicket" includes="**" />
 		</copy>
 		<copy todir="${war-path}" overwrite="${assemble.overwrite}">
 			<fileset dir="${skyve-war-path}" includes="*.xhtml,*.jsp" />
@@ -185,16 +129,6 @@
 	</target>
 	
 	<target name="assembleTools">
-		<!-- Assemble backup -->
-		<delete failonerror="false"> <!-- prod/backup/lib may not exist yet -->
-			<fileset dir="prod/backup/lib" includes="**.jar"/>
-		</delete>
-		<copy todir="prod/backup/lib">
-			<fileset dir="${skyve-ear-path}/lib" includes="**.jar" />
-			<fileset dir="${skyve-ee-path}/lib" includes="**.jar" />
-			<fileset dir="${skyve-ee-path}/tools/lib" includes="skyve-tools.jar" />
-		</copy>
-
 		<!-- Assemble build template -->
 		<copy todir="tools" overwrite="true">
 			<fileset dir="${skyve-ee-path}/tools" includes="build-template.xml" />
@@ -231,58 +165,5 @@
             </doclet>
         </javadoc>
 		<delete dir="src/skyve" includes="**/package.html" />
-	</target>
-	
-	<target name="MANIFEST.MF">
-		<!-- create a property containing all .jar files, prefix lib/, and separated with a space -->
-		<pathconvert property="libs.deploy" pathsep=" ">
-			<mapper>
-				<chainedmapper>
-					<!-- remove absolute path -->
-					<flattenmapper />
-					<!-- add lib/ prefix -->
-					<globmapper from="*" to="lib/*" />
-				</chainedmapper>
-			</mapper>
-			<path>
-				<fileset dir="${ear-path}/lib">
-					<include name="**/*skyve-core.jar" />
-					<include name="**/*skyve-ext.jar" />
-				</fileset>
-				<fileset dir="${ear-path}/lib">
-					<include name="**/*.jar" />
-					<exclude name="**/*skyve*.jar" />
-				</fileset>
-			</path>
-		</pathconvert>
-		<manifest file="${war-path}/META-INF/MANIFEST.MF">
-			<!-- finally, use the magically generated libs path -->
-			<attribute name="Class-Path" value="${libs.deploy}" />
-		</manifest>
-	</target>
-	<target name="backupClasspath">
-		<!-- create a property containing all .jar files, prefix lib/, and separated with a space -->
-		<pathconvert property="libs.deploy" pathsep=":">
-			<mapper>
-				<chainedmapper>
-					<!-- remove absolute path -->
-					<flattenmapper />
-					<!-- add lib/ prefix -->
-					<globmapper from="*" to="lib/*" />
-				</chainedmapper>
-			</mapper>
-			<path>
-				<fileset dir="${ear-path}/lib">
-					<include name="**/*skyve-core.jar" />
-					<include name="**/*skyve-ext.jar" />
-				</fileset>
-				<file name="tools/lib/skyve-tools.jar" />
-				<fileset dir="${ear-path}/lib">
-					<include name="**/*.jar" />
-					<exclude name="**/*skyve*.jar" />
-				</fileset>
-			</path>
-		</pathconvert>
-		<echo message="CLASSPATH=${libs.deploy}" file="prod/backup/classpath.txt"/>
 	</target>
 </project>
