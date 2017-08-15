@@ -46,6 +46,7 @@ public class UserImpl implements User {
 	private String id;
 	private String name;
 	private String languageTag;
+	private String passwordHash;
 	private boolean passwordChangeRequired;
 	private String contactId;
 	private String contactName;
@@ -147,6 +148,15 @@ public class UserImpl implements User {
 		}
 	}
 	
+	@Override
+	public String getPasswordHash() {
+		return passwordHash;
+	}
+
+	public void setPasswordHash(String passwordHash) {
+		this.passwordHash = passwordHash;
+	}
+
 	@Override
 	public boolean isPasswordChangeRequired() {
 		return passwordChangeRequired;

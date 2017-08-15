@@ -41,6 +41,7 @@ public class SQLMetaDataUtil {
 			
 			StringBuilder sql = new StringBuilder(512);
 			sql.append("select u.bizId, " +
+						"u.password, " +
 						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
@@ -57,6 +58,7 @@ public class SQLMetaDataUtil {
 			sql.append("and u.bizCustomer = '").append(customer.getName()).append("' ");
 			sql.append("union " +
 						"select u.bizId, " +
+						"u.password, " +
 						"u.passwordExpired, " +
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
@@ -80,6 +82,7 @@ public class SQLMetaDataUtil {
 			for (DynaBean userRoleRow : SQLUtil.retrieveListForSQL(null, null, sql.toString(), null, false, false)) {
 				if (firstRow) {
 					internalUser.setId((String) userRoleRow.get("bizid"));
+					internalUser.setPasswordHash((String) userRoleRow.get("password"));
 					Boolean passwordChangeRequired = (Boolean) userRoleRow.get("passwordexpired");
 					internalUser.setPasswordChangeRequired(Boolean.TRUE.equals(passwordChangeRequired));
 					internalUser.setContactId((String) userRoleRow.get("contactid"));

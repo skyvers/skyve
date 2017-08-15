@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
 import org.skyve.impl.metadata.user.UserImpl;
 
 public class SuperUser extends UserImpl {
@@ -16,6 +17,21 @@ public class SuperUser extends UserImpl {
 
 	public SuperUser() {
 		roleNames.add(SUPER_ROLE);
+	}
+	
+	public SuperUser(User user) {
+		this();
+    	setContactId(user.getContactId());
+    	setContactName(user.getContactName());
+    	setCustomerName(user.getCustomerName());
+    	setDataGroupId(user.getDataGroupId());
+    	setHomeModuleName(user.getHomeModuleName());
+    	setId(user.getId());
+    	setLanguageTag(user.getLanguageTag());
+    	setName(user.getName());
+    	setPasswordHash(user.getPasswordHash());
+    	setPasswordChangeRequired(user.isPasswordChangeRequired());
+    	setWebLocale(user.getLocale());
 	}
 
 	@Override

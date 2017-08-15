@@ -32,6 +32,11 @@ public interface User extends NamedMetaData {
 	public Locale getLocale();
 	
 	/**
+	 * @return	The hashed password value as stored in the data store.
+	 */
+	public String getPasswordHash();
+
+	/**
 	 * Does the password need to be changed before accessing the system.
 	 * 
 	 * @return <code>true</code> if a change of password is required, 
