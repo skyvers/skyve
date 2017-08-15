@@ -49,10 +49,12 @@
 	<target name="_generateDomain" description="Domain Class Generation">
 		<java fork="true" classname="org.skyve.impl.generate.DomainGenerator">
 			<classpath refid="classpath" />
-			<arg value="src/skyve/" />
-<!--
-			<arg value="debug!" />
--->
+			<arg value="src/skyve/" /> <!-- source path -->
+			<arg value="src/test/" /> <!-- test path -->
+			<arg value="src/generatedTest/" /> <!-- generated test path -->
+			<arg value="true" /> <!-- allow cascade merge -->
+			<arg value="true" /> <!-- debug -->
+			<arg value="" /> <!-- excluded modules -->
 		</java>
 	</target>
 
