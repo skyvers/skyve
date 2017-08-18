@@ -8,7 +8,7 @@ public class HibernateNoContentPersistence extends AbstractHibernatePersistence 
 	private static final long serialVersionUID = 2357146148341285353L;
 
 	@Override
-	protected void commitContent() {
+	protected void closeContent() {
 		// no-op
 	}
 

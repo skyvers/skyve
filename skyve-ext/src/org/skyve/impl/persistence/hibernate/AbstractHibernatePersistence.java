@@ -139,7 +139,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 	private EntityManager em = null;
 	private Session session = null;
-
+	
 	public AbstractHibernatePersistence() {
 		em = emf.createEntityManager();
 		session = ((HibernateEntityManager) em).getSession();
@@ -150,7 +150,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	protected abstract void putBeanContent(BeanContent content) throws Exception;
 	protected abstract void moveBeanContent(BeanContent content, String oldBizDataGroupId, String oldBizUserId) throws Exception;
 	protected abstract void removeAttachmentContent(String contentId) throws Exception;
-	protected abstract void commitContent() throws Exception;
+	protected abstract void closeContent() throws Exception;
 	
 	@Override
 	@SuppressWarnings("unchecked")
@@ -729,13 +729,23 @@ t.printStackTrace();
 		setFilters(document, scope);
 	}
 	
+	@Override
+	public void setRollbackOnly() {
+		if (em != null) {
+			EntityTransaction et = em.getTransaction();
+			if ((et != null) && et.isActive()) {
+				et.setRollbackOnly();
+			}
+		}
+	}
+	
 	// This code is called in exception blocks all over the place.
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void rollback() {
 		if (em != null) {
 			EntityTransaction et = em.getTransaction();
-			if ((et != null) && et.isActive()) {
+			if ((et != null) && et.isActive() && (! et.getRollbackOnly())) {
                 // FROM THE HIBERNATE_REFERENCE DOCS Page 190
                 // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
                 // These methods are deprecated, as beginning and ending a transaction has the same effect.
@@ -748,14 +758,24 @@ t.printStackTrace();
 	// So we have to ensure its robust as all fuck
 	@Override
 	public final void commit(boolean close) {
+		boolean rollbackOnly = false;
 		try {
 			if (em != null) { // can be null after a relogin
 				EntityTransaction et = em.getTransaction();
 				if ((et != null) && et.isActive()) {
-				    // FROM THE HIBERNATE_REFERENCE DOCS Page 190
-				    // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
-				    // These methods are deprecated, as beginning and ending a transaction has the same effect.
-				    et.commit();
+					rollbackOnly = et.getRollbackOnly();
+					if (rollbackOnly) {
+		                // FROM THE HIBERNATE_REFERENCE DOCS Page 190
+		                // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+		                // These methods are deprecated, as beginning and ending a transaction has the same effect.
+						et.rollback();
+					}
+					else {
+						// FROM THE HIBERNATE_REFERENCE DOCS Page 190
+					    // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
+					    // These methods are deprecated, as beginning and ending a transaction has the same effect.
+					    et.commit();
+					}
 				}
 			}
 		}
@@ -764,7 +784,7 @@ t.printStackTrace();
 		}
 		finally {
 			try {
-				commitContent();
+				closeContent();
 			}
 			catch (Exception e) {
 				UtilImpl.LOGGER.warning("Cannot commit content manager - " + e.getLocalizedMessage());

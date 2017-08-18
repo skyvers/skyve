@@ -390,9 +390,10 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 	
 	// Used to hydrate the state after dehydration in SkyvePhaseListener.afterRestoreView()
-	private String webId;
-	public String getWebId() {
-		return webId;
+ 	// NB This is only set when the bean is dehydrated
+	private String dehydratedWebId;
+	public String getDehydratedWebId() {
+		return dehydratedWebId;
 	}
 
  	// restore the webContext and current bean etc
@@ -400,7 +401,7 @@ public class FacesView<T extends Bean> extends Harness {
 	throws Exception {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - hydrate");
 		webContext = newWebContext;
-		webId = null;
+		dehydratedWebId = null;
 		setBean(getBean());
 	}
 
@@ -408,7 +409,8 @@ public class FacesView<T extends Bean> extends Harness {
 	public void dehydrate() {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydrate");
 		if (webContext != null) {
-			webId = webContext.getWebId();
+			dehydratedWebId = webContext.getWebId();
+			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydratedWebId=" + dehydratedWebId);
 		}
 		webContext = null;
 		models.clear();

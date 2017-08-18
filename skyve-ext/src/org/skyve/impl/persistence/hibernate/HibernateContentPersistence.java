@@ -12,7 +12,7 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	private transient ContentManager cm;
 	
 	@Override
-	protected void commitContent() throws Exception {
+	protected void closeContent() throws Exception {
 		if (cm != null) {
 			cm.close();
 		}

@@ -65,7 +65,6 @@ public class SaveAction<T extends Bean> extends FacesAction<Void> {
 				throw new SecurityException("update this data", user.getName());
 			}
 	
-			Util.populateFully(targetBean);
 			targetBean = persistence.save(targetBean);
 			ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, (T) targetBean);
 		}

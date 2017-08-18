@@ -28,17 +28,22 @@ public interface Persistence extends Serializable {
 	public boolean isPersisted(Bean bean);
 	
 	/**
-	 * 
+	 * Begin a transaction.
 	 */
 	public void begin();
 	
 	/**
-	 * 
+	 * Rollback immediately.
 	 */
 	public void rollback();
 	
 	/**
-	 * 
+	 * Rollback at the end of the transaction.
+	 */
+	public void setRollbackOnly();
+	
+	/**
+	 * Commit the transaction (and optionally close the associated resources).
 	 * @param close
 	 */
 	public void commit(boolean close);

@@ -24,7 +24,10 @@ public class SkyvePhaseListener implements PhaseListener {
 
 	@Override
 	public void beforePhase(PhaseEvent event) {
-		// nothing to see here
+		if (UtilImpl.FACES_TRACE) {
+			PhaseId phaseId = event.getPhaseId();
+			UtilImpl.LOGGER.info("SkyvePhaseListener - BEFORE " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
+		}
 	}
 
 	@Override
@@ -89,7 +92,7 @@ public class SkyvePhaseListener implements PhaseListener {
 	throws Exception {
 		// restore the context
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-		AbstractWebContext webContext = WebUtil.getCachedConversation(view.getWebId(),
+		AbstractWebContext webContext = WebUtil.getCachedConversation(view.getDehydratedWebId(),
 																	(HttpServletRequest) ec.getRequest(),
 																	(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case

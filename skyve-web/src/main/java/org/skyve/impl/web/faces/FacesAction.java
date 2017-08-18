@@ -41,7 +41,7 @@ public abstract class FacesAction<T> {
 			}
 		}
 		catch (Throwable t) {
-			persistence.rollback();
+			persistence.setRollbackOnly();
 			t.printStackTrace();
 			
 			if (t instanceof MessageException) {
