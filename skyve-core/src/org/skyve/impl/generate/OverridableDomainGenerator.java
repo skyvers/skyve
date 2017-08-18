@@ -945,10 +945,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// map the document defined properties
 		for (Attribute attribute : document.getAttributes()) {
-			if (!attribute.isPersistent()) {
-				continue;
-			}
-
 			if (attribute instanceof Collection) {
 				Collection collection = (Collection) attribute;
 
@@ -956,6 +952,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 				Persistent referencedPersistent = referencedDocument.getPersistent();
 				String referencedModuleName = referencedDocument.getOwningModuleName();
+
+				// check that persistent collections don't reference transient documents.
+				if (collection.isPersistent()) {
+					if (referencedPersistent == null) {
+						throw new MetaDataException(String.format("The Collection %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
+																	collection.getName(), moduleName, documentName, referencedDocumentName));
+					}
+				}
+				// ignore transient attributes
+				else {
+					continue;
+				}
 
 				StringBuilder orderBy = null;
 				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
@@ -981,8 +989,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				CollectionType type = collection.getType();
-				boolean mapped = (referencedPersistent != null)
-						&& ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
+				boolean mapped = ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy());
 
 				if (type == CollectionType.child) {
 					if (mapped) {
@@ -1123,8 +1130,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Persistent referencedPersistent = referencedDocument.getPersistent();
 				String referencedModuleName = referencedDocument.getOwningModuleName();
 
+				// check that persistent collections don't reference transient documents.
+				if (association.isPersistent()) {
+					if (referencedPersistent == null) {
+						throw new MetaDataException(String.format("The Association %s in document %s.%s is persistent but the target [documentName] of %s is a transient document.", 
+																	association.getName(), moduleName, documentName, referencedDocumentName));
+					}
+				}
+				// ignore transient attributes
+				else {
+					continue;
+				}
+				
 				AssociationType type = association.getType();
-				if ((referencedPersistent != null) && ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
+				if (ExtensionStrategy.mapped.equals(referencedPersistent.getStrategy())) {
 					fw.append(indentation).append("\t\t<any name=\"").append(association.getName());
 					fw.append("\" meta-type=\"string\" id-type=\"string\">\n");
 					Map<String, Document> arcs = new TreeMap<>();
@@ -1198,6 +1217,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append("\" />\n");
 				}
 			} else if (attribute instanceof Enumeration) {
+				// ignore transient attributes
+				if (! attribute.isPersistent()) {
+					continue;
+				}
+
 				Enumeration enumeration = (Enumeration) attribute;
 
 				String enumerationName = enumeration.getName();
@@ -1241,6 +1265,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append(indentation).append("\t\t\t</type>\n");
 				fw.append(indentation).append("\t\t</property>\n");
 			} else if (attribute instanceof Inverse) {
+				// ignore transient attributes
+				if (! attribute.isPersistent()) {
+					continue;
+				}
+
 				AbstractInverse inverse = (AbstractInverse) attribute;
 
 				// determine the inverse target metadata
@@ -1315,6 +1344,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append(indentation).append("\t\t</bag>\n");
 				}
 			} else {
+				// ignore transient attributes
+				if (! attribute.isPersistent()) {
+					continue;
+				}
+
 				Field field = (Field) attribute;
 				String fieldName = field.getName();
 				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
