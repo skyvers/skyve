@@ -735,21 +735,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			} else {
 				fw.append(indent).append("\t<class name=\"");
 			}
-			String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
-					+ documentName + "Extension.java";
-			if (new File(extensionPath).exists()) {
-				System.out.println("    Generate ORM using " + extensionPath);
-				fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName)
-						.append("Extension");
-			} else {
-				fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.')
-						.append(documentName);
-				if (forExt) {
-					fw.append("Ext");
+			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
+				String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
+						+ documentName + "Extension.java";
+				if (new File(extensionPath).exists()) {
+					System.out.println("    Generate ORM using " + extensionPath);
+					fw.append(packagePathPrefix).append(moduleName).append('.').append(documentName).append('.').append(documentName)
+							.append("Extension");
+				} else {
+					fw.append(packagePathPrefix).append(moduleName).append('.').append(repository.DOMAIN_NAME).append('.')
+							.append(documentName);
+					if (forExt) {
+						fw.append("Ext");
+					}
 				}
+				fw.append("\" ");
 			}
-			fw.append("\" ");
-
+			
 			if ((baseDocumentName == null) || ExtensionStrategy.joined.equals(strategy)) {
 				fw.append("table=\"").append(persistent.getName());
 				String schemaName = persistent.getSchema();
@@ -774,15 +776,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append("\" ");
 			}
 
-			fw.append("entity-name=\"");
-			StringBuilder entityNameBuilder = new StringBuilder(64);
-			if (customerName != null) {
-				entityNameBuilder.append(customerName);
+			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
+				fw.append("entity-name=\"");
+				StringBuilder entityNameBuilder = new StringBuilder(64);
+				if (customerName != null) {
+					entityNameBuilder.append(customerName);
+				}
+				entityNameBuilder.append(moduleName).append(documentName);
+				entityName = entityNameBuilder.toString();
+				fw.append(entityName).append("\">\n");
 			}
-			entityNameBuilder.append(moduleName).append(documentName);
-			entityName = entityNameBuilder.toString();
-			fw.append(entityName).append("\">\n");
-
+			
 			if ((baseDocumentName != null) && ExtensionStrategy.joined.equals(strategy)) {
 				fw.append(indent).append("\t\t<key column=\"bizId\" />\n");
 			} else if (baseDocumentName == null) {
