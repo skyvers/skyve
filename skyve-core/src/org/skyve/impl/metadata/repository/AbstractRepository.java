@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.enterprise.inject.spi.Unmanaged;
+
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -23,7 +25,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 
 public abstract class AbstractRepository implements Repository {
 	private static AbstractRepository repository;
@@ -138,15 +139,14 @@ public abstract class AbstractRepository implements Repository {
 	 * @param customer The customer to load the code for, or null
 	 * @param fullyQualifiedJavaCodeName
 	 * @param assertExistence
-	 * @return
+	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public final <T extends MetaData> T getJavaCode(Customer customer, 
-														String fullyQualifiedJavaCodeName,
-														boolean assertExistence) {
-		T result = null;
-		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);
+													String fullyQualifiedJavaCodeName,
+													boolean assertExistence) {
 		
+		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);
 		if (type == null) {
 			if (assertExistence) {
 				throw new MetaDataException(fullyQualifiedJavaCodeName + " does not exist in the customer's vtable");
@@ -154,14 +154,18 @@ public abstract class AbstractRepository implements Repository {
 		}
 		else {
 			try {
-				result = (T) type.newInstance();
+				return (T) new Unmanaged(type)
+					.newInstance()
+					.produce()
+					.inject()
+					.postConstruct()
+					.get();
 			}
 			catch (Exception e) {
 				throw new MetaDataException("A problem was encountered loading class " + type, e);
 			}
 		}
-		
-		return result;
+		return null;
 	}
 
 	@Override
