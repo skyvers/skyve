@@ -4,6 +4,8 @@ import java.security.Principal;
 import java.util.Map;
 
 import javax.faces.FacesException;
+import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -114,9 +116,11 @@ public class SkyvePhaseListener implements PhaseListener {
 				if (managedBeanName != null) {
 					FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
 					AbstractWebContext webContext = view.getWebContext();
-//					if (event.getFacesContext().getMaximumSeverity().getOrdinal() < FacesMessage.SEVERITY_ERROR) {
+					Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
+					if ((maximumSeverity == null) || 
+							(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
 						WebUtil.putConversationInCache(webContext);
-//					}
+					}
 					view.dehydrate();
 				}
 			}
