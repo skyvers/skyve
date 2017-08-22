@@ -1,7 +1,0 @@
-<Object ID="PopulateValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="populate" addGlobalId="false" >
-	<fields>
-		<formula type="string"/>
-		<formulaVars type="ValueMap"/>
-	</fields>
-</Object>
-

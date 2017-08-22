@@ -1,3 +1,0 @@
-<DataSource ID="WindowMinimizeButton" inheritsFrom="ImgButton" Constructor="WindowMinimizeButton"
-            showLocalFieldsOnly="true" showSuperClassEvents="false">
-</DataSource>

@@ -1,5 +1,0 @@
-<Object ID="ReadOnlyValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="readOnly" addGlobalId="false">
-    <fields>
-        <fieldAppearance type="string"/>
-    </fields>
-</Object>

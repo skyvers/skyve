@@ -1,7 +1,0 @@
-<Object ID="ActionDeclaration" __autoConstruct="DataSource">
-    <fields>
-        <name type="string"/>
-        <title type="string"/>
-        <params type="Object" multiple="true"/> 
-    </fields>
-</Object>

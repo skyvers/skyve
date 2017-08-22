@@ -1,3 +1,0 @@
-<DataSource ID="WindowHeaderLabel" inheritsFrom="Label" Constructor="WindowHeaderLabel"
-            showLocalFieldsOnly="true" showSuperClassEvents="false">
-</DataSource>

@@ -1,8 +1,0 @@
-<Object ID="MessageValidator" __autoConstruct="DataSource" inheritsFrom="Validator" Constructor="message" addGlobalId="false">
-	<fields>
-		<message type="string"/>
-		<severity type="string"/>
-		<displayMode type="string"/>
-	</fields>
-</Object>
-

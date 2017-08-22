@@ -1,5 +1,0 @@
-<DataSource ID="FileAssemblyEntry" inheritsFrom="Object">
-	<fields>
-        <field name="components" type="Object" multiple="true"/>
-    </fields>
-</DataSource>

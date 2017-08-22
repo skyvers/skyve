@@ -1,5 +1,0 @@
-<DataSource	ID="DrawShape" inheritsFrom="DrawItem" Constructor="DrawShape" >
-    <fields>
-        <field name="commands" type="DrawShapeCommand" title="Commands" multiple="true"/>
-    </fields>
-</DataSource>
