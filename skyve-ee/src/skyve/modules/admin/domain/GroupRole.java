@@ -11,7 +11,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
- * GroupRole
+ * Group Role
  * 
  * @stereotype "persistent child"
  */

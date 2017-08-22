@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class ChangePasswordFactory extends AbstractDomainFactory<ChangePassword> {
+public class ChangePasswordFactory extends AbstractDomainFactory<ChangePassword > {
 
 	@Override
 	public ChangePassword getInstance() throws Exception {

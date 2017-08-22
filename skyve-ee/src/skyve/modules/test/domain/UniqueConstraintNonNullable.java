@@ -13,6 +13,8 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * All Unique Constraint Non-nullable
+ * <br/>
  * All unique constraint attributes are required.
  * 
  * @depend - - - Enum3

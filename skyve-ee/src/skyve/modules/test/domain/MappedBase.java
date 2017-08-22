@@ -31,6 +31,8 @@ import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * Mapped Base
+ * <br/>
  * A base document using the mapped strategy.
  * 
  * @depend - - - Enum3

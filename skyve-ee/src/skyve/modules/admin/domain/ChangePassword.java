@@ -8,7 +8,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * ChangePassword
+ * Change Password
  * 
  * @stereotype "transient"
  */

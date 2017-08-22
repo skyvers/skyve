@@ -14,7 +14,7 @@ import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 
 /**
- * UserDashboard
+ * User Dashboard
  * 
  * @navhas n currentUser 0..1 User
  * @navhas n roles 0..n UserRole

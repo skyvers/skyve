@@ -10,7 +10,7 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
- * SystemDashboard
+ * System Dashboard
  * 
  * @navhas n jobs 0..n Job
  * @stereotype "transient"

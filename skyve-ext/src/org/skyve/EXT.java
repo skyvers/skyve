@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.enterprise.inject.Produces;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -491,10 +492,12 @@ public class EXT {
 		return result;
 	}
 	
+	@Produces
 	public static Connection getDataStoreConnection() {
 		return getDataStoreConnection(UtilImpl.DATA_STORE);
 	}
 
+	@Produces
 	public static ContentManager newContentManager() {
 		return AbstractContentManager.get();
 	}

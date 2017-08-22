@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class UserCandidateContactFactory extends AbstractDomainFactory<UserCandidateContact> {
+public class UserCandidateContactFactory extends AbstractDomainFactory<UserCandidateContact > {
 
 	@Override
 	public UserCandidateContact getInstance() throws Exception {

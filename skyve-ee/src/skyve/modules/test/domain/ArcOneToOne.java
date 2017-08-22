@@ -8,6 +8,8 @@ import org.skyve.CORE;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
+ * ArcOneToOne
+ * <br/>
  * A single Arc.
  * 
  * @navhas n arc 0..1 AnyBase

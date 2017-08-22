@@ -22,6 +22,8 @@ import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
+ * Staff
+ * <br/>
  * Someone who works for this organisation
  * 
  * @depend - - - Status
@@ -357,36 +359,57 @@ return getContact().getName();
 
 	/**
 	 * Can Change
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isCanChange() {
 		return (isManager() || isMe());
 	}
 
+	/**	 * {@link #isCanChange} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotCanChange() {
 		return (! isCanChange());
 	}
 
 	/**
 	 * Manager
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));
 	}
 
+	/**	 * {@link #isManager} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotManager() {
 		return (! isManager());
 	}
 
 	/**
 	 * Is me
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isMe() {
 		return (modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this));
 	}
 
+	/**	 * {@link #isMe} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotMe() {
 		return (! isMe());
 	}

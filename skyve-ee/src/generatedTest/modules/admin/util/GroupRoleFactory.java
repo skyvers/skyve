@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class GroupRoleFactory extends AbstractDomainFactory<GroupRole> {
+public class GroupRoleFactory extends AbstractDomainFactory<GroupRole > {
 
 	@Override
 	public GroupRole getInstance() throws Exception {

@@ -265,6 +265,8 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 
 	/**
 	 * Updates to contact details is allowed
+	 * @return	The condition
+
 	 */
 	@XmlTransient
 	public boolean isAllowUpdate() {
@@ -274,6 +276,11 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 					|| isUserInRole("admin","SecurityAdministrator")?true:false));
 	}
 
+	/**	 * {@link #isAllowUpdate} negation.
+
+	 * @return	The negated condition
+
+	 */
 	public boolean isNotAllowUpdate() {
 		return (! isAllowUpdate());
 	}

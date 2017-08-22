@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class DataMaintenanceFactory extends AbstractDomainFactory<DataMaintenance> {
+public class DataMaintenanceFactory extends AbstractDomainFactory<DataMaintenance > {
 
 	@Override
 	public DataMaintenance getInstance() throws Exception {

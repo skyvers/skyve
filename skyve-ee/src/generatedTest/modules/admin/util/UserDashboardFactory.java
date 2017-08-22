@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class UserDashboardFactory extends AbstractDomainFactory<UserDashboard> {
+public class UserDashboardFactory extends AbstractDomainFactory<UserDashboard > {
 
 	@Override
 	public UserDashboard getInstance() throws Exception {

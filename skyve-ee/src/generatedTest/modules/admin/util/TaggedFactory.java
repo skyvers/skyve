@@ -16,7 +16,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class TaggedFactory extends AbstractDomainFactory<Tagged> {
+public class TaggedFactory extends AbstractDomainFactory<Tagged > {
 
 	@Override
 	public Tagged getInstance() throws Exception {

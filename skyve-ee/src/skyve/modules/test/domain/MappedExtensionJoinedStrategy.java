@@ -11,6 +11,8 @@ import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
 
 /**
+ * Mapped Extension
+ * <br/>
  * Extension document.
  * 
  * @navhas n aggregatedCollection 0..n MappedExtensionJoinedStrategy

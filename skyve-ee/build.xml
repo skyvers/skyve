@@ -5,6 +5,9 @@
 	<mkdir dir="tools/lib"/>
 	
 	<path id="classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
 		</fileset>

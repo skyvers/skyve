@@ -16,7 +16,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class JobScheduleFactory extends AbstractDomainFactory<JobSchedule> {
+public class JobScheduleFactory extends AbstractDomainFactory<JobSchedule > {
 
 	@Override
 	public JobSchedule getInstance() throws Exception {

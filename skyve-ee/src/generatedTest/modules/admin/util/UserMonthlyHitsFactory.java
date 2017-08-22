@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class UserMonthlyHitsFactory extends AbstractDomainFactory<UserMonthlyHits> {
+public class UserMonthlyHitsFactory extends AbstractDomainFactory<UserMonthlyHits > {
 
 	@Override
 	public UserMonthlyHits getInstance() throws Exception {

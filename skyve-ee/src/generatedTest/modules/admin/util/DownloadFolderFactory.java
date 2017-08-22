@@ -15,7 +15,7 @@ import util.AbstractDomainFactory;
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class DownloadFolderFactory extends AbstractDomainFactory<DownloadFolder> {
+public class DownloadFolderFactory extends AbstractDomainFactory<DownloadFolder > {
 
 	@Override
 	public DownloadFolder getInstance() throws Exception {

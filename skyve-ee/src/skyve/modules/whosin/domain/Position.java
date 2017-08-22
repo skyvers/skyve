@@ -13,6 +13,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
 /**
+ * Position
+ * <br/>
  * Staff position.
  * 
  * @navhas n staff 0..1 Staff
