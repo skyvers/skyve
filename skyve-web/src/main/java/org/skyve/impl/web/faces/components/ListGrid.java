@@ -88,7 +88,7 @@ public class ListGrid extends HtmlPanelGroup {
 					}
 					else {
 						Document document = module.getDocument(customer, documentName);
-						model = CORE.getRepository().getListModel(customer, document, modelName);
+						model = CORE.getRepository().getListModel(customer, document, modelName, true);
 						name = modelName;
 					}
 					

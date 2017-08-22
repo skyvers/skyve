@@ -149,7 +149,8 @@ public class FileUpload extends Localisable {
 			}
 			UploadAction<Bean> uploadAction = repository.getUploadAction(customer, 
 																			document, 
-																			action);
+																			action,
+																			true);
 			UploadException exception = new UploadException();
 			MimeType mimeType = null;
 			try {

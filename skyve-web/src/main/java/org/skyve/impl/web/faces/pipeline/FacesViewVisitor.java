@@ -860,7 +860,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		ListModel<? extends Bean> model = null;
 		Document drivingDocument = null;
 		if ((queryName == null) && (modelName != null)) {
-			model = CORE.getRepository().getListModel(customer, document, modelName);
+			model = CORE.getRepository().getListModel(customer, document, modelName, true);
 			modelDocumentName = document.getName();
 			drivingDocument = model.getDrivingDocument();
 		}

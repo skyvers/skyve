@@ -204,20 +204,20 @@ public class ViewGenerator {
 		for (String actionName : ((DocumentImpl) document).getDefinedActionNames()) {
 			action = new ActionImpl();
 			try {
-				repository.getServerSideAction(customer, document, actionName);
+				repository.getServerSideAction(customer, document, actionName, false);
 			}
 			catch (Exception e) {
 				try {
-					repository.getUploadAction(customer, document, actionName);
+					repository.getUploadAction(customer, document, actionName, false);
 					action.setImplicitName(ImplicitActionName.Upload);
 				}
 				catch (Exception e1) {
 					try {
-						repository.getBizExportAction(customer, document, actionName);
+						repository.getBizExportAction(customer, document, actionName, false);
 						action.setImplicitName(ImplicitActionName.BizExport);
 					}
 					catch (Exception e2) {
-						repository.getBizImportAction(customer, document, actionName);
+						repository.getBizImportAction(customer, document, actionName, false);
 						action.setImplicitName(ImplicitActionName.BizImport);
 					}
 				}

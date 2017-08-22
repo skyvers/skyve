@@ -59,7 +59,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 
 		// model type of request
 		if (modelName != null) {
-			model = CORE.getRepository().getListModel(c, d, modelName);
+			model = CORE.getRepository().getListModel(c, d, modelName, true);
 			if (model == null) {
 				throw new MetaDataException(modelName + " is not a valid ListModel");
 			}

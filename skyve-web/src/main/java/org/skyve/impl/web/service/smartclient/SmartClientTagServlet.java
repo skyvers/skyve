@@ -219,7 +219,7 @@ public class SmartClientTagServlet extends HttpServlet {
 			String documentName = documentOrQueryOrModelName.substring(0, __Index);
 			Document document = module.getDocument(customer, documentName);
 			String modelName = documentOrQueryOrModelName.substring(__Index + 2);
-			model = CORE.getRepository().getListModel(customer, document, modelName);
+			model = CORE.getRepository().getListModel(customer, document, modelName, true);
 			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
 		}

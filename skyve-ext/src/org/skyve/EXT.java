@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -53,6 +54,7 @@ import org.skyve.util.MailAttachment;
  * The central factory for creating all objects required in skyve ext.
  * See {@link org.skyve.CORE} for creating objects implemented in the skyve core API.
  */
+@ApplicationScoped
 public class EXT {
 	/**
 	 * Disallow instantiation
@@ -555,6 +557,7 @@ public class EXT {
 		return result;
 	}
 	
+	@Produces
 	public static SQLDataAccess newSQLDataAccess() {
 		return new SQLDataAccessImpl(UtilImpl.DATA_STORE);
 	}

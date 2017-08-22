@@ -65,11 +65,13 @@ public interface Repository {
 	 * @param customer
 	 * @param document
 	 * @param imageName
+	 * @param runtime
 	 * @return
 	 */
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer,
 																Document document,
-																String imageName);
+																String imageName,
+																boolean runtime);
 
 	/**
 	 * 
@@ -81,11 +83,11 @@ public interface Repository {
 	 */
 	public View getView(String uxui, Customer customer, Document document, ViewType viewType);
 
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName);
+	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
 	
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName);
+	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime);
 
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName);
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime);
 	
 	/**
 	 * 
@@ -94,7 +96,7 @@ public interface Repository {
 	 * @param className
 	 * @return
 	 */
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className);
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime);
 
 	/**
 	 * 
@@ -103,34 +105,37 @@ public interface Repository {
 	 * @param className
 	 * @return
 	 */
-	public BizExportAction getBizExportAction(Customer customer, Document document, String className);
+	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime);
 
 	/**
 	 * 
 	 * @param customer
 	 * @param document
 	 * @param className
+	 * @param runtime
 	 * @return
 	 */
-	public BizImportAction getBizImportAction(Customer customer, Document document, String className);
+	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime);
 
 	/**
 	 * 
 	 * @param customer
 	 * @param document
 	 * @param className
+	 * @param runtime
 	 * @return
 	 */
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className);
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime);
 
 	/**
 	 * 
 	 * @param customer
 	 * @param document
 	 * @param className
+	 * @param runtime
 	 * @return
 	 */
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className);
+	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime);
 
 	/**
 	 * 

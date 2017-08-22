@@ -150,7 +150,7 @@ public class SmartClientListServlet extends HttpServlet {
 						// model type of request
 						if (dataSource.contains("__")) {
 							drivingDocument = module.getDocument(customer, tokens[1]);
-							model = CORE.getRepository().getListModel(customer, drivingDocument, tokens[3]);
+							model = CORE.getRepository().getListModel(customer, drivingDocument, tokens[3], true);
 							if (model == null) {
 								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
 							}

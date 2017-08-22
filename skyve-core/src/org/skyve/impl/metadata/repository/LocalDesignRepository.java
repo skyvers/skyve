@@ -612,7 +612,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		StringBuilder fullyQualifiedBizletName = new StringBuilder(64);
 		fullyQualifiedBizletName.append(document.getOwningModuleName()).append('.');
 		fullyQualifiedBizletName.append(document.getName()).append("Bizlet");
-		return getJavaCode(customer, fullyQualifiedBizletName.toString(), false);
+		return getJavaCode(customer, fullyQualifiedBizletName.toString(), false, true);
 	}
 
 	
@@ -635,11 +635,11 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName) {
+	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
 		StringBuilder fullyQualifiedImageName = new StringBuilder(128);
 		fullyQualifiedImageName.append(document.getOwningModuleName()).append('.').append(document.getName());
 		fullyQualifiedImageName.append(".images.").append(imageName);
-		return getJavaCode(customer, fullyQualifiedImageName.toString(), true);
+		return getJavaCode(customer, fullyQualifiedImageName.toString(), true, runtime);
 	}
 
 	@Override
@@ -730,54 +730,55 @@ public class LocalDesignRepository extends AbstractRepository {
 		return result;
 	}
 
-	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName) {
-		return getJavaCode(customer, String.format("%s.%s.models.%s", document.getOwningModuleName(), document.getName(), modelName), true);
+	private <T extends MetaData> T getModel(Customer customer, Document document, String modelName, boolean runtime) {
+		return getJavaCode(customer, String.format("%s.%s.models.%s", document.getOwningModuleName(), document.getName(), modelName), true, runtime);
 	}
 
 	@Override
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, 
 																						Document document, 
-																						String modelName) {
-		return getModel(customer, document, modelName);
+																						String modelName,
+																						boolean runtime) {
+		return getModel(customer, document, modelName, runtime);
 	}
 
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName) {
-		return getModel(customer, document, modelName);
+	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+		return getModel(customer, document, modelName, runtime);
 	}
 
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName) {
-		return getModel(customer, document, modelName);
+	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
+		return getModel(customer, document, modelName, runtime);
 	}
 
-	private <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence) {
-		return getJavaCode(customer, String.format("%s.%s.actions.%s", document.getOwningModuleName(), document.getName(), actionName), assertExistence);
+	private <T extends MetaData> T getAction(Customer customer, Document document, String actionName, boolean assertExistence, boolean runtime) {
+		return getJavaCode(customer, String.format("%s.%s.actions.%s", document.getOwningModuleName(), document.getName(), actionName), assertExistence, runtime);
 	}
 	
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName) {
-		return getAction(customer, document, actionName, true);
+	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
+		return getAction(customer, document, actionName, true, runtime);
 	}
 
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName) {
-		return getAction(customer, document, exportActionName, true);
+	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
+		return getAction(customer, document, exportActionName, true, runtime);
 	}
 
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName) {
-		return getAction(customer, document, importActionName, true);
+	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
+		return getAction(customer, document, importActionName, true, runtime);
 	}
 
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName) {
-		return getAction(customer, document, downloadActionName, true);
+	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
+		return getAction(customer, document, downloadActionName, true, runtime);
 	}
 
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName) {
-		return getAction(customer, document, uploadActionName, true);
+	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
+		return getAction(customer, document, uploadActionName, true, runtime);
 	}
 
 	@Override
@@ -887,7 +888,7 @@ public class LocalDesignRepository extends AbstractRepository {
 					ActionPrivilege actionPrivilege = (ActionPrivilege) privilege;
 					String actionPrivilegeName = actionPrivilege.getName();
 					Document actionDocument = module.getDocument(customer, actionPrivilege.getDocumentName());
-					if (getAction(customer, actionDocument, actionPrivilegeName, false) == null) {
+					if (getAction(customer, actionDocument, actionPrivilegeName, false, false) == null) {
 						throw new MetaDataException("Action privilege " + actionPrivilege.getName() + 
 														" for customer " + customer.getName() + 
 														" in module " + module.getName() +
@@ -1005,7 +1006,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						if (modelName != null) {
 							if (item instanceof MapItem) {
 								try {
-									getMapModel(customer, document, modelName);
+									getMapModel(customer, document, modelName, false);
 								}
 								catch (Exception e) {
 									throw new MetaDataException("Menu [" + item.getName() + 

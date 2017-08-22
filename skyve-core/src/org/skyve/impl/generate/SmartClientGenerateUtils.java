@@ -1384,7 +1384,7 @@ public class SmartClientGenerateUtils {
 														boolean config,
 														StringBuilder toAppendTo,
 														Set<String> visitedQueryNames) {
-		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName);
+		ListModel<Bean> model = CORE.getRepository().getListModel(customer, owningDocument, modelName, true);
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingDocumentModule = customer.getModule(drivingDocument.getOwningModuleName());
 

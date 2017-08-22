@@ -148,7 +148,8 @@ public class BizportImport extends Localisable {
 			}
 			BizImportAction bizPortAction = repository.getBizImportAction(customer, 
 																			document,
-																			action);
+																			action,
+																			true);
 
 			UploadException exception = new UploadException();
 			try {

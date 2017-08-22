@@ -170,7 +170,7 @@ public class ActionImpl implements Action {
 			throw new IllegalStateException("The ActionConfig " + getName() + " is an implicit action.");
 		}
 
-		return AbstractRepository.get().getServerSideAction(customer, document, resourceName);
+		return AbstractRepository.get().getServerSideAction(customer, document, resourceName, true);
 	}
 
 	@Override

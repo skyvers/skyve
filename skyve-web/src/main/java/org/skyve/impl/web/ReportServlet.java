@@ -312,7 +312,7 @@ public class ReportServlet extends HttpServlet {
 					String documentName = documentOrQueryOrModelName.substring(0, __Index);
 					Document document = module.getDocument(customer, documentName);
 					String modelName = documentOrQueryOrModelName.substring(__Index + 2);
-					model = repository.getListModel(customer, document, modelName);
+					model = repository.getListModel(customer, document, modelName, true);
 					
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context

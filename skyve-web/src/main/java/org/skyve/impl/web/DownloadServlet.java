@@ -62,7 +62,8 @@ public class DownloadServlet extends HttpServlet {
 					}
 					DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
 																						document, 
-																						resourceName);
+																						resourceName,
+																						true);
 					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
 		        	Bean bean = context.getCurrentBean();

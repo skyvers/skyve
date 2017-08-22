@@ -203,7 +203,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 	@Override
 	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		return AbstractRepository.get().getDynamicImage(customer, this, name);
+		return AbstractRepository.get().getDynamicImage(customer, this, name, true);
 	}
 
 	@Override

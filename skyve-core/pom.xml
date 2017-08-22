@@ -15,9 +15,10 @@
 
 	<dependencies>
 		<dependency>
-    		<groupId>org.jboss.weld.se</groupId>
-    		<artifactId>weld-se</artifactId>
-    		<version>2.4.4.Final</version>
+			<groupId>javax</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>${javaee-api.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>

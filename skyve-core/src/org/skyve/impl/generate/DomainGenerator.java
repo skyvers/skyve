@@ -2,8 +2,6 @@ package org.skyve.impl.generate;
 
 import java.util.Map.Entry;
 
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
@@ -163,14 +161,10 @@ public abstract class DomainGenerator {
 		AbstractRepository repository = new LocalDesignRepository();
 		AbstractRepository.set(repository);
 
-		// Create weld instance so we can create beans using CDI outside of a J2EE container.
-		Weld weld = new Weld();
-		try (WeldContainer container = weld.initialize()) {
-			// generate for all customers
-			for (String customerName : repository.getAllCustomerNames()) {
-				validate(customerName);
-			}
-			foo.generate();
+		// generate for all customers
+		for (String customerName : repository.getAllCustomerNames()) {
+			validate(customerName);
 		}
+		foo.generate();
 	}
 }

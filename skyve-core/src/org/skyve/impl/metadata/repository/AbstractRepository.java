@@ -139,12 +139,15 @@ public abstract class AbstractRepository implements Repository {
 	 * @param customer The customer to load the code for, or null
 	 * @param fullyQualifiedJavaCodeName
 	 * @param assertExistence
+	 * @param runtime	Are we really running or just generating etc.
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public final <T extends MetaData> T getJavaCode(Customer customer, 
 													String fullyQualifiedJavaCodeName,
-													boolean assertExistence) {
+													boolean assertExistence,
+													boolean runtime) {
+		T result = null;
 		
 		Class<?> type = getJavaClass(customer, fullyQualifiedJavaCodeName);
 		if (type == null) {
@@ -154,18 +157,18 @@ public abstract class AbstractRepository implements Repository {
 		}
 		else {
 			try {
-				return (T) new Unmanaged(type)
-					.newInstance()
-					.produce()
-					.inject()
-					.postConstruct()
-					.get();
+				if (runtime) {
+					result = (T) new Unmanaged(type).newInstance().produce().inject().postConstruct().get();
+				}
+				else {
+					result = (T) type.newInstance();
+				}
 			}
 			catch (Exception e) {
 				throw new MetaDataException("A problem was encountered loading class " + type, e);
 			}
 		}
-		return null;
+		return result;
 	}
 
 	@Override

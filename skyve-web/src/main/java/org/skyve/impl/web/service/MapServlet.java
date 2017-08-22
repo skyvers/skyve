@@ -155,7 +155,7 @@ public class MapServlet extends HttpServlet {
 		Document document = module.getDocument(customer, bean.getBizDocument());
 
 		Repository repository = CORE.getRepository();
-		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME));
+		MapModel<Bean> model = repository.getMapModel(customer, document, request.getParameter(AbstractWebContext.MODEL_NAME), true);
 		model.setBean(bean);
 		// TODO get the envelope from the map
 		return JSON.marshall(customer, model.getResult(new Envelope(-180, 180, -90, 90)), null);
