@@ -85,7 +85,6 @@
 						</goals>
 						<configuration>
 							<tasks>
-								<move file="${ear-path}/lib/weld-se-2.4.4.Final.jar" tofile="${basedir}/lib/weld-se-2.4.4.Final.jar" />
 								<move file="${ear-path}/lib/javaee-api-7.0.jar" tofile="${basedir}/lib/javaee-api-7.0.jar" />
 								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
 									<fileset dir="${ear-path}/lib" 
