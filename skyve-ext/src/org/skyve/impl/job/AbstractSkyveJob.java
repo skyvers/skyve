@@ -4,14 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.UnableToInterruptJobException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -120,7 +121,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 			customer = user.getCustomer();
 			persistence.setUser(user);
 			persistence.begin();
-
+			BeanProvider.injectFields(this);
 			execute();
 			status = JobStatus.complete;
 		}
