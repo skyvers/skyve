@@ -22,16 +22,18 @@ public class PropertyMapAdapter extends XmlAdapter<PropertyMapType, Map<String, 
 
 	@Override
 	public PropertyMapType marshal(Map<String, String> v) throws Exception {
-		PropertyMapType result = new PropertyMapType();
-
-		List<PropertyMapEntryType> properties = result.properties;
-		for (Entry<String, String> entry : v.entrySet()) {
-			PropertyMapEntryType property = new PropertyMapEntryType();
-			property.key = entry.getKey();
-			property.value = entry.getValue();
-			properties.add(property);
+		PropertyMapType result = null;
+		if (! v.isEmpty()) {
+			result = new PropertyMapType();
+			List<PropertyMapEntryType> properties = result.properties;
+			for (Entry<String, String> entry : v.entrySet()) {
+				PropertyMapEntryType property = new PropertyMapEntryType();
+				property.key = entry.getKey();
+				property.value = entry.getValue();
+				properties.add(property);
+			}
 		}
-
+		
 		return result;
 	}
 }
