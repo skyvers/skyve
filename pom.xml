@@ -27,6 +27,7 @@
 		<commons-io.version>2.2</commons-io.version>
 		<commons-lang3.version>3.1</commons-lang3.version>
 		<commons-validator.version>1.5.1</commons-validator.version>
+		<deltaspike-core.version>1.8.0</deltaspike-core.version>
 		<ehcache.version>2.0.1</ehcache.version>
 		<elasticsearch.version>1.4.2</elasticsearch.version>
 		<geodb.version>0.7</geodb.version>
@@ -440,6 +441,11 @@
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
 				<version>${quartz.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.deltaspike.core</groupId>
+				<artifactId>deltaspike-core-api</artifactId>
+				<version>${deltaspike-core.version}</version>
 			</dependency>
 
 			<!-- Runtime dependencies -->

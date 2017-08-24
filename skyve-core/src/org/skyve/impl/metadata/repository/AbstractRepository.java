@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.enterprise.inject.spi.Unmanaged;
-
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -142,7 +141,7 @@ public abstract class AbstractRepository implements Repository {
 	 * @param runtime	Are we really running or just generating etc.
 	 * @return a new instance of the specified java class name or null if it does not exist in the customers vtable
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public final <T extends MetaData> T getJavaCode(Customer customer, 
 													String fullyQualifiedJavaCodeName,
 													boolean assertExistence,
@@ -157,11 +156,9 @@ public abstract class AbstractRepository implements Repository {
 		}
 		else {
 			try {
+				result = (T) type.newInstance();
 				if (runtime) {
-					result = (T) new Unmanaged(type).newInstance().produce().inject().postConstruct().get();
-				}
-				else {
-					result = (T) type.newInstance();
+					BeanProvider.injectFields(result);
 				}
 			}
 			catch (Exception e) {
