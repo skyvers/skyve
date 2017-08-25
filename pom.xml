@@ -63,6 +63,7 @@
 		<xmlbeans.version>2.6.0</xmlbeans.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
 		<generex.version>1.0.2</generex.version>
+		<weld-se.version>2.4.4.Final</weld-se.version>
 	</properties>
 
 	<distributionManagement>
@@ -446,6 +447,14 @@
 				<groupId>org.apache.deltaspike.core</groupId>
 				<artifactId>deltaspike-core-api</artifactId>
 				<version>${deltaspike-core.version}</version>
+			</dependency>
+
+			<!-- Test dependencies -->
+			<dependency>
+	    		<groupId>org.jboss.weld.se</groupId>
+	    		<artifactId>weld-se</artifactId>
+	    		<version>${weld-se.version}</version>
+	    		<scope>test</scope>
 			</dependency>
 
 			<!-- Runtime dependencies -->
