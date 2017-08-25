@@ -197,6 +197,18 @@
 			<type>java.lang.Boolean</type>
 		</attribute>
 		<attribute>
+			<description>Indicates whether this grid should use a sticky header when the header scrolls from the browser viewport.</description>
+			<name>stickyHeader</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
+			<description>Indicates whether this grid should use a paginator.</description>
+			<name>paginator</name>
+			<required>false</required>
+			<type>java.lang.Boolean</type>
+		</attribute>
+		<attribute>
 			<description>The fully qualified class name of a component builder to use</description>
 			<name>componentBuilderClass</name>
 			<required>false</required>

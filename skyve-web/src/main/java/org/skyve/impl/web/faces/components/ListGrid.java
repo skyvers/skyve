@@ -54,7 +54,12 @@ public class ListGrid extends HtmlPanelGroup {
 			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
 			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
 											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
-			final boolean paginator = "true".equals(attributes.get("paginator"));
+			Object stickyHeaderAttribute = attributes.get("stickyHeader");
+			final boolean stickyHeader = String.valueOf(true).equals(stickyHeaderAttribute) || // literal "true"
+											Boolean.TRUE.equals(stickyHeaderAttribute); // evaluated EL expression
+			Object paginatorAttribute = attributes.get("paginator");
+			final boolean paginator = String.valueOf(true).equals(paginatorAttribute) || // literal "true"
+											Boolean.TRUE.equals(paginatorAttribute); // evaluated EL expression
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
@@ -107,7 +112,7 @@ public class ListGrid extends HtmlPanelGroup {
 				    												zoomRendered,
 				    												new String[] {String.valueOf(zoomDisabled)},
 				    												paginator, 
-				    												true);
+				    												stickyHeader);
 				    ListGrid.this.getChildren().add(grid);
 				    
 					return null;
