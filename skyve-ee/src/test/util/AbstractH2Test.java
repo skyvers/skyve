@@ -1,7 +1,10 @@
 package util;
 
+import org.jboss.weld.environment.se.Weld;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.skyve.CORE;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -30,6 +33,21 @@ public abstract class AbstractH2Test {
 	// protected WebContext webContext;
 
 	protected Persistence p;
+
+	private static Weld weld;
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		weld = new Weld();
+		weld.initialize();
+	}
+	
+	@AfterClass
+	public static void afterClass() throws Exception {
+		if (weld != null) {
+			weld.shutdown();
+		}
+	}
 
 	@Before
 	public void beforeBase() {

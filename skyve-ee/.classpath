@@ -26,5 +26,6 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.1.jar"/>
+	<classpathentry kind="lib" path="lib/weld-se-2.4.4.Final.jar"/>
 	<classpathentry kind="output" path="javaee/skyve.ear/apps.jar"/>
 </classpath>
