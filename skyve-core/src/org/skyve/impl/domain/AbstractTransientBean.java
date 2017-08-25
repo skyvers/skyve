@@ -29,6 +29,10 @@ public abstract class AbstractTransientBean extends AbstractBean implements Tran
 		return bizId;
 	}
 
+	public void setBizId(String bizId) {
+		this.bizId = bizId;
+	}
+
 	@Override
 	public int hashCode() {
 		return bizId.hashCode();
