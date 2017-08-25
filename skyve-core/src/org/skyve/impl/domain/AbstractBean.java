@@ -1,14 +1,18 @@
 package org.skyve.impl.domain;
 
 import java.beans.PropertyDescriptor;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.collection.PersistentCollection;
 import org.skyve.CORE;
+import org.skyve.cdi.CDIProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.impl.bind.BindUtil;
@@ -264,5 +268,15 @@ public abstract class AbstractBean implements Bean {
 		else {
 			return thisOne.getBizId().compareTo(otherOne.getBizId());
 		}
+	}
+	
+	private void readObject(ObjectInputStream in) throws Exception {
+	    in.defaultReadObject();
+	    BeanProvider.injectFields(this);
+	}
+	
+	private void writeObject(ObjectOutputStream out) throws Exception {
+	    CDIProvider.clearInjectedFields(this);
+	    out.defaultWriteObject();
 	}
 }

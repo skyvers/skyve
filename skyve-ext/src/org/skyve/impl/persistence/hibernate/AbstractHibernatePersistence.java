@@ -26,6 +26,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.hibernate.EntityMode;
@@ -1626,6 +1627,9 @@ t.printStackTrace();
 
 		// clear the object's dirtiness
 		loadedBean.originalValues().clear();
+		
+		// Inject any dependencies
+		BeanProvider.injectFields(loadedBean);
 	}
 
 	@Override
