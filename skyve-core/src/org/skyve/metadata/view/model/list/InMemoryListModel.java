@@ -54,17 +54,18 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		for (QueryColumn column : getColumns()) {
 			if (column.isProjected()) {
 				String binding = column.getBinding();
-				// if this binding is to an association, 
-				// add the bizId as the column value and bizKey as the column displayValue
-				TargetMetaData target = Binder.getMetaDataForBinding(customer,
-																		module,
-																		drivingDocument,
-																		binding);
-				
-				if (target.getAttribute() instanceof Association) {
-					StringBuilder sb = new StringBuilder(64);
-					sb.append(binding).append('.').append(Bean.BIZ_KEY);
-					projections.add(sb.toString());
+				if (binding != null) {
+					// if this binding is to an association, 
+					// add the bizId as the column value and bizKey as the column displayValue
+					TargetMetaData target = Binder.getMetaDataForBinding(customer,
+																			module,
+																			drivingDocument,
+																			binding);
+					if (target.getAttribute() instanceof Association) {
+						StringBuilder sb = new StringBuilder(64);
+						sb.append(binding).append('.').append(Bean.BIZ_KEY);
+						projections.add(sb.toString());
+					}
 				}
 				projections.add((binding != null) ? binding : column.getName());
 			}
@@ -115,9 +116,9 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			OrderingImpl[] order = new OrderingImpl[sorts.length];
 			int i = 0;
 			for (SortParameter sort : sorts) {
-				String binding = sort.getBinding();
+				String by = sort.getBy();
 				SortDirection direction = sort.getDirection();
-				order[i++] = new OrderingImpl(binding, direction);
+				order[i++] = new OrderingImpl(by, direction);
 			}
 			Binder.sortCollectionByOrdering(rows, order);
 		}

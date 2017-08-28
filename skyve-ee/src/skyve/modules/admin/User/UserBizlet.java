@@ -85,7 +85,7 @@ public class UserBizlet extends Bizlet<User> {
 
 		if (User.groupsPropertyName.equals(fieldName)) {
 			DocumentQuery query = persistence.newDocumentQuery(Group.MODULE_NAME, Group.DOCUMENT_NAME);
-			query.addOrdering(Group.namePropertyName, SortDirection.ascending);
+			query.addBoundOrdering(Group.namePropertyName, SortDirection.ascending);
 			List<Group> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
 			for (Group group : groups) {
@@ -95,7 +95,7 @@ public class UserBizlet extends Bizlet<User> {
 			return result;
 		} else if (User.dataGroupPropertyName.equals(fieldName)) {
 			DocumentQuery query = persistence.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
-			query.addOrdering(DataGroup.namePropertyName, SortDirection.ascending);
+			query.addBoundOrdering(DataGroup.namePropertyName, SortDirection.ascending);
 			List<DataGroup> groups = query.beanResults();
 			List<DomainValue> result = new ArrayList<>(groups.size());
 			for (DataGroup group : groups) {

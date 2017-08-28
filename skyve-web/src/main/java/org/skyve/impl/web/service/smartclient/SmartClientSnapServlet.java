@@ -154,7 +154,7 @@ public class SmartClientSnapServlet extends HttpServlet {
 	    DocumentFilter f = q.getFilter();
 	    f.addEquals(SNAPSHOT_MODULE_NAME_PROPERTY_NAME, moduleName);
 	    f.addEquals(SNAPSHOT_QUERY_NAME_PROPERTY_NAME, queryName);
-	    q.addOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
+	    q.addBoundOrdering(SNAPSHOT_NAME_PROPERTY_NAME);
 
 	    for (Bean bean : q.projectedResults()) {
         	String escapedCode = SmartClientGenerateUtils.processString((String) BindUtil.get(bean, Bean.DOCUMENT_ID));

@@ -71,7 +71,7 @@ public class DataGroupUtil {
 		}
 		
 		DocumentQuery query = pers.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
-		query.addOrdering(DataGroup.namePropertyName, SortDirection.ascending);
+		query.addBoundOrdering(DataGroup.namePropertyName, SortDirection.ascending);
 		List<DataGroup> groups = query.beanResults();
 			for (DataGroup group : groups) {
 			result.add(new DomainValue(group.getBizId(), group.getBizKey()));

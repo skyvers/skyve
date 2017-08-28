@@ -10,13 +10,13 @@ public interface SortParameter {
 	 * 
 	 * @return
 	 */
-	public String getBinding();
+	public String getBy();
 	
 	/**
 	 * 
-	 * @param binding
+	 * @param by
 	 */
-	public void setBinding(String binding);
+	public void setBy(String by);
 	
 	/**
 	 * 

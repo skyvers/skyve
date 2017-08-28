@@ -84,27 +84,53 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * 
 	 * @param binding
 	 */
-	public DocumentQuery addOrdering(String binding);
+	public DocumentQuery addBoundOrdering(String binding);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery addOrdering(String binding, SortDirection order);
+	public DocumentQuery addBoundOrdering(String binding, SortDirection order);
 	
 	/**
 	 * 
 	 * @param binding
 	 * @param order
 	 */
-	public DocumentQuery insertOrdering(String binding, SortDirection order);
+	public DocumentQuery insertBoundOrdering(String binding, SortDirection order);
 	
 	/**
 	 * 
 	 * @param binding
 	 */
-	public DocumentQuery addGrouping(String binding);
+	public DocumentQuery addBoundGrouping(String binding);
+	
+	/**
+	 * 
+	 * @param expression
+	 */
+	public DocumentQuery addExpressionOrdering(String expression);
+	
+	/**
+	 * 
+	 * @param expression
+	 * @param order
+	 */
+	public DocumentQuery addExpressionOrdering(String expression, SortDirection order);
+	
+	/**
+	 * 
+	 * @param expression
+	 * @param order
+	 */
+	public DocumentQuery insertExpressionOrdering(String expression, SortDirection order);
+	
+	/**
+	 * 
+	 * @param expression
+	 */
+	public DocumentQuery addExpressionGrouping(String expression);
 	
 	/**
 	 * 

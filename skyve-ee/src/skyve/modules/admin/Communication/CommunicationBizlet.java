@@ -120,7 +120,7 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 
 			// look for OTHER tags
 			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
-			q.addOrdering(Tag.namePropertyName);
+			q.addBoundOrdering(Tag.namePropertyName);
 
 			List<Tag> tags = q.beanResults();
 			for (Tag t : tags) {

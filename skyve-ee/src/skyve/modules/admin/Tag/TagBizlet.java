@@ -78,7 +78,7 @@ public class TagBizlet extends Bizlet<Tag> {
 			// look for OTHER tags
 			DocumentQuery q = pers.newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 			q.getFilter().addNotEquals(Bean.DOCUMENT_ID, bean.getBizId());
-			q.addOrdering(Tag.namePropertyName);
+			q.addBoundOrdering(Tag.namePropertyName);
 
 			List<Tag> tags = q.beanResults();
 			for (Tag t : tags) {

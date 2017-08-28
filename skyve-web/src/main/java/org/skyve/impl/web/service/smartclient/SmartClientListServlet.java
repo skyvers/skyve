@@ -245,7 +245,7 @@ public class SmartClientListServlet extends HttpServlet {
 								else {
 									sortParameter.setDirection(SortDirection.ascending);
 								}
-								sortParameter.setBinding(sortBy.replace('_', '.'));
+								sortParameter.setBy(sortBy.replace('_', '.'));
 								
 								sortParameters[i] = sortParameter;
 							}

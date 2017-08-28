@@ -28,7 +28,9 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
 	private DocumentFilter filter;
+	// projection (bean.<binding> or alias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
+	// projection (bean.<binding> or alias) -> order
 	private LinkedHashMap<String, SortDirection> appendedOrderings = new LinkedHashMap<>();
 	private StringBuilder groupClause = new StringBuilder(32);
 
@@ -178,29 +180,56 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	}
 
 	@Override
-	public DocumentQuery addOrdering(String binding) {
-		addOrdering(binding, SortDirection.ascending);
+	public DocumentQuery addBoundOrdering(String binding) {
+		appendedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), SortDirection.ascending);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addOrdering(String binding, SortDirection order) {
-		appendedOrderings.put(binding, order);
+	public DocumentQuery addBoundOrdering(String binding, SortDirection order) {
+		appendedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), order);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery insertOrdering(String binding, SortDirection order) {
-		insertedOrderings.put(binding, order);
+	public DocumentQuery insertBoundOrdering(String binding, SortDirection order) {
+		insertedOrderings.put(String.format("%s.%s", THIS_ALIAS, binding), order);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addGrouping(String binding) {
+	public DocumentQuery addBoundGrouping(String binding) {
 		if (groupClause.length() > 0) {
 			groupClause.append(", ");
 		}
 		groupClause.append(THIS_ALIAS).append('.').append(binding);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addExpressionOrdering(String expression) {
+		appendedOrderings.put(expression, SortDirection.ascending);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addExpressionOrdering(String expression, SortDirection order) {
+		appendedOrderings.put(expression, order);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery insertExpressionOrdering(String expression, SortDirection order) {
+		insertedOrderings.put(expression, order);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addExpressionGrouping(String expression) {
+		if (groupClause.length() > 0) {
+			groupClause.append(", ");
+		}
+		groupClause.append(expression);
 		return this;
 	}
 
@@ -243,17 +272,17 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if ((! insertedOrderings.isEmpty()) || (! appendedOrderings.isEmpty())) {
 			// append the inserted orderings first
 			result.append(" ORDER BY ");
-			for (String binding : insertedOrderings.keySet()) {
-				SortDirection direction = insertedOrderings.get(binding);
-				result.append(THIS_ALIAS).append('.').append(binding).append(' ');
+			for (String projection : insertedOrderings.keySet()) {
+				SortDirection direction = insertedOrderings.get(projection);
+				result.append(projection).append(' ');
 				result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
 			}
 
-			// append the appended orderings if the binding is not in the inserted orderings
-			for (String binding : appendedOrderings.keySet()) {
-				if (! insertedOrderings.containsKey(binding)) {
-					SortDirection direction = appendedOrderings.get(binding);
-					result.append(THIS_ALIAS).append('.').append(binding).append(' ');
+			// append the appended orderings if the projection is not in the inserted orderings
+			for (String projection : appendedOrderings.keySet()) {
+				if (! insertedOrderings.containsKey(projection)) {
+					SortDirection direction = appendedOrderings.get(projection);
+					result.append(projection).append(' ');
 					result.append(SortDirection.descending.equals(direction) ? "desc, " : "asc, ");
 				}
 			}

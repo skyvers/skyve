@@ -39,6 +39,7 @@ public abstract class AbstractH2Test {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		weld = new Weld();
+		weld.addPackage(true, CORE.class);
 		weld.initialize();
 	}
 	

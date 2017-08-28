@@ -180,7 +180,7 @@ public final class TagUtil {
         query.addBoundProjection(Bean.DOCUMENT_ID);
         query.addBoundProjection("name");
         query.getFilter().addEquals(Bean.USER_ID, user.getId());
-        query.addOrdering("name");
+        query.addBoundOrdering("name");
         
         List<Bean> tags = query.projectedResults();
         List<DomainValue> result = new ArrayList<>(tags.size());

@@ -442,7 +442,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 			
 			referenceQuery.addBoundProjection(Bean.DOCUMENT_ID);
 			referenceQuery.addBoundProjection(Bean.BIZ_KEY);
-			referenceQuery.addOrdering(Bean.BIZ_KEY);
+			referenceQuery.addBoundOrdering(Bean.BIZ_KEY);
 
 			List<Bean> beans = referenceQuery.projectedResults();
 			result = new ArrayList<>(beans.size());

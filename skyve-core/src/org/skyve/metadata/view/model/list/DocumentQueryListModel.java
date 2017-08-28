@@ -1,9 +1,10 @@
 package org.skyve.metadata.view.model.list;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -42,11 +43,11 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
 		
-		projections.add(Bean.DOCUMENT_ID);
-		projections.add(PersistentBean.LOCK_NAME);
-		projections.add(PersistentBean.TAGGED_NAME);
-		projections.add(PersistentBean.FLAG_COMMENT_NAME);
-		projections.add(Bean.BIZ_KEY);
+		projections.put(Bean.DOCUMENT_ID, null);
+		projections.put(PersistentBean.LOCK_NAME, null);
+		projections.put(PersistentBean.TAGGED_NAME, null);
+		projections.put(PersistentBean.FLAG_COMMENT_NAME, null);
+		projections.put(Bean.BIZ_KEY, null);
 
 		drivingDocument = module.getDocument(customer, query.getDocumentName());
 		for (QueryColumn column : query.getColumns()) {
@@ -59,16 +60,15 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 																			module,
 																			drivingDocument,
 																			binding);
-					
 					if (target.getAttribute() instanceof Association) {
 						StringBuilder sb = new StringBuilder(64);
 						sb.append(binding).append('.').append(Bean.BIZ_KEY);
-						projections.add(sb.toString());
+						projections.put(sb.toString(), null);
 					}
-					projections.add(binding);
+					projections.put(binding, null);
 				}
 				else {
-					projections.add(column.getName());
+					projections.put(column.getName(), column.getExpression());
 				}
 			}
 		}
@@ -91,11 +91,12 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		return columns;
 	}
 
-	private Set<String> projections = new TreeSet<>();
+	// column binding/alias -> null (if binding) or expression (if alias)
+	private Map<String, String> projections = new TreeMap<>();
 	
 	@Override
 	public Set<String> getProjections() {
-		return projections;
+		return projections.keySet();
 	}
 
 	private DocumentQuery detailQuery;
@@ -139,9 +140,15 @@ public class DocumentQueryListModel extends ListModel<Bean> {
 		SortParameter[] sorts = getSortParameters();
 		if (sorts != null) {
 			for (SortParameter sort : sorts) {
-				String binding = sort.getBinding();
+				String by = sort.getBy();
 				SortDirection direction = sort.getDirection();
-				detailQuery.insertOrdering(binding, direction);
+				String expression = projections.get(by);
+				if (expression == null) {
+					detailQuery.insertBoundOrdering(by, direction);
+				}
+				else {
+					detailQuery.insertExpressionOrdering(expression, direction);
+				}
 			}
 		}
 		

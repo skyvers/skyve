@@ -164,7 +164,7 @@ public class TrackmateServlet extends HttpServlet {
 
 					if (moduleName != null && documentName != null) {
 						DocumentQuery q = persistence.newDocumentQuery(moduleName, documentName);
-						q.addOrdering(Bean.BIZ_KEY);
+						q.addBoundOrdering(Bean.BIZ_KEY);
 
 						List<Bean> beans = q.projectedResults();
 						int i = 0;
@@ -195,8 +195,8 @@ public class TrackmateServlet extends HttpServlet {
 					DocumentQuery q = persistence.newDocumentQuery(TRACK_MODULE_NAME, TRACK_DOCUMENT_NAME);
 					q.addAggregateProjection(AggregateFunction.Max, TRACK_TIMESTAMP_PROPERTY_NAME, "MaxTimestamp");
 					q.addBoundProjection(TRACK_USER_PROPERTY_NAME);
-					q.addGrouping(TRACK_USER_PROPERTY_NAME);
-					q.addOrdering(Binder.createCompoundBinding(TRACK_USER_PROPERTY_NAME, Bean.BIZ_KEY));
+					q.addBoundGrouping(TRACK_USER_PROPERTY_NAME);
+					q.addBoundOrdering(Binder.createCompoundBinding(TRACK_USER_PROPERTY_NAME, Bean.BIZ_KEY));
 					
 					//exclude the current user
 					q.getFilter().addNotEquals(Binder.createCompoundBinding(TRACK_USER_PROPERTY_NAME,  Bean.DOCUMENT_ID), user.getId());

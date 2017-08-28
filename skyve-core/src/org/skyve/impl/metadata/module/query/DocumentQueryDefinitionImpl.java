@@ -488,13 +488,18 @@ public class DocumentQueryDefinitionImpl extends QueryDefinitionImpl implements 
 			if (summaryType == null) {
 				SortDirection sortDirection = column.getSortOrder();
 				if (sortDirection != null) {
-					if (attribute instanceof Association) {
-						StringBuilder sb = new StringBuilder(64);
-						sb.append(binding).append('.').append(Bean.BIZ_KEY);
-						result.addOrdering(sb.toString(), sortDirection);
+					if (binding != null) {
+						if (attribute instanceof Association) {
+							StringBuilder sb = new StringBuilder(64);
+							sb.append(binding).append('.').append(Bean.BIZ_KEY);
+							result.addBoundOrdering(sb.toString(), sortDirection);
+						}
+						else {
+							result.addBoundOrdering(binding, sortDirection);
+						}
 					}
 					else {
-						result.addOrdering(binding, sortDirection);
+						result.addExpressionOrdering(expression, sortDirection);
 					}
 				}
 			}

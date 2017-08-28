@@ -57,7 +57,7 @@ public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 			//get last login time
 			DocumentQuery qLogins = pers.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 			qLogins.getFilter().addEquals(UserLoginRecord.userNamePropertyName, user.getUserName());
-			qLogins.addOrdering(UserLoginRecord.loginDateTimePropertyName, SortDirection.descending);
+			qLogins.addBoundOrdering(UserLoginRecord.loginDateTimePropertyName, SortDirection.descending);
 			
 			//we only want the second login (not our current log in)
 			qLogins.setFirstResult(1).setMaxResults(1);

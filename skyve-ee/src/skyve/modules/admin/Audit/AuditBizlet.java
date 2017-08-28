@@ -69,7 +69,7 @@ public class AuditBizlet extends Bizlet<Audit> {
 			if (forComparison) {
 				f.addLessThan(Audit.millisPropertyName, audit.getMillis());
 			}
-			q.addOrdering(Audit.millisPropertyName, SortDirection.descending);
+			q.addBoundOrdering(Audit.millisPropertyName, SortDirection.descending);
 			
 			q.setFirstResult(0).setMaxResults(100);
 			List<Bean> versions = q.projectedResults();

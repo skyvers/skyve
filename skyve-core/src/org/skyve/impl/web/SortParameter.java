@@ -10,17 +10,17 @@ public class SortParameter implements Serializable, org.skyve.web.SortParameter 
 	 */
 	private static final long serialVersionUID = 4250974309552241616L;
 
-	private String binding;
+	private String by;
 	private SortDirection direction;
 
 	@Override
-	public String getBinding() {
-		return binding;
+	public String getBy() {
+		return by;
 	}
 
 	@Override
-	public void setBinding(String binding) {
-		this.binding = binding;
+	public void setBy(String by) {
+		this.by = by;
 	}
 
 	@Override
@@ -38,12 +38,12 @@ public class SortParameter implements Serializable, org.skyve.web.SortParameter 
 		if (spaceIndex < 0) {
 			throw new IllegalStateException("No space in the string value");
 		}
-		setBinding(string.substring(0, spaceIndex));
+		setBy(string.substring(0, spaceIndex));
 		setDirection(SortDirection.valueOf(string.substring(spaceIndex + 1)));
 	}
 
 	@Override
 	public String toString() {
-		return new StringBuilder(32).append(binding).append(' ').append(direction.toString()).toString();
+		return String.format("%s %s", by, direction.toString());
 	}
 }
