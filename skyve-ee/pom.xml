@@ -87,7 +87,7 @@
 							<tasks>
 								<move todir="${basedir}/lib/" failonerror="true">
 									<fileset dir="${ear-path}/lib"
-												includes="javaee-*.jar,junit-*.jar,mockito-*.jar,hamcrest-*.jar weld-*.jar" />
+												includes="byte-buddy-*.jar,hamcrest-*.jar,javaee-*.jar,junit-*.jar,mockito-*.jar,objenesis-*.jar,weld-*.jar" />
 								</move>
 								<move todir="${war-path}/WEB-INF/lib" failonerror="true">
 									<fileset dir="${ear-path}/lib" 
