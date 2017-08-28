@@ -44,10 +44,5 @@
 			<artifactId>geodb</artifactId>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-    		<groupId>org.jboss.weld.se</groupId>
-    		<artifactId>weld-se</artifactId>
-    		<scope>test</scope>
-		</dependency>
 	</dependencies>
 </project>

@@ -63,7 +63,10 @@
 		<xmlbeans.version>2.6.0</xmlbeans.version>
 		<xmlschema-core.version>2.0.1</xmlschema-core.version>
 		<generex.version>1.0.2</generex.version>
-		<weld-se.version>2.4.4.Final</weld-se.version>
+		<junit.version>4.12</junit.version>
+		<mockito.version>2.8.47</mockito.version>
+		<hamcrest.version>1.3</hamcrest.version>
+		<weld-se.version>3.0.1.Final</weld-se.version>
 	</properties>
 
 	<distributionManagement>
@@ -453,24 +456,24 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.12</version>
+				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.8.47</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest-library</artifactId>
-				<version>1.3</version>
+				<version>${hamcrest.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 	    		<groupId>org.jboss.weld.se</groupId>
-	    		<artifactId>weld-se</artifactId>
+	    		<artifactId>weld-se-shaded</artifactId>
 	    		<version>${weld-se.version}</version>
 	    		<scope>test</scope>
 			</dependency>
