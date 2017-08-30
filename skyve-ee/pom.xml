@@ -466,7 +466,7 @@
 		</dependency>
 		<dependency>
     		<groupId>org.jboss.weld.se</groupId>
-    		<artifactId>weld-se-shaded</artifactId>
+    		<artifactId>weld-se</artifactId>
     		<version>${weld-se.version}</version>
     		<scope>test</scope>
 		</dependency>
@@ -524,6 +524,12 @@
 			<groupId>org.opengeo</groupId>
 			<artifactId>geodb</artifactId>
 			<version>${geodb.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
