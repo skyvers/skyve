@@ -141,8 +141,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5";
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20170828";
-	public static final String SKYVE_VERSION = "20170828";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20170830";
+	public static final String SKYVE_VERSION = "20170830";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	private static String absoluteBasePath;
