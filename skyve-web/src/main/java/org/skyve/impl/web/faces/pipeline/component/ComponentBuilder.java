@@ -110,7 +110,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											boolean createRendered,
 											String[] createDisabledConditionNames,
 											boolean zoomRendered,
-											String[] zoomDisabledConditionNames,
+											String zoomDisabledConditionName,
 											boolean showPaginator,
 											boolean stickyHeader);
 

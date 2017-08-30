@@ -143,6 +143,7 @@ import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
@@ -876,10 +877,16 @@ public class FacesViewVisitor extends ViewVisitor {
 	        model = queryModel;
 		}
 		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
-		String[] createDisabled = new String[] {grid.getDisableAddConditionName(), grid.getDisabledConditionName()};
+		String disableAddConditionName = grid.getDisableAddConditionName();
+		String disabledConditionName = grid.getDisabledConditionName();
+		String[] createDisabled = (disableAddConditionName == null) ? 
+									((disabledConditionName == null) ? 
+										null : 
+										new String[] {disabledConditionName}) :
+									((disabledConditionName == null) ? 
+										new String[] {disableAddConditionName} : 
+										new String[] {disableAddConditionName, disabledConditionName});
 		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
-		String[] zoomDisabled = new String[] {grid.getDisabledConditionName(), grid.getDisableZoomConditionName()};
-		
 		UIComponent l = cb.listGrid(modelDocumentName, 
 										modelName, 
 										model, 
@@ -888,7 +895,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										createRendered,
 										createDisabled,
 										zoomRendered,
-										zoomDisabled,
+										grid.getDisableZoomConditionName(),
 										true,
 										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth());
@@ -1992,11 +1999,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitParameter(
-			org.skyve.metadata.view.widget.bound.Parameter parameter,
-			boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
-		
+	public void visitParameter(Parameter parameter,
+								boolean parentVisible,
+								boolean parentEnabled) {
 	}
 	
 	@Override

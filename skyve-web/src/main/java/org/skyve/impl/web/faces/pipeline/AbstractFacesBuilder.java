@@ -167,40 +167,38 @@ public abstract class AbstractFacesBuilder {
 		return createValueExpressionFromBinding(condition, true, extraELConditionToAnd, Boolean.class);
 	}
 	
-	protected String createAndedValueExpressionFragmentFromConditions(String[] conditions, boolean negate) {
+	protected String createOredValueExpressionFragmentFromConditions(String[] conditions) {
 		StringBuilder result = new StringBuilder(64);
 		
-		if (negate) {
-			result.append("not (");
-		}
-		for (String condition : conditions) {
-			if (String.valueOf(true).equals(condition) || String.valueOf(false).equals(condition)) {
-				result.append(condition);
+		if ((conditions != null) && (conditions.length > 0)) {
+			for (String condition : conditions) {
+				if (String.valueOf(true).equals(condition) || String.valueOf(false).equals(condition)) {
+					result.append(condition);
+				}
+				else {
+					result.append(managedBeanName).append(".currentBean['").append(condition).append("']");
+				}
+				result.append(" or ");
 			}
-			else {
-				result.append(managedBeanName).append(".currentBean['").append(condition).append("']");
-			}
-			result.append(" and ");
+			result.setLength(result.length() - 4); // remove last or
 		}
-		result.setLength(result.length() - 5); // remove last and
-		if (negate) {
-			result.append(")");
-		}
-
+		
 		return result.toString();
 	}
 	
-	protected ValueExpression createAndedValueExpressionFromConditions(String[] conditions, boolean negate) {
+	protected ValueExpression createOredValueExpressionFromConditions(String[] conditions) {
 		if (conditions.length == 1) {
 			return createValueExpressionFromCondition(conditions[0], null);
 		}
-
-		return createValueExpressionFromBinding(null, 
-													false, 
-													createAndedValueExpressionFragmentFromConditions(conditions, negate), 
-													false, 
-													null, 
-													Boolean.class);
+		else if (conditions.length > 0) {
+			return createValueExpressionFromBinding(null, 
+														false, 
+														createOredValueExpressionFragmentFromConditions(conditions), 
+														false, 
+														null, 
+														Boolean.class);
+		}
+		return null;
 	}
 	
 	protected HtmlPanelGroup panelGroup(boolean nowrap, 

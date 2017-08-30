@@ -386,7 +386,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									boolean createRendered,
 									String[] createDisabledConditionNames,
 									boolean zoomRendered,
-									String[] zoomDisabledConditionNames,
+									String zoomDisabledConditionName,
 									boolean showPaginator,
 									boolean stickyHeader) {
 		Document drivingDocument =  model.getDrivingDocument();
@@ -408,10 +408,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
         setId(result, null);
     	result.setWidgetVar(result.getId());
     	if (zoomRendered) {
-    		result.setValueExpression("selectionMode", 
-    									ef.createValueExpression(elc, String.format("#{(%s) ? '' : 'single'}", 
-    																					createAndedValueExpressionFragmentFromConditions(zoomDisabledConditionNames, false)),
-    																					String.class));
+    		if (zoomDisabledConditionName == null) {
+	    		result.setSelectionMode("single"); 
+    		}
+    		else {
+	    		result.setValueExpression("selectionMode", 
+	    									ef.createValueExpression(elc, String.format("#{(%s) ? '' : 'single'}", 
+	    																					createOredValueExpressionFragmentFromConditions(new String[] {zoomDisabledConditionName})),
+	    																					String.class));
+    		}
 	        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
         
 	        AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
@@ -465,7 +470,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         								createRendered, 
         								createDisabledConditionNames, 
         								zoomRendered,
-        								zoomDisabledConditionNames,
+        								zoomDisabledConditionName,
         								children);
         }
     	
@@ -540,7 +545,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											boolean createRendered,
 											String[] createDisabledConditionNames,
 											boolean zoomRendered,
-											String[] zoomDisabledConditionNames,
+											String zoomDisabledConditionName,
 											List<UIComponent> componentChildrenToAddTo) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
@@ -551,8 +556,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	    	button.setValue(null);
         	button.setTitle("New record");
 	    	button.setIcon("fa fa-plus");
-			button.setValueExpression("disabled",
-										createAndedValueExpressionFromConditions(createDisabledConditionNames, false));
+	    	if ((createDisabledConditionNames != null) && (createDisabledConditionNames.length > 0)) {
+		    	button.setValueExpression("disabled",
+											createOredValueExpressionFromConditions(createDisabledConditionNames));
+	    	}
         	StringBuilder value = new StringBuilder(128);
         	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
         	value.append("&d=").append(documentName);
@@ -568,8 +575,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	    	button.setValue(null);
 	    	button.setTitle("View Detail");
 	    	button.setIcon("fa fa-chevron-right");
-			button.setValueExpression("disabled",
-										createAndedValueExpressionFromConditions(zoomDisabledConditionNames, false));
+	    	if (zoomDisabledConditionName != null) {
+		    	button.setValueExpression("disabled",
+											createValueExpressionFromCondition(zoomDisabledConditionName, null));
+	    	}
 			StringBuilder value = new StringBuilder(128);
 			value.append("./?a=").append(WebAction.e.toString());
 			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
