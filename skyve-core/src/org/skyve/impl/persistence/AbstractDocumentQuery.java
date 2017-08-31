@@ -234,20 +234,38 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	}
 
 	@Override
-	public DocumentQuery addInnerJoin(String associationBinding) {
-		fromClause.append(" INNER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+	public DocumentQuery addInnerJoin(String referenceBinding) {
+		fromClause.append(" INNER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addLeftOuterJoin(String associationBinding) {
-		fromClause.append(" LEFT OUTER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+	public DocumentQuery addLeftOuterJoin(String referenceBinding) {
+		fromClause.append(" LEFT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
 		return this;
 	}
 
 	@Override
-	public DocumentQuery addRightOuterJoin(String associationBinding) {
-		fromClause.append(" RIGHT OUTER JOIN ").append(THIS_ALIAS).append('.').append(associationBinding);
+	public DocumentQuery addRightOuterJoin(String referenceBinding) {
+		fromClause.append(" RIGHT OUTER JOIN ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addFetchedInnerJoin(String referenceBinding) {
+		fromClause.append(" INNER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding) {
+		fromClause.append(" LEFT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
+		return this;
+	}
+
+	@Override
+	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding) {
+		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(THIS_ALIAS).append('.').append(referenceBinding);
 		return this;
 	}
 

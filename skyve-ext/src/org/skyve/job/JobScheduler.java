@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
@@ -208,6 +209,10 @@ public class JobScheduler {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		JobMetaData job = module.getJob(jobName);
+		if (job == null) { // no job defined
+			throw new MetaDataException(String.format("Job %s.%s in the data store (ADM_JobSchedule) is not defined in the skyve metadata.",
+														moduleName, jobName)); 
+		}
 		
 		Date sqlStartTime = (Date) BindUtil.get(jobSchedule, "startTime");
 		DateTime startTime = (sqlStartTime == null) ? null : new DateTime(sqlStartTime.getTime());

@@ -133,22 +133,40 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	public DocumentQuery addExpressionGrouping(String expression);
 	
 	/**
-	 * 
-	 * @param associationBinding
+	 * Inner join an association or collection.
+	 * @param referenceBinding
 	 */
-	public DocumentQuery addInnerJoin(String associationBinding);
+	public DocumentQuery addInnerJoin(String referenceBinding);
 	
 	/**
-	 * 
-	 * @param associationBinding
+	 * Left Outer join an association or collection.
+	 * @param referenceBinding
 	 */
-	public DocumentQuery addLeftOuterJoin(String associationBinding);
+	public DocumentQuery addLeftOuterJoin(String referenceBinding);
 	
 	/**
-	 * 
-	 * @param associationBinding
+	 * Right Outer join an association or collection.
+	 * @param referenceBinding
 	 */
-	public DocumentQuery addRightOuterJoin(String associationBinding);
+	public DocumentQuery addRightOuterJoin(String referenceBinding);
+
+	/**
+	 * Inner join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param referenceBinding
+	 */
+	public DocumentQuery addFetchedInnerJoin(String referenceBinding);
+	
+	/**
+	 * Left Outer join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param referenceBinding
+	 */
+	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding);
+	
+	/**
+	 * Right Outer join an association or collection and fetch the domain bean(s) at the same time.
+	 * @param referenceBinding
+	 */
+	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding);
 
 	/**
 	 * 
