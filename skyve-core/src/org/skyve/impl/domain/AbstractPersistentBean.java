@@ -16,7 +16,6 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.types.jaxb.OptimisticLockMapper;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.domain.AbstractBean;
 
 /**
  * 

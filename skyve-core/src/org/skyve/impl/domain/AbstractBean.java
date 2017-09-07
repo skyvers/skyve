@@ -279,4 +279,10 @@ public abstract class AbstractBean implements Bean {
 	    CDIProvider.clearInjectedFields(this);
 	    out.defaultWriteObject();
 	}
+	
+	@Override
+	public void postProcess() {
+		originalValues().clear();
+		BeanProvider.injectFields(this);
+	}
 }
