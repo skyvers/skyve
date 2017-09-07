@@ -71,7 +71,7 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	/**
 	 * This indicates whether a database index should be created on the "parent_id" foreign key column.
 	 */
-	private boolean parentDatabaseIndex;
+	private Boolean parentDatabaseIndex;
 	
 	private String bizKeyMethodCode;
 	// Although this is code generated into the domain class, we need it here
@@ -312,11 +312,11 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		this.parentDocumentName = parentDocumentName;
 	}
 	
-	public boolean getParentDatabaseIndex() {
+	public Boolean getParentDatabaseIndex() {
 		return parentDatabaseIndex;
 	}
 
-	public void setParentDatabaseIndex(boolean parentDatabaseIndex) {
+	public void setParentDatabaseIndex(Boolean parentDatabaseIndex) {
 		this.parentDatabaseIndex = parentDatabaseIndex;
 	}
 

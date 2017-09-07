@@ -17,11 +17,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
-		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
+		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
+		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
 		<property name="levelUnit" length="200" />
 		<property name="buildingName" length="200" />
 		<property name="streetAddress" length="200" />
@@ -39,16 +39,16 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="bizKeyIndex" not-null="true" />
-		<property name="bizCustomer" length="50" index="bizCustomerIndex" not-null="true" />
+		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
+		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="bizUserIdIndex" not-null="true" />
-		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" />
+		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" index="IDX_contact" foreign-key="FK_WHO_Staff_contact" />
 		<property name="staffCode" length="50" />
 		<property name="dateOfBirth" type="DateOnly" />
 		<property name="roleTitle" length="200" />
-		<many-to-one name="baseOffice" entity-name="whosinIntegrateOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" />
+		<many-to-one name="baseOffice" entity-name="whosinIntegrateOffice" column="baseOffice_id" cascade="persist,save-update,refresh,merge" index="IDX_baseOffice" foreign-key="FK_WHO_Staff_baseOffice" />
 		<property name="location" type="Geometry" />
 		<property name="status" length="9">
 			<type name="Enum">

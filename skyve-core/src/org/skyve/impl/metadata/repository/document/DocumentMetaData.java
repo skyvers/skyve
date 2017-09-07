@@ -307,7 +307,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		ParentDocument parent = getParentDocument();
 		if (parent != null) {
 			result.setParentDocumentName(parent.getParentDocumentName());
-			result.setParentDatabaseIndex(java.lang.Boolean.TRUE.equals(parent.getDatabaseIndex()));
+			result.setParentDatabaseIndex(parent.getDatabaseIndex());
 		}
 
 		Persistent resultPersistent = result.getPersistent();
@@ -342,7 +342,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		if ((resultPersistent == null) && (result.getBizKeyMethodCode() != null)) {
 			throw new MetaDataException(metaDataName + " : The document [bizKey] is NOT required for a transient document");
 		}
-		if ((resultPersistent == null) && result.getParentDatabaseIndex()) {
+		if ((resultPersistent == null) && java.lang.Boolean.TRUE.equals(result.getParentDatabaseIndex())) {
 			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();

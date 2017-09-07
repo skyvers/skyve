@@ -5,6 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,6 +22,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
@@ -726,6 +731,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// class defn
 		if ((persistent != null) && (persistent.getName() != null)) { // persistent document
+			// check table name length if required
+			if (identifierIsTooLong(persistent.getName())) {
+				throw new MetaDataException("Persistent name " + persistent.getName() + 
+												" in document " + document.getName() + 
+												" in module " + module.getName() +
+												" is longer than the allowed data store identifier character limit of " +
+												DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+			}
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
 					fw.append(indent).append("\t<joined-subclass name=\"");
@@ -804,14 +817,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
-				fw.append(indent)
-						.append("\t\t<property name=\"bizKey\" length=\"1024\" index=\"bizKeyIndex\" not-null=\"true\" />\n");
-				fw.append(indent).append(
-						"\t\t<property name=\"bizCustomer\" length=\"50\" index=\"bizCustomerIndex\" not-null=\"true\" />\n");
+				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"1024\" index=\"%s\" not-null=\"true\" />\n", 
+														Bean.BIZ_KEY, 
+														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
+				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
+														Bean.CUSTOMER_NAME, 
+														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
 				fw.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
 				fw.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
-				fw.append(indent)
-						.append("\t\t<property name=\"bizUserId\" length=\"36\" index=\"bizUserIdIndex\" not-null=\"true\" />\n");
+				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
+														Bean.USER_ID,
+														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
 			}
 
 			// map the parent property, if parent document is persistent
@@ -820,9 +836,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Document parentDocument = document.getParentDocument(null);
 				if (parentDocument.getPersistent() != null) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
-						fw.append(indent).append("\t\t<property name=\"bizParentId\" length=\"36\"");
-						if (((DocumentImpl) document).getParentDatabaseIndex()) {
-							fw.append(" index=\"bizParentIdIndex\"");
+						fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\"", HierarchicalBean.PARENT_ID));
+						if (shouldIndex(((DocumentImpl) document).getParentDatabaseIndex())) {
+							fw.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), HierarchicalBean.PARENT_ID)).append('"');
 						}
 						fw.append(" />\n");
 					} else {
@@ -833,17 +849,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 						// Add parent reference ORM
 						String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
-						fw.append(indent).append("\t\t<many-to-one name=\"parent\" entity-name=\"");
+						fw.append(indent).append("\t\t<many-to-one name=\"").append(ChildBean.PARENT_NAME).append("\" entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(parentModuleName + '.' + parentDocumentName)) {
 							fw.append(customerName);
 						}
 						fw.append(parentModuleName).append(parentDocumentName);
 						fw.append("\" column=\"parent_id\" insert=\"false\" update=\"false\"");
-						if (((DocumentImpl) document).getParentDatabaseIndex()) {
-							fw.append(" index=\"parentIndex\"");
+						if (shouldIndex(((DocumentImpl) document).getParentDatabaseIndex())) {
+							fw.append(" index=\"").append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), ChildBean.PARENT_NAME)).append('"');
 						}
-						fw.append(" />\n");
+						fw.append(" foreign-key=\"");
+						fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), ChildBean.PARENT_NAME));
+						fw.append("\" />\n");
 					}
 				}
 			}
@@ -1029,7 +1047,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (schema != null) {
 						fw.append("\" schema=\"").append(schema);
 					}
-					fw.append("\" table=\"").append(persistent.getName()).append('_').append(collection.getName());
+					String collectionTableName = String.format("%s_%s", persistent.getName(), collection.getName());
+
+					// check collection table name length if required
+					if (identifierIsTooLong(collectionTableName)) {
+						throw new MetaDataException("Collection table name of " + collectionTableName +
+														" for collection " + collection.getName() + 
+														" in document " + document.getName() + 
+														" in module " + module.getName() +
+														" is longer than the allowed data store identifier character limit of " +
+														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+					}
+					
+					fw.append("\" table=\"").append(collectionTableName);
 
 					if (type == CollectionType.aggregation) {
 						fw.append("\" cascade=\"persist,save-update,refresh");
@@ -1053,14 +1083,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					} else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
 					}
-					if (Boolean.TRUE.equals(collection.getOwnerDatabaseIndex())) {
-						fw.append(indentation).append("\t\t\t<key>\n");
+					if (shouldIndex(collection.getOwnerDatabaseIndex())) {
+						fw.append(indentation).append("\t\t\t<key foreign-key=\"");
+						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
+						fw.append("\">\n");
 						fw.append("\t\t\t\t<column name=\"").append(PersistentBean.OWNER_COLUMN_NAME);
-						fw.append("\" index=\"").append("ownerIndex\" />\n");
+						fw.append(String.format("\" index=\"%s\" />\n", 
+													generateDataStoreName(DataStoreType.IDX, 
+																			collectionTableName, 
+																			PersistentBean.OWNER_COLUMN_NAME)));
 						fw.append(indentation).append("\t\t\t</key>\n");
 					} else {
-						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME)
-								.append("\" />\n");
+						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
+						fw.append("\" foreign-key=\"");
+						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
+						fw.append("\" />\n");
 					}
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t\t<list-index column=\"").append(Bean.ORDINAL_NAME).append("\"/>\n");
@@ -1084,17 +1121,33 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 						}
 
-						// bizId first in the index as it's values will vary the most
+						// check type column name length if required
+						if (identifierIsTooLong(collection.getName() + "_type")) {
+							throw new MetaDataException("Collection name " + collection.getName() + 
+															" in document " + document.getName() + 
+															" in module " + module.getName() +
+															" is longer than the allowed data store identifier character limit of " +
+															DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + collection.getName() + "_type)");
+						}
+
+						// Even though it would be better index wise to put the bizId column first
+						// This doesn't work - hibernate returns nulls for the association getter call.
+						// So sub-optimal but working if type column is first.
+						// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_id\" length=\"36\"");
-						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
-							fw.append(" index=\"elementIndex\"");
+						fw.append(collection.getName()).append("_type\"");
+						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
+							fw.append(" index=\"");
+							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							fw.append('"');
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t\t<column name=\"");
-						fw.append(collection.getName()).append("_type\"");
-						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
-							fw.append(" index=\"elementIndex\"");
+						fw.append(collection.getName()).append("_id\" length=\"36\"");
+						if (! Boolean.FALSE.equals(collection.getElementDatabaseIndex())) {
+							fw.append(" index=\"");
+							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							fw.append('"');
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t</many-to-any>\n");
@@ -1105,10 +1158,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							fw.append(customerName);
 						}
 						fw.append(referencedModuleName).append(referencedDocumentName);
-						if (Boolean.TRUE.equals(collection.getElementDatabaseIndex())) {
+						fw.append("\" foreign-key=\"");
+						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+						if (shouldIndex(collection.getElementDatabaseIndex())) {
 							fw.append("\">\n");
 							fw.append("\t\t\t\t<column name=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
-							fw.append("\" index=\"").append("elementIndex\" />\n");
+							fw.append("\" index=\"");
+							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
+							fw.append("\" />\n");
 							fw.append("\t\t\t</many-to-many>\n");
 						} else {
 							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
@@ -1162,25 +1219,44 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						fw.append(derivedModuleName).append(derivedDocumentName).append("\" />\n");
 					}
 
+					// check type column name length if required
+					if (identifierIsTooLong(association.getName() + "_type")) {
+						throw new MetaDataException("Association name " + association.getName() + 
+														" in document " + document.getName() + 
+														" in module " + module.getName() +
+														" is longer than the allowed data store identifier character limit of " +
+														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + association.getName() + "_type)");
+					}
+
 					// Even though it would be better index wise to put the bizId column first
 					// This doesn't work - hibernate returns nulls for the association getter call.
 					// So sub-optimal but working if type column is first.
+					// Notice that an index is applied unless explicitly false as this type of reference is not constrained by a FK.
 					fw.append(indentation).append("\t\t\t<column name=\"");
 					fw.append(association.getName()).append("_type");
-					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(moduleName).append(documentName).append(association.getName());
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t\t<column name=\"");
 					fw.append(association.getName()).append("_id\" length=\"36");
-					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+					if (! Boolean.FALSE.equals(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(moduleName).append(documentName).append(association.getName());
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
 					}
 					fw.append("\" />\n");
 					fw.append(indentation).append("\t\t</any>\n");
 				} else {
+					// check id column name length if required
+					if (identifierIsTooLong(association.getName() + "_id")) {
+						throw new MetaDataException("Association name " + association.getName() + 
+														" in document " + document.getName() + 
+														" in module " + module.getName() +
+														" is longer than the allowed data store identifier character limit of " +
+														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + association.getName() + "_id)");
+					}
+
 					fw.append(indentation).append("\t\t<many-to-one name=\"");
 					fw.append(association.getName()).append("\" entity-name=\"");
 					// reference overridden document if applicable
@@ -1210,10 +1286,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					} else if (Boolean.TRUE.equals(allowCascadeMerge)) {
 						fw.append(",merge");
 					}
-					if (Boolean.TRUE.equals(association.getDatabaseIndex())) {
+					if (shouldIndex(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
-						fw.append(moduleName).append(documentName).append(association.getName());
+						fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), association.getName()));
 					}
+					fw.append("\" foreign-key=\"");
+					fw.append(generateDataStoreName(DataStoreType.FK, persistent.getName(), association.getName()));
 					fw.append("\" />\n");
 				}
 			} else if (attribute instanceof Enumeration) {
@@ -1225,6 +1303,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Enumeration enumeration = (Enumeration) attribute;
 
 				String enumerationName = enumeration.getName();
+
+				// check column name length if required
+				if (identifierIsTooLong(enumerationName)) {
+					throw new MetaDataException("Enumeration name " + enumerationName + 
+													" in document " + document.getName() + 
+													" in module " + module.getName() +
+													" is longer than the allowed data store identifier character limit of " +
+													DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+				}
+
 				fw.append(indentation).append("\t\t<property name=\"").append(enumerationName);
 
 				Integer fieldLength = persistentPropertyLengths.get(persistent.getPersistentIdentifier()).get(enumerationName);
@@ -1235,7 +1323,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				IndexType index = enumeration.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
-					fw.append(moduleName).append(documentName).append(enumerationName);
+					fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), enumerationName));
 				}
 				fw.append("\">\n");
 
@@ -1351,6 +1439,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				Field field = (Field) attribute;
 				String fieldName = field.getName();
+
+				// check column name length if required
+				if (identifierIsTooLong(fieldName)) {
+					throw new MetaDataException("Field name " + fieldName + 
+													" in document " + document.getName() + 
+													" in module " + module.getName() +
+													" is longer than the allowed data store identifier character limit of " +
+													DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+				}
+
 				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
 
 				Integer fieldLength = persistentPropertyLengths.get(persistent.getPersistentIdentifier()).get(fieldName);
@@ -1405,13 +1503,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				IndexType index = field.getIndex();
 				if (IndexType.database.equals(index) || IndexType.both.equals(index)) {
 					fw.append("\" index=\"");
-					fw.append(moduleName).append(documentName).append(fieldName);
+					fw.append(generateDataStoreName(DataStoreType.IDX, persistent.getName(), fieldName));
 				}
 				fw.append("\" />\n");
 			}
 		}
 	}
 
+	// check identifier length if required
+	private static boolean identifierIsTooLong(String identifier) {
+		return ((DATA_STORE_IDENTIFIER_CHARACTER_LIMIT > 0) && 
+				(identifier.length() > DATA_STORE_IDENTIFIER_CHARACTER_LIMIT));
+	}
+	
 	private void populateArcs(Document document, Map<String, Document> result) {
 		String key = new StringBuilder(32).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
 		TreeMap<String, Document> derivations = modocDerivations.get(key);
@@ -1560,6 +1664,47 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
+	private enum DataStoreType {
+		PK, FK, IDX
+	}
+	private static String generateDataStoreName(DataStoreType type, String tableName, String columnName) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(type).append('_');
+		if (DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE || DataStoreType.FK.equals(type)) {
+			result.append(tableName).append('_');
+		}
+		result.append(columnName);
+		String name = result.toString();
+		if (identifierIsTooLong(name)) {
+			// MD5 hash
+		    try {
+		        MessageDigest md = MessageDigest.getInstance("MD5");
+		        md.reset();
+		        md.update(name.getBytes());
+		        byte[] digest = md.digest();
+		        BigInteger bigInt = new BigInteger(1, digest);
+		        // By converting to base 35 (full alphanumeric), we guarantee
+		        // that the length of the name will always be smaller than the 30
+		        // character identifier restriction enforced by a few dialects.
+		        result.setLength(0);
+				result.append(type).append('_').append(bigInt.toString(35));
+				name = result.toString();
+		    }
+		    catch (NoSuchAlgorithmException e) {
+		        throw new MetaDataException("Unable to generate a hashed Constraint name", e);
+		    }
+		}
+		return name;
+	}
+	
+	private static boolean shouldIndex(Boolean index) {
+		if (index == null) {
+			return DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT;
+		}
+
+		return index.booleanValue();
+	}
+	
 	private static final TreeMap<String, AttributeType> generateDocumentPropertyNames(Document document) {
 		TreeMap<String, AttributeType> result = new TreeMap<>();
 

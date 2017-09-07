@@ -270,13 +270,13 @@ public abstract class AbstractBean implements Bean {
 		}
 	}
 	
-	private void readObject(ObjectInputStream in) throws Exception {
-	    in.defaultReadObject();
+	private Object readResolve() throws Exception {
 	    BeanProvider.injectFields(this);
+	    return this;
 	}
 	
-	private void writeObject(ObjectOutputStream out) throws Exception {
+	private Object writeReplace() throws Exception {
 	    CDIProvider.clearInjectedFields(this);
-	    out.defaultWriteObject();
+	    return this;
 	}
 }
