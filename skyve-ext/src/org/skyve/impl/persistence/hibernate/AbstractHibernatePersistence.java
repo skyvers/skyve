@@ -26,7 +26,6 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.hibernate.EntityMode;
@@ -1111,11 +1110,11 @@ t.printStackTrace();
 					}
 				}
 
-				// now that we have saved, clear the values
-				bean.originalValues().clear();
+				bean.postProcess();
 
 				return true;
 			}
+
 		}.visit(document, beanToSave, customer);
 	}
 
@@ -1625,11 +1624,7 @@ t.printStackTrace();
 			internalCustomer.interceptAfterPostLoad(loadedBean);
 		}
 
-		// clear the object's dirtiness
-		loadedBean.originalValues().clear();
-		
-		// Inject any dependencies
-		BeanProvider.injectFields(loadedBean);
+		loadedBean.postProcess();
 	}
 
 	@Override

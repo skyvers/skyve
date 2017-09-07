@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -128,12 +127,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 			internalCustomer.interceptAfterNewInstance(result);
 		}
-
-		// clear the object's dirtiness
-		result.originalValues().clear();
-		
-		// Inject any dependencies
-		return BeanProvider.injectFields(result);
+		result.postProcess();
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
