@@ -2,6 +2,7 @@ package org.skyve.impl.persistence.hibernate;
 
 import java.util.Date;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.HibernateException;
 import org.hibernate.collection.PersistentCollection;
 import org.hibernate.event.InitializeCollectionEvent;
@@ -75,6 +76,8 @@ public class HibernateListener implements PostUpdateEventListener,
 		String[] propertyNames = cmd.getPropertyNames();
 		Type[] propertyTypes = cmd.getPropertyTypes();
 		Object[] state = event.getState();
+
+		BeanProvider.injectFields(eventBean);
 
 		try {
 			persistence.index(eventBean, propertyNames, propertyTypes, null, state);

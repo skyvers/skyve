@@ -5,7 +5,6 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.DynaProperty;
 import org.apache.commons.beanutils.LazyDynaMap;
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.AbstractBean;
 import org.skyve.persistence.DocumentQuery;
@@ -279,11 +278,5 @@ public class MapBean extends LazyDynaMap implements Bean {
 	@Override
 	public int compareTo(Bean other) {
 		return AbstractBean.compareTo(this, other);
-	}
-
-	@Override
-	public void postProcess() {
-		originalValues().clear();
-		BeanProvider.injectFields(this);
 	}
 }
