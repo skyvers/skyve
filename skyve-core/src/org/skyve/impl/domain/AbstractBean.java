@@ -1,8 +1,6 @@
 package org.skyve.impl.domain;
 
 import java.beans.PropertyDescriptor;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -278,11 +276,5 @@ public abstract class AbstractBean implements Bean {
 	private Object writeReplace() throws Exception {
 	    CDIProvider.clearInjectedFields(this);
 	    return this;
-	}
-	
-	@Override
-	public void postProcess() {
-		originalValues().clear();
-		BeanProvider.injectFields(this);
 	}
 }

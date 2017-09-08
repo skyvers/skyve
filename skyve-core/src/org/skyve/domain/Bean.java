@@ -183,9 +183,4 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @return
 	 */
 	public boolean isNotCreated();
-
-	/**
-	 * Perform any post loading/saving activities
-	 */
-	public void postProcess();
 }
