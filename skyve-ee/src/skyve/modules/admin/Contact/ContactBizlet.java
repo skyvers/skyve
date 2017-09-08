@@ -72,46 +72,4 @@ public class ContactBizlet extends Bizlet<Contact> {
 		return result;
 	}
 
-	public static void updateUserDataGroup(String contactBizId, String contactBizDataGroupId)
-	throws Exception {
-		if (contactBizDataGroupId != null) {
-			// ensure contact User has matching datagroup
-
-			Persistence pers = CORE.getPersistence();
-			DocumentQuery qUser = pers.newDocumentQuery(User.MODULE_NAME, User.DOCUMENT_NAME);
-			qUser.getFilter().addEquals(Binder.createCompoundBinding(User.contactPropertyName, Bean.DOCUMENT_ID), contactBizId);
-			
-			List<User> users = qUser.beanResults();
-			if (users.size() > 0) {
-				User user = users.get(0);
-				if (!ModulesUtil.bothNullOrEqual(contactBizDataGroupId, user.getBizDataGroupId())) {
-
-					// set user bizDataGroup and DataGroup reference
-					user.setBizDataGroupId(contactBizDataGroupId);
-
-					DocumentQuery qDG = pers.newDocumentQuery(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
-					qDG.getFilter().addEquals(Bean.DATA_GROUP_ID, contactBizDataGroupId);
-
-					DataGroup dg = qDG.retrieveBean();
-					user.setDataGroup(dg);
-
-					// save User
-					Customer customer = pers.getUser().getCustomer();
-					Module module = customer.getModule(User.MODULE_NAME);
-					Document document = module.getDocument(customer, User.DOCUMENT_NAME);
-
-					user = pers.save(document, user);
-				}
-			}
-		}
-	}
-	
-	@Override
-	public void preSave(Contact bean) throws Exception {
-		if(bean.isChanged() && !bean.isAllowUpdate()){
-			throw new ValidationException(new Message("You do not have access to update the contact details for " + bean.getBizKey()));
-		}
-		updateUserDataGroup(bean.getBizId(), bean.getBizDataGroupId());
-		
-	}
 }
