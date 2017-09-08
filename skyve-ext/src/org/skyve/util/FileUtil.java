@@ -80,7 +80,7 @@ public class FileUtil {
 	 */
 	public static String safeFileName(String unsafeName) {
 
-		return unsafeName.replace(',', '_').replace('&', '_').replace('/', '_').replace('\\', '_').replace(" ", "");
+		return unsafeName.replace(',', '_').replace('&', '_').replace('/', '_').replace('\\', '_').replace(" ", "").replace(":", "_").replace("-","_");
 	}
 
 	/**
@@ -103,10 +103,14 @@ public class FileUtil {
 		if (!safeBasePath.endsWith(separator)) {
 			filePath.append(separator);
 		}
-		for (String folder : unsafeFolderNames) {
-			filePath.append(FileUtil.safeFileName(folder));
+		if(unsafeFolderNames!=null){
+			for (String folder : unsafeFolderNames) {
+				filePath.append(FileUtil.safeFileName(folder));
+			}
 		}
-		filePath.append(separator);
+		if (!filePath.toString().endsWith(separator)) {
+			filePath.append(separator);
+		}
 
 		//make directories if requested
 		if (makeDirectories) {

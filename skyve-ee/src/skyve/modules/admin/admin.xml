@@ -41,6 +41,14 @@
 	</documents>
 	<roles>
 		<role name="BasicUser">
+			<documentation>
+				The intention of Basic User role is to provide basic capability to back-office users.
+				
+				The role is for a typical office situation where users collaborate within the "Customer" scope on key application areas.
+				
+				For example, shared contact management, common document number serials 
+				and the ability to use Skyve's basic personal efficiency and automation capabilities, Tags, Snapshots, Communication and view dashboards.			
+			</documentation>
 			<description>
 				Enough privileges and permissions to login and operate Skyve with access to the admin module only.
 			</description>
@@ -82,6 +90,9 @@
 			</privileges>
 		</role>
 		<role name="ViewUser">
+			<documentation>
+			The view user is intended as a read-only office user, with visibility as per Basic User role.
+			</documentation>
 			<description>
 				Enough privileges and permissions to login, change password and update own contact details.
 			</description>
@@ -115,6 +126,9 @@
 			</privileges>
 		</role>
 		<role name="ContactViewer">
+			<documentation>
+				Allows atomic control over visibility of contacts.
+			</documentation>
 			<description>Can only view contacts.</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
@@ -124,6 +138,9 @@
 			</privileges>
 		</role>
 		<role name="ContactManager">
+			<documentation>
+				Allows atomic control over management of, and interaction with, contacts.
+			</documentation>
 			<description>Can manage contacts.</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
@@ -147,6 +164,9 @@
 			</privileges>
 		</role>
 		<role name="SecurityAdministrator">
+			<documentation>
+				Allows atomic control over administration of users and permissions.
+			</documentation>
 			<description>Allows administration of Users and Groups.</description>
 			<privileges>
 				<document name="Audit" permission="_R__C">
@@ -211,6 +231,9 @@
 			</privileges>
 		</role>
 		<role name="JobMaintainer">
+			<documentation>
+				Allows atomic control over the ability to schedule jobs and review job progress.
+			</documentation>
 			<description>Maintain customer Jobs.</description>
 			<privileges>
 				<document name="ChangePassword" permission="_____">
@@ -227,6 +250,11 @@
 			</privileges>
 		</role>
 		<role name="AppUser">
+			<documentation>
+				The App User role is intended for retail and public users interacting through the "front office". These users are assumed to operate within their own scope and have only visibility to their own data.
+				
+				App Users can create their own contacts, and change their own passwords.			
+			</documentation>
 			<description>
 				Privileges and permissions to login but no native visibility of the admin module.
 			</description>
@@ -234,36 +262,8 @@
 				<document name="ChangePassword" permission="_____">
 					<action name="MakePasswordChange" />
 				</document>
-				<document name="Contact" permission="_RU_U" />
+				<document name="Contact" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
-				<document name="Group" permission="_R__C" />
-				<document name="GroupRole" permission="_R__C" />
-
-				<document name="UserDashboard" permission="CR__U">
-					<action name="UpdateMyDetails" />
-				</document>
-				<document name="DocumentNumber" permission="CRUDC" />
-				<document name="Snapshot" permission="CRUDU">
-					<action name="CopySnapshotToUser" />
-				</document>
-				<document name="Tag" permission="CRUDU">
-					<action name="Clear" />
-					<action name="TagAll" />
-					<action name="ExceptTag" />
-					<action name="IntersectTag" />
-					<action name="UnionTag" />
-					<action name="UpdateActionModule" />
-					<action name="UpdateActionDocument" />
-					<action name="UpdateUploadModule" />
-					<action name="UpdateUploadDocument" />
-					<action name="UploadTagCriteria" />
-					<action name="BulkDocumentAction" />
-					<action name="PerformCombination" />
-					<action name="PrepareExplanation" />
-					<action name="CopyTagToUser" />
-				</document>
-				<document name="Tagged" permission="CRUDU" />
-				<document name="Subscription" permission="CRUDU"/>
 			</privileges>
 		</role>
 		<role name="Anonymous">
@@ -290,6 +290,7 @@
 		<edit document="ChangePassword" name="Password">
 			<role name="BasicUser" />
 			<role name="ViewUser" />
+			<role name="AppUser" />
 		</edit>
 		<edit document="UserDashboard" name="User Dashboard">
 			<role name="BasicUser" />

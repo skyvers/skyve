@@ -41,17 +41,4 @@
 			<displayName>Image</displayName>
 		</content>
 	</attributes>
-	<conditions>
-		<condition name="allowUpdate">
-			<description>Updates to contact details is allowed</description>
-			<expression>
-				<![CDATA[
-				(CORE.getPersistence().getUser().getContactId() != null 
-					&& CORE.getPersistence().getUser().getContactId().equals(this.getBizId())
-					|| isUserInRole("admin","ContactManager")
-					|| isUserInRole("admin","SecurityAdministrator")?true:false)
-				]]>
-			</expression>
-		</condition>
-	</conditions>
 </document>

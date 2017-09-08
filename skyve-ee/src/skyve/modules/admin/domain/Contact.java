@@ -262,26 +262,4 @@ return modules.admin.Contact.ContactBizlet.bizKey(this);
 		preset(imagePropertyName, image);
 		this.image = image;
 	}
-
-	/**
-	 * Updates to contact details is allowed
-	 * @return	The condition
-
-	 */
-	@XmlTransient
-	public boolean isAllowUpdate() {
-		return ((CORE.getPersistence().getUser().getContactId() != null 
-					&& CORE.getPersistence().getUser().getContactId().equals(this.getBizId())
-					|| isUserInRole("admin","ContactManager")
-					|| isUserInRole("admin","SecurityAdministrator")?true:false));
-	}
-
-	/**	 * {@link #isAllowUpdate} negation.
-
-	 * @return	The negated condition
-
-	 */
-	public boolean isNotAllowUpdate() {
-		return (! isAllowUpdate());
-	}
 }
