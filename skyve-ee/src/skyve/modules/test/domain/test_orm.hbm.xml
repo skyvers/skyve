@@ -255,6 +255,22 @@
 		<filter name="testHierarchicalUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.test.InjectedDocument.InjectedDocumentExtension" table="TEST_InjectedDocument" entity-name="testInjectedDocument">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
+		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="text" length="255" />
+		<filter name="testInjectedDocumentNoneFilter" condition="1=0"/>
+		<filter name="testInjectedDocumentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testInjectedDocumentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testInjectedDocumentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 		<class name="modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
 			<id name="bizId" length="36" />
 			<discriminator column="bizDiscriminator" type="string" />
@@ -501,6 +517,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testHierarchicalUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInjectedDocumentNoneFilter" />
+	<filter-def name="testInjectedDocumentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInjectedDocumentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testInjectedDocumentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testMappedExtensionSingleStrategyNoneFilter" />

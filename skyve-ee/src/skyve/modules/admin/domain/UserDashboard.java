@@ -16,9 +16,9 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 /**
  * User Dashboard
  * 
- * @navhas n jobs 0..n Job
  * @navhas n currentUser 0..1 User
  * @navhas n roles 0..n UserRole
+ * @navhas n jobs 0..n Job
  * @navhas n groups 0..n Group
  * @stereotype "transient"
  */

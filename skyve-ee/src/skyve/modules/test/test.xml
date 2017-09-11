@@ -13,6 +13,7 @@
 		<document ref="ArcOneToMany" />
 		<document ref="ArcOneToOne" />
 		<document ref="Hierarchical" />
+		<document ref="InjectedDocument" />
 		<document ref="MappedBase" />
 		<document ref="MappedExtensionJoinedStrategy" />
 		<document ref="MappedExtensionSingleStrategy" />

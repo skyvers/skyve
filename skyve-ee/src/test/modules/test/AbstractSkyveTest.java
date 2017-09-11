@@ -13,6 +13,7 @@ import modules.test.domain.AnyDerived2;
 import modules.test.domain.ArcOneToMany;
 import modules.test.domain.ArcOneToOne;
 import modules.test.domain.Hierarchical;
+import modules.test.domain.InjectedDocument;
 import modules.test.domain.MappedBase;
 import modules.test.domain.MappedExtensionJoinedStrategy;
 import modules.test.domain.MappedExtensionSingleStrategy;
@@ -35,6 +36,7 @@ public abstract class AbstractSkyveTest extends AbstractH2Test {
 	protected Document ao2m;
 	protected Document ao2o;
 	protected Document hd;
+	protected Document id;
 	protected Document mbd;
 	protected Document mejsd;
 	protected Document messd;
@@ -58,6 +60,7 @@ public abstract class AbstractSkyveTest extends AbstractH2Test {
 		ao2m = m.getDocument(c, ArcOneToMany.DOCUMENT_NAME);
 		ao2o = m.getDocument(c, ArcOneToOne.DOCUMENT_NAME);
 		hd = m.getDocument(c, Hierarchical.DOCUMENT_NAME);
+		id = m.getDocument(c, InjectedDocument.DOCUMENT_NAME);
 		mbd = m.getDocument(c, MappedBase.DOCUMENT_NAME);
 		mejsd = m.getDocument(c, MappedExtensionJoinedStrategy.DOCUMENT_NAME);
 		messd = m.getDocument(c, MappedExtensionSingleStrategy.DOCUMENT_NAME);

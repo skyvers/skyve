@@ -1,18 +1,41 @@
 package modules.test;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.util.Util;
 
-import junit.framework.Assert;
-import modules.test.AllAttributesPersistent.AllAttributesPersistentExtension;
-import modules.test.domain.AllAttributesPersistent;
+import modules.test.InjectedDocument.InjectedDocumentExtension;
+import modules.test.domain.InjectedDocument;
 
 public class InjectionTest extends AbstractSkyveTest {
 	@Test
-	public void testValidateBeanAgainstDocument() throws Exception {
-		AllAttributesPersistentExtension test = Util.constructRandomInstance(u, m, aapd, 2);
-		Assert.assertNotNull(test.getPersistence());
-		test = test.getPersistence().save(test);
-		Assert.assertNotNull(test.getPersistence());
+	public void testInjectedOnCreateAfterSaveAndAfterLoad() throws Exception {
+		InjectedDocumentExtension test = Util.constructRandomInstance(u, m, id, 1);
+		Assert.assertNotNull(test.p);
+		Assert.assertNotNull(test.c);
+		Assert.assertNotNull(test.u);
+		Assert.assertNotNull(test.r);
+		Assert.assertNotNull(test.s);
+		
+		test = test.p.save(test);
+		Assert.assertNotNull(test.p);
+		Assert.assertNotNull(test.c);
+		Assert.assertNotNull(test.u);
+		Assert.assertNotNull(test.r);
+		Assert.assertNotNull(test.s);
+		
+		test.p.evictAllCached();
+		test = test.p.retrieve(InjectedDocument.MODULE_NAME, InjectedDocument.DOCUMENT_NAME, test.getBizId(), false);
+		Assert.assertNotNull(test.p);
+		Assert.assertNotNull(test.c);
+		Assert.assertNotNull(test.u);
+		Assert.assertNotNull(test.r);
+		Assert.assertNotNull(test.s);
+	}
+	
+	@Test
+	public void testBizlet() throws Exception {
+		Util.constructRandomInstance(u, m, id, 1);
+		// if this succeeds then Bizlet.newInstance() passed its asserts
 	}
 }
