@@ -120,4 +120,14 @@ public class Decimal10 extends Decimal {
 	public Decimal10 negate() {
 		return new Decimal10(value.negate());
 	}
+
+	@Override
+	public Decimal10 min(Decimal other) {
+		return new Decimal10(bigDecimalValue().min(other.bigDecimalValue()));
+	}
+
+	@Override
+	public Decimal10 max(Decimal other) {
+		return new Decimal10(bigDecimalValue().max(other.bigDecimalValue()));
+	}
 }

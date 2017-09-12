@@ -125,4 +125,14 @@ public class Decimal5 extends Decimal {
 	public Decimal5 negate() {
 		return new Decimal5(value.negate());
 	}
+	
+	@Override
+	public Decimal5 min(Decimal other) {
+		return new Decimal5(bigDecimalValue().min(other.bigDecimalValue()));
+	}
+
+	@Override
+	public Decimal5 max(Decimal other) {
+		return new Decimal5(bigDecimalValue().max(other.bigDecimalValue()));
+	}
 }
