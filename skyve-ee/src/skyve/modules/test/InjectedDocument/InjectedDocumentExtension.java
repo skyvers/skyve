@@ -28,9 +28,9 @@ public class InjectedDocumentExtension extends InjectedDocument {
 	@Inject
 	public Repository r;
 	@Inject
-	Connection con;
+	public Connection con;
 	@Inject
-	ContentManager cm;
+	public ContentManager cm;
 	@Inject
-	SQLDataAccess sda;
+	public SQLDataAccess sda;
 }
