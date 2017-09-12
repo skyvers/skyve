@@ -130,4 +130,14 @@ public class Decimal2 extends Decimal {
 	public Decimal2 negate() {
 		return new Decimal2(value.negate());
 	}
+
+	@Override
+	public Decimal2 min(Decimal other) {
+		return new Decimal2(bigDecimalValue().min(other.bigDecimalValue()));
+	}
+
+	@Override
+	public Decimal2 max(Decimal other) {
+		return new Decimal2(bigDecimalValue().max(other.bigDecimalValue()));
+	}
 }

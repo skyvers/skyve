@@ -60,6 +60,9 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 */
 	public abstract Decimal negate();
 
+	public abstract Decimal min(Decimal other);
+	public abstract Decimal max(Decimal other);
+	
 	/**
 	 * 
 	 * @return
