@@ -10,11 +10,11 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 	 * No spacers rendered for phones.
 	 */
 	@Override
-	public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
+	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return null;
 		}
-		return super.spacer(pixelWidth, pixelHeight);
+		return super.spacer(spacer);
 	}
 	
 	/**

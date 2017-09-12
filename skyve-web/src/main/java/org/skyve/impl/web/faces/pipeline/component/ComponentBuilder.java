@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -73,7 +74,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										Integer pixelWidth);
 	public abstract UIComponent label(String value);
 	
-	public abstract UIComponent spacer(Integer pixelWidth, Integer pixelHeight);
+	public abstract UIComponent spacer(Spacer spacer);
 	
 	public abstract UIComponent actionButton(String listBinding, Button button, Action action);
 	public abstract UIComponent reportButton(Button button, Action action);

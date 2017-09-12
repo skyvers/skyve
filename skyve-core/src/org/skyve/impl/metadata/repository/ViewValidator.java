@@ -1127,7 +1127,7 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitSpacer(Spacer spacer) {
-		// nothing to validate
+		validateConditionName(spacer.getInvisibleConditionName(), "A Spacer");
 	}
 
 	@Override

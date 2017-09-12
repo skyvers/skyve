@@ -1437,9 +1437,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
+	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
-		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
+		setSize(result, null, spacer.getPixelWidth(), null, null, spacer.getPixelHeight(), null, null);
+		setInvisible(result, spacer.getInvisibleConditionName(), null);
 		setId(result, null);
 
 		return result;

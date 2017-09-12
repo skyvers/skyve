@@ -197,7 +197,8 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										UIComponent componentToAdd, 
 										Integer pixelWidth, 
 										Integer responsiveWidth,
-										Integer percentageWidth) {
+										Integer percentageWidth,
+										String widgetInvisible) {
 		if (container instanceof PanelGrid) {
 			if (viewContainer instanceof HBox) {
 				// get the row or add a row if there is none
@@ -211,7 +212,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 				}
 
 				// add a column
-				Column col = column(null, false, true, pixelWidth, responsiveWidth, percentageWidth, null, null);
+				Column col = column(widgetInvisible, false, true, pixelWidth, responsiveWidth, percentageWidth, null, null);
 				col.getChildren().add(componentToAdd);
 				r.getChildren().add(col);
 			}

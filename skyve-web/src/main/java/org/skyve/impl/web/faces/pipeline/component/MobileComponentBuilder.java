@@ -48,7 +48,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public Spacer spacer(Integer pixelWidth, Integer pixelHeight) {
+	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		// Don't add spacers to the mobile UI as they just leave a space and a line which sux
 		return null;
 	}

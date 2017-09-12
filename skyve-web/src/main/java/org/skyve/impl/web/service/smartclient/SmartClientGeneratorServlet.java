@@ -815,9 +815,12 @@ code.append("_view:view})");
 			if (formVariable == null) { // not a form
 				String variable = "v" + variableCounter++;
 				code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
-		        if ((spacer.getPixelWidth() != null) || spacer.getPixelHeight() != null) {
+		        if ((spacer.getPixelWidth() != null) || 
+		        		(spacer.getPixelHeight() != null) ||
+		        		(spacer.getInvisibleConditionName() != null)) {
 		        	code.append('{');
 		        	size(spacer, null, code);
+			        invisible(spacer.getInvisibleConditionName(), code);
 		        	code.setLength(code.length() - 1); // remove trailing comma
 		        	code.append('}');
 		        }
@@ -827,6 +830,7 @@ code.append("_view:view})");
 			else {
 				code.append("type:'spacer',");
 				size(spacer, null, code);
+		        invisible(spacer.getInvisibleConditionName(), code);
 			}
 		}
 

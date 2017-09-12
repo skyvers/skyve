@@ -102,7 +102,8 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 										UIComponent componentToAdd, 
 										Integer pixelWidth, 
 										Integer responsiveWidth,
-										Integer percentageWidth) {
+										Integer percentageWidth,
+										String widgetInvisible) {
 		container.getChildren().add(componentToAdd);
 		return componentToAdd;
 	}

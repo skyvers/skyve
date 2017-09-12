@@ -38,7 +38,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 */	
 	@Override
 	public UIComponent viewLayout() {
-		return responsiveColumn(null, Integer.valueOf(12), null, true);
+		return responsiveColumn(null, Integer.valueOf(12), null, null, true);
 	}
 	
 	@Override
@@ -62,7 +62,8 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 										UIComponent componentToAdd,
 										Integer pixelWidth, 
 										Integer responsiveWidth,
-										Integer percentageWidth) {
+										Integer percentageWidth,
+										String widgetInvisible) {
 		Integer mutablePercentageWidth = percentageWidth;
 		boolean nopad = false;
 
@@ -110,7 +111,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 			}
 			mutablePercentageWidth = Integer.valueOf(LayoutUtil.responsiveWidthToPercentageWidth(mediumColsRemaining / unsizedCols));
 		}
-		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, nopad);
+		HtmlPanelGroup div = responsiveColumn(pixelWidth, responsiveWidth, mutablePercentageWidth, widgetInvisible, nopad);
 		div.getChildren().add(componentToAdd);
 		container.getChildren().add(div);
 		return componentToAdd;
@@ -300,13 +301,18 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
-	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, Integer responsiveWidth, Integer percentageWidth, boolean nopad) {
+	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
+												Integer responsiveWidth, 
+												Integer percentageWidth, 
+												String widgetInvisible,
+												boolean nopad) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
 		String responsiveGridStyleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth);
 		if (responsiveGridStyleClasses != null) {
 			result.setStyleClass(nopad ? responsiveGridStyleClasses + " ui-g-nopad" : responsiveGridStyleClasses);
 		}
+		setInvisible(result, widgetInvisible, null);
 		return result;
 	}
 

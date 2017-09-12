@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:ns1="http://www.skyve.org/xml/common" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/view" xmlns:tns="http://www.skyve.org/xml/view" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
 
@@ -1123,8 +1123,10 @@
     <xs:sequence>
       <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute name="pixelHeight" type="xs:int"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
+    <xs:attribute name="pixelHeight" type="xs:int"/>
+    <xs:attribute name="invisible" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="link">
