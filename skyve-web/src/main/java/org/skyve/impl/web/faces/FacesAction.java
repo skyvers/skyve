@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.el.ValueExpression;
 import javax.faces.application.FacesMessage;
@@ -45,8 +46,9 @@ public abstract class FacesAction<T> {
 			t.printStackTrace();
 			
 			if (t instanceof MessageException) {
+				TreeSet<String> globalMessageSet = new TreeSet<>();
 				for (Message em : ((MessageException) t).getMessages()) {
-					processErrors(fc, em);
+					processErrors(fc, em, globalMessageSet);
 				}
 			}
 			else {
@@ -74,7 +76,7 @@ public abstract class FacesAction<T> {
 	 * @param context
 	 * @param em
 	 */
-	private static void processErrors(FacesContext context, Message em) {
+	private static void processErrors(FacesContext context, Message em, TreeSet<String> globalMessageSet) {
 		String message = em.getErrorMessage();
 		FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
 		for (String binding : em.getBindings()) {
@@ -85,13 +87,19 @@ public abstract class FacesAction<T> {
 				}
 			}
 		}
-		context.addMessage(null, msg);
+
+		// only add distinct error messages globally
+		if (globalMessageSet.add(message)) {
+			context.addMessage(null, msg);
+		}
 	}
 	
 	public abstract T callback() throws Exception;
 	
     public static boolean validateRequiredFields() {
     	boolean result = true;
+    	
+    	TreeSet<String> globalMessages = null; // used for removing duplicate global messages
     	
     	FacesContext fc = FacesContext.getCurrentInstance();
     	Map<String, String> requestMap = fc.getExternalContext().getRequestParameterMap();
@@ -110,7 +118,14 @@ public abstract class FacesAction<T> {
 						result = false;
 						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
     					fc.addMessage(component.getClientId(), msg);
-    					fc.addMessage(null, msg);
+    					
+    					// Add distinct global messages
+    					if (globalMessages == null) {
+    						globalMessages = new TreeSet<>();
+    					}
+    					if (globalMessages.add(message)) {
+    						fc.addMessage(null, msg);
+    					}
 					}
     			}
     		}
