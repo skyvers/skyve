@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 
 import javax.el.ValueExpression;
@@ -13,9 +12,10 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 
+import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.domain.messages.Message;
+import org.skyve.util.Util;
 
 /**
  * Faces Action provides standard exception handling for Faces processing that
@@ -97,44 +97,46 @@ public abstract class FacesAction<T> {
 	public abstract T callback() throws Exception;
 	
     public static boolean validateRequiredFields() {
-    	boolean result = true;
-    	
-    	TreeSet<String> globalMessages = null; // used for removing duplicate global messages
-    	
+    	TreeSet<String> globalMessages = new TreeSet<>(); // used for removing duplicate global messages
     	FacesContext fc = FacesContext.getCurrentInstance();
-    	Map<String, String> requestMap = fc.getExternalContext().getRequestParameterMap();
-    	for (String paramName : requestMap.keySet()) {
-    		String paramValue = requestMap.get(paramName);
-    		String clientId = paramName;
-    		clientId = clientId.replaceAll(":\\d+:", ":"); // remove the grid indexing used in request parameters
-    		if (clientId.endsWith("_input")) { // date columns, check boxes etc
-    			clientId = clientId.substring(0, clientId.length() - 6);
-    		}
-    		if ((paramValue == null) || "".equals(paramValue.trim())) {
-    			UIComponent component = findComponentByClientId(fc.getViewRoot(), clientId);
-    			if ((component != null) && component.isRendered() && (component instanceof UIInput)) {
-					String message = ((UIInput) component).getRequiredMessage();
-					if (message != null) {
-						result = false;
-						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
-    					fc.addMessage(component.getClientId(), msg);
-    					
-    					// Add distinct global messages
-    					if (globalMessages == null) {
-    						globalMessages = new TreeSet<>();
-    					}
-    					if (globalMessages.add(message)) {
-    						fc.addMessage(null, msg);
-    					}
-					}
-    			}
-    		}
-    	}
-
-    	return result;
+    	return validateRequiredFields(fc, fc.getViewRoot(), globalMessages);
     }
     
-	public static UIComponent findComponentById(UIComponent base, String id) {
+	private static boolean validateRequiredFields(FacesContext fc, UIComponent component, TreeSet<String> globalMessages) {
+		boolean result = true;
+		
+		// only process this component (and it's children) if it was rendered
+		if (component.isRendered()) {
+			if (component instanceof UIInput) {
+				UIInput input = (UIInput) component;
+				String message = input.getRequiredMessage();
+				if (Util.processStringValue(message) != null) {
+					Object value = input.getValue();
+					if ((value == null) || ((value instanceof String) && ((String) value).trim().isEmpty())) {
+						result = false;
+						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
+						fc.addMessage(component.getClientId(), msg);
+						
+						// Add distinct global messages
+						if (globalMessages.add(message)) {
+							fc.addMessage(null, msg);
+						}
+					}
+				}
+			}
+			
+			Iterator<UIComponent> kids = component.getFacetsAndChildren();
+			while (kids.hasNext()) {
+				// NB ensure && operator doesn't short circuit by putting the function call as the first argument
+				// This way we'll get all validation error messages
+				result = validateRequiredFields(fc, kids.next(), globalMessages) && result;
+			}
+		}
+
+		return result;
+	}
+
+ 	public static UIComponent findComponentById(UIComponent base, String id) {
 		if (id.equals(base.getId())) {
 			return base;
 		}
@@ -149,29 +151,6 @@ public abstract class FacesAction<T> {
 				break;
 			}
 			result = findComponentById(kid, id);
-			if (result != null) {
-				break;
-			}
-		}
-		
-		return result;
-	}
-
-	private static UIComponent findComponentByClientId(UIComponent base, String id) {
-		if (id.equals(base.getClientId())) {
-			return base;
-		}
-		
-		UIComponent kid = null;
-		UIComponent result = null;
-		Iterator<UIComponent> kids = base.getFacetsAndChildren();
-		while (kids.hasNext()) {
-			kid = kids.next();
-			if (id.equals(kid.getClientId())) {
-				result = kid;
-				break;
-			}
-			result = findComponentByClientId(kid, id);
 			if (result != null) {
 				break;
 			}
