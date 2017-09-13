@@ -27,7 +27,6 @@ import org.skyve.metadata.view.Invisible;
 							"enabledConditionName", 
 							"invisibleConditionName", 
 							"visibleConditionName", 
-							"selectedConditionName",
 							"properties"})
 public final class Tab extends Container implements Disableable, Invisible, DecoratedMetaData {
 	private static final long serialVersionUID = -3216551162394859248L;
@@ -37,7 +36,6 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	private String iconStyleClass;
 	private String disabledConditionName;
 	private String invisibleConditionName;
-	private String selectedConditionName;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
@@ -116,15 +114,6 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
 	}
 
-	public String getSelectedConditionName() {
-		return selectedConditionName;
-	}
-
-	@XmlAttribute(name = "selected", required = false)
-	public void setSelectedConditionName(String selectedConditionName) {
-		this.selectedConditionName = selectedConditionName;
-	}
-	
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;

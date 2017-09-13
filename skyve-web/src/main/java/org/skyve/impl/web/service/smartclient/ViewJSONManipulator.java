@@ -934,6 +934,7 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(tabPane.getInvisibleConditionName());
 		addCondition(tabPane.getDisabledConditionName());
+		addBinding(tabPane.getSelectedTabIndexBinding(), false);
 	}
 
 	@Override
@@ -949,7 +950,6 @@ class ViewJSONManipulator extends ViewVisitor {
 							boolean parentEnabled) {
 		addCondition(tab.getInvisibleConditionName());
 		addCondition(tab.getDisabledConditionName());
-		addCondition(tab.getSelectedConditionName());
 	}
 
 	@Override

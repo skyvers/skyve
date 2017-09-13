@@ -704,11 +704,13 @@ isc.EditView.addMethods({
 		var valueMaps = values._valueMaps;
 		delete values._valueMaps; // dont need these any more
 
+		// enable/disable, hide/show controls, invalidate caches etc
+		// NB process visibility etc before setting the values in the values manager to ensure they take correctly
+		this._processWidgets(this._editPanel, false, values, valueMaps);
+
 		// scatter of the scalar values happens automatically
 		// through this._vm.setValues(); which calls remember values also
 		this._vm.setValues(values);
-		// enable/disable, hide/show controls, invalidate caches etc
-		this._processWidgets(this._editPanel, false, values, valueMaps);
 
 		// scatter the list and membership values
 		for (var gridBinding in this._grids) {
@@ -1046,8 +1048,7 @@ isc.EditView.addMethods({
 			}
 			if (isc.isA.Function(contained.addBizTab)) { // tab pane
 				// hold the current tab pane
-				var selectedTab = contained.getSelectedTab();
-				var selectedTabPane = selectedTab ? selectedTab.pane : null;
+				var selectedTabNumber = contained.getSelectedTabNumber();
 				
 				// for each bizTab, show/hide and enable disable
 				for (var j = 0, m = contained.bizTabs.length; j < m; j++) {
@@ -1055,21 +1056,20 @@ isc.EditView.addMethods({
 
 					var tabInvisible = containedInvisible || this._showHide(bizTab, contained, values, false);
 					this._enableDisable(bizTab, contained, values);
-
-					// Determine if this should be the selected tab
-					if (this._evaluateConditionName(bizTab.selectedConditionName, values)) {
-						selectedTabPane = bizTab.pane;
-					}
-					
 					this._processWidgets(bizTab.pane, tabInvisible, values, valueMaps);
 				}
 				
-				// restore the current tab
-				if (selectedTabPane) {
-					selectedTab = contained.tabForPane(selectedTabPane);
-					if (selectedTab) {
-						contained.selectTab(selectedTab);
+				// Determine what is the selected tab
+				var selectedTabIndexBinding = contained.selectedTabIndexBinding;
+				if (selectedTabIndexBinding) {
+					if (values[selectedTabIndexBinding]) {
+						selectedTabNumber = values[selectedTabIndexBinding];
 					}
+				}
+
+				// restore the current tab
+				if (selectedTabNumber) {
+					contained.selectTab(selectedTabNumber);
 				}
 			}
 

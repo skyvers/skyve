@@ -225,12 +225,10 @@ public class FacesViewVisitor extends ViewVisitor {
     	}
 	}
 
-//	private TabPane currentTabPane; // for setting disabled tabs
 	@Override
 	public void visitTabPane(TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
-//		currentTabPane = tabPane;
 		UIComponent component = cb.tabPane(tabPane);
         addToContainer(component, 
         				tabPane.getPixelWidth(), 
@@ -248,7 +246,6 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitedTabPane(TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
-//		currentTabPane = null;
 		addedToContainer();
 
 		// stop rendering if appropriate
@@ -260,12 +257,10 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 	}
 	
-// TODO activeIndex used to select selected tab
 	@Override
 	public void visitTab(Tab tab,
 							boolean parentVisible,
 							boolean parentEnabled) {
-//		tab.getSelectedConditionName();
 		UIComponent component = cb.tab(tab);
 		lb.addTab(current, component);
 		current = component;

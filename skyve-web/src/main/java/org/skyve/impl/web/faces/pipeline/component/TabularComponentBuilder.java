@@ -114,7 +114,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent tabPane(TabPane tabPane) {
-		return tabView(tabPane.getInvisibleConditionName(), tabPane.getWidgetId());
+		return tabView(tabPane.getInvisibleConditionName(), 
+						tabPane.getSelectedTabIndexBinding(),
+						tabPane.getWidgetId());
 	}
 	
 	@Override
@@ -1124,11 +1126,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private TabView tabView(String invisible, String widgetId) {
+	private TabView tabView(String invisible, String activeIndexBinding, String widgetId) {
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		setInvisible(result, invisible, null);
 		setId(result, widgetId);
-		// result.setDynamic(true);
+		if (activeIndexBinding != null) {
+			result.setValueExpression("activeIndex", createValueExpressionFromBinding(activeIndexBinding, true, null, Number.class));
+		}
 		return result;
 	}
 

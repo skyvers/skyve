@@ -204,6 +204,10 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			size(tabPane, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(tabPane.getDisabledConditionName(), code);
 			invisible(tabPane.getInvisibleConditionName(), code);
+			String selected = tabPane.getSelectedTabIndexBinding();
+			if (selected != null) {
+				code.append("selectedTabIndexBinding:'").append(selected).append("',");
+			}
 			code.append("_view:view});\n");
 
 			containerVariables.push(variable);
@@ -255,10 +259,6 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
 			disabled(tab.getDisabledConditionName(), code);
 			invisible(tab.getInvisibleConditionName(), code);
-			String selected = tab.getSelectedConditionName();
-			if (selected != null) {
-				code.append("selectedConditionName:'").append(selected).append("',");
-			}
 			removeTrailingComma(code);
 			code.append("});\n");
 		}

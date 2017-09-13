@@ -188,6 +188,7 @@ class ViewValidator extends ViewVisitor {
 					}
 					msg.setLength(msg.length() - 2); // remove last comma
 					msg.append('.');
+					throw new MetaDataException(msg.toString());
 				}
 			}
 			
@@ -468,6 +469,7 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							comboIdentifier,
+							AttributeType.enumeration,
 							AttributeType.text,
 							AttributeType.association,
 							AttributeType.inverseOne);
@@ -1383,7 +1385,6 @@ class ViewValidator extends ViewVisitor {
 		String tabIdentifier = "Tab " + tab.getTitle();
 		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
 		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
-		validateConditionName(tab.getSelectedConditionName(), tabIdentifier);
 	}
 
 	@Override
@@ -1397,6 +1398,15 @@ class ViewValidator extends ViewVisitor {
 		}
 		validateConditionName(tabPane.getDisabledConditionName(), tabPaneIdentifier);
 		validateConditionName(tabPane.getInvisibleConditionName(), tabPaneIdentifier);
+		validateBinding(null, 
+							tabPane.getSelectedTabIndexBinding(), 
+							false, 
+							false, 
+							false, 
+							true, 
+							"The [selectedTabIndexBinding] of " + tabPaneIdentifier, 
+							AttributeType.integer, 
+							AttributeType.longInteger);
 	}
 
 	@Override

@@ -39,6 +39,7 @@ import org.skyve.impl.metadata.view.container.Tab;
 							"enabledConditionName",
 							"invisibleConditionName", 
 							"visibleConditionName",
+							"selectedTabIndexBinding",
 							"tabs",
 							"properties"})
 public final class TabPane implements MetaData, DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible {
@@ -59,6 +60,7 @@ public final class TabPane implements MetaData, DecoratedMetaData, Identifiable,
 	
 	private String disabledConditionName;
 	private String invisibleConditionName;
+	private String selectedTabIndexBinding;
 	private List<Tab> tabs = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -223,6 +225,15 @@ public final class TabPane implements MetaData, DecoratedMetaData, Identifiable,
 	@XmlAttribute(name = "visible", required = false)
 	public void setVisibleConditionName(String visibleConditionName) {
 		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	}
+
+	public String getSelectedTabIndexBinding() {
+		return selectedTabIndexBinding;
+	}
+
+	@XmlAttribute(required = false)
+	public void setSelectedTabIndexBinding(String selectedTabIndexBinding) {
+		this.selectedTabIndexBinding = UtilImpl.processStringValue(selectedTabIndexBinding);
 	}
 
 	@Override
