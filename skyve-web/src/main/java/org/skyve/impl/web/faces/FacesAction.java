@@ -9,9 +9,14 @@ import java.util.TreeSet;
 import javax.el.ValueExpression;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIData;
 import javax.faces.component.UIInput;
+import javax.faces.component.visit.VisitCallback;
+import javax.faces.component.visit.VisitContext;
+import javax.faces.component.visit.VisitResult;
 import javax.faces.context.FacesContext;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -102,41 +107,71 @@ public abstract class FacesAction<T> {
     	return validateRequiredFields(fc, fc.getViewRoot(), globalMessages);
     }
     
-	private static boolean validateRequiredFields(FacesContext fc, UIComponent component, TreeSet<String> globalMessages) {
+	private static boolean validateRequiredFields(final FacesContext fc, 
+													UIComponent component, 
+													final TreeSet<String> globalMessages) {
 		boolean result = true;
-		
+
 		// only process this component (and it's children) if it was rendered
 		if (component.isRendered()) {
-			if (component instanceof UIInput) {
-				UIInput input = (UIInput) component;
-				String message = input.getRequiredMessage();
-				if (Util.processStringValue(message) != null) {
-					Object value = input.getValue();
-					if ((value == null) || ((value instanceof String) && ((String) value).trim().isEmpty())) {
-						result = false;
-						FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
-						fc.addMessage(component.getClientId(), msg);
-						
-						// Add distinct global messages
-						if (globalMessages.add(message)) {
-							fc.addMessage(null, msg);
-						}
-					}
-				}
+			// If this is a collection based component, iterate it for any UIInput values
+			if (component instanceof UIData) {
+				UIData data = (UIData) component;
+				final MutableBoolean assignedResult = new MutableBoolean(result);
+				data.visitTree(VisitContext.createVisitContext(fc), new VisitCallback() {
+					@Override
+				    @SuppressWarnings("synthetic-access")
+				    public VisitResult visit(VisitContext context, UIComponent target) {
+				    	if (target instanceof UIInput) {
+							// NB ensure && operator doesn't short circuit by putting the function call as the first argument
+							// This way we'll get all validation error messages
+							assignedResult.setValue(checkRequiredInput(fc, (UIInput) target, globalMessages) && 
+														assignedResult.booleanValue());
+				        }
+
+				        return VisitResult.ACCEPT;
+				    }
+				});
+				result = assignedResult.booleanValue();
 			}
-			
-			Iterator<UIComponent> kids = component.getFacetsAndChildren();
-			while (kids.hasNext()) {
-				// NB ensure && operator doesn't short circuit by putting the function call as the first argument
-				// This way we'll get all validation error messages
-				result = validateRequiredFields(fc, kids.next(), globalMessages) && result;
+			else { // just check the required values
+				if (component instanceof UIInput) {
+					result = checkRequiredInput(fc, (UIInput) component, globalMessages);
+				}
+
+				// iterate the children (if not in a UIData)
+				Iterator<UIComponent> kids = component.getFacetsAndChildren();
+				while (kids.hasNext()) {
+					// NB ensure && operator doesn't short circuit by putting the function call as the first argument
+					// This way we'll get all validation error messages
+					result = validateRequiredFields(fc, kids.next(), globalMessages) && result;
+				}
 			}
 		}
 
 		return result;
 	}
 
- 	public static UIComponent findComponentById(UIComponent base, String id) {
+	private static boolean checkRequiredInput(FacesContext fc, UIInput input, TreeSet<String> globalMessages) {
+		String message = input.getRequiredMessage();
+		if (Util.processStringValue(message) != null) {
+			Object value = input.getValue();
+			if ((value == null) || ((value instanceof String) && ((String) value).trim().isEmpty())) {
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message);
+				fc.addMessage(input.getClientId(), msg);
+				
+				// Add distinct global messages
+				if (globalMessages.add(message)) {
+					fc.addMessage(null, msg);
+				}
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+	public static UIComponent findComponentById(UIComponent base, String id) {
 		if (id.equals(base.getId())) {
 			return base;
 		}
