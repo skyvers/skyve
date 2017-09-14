@@ -878,15 +878,25 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void preFlush(Document document, final Bean beanToSave) {
+	public void preFlush(Document document, Bean beanToSave) {
 		// set bizCustomer, bizLock & bizKey
 		setMandatories(document, beanToSave);
 		
 		// Validate all and sundry before touching the database
-		final Customer customer = user.getCustomer();
+		// Note that preSave events are all fired for the object graph and then validate for the graph is called.
+		// This allows preSave events to mutate values and build more object graph nodes on before it is all validated.
+		Customer customer = user.getCustomer();
+		firePreSaveEvents(customer, document, beanToSave);
+		validatePreFlush(customer, document, beanToSave);
+
+		// set bizCustomer, bizLock & bizKey again in case 
+		// more object hierarchy has been added during preSave()
+		setMandatories(document, beanToSave);
+	}
+
+	private static void firePreSaveEvents(final Customer customer, Document document, final Bean beanToSave) {
 		new BeanVisitor(false, false, false) {
 			@Override
-			@SuppressWarnings( {"synthetic-access"})
 			protected boolean accept(String binding,
 										@SuppressWarnings("hiding") Document document,
 										Document parentDocument,
@@ -916,9 +926,40 @@ t.printStackTrace();
 							internalCustomer.interceptAfterPreSave(bean);
 						}
 					}
-					
+				}
+				catch (ValidationException e) {
+					for (Message message : e.getMessages()) {
+						ValidationUtil.processMessageBindings(customer, message, beanToSave, bean);
+					}
+					throw e;
+				}
+
+				return true;
+			}
+		}.visit(document, beanToSave, customer);
+	}
+	
+	private void validatePreFlush(final Customer customer, Document document, final Bean beanToSave) {
+		new BeanVisitor(false, false, false) {
+			@Override
+			@SuppressWarnings( {"synthetic-access"})
+			protected boolean accept(String binding,
+										@SuppressWarnings("hiding") Document document,
+										Document parentDocument,
+										Relation parentRelation,
+										Bean bean)
+			throws Exception {
+				// NOTE:- We only check if the document is a persistent document here,
+				// not if the reference (if any) is persistent.
+				// We could have a transient reference to a persistent document and 
+				// the save operation still needs to cascade persist any changes to the 
+				// persistent attributes in the referenced document.
+				Persistent persistent = document.getPersistent();
+				String persistentName = (persistent == null) ? null : persistent.getName();
+				try {
 					ValidationUtil.validateBeanAgainstDocument(document, bean);
 
+					Bizlet<Bean> bizlet = ((DocumentImpl) document).getBizlet(customer);
 					if (bizlet != null) { // has a bizlet
 						ValidationUtil.validateBeanAgainstBizlet(bizlet, bean);
 					}
@@ -948,12 +989,8 @@ t.printStackTrace();
 				return true;
 			}
 		}.visit(document, beanToSave, customer);
-
-		// set bizCustomer, bizLock & bizKey again in case 
-		// more object hierarchy has been added during preSave()
-		setMandatories(document, beanToSave);
 	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> T save(Document document, T bean) {
