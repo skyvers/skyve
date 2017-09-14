@@ -472,7 +472,8 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.enumeration,
 							AttributeType.text,
 							AttributeType.association,
-							AttributeType.inverseOne);
+							AttributeType.inverseOne,
+							AttributeType.bool);
 		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
 		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
 	}
@@ -1061,6 +1062,7 @@ class ViewValidator extends ViewVisitor {
 							true,
 							false,
 							radioIdentifier,
+							AttributeType.enumeration,
 							AttributeType.text,
 							AttributeType.association,
 							AttributeType.inverseOne,
@@ -1090,6 +1092,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							richTextIdentifier,
+							AttributeType.memo,
 							AttributeType.markup);
 		validateConditionName(richText.getDisabledConditionName(), richTextIdentifier);
 		validateConditionName(richText.getInvisibleConditionName(), richTextIdentifier);
