@@ -946,7 +946,7 @@ public class SmartClientGenerateUtils {
 		    if (helpText != null) {
 				result.append(",icons:[{src:'icons/help.png',tabIndex:-1,showOver:true,neverDisable:true,prompt:'");
 				result.append(processString(Util.i18n(helpText, locale), false, true));
-				result.append("',click:'isc.say(this.prompt, null, {title:\"").append(Util.i18n(title, locale)).append("\"})'}]");
+				result.append("',click:function(){isc.say(this.prompt, null, {title:'").append(processString(Util.i18n(title, locale))).append("'})}}]");
 			}
 
 		    if (lookup != null) {
