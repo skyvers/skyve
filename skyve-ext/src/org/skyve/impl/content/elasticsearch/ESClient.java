@@ -492,6 +492,24 @@ public class ESClient extends AbstractContentManager {
 	}
 
 	@Override
+	public void truncateAttachments(String customerName) throws Exception {
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.truncateAttachments(" + customerName + ")");
+		client.prepareDeleteByQuery()
+			.setIndices(ATTACHMENT_INDEX_NAME)
+			.setTypes(ATTACHMENT_INDEX_TYPE)
+			.setQuery(QueryBuilders.termQuery(BEAN_CUSTOMER_NAME, customerName)).execute().actionGet();
+	}
+
+	@Override
+	public void truncateBeans(String customerName) throws Exception {
+		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.truncateBeans(" + customerName + ")");
+		client.prepareDeleteByQuery()
+			.setIndices(BEAN_INDEX_NAME)
+			.setTypes(BEAN_INDEX_TYPE)
+			.setQuery(QueryBuilders.termQuery(BEAN_CUSTOMER_NAME, customerName)).execute().actionGet();
+	}
+
+	@Override
 	public SearchResults google(String search, int maxResults)
 	throws Exception {
 		QueryBuilder qb;

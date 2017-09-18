@@ -44,6 +44,16 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 
 	@Override
+	public void truncateAttachments(String customerName) throws Exception {
+		// no-op
+	}
+
+	@Override
+	public void truncateBeans(String customerName) throws Exception {
+		// no-op
+	}
+
+	@Override
 	public ContentIterable all() throws Exception {
 		// no-op
 		return null;

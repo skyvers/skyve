@@ -24,6 +24,14 @@ public class Reindex {
 	public static void reindex() throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Customer customer = persistence.getUser().getCustomer();
+
+		// truncate the bean content ready to reindex
+		try (ContentManager cm = EXT.newContentManager()) {
+			UtilImpl.LOGGER.info("Truncate Beans");
+			cm.truncateBeans(customer.getName());
+		}
+		
+		// reindex
 		for (Module module : customer.getModules()) {
 			String moduleName = module.getName();
 
@@ -41,7 +49,7 @@ public class Reindex {
 								// Don't check if a document has indexable fields as we
 								// may need to have nodes deleted
 								// (i.e. a document field used to be indexed but now is not)
-								UtilImpl.LOGGER.info("Reindex document " + module.getName() + '.' + documentName);
+								UtilImpl.LOGGER.info(String.format("Reindex document %s.%s", module.getName(), documentName));
 								DocumentQuery query = persistence.newDocumentQuery(document);
 								for (Bean bean : query.beanIterable()) {
 									persistence.reindex((PersistentBean) bean);
