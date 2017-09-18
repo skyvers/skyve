@@ -373,6 +373,22 @@ class ViewJSONManipulator extends ViewVisitor {
 			if (value instanceof Bean) {
 				value = ((Bean) value).getBizId();
 			}
+			// Coerce boolean and numbers into strings if they have a domain defined
+			// because SmartClient needs strings in its FormItem "valueMap" property 
+			// and the item value has to match for a domain value to be selected.
+			else if ((value instanceof Boolean) || (value instanceof Number)) {
+				Attribute attribute = null;
+				try {
+					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+					attribute = (target != null) ? target.getAttribute() : null;
+				}
+				catch (MetaDataException e) {
+					// not an attribute
+				}
+				if ((attribute != null) && (attribute.getDomainType() != null)) {
+					value = value.toString();
+				}
+			}
 			toAddTo.put(binding.replace('.', '_'), value);
 		}
 		
