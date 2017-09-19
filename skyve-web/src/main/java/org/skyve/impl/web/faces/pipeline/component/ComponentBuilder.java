@@ -252,12 +252,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
 					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionName).append("',");
-					expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				} 
 				else {
 					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionName).append("', ");
-					expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 			} 
 			else {
