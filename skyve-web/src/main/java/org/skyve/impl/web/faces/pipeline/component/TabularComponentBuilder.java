@@ -179,11 +179,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setValue(value);
 		} 
 		else {
+			// escape bindings with ' as \' as the binding could be for blurb expressions
+			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
 			if (listBinding != null) {
-				result.setValueExpression("value", createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromFragment(listBinding, true, sanitisedBinding, true, null, Object.class));
 			}
 			else {
-				result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
+				result.setValueExpression("value", createValueExpressionFromFragment(sanitisedBinding, true, null, Object.class));
 			}
 		}
 		result.setEscape(false);
@@ -214,7 +216,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setValue(value);
 		} 
 		else {
-			result.setValueExpression("value", createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
+			// escape bindings with ' as \' as the binding could be for blurb expressions
+			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
+			result.setValueExpression("value", createValueExpressionFromFragment(listBinding, true, sanitisedBinding, true, null, Object.class));
 		}
 
 		return result;
@@ -1131,7 +1135,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		setId(result, widgetId);
 		if (activeIndexBinding != null) {
-			result.setValueExpression("activeIndex", createValueExpressionFromBinding(activeIndexBinding, true, null, Number.class));
+			result.setValueExpression("activeIndex", createValueExpressionFromFragment(activeIndexBinding, true, null, Number.class));
 		}
 		return result;
 	}
@@ -1263,7 +1267,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			expression.append("empty ").append(managedBeanName).append(".viewBinding");
 			if (invisible == null) {
 				result.setValueExpression("rendered",
-											createValueExpressionFromBinding(null, 
+											createValueExpressionFromFragment(null, 
 																				false,
 																				expression.toString(), 
 																				false, 
@@ -1281,7 +1285,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				expression.append("not empty ").append(managedBeanName).append(".viewBinding");
 				if (invisible == null) {
 					result.setValueExpression("rendered",
-												createValueExpressionFromBinding(null, 
+												createValueExpressionFromFragment(null, 
 																					false,
 																					expression.toString(), 
 																					false, 
@@ -1433,7 +1437,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	private UIOutput outputText(String listBinding, String binding) {
-		ValueExpression ve = createValueExpressionFromBinding(listBinding, true, binding, true, null, String.class);
+		// escape bindings with ' as \' as the binding could be for blurb expressions
+		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
+		ValueExpression ve = createValueExpressionFromFragment(listBinding, true, sanitisedBinding, true, null, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
 		setId(result, null);
@@ -1628,9 +1634,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",
-									createValueExpressionFromBinding(var, false, displayBinding, true, null, String.class));
+									createValueExpressionFromFragment(var, false, displayBinding, true, null, String.class));
 		result.setValueExpression("itemValue",
-									createValueExpressionFromBinding(null, false, var, false, null, BeanMapAdapter.class));
+									createValueExpressionFromFragment(null, false, var, false, null, BeanMapAdapter.class));
 		result.setConverter(new AssociationAutoCompleteConverter());
 		result.setScrollHeight(200);
 
@@ -1691,14 +1697,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		addGridHeader(title, result);
 
 		result.setVar(binding.replace('.',  '_'));
-		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
+		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		if (clickToZoom) {
 			String id = result.getId();
 			result.setWidgetVar(id);
 			result.setSelectionMode("single");
 			result.setValueExpression("rowKey",
-										createValueExpressionFromBinding(result.getVar(),
+										createValueExpressionFromFragment(result.getVar(),
 																			false,
 																			Bean.DOCUMENT_ID, 
 																			true, 
@@ -1724,7 +1730,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		addGridHeader(title, result);
 
 		result.setVar(binding);
-		result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, List.class));
+		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		return result;
 	}
@@ -1737,36 +1743,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			setId(text, null);
 			dataTableOrList.getFacets().put("header", text);
 		}
-/*
-		if (singularDocumentAlias != null) {
-			UIComponent buttonOrLink = buttons ? 
-										actionButton("Add", 
-														"Add a new " + singularDocumentAlias, 
-														ImplicitActionName.Add, 
-														null, 
-														inline,
-														binding, 
-														null, 
-														null, 
-														Boolean.TRUE, 
-														null,
-														null, 
-														null) :
-										actionLink("Add a new " + singularDocumentAlias, 
-													"New Record", 
-													ImplicitActionName.Add, 
-													null,
-													inline, 
-													binding, 
-													null, 
-													null, 
-													Boolean.TRUE, 
-													null,
-													null, 
-													null);
-			dataTableOrList.getFacets().put("footer", buttonOrLink);
-		}
-*/
 	}
 
 	protected AccordionPanel accordionPanel(String invisible, String widgetId) {
@@ -1788,7 +1764,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setHeaderText(title);
 		if (sortBinding != null) {
 			result.setValueExpression("sortBy",
-										createValueExpressionFromBinding(listBinding, true, sortBinding, true, null, Object.class));
+										createValueExpressionFromFragment(listBinding, true, sortBinding, true, null, Object.class));
 		}
 
 		StringBuilder style = new StringBuilder(64);
@@ -1815,10 +1791,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		expression.append("getSelectItems('").append(binding).append("',").append(includeEmptyItems).append(')');
 		ValueExpression valueExpression = null;
 		if (listBinding != null) {
-			valueExpression = createValueExpressionFromBinding(listBinding, true, expression.toString(), false, null, List.class);
+			valueExpression = createValueExpressionFromFragment(listBinding, true, expression.toString(), false, null, List.class);
 		}
 		else {
-			valueExpression = createValueExpressionFromBinding(expression.toString(), false, null, List.class);
+			valueExpression = createValueExpressionFromFragment(expression.toString(), false, null, List.class);
 		}
 		result.setValueExpression("value", valueExpression);
 
@@ -1835,10 +1811,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setId(result, null);
 		if (listBinding != null) {
 			result.setValueExpression("value",
-										createValueExpressionFromBinding(listBinding, true, binding, true, null, Object.class));
+										createValueExpressionFromFragment(listBinding, true, binding, true, null, Object.class));
 		}
 		else {
-			result.setValueExpression("value", createValueExpressionFromBinding(binding, true, null, Object.class));
+			result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));
 		}
 		result.setValueExpression("title",
 									ef.createValueExpression(elc, required ? title + " *" : title, String.class));

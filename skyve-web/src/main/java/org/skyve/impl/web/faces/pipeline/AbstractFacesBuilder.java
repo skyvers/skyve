@@ -112,35 +112,31 @@ public abstract class AbstractFacesBuilder {
 		component.setValueExpression("style", ef.createValueExpression(style.toString(), String.class));
 	}
 
-	protected ValueExpression createValueExpressionFromBinding(String binding, 
-																boolean map,
-																String extraELConditionToAnd, 
-																Class<?> typeReturned) {
-		StringBuilder expressionPrefix = new StringBuilder(64);
-		expressionPrefix.append(managedBeanName).append(".currentBean");
-		String fullBinding = binding;
-
-		return createValueExpressionFromBinding(expressionPrefix.toString(), 
+	protected ValueExpression createValueExpressionFromFragment(String fragment, 
+																	boolean map,
+																	String extraELConditionToAnd, 
+																	Class<?> typeReturned) {
+		return createValueExpressionFromFragment(String.format("%s.currentBean", managedBeanName), 
 													false,
-													fullBinding, 
+													fragment, 
 													map, 
 													extraELConditionToAnd,
 													typeReturned);
 	}
 
-	protected ValueExpression createValueExpressionFromBinding(String expressionPrefix, 
-																boolean listVar,
-																String binding, 
-																boolean map,
-																String extraELConditionToAnd, 
-																Class<?> typeReturned) {
+	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
+																	boolean listVar,
+																	String fragment, 
+																	boolean map,
+																	String extraELConditionToAnd, 
+																	Class<?> typeReturned) {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
 		if (expressionPrefix != null) {
 			sb.append(listVar ? expressionPrefix.replace('.', '_') : expressionPrefix);
 			sb.append(map ? "['" : ".");
 		}
-		sb.append(binding);
+		sb.append(fragment);
 		if (map && (expressionPrefix != null)) {
 			sb.append("']");
 		}
@@ -161,10 +157,10 @@ public abstract class AbstractFacesBuilder {
 				return ef.createValueExpression(condition, Boolean.class);
 			}
 
-			return createValueExpressionFromBinding(null, false, extraELConditionToAnd, false, null, Boolean.class);
+			return createValueExpressionFromFragment(null, false, extraELConditionToAnd, false, null, Boolean.class);
 		}
 
-		return createValueExpressionFromBinding(condition, true, extraELConditionToAnd, Boolean.class);
+		return createValueExpressionFromFragment(condition, true, extraELConditionToAnd, Boolean.class);
 	}
 	
 	protected String createOredValueExpressionFragmentFromConditions(String[] conditions) {
@@ -191,7 +187,7 @@ public abstract class AbstractFacesBuilder {
 			return createValueExpressionFromCondition(conditions[0], null);
 		}
 		else if (conditions.length > 0) {
-			return createValueExpressionFromBinding(null, 
+			return createValueExpressionFromFragment(null, 
 														false, 
 														createOredValueExpressionFragmentFromConditions(conditions), 
 														false, 
