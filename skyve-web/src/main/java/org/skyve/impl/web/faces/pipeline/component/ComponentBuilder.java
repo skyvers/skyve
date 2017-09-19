@@ -275,7 +275,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			expression.append("action('").append(actionName).append('\'');
 			if (collectionName != null) {
 				expression.append(", '").append(collectionName).append("', ");
-				expression.append(collectionName).append("['").append(Bean.DOCUMENT_ID).append("'])");
+				expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
 			} 
 			else {
 				expression.append(", null, null)");
