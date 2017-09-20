@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.enterprise.inject.Alternative;
+
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
@@ -25,6 +27,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 
+@Alternative
 public abstract class AbstractRepository implements Repository {
 	private static AbstractRepository repository;
 

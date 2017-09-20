@@ -1649,6 +1649,9 @@ t.printStackTrace();
 	@Override
 	public void postLoad(AbstractPersistentBean loadedBean)
 	throws Exception {
+		// Inject any dependencies
+		BeanProvider.injectFields(loadedBean);
+
 		Customer customer = user.getCustomer();
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePostLoad(loadedBean);
@@ -1665,9 +1668,6 @@ t.printStackTrace();
 
 		// clear the object's dirtiness
 		loadedBean.originalValues().clear();
-		
-		// Inject any dependencies
-		BeanProvider.injectFields(loadedBean);
 	}
 
 	@Override

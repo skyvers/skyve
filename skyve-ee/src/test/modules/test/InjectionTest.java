@@ -16,9 +16,6 @@ public class InjectionTest extends AbstractSkyveTest {
 		Assert.assertNotNull(test.u);
 		Assert.assertNotNull(test.s);
 		Assert.assertNotNull(test.r);
-		Assert.assertNotNull(test.con);
-		Assert.assertNotNull(test.cm);
-		Assert.assertNotNull(test.sda);
 		
 		test = test.p.save(test);
 		Assert.assertNotNull(test.p);
@@ -26,9 +23,6 @@ public class InjectionTest extends AbstractSkyveTest {
 		Assert.assertNotNull(test.u);
 		Assert.assertNotNull(test.s);
 		Assert.assertNotNull(test.r);
-		Assert.assertNotNull(test.con);
-		Assert.assertNotNull(test.cm);
-		Assert.assertNotNull(test.sda);
 		
 		test.p.evictAllCached();
 		test = test.p.retrieve(InjectedDocument.MODULE_NAME, InjectedDocument.DOCUMENT_NAME, test.getBizId(), false);
@@ -37,9 +31,6 @@ public class InjectionTest extends AbstractSkyveTest {
 		Assert.assertNotNull(test.u);
 		Assert.assertNotNull(test.s);
 		Assert.assertNotNull(test.r);
-		Assert.assertNotNull(test.con);
-		Assert.assertNotNull(test.cm);
-		Assert.assertNotNull(test.sda);
 	}
 	
 	@Test

@@ -1,5 +1,7 @@
 package org.skyve.impl.content;
 
+import javax.enterprise.inject.Alternative;
+
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.messages.DomainException;
@@ -10,6 +12,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.impl.content.AbstractContentManager;
 
+@Alternative
 public abstract class AbstractContentManager implements ContentManager {
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	

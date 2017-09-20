@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.enterprise.inject.Alternative;
+
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -29,6 +32,7 @@ import org.skyve.impl.metadata.user.DocumentPrivilege;
 import org.skyve.impl.metadata.user.Privilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 
+@Alternative
 public class UserImpl implements User {
 	/**
 	 * For Serialization.

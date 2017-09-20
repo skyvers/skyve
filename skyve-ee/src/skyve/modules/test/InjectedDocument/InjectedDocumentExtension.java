@@ -1,12 +1,9 @@
 package modules.test.InjectedDocument;
 
-import java.sql.Connection;
 import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.skyve.content.ContentManager;
-import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
@@ -27,10 +24,4 @@ public class InjectedDocumentExtension extends InjectedDocument {
 	public Map<String, Object> s;
 	@Inject
 	public Repository r;
-	@Inject
-	public Connection con;
-	@Inject
-	public ContentManager cm;
-	@Inject
-	public SQLDataAccess sda;
 }

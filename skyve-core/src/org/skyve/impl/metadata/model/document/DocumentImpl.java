@@ -103,6 +103,9 @@ public final class DocumentImpl extends ModelImpl implements Document {
 		Class<T> beanClass = getBeanClass(customer);
 		T result = beanClass.newInstance();
 		
+		// Inject any dependencies
+		result = BeanProvider.injectFields(result);
+		
 		// Set implicit properties
 		// NB These properties need to be set before the bizlet.newInstance() is called.
 		// For singletons, if we were to set these after the bizlet call, 
@@ -131,9 +134,8 @@ public final class DocumentImpl extends ModelImpl implements Document {
 
 		// clear the object's dirtiness
 		result.originalValues().clear();
-		
-		// Inject any dependencies
-		return BeanProvider.injectFields(result);
+
+		return result;
 	}
 
 	@SuppressWarnings("unchecked")
