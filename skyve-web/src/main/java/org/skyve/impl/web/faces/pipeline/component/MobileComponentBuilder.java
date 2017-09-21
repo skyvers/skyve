@@ -38,8 +38,8 @@ import org.skyve.web.WebAction;
 public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
-	public UIComponent toolbar(String widgetId) {
-		return null; // no toolbar for mobile
+	public List<UIComponent> toolbars(String widgetId) {
+		return null; // no toolbars for mobile
 	}
 
 	@Override

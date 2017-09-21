@@ -159,7 +159,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private UIComponent current; // current component being constructed
 	private Stack<Container> currentContainers = new Stack<>(); // used to determine how to add widgets to containers
 	private UIComponent facesView; // the result of construction
-	private UIComponent toolbarLayout; // the toolbar layout
+	private List<UIComponent> toolbarLayouts; // the toolbar layouts
 
 	public FacesViewVisitor(User user, 
 							CustomerImpl customer,
@@ -188,8 +188,8 @@ public class FacesViewVisitor extends ViewVisitor {
         current = cb.view(createView ? "created" : "notCreated");
         facesView = current;
         
-		// Create the toolbar
-    	toolbarLayout = lb.toolbarLayout();
+		// Create the toolbar(s)
+    	toolbarLayouts = lb.toolbarLayouts();
 
         // Add the view layout if defined
     	UIComponent layout = lb.viewLayout();
@@ -207,19 +207,26 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitedView() {
         currentContainers.pop();
 
-        // Add the toolbar if this is a full view render or
+        // Add the toolbar(s) if this is a full view render or
         // a view with a widgetId = actions widgetId
         if ((widgetId == null) || widgetId.equals(view.getActionsWidgetId()))  {
-			// Add the toolbar if it has contents
-        	if (! toolbarLayout.getChildren().isEmpty()) {
-				// If we get a toolbar back, add the toolbar layout to it
-				UIComponent toolbar = cb.toolbar(view.getActionsWidgetId());
-				if (toolbar != null) {
-					facesView.getChildren().add(0, toolbar);
-					lb.addToolbarLayout(toolbar, toolbarLayout);
+			// Add the toolbar(s) if it/they has/have contents
+        	if ((toolbarLayouts != null) && (! toolbarLayouts.isEmpty()) && (! toolbarLayouts.get(0).getChildren().isEmpty())) {
+				// If we get any toolbars back, add the toolbar layouts to it
+				List<UIComponent> toolbars = cb.toolbars(view.getActionsWidgetId());
+				if (toolbars != null) {
+					if (toolbars.size() != toolbarLayouts.size()) {
+						throw new IllegalStateException(String.format("The component Builder %s yielded %d toolbars but Layout Builder %s yielded %d toolbar layouts", 
+																		cb.getClass().getName(),
+																		Integer.valueOf(toolbars.size()), 
+																		lb.getClass().getName(),
+																		Integer.valueOf(toolbarLayouts.size())));
+					}
+					lb.addToolbarLayouts(toolbars, toolbarLayouts);
+					lb.addToolbarsOrLayouts(facesView, toolbars);
 				}
 				else {
-					facesView.getChildren().add(0, toolbarLayout);
+					lb.addToolbarsOrLayouts(facesView, toolbarLayouts);
 				}
 			}
     	}
@@ -1903,21 +1910,29 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitCustomAction(ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
+			if (toolbarLayouts != null) {
+				for (UIComponent toolbarLayout : toolbarLayouts) {
+					toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
+				}
+			}
 		}
 	}
 
 	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			if (ImplicitActionName.Report.equals(name)) {
-				toolbarLayout.getChildren().add(cb.report(action));
-			}
-			else {
-				String displayName = action.getDisplayName();
-				if (displayName == null) {
-					displayName = name.getDisplayName();
+			if (toolbarLayouts != null) {
+				for (UIComponent toolbarLayout : toolbarLayouts) {
+					if (ImplicitActionName.Report.equals(name)) {
+						toolbarLayout.getChildren().add(cb.report(action));
+					}
+					else {
+						String displayName = action.getDisplayName();
+						if (displayName == null) {
+							displayName = name.getDisplayName();
+						}
+						toolbarLayout.getChildren().add(cb.action(listBinding, action, name, displayName));
+					}
 				}
-				toolbarLayout.getChildren().add(cb.action(listBinding, action, name, displayName));
 			}
 		}
 	}

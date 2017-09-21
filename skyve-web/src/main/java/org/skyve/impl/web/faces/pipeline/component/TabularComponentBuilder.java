@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -105,10 +106,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent toolbar(String widgetId) {
-		Toolbar result = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
-		setId(result, widgetId);
-		result.setStyle("width:100%");
+	public List<UIComponent> toolbars(String widgetId) {
+		Toolbar toolbar = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
+		setId(toolbar, widgetId);
+		toolbar.setStyle("width:100%");
+		
+		List<UIComponent> result = new ArrayList<>(1);
+		result.add(toolbar);
 		return result;
 	}
 

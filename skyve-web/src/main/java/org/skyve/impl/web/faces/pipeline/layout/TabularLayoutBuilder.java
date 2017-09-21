@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.component.UIComponent;
@@ -28,21 +29,34 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	}
 
 	@Override
-	public UIComponent toolbarLayout() {
-		return panelGroup(false, false, false, null, null);
+	public List<UIComponent> toolbarLayouts() {
+		UIComponent layout = panelGroup(false, false, false, null, null);
+		List<UIComponent> result = new ArrayList<>(1);
+		result.add(layout);
+		return result;
 	}
 	
 	@Override
-	public void addToolbarLayout(UIComponent toolbar, UIComponent toolbarLayout) {
-		toolbar.getFacets().put("left", toolbarLayout);
+	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
+		for (int i = 0, s = toolbars.size(); i < s; i++) {
+			toolbars.get(i).getFacets().put("left", toolbarLayouts.get(i));
 /*		
-		Sticky sticky = (Sticky) a.createComponent(Sticky.COMPONENT_TYPE);
-		sticky.setTarget(toolbar.getId());
-		sticky.setMargin(45);
-		toolbar.getParent().getChildren().add(sticky);
+			Sticky sticky = (Sticky) a.createComponent(Sticky.COMPONENT_TYPE);
+			sticky.setTarget(toolbar.getId());
+			sticky.setMargin(45);
+			toolbar.getParent().getChildren().add(sticky);
 */
+		}
 	}
 	
+	/**
+	 * There's only 1 toolbar for this layout and its at the top.
+	 */
+	@Override
+	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+		view.getChildren().add(0, toolbarsOrLayouts.get(0));
+	}
+
 	@Override
 	public UIComponent tabLayout() {
 		PanelGrid result = panelGrid(null, null, ONE_HUNDRED, null, null, null, null);

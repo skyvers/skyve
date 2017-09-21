@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.layout;
 
+import java.util.List;
+
 import javax.faces.component.UIComponent;
 
 import org.skyve.impl.metadata.Container;
@@ -18,11 +20,24 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent viewLayout();
 	
 	/**
-	 * The toolbar layout for the view.
-	 * @return	The toolbar layout
+	 * The layout within each toolbar for the view.
+	 * @return	The toolbar layout(s)
 	 */
-	public abstract UIComponent toolbarLayout();
-	public abstract void addToolbarLayout(UIComponent toolbar, UIComponent toolbarLayout);
+	public abstract List<UIComponent> toolbarLayouts();
+
+	/**
+	 * The number of toolbars and the number of layouts will always be equal.
+	 * @param toolbars
+	 * @param toolbarLayouts
+	 */
+	public abstract void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts);
+
+	/**
+	 * Add the toolbars/toolbar layouts to the view.
+	 * @param view	UIComponent generated for the view (use getChildren() to add to).
+	 * @param toolbarsOrLayouts	Either a list of toolbars if ComponentBuilder.toolbars() returned some toolbars or toolbar layouts if not.
+	 */
+	public abstract void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts);
 	
 	public abstract UIComponent tabLayout();
 	public abstract UIComponent addTabLayout(UIComponent tab, UIComponent tabLayout);
