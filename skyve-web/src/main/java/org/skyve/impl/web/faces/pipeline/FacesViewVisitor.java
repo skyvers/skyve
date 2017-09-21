@@ -1722,10 +1722,11 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = changeable.getBinding();
-		addAjaxBehavior("change", binding, changeable.getChangedActions());
+		List<EventAction> changedActions = changeable.getChangedActions();
+		addAjaxBehavior("change", binding, changedActions);
 		// Add this special event for date selection on calendar as "changed" doesn't fire on select
 		if (eventSource instanceof Calendar) {
-			addAjaxBehavior("dateSelect", binding, changeable.getChangedActions());
+			addAjaxBehavior("dateSelect", binding, changedActions);
 		}
 	}
 
@@ -1756,7 +1757,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		addAjaxBehavior("blur", binding, blurable.getFocusActions());
+		addAjaxBehavior("blur", binding, blurable.getBlurActions());
 	}
 
 	@Override
