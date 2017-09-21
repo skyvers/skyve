@@ -14,7 +14,7 @@
 			<f:event type="preRenderView" listener="#{myStatusView.preRender}"/>
 		</f:metadata>
 		<s:conversation managedBean="myStatusView" />
-		<ui:composition template="../phone/template.xhtml">
+		<ui:composition template="../mobile/template.xhtml">
 			<ui:param name="baseHref" value="#{myStatusView.baseHref}" />
 			<ui:param name="skyveVersionComment" value="#{myStatusView.skyveVersionComment}" />
 			<ui:define name="head">

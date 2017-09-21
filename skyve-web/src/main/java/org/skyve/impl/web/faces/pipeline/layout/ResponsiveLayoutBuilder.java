@@ -36,6 +36,18 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 //		return responsiveColumn(null, null, false);
 	}
 */	
+
+	/**
+	 * There's only 1 toolbar for this layout and its at the top.
+	 */
+	@Override
+	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
+		div.setStyleClass("ui-g-12");
+		div.getChildren().add(toolbarsOrLayouts.get(0));
+		view.getChildren().add(0, div);
+	}
+
 	@Override
 	public UIComponent viewLayout() {
 		return responsiveColumn(null, Integer.valueOf(12), null, null, true);

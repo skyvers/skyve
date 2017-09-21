@@ -1,9 +1,13 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 
 import org.primefaces.component.panel.Panel;
+import org.primefaces.component.toolbar.Toolbar;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
@@ -12,12 +16,19 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		result.setStyleClass("ui-g");
 		return result;
 	}
-/*	
+
+	// Overridden to not set the toolbar style width to 100% since it's wrapped in a ui-g-12
+	// for the responsive renderer.
 	@Override
-	public UIComponent toolbar() {
-		return null;
+	public List<UIComponent> toolbars(String widgetId) {
+		Toolbar toolbar = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
+		setId(toolbar, widgetId);
+		
+		List<UIComponent> result = new ArrayList<>(1);
+		result.add(toolbar);
+		return result;
 	}
-*/	
+
 	@Override
 	public UIComponent border(String borderTitle, String invisibleConditionName, Integer pixelWidth) {
 /*
