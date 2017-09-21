@@ -81,7 +81,8 @@ public class ContentGarbageCollectionJob implements Job {
 							}
 						}
 						catch (Exception e) {
-							Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
+							Util.LOGGER.warning("ContentGarbageCollectionJob retrieve problem..." + e.getLocalizedMessage());
+							if (UtilImpl.CONTENT_TRACE) Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
 					
@@ -91,7 +92,8 @@ public class ContentGarbageCollectionJob implements Job {
 							cm.remove(contentId);
 						}
 						catch (Exception e) {
-							Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
+							Util.LOGGER.warning("ContentGarbageCollectionJob remove problem..." + e.getLocalizedMessage());
+							if (UtilImpl.CONTENT_TRACE) Util.LOGGER.log(Level.WARNING, "ContentGarbageCollectionJob.execute() problem...", e);
 						}
 					}
 				}
