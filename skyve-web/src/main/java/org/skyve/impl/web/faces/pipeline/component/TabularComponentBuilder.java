@@ -234,12 +234,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent dataGrid(DataGrid grid) {
 		columnPriority = 1;
 		
+		String disabledConditionName = grid.getDisabledConditionName();
+		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		String[] clickToZoomDisabledConditionNames = (disableZoomConditionName == null) ? 
+														((disabledConditionName == null) ? 
+															null : 
+															new String[] {disabledConditionName}) :
+														((disabledConditionName == null) ? 
+															new String[] {disableZoomConditionName} : 
+															new String[] {disableZoomConditionName, disabledConditionName});
+
 		return dataTable(grid.getBinding(),
 							grid.getTitle(),
 							grid.getInvisibleConditionName(),
 							((! Boolean.TRUE.equals(grid.getInline())) && 
 								(! Boolean.FALSE.equals(grid.getShowZoom())) &&
 								(! Boolean.FALSE.equals(grid.getEditable()))),
+							clickToZoomDisabledConditionNames,
 							grid.getWidgetId());
 	}
 	
@@ -318,12 +329,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			col.setPriority(1);
 			List<UIComponent> children = col.getChildren();
 
+			String disabledConditionName = grid.getDisabledConditionName();
+
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
 				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		    	button.setValue(null);
 	        	button.setTitle("Add a new " + singularDocumentAlias);
 		    	button.setIcon("fa fa-plus");
 				action(button, ImplicitActionName.Add, null, gridBinding, inline);
+				String disableAddConditionName = grid.getDisableAddConditionName();
+				String[] createDisabled = (disableAddConditionName == null) ? 
+											((disabledConditionName == null) ? 
+												null : 
+												new String[] {disabledConditionName}) :
+											((disabledConditionName == null) ? 
+												new String[] {disableAddConditionName} : 
+												new String[] {disableAddConditionName, disabledConditionName});
+				if (createDisabled != null) {
+					button.setValueExpression("disabled", 
+												createOredValueExpressionFromConditions(createDisabled));
+				}
 				col.getFacets().put("header", button);
 			}
 			
@@ -333,6 +358,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        	button.setTitle("Edit this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-chevron-right");
 				action(button, ImplicitActionName.Navigate, null, gridBinding, inline);
+				String disableZoomConditionName = grid.getDisableZoomConditionName();
+				String[] zoomDisabled = (disableZoomConditionName == null) ? 
+											((disabledConditionName == null) ? 
+												null : 
+												new String[] {disabledConditionName}) :
+											((disabledConditionName == null) ? 
+												new String[] {disableZoomConditionName} : 
+												new String[] {disableZoomConditionName, disabledConditionName});
+				if (zoomDisabled != null) {
+					button.setValueExpression("disabled", 
+												createOredValueExpressionFromConditions(zoomDisabled));
+				}
 				children.add(button);
 			}
 
@@ -348,6 +385,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setIcon("fa fa-minus");
 		    	button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
 				action(button, ImplicitActionName.Remove, null, gridBinding, true);
+				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
+				String[] removeDisabled = (disableRemoveConditionName == null) ? 
+											((disabledConditionName == null) ? 
+												null : 
+												new String[] {disabledConditionName}) :
+											((disabledConditionName == null) ? 
+												new String[] {disableRemoveConditionName} : 
+												new String[] {disableRemoveConditionName, disabledConditionName});
+				if (removeDisabled != null) {
+					button.setValueExpression("disabled", 
+												createOredValueExpressionFromConditions(removeDisabled));
+				}
 				children.add(button);
 			}
 
@@ -1694,6 +1743,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String title, 
 									String invisible, 
 									boolean clickToZoom,
+									String[] clickToZoomDisabledConditionNames,
 									String widgetId) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result, widgetId);
@@ -1721,6 +1771,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			expression.append(ImplicitActionName.Navigate.name().toLowerCase()).append('}');
 			MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+
+			if (clickToZoomDisabledConditionNames != null) {
+				ajax.setValueExpression("disabled", 
+											createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames));
+			}
 			result.addClientBehavior("rowSelect", ajax);
 		}
 
