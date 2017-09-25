@@ -54,6 +54,9 @@
 			<arg value="src/generatedTest/" /> <!-- generated test path -->
 			<arg value="true" /> <!-- allow cascade merge -->
 			<arg value="true" /> <!-- debug -->
+			<arg value="true" /> <!-- data store index foreign keys by default -->
+			<arg value="false" /> <!-- data store index names in global namespace -->
+			<arg value="0" /> <!-- data store identifier character limit -->
 			<arg value="" /> <!-- excluded modules -->
 		</java>
 	</target>
