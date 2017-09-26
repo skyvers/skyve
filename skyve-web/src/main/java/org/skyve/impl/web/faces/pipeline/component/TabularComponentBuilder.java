@@ -90,6 +90,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
@@ -149,7 +150,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent actionButton(String listBinding, 
 										org.skyve.impl.metadata.view.widget.Button button, 
-										org.skyve.metadata.view.Action action) {
+										Action action) {
 		return actionButton(action.getDisplayName(),
 								action.getIconStyleClass(),
 				                action.getToolTip(),
@@ -167,10 +168,34 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent reportButton(org.skyve.impl.metadata.view.widget.Button button, 
-									org.skyve.metadata.view.Action action) {
+										Action action) {
 		return reportButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
 								action.getToolTip(), 
 								action.getParameters(), 
+								button.getPixelWidth(),
+								button.getPixelHeight(),
+								action.getClientValidation(),
+								action.getConfirmationText(),
+								action.getDisabledConditionName(), 
+								action.getInvisibleConditionName());
+	}
+
+	@Override
+	public UIComponent downloadButton(org.skyve.impl.metadata.view.widget.Button button, 
+										Action action,
+										String moduleName, 
+										String documentName) {
+		return downloadButton(action.getDisplayName(),
+								action.getIconStyleClass(),
+								action.getToolTip(),
+								action.getName(),
+								moduleName, 
+								documentName, 
+								button.getPixelWidth(),
+								button.getPixelHeight(),
+								action.getClientValidation(),
+								action.getConfirmationText(),
 								action.getDisabledConditionName(), 
 								action.getInvisibleConditionName());
 	}
@@ -929,17 +954,40 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent report(org.skyve.metadata.view.Action action) {
+	public UIComponent report(Action action) {
 		return reportButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
 								action.getToolTip(), 
 								action.getParameters(), 
+								null,
+								null,
+								action.getClientValidation(),
+								action.getConfirmationText(),
 								action.getDisabledConditionName(), 
 								action.getInvisibleConditionName());
 	}
 	
 	@Override
+	public UIComponent download(Action action,
+									String moduleName,
+									String documentName) {
+		return downloadButton(action.getDisplayName(), 
+								action.getIconStyleClass(),
+								action.getToolTip(), 
+								action.getName(), 
+								moduleName,
+								documentName,
+								null,
+								null,
+								action.getClientValidation(),
+								action.getConfirmationText(),
+								action.getDisabledConditionName(), 
+								action.getInvisibleConditionName());
+	}
+
+	@Override
 	public UIComponent action(String listBinding, 
-								org.skyve.metadata.view.Action action, 
+								Action action, 
 								ImplicitActionName name,
 								String title) {
 		return actionButton(title,
@@ -1366,9 +1414,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * Create a button with a href URL that looks like...
 	 * http://localhost:8080/skyve/report/Bum.html?_f=html&_c=<webId>&_id=<id>&wee=poo&_n=Bum&_mod=<module>&_doc=<document>
 	 */
-	private Button reportButton(String value, 
-									String title,
+	private Button reportButton(String title,
+									String iconStyleClass,
+									String tooltip,
 									List<Parameter> parameters,
+									Integer pixelWidth, 
+									Integer pixelHeight,
+									@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemented
+									// TODO LinkButton is not a Confirmable. ConfirmBehavior can only be attached to components that implement org.primefaces.component.api.Confirmable interface
+									@SuppressWarnings("unused") String confirmationText,
 									String disabled,
 									String invisible) {
 		StringBuilder href = new StringBuilder(128);
@@ -1409,18 +1463,60 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		// NB yes this is backwards coz its inserted
 		href.insert(0, '?').insert(0, reportFormat).insert(0, '.').insert(0, reportName).insert(0, "report/");
 
-		return linkButton(null, 
-							null, 
+		return linkButton((iconStyleClass == null) ? "fa fa-newspaper" : iconStyleClass, 
 							null,
-							value,
+							null,
 							title,
+							tooltip,
 							href.toString(),
+							pixelWidth,
+							pixelHeight,
 							disabled,
 							invisible,
 							(ReportFormat.html.equals(reportFormat) ||
 								ReportFormat.xhtml.equals(reportFormat)) ? 
 									"_blank" : 
 									null);
+	}
+
+	/**
+	 * Create a button with a href URL that looks like...
+	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_ctim=<currentTimeInMillis>
+	 */
+	private Button downloadButton(String title, 
+									String iconStyleClass,
+									String tooltip,
+									String downloadActionName,
+									String moduleName,
+									String documentName,
+									Integer pixelWidth, 
+									Integer pixelHeight,
+									@SuppressWarnings("unused") Boolean clientValidation, // TODO not implemmented
+									// TODO LinkButton is not a Confirmable. ConfirmBehavior can only be attached to components that implement org.primefaces.component.api.Confirmable interface
+									@SuppressWarnings("unused") String confirmationText,
+									String disabled,
+									String invisible) {
+		String href = String.format("download?%s=%s&%s=%s.%s&%s=#{%s.webContext.webId}&%s=%d", 
+										AbstractWebContext.RESOURCE_FILE_NAME,
+										downloadActionName,
+										AbstractWebContext.DOCUMENT_NAME,
+										moduleName,
+										documentName,
+										AbstractWebContext.CONTEXT_NAME,
+										managedBeanName,
+										AbstractWebContext.CURRENT_TIME_IN_MILLIS,
+										Long.valueOf(System.currentTimeMillis()));
+		return linkButton((iconStyleClass == null) ? "fa fa-download" : iconStyleClass, 
+							null, 
+							null,
+							title,
+							tooltip,
+							href.toString(),
+							pixelWidth,
+							pixelHeight,
+							disabled,
+							invisible,
+							null);
 	}
 	
 	protected CommandLink actionLink(String title, 
@@ -1473,6 +1569,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								String value, 
 								String title, 
 								String href,
+								Integer pixelWidth,
+								Integer pixelHeight,
 								String disabled, 
 								String invisible, 
 								String target) {
@@ -1483,6 +1581,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setTarget(target);
 
 		setId(result, null);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
 		setInvisible(result, invisible, null);
 

@@ -590,6 +590,9 @@ public class FacesViewVisitor extends ViewVisitor {
 		if (ImplicitActionName.Report.equals(name)) {
 			c = cb.reportButton(button, action);
 		}
+		else if (ImplicitActionName.Download.equals(name)) {
+			c = cb.downloadButton(button, action, module.getName(), document.getName());
+		}
 		else {
 			c = cb.actionButton(listBinding, button, action);
 		}
@@ -1924,6 +1927,9 @@ public class FacesViewVisitor extends ViewVisitor {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
 					if (ImplicitActionName.Report.equals(name)) {
 						toolbarLayout.getChildren().add(cb.report(action));
+					}
+					else if (ImplicitActionName.Download.equals(name)) {
+						toolbarLayout.getChildren().add(cb.download(action, module.getName(), document.getName()));
 					}
 					else {
 						String displayName = action.getDisplayName();

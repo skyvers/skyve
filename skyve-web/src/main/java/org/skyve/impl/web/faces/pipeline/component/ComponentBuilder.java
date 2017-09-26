@@ -78,6 +78,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	public abstract UIComponent actionButton(String listBinding, Button button, Action action);
 	public abstract UIComponent reportButton(Button button, Action action);
+	public abstract UIComponent downloadButton(Button button, Action action, String moduleName, String documentName);
 	
 	public abstract UIComponent staticImage(StaticImage image);
 	public abstract UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName);
@@ -210,6 +211,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent actionLink(String listBinding, Link link, String actionName);
 
 	public abstract UIComponent report(Action action);
+	public abstract UIComponent download(Action action, String moduleName, String documentName);
 	
 	public abstract UIComponent action(String listBinding, 
 										Action action, 
