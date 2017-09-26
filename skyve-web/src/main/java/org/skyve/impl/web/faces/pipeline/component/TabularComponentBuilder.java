@@ -546,7 +546,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         addListGridHeader(model, result);
         List<UIComponent> children = result.getChildren();
-        addListGridBoundColumns(model, children);
+        addListGridDataColumns(model, children);
         if ((canCreateDocument && createRendered) || zoomRendered) {
         	addListGridActionColumn(moduleName, 
         								drivingDocumentName, 
@@ -568,7 +568,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		componentToAddTo.getFacets().put("header", heading);
 	}
 	
-	private void addListGridBoundColumns(ListModel<? extends Bean> model,
+	private void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
@@ -581,9 +581,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				continue;
 			}
 			
+			String name = queryColumn.getName();
+			String binding = queryColumn.getBinding();
+
+			// Sort out a display name
 			String displayName = queryColumn.getDisplayName();
 			if (displayName == null) {
-				String binding = queryColumn.getBinding();
 				if (binding != null) {
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Document bindingDocument = target.getDocument();
@@ -604,6 +607,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					}
 				}
 			}
+			
+			// Create the column
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 			column.setHeaderText(displayName);
 			column.setPriority(columnPriority);
@@ -615,7 +620,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			column.setSortBy(queryColumn.getBinding());
 			column.setFilterBy(queryColumn.getBinding());
 */
-			String value = String.format("#{row['{%s}']}", queryColumn.getBinding());
+			// Add the EL expression
+			String value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
 			outputText.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));
 			column.getChildren().add(outputText);
