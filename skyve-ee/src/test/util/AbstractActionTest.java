@@ -11,7 +11,7 @@ public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAct
 	protected abstract T getBean() throws Exception;
 
 	@Test
-	public void testExceute() throws Exception {
+	public void testExecute() throws Exception {
 		getAction().execute(getBean(), null);
 	}
 }
