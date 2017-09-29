@@ -411,8 +411,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");
-		    	button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
-				action(button, ImplicitActionName.Remove, null, gridBinding, true, grid.getRemovedActions());
+
+		    	// If the remove button is vanilla, no events, just update the table as we know there'll
+		    	// be no side effects, but if there is an action on it, update the forms to render
+		    	// any side effects
+		    	List<EventAction> removedActions = grid.getRemovedActions();
+		    	if ((removedActions != null) && (! removedActions.isEmpty())) {
+					button.setUpdate(update); // update all forms (by default)
+		    	}
+		    	else {
+		    		button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+		    	}
+
+		    	action(button, ImplicitActionName.Remove, null, gridBinding, true, removedActions);
 				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 				String[] removeDisabled = (disableRemoveConditionName == null) ? 
 											((disabledConditionName == null) ? 
