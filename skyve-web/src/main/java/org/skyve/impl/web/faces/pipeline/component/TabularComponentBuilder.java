@@ -58,6 +58,9 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.metadata.view.event.EventAction;
+import org.skyve.impl.metadata.view.event.RerenderEventAction;
+import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
@@ -361,7 +364,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Add a new " + singularDocumentAlias);
 		    	button.setIcon("fa fa-plus");
-				action(button, ImplicitActionName.Add, null, gridBinding, inline);
+				action(button, ImplicitActionName.Add, null, gridBinding, inline, null);
 				String disableAddConditionName = grid.getDisableAddConditionName();
 				String[] createDisabled = (disableAddConditionName == null) ? 
 											((disabledConditionName == null) ? 
@@ -382,7 +385,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Edit this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-chevron-right");
-				action(button, ImplicitActionName.Navigate, null, gridBinding, inline);
+				action(button, ImplicitActionName.Navigate, null, gridBinding, inline, null);
 				String disableZoomConditionName = grid.getDisableZoomConditionName();
 				String[] zoomDisabled = (disableZoomConditionName == null) ? 
 											((disabledConditionName == null) ? 
@@ -409,7 +412,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");
 		    	button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
-				action(button, ImplicitActionName.Remove, null, gridBinding, true);
+				action(button, ImplicitActionName.Remove, null, gridBinding, true, grid.getRemovedActions());
 				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 				String[] removeDisabled = (disableRemoveConditionName == null) ? 
 											((disabledConditionName == null) ? 
@@ -1266,7 +1269,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setIcon(iconStyleClass);
 		result.setTitle(tooltip);
 
-		action(result, implicitActionName, actionName, listBinding, inline);
+		action(result, implicitActionName, actionName, listBinding, inline, null);
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
 		setConfirmation(result, confirmationText);
@@ -1542,7 +1545,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setValue(title);
 		result.setTitle(tooltip);
 
-		action(result, implicitActionName, actionName, collectionName, inline);
+		action(result, implicitActionName, actionName, collectionName, inline, null);
 
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
@@ -1565,8 +1568,28 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							ImplicitActionName implicitActionName, 
 							String actionName,
 							String collectionName, 
-							boolean inline) {
-		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionName, inline));
+							boolean inline,
+							List<EventAction> eventHandlerActions) {
+		// Marshall the event actions into strings for the remove EL
+		// NB rerender action represented as true/false for client validation true/false
+		List<String> eventHandlerActionNames = null;
+		if ((eventHandlerActions != null) && (! eventHandlerActions.isEmpty())) { 
+			eventHandlerActionNames = new ArrayList<>(eventHandlerActions.size());
+			for (EventAction eventAction : eventHandlerActions) {
+				if (eventAction instanceof ServerSideActionEventAction) {
+					eventHandlerActionNames.add(((ServerSideActionEventAction) eventAction).getActionName());
+				}
+				else if (eventAction instanceof RerenderEventAction) {
+					if (Boolean.FALSE.equals(((RerenderEventAction) eventAction).getClientValidation())) {
+						eventHandlerActionNames.add(Boolean.FALSE.toString());
+					}
+					else {
+						eventHandlerActionNames.add(Boolean.TRUE.toString());
+					}
+				}
+			}
+		}
+		command.setActionExpression(methodExpressionForAction(implicitActionName, actionName, collectionName, inline, eventHandlerActionNames));
 	}
 
 	private Button linkButton(String icon, 

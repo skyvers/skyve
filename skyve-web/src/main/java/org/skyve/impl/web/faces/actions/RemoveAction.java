@@ -10,16 +10,24 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.util.Util;
 
+/**
+ * Remove an element from an array.
+ * The onRemovedHandlers event actions are processed here also.
+ */
 public class RemoveAction extends FacesAction<Void> {
 	private FacesView<? extends Bean> facesView;
 	private String collectionName;
 	private String elementBizId;
+	private List<String> removedHandlerActionNames; // "true/false" means rerender with/without client validation
+	
 	public RemoveAction(FacesView<? extends Bean> facesView,
 							String collectionName,
-							String elementBizId) {
+							String elementBizId,
+							List<String> removedHandlerActionNames) {
 		this.facesView = facesView;
 		this.collectionName = collectionName;
 		this.elementBizId = elementBizId;
+		this.removedHandlerActionNames = removedHandlerActionNames;
 	}
 
 	@Override
@@ -42,6 +50,24 @@ public class RemoveAction extends FacesAction<Void> {
 			list.remove(beanToRemove);
 			if (beanToRemove instanceof ChildBean<?>) {
 				((ChildBean<?>) beanToRemove).setParent(null);
+			}
+			
+			// fire onRemovedHandlers after removal
+			if (removedHandlerActionNames != null) {
+				for (String removedHandlerActionName : removedHandlerActionNames) {
+					if (Boolean.TRUE.toString().equals(removedHandlerActionName)) {
+						if (UtilImpl.FACES_TRACE) Util.LOGGER.info("RemoveAction - execute removed handler rerender with client validation");
+						new RerenderAction<>(facesView, collectionName, true).execute();
+					}
+					else if (Boolean.FALSE.toString().equals(removedHandlerActionName)) {
+						if (UtilImpl.FACES_TRACE) Util.LOGGER.info("RemoveAction - execute removed handler rerender with no client validation");
+						new RerenderAction<>(facesView, collectionName, false).execute();
+					}
+					else {
+						if (UtilImpl.FACES_TRACE) Util.LOGGER.info(String.format("RemoveAction - execute removed handler [%s] action", removedHandlerActionName));
+						new ExecuteActionAction<>(facesView, removedHandlerActionName, null, null).execute();
+					}
+				}
 			}
 		}
 		else { // Remove on zoomed view

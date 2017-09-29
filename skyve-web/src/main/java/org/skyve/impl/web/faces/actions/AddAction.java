@@ -24,7 +24,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
 
 /**
- * Adds an element to an array
+ * Adds an element to an array.
+ * The onAddedHandlers event actions is not implemented since the grid cannot be inlined.
  */
 public class AddAction extends FacesAction<Void> {
 	private FacesView<? extends Bean> facesView;

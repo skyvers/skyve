@@ -221,10 +221,11 @@ public class FacesView<T extends Bean> extends Harness {
 
 	/**
 	 * This method only removes elements from collections, it doesn't null out associations.
+	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
-	public void remove(String listBinding, String bizId) {
+	public void remove(String listBinding, String bizId, List<String> removedHandlerActionNames) {
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - remove " + viewBinding);
-		new RemoveAction(this, listBinding, bizId).execute();
+		new RemoveAction(this, listBinding, bizId, removedHandlerActionNames).execute();
 	}
 
 	public void action(String actionName, String listBinding, String bizId) {

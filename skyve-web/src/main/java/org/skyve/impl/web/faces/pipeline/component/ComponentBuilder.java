@@ -197,7 +197,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		result.setProcess(process);
 		result.setUpdate(update);
 		if (actionName != null) {
-			MethodExpression me = methodExpressionForAction(null, actionName, listBinding, false);
+			MethodExpression me = methodExpressionForAction(null, actionName, listBinding, false, null);
 			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
 		else {
@@ -220,6 +220,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	private static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
 	private static final Class<?>[] STRING_STRING_STRING = new Class<?>[] {String.class, String.class, String.class};
+	private static final Class<?>[] STRING_STRING_LIST = new Class<?>[] {String.class, String.class, List.class};
 	private static final Class<?>[] STRING_BOOLEAN = new Class<?>[] {String.class, Boolean.class};
 	private static final Class<?>[] NONE = new Class[0];
 	
@@ -240,7 +241,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
 															String actionName,
 															String collectionName, 
-															boolean inline) {
+															boolean inline,
+															List<String> eventHandlerActionNames) {
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append('.');
 		Class<?>[] parameterTypes = null;
@@ -252,9 +254,22 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 					expression.append("('").append(collectionName).append("',").append(inline).append(")");
 				} 
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
-					parameterTypes = STRING_STRING;
+					parameterTypes = STRING_STRING_LIST;
 					expression.append("('").append(collectionName).append("',");
-					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'],");
+
+					// Add filter parameters to getModel call
+					if ((eventHandlerActionNames != null) && (! eventHandlerActionNames.isEmpty())) {
+						expression.append('[');
+						for (String eventHandlerActionName : eventHandlerActionNames) {
+							expression.append("'").append(eventHandlerActionName).append("',");
+						}
+						expression.setLength(expression.length() - 1); // remove last comma
+						expression.append("])");
+					}
+					else {
+						expression.append("null)");
+					}
 				} 
 				else {
 					parameterTypes = STRING_STRING;
@@ -264,8 +279,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			} 
 			else {
 				if (ImplicitActionName.Remove.equals(implicitActionName)) {
-					parameterTypes = STRING_STRING;
-					expression.append("(null,null)");
+					parameterTypes = STRING_STRING_LIST;
+					expression.append("(null,null,null)");
 				} 
 				else {
 					parameterTypes = NONE;
