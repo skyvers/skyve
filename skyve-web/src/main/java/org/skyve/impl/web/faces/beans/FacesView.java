@@ -205,7 +205,8 @@ public class FacesView<T extends Bean> extends Harness {
 		@SuppressWarnings("unchecked")
 		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
 		String listBinding = ((DataTable) evt.getComponent()).getVar();
-		navigate(listBinding.replace('_',  '.'), bizId);
+		// change list var back to list binding - '_' to '.' and remove "Row" from the end.
+		navigate(listBinding.replace('_',  '.').substring(0, listBinding.length() - 3), bizId);
 	}
 	
 	public void add(String listBinding, boolean inline) {

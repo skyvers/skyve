@@ -304,9 +304,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		current.getChildren().add(result);
 
 		if (! Boolean.TRUE.equals(grid.getInline())) {
+			String listVar = gridBinding.replace('.', '_') + "Row";
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
-	        result.getChildren().add(outputText(gridBinding, gridColumnExpression.toString()));
+	        result.getChildren().add(outputText(listVar, gridColumnExpression.toString()));
 		}
 		
 		return result;
@@ -1628,10 +1629,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIOutput outputText(String listBinding, String binding) {
+	private UIOutput outputText(String listVar, String binding) {
 		// escape bindings with ' as \' as the binding could be for blurb expressions
 		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
-		ValueExpression ve = createValueExpressionFromFragment(listBinding, true, sanitisedBinding, true, null, String.class);
+		ValueExpression ve = createValueExpressionFromFragment(listVar, true, sanitisedBinding, true, null, String.class);
 		UIOutput result = new UIOutput();
 		result.setValueExpression("value", ve);
 		setId(result, null);
@@ -1822,7 +1823,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													disabled);
 		result.setForceSelection(true);
 		result.setDropdown(true);
-		String var = binding.replace('.', '_');
+		String var = binding.replace('.', '_') + "Row";
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",
@@ -1889,7 +1890,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
-		result.setVar(binding.replace('.',  '_'));
+		String var = binding.replace('.',  '_') + "Row";
+		result.setVar(var);
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		if (clickToZoom) {
@@ -1897,7 +1899,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setWidgetVar(id);
 			result.setSelectionMode("single");
 			result.setValueExpression("rowKey",
-										createValueExpressionFromFragment(result.getVar(),
+										createValueExpressionFromFragment(var,
 																			false,
 																			Bean.DOCUMENT_ID, 
 																			true, 
@@ -1927,7 +1929,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		setInvisible(result, invisible, null);
 		addGridHeader(title, result);
 
-		result.setVar(binding);
+		result.setVar(binding.replace(".", "_") + "Row");
 		result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, List.class));
 
 		return result;
@@ -1961,8 +1963,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		result.setHeaderText(title);
 		if (sortBinding != null) {
+			String tableVar = listBinding.replace('.', '_') + "Row";
 			result.setValueExpression("sortBy",
-										createValueExpressionFromFragment(listBinding, true, sortBinding, true, null, Object.class));
+										createValueExpressionFromFragment(tableVar, true, sortBinding, true, null, Object.class));
 		}
 
 		StringBuilder style = new StringBuilder(64);

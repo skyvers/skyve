@@ -256,7 +256,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
 					parameterTypes = STRING_STRING_LIST;
 					expression.append("('").append(collectionName).append("',");
-					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'],");
+					expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'],");
 
 					// Add filter parameters to getModel call
 					if ((eventHandlerActionNames != null) && (! eventHandlerActionNames.isEmpty())) {
@@ -274,7 +274,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				else {
 					parameterTypes = STRING_STRING;
 					expression.append("('").append(collectionName).append("', ");
-					expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 			} 
 			else {
@@ -292,7 +292,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 			expression.append("action('").append(actionName).append('\'');
 			if (collectionName != null) {
 				expression.append(", '").append(collectionName).append("', ");
-				expression.append(collectionName.replace('.', '_')).append("['").append(Bean.DOCUMENT_ID).append("'])");
+				expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'])");
 			} 
 			else {
 				expression.append(", null, null)");
