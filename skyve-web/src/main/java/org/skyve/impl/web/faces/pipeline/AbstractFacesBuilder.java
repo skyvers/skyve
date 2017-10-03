@@ -183,10 +183,13 @@ public abstract class AbstractFacesBuilder {
 	}
 	
 	protected ValueExpression createOredValueExpressionFromConditions(String[] conditions) {
+		if (conditions == null) {
+			return null;
+		}
 		if (conditions.length == 1) {
 			return createValueExpressionFromCondition(conditions[0], null);
 		}
-		else if (conditions.length > 0) {
+		if (conditions.length > 0) {
 			return createValueExpressionFromFragment(null, 
 														false, 
 														createOredValueExpressionFragmentFromConditions(conditions), 

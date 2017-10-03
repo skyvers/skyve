@@ -374,9 +374,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											((disabledConditionName == null) ? 
 												new String[] {disableAddConditionName} : 
 												new String[] {disableAddConditionName, disabledConditionName});
-				if (createDisabled != null) {
-					button.setValueExpression("disabled", 
-												createOredValueExpressionFromConditions(createDisabled));
+				ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
+				if (disabled != null) {
+					button.setValueExpression("disabled", disabled);
 				}
 				col.getFacets().put("header", button);
 			}
@@ -661,9 +661,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	    	button.setValue(null);
         	button.setTitle("New record");
 	    	button.setIcon("fa fa-plus");
-	    	if ((createDisabledConditionNames != null) && (createDisabledConditionNames.length > 0)) {
-		    	button.setValueExpression("disabled",
-											createOredValueExpressionFromConditions(createDisabledConditionNames));
+	    	ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
+	    	if (disabled != null) {
+	    		button.setValueExpression("disabled", disabled);
 	    	}
         	StringBuilder value = new StringBuilder(128);
         	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
@@ -1913,9 +1913,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			MethodExpression me = ef.createMethodExpression(elc, expression.toString(), null, new Class[0]);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 
-			if ((clickToZoomDisabledConditionNames != null) && (clickToZoomDisabledConditionNames.length > 0)){
-				ajax.setValueExpression("disabled", 
-											createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames));
+			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames);
+			if (disabled != null) {
+				ajax.setValueExpression("disabled", disabled);
 			}
 			result.addClientBehavior("rowSelect", ajax);
 		}

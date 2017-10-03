@@ -398,10 +398,10 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
     	button.setValue("New");
     	button.setTitle("New record");
-    	if ((createDisabledConditionNames != null) && (createDisabledConditionNames.length > 0)) {
-	    	button.setValueExpression("disabled",
-										createOredValueExpressionFromConditions(createDisabledConditionNames));
-    	}
+		ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
+		if (disabled != null) {
+			button.setValueExpression("disabled", disabled);
+		}
     	StringBuilder value = new StringBuilder(128);
     	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
     	value.append("&d=").append(documentName);
