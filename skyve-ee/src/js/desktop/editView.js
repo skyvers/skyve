@@ -699,11 +699,15 @@ isc.EditView.addMethods({
 		// remove the form title so it is not subsequently posted
 		delete values._title;
 
-		// remove the value maps so they are not subsequently posted
-		// NB valueMaps may be undefined if there are none required by the view
+		// remove the _valueMaps, _growls & _messages so they are not subsequently posted
+		// NB These may be undefined if there are none required by the view
 		var valueMaps = values._valueMaps;
-		delete values._valueMaps; // dont need these any more
-
+		delete values._valueMaps;
+		var growls = values._growls;
+		delete values._growls;
+		var messages = values._messages;
+		delete values._messages;
+		
 		// enable/disable, hide/show controls, invalidate caches etc
 		// NB process visibility etc before setting the values in the values manager to ensure they take correctly
 		this._processWidgets(this._editPanel, false, values, valueMaps);
@@ -864,6 +868,37 @@ isc.EditView.addMethods({
 									// only allow Cancel button if not the only view
 									(onlyView && (tool.type == 'C')));
 				}
+			}
+		}
+		
+		// show growls and messages
+		if (growls) {
+			isc.BizUtil.growl(growls);
+		}
+		if (messages) {
+			var warn = false;
+			var markup = (messages.length > 1) ? '<ul>' : '';
+			for (var i = 0, l = messages.length; i < l; i++) {
+				var message = messages[i];
+				if (message.severity != 'info') {
+					warn = true;
+				}
+				if (l > 1) {
+					markup += '<li>';
+				}
+				markup += message.summary;
+				if (l > 1) {
+					markup += '</li>';
+				}
+			}
+			if (messages.length > 1) {
+				markup += '</ul>';
+			}
+			if (warn) {
+				isc.warn(markup);
+			}
+			else {
+				isc.say(markup);
 			}
 		}
 	},
@@ -1347,12 +1382,12 @@ isc.BizButton.addMethods({
 			// New and Edit are list view actions
 			if (this.type == "O") { // OK on edit view
 				this._view.saveInstance(validate, this.actionName, function() {
-//					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
+//					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
 				});
 			}
 			else if (this.type == "S") { // Save on edit view
 				this._view.saveInstance(validate, this.actionName, function() {
-//					isc.BizUtil.growl('info', 'Saved', 'Changes Saved');
+//					isc.BizUtil.growl([{severity: 'info', summary: 'Saved', detail: 'Changes Saved'}]);
 				});
 			}
 			else if (this.type == "A") { // Add on child edit view

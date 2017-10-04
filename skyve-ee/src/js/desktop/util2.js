@@ -982,7 +982,15 @@ isc.BizUtil.addClassMethods({
 		win.focus();
 	},
 	
-	growl: function(severity, summary, detail) {
-		PrimeFaces.cw('Growl', 'growl', {id:'growl', widgetVar:'growl', life:6000, msgs:[{summary: summary, detail: detail, severity: severity}]});
+	growl: function(msgs, // [{severity:'info/warn/error/fatal', summary:'summary', detail:'detail'}]
+						life, // number of millis
+						sticky) { // true/false
+		PrimeFaces.cw('Growl', 'growl', {
+			id: 'growl', 
+			widgetVar: 'growl', 
+			life: (life ? life : 6000), 
+			sticky: (sticky ? sticky : false), 
+			msgs: msgs 
+		});
 	}
 });

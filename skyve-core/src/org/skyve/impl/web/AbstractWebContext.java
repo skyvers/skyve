@@ -1,13 +1,15 @@
 package org.skyve.impl.web;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.web.WebContext;
 
-public abstract class AbstractWebContext implements Serializable, org.skyve.web.WebContext {
+public abstract class AbstractWebContext implements Serializable, WebContext {
 	/**
 	 * For Serialization
 	 */
@@ -143,6 +145,18 @@ public abstract class AbstractWebContext implements Serializable, org.skyve.web.
 		this.response = response;
 	}
 
+	/**
+	 * Get a list of accumulated growls to display.
+	 * @return	<code>null</code> or [{severity:'info/warn/error/fatal', summary: 'message'}...]
+	 */
+	public abstract List<Map<String, String>> getGrowls();
+
+	/**
+	 * Get a list of accumulated messages to display.
+	 * @return	<code>null</code> or [{severity:'info/warn/error/fatal', summary: 'message'}...]
+	 */
+	public abstract List<Map<String, String>> getMessages();
+	
 	@Override
 	public String toString() {
 		return super.toString() + '#' + getWebId();

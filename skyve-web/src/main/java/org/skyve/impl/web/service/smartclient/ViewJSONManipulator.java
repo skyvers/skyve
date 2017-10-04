@@ -318,6 +318,16 @@ class ViewJSONManipulator extends ViewVisitor {
 
 		// put the view changed/dirty flag in
 		result.put("_changed", Boolean.valueOf(UtilImpl.hasChanged(webContextToReference.getCurrentBean())));
+
+		// put web context growls and messages in
+		List<Map<String, String>> messages = webContextToReference.getGrowls();
+		if (messages != null) {
+			result.put("_growls", messages);
+		}
+		messages = webContextToReference.getMessages();
+		if (messages != null) {
+			result.put("_messages", messages);
+		}
 		
 		constructJSONObjectFromBinding(bindingTree, result, webId);
 		

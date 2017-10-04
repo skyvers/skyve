@@ -1,6 +1,7 @@
 package org.skyve.web;
 
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.MessageSeverity;
 
 /**
  * 
@@ -87,4 +88,8 @@ public interface WebContext {
 	 * @param o	The object to push
 	 */
 	public void push(String path, Object o);
+	
+	public void message(MessageSeverity severity, String message);
+	
+	public void growl(MessageSeverity severity, String message);
 }
