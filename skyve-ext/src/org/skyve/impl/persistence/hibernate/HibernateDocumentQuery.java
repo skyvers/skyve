@@ -2,7 +2,7 @@ package org.skyve.impl.persistence.hibernate;
 
 import java.util.List;
 
-import org.hibernate.Query;
+import org.hibernate.query.Query;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
@@ -56,7 +56,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T extends Bean> List<T> beanResults() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<T> query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, true, false);
 		}
 		catch (Throwable t) {
@@ -67,7 +67,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<T> query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, true, false);
 		}
 		catch (Throwable t) {
@@ -78,7 +78,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T extends Bean> List<T> projectedResults() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<T> query = delegate.createHibernateQuery(this);
 			return delegate.list(query, false, false, false);
 		}
 		catch (Throwable t) {
@@ -89,7 +89,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<T> query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, false, false, false);
 		}
 		catch (Throwable t) {
@@ -100,7 +100,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T> List<T> scalarResults(Class<T> type) {
 		try {
-		Query query = delegate.createHibernateQuery(this);
+		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
 		}
 		catch (Throwable t) {
@@ -111,7 +111,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
-		Query query = delegate.createHibernateQuery(this);
+		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
 		}
 		catch (Throwable t) {
@@ -122,7 +122,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public List<Object[]> tupleResults() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<Object[]> query = delegate.createHibernateQuery(this);
 			return delegate.list(query, true, false, true);
 		}
 		catch (Throwable t) {
@@ -133,7 +133,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	@Override
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
-			Query query = delegate.createHibernateQuery(this);
+			Query<Object[]> query = delegate.createHibernateQuery(this);
 			return delegate.iterate(query, true, false, true);
 		}
 		catch (Throwable t) {

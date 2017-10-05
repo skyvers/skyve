@@ -9,12 +9,15 @@ import java.sql.Types;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Enumeration;
 
-public class EnumUserType implements UserType, ParameterizedType {
-    private Class<? extends Enum<?>> enumClass;
+public class EnumUserType implements UserType, Serializable, ParameterizedType {
+	private static final long serialVersionUID = 8418711259919061318L;
+
+	private Class<? extends Enum<?>> enumClass;
 	private Method toCodeMethod;
 	private Method fromCodeMethod;
 
@@ -77,7 +80,7 @@ public class EnumUserType implements UserType, ParameterizedType {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
         String code = rs.getString(names[0]);
 		if ((rs.wasNull()) || (code == null) || (code.length() == 0)) {
@@ -94,15 +97,15 @@ public class EnumUserType implements UserType, ParameterizedType {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement st, Object value, int index)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
         try {
             if (value == null) {
-                st.setNull(index, Types.VARCHAR);
+            	ps.setNull(index, Types.VARCHAR);
             }
             else {
                 String code = (String) toCodeMethod.invoke(value, new Object[0]);
-                st.setString(index, code);
+                ps.setString(index, code);
             }
         }
         catch (Exception e) {

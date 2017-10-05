@@ -9,11 +9,15 @@ import java.util.Date;
 import java.util.Iterator;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
@@ -50,12 +54,21 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 							AttributeType.content.equals(type) ||
 							AttributeType.enumeration.equals(type) ||
 							AttributeType.text.equals(type) ||
-							AttributeType.id.equals(type)) {
+							AttributeType.id.equals(type) ||
+							AttributeType.association.equals(type)) {
 					if (value == null) {
 						ps.setNull(name, Types.VARCHAR);
 					}
 					else {
-						ps.setString(name, (String) value);
+						if (value instanceof Bean) {
+							ps.setString(name, ((Bean) value).getBizId());
+						}
+						else if (value instanceof Enumeration) {
+							ps.setString(name, ((Enumeration) value).toCode());
+						}
+						else {
+							ps.setString(name, (String) value);
+						}
 					}
 				}
 				else if (AttributeType.markup.equals(type) ||
@@ -90,17 +103,29 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						ps.setNull(name, Types.DECIMAL);
 					}
 					else {
-						ps.setBigDecimal(name, (BigDecimal) value);
+						if (value instanceof BigDecimal) {
+							ps.setBigDecimal(name, (BigDecimal) value);
+						}
+						else if (value instanceof Decimal) {
+							ps.setBigDecimal(name, ((Decimal) value).bigDecimalValue());
+						}
+						else {
+							ps.setBigDecimal(name, new BigDecimal(((Number) value).toString()));
+						}
 					}
 				}
 				else if (AttributeType.geometry.equals(type)) {
-					// The SpatialDialect.getGeomertyUseType() subclasses all give values of JDBC Types.ARRAY
+					SkyveDialect dialect = dataAccess.getDialect();
 					if (value == null) {
-						ps.setNull(name, Types.ARRAY);
+						ps.setNull(name, dialect.getGeometrySqlType());
 					}
 					else {
-						// The SpatialDialect.getGeometryUseType() subclasses all give values of JDBC Types.ARRAY
-						ps.setBytes(name, (byte[]) dataAccess.getGeometryUserType().conv2DBGeometry((Geometry) value, dataAccess.getConnection()));
+						if (dialect.getGeometrySqlType() == Types.ARRAY) {
+							ps.setBytes(name, (byte[]) dialect.convertToPersistedValue((Geometry) value));
+						}
+						else {
+							ps.setObject(name, dialect.convertToPersistedValue((Geometry) value));
+						}
 					}
 				}
 				else if (AttributeType.integer.equals(type)) {
@@ -108,7 +133,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						ps.setNull(name, Types.INTEGER);
 					}
 					else {
-						ps.setInt(name, ((Integer) value).intValue());
+						ps.setInt(name, ((Number) value).intValue());
 					}
 				}
 				else if (AttributeType.longInteger.equals(type)) {
@@ -116,7 +141,7 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						ps.setNull(name, Types.NUMERIC);
 					}
 					else {
-						ps.setLong(name,  ((Long) value).longValue());
+						ps.setLong(name,  ((Number) value).longValue());
 					}
 				}
 				else if (AttributeType.time.equals(type)) {
@@ -260,8 +285,19 @@ class SQLIterable<T> implements AutoClosingIterable<T> {
 						BindUtil.set(result, name, rs.wasNull() ? null : new Decimal5(value));
 					}
 					else if (AttributeType.geometry.equals(type)) {
-						Geometry geometry = (Geometry) dataAccess.getGeometryUserType().nullSafeGet(rs, new String[] {name}, null);
-						BindUtil.set(result, name, geometry);
+						SkyveDialect dialect = dataAccess.getDialect();
+						int geometrySqlType = dialect.getGeometrySqlType();
+						Object value = null;
+						if (geometrySqlType == Types.ARRAY) {
+							value = rs.getBytes(name);
+						}
+						else {
+							value = rs.getObject(name);
+						}
+						if (value != null) {
+							Geometry geometry = dialect.convertFromPersistedValue(value);
+							BindUtil.set(result, name, geometry);
+						}
 					}
 					else if (AttributeType.integer.equals(type)) {
 						int value = rs.getInt(name);

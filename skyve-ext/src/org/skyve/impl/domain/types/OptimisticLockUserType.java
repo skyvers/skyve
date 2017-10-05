@@ -8,15 +8,13 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 
-public class OptimisticLockUserType implements UserType, Serializable, LiteralType {
-	/**
-	 * For Serialization
-	 */
+public class OptimisticLockUserType implements UserType, Serializable, LiteralType<OptimisticLock> {
 	private static final long serialVersionUID = 3237725890005410642L;
 
 	@Override
@@ -42,7 +40,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		String value = rs.getString(names[0]);
 		if ((rs.wasNull()) || (value == null) || (value.length() == 0)) {
@@ -58,7 +56,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.VARCHAR);
@@ -103,7 +101,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public String objectToSQLString(Object value, Dialect dialect)
+	public String objectToSQLString(OptimisticLock value, Dialect dialect)
 	throws Exception {
 		return (value == null) ? "NULL" : value.toString();
 	}

@@ -1,11 +1,42 @@
 package org.skyve.impl.persistence.hibernate.dialect;
 
-import org.hibernatespatial.geodb.GeoDBDialect;
+import org.geolatte.geom.jts.JTS;
+import org.hibernate.spatial.JTSGeometryType;
+import org.hibernate.spatial.dialect.h2geodb.GeoDBDialect;
+import org.hibernate.spatial.dialect.h2geodb.GeoDBGeometryTypeDescriptor;
+import org.hibernate.spatial.dialect.h2geodb.GeoDbWkb;
 
-public class H2SpatialDialect extends GeoDBDialect {
-	private static final long serialVersionUID = -8416414426232646559L;
+import com.vividsolutions.jts.geom.Geometry;
 
-	public H2SpatialDialect() {
-		super();
+public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
+	private static final long serialVersionUID = 2491505869930720627L;
+
+	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
+
+	@Override
+	public int getGeometrySqlType() {
+		return GeoDBGeometryTypeDescriptor.INSTANCE.getSqlType();
+	}
+
+	@Override
+	public final JTSGeometryType getGeometryType() {
+		return geometryType;
+	}
+
+	// From GeoDBGeometryTypeDescriptor
+	@Override
+	public Object convertToPersistedValue(Geometry geometry) {
+		return GeoDbWkb.to(JTS.from(geometry));
+	}
+	
+	// From GeoDBGeometryTypeDescriptor
+	@Override
+	public Geometry convertFromPersistedValue(Object geometry) {
+		return JTS.to((org.geolatte.geom.Geometry<?>) GeoDbWkb.from(geometry));
+	}
+
+	@Override
+	public String getModifyColumnString() {
+		return "alter column";
 	}
 }

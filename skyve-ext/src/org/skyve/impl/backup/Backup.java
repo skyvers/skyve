@@ -21,8 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hibernate.usertype.UserType;
-import org.hibernatespatial.SpatialDialect;
+import org.hibernate.engine.spi.SessionImplementor;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -31,6 +30,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -80,8 +80,6 @@ public class Backup {
 		p.generateDDL(drops, creates, null);
 		BackupUtil.writeScript(drops, new File(backupDir, "drop.sql"));
 		BackupUtil.writeScript(creates, new File(backupDir, "create.sql"));
-
-		UserType geometryUserType = null; // this is only created when we come across a geometry
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -154,11 +152,9 @@ public class Backup {
 												}
 											}
 											else if (AttributeType.geometry.equals(attributeType)) {
-												if (geometryUserType == null) {
-													SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
-													geometryUserType = dialect.getGeometryUserType();
-												}
-												Geometry geometry = (Geometry) geometryUserType.nullSafeGet(resultSet, new String[] {name}, null);
+												@SuppressWarnings("resource")
+												SessionImplementor sessionImpl = (SessionImplementor) ((AbstractHibernatePersistence) p).getSession();
+												Geometry geometry = AbstractHibernatePersistence.getDialect().getGeometryType().nullSafeGet(resultSet, name, sessionImpl);
 												if (geometry == null) {
 													value = "";
 												}

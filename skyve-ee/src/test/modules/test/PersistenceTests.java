@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyve.domain.PersistentBean;
@@ -11,6 +12,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 
@@ -29,8 +31,8 @@ public class PersistenceTests extends AbstractSkyveTest {
 		test = p.save(test);
 		test = p.save(test);
 
-		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedCollection().get(0).getBizVersion());
-		Assert.assertEquals(Integer.valueOf(1), test.getAggregatedCollection().get(1).getBizVersion());
+		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(0).getBizVersion());
+		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}
 
 	@Test
@@ -609,6 +611,42 @@ public class PersistenceTests extends AbstractSkyveTest {
 		p.refresh(test);
 	}
 
+	@Test
+	public void testEvict() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		@SuppressWarnings("resource")
+		Session s = ((AbstractHibernatePersistence) p).getSession();
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		test = p.save(test);
+		Assert.assertTrue(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		p.evictCached(test);
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+	}
+	
+	@Test
+	public void testEvictEvicted() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		@SuppressWarnings("resource")
+		Session s = ((AbstractHibernatePersistence) p).getSession();
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		test = p.save(test);
+		Assert.assertTrue(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		p.evictCached(test);
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		p.evictCached(test);
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+	}
+
+	@Test
+	public void testEvictTransient() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 1);
+		@SuppressWarnings("resource")
+		Session s = ((AbstractHibernatePersistence) p).getSession();
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+		p.evictCached(test);
+		Assert.assertFalse(s.contains(test.getBizModule() + test.getBizDocument(), test));
+	}
+	
 	@Test
 	public void testSaveOfList() throws Exception {
 		AllAttributesPersistent test1 = Util.constructRandomInstance(u, m, aapd, 1);

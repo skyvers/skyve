@@ -1,0 +1,152 @@
+package org.skyve.impl.persistence.hibernate.dialect;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.model.naming.Identifier;
+import org.hibernate.boot.model.relational.Database;
+import org.hibernate.boot.model.relational.Namespace;
+import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
+import org.hibernate.mapping.Column;
+import org.hibernate.mapping.Table;
+import org.hibernate.resource.transaction.spi.DdlTransactionIsolator;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.tool.schema.extract.spi.ColumnInformation;
+import org.hibernate.tool.schema.extract.spi.DatabaseInformation;
+import org.hibernate.tool.schema.extract.spi.TableInformation;
+import org.hibernate.tool.schema.internal.Helper;
+import org.hibernate.tool.schema.internal.exec.JdbcContext;
+import org.skyve.EXT;
+import org.skyve.impl.util.UtilImpl;
+
+public class DDLDelegate {
+	public static void migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect)
+	throws SQLException {
+		try (Connection connection = EXT.getDataStoreConnection()) {
+			connection.setAutoCommit(true);
+			final DdlTransactionIsolator ddlTransactionIsolator = new DdlTransactionIsolator() {
+				@Override
+				public void release() {
+					// nothing to do as the connection is outside
+				}
+				
+				@Override
+				public void prepare() {
+					// nothing to do as the connection is outside
+				}
+				
+				@Override
+				public JdbcContext getJdbcContext() {
+					return null;
+				}
+				
+				@Override
+				public Connection getIsolatedConnection() {
+					return connection;
+				}
+			};
+		
+			final DatabaseInformation databaseInformation = Helper.buildDatabaseInformation(
+																		standardRegistry,
+																		ddlTransactionIsolator,
+																		metadata.getDatabase().getDefaultNamespace().getName());
+			try (Statement statement = connection.createStatement()) {
+				final Database database = metadata.getDatabase();
+				for (Namespace namespace : database.getNamespaces()) {
+					for (Table table : namespace.getTables() ) {
+						if (table.isPhysicalTable() ) {
+							final TableInformation tableInformation = databaseInformation.getTableInformation(table.getQualifiedTableName());
+							if (tableInformation != null && tableInformation.isPhysicalTable()) {
+								for (String ddl : sqlAlterTableDDL(skyveDialect, table, tableInformation, metadata)) {
+	                        		UtilImpl.LOGGER.info(ddl);
+	                        		statement.executeUpdate(ddl);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		// return ArrayHelper.toStringArray(result);
+	}
+	
+    /**
+     * This method exists because by default, hibernate does not issue "alter table alter/modify column" statements only
+     * "alter table add column" statements. So this hack allows alter table modify/alter column when the type, length or precision
+     * has changed. The "modify column" syntax is outside the scope of the hibernate dialect classes and so its added to SkyveDialect.
+     */
+	// from org.hibernate.mapping.Table
+	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
+														Table table, 
+														TableInformation tableInformation, 
+														Metadata metadata) {
+		List<String> result = new ArrayList<>();
+		
+		final Dialect dialect = (Dialect) skyveDialect;
+		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
+
+		final String tableName = jdbcEnvironment.getQualifiedObjectNameFormatter().format(
+																	tableInformation.getName(), dialect);
+
+		StringBuilder root = new StringBuilder(dialect.getAlterTableString(tableName));
+		root.append(' ').append(skyveDialect.getModifyColumnString());
+
+		Iterator<?> iter = table.getColumnIterator();
+		while ( iter.hasNext() ) {
+			final Column column = (Column) iter.next();
+			final ColumnInformation columnInfo = tableInformation.getColumn(Identifier.toIdentifier(column.getName(), column.isQuoted()));
+			int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
+			
+			if ((columnInfo != null) && // the column exists
+		            // char column and lengths are different
+		            ((((typeCode == Types.VARCHAR) || 
+		                    (typeCode == Types.CHAR) || 
+		                    (typeCode == Types.LONGVARCHAR) || 
+		                    (typeCode == Types.LONGNVARCHAR)) && 
+		                (column.getLength() != columnInfo.getColumnSize())) ||
+	                // decimal column and scales are different
+	                (((typeCode == Types.FLOAT) || 
+	                        (typeCode == Types.REAL) || 
+	                        (typeCode == Types.DOUBLE) || 
+	                        (typeCode == Types.NUMERIC)) && 
+	                    ((column.getScale() != columnInfo.getDecimalDigits()) || 
+	                        (column.getPrecision() != columnInfo.getColumnSize()))))) {
+				StringBuilder alter = new StringBuilder( root.toString() )
+						.append( ' ' )
+						.append( column.getQuotedName( dialect ) )
+						.append( ' ' )
+						.append( column.getSqlType( dialect, metadata ) );
+
+				String defaultValue = column.getDefaultValue();
+				if ( defaultValue != null ) {
+					alter.append( " default " ).append( defaultValue );
+				}
+
+				if ( column.isNullable() ) {
+					alter.append( dialect.getNullColumnString() );
+				}
+				else {
+					alter.append( " not null" );
+				}
+
+				String columnComment = column.getComment();
+				if ( columnComment != null ) {
+					alter.append(dialect.getColumnComment(columnComment));
+				}
+
+				alter.append(dialect.getAddColumnSuffixString());
+
+				result.add(alter.toString());
+			}
+		}
+
+		return result;
+	}
+}

@@ -5,18 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.hibernate.Query;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernatespatial.GeometryUserType;
+import org.hibernate.query.Query;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
-import org.skyve.impl.persistence.hibernate.HibernateAutoClosingIterable;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -39,7 +36,7 @@ class HibernateQueryDelegate {
 		maxResults = max;
 	}
 	
-	Query createHibernateQuery(AbstractQuery query) {
+	<T> Query<T> createHibernateQuery(AbstractQuery query) {
 		// This needs to be be before we set the driving document (below)
 		// as it sets the driving document in a BizQL
 		String queryString = query.toQueryString();
@@ -49,7 +46,7 @@ class HibernateQueryDelegate {
 		drivingDocumentName = query.getDrivingDocumentName();
 		
 
-		Query result = session.createQuery(queryString);
+		Query<T> result = session.createQuery(queryString);
 		if (firstResult >= 0) {
 			result.setFirstResult(firstResult);
 		}
@@ -60,7 +57,7 @@ class HibernateQueryDelegate {
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
 			if (value instanceof Geometry) {
-				result.setParameter(parameterName, value, GeometryUserType.TYPE);
+				result.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
 			}
 			else {
 				result.setParameter(parameterName, value);
@@ -71,7 +68,7 @@ class HibernateQueryDelegate {
 	}
 	
 	@SuppressWarnings("unchecked")
-	<T> List<T> list(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
+	<T> List<T> list(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			if (asIs) {
 				if (assertSingle && (query.getReturnAliases().length != 1)) {
@@ -120,7 +117,8 @@ class HibernateQueryDelegate {
 		}
 	}
 
-	<T> AutoClosingIterable<T> iterate(Query query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
+	@SuppressWarnings("resource")
+	<T> AutoClosingIterable<T> iterate(Query<T> query, boolean asIs, boolean assertSingle, boolean assertMultiple) {
 		try {
 			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			if (asIs) {
@@ -152,11 +150,11 @@ class HibernateQueryDelegate {
 	}
 	
 	int execute(AbstractQuery query) {
-		Query hibernateQuery = session.createQuery(query.toQueryString());
+		Query<?> hibernateQuery = session.createQuery(query.toQueryString());
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
 			if (value instanceof Geometry) {
-				hibernateQuery.setParameter(parameterName, value, GeometryUserType.TYPE);
+				hibernateQuery.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
 			}
 			else {
 				hibernateQuery.setParameter(parameterName, value);

@@ -2,11 +2,11 @@ package org.skyve.impl.dataaccess.sql;
 
 import java.sql.Connection;
 
-import org.hibernatespatial.AbstractDBGeometryType;
-import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.dataaccess.sql.SQLDataAccess;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DataStore;
@@ -14,7 +14,7 @@ import org.skyve.persistence.SQL;
 
 public class SQLDataAccessImpl implements SQLDataAccess {
 	private DataStore dataStore; // to get a connection and construct SQL from
-	private AbstractDBGeometryType geometryUserType = null; // this is only created when we come across a geometry
+	private SkyveDialect dialect = null; // this is only created when we come across a geometry
 
 	private Connection connection;
 	
@@ -30,13 +30,12 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 		return connection;
 	}
 	
-	AbstractDBGeometryType getGeometryUserType() throws Exception {
-		if (geometryUserType == null) {
-			SpatialDialect dialect = (SpatialDialect) Class.forName(dataStore.getDialectClassName()).newInstance();
-			geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
+	SkyveDialect getDialect() throws Exception {
+		if (dialect == null) {
+			dialect = AbstractHibernatePersistence.getDialect(dataStore.getDialectClassName());
 		}
 		
-		return geometryUserType;
+		return dialect;
 	}
 	
 	@Override
