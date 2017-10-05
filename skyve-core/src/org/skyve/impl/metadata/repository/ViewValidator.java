@@ -473,7 +473,9 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.text,
 							AttributeType.association,
 							AttributeType.inverseOne,
-							AttributeType.bool);
+							AttributeType.bool,
+							AttributeType.integer,
+							AttributeType.longInteger);
 		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
 		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
 	}
@@ -1066,7 +1068,9 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.text,
 							AttributeType.association,
 							AttributeType.inverseOne,
-							AttributeType.bool);
+							AttributeType.bool,
+							AttributeType.integer,
+							AttributeType.longInteger);
 		validateConditionName(radio.getDisabledConditionName(), radioIdentifier);
 		validateConditionName(radio.getInvisibleConditionName(), radioIdentifier);
 	}
