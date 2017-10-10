@@ -53,7 +53,6 @@ public class XMLMetaData {
 	private static final Schema VIEW_SCHEMA;
 
 	static {
-UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/pirsa/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
 		try {
 			ROUTER_CONTEXT = JAXBContext.newInstance(Router.class);
 			ROUTER_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/router.xsd");
