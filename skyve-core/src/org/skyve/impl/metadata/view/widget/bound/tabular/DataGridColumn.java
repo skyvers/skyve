@@ -1,15 +1,22 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import java.util.Map;
+import java.util.TreeMap;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
+import org.skyve.metadata.DecoratedMetaData;
 
-@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth"})
-public abstract class DataGridColumn implements TabularColumn {
+@XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth", "properties"})
+public abstract class DataGridColumn implements TabularColumn, DecoratedMetaData {
 	/**
 	 * For Serialization
 	 */
@@ -18,6 +25,10 @@ public abstract class DataGridColumn implements TabularColumn {
 	private String title;
 	private HorizontalAlignment alignment;
 	private Integer pixelWidth;
+
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public String getTitle() {
@@ -48,5 +59,10 @@ public abstract class DataGridColumn implements TabularColumn {
 	@XmlAttribute
 	public void setPixelWidth(Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }
