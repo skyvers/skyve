@@ -77,7 +77,7 @@ public class DDLDelegate {
 		// return ArrayHelper.toStringArray(result);
 	}
 	
-    /**
+	/**
      * This method exists because by default, hibernate does not issue "alter table alter/modify column" statements only
      * "alter table add column" statements. So this hack allows alter table modify/alter column when the type, length or precision
      * has changed. The "modify column" syntax is outside the scope of the hibernate dialect classes and so its added to SkyveDialect.
@@ -85,7 +85,7 @@ public class DDLDelegate {
 	// from org.hibernate.mapping.Table
 	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
 														Table table, 
-														TableInformation tableInformation, 
+														TableInformation tableInfo, 
 														Metadata metadata) {
 		List<String> result = new ArrayList<>();
 		
@@ -93,51 +93,36 @@ public class DDLDelegate {
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
 
 		final String tableName = jdbcEnvironment.getQualifiedObjectNameFormatter().format(
-																	tableInformation.getName(), dialect);
+																	tableInfo.getName(), dialect);
 
 		StringBuilder root = new StringBuilder(dialect.getAlterTableString(tableName));
 		root.append(' ').append(skyveDialect.getModifyColumnString());
 
 		Iterator<?> iter = table.getColumnIterator();
-		while ( iter.hasNext() ) {
+		while (iter.hasNext()) {
 			final Column column = (Column) iter.next();
-			final ColumnInformation columnInfo = tableInformation.getColumn(Identifier.toIdentifier(column.getName(), column.isQuoted()));
-			int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
-			
-			if ((columnInfo != null) && // the column exists
-		            // char column and lengths are different
-		            ((((typeCode == Types.VARCHAR) || 
-		                    (typeCode == Types.CHAR) || 
-		                    (typeCode == Types.LONGVARCHAR) || 
-		                    (typeCode == Types.LONGNVARCHAR)) && 
-		                (column.getLength() != columnInfo.getColumnSize())) ||
-	                // decimal column and scales are different
-	                (((typeCode == Types.FLOAT) || 
-	                        (typeCode == Types.REAL) || 
-	                        (typeCode == Types.DOUBLE) || 
-	                        (typeCode == Types.NUMERIC)) && 
-	                    ((column.getScale() != columnInfo.getDecimalDigits()) || 
-	                        (column.getPrecision() != columnInfo.getColumnSize()))))) {
-				StringBuilder alter = new StringBuilder( root.toString() )
-						.append( ' ' )
-						.append( column.getQuotedName( dialect ) )
-						.append( ' ' )
-						.append( column.getSqlType( dialect, metadata ) );
+			final ColumnInformation columnInfo = tableInfo.getColumn(Identifier.toIdentifier(column.getName(), column.isQuoted()));
+			if (skyveDialect.isAlterTableColumnChangeRequired(column, columnInfo)) {
+				StringBuilder alter = new StringBuilder(root.toString())
+						.append(' ')
+						.append(column.getQuotedName(dialect))
+						.append(' ')
+						.append(column.getSqlType(dialect, metadata));
 
 				String defaultValue = column.getDefaultValue();
-				if ( defaultValue != null ) {
-					alter.append( " default " ).append( defaultValue );
+				if (defaultValue != null) {
+					alter.append(" default ").append(defaultValue);
 				}
 
-				if ( column.isNullable() ) {
-					alter.append( dialect.getNullColumnString() );
+				if (column.isNullable()) {
+					alter.append(dialect.getNullColumnString());
 				}
 				else {
-					alter.append( " not null" );
+					alter.append(" not null");
 				}
 
 				String columnComment = column.getComment();
-				if ( columnComment != null ) {
+				if (columnComment != null) {
 					alter.append(dialect.getColumnComment(columnComment));
 				}
 
@@ -148,5 +133,26 @@ public class DDLDelegate {
 		}
 
 		return result;
+	}
+	
+	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+		int typeCode = (columnInfo == null) ? 0 : columnInfo.getTypeCode();
+
+		return (columnInfo != null) && // the column exists
+				// char column and lengths are different
+				(
+					(((typeCode == Types.VARCHAR) || 
+							(typeCode == Types.CHAR) || 
+							(typeCode == Types.LONGVARCHAR) ||
+							(typeCode == Types.LONGNVARCHAR)) && 
+							(column.getLength() != columnInfo.getColumnSize()))
+					||
+					// decimal column and scales are different
+					(((typeCode == Types.FLOAT) || 
+							(typeCode == Types.REAL) || 
+							(typeCode == Types.DOUBLE) ||
+							(typeCode == Types.NUMERIC)) &&
+						((column.getScale() != columnInfo.getDecimalDigits()) ||
+							(column.getPrecision() != columnInfo.getColumnSize()))));
 	}
 }

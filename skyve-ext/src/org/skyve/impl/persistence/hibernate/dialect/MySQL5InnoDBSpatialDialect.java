@@ -6,8 +6,10 @@ import org.geolatte.geom.codec.Wkb;
 import org.geolatte.geom.codec.WkbDecoder;
 import org.geolatte.geom.codec.WkbEncoder;
 import org.geolatte.geom.jts.JTS;
+import org.hibernate.mapping.Column;
 import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.spatial.dialect.mysql.MySQLGeometryTypeDescriptor;
+import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -43,6 +45,11 @@ public class MySQL5InnoDBSpatialDialect extends org.hibernate.spatial.dialect.my
 		return JTS.to(decoder.decode(buffer));
 	}
 
+	@Override
+	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+		return DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
+	}
+	
 	@Override
 	public String getModifyColumnString() {
 		return "modify column";
