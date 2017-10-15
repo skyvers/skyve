@@ -1502,7 +1502,9 @@
   </xs:complexType>
 
   <xs:complexType name="dataGridColumn" abstract="true">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
     <xs:attribute name="alignment" type="tns:horizontalAlignment"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
