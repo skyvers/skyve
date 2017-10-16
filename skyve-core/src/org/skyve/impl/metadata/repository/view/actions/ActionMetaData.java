@@ -1,9 +1,15 @@
 package org.skyve.impl.metadata.repository.view.actions;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -20,7 +26,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 							"disabledConditionName",
 							"enabledConditionName",
 							"invisibleConditionName",
-							"visibleConditionName"})
+							"visibleConditionName",
+							"properties"})
 public abstract class ActionMetaData {
 	protected ImplicitActionName implicitName;
 
@@ -131,6 +138,14 @@ public abstract class ActionMetaData {
 		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
 	}
 
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
+	public Map<String, String> properties = new TreeMap<>();
+
+	public Map<String, String> getProperties() {
+		return properties;
+	}
+
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = new ActionImpl();
 
@@ -148,6 +163,7 @@ public abstract class ActionMetaData {
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
+		result.setProperties(properties);
 
 		return result;
 	}

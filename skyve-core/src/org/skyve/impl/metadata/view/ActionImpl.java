@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -51,6 +53,7 @@ public class ActionImpl implements Action {
 	private String disabledConditionName;
 	private String invisibleConditionName;
 	private List<Parameter> parameters = new ArrayList<>();
+	private Map<String, String> properties = new TreeMap<>();
 
 	@Override
 	public List<Parameter> getParameters() {
@@ -303,5 +306,14 @@ public class ActionImpl implements Action {
 		}
 		
 		return result;
+	}
+
+	public void setProperties(Map<String, String> properties) {
+		this.properties = properties;
+	}
+
+	@Override
+	public Map<String, String> getProperties() {
+		return properties;
 	}
 }

@@ -694,7 +694,9 @@
   </xs:complexType>
 
   <xs:complexType name="abstractAction" abstract="true">
-    <xs:sequence/>
+    <xs:sequence>
+      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+    </xs:sequence>
     <xs:attribute name="name" type="xs:string"/>
     <xs:attribute name="displayName" type="xs:string"/>
     <xs:attribute name="toolTip" type="xs:string"/>
