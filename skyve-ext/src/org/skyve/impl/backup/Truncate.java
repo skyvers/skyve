@@ -13,12 +13,11 @@ import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
-import org.skyve.util.Util;
+import org.skyve.persistence.Persistence;
 
 public class Truncate {
 	public static void truncate(String schemaName, boolean database, boolean content) 
@@ -33,88 +32,77 @@ public class Truncate {
 									boolean content)
 	throws Exception {
 		if (database) {
+			Persistence persistence = CORE.getPersistence();
 			StringBuilder sql = new StringBuilder(128);
 
-			AbstractPersistence persistence = AbstractPersistence.get();
-			try {
-				persistence.begin();
-	
-				// update foreign keys to null
-				for (Table table : tables) { 
-					if (table instanceof JoinTable) {
-						continue;
-					}
-					sql.setLength(0);
-					sql.append("update ").append(table.name).append(" set ");
-					for (String fieldName : table.fields.keySet()) {
-						if (fieldName.toLowerCase().endsWith("_id")) {
-							sql.append(fieldName).append(" = null,");
-						}
-					}
-					if (sql.charAt(sql.length() - 1) == ',') {
-						sql.setLength(sql.length() - 1); // remove the comma
-	
-						BackupUtil.secureSQL(sql, table, customerName);
-						UtilImpl.LOGGER.info("unlink table " + table.name);
-						persistence.newSQL(sql.toString()).execute();
-						persistence.commit(false);
-						persistence.begin();
+			// update foreign keys to null
+			for (Table table : tables) { 
+				if (table instanceof JoinTable) {
+					continue;
+				}
+				sql.setLength(0);
+				sql.append("update ").append(table.name).append(" set ");
+				for (String fieldName : table.fields.keySet()) {
+					if (fieldName.toLowerCase().endsWith("_id")) {
+						sql.append(fieldName).append(" = null,");
 					}
 				}
-	
-				// delete rows from joining tables
-				for (Table table : tables) {
-					if (table instanceof JoinTable) {
-						sql.setLength(0);
-						sql.append("delete from ").append(table.name);
-						BackupUtil.secureSQL(sql, table, customerName);
-						UtilImpl.LOGGER.info("delete joining table " + table.name);
-						persistence.newSQL(sql.toString()).execute();
-						persistence.commit(false);
-						persistence.begin();
-					}
-				}
-				
-				// delete rows from joined-extension tables
-				for (Table table : tables) {
-					if (table instanceof JoinTable) {
-						continue;
-					}
-					if (BackupUtil.hasBizCustomer(table)) {
-						continue;
-					}
-					sql.setLength(0);
-					sql.append("delete from ").append(table.name);
-					BackupUtil.secureSQL(sql, table, customerName);
-					UtilImpl.LOGGER.info("delete extension table " + table.name);
-					persistence.newSQL(sql.toString()).execute();
-					persistence.commit(false);
-					persistence.begin();
-				}
+				if (sql.charAt(sql.length() - 1) == ',') {
+					sql.setLength(sql.length() - 1); // remove the comma
 
-				// delete rows from non-joining tables
-				for (Table table : tables) {
-					if (table instanceof JoinTable) {
-						continue;
-					}
-					if (! BackupUtil.hasBizCustomer(table)) {
-						continue;
-					}
-					sql.setLength(0);
-					sql.append("delete from ").append(table.name);
 					BackupUtil.secureSQL(sql, table, customerName);
-					UtilImpl.LOGGER.info("delete table " + table.name);
+					UtilImpl.LOGGER.info("unlink table " + table.name);
 					persistence.newSQL(sql.toString()).execute();
 					persistence.commit(false);
 					persistence.begin();
 				}
 			}
-			catch (DomainException e) {
-				Util.LOGGER.severe(sql.toString());
-				throw e;
+
+			// delete rows from joining tables
+			for (Table table : tables) {
+				if (table instanceof JoinTable) {
+					sql.setLength(0);
+					sql.append("delete from ").append(table.name);
+					BackupUtil.secureSQL(sql, table, customerName);
+					UtilImpl.LOGGER.info("delete joining table " + table.name);
+					persistence.newSQL(sql.toString()).execute();
+					persistence.commit(false);
+					persistence.begin();
+				}
 			}
-			finally {
+			
+			// delete rows from joined-extension tables
+			for (Table table : tables) {
+				if (table instanceof JoinTable) {
+					continue;
+				}
+				if (BackupUtil.hasBizCustomer(table)) {
+					continue;
+				}
+				sql.setLength(0);
+				sql.append("delete from ").append(table.name);
+				BackupUtil.secureSQL(sql, table, customerName);
+				UtilImpl.LOGGER.info("delete extension table " + table.name);
+				persistence.newSQL(sql.toString()).execute();
 				persistence.commit(false);
+				persistence.begin();
+			}
+
+			// delete rows from non-joining tables
+			for (Table table : tables) {
+				if (table instanceof JoinTable) {
+					continue;
+				}
+				if (! BackupUtil.hasBizCustomer(table)) {
+					continue;
+				}
+				sql.setLength(0);
+				sql.append("delete from ").append(table.name);
+				BackupUtil.secureSQL(sql, table, customerName);
+				UtilImpl.LOGGER.info("delete table " + table.name);
+				persistence.newSQL(sql.toString()).execute();
+				persistence.commit(false);
+				persistence.begin();
 			}
 		}
 		
@@ -125,110 +113,110 @@ public class Truncate {
 		}
 	}
 
+	@SuppressWarnings("resource")
 	private static Collection<Table> getTables(String schema)
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();
 
-		try (Connection c = ((AbstractHibernatePersistence) AbstractPersistence.get()).getConnection()) {
-			DatabaseMetaData dmd = c.getMetaData();
-			String catalog = c.getCatalog();
-			try (ResultSet tableResultSet = dmd.getTables(catalog, schema, "%", null)) {
-				while (tableResultSet.next()) {
-					String tableName = tableResultSet.getString("TABLE_NAME");
-					String tableType = tableResultSet.getString("TABLE_TYPE");
-					if ("TABLE".equalsIgnoreCase(tableType)) {
-						Table table = new Table(tableName);
-						boolean hasBizIdColumn = false;
-						try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
-							while (columnResultSet.next()) {
-								String columnName = columnResultSet.getString("COLUMN_NAME");
-								if (columnName.toLowerCase().endsWith("_id")) {
-									table.fields.put(columnName, AttributeType.text);
-								}
-								else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
-									hasBizIdColumn = true;
-								}
-								// NB Ensure we can detect extension tables
-								else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
-									table.fields.put(columnName, AttributeType.text);
-								}
+		Connection c = ((AbstractHibernatePersistence) AbstractPersistence.get()).getConnection();
+		DatabaseMetaData dmd = c.getMetaData();
+		String catalog = c.getCatalog();
+		try (ResultSet tableResultSet = dmd.getTables(catalog, schema, "%", null)) {
+			while (tableResultSet.next()) {
+				String tableName = tableResultSet.getString("TABLE_NAME");
+				String tableType = tableResultSet.getString("TABLE_TYPE");
+				if ("TABLE".equalsIgnoreCase(tableType)) {
+					Table table = new Table(tableName);
+					boolean hasBizIdColumn = false;
+					try (ResultSet columnResultSet = dmd.getColumns(catalog, schema, tableName, null)) {
+						while (columnResultSet.next()) {
+							String columnName = columnResultSet.getString("COLUMN_NAME");
+							if (columnName.toLowerCase().endsWith("_id")) {
+								table.fields.put(columnName, AttributeType.text);
 							}
-						}
-
-						// detect joining tables
-						int tableFieldSize = table.fields.size();
-						boolean joinTable = ((tableFieldSize == 2) || // unordered collection 
-												(tableFieldSize == 3)); // ordered collection
-						if (joinTable) {
-							// check for owner_id and element_id
-							Set<String> columnNames = table.fields.keySet();
-							for (String columnName : columnNames) {
-								if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
-										(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
-										(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
-									joinTable = false;
-									break;
-								}
+							else if (columnName.equalsIgnoreCase(Bean.DOCUMENT_ID)) {
+								hasBizIdColumn = true;
 							}
-							
-							if (joinTable) {
-								String ownerTableName = null;
-								try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
-									while (foreignKeyResultSet.next()) {
-										String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
-										if (PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(foreignKeyColumn)) {
-											ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
-										}
-									}
-								}
-
-								if (ownerTableName == null) { // is null when the foreign key is not defined
-									table = null; // skip this table
-									joinTable = false;
-								}
-								else {
-									table = new JoinTable(tableName, ownerTableName, (tableFieldSize == 3));
-								}
+							// NB Ensure we can detect extension tables
+							else if (columnName.equalsIgnoreCase(Bean.CUSTOMER_NAME)) {
+								table.fields.put(columnName, AttributeType.text);
 							}
-						}
-						
-						if ((table != null) && 
-								(joinTable || hasBizIdColumn)) {
-							result.add(table);
 						}
 					}
-				}
-				
-				// Resolve join tables that have collections on joined extension persistence table strategies
-				// The owner Table name should be the ultimate base table (the one that has the bizCustomer column)
-				for (Table table : result) {
-					if (table instanceof JoinTable) {
-						JoinTable joinTable = (JoinTable) table;
-						String ownerTableName = joinTable.ownerTableName;
 
-						// Determine if the owner table has the bizCustomer field or not
-						boolean ownerTableHasBizCustomer = false;
-						for (Table ownerTable : result) {
-							if (ownerTableName.equals(ownerTable.name)) {
-								for (String fieldName : ownerTable.fields.keySet()) {
-									if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
-										ownerTableHasBizCustomer = true;
-										break;
-									}
-								}
+					// detect joining tables
+					int tableFieldSize = table.fields.size();
+					boolean joinTable = ((tableFieldSize == 2) || // unordered collection 
+											(tableFieldSize == 3)); // ordered collection
+					if (joinTable) {
+						// check for owner_id and element_id
+						Set<String> columnNames = table.fields.keySet();
+						for (String columnName : columnNames) {
+							if ((! PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
+									(! PersistentBean.ELEMENT_COLUMN_NAME.equalsIgnoreCase(columnName)) &&
+									(! Bean.ORDINAL_NAME.equalsIgnoreCase(columnName))) {
+								joinTable = false;
 								break;
 							}
 						}
 						
-						// If it does not, look for the target of the FK from the bizId column
-						if (! ownerTableHasBizCustomer) {
-							// Look for the table name that the bizId FK points to
-							try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, ownerTableName)) {
+						if (joinTable) {
+							String ownerTableName = null;
+							try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, tableName)) {
 								while (foreignKeyResultSet.next()) {
 									String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
-									if (Bean.DOCUMENT_ID.equalsIgnoreCase(foreignKeyColumn)) {
-										joinTable.ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
+									if (PersistentBean.OWNER_COLUMN_NAME.equalsIgnoreCase(foreignKeyColumn)) {
+										ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
 									}
+								}
+							}
+
+							if (ownerTableName == null) { // is null when the foreign key is not defined
+								table = null; // skip this table
+								joinTable = false;
+							}
+							else {
+								table = new JoinTable(tableName, ownerTableName, (tableFieldSize == 3));
+							}
+						}
+					}
+					
+					if ((table != null) && 
+							(joinTable || hasBizIdColumn)) {
+						result.add(table);
+					}
+				}
+			}
+			
+			// Resolve join tables that have collections on joined extension persistence table strategies
+			// The owner Table name should be the ultimate base table (the one that has the bizCustomer column)
+			for (Table table : result) {
+				if (table instanceof JoinTable) {
+					JoinTable joinTable = (JoinTable) table;
+					String ownerTableName = joinTable.ownerTableName;
+
+					// Determine if the owner table has the bizCustomer field or not
+					boolean ownerTableHasBizCustomer = false;
+					for (Table ownerTable : result) {
+						if (ownerTableName.equals(ownerTable.name)) {
+							for (String fieldName : ownerTable.fields.keySet()) {
+								if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
+									ownerTableHasBizCustomer = true;
+									break;
+								}
+							}
+							break;
+						}
+					}
+					
+					// If it does not, look for the target of the FK from the bizId column
+					if (! ownerTableHasBizCustomer) {
+						// Look for the table name that the bizId FK points to
+						try (ResultSet foreignKeyResultSet = dmd.getImportedKeys(catalog, schema, ownerTableName)) {
+							while (foreignKeyResultSet.next()) {
+								String foreignKeyColumn = foreignKeyResultSet.getString("FKCOLUMN_NAME");
+								if (Bean.DOCUMENT_ID.equalsIgnoreCase(foreignKeyColumn)) {
+									joinTable.ownerTableName = foreignKeyResultSet.getString("PKTABLE_NAME");
 								}
 							}
 						}

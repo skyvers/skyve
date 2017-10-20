@@ -4,24 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
 import javax.persistence.RollbackException;
@@ -29,44 +23,34 @@ import javax.persistence.RollbackException;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
-import org.hibernate.EntityMode;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
 import org.hibernate.LockMode;
 import org.hibernate.MappingException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.StaleObjectStateException;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.SQLServerDialect;
-import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.ejb.HibernateEntityManager;
-import org.hibernate.ejb.HibernateEntityManagerFactory;
-import org.hibernate.ejb.event.EJB3PostInsertEventListener;
-import org.hibernate.ejb.event.EJB3PostUpdateEventListener;
-import org.hibernate.engine.Mapping;
-import org.hibernate.event.InitializeCollectionEventListener;
-import org.hibernate.event.PostInsertEventListener;
-import org.hibernate.event.PostUpdateEventListener;
-import org.hibernate.event.PreUpdateEventListener;
-import org.hibernate.event.def.DefaultInitializeCollectionEventListener;
-import org.hibernate.mapping.Column;
-import org.hibernate.mapping.Index;
-import org.hibernate.mapping.Table;
-import org.hibernate.tool.hbm2ddl.ColumnMetadata;
-import org.hibernate.tool.hbm2ddl.DatabaseMetadata;
-import org.hibernate.tool.hbm2ddl.TableMetadata;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.SessionFactoryBuilder;
+import org.hibernate.boot.cfgxml.spi.LoadedConfig;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.hibernate.event.service.spi.EventListenerRegistry;
+import org.hibernate.event.spi.EventType;
+import org.hibernate.integrator.spi.Integrator;
+import org.hibernate.integrator.spi.IntegratorService;
+import org.hibernate.internal.SessionImpl;
+import org.hibernate.jpa.event.spi.JpaIntegrator;
+import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
+import org.hibernate.service.ServiceRegistry;
+import org.hibernate.service.spi.SessionFactoryServiceRegistry;
+import org.hibernate.tool.hbm2ddl.SchemaExport;
+import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
-import org.hibernate.util.ArrayHelper;
-import org.hibernatespatial.AbstractDBGeometryType;
-import org.hibernatespatial.SpatialDialect;
-import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -91,6 +75,8 @@ import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -126,9 +112,9 @@ import org.skyve.util.Util;
 public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final long serialVersionUID = -1813679859498468849L;
 
-	private static EntityManagerFactory emf = null;
-	private static AbstractDBGeometryType geometryUserType = null;
-
+	private static SessionFactory sf = null;
+	private static final Map<String, SkyveDialect> DIALECTS = new TreeMap<>();
+	
 	static {
 		try {
 			configure();
@@ -142,9 +128,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private Session session = null;
 	
 	public AbstractHibernatePersistence() {
-		em = emf.createEntityManager();
-		session = ((HibernateEntityManager) em).getSession();
-		session.setFlushMode(FlushMode.MANUAL);
+		em = sf.createEntityManager();
+		session = em.unwrap(Session.class);
+		session.setHibernateFlushMode(FlushMode.MANUAL);
 	}
 
 	protected abstract void removeBeanContent(PersistentBean bean) throws Exception;
@@ -159,8 +145,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		// remove this instance - and hopefully the only instance running
 		commit(true);
 
-		emf.close();
-		emf = null;
+		sf.close();
+		sf = null;
 
 		if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
 			AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
@@ -178,76 +164,112 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	private static void configure() {
-		Ejb3Configuration cfg = new Ejb3Configuration();
-
+		LoadedConfig config = LoadedConfig.baseline();
+		Map<String, String> cfg = config.getConfigurationValues();
+		
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
 		if (dataSource == null) {
-			cfg.setProperty("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
-			cfg.setProperty("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
+			cfg.put("hibernate.connection.driver_class", UtilImpl.DATA_STORE.getJdbcDriverClassName());
+			cfg.put("hibernate.connection.url", UtilImpl.DATA_STORE.getJdbcUrl());
 			String value = UtilImpl.DATA_STORE.getUserName();
 			if (value != null) {
-				cfg.setProperty("hibernate.connection.username", value);
+				cfg.put("hibernate.connection.username", value);
 			}
 			value = UtilImpl.DATA_STORE.getPassword();
 			if (value != null) {
-				cfg.setProperty("hibernate.connection.password", value);
+				cfg.put("hibernate.connection.password", value);
 			}
-			cfg.setProperty("hibernate.connection.autocommit", "false");
+			cfg.put("hibernate.connection.autocommit", "false");
 		}
 		else {
-			cfg.setProperty("hibernate.connection.datasource", dataSource);
+			cfg.put("hibernate.connection.datasource", dataSource);
 		}
-		cfg.setProperty("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
+		cfg.put("hibernate.dialect", UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
-		cfg.setProperty("hibernate.cache.use_query_cache", "false");
+		cfg.put("hibernate.cache.use_query_cache", "false");
 
-		HibernateListener hibernateListener = new HibernateListener();
-		
-		// For CMS Update callbacks
-		cfg.setListeners("post-update", new PostUpdateEventListener[] {new EJB3PostUpdateEventListener(), hibernateListener});
-		cfg.setListeners("post-insert",  new PostInsertEventListener[] {new EJB3PostInsertEventListener(), hibernateListener});
-
-		// For BizLock and BizKey callbacks
-		cfg.setListeners("pre-update", new PreUpdateEventListener[] {hibernateListener});
-
-		// For ordering collection elements when initialised
-		cfg.setListeners("load-collection", new InitializeCollectionEventListener[] {new DefaultInitializeCollectionEventListener(), hibernateListener});
-
-		// For collection mutation callbacks
-		// NB this didn't work - got the event name from the hibernate envers doco - maybe in a new version of hibernate
-//		cfg.setListeners("pre-collection-update", new PreCollectionUpdateEventListener[] {hibernateListener});
-//		cfg.setListeners("pre-collection-remove", new PreCollectionRemoveEventListener[] {hibernateListener});
-		
 		// JDBC parameters
-		cfg.setProperty("hibernate.jdbc.use_streams_for_binary", "true");
-		cfg.setProperty("hibernate.jdbc.batch_size", "16");
-		cfg.setProperty("hibernate.max_fetch_depth", "3");
+		cfg.put("hibernate.jdbc.use_streams_for_binary", "true");
+		cfg.put("hibernate.jdbc.batch_size", "16");
+		cfg.put("hibernate.max_fetch_depth", "3");
+
+		if (UtilImpl.CATALOG != null) {
+			cfg.put("hibernate.default_catalog", UtilImpl.CATALOG);
+		}
+		if (UtilImpl.SCHEMA != null) {
+			cfg.put("hibernate.default_schema", UtilImpl.SCHEMA);
+		}
 
 		// Whether to generate dynamic proxies as classes or not (adds to classes loaded and thus Permanent Generation)
-		cfg.setProperty("hibernate.bytecode.use_reflection_optimizer", "false");
+		cfg.put("hibernate.bytecode.use_reflection_optimizer", "false");
 
 		// Update the database schema on first use
 		if (UtilImpl.DDL_SYNC) {
-			cfg.setProperty("hibernate.hbm2ddl.auto", "update");
+			cfg.put("hibernate.hbm2ddl.auto", "update");
 		}
 
 		// Keep stats on usage
-		cfg.setProperty("hibernate.generate_statistics", "false");
+		cfg.put("hibernate.generate_statistics", "false");
 
 		// Log SQL to stdout
-		cfg.setProperty("hibernate.show_sql", Boolean.toString(UtilImpl.SQL_TRACE));
-		cfg.setProperty("hibernate.format_sql", Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
+		cfg.put("hibernate.show_sql", Boolean.toString(UtilImpl.SQL_TRACE));
+		cfg.put("hibernate.format_sql", Boolean.toString(UtilImpl.PRETTY_SQL_OUTPUT));
 
 		// Don't import simple class names as entity names
-		cfg.setProperty("auto-import", "false");
+		cfg.put("auto-import", "false");
 
-		cfg.addAnnotatedClass(AbstractPersistentBean.class);
+		StandardServiceRegistryBuilder ssrb = new StandardServiceRegistryBuilder().configure(config);
+		ssrb.addService(IntegratorService.class, new IntegratorService() {
+			private static final long serialVersionUID = -1078480021120121931L;
+
+			/**
+			 * Add the JPA Integrator and then the skyve event listeners.
+			 */
+			@Override
+			public Iterable<Integrator> getIntegrators() {
+				List<Integrator> result = new ArrayList<>();
+				result.add(new JpaIntegrator());
+				result.add(new Integrator() {
+					@Override
+					public void integrate(Metadata metadata, SessionFactoryImplementor sessionFactory,
+							SessionFactoryServiceRegistry serviceRegistry) {
+						HibernateListener listener = new HibernateListener();
+						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
+
+						// For CMS Update callbacks
+						eventListenerRegistry.appendListeners(EventType.POST_UPDATE, listener);
+						eventListenerRegistry.appendListeners(EventType.POST_INSERT, listener);
+
+						// For BizLock and BizKey callbacks
+						eventListenerRegistry.appendListeners(EventType.PRE_UPDATE, listener);
+
+						// For ordering collection elements when initialised
+						eventListenerRegistry.appendListeners(EventType.INIT_COLLECTION, listener);
+
+						// For collection mutation callbacks
+						// NB this didn't work - got the event name from the hibernate envers doco - maybe in a new version of hibernate
+//						cfg.setListeners("pre-collection-update", new PreCollectionUpdateEventListener[] {hibernateListener});
+//						cfg.setListeners("pre-collection-remove", new PreCollectionRemoveEventListener[] {hibernateListener});
+					}
+					
+					@Override
+					public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+						// nothing to clean up here
+					}
+				});
+				return result;
+			}
+		});
+		
+		ServiceRegistry standardRegistry = ssrb.build();
+		MetadataSources sources = new MetadataSources(standardRegistry);
+
+		sources.addAnnotatedClass(AbstractPersistentBean.class);
 
 		AbstractRepository repository = AbstractRepository.get();
-
 		if (UtilImpl.USING_JPA) {
-			cfg.configure("bizhub", null);
+			// cfg.configure("bizhub", null);
 			// emf = javax.persistence.Persistence.createEntityManagerFactory("bizhub");
 		}
 		else {
@@ -264,7 +286,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 				File mappingFile = new File(UtilImpl.getAbsoluteBasePath() + mappingPath);
 				if (mappingFile.exists()) {
-					cfg.addResource(mappingPath);
+					sources.addResource(mappingPath);
 				}
 			}
 
@@ -277,15 +299,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				
 				File ormFile = new File(UtilImpl.getAbsoluteBasePath() + ormResourcePath);
 				if (ormFile.exists()) {
-					cfg.addResource(ormResourcePath);
+					sources.addResource(ormResourcePath);
 				}
 			}
 		}
 
-		emf = cfg.buildEntityManagerFactory();
+		Metadata metadata = sources.getMetadataBuilder().build();
+		SessionFactoryBuilder sessionFactoryBuilder = metadata.getSessionFactoryBuilder();
+		
+		sf = sessionFactoryBuilder.build();
+
 		if (UtilImpl.DDL_SYNC) {
 			try {
-				generateExtraSchemaUpdates(cfg.getHibernateConfiguration(), true);
+				DDLDelegate.migrate(standardRegistry, metadata, AbstractHibernatePersistence.getDialect());
 			}
 			catch (Exception e) {
 				throw new MetaDataException("Could not apply skyve extra schema updates", e);
@@ -293,173 +319,34 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 	}
 
-	static AbstractDBGeometryType getGeometryUserType() throws Exception {
-		if (geometryUserType == null) {
-			SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
-			geometryUserType = (AbstractDBGeometryType) dialect.getGeometryUserType();
+	public static SkyveDialect getDialect(String dialectClassName) {
+		SkyveDialect dialect = DIALECTS.get(dialectClassName);
+		if (dialect == null) {
+			synchronized (AbstractHibernatePersistence.class) {
+				dialect = DIALECTS.get(dialectClassName);
+				if (dialect == null) {
+					try {
+						dialect = (SkyveDialect) Class.forName(dialectClassName).newInstance();
+						DIALECTS.put(dialectClassName, dialect);
+					}
+					catch (Exception e) {
+						throw new IllegalStateException(dialectClassName + " cannot be loaded.", e);
+					}
+				}
+			}
 		}
-		
-		return geometryUserType;
-	}
+		return dialect;
+	}	
 	
-	@SuppressWarnings("resource")
-	private static String[] generateExtraSchemaUpdates(Configuration cfg, boolean doUpdate)
-	throws SQLException {
-		UtilImpl.LOGGER.info("Apply skyve extra schema updates");
-        ArrayList<String> result = new ArrayList<>(50);
-
-        Connection connection = EXT.getDataStoreConnection();
-		if (connection == null) {
-			throw new IllegalStateException("Connection is null");
-		}
-
-		try {
-			connection.setAutoCommit(true);
-			try (Statement statement = connection.createStatement()) {
-	            Dialect dialect = Dialect.getDialect(cfg.getProperties());
-	            DatabaseMetadata meta = new DatabaseMetadata( connection, dialect );
-	            Mapping mapping = cfg.buildMapping();
-	            
-	            Properties properties = cfg.getProperties();
-	            String defaultCatalog = properties.getProperty(Environment.DEFAULT_CATALOG);
-	            String defaultSchema = properties.getProperty(Environment.DEFAULT_SCHEMA);
-
-	            Iterator<?> iter = cfg.getTableMappings();
-	            while (iter.hasNext()) {
-	                Table table = (Table) iter.next();
-	                if (table.isPhysicalTable()) {
-	                    TableMetadata tableInfo = meta.getTableMetadata(
-	                            table.getName(),
-	                            (table.getSchema() == null) ? defaultSchema : table.getSchema(),
-	                            (table.getCatalog() == null) ? defaultCatalog : table.getCatalog(),
-	                            table.isQuoted());
-	                    if (tableInfo != null) { // already exists - does it need altering?
-	                        if (dialect.hasAlterTable()) { // can we alter it in this database?
-                        		String ddl = null;
-	                        	try {
-	                        		Iterator<?> subIter = sqlExtraAlterStrings(table,
-	        	                                                                dialect,
-	        	                                                                mapping,
-	        	                                                                tableInfo,
-	        	                                                                defaultCatalog,
-	        	                                                                defaultSchema);
-		                            while (subIter.hasNext()) {
-		                                ddl = (String) subIter.next();
-		                                if (doUpdate) {
-		                            		UtilImpl.LOGGER.info(ddl);
-		                                    statement.executeUpdate(ddl);
-		                                }
-		                                result.add(ddl);
-		                            }
-		                            
-		                            subIter = table.getIndexIterator();
-		                            while (subIter.hasNext()) {
-		                                Index index = (Index) subIter.next();
-		                                if (tableInfo.getIndexMetadata(index.getName()) == null) {
-		                                    ddl = index.sqlCreateString(dialect,
-	                                                                        mapping,
-	                                                                        defaultCatalog,
-	                                                                        defaultSchema);
-		                                    if (doUpdate) {
-		                                		UtilImpl.LOGGER.info(ddl);
-		                                        statement.executeUpdate(ddl);
-		                                    }
-		                                    result.add(ddl);
-		                                }
-		                            }
-	                        	}
-	                        	catch (SQLException e) {
-	                    			UtilImpl.LOGGER.severe("Could not apply skyve extra schema updates : " + ddl);
-	                        	}
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    }
-	    finally {
-    		connection.close();
-	    }
-	    
-	    return ArrayHelper.toStringArray(result);
+	public static SkyveDialect getDialect() {
+		return getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 	}
-
-    /**
-     * This method exists because by default, hibernate does not issue "alter table modify column" statements only
-     * "alter table add column" statements. So this hack allows alter table modify/alter column when the type, length or precision
-     * has changed. The "modify column" syntax is outside the scope of the hibernate dialect classes so I;ve had to hack/hard-code
-     * it.
-     */
-    private static Iterator<String> sqlExtraAlterStrings(Table table,
-		                                                    Dialect dialect,
-		                                                    Mapping mapping,
-		                                                    TableMetadata tableInfo,
-		                                                    String defaultCatalog,
-		                                                    String defaultSchema) {
-        StringBuffer root = new StringBuffer("alter table ").append(table.getQualifiedName(dialect, defaultCatalog, defaultSchema)).append(' ');
-
-        Iterator<?> iter = table.getColumnIterator();
-        List<String> results = new ArrayList<>();
-        while (iter.hasNext()) {
-            Column column = (Column) iter.next();
-            ColumnMetadata columnInfo = tableInfo.getColumnMetadata(column.getName());
-
-            int sqlTypeCode = column.getSqlTypeCode(mapping);
-            if ((columnInfo != null) && // column exists
-                    // char column and lengths are different
-                    ((((sqlTypeCode == Types.VARCHAR) || 
-                            (sqlTypeCode == Types.CHAR) || 
-                            (sqlTypeCode == Types.LONGVARCHAR) || 
-                            (sqlTypeCode == Types.LONGNVARCHAR)) && 
-                        (column.getLength() != columnInfo.getColumnSize())) ||
-	                    // decimal column and scales are different
-	                    (((sqlTypeCode == Types.FLOAT) || 
-	                            (sqlTypeCode == Types.REAL) || 
-	                            (sqlTypeCode == Types.DOUBLE) || 
-	                            (sqlTypeCode == Types.NUMERIC)) && 
-	                        ((column.getScale() != columnInfo.getDecimalDigits()) || 
-	                            (column.getPrecision() != columnInfo.getColumnSize()))))) {
-            	StringBuffer alter = new StringBuffer(root.toString())
-                                .append((dialect instanceof SQLServerDialect) ? "alter column" : "modify column")
-                                .append(' ').append(column.getQuotedName(dialect)).append(' ')
-                                .append(column.getSqlType(dialect, mapping));
-
-                String defaultValue = column.getDefaultValue();
-                if (defaultValue != null) {
-                    alter.append(" default ").append(defaultValue);
-
-                    if (column.isNullable()) {
-                        alter.append(dialect.getNullColumnString());
-                    }
-                    else {
-                        alter.append(" not null");
-                    }
-                }
-
-                boolean useUniqueConstraint = column.isUnique() && dialect.supportsUnique() &&
-                                (! column.isNullable() || dialect.supportsNotNullUnique());
-                if (useUniqueConstraint) {
-                    alter.append(" unique");
-                }
-
-                if (column.hasCheckConstraint() && dialect.supportsColumnCheck()) {
-                    alter.append(" check(").append(column.getCheckConstraint()).append(")");
-                }
-
-                String columnComment = column.getComment();
-                if (columnComment != null) {
-                    alter.append(dialect.getColumnComment(columnComment));
-                }
-
-                results.add(alter.toString());
-            }
-        }
-
-        return results.iterator();
-    }
 	
 	@Override
 	public final void generateDDL(List<String> drops, List<String> creates, List<String> updates) {
+// TODO reinstate this method
+		SchemaExport export = new SchemaExport();
+/*
 		Properties properties = new Properties();
 		String dataSource = UtilImpl.DATA_STORE.getJndiDataSourceName();
 		if (dataSource == null) {
@@ -530,14 +417,15 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				throw new DomainException("Could not get database metadata", e);
 			}
 		}
+*/
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public final String getDocumentEntityName(String moduleName, String documentName) {
-		SessionFactory sf = ((HibernateEntityManagerFactory) emf).getSessionFactory();
 		String overriddenEntityName = user.getCustomerName() + moduleName + documentName;
 
-		if (sf.getClassMetadata(overriddenEntityName) != null) {
+		if (sf.getMetamodel().entity(overriddenEntityName) != null) {
 			return overriddenEntityName;
 		}
 
@@ -551,7 +439,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (MappingException e) {
+				catch (MappingException | IllegalArgumentException e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
@@ -563,7 +451,7 @@ t.printStackTrace();
 				try {
 					session.refresh(bean);
 				}
-				catch (MappingException e) {
+				catch (MappingException | IllegalArgumentException e) {
 					// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 					// So do nothing, we're about to throw Optimistic Lock anyway
 				}
@@ -811,7 +699,9 @@ t.printStackTrace();
 
 	@Override
 	public void evictCached(Bean bean) {
-		session.evict(bean);
+		if (session.contains(getDocumentEntityName(bean.getBizModule(), bean.getBizDocument()), bean)) {
+			session.evict(bean);
+		}
 	}
 
 	@Override
@@ -820,7 +710,7 @@ t.printStackTrace();
 			try {
 				session.refresh(bean);
 			}
-			catch (MappingException e) {
+			catch (MappingException | IllegalArgumentException e) {
 				// Cannot send in an entity name to refresh, so this happens when the object is transient or detached
 				// So do nothing, we're about to throw Optimistic Lock anyway
 				throw new DomainException("Bean " + bean.toString() + " is transient or detached", e);
@@ -1271,7 +1161,7 @@ t.printStackTrace();
 					continue; // iterate to next constraint
 				}
 
-				Query query = session.createQuery(queryString.toString());
+				Query<?> query = session.createQuery(queryString.toString());
 				if (UtilImpl.QUERY_TRACE) {
 					StringBuilder log = new StringBuilder(256);
 					log.append("TEST CONSTRAINT ").append(owningModuleName).append('.').append(documentName).append('.').append(constraint.getName());
@@ -1289,8 +1179,7 @@ t.printStackTrace();
 				}
 	
 				// Use a scrollable result set in case the result set is massive
-				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-				try {
+				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
 						boolean persistent = isPersisted(bean);
 						Bean first = (Bean) results.get()[0];
@@ -1310,9 +1199,6 @@ t.printStackTrace();
 							throw new UniqueConstraintViolationException(constraint.getName(), message);
 						}
 					}
-				}
-				finally {
-					results.close();
 				}
 			}
 		}
@@ -1480,28 +1366,24 @@ t.printStackTrace();
 				}
 				if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
 	
-				Query query = session.createQuery(queryString.toString());
+				Query<?> query = session.createQuery(queryString.toString());
 				query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 				// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-				query.setString("referencedBeanId", beanToDelete.getBizId());
+				query.setParameter("referencedBeanId", beanToDelete.getBizId(), StringType.INSTANCE);
 				if (theseBeansToBeCascaded != null) {
 					int i = 0;
 					for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
 						// Use the id, not the entity as hibernate cannot resolve the entity mapping of the parameter under some circumstances.
-						query.setString("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId());
+						query.setParameter("deletedBeanId" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 					}
 				}
 	
-				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-				try {
+				try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 					if (results.next()) {
 						throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
 																			" \"" + beanToDelete.getBizKey() + 
 																			"\" as it is referenced by a " + ref.getDocumentAlias());
 					}
-				}
-				finally {
-					results.close();
 				}
 			}
 			finally {
@@ -1552,26 +1434,22 @@ t.printStackTrace();
 			}
 			if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("FK check : " + queryString);
 	
-			SQLQuery query = session.createSQLQuery(queryString.toString());
+			NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 //			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
-			query.setString("reference_id", beanToDelete.getBizId());
+			query.setParameter("reference_id", beanToDelete.getBizId(), StringType.INSTANCE);
 			if (theseBeansToBeCascaded != null) {
 				int i = 0;
 				for (Bean thisBeanToBeCascaded : theseBeansToBeCascaded) {
-					query.setString("deleted_id" + i++, thisBeanToBeCascaded.getBizId());
+					query.setParameter("deleted_id" + i++, thisBeanToBeCascaded.getBizId(), StringType.INSTANCE);
 				}
 			}
 	
-			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-			try {
+			try (ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY)) {
 				if (results.next()) {
 					throw new ReferentialConstraintViolationException("Cannot delete " + document.getSingularAlias() + 
 																		" \"" + beanToDelete.getBizKey() + 
 																		"\" as it is referenced by a " + ref.getDocumentAlias());
 				}
-			}
-			finally {
-				results.close();
 			}
 		}
 	}
@@ -1608,10 +1486,10 @@ t.printStackTrace();
 
 			if (forUpdate) {
 				if (beanClass != null) {
-					result = (T) session.load(beanClass, id, LockMode.UPGRADE);
+					result = (T) session.load(beanClass, id, LockMode.PESSIMISTIC_WRITE);
 				}
 				else {
-					result = (T) session.load(entityName, id, LockMode.UPGRADE);
+					result = (T) session.load(entityName, id, LockMode.PESSIMISTIC_WRITE);
 				}
 			}
 			else // works with transient instances
@@ -1637,7 +1515,7 @@ t.printStackTrace();
 				result = (T) session.get(entityName, id);
 			}
 
-			session.refresh(result, LockMode.UPGRADE);
+			session.refresh(result, LockMode.PESSIMISTIC_WRITE);
 		}
 		catch (ClassNotFoundException e) {
 			throw new MetaDataException("Could not find bean", e);
@@ -1738,7 +1616,7 @@ t.printStackTrace();
 				IndexType index = field.getIndex();
 				if (IndexType.textual.equals(index) || IndexType.both.equals(index)) {
 					if (oldState != null) { // an update
-						if (! propertyTypes[i].isEqual(state[i], oldState[i], EntityMode.POJO)) {
+						if (! propertyTypes[i].isEqual(state[i], oldState[i])) {
 							String value = (state[i] == null) ? null : state[i].toString();
 							if (value != null) {
 								if (AttributeType.markup.equals(type)) {
@@ -1868,9 +1746,18 @@ t.printStackTrace();
 		removeBeanContent(loadedBean);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public final Connection getConnection() {
-		return session.connection();
+/*
+Maybe use this...
+public void doWorkOnConnection(Session session) {
+  session.doWork(new Work() {
+    public void execute(Connection connection) throws SQLException {
+      //use the connection here...
+    }
+  });
+}
+*/
+		return ((SessionImpl) session).connection();
 	}
 	
 	private static final Integer NEW_VERSION = new Integer(0);

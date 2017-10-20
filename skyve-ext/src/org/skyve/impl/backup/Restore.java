@@ -10,17 +10,18 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Collection;
 import java.util.Map;
 
-import org.hibernate.usertype.UserType;
-import org.hibernatespatial.SpatialDialect;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
+import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Util;
@@ -73,8 +74,6 @@ public class Restore {
 										boolean joinTables,
 										boolean extensionTables) 
 	throws Exception {
-		UserType geometryUserType = null; // this is only created when we come across a geometry
-
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
 				if (table instanceof JoinTable) {
@@ -174,11 +173,16 @@ public class Restore {
 									}
 									else if (AttributeType.geometry.equals(attributeType)) {
 										Geometry geometry = new WKTReader().read(stringValue);
-										if (geometryUserType == null) {
-											SpatialDialect dialect = (SpatialDialect) Class.forName(UtilImpl.DATA_STORE.getDialectClassName()).newInstance();
-											geometryUserType = dialect.getGeometryUserType();
+										SkyveDialect dialect = AbstractHibernatePersistence.getDialect();
+										int geometrySqlType = dialect.getGeometrySqlType();
+										if (geometrySqlType == Types.ARRAY) {
+											statement.setBytes(index++, (byte[]) dialect.convertToPersistedValue(geometry));
 										}
-										geometryUserType.nullSafeSet(statement, geometry, index++);
+										else {
+											statement.setObject(index++, 
+																	dialect.convertToPersistedValue(geometry), 
+																	geometrySqlType);
+										}
 									}
 									else if (AttributeType.bool.equals(attributeType)) {
 										statement.setBoolean(index++, Boolean.parseBoolean(stringValue));

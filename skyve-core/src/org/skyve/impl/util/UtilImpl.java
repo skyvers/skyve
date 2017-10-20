@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
-import org.hibernate.util.SerializationHelper;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -113,7 +113,9 @@ public class UtilImpl {
 	public static Map<String, DataStore> DATA_STORES = new TreeMap<>();
 	public static DataStore DATA_STORE = null;
 	public static boolean DDL_SYNC = true;
-
+	public static String CATALOG = null;
+	public static String SCHEMA = null;
+	
 	// For E-Mail
 	public static String SMTP = null;
 	public static String SMTP_PORT = null;
@@ -141,8 +143,8 @@ public class UtilImpl {
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5";
 
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20171002";
-	public static final String SKYVE_VERSION = "20171002";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20171020";
+	public static final String SKYVE_VERSION = "20171020";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	private static String absoluteBasePath;

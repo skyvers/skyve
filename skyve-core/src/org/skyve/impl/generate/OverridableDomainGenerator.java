@@ -628,7 +628,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		mappingFileWriter.append("\t<typedef name=\"TimeOnly\" class=\"org.skyve.impl.domain.types.TimeOnlyUserType\" />\n");
 		mappingFileWriter.append("\t<typedef name=\"Timestamp\" class=\"org.skyve.impl.domain.types.TimestampUserType\" />\n");
 		mappingFileWriter.append("\t<typedef name=\"Enum\" class=\"org.skyve.impl.domain.types.EnumUserType\" />\n");
-		mappingFileWriter.append("\t<typedef name=\"Geometry\" class=\"org.hibernatespatial.GeometryUserType\" />\n\n");
 	}
 
 	private static void createMappingFileFooter(FileWriter mappingFileWriter, StringBuilder filterDefinitions) throws IOException {
@@ -1471,8 +1470,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append("\" type=\"").append(TIME_ONLY);
 				} else if (type == AttributeType.timestamp) {
 					fw.append("\" type=\"").append(TIMESTAMP);
-				} else if (type == AttributeType.geometry) {
-					fw.append("\" type=\"").append(GEOMETRY);
 				} else if (type == AttributeType.id) {
 					fw.append("\" length=\"36");
 				} else if (type == AttributeType.content) {

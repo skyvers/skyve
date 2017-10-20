@@ -11,8 +11,6 @@
 	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
-	<typedef name="Geometry" class="org.hibernatespatial.GeometryUserType" />
-
 	<class name="modules.test.domain.AllAttributesInverseOneToOnePersistent" table="TEST_AllAttributesInverseOneToOnePersistent" entity-name="testAllAttributesInverseOneToOnePersistent">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -43,7 +41,7 @@
 				<param name="enumClass">modules.test.domain.AllAttributesInverseOneToOnePersistent$Enum3</param>
 			</type>
 		</property>
-		<property name="geometry" type="Geometry" />
+		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
 		<one-to-one name="inverseAggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" property-ref="aggregatedAssociation" />
@@ -89,7 +87,7 @@
 				<param name="enumClass">modules.test.domain.AllAttributesPersistent$Enum3</param>
 			</type>
 		</property>
-		<property name="geometry" type="Geometry" />
+		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
 		<bag name="inverseAggregatedAssociation" inverse="true">
@@ -138,7 +136,7 @@
 				<param name="enumClass">modules.test.domain.AllAttributesRequiredPersistent$Enum3</param>
 			</type>
 		</property>
-		<property name="geometry" type="Geometry" />
+		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
 		<bag name="inverseAggregatedAssociation" inverse="true">
@@ -293,7 +291,7 @@
 					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
 				</type>
 			</property>
-			<property name="geometry" type="Geometry" />
+			<property name="geometry" />
 			<property name="id" length="36" />
 			<property name="normalInteger" />
 			<property name="longInteger" />
@@ -354,7 +352,7 @@
 					<param name="enumClass">modules.test.domain.MappedBase$Enum3</param>
 				</type>
 			</property>
-			<property name="geometry" type="Geometry" />
+			<property name="geometry" />
 			<property name="id" length="36" />
 			<property name="normalInteger" />
 			<property name="longInteger" />

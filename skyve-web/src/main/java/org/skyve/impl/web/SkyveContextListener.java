@@ -140,6 +140,8 @@ public class SkyveContextListener implements ServletContextListener {
 			throw new IllegalStateException("hibernate.dataStore " + UtilImpl.DATA_STORE + " is not defined in dataStores");
 		}
 		UtilImpl.DDL_SYNC = getBoolean("hibernate", "ddlSync", hibernate);
+		UtilImpl.CATALOG = getString("hibernate", "catalog", hibernate, false);
+		UtilImpl.SCHEMA = getString("hibernate", "schema", hibernate, false);
 		UtilImpl.PRETTY_SQL_OUTPUT = getBoolean("hibernate", "prettySql", hibernate);
 
 		Map<String, Object> factories = getObject(null, "factories", properties, true);

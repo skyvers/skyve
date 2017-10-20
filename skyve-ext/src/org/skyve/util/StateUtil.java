@@ -10,7 +10,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64;
-import org.hibernate.util.SerializationHelper;
+import org.hibernate.internal.util.SerializationHelper;
 
 public final class StateUtil {
 	/**

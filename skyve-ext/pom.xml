@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20171002</version>
+		<version>20171020</version>
 	</parent>
 	<artifactId>skyve-ext</artifactId>
 
@@ -17,6 +17,21 @@
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-core</artifactId>
 			<version>${skyve.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-spatial</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -97,11 +112,6 @@
 		<dependency>
 			<groupId>org.elasticsearch</groupId>
 			<artifactId>elasticsearch</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

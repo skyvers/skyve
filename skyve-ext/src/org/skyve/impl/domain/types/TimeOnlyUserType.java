@@ -11,14 +11,12 @@ import java.util.Date;
 
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.TimeOnly;
 
-public class TimeOnlyUserType implements UserType, LiteralType, Serializable {
-	/**
-	 * For Serialization
-	 */
+public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 8170300540374728474L;
 
 	@Override
@@ -72,7 +70,7 @@ public class TimeOnlyUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		Time value = rs.getTime(names[0]);
 		if (rs.wasNull()) {
@@ -83,7 +81,7 @@ public class TimeOnlyUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIME);
@@ -123,8 +121,8 @@ public class TimeOnlyUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public String objectToSQLString(Object value, Dialect dialect)
+	public String objectToSQLString(Date value, Dialect dialect)
 	throws Exception {
-		return (value == null) ? "NULL" : '\'' + new Time(((java.util.Date) value).getTime()).toString() + '\'';
+		return (value == null) ? "NULL" : '\'' + new Time(value.getTime()).toString() + '\'';
 	}
 }
