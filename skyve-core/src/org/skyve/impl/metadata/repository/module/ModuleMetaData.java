@@ -379,13 +379,16 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + 
 															role.getName());
 						}
-						if ( !docPrivNames.add(value)) {
+						if (!docPrivNames.add(value)) {
 							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value +
 															" in role " + role.getName());
 						}
-						if ( !documentNames.contains(value)) {
-							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
-															" in role " + role.getName() + " is not a module document");
+						if (!documentNames.contains(value)) {
+							String message = String.format(
+									"%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. "
+											+ "Excepted %2$s to be defined in the <documents> section of %4$s.xml",
+									metaDataName, value, role.getName(), result.getName());
+							throw new MetaDataException(message);
 						}
 						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
 							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +

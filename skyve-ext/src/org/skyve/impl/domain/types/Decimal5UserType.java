@@ -9,15 +9,13 @@ import java.sql.Types;
 
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal5;
 
-public class Decimal5UserType implements UserType, Serializable, LiteralType {
-	/**
-	 * For Serialization
-	 */
+public class Decimal5UserType implements UserType, Serializable, LiteralType<Number> {
 	private static final long serialVersionUID = -4189877865378690596L;
 
 	@Override
@@ -43,7 +41,7 @@ public class Decimal5UserType implements UserType, Serializable, LiteralType {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner)
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		BigDecimal value = rs.getBigDecimal(names[0]);
 		if (rs.wasNull()) {
@@ -54,7 +52,7 @@ public class Decimal5UserType implements UserType, Serializable, LiteralType {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index)
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.NUMERIC);
@@ -94,7 +92,7 @@ public class Decimal5UserType implements UserType, Serializable, LiteralType {
 	}
 
 	@Override
-	public String objectToSQLString(Object value, Dialect dialect)
+	public String objectToSQLString(Number value, Dialect dialect)
 	throws Exception {
 		return (value == null) ? "NULL" : value.toString();
 	}

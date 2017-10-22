@@ -9,16 +9,13 @@ import java.sql.Types;
 import java.util.Date;
 
 import org.hibernate.HibernateException;
-import org.hibernate.cfg.Environment;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.DateTime;
 
-public class DateTimeUserType implements UserType, LiteralType, Serializable {
-	/**
-	 * For Serialization
-	 */
+public class DateTimeUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 4767832769224136166L;
 
 	@Override
@@ -46,10 +43,6 @@ public class DateTimeUserType implements UserType, LiteralType, Serializable {
 		boolean yts = (y instanceof Timestamp);
 		int xNanos = xts ? ((Timestamp) x).getNanos() : 0;
 		int yNanos = yts ? ((Timestamp) y).getNanos() : 0;
-		if (! Environment.jvmHasJDK14Timestamp()) {
-			xTime += xNanos / 1000000;
-			yTime += yNanos / 1000000;
-		}
 		if (xTime != yTime) {
 			return false;
 		}
@@ -72,7 +65,7 @@ public class DateTimeUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) 
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		Timestamp value = rs.getTimestamp(names[0]);
 		if (rs.wasNull()) {
@@ -83,7 +76,7 @@ public class DateTimeUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index) 
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIMESTAMP);
@@ -123,8 +116,8 @@ public class DateTimeUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public String objectToSQLString(Object value, Dialect dialect) 
+	public String objectToSQLString(Date value, Dialect dialect) 
 	throws Exception {
-		return (value == null) ? "NULL" : '\'' + new Timestamp(((Date) value).getTime()).toString() + '\'';
+		return (value == null) ? "NULL" : '\'' + new Timestamp(value.getTime()).toString() + '\'';
 	}
 }

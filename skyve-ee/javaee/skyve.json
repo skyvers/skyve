@@ -63,6 +63,8 @@
 		dataStore: "skyve", 
 		// Issue DDL on startup to synchronise the database schema
 		ddlSync: true, 
+		catalog: null,
+		schema: null,
 		// Format the SQL statements when logged
 		prettySql: false
 	},

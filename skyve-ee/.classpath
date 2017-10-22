@@ -9,11 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jts-1.13.jar"/>
 	<classpathentry kind="lib" path="lib/javaee-api-7.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
-		<attributes>
-			<attribute name="owner.project.facets" value="java"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/quartz-1.7.2.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-codec-1.5.jar"/>
@@ -27,5 +22,12 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/poi-ooxml-schemas-3.10.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/skyve.war/WEB-INF/lib/primefaces-6.1.jar"/>
 	<classpathentry kind="lib" path="lib/weld-se-2.4.4.Final.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-core-5.2.11.Final.jar"/>
 	<classpathentry kind="output" path="javaee/skyve.ear/apps.jar"/>
 </classpath>

@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
-import org.hibernate.collection.PersistentCollection;
+import org.hibernate.collection.spi.PersistentCollection;
 import org.skyve.CORE;
 import org.skyve.cdi.CDIProvider;
 import org.skyve.domain.Bean;

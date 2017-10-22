@@ -14,8 +14,8 @@ import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import com.vividsolutions.jts.geom.Geometry;
 
 @SuppressWarnings("deprecation")
-public class MySQL5InnoDBSpatialDialect extends org.hibernate.spatial.dialect.mysql.MySQL5InnoDBSpatialDialect implements SkyveDialect {
-	private static final long serialVersionUID = 8837141701299320147L;
+public class MySQL56InnoDBSpatialDialect extends org.hibernate.spatial.dialect.mysql.MySQL56InnoDBSpatialDialect implements SkyveDialect {
+	private static final long serialVersionUID = -6017668196369823514L;
 
 	private JTSGeometryType geometryType = new JTSGeometryType(MySQLGeometryTypeDescriptor.INSTANCE);
 

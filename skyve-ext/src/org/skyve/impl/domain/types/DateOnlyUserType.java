@@ -8,18 +8,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Calendar;
 
-import org.hibernate.EntityMode;
-import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.CalendarDateType;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.DateOnly;
 
-public class DateOnlyUserType implements UserType, LiteralType, Serializable {
-	/**
-	 * For Serialization
-	 */
+public class DateOnlyUserType implements UserType, LiteralType<Date>, Serializable {
 	private static final long serialVersionUID = 4351232657679942727L;
 
 	@Override
@@ -54,7 +51,7 @@ public class DateOnlyUserType implements UserType, LiteralType, Serializable {
 		calendar1.setTime(xdate);
 		calendar2.setTime(ydate);
 
-		return Hibernate.CALENDAR_DATE.isEqual(calendar1, calendar2);
+		return CalendarDateType.INSTANCE.isEqual(calendar1, calendar2);
 	}
 
 	@Override
@@ -62,11 +59,11 @@ public class DateOnlyUserType implements UserType, LiteralType, Serializable {
 	throws HibernateException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime((java.util.Date) o);
-		return Hibernate.CALENDAR_DATE.getHashCode(calendar, EntityMode.POJO);
+		return CalendarDateType.INSTANCE.getHashCode(calendar);
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, Object owner) 
+	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
 	throws HibernateException, SQLException {
 		Date value = rs.getDate(names[0]);
 		if (rs.wasNull()) {
@@ -77,7 +74,7 @@ public class DateOnlyUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index) 
+	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.DATE);
@@ -117,8 +114,8 @@ public class DateOnlyUserType implements UserType, LiteralType, Serializable {
 	}
 
 	@Override
-	public String objectToSQLString(Object value, Dialect dialect) 
+	public String objectToSQLString(Date value, Dialect dialect) 
 	throws Exception {
-		return (value == null) ? "NULL" : '\'' + new Date(((java.util.Date) value).getTime()).toString() + '\'';
+		return (value == null) ? "NULL" : '\'' + new Date(value.getTime()).toString() + '\'';
 	}
 }

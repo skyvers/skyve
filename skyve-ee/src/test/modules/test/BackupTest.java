@@ -1,7 +1,11 @@
 package modules.test;
 
+import java.io.File;
+
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.skyve.impl.backup.Backup;
+import org.skyve.impl.backup.Restore;
 import org.skyve.util.Util;
 
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
@@ -12,6 +16,8 @@ import modules.test.domain.MappedSubclassedJoinedStrategy;
 import modules.test.domain.MappedSubclassedSingleStrategy;
 
 public class BackupTest extends AbstractSkyveTest {
+	private static File backupFile;
+	
 	@Test
 	public void testBackup() throws Exception {
 		MappedExtensionJoinedStrategy mejs = Util.constructRandomInstance(u, m, mejsd, 3);
@@ -27,6 +33,33 @@ public class BackupTest extends AbstractSkyveTest {
 		MappedExtensionJoinedStrategyExtension mejse = Util.constructRandomInstance(u, m, mejsd, 3);
 		p.save(mejse);
 		p.commit(false);
-		Backup.backup();
+		backupFile = Backup.backup();
+	}
+	
+	@Test
+	public void testRestore() throws Exception {
+		if (backupFile == null) {
+			testBackup();
+		}
+		else {
+			Restore.restore(backupFile.getName(), false);
+		}
+	}
+	
+	@Test
+	public void testRestoreAgain() throws Exception {
+		if (backupFile == null) {
+			testBackup();
+		}
+		else {
+			Restore.restore(backupFile.getName(), false);
+		}
+	}
+	
+	@AfterClass
+	public static void afterClass() {
+		if (backupFile != null) {
+			backupFile.delete();
+		}
 	}
 }

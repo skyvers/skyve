@@ -4,15 +4,15 @@ import java.util.Date;
 
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.HibernateException;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.event.InitializeCollectionEvent;
-import org.hibernate.event.InitializeCollectionEventListener;
-import org.hibernate.event.PostInsertEvent;
-import org.hibernate.event.PostInsertEventListener;
-import org.hibernate.event.PostUpdateEvent;
-import org.hibernate.event.PostUpdateEventListener;
-import org.hibernate.event.PreUpdateEvent;
-import org.hibernate.event.PreUpdateEventListener;
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hibernate.event.spi.InitializeCollectionEvent;
+import org.hibernate.event.spi.InitializeCollectionEventListener;
+import org.hibernate.event.spi.PostInsertEvent;
+import org.hibernate.event.spi.PostInsertEventListener;
+import org.hibernate.event.spi.PostUpdateEvent;
+import org.hibernate.event.spi.PostUpdateEventListener;
+import org.hibernate.event.spi.PreUpdateEvent;
+import org.hibernate.event.spi.PreUpdateEventListener;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.EntityPersister;
 import org.hibernate.type.Type;
@@ -32,9 +32,6 @@ public class HibernateListener implements PostUpdateEventListener,
 											PostInsertEventListener,
 											PreUpdateEventListener,
 											InitializeCollectionEventListener {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -2075261951031625148L;
 
 	/**
@@ -47,8 +44,7 @@ public class HibernateListener implements PostUpdateEventListener,
 		Object[] state = event.getState();
 		
 		AbstractPersistence persistence = AbstractPersistence.get();
-		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
-		ClassMetadata cmd = ep.getFactory().getClassMetadata(entityName);
+		ClassMetadata cmd = ep.getClassMetadata();
 		String[] propertyNames = cmd.getPropertyNames();
 
 		for (int i = 0, l = propertyNames.length; i < l; i++) {
@@ -70,9 +66,8 @@ public class HibernateListener implements PostUpdateEventListener,
 	public void onPostInsert(PostInsertEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
-		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();
-		ClassMetadata cmd = ep.getFactory().getClassMetadata(entityName);
+		ClassMetadata cmd = ep.getClassMetadata();
 		String[] propertyNames = cmd.getPropertyNames();
 		Type[] propertyTypes = cmd.getPropertyTypes();
 		Object[] state = event.getState();
@@ -95,9 +90,8 @@ public class HibernateListener implements PostUpdateEventListener,
 	public void onPostUpdate(PostUpdateEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		AbstractPersistentBean eventBean = (AbstractPersistentBean) event.getEntity();
-		String entityName = persistence.getDocumentEntityName(eventBean.getBizModule(), eventBean.getBizDocument());
 		EntityPersister ep = event.getPersister();
-		ClassMetadata cmd = ep.getFactory().getClassMetadata(entityName);
+		ClassMetadata cmd = ep.getClassMetadata();
 		String[] propertyNames = cmd.getPropertyNames();
 		Type[] propertyTypes = cmd.getPropertyTypes();
 		Object[] oldState = event.getOldState();
@@ -142,5 +136,10 @@ public class HibernateListener implements PostUpdateEventListener,
 		catch (Exception e) {
 			throw new HibernateException("Could not order the freshly loaded collection", e);
 		}
+	}
+
+	@Override
+	public boolean requiresPostCommitHanding(EntityPersister persister) {
+		return false;
 	}
 }

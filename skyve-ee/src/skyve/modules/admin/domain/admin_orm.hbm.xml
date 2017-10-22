@@ -11,8 +11,6 @@
 	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
-	<typedef name="Geometry" class="org.hibernatespatial.GeometryUserType" />
-
 	<class name="modules.admin.domain.Audit" table="ADM_Audit" entity-name="adminAudit">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
