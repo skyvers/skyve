@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.el.MethodExpression;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIOutput;
 import javax.faces.component.html.HtmlOutputLink;
 
@@ -14,6 +15,9 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.metadata.view.event.EventAction;
+import org.skyve.impl.metadata.view.event.RerenderEventAction;
+import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget;
 import org.skyve.impl.metadata.view.reference.ReferenceTarget.ReferenceTargetType;
 import org.skyve.impl.metadata.view.widget.Blurb;
@@ -76,20 +80,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	public abstract UIComponent spacer(Spacer spacer);
 	
-	public abstract UIComponent actionButton(String listBinding, Button button, Action action);
+	public abstract UIComponent actionButton(String listBinding, String listVar, Button button, Action action);
 	public abstract UIComponent reportButton(Button button, Action action);
 	public abstract UIComponent downloadButton(Button button, Action action, String moduleName, String documentName);
 	
 	public abstract UIComponent staticImage(StaticImage image);
 	public abstract UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName);
 	
-	public abstract UIComponent blurb(String listBinding, String value, String binding, Blurb blurb);
-	public abstract UIComponent label(String listBinding, String value, String binding, Label label);
+	public abstract UIComponent blurb(String listVar, String value, String binding, Blurb blurb);
+	public abstract UIComponent label(String listVar, String value, String binding, Label label);
 
-	public abstract UIComponent dataGrid(DataGrid grid);
+	public abstract UIComponent dataGrid(String listVar, DataGrid grid);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 
 														DataGrid grid,
 														DataGridColumn column,
+														String listVar,
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression);
@@ -100,6 +105,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent current, 
 															DataGrid grid,
+															String listVar,
 															String gridColumnExpression,
 															String singluarDocumentAlias,
 															boolean inline);
@@ -113,41 +119,43 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String[] createDisabledConditionNames,
 											boolean zoomRendered,
 											String zoomDisabledConditionName,
+											String selectedIdBinding,
+											List<EventAction> selectedActions,
 											boolean showPaginator,
 											boolean stickyHeader);
 
 	public abstract UIComponent listMembership(ListMembership membership);
 	
-	public abstract UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required);
+	public abstract UIComponent checkBox(String listVar, CheckBox checkBox, String title, boolean required);
 
-	public abstract UIComponent colourPicker(String listBinding, ColourPicker colour, String title, boolean required);
+	public abstract UIComponent colourPicker(String listVar, ColourPicker colour, String title, boolean required);
 	
-	public abstract UIComponent combo(String listBinding, Combo combo, String title, boolean required);
+	public abstract UIComponent combo(String listVar, Combo combo, String title, boolean required);
 
-	public abstract UIComponent contentImage(String listBinding, ContentImage image, String title, boolean required);
+	public abstract UIComponent contentImage(String listVar, ContentImage image, String title, boolean required);
 
-	public abstract UIComponent contentLink(String listBinding, ContentLink link, String title, boolean required);
+	public abstract UIComponent contentLink(String listVar, ContentLink link, String title, boolean required);
 	
-	public abstract UIComponent html(String listBinding, HTML html, String title, boolean required);
+	public abstract UIComponent html(String listVar, HTML html, String title, boolean required);
 
-	public abstract UIComponent lookupDescription(String listBinding,
+	public abstract UIComponent lookupDescription(String listVar,
 													LookupDescription lookup,
 													String title,
 													boolean required,
 													String displayBinding,
 													QueryDefinition query);
 	
-	public abstract UIComponent password(String listBinding, Password password, String title, boolean required);
+	public abstract UIComponent password(String listVar, Password password, String title, boolean required);
 
-	public abstract UIComponent radio(String listBinding, Radio radio, String title, boolean required);
+	public abstract UIComponent radio(String listVar, Radio radio, String title, boolean required);
 	
-	public abstract UIComponent richText(String listBinding, RichText text, String title, boolean required);
+	public abstract UIComponent richText(String listVar, RichText text, String title, boolean required);
 	
-	public abstract UIComponent spinner(String listBinding, Spinner spinner, String title, boolean required);
+	public abstract UIComponent spinner(String listVar, Spinner spinner, String title, boolean required);
 	
-	public abstract UIComponent textArea(String listBinding, TextArea text, String title, boolean required, Integer length);
+	public abstract UIComponent textArea(String listVar, TextArea text, String title, boolean required, Integer length);
 	
-	public abstract UIComponent text(String listBinding, 
+	public abstract UIComponent text(String listVar, 
 										TextField text, 
 										String title, 
 										boolean required,
@@ -156,14 +164,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										Format<?> format,
 										javax.faces.convert.Converter facesConverter);
 	
-	public HtmlOutputLink outputLink(String listBinding, 
+	public HtmlOutputLink outputLink(String listVar, 
 										String value, 
 										String href, 
 										String invisible,
 										ReferenceTarget target) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-		if (listBinding != null) {
-			result.setValueExpression("value", createValueExpressionFromFragment(listBinding, true, href, true, null, String.class));
+		if (listVar != null) {
+			result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, href, true, null, String.class));
 		}
 		else {
 			result.setValueExpression("value", createValueExpressionFromFragment(href, true, null, String.class));
@@ -189,40 +197,66 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		return result;
 	}
 	
-	public AjaxBehavior ajax(String listBinding, 
-								String actionName, 
-								String rerenderSource,
-								boolean rerenderValidate) {
-		AjaxBehavior result = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-		result.setProcess(process);
-		result.setUpdate(update);
-		if (actionName != null) {
-			MethodExpression me = methodExpressionForAction(null, actionName, listBinding, false, null);
-			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+	protected static String determineActionName(List<EventAction> actions) {
+		String result = null;
+		boolean rerenderValidate = true;
+		for (EventAction action : actions) {
+			if (action instanceof ServerSideActionEventAction) {
+				result = ((ServerSideActionEventAction) action).getActionName();
+				break;
+			}
+			else if (action instanceof RerenderEventAction) {
+				rerenderValidate = ! Boolean.FALSE.equals(((RerenderEventAction) action).getClientValidation());
+				result = String.valueOf(rerenderValidate);
+				break;
+			}
 		}
-		else {
-			MethodExpression me = methodExpressionForRerender(rerenderSource, rerenderValidate);
-			result.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
-		}
-
+		
 		return result;
 	}
 	
-	public abstract UIComponent actionLink(String listBinding, Link link, String actionName);
+	public void addAjaxBehavior(UIComponentBase component, 
+									String eventName,
+									String collectionBinding,
+									String listVar,
+									String rerenderSource, 
+									List<EventAction> actions) {
+		String actionName = determineActionName(actions);
+		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
+		ajax.setProcess(process);
+		ajax.setUpdate(update);
+		if (Boolean.TRUE.toString().equals(actionName)) {
+			MethodExpression me = methodExpressionForRerender(rerenderSource, true);
+			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+		}
+		else if (Boolean.FALSE.toString().equals(actionName)) {
+			MethodExpression me = methodExpressionForRerender(rerenderSource, false);
+			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+		}
+		else {
+			MethodExpression me = methodExpressionForAction(null, actionName, collectionBinding, listVar, false, null);
+			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
+		}
+
+		component.addClientBehavior(eventName, ajax);
+	}
+
+	public abstract UIComponent actionLink(String listBinding, String listVar, Link link, String actionName);
 
 	public abstract UIComponent report(Action action);
 	public abstract UIComponent download(Action action, String moduleName, String documentName);
 	
 	public abstract UIComponent action(String listBinding, 
+										String listVar,
 										Action action, 
 										ImplicitActionName name, 
 										String title);
 	
-	private static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
-	private static final Class<?>[] STRING_STRING_STRING = new Class<?>[] {String.class, String.class, String.class};
-	private static final Class<?>[] STRING_STRING_LIST = new Class<?>[] {String.class, String.class, List.class};
-	private static final Class<?>[] STRING_BOOLEAN = new Class<?>[] {String.class, Boolean.class};
-	private static final Class<?>[] NONE = new Class[0];
+	static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
+	static final Class<?>[] STRING_STRING_STRING = new Class<?>[] {String.class, String.class, String.class};
+	static final Class<?>[] STRING_STRING_LIST = new Class<?>[] {String.class, String.class, List.class};
+	static final Class<?>[] STRING_BOOLEAN = new Class<?>[] {String.class, Boolean.class};
+	static final Class<?>[] NONE = new Class[0];
 	
 	protected MethodExpression methodExpressionForRerender(String source, boolean validate) {
 		StringBuilder expression = new StringBuilder(64);
@@ -240,7 +274,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
 															String actionName,
-															String collectionName, 
+															String collectionBinding, 
+															String listVar,
 															boolean inline,
 															List<String> eventHandlerActionNames) {
 		StringBuilder expression = new StringBuilder(64);
@@ -248,15 +283,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		Class<?>[] parameterTypes = null;
 		if (implicitActionName != null) {
 			expression.append(implicitActionName.toString().toLowerCase());
-			if (collectionName != null) {
+			if (collectionBinding != null) {
 				if (ImplicitActionName.Add.equals(implicitActionName)) {
 					parameterTypes = STRING_BOOLEAN;
-					expression.append("('").append(collectionName).append("',").append(inline).append(")");
+					expression.append("('").append(collectionBinding).append("',").append(inline).append(")");
 				} 
 				else if (ImplicitActionName.Remove.equals(implicitActionName)) {
 					parameterTypes = STRING_STRING_LIST;
-					expression.append("('").append(collectionName).append("',");
-					expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'],");
+					expression.append("('").append(collectionBinding).append("',");
+					expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'],");
 
 					// Add filter parameters to getModel call
 					if ((eventHandlerActionNames != null) && (! eventHandlerActionNames.isEmpty())) {
@@ -273,8 +308,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 				} 
 				else {
 					parameterTypes = STRING_STRING;
-					expression.append("('").append(collectionName).append("', ");
-					expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'])");
+					expression.append("('").append(collectionBinding).append("', ");
+					expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
 				}
 			} 
 			else {
@@ -290,9 +325,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		else {
 			parameterTypes = STRING_STRING_STRING;
 			expression.append("action('").append(actionName).append('\'');
-			if (collectionName != null) {
-				expression.append(", '").append(collectionName).append("', ");
-				expression.append(collectionName.replace('.', '_')).append("Row['").append(Bean.DOCUMENT_ID).append("'])");
+			if (collectionBinding != null) {
+				expression.append(", '").append(collectionBinding).append("', ");
+				expression.append(listVar).append("['").append(Bean.DOCUMENT_ID).append("'])");
 			} 
 			else {
 				expression.append(", null, null)");

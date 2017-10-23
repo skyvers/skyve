@@ -111,6 +111,8 @@ public class ListGrid extends HtmlPanelGroup {
 				    												new String[] {String.valueOf(createDisabled)},
 				    												zoomRendered,
 				    												String.valueOf(zoomDisabled),
+				    												null,
+				    												null,
 				    												paginator, 
 				    												stickyHeader);
 				    ListGrid.this.getChildren().add(grid);

@@ -13,7 +13,6 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class RerenderAction<T extends Bean> extends FacesAction<Void> {
@@ -29,7 +28,7 @@ public class RerenderAction<T extends Bean> extends FacesAction<Void> {
 
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("PrerenderAction - source=" + source);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("RerenderAction - EXECUTE RERENDER with source " + source + (validate ? " with" : " without") + " validation ");
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, null, null);

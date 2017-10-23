@@ -16,7 +16,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
@@ -39,7 +38,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ExecuteActionAction - actionName=" + actionName + " : collectionName=" + collectionName + " : elementBizId=" + elementBizId);
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteActionAction - EXECUTE ACTION " + actionName + ((collectionName != null) ? (" for grid " + collectionName + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndCollectionBinding(facesView, collectionName, elementBizId);
@@ -49,6 +48,8 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 		View view = targetDocument.getView(facesView.getUxUi().getName(), customer, targetBean.isCreated() ? ViewType.edit : ViewType.create);
     	Action action = view.getAction(actionName);
+    	Boolean clientValidation = action.getClientValidation();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("ExecuteActionAction - client validation = " + (! Boolean.FALSE.equals(clientValidation)));
     	String resourceName = action.getResourceName();
     	
 		if (! user.canExecuteAction(targetDocument, resourceName)) {
@@ -56,7 +57,7 @@ public class ExecuteActionAction<T extends Bean> extends FacesAction<Void> {
 		}
 
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
-	    if (Boolean.FALSE.equals(action.getClientValidation()) || FacesAction.validateRequiredFields()) {
+	    if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
 			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,

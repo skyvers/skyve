@@ -20,6 +20,7 @@ import org.primefaces.component.spacer.Spacer;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.TabPane;
+import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -61,6 +62,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										String actionName, 
 										boolean inline, 
 										String listBinding, 
+										String listVar,
 										Integer pixelWidth, 
 										Integer pixelHeight,
 										Boolean clientValidation, 
@@ -74,6 +76,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													actionName, 
 													inline, 
 													listBinding, 
+													listVar,
 													pixelWidth, 
 													pixelHeight,
 													clientValidation, 
@@ -91,6 +94,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String actionName, 
 									boolean inline, 
 									String collectionName, 
+									String listVar,
 									Integer pixelWidth, 
 									Integer pixelHeight,
 									Boolean clientValidation, 
@@ -103,6 +107,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									actionName, 
 									inline, 
 									collectionName, 
+									listVar,
 									pixelWidth, 
 									pixelHeight,
 									clientValidation, 
@@ -112,8 +117,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent dataGrid(DataGrid grid) {
+	public UIComponent dataGrid(String listVar, DataGrid grid) {
 		DataList result = dataList(grid.getBinding(), 
+									listVar,
 		                			grid.getTitle(),
 		                			grid.getInvisibleConditionName(),
 		                			grid.getWidgetId());
@@ -125,6 +131,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addDataGridBoundColumn(UIComponent current, 
 												DataGrid grid,
 												DataGridColumn column,
+												String listVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
@@ -165,11 +172,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	@Override
 	public UIComponent addDataGridActionColumn(UIComponent current, 
 												DataGrid grid, 
+												String listVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
 		UIComponent result = current;
-		String gridBinding = grid.getBinding();
+		String listBinding = grid.getBinding();
 		
 		UIOutput outputText = outputText(gridColumnExpression);
 		// If the grid is editable, add the ability to zoom
@@ -179,7 +187,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												ImplicitActionName.Navigate,
 												null,
 												false,
-												gridBinding,
+												listBinding,
+												listVar,
 												null,
 												null,
 												Boolean.TRUE,
@@ -208,8 +217,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 
 	@Override
-	public UIComponent checkBox(String listBinding, CheckBox checkBox, String title, boolean required) {
-		SelectBooleanCheckbox result = checkbox(listBinding,
+	public UIComponent checkBox(String listVar, CheckBox checkBox, String title, boolean required) {
+		SelectBooleanCheckbox result = checkbox(listVar,
 												checkBox.getBinding(), 
 												title,
 												required,
@@ -219,8 +228,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent colourPicker(String listBinding, ColourPicker colour, String title, boolean required) {
-		return colourPicker(listBinding, 
+	public UIComponent colourPicker(String listVar, ColourPicker colour, String title, boolean required) {
+		return colourPicker(listVar, 
 								colour.getBinding(), 
 								title, 
 								required, 
@@ -229,13 +238,13 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent lookupDescription(String listBinding, 
+	public UIComponent lookupDescription(String listVar, 
 											LookupDescription lookup, 
 											String title, 
 											boolean required,
 											String displayBinding,
 											QueryDefinition query) {
-		UIComponent c = autoComplete(listBinding,
+		UIComponent c = autoComplete(listVar,
 										lookup.getBinding(),
 										title,
 										required,
@@ -248,7 +257,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		UIComponent result = panelGroup(false, false, false, null, null);
 		List<UIComponent> children = result.getChildren();
 		children.add(c);
-		InputText text = textField(listBinding, 
+		InputText text = textField(listVar, 
 									String.format("%s.%s", lookup.getBinding(), displayBinding), 
 									title,
 									required, 
@@ -269,11 +278,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent password(String listBinding, 
+	public UIComponent password(String listVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
 									String title, 
 									boolean required) {
-		return password(listBinding,
+		return password(listVar,
 							password.getBinding(), 
 			                title,
 			                required,
@@ -283,12 +292,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent textArea(String listBinding, 
+	public UIComponent textArea(String listVar, 
 									TextArea text, 
 									String title, 
 									boolean required,
 									Integer length) {
-        return textArea(listBinding,
+        return textArea(listVar,
 							text.getBinding(),
 							title,
 							required,
@@ -300,7 +309,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent text(String listBinding, 
+	public UIComponent text(String listVar, 
 								TextField text, 
 								String title, 
 								boolean required,
@@ -308,7 +317,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 								org.skyve.domain.types.converters.Converter<?> converter,
 								Format<?> format,
 								Converter facesConverter) {
-        return textField(listBinding,
+        return textField(listVar,
 							text.getBinding(),
 							title,
 							required,
@@ -346,6 +355,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String[] createDisabledConditionNames,
 									boolean zoomRendered,
 									String zoomDisabledConditionName,
+									String selectedIdBinding,
+									List<EventAction> selectedActions,
 									boolean showPaginator,
 									boolean stickyHeader) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);

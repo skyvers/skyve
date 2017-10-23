@@ -594,7 +594,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			c = cb.downloadButton(button, action, module.getName(), document.getName());
 		}
 		else {
-			c = cb.actionButton(listBinding, button, action);
+			c = cb.actionButton(listBinding, listVar, button, action);
 		}
 	    addComponent(null, 
 	    				false, 
@@ -732,7 +732,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		else {
 			value = markup;
 		}
-		UIComponent c = cb.blurb(listBinding, value, binding, blurb);
+		UIComponent c = cb.blurb(listVar, value, binding, blurb);
 		addComponent(null, 
 						false, 
 						blurb.getInvisibleConditionName(), 
@@ -789,7 +789,7 @@ public class FacesViewVisitor extends ViewVisitor {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 
-				c.set(cb.outputLink(listBinding, link.getValue(), href.toString(), link.getInvisibleConditionName(), target));
+				c.set(cb.outputLink(listVar, link.getValue(), href.toString(), link.getInvisibleConditionName(), target));
 			}
 			
 			@Override
@@ -807,7 +807,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				c.set(cb.actionLink(listBinding, link, reference.getActionName()));
+				c.set(cb.actionLink(listBinding, listVar, link, reference.getActionName()));
 			}
 		}.process(outerReference);
 
@@ -832,7 +832,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			binding = value;
 			value = null;
 		}
-	    UIComponent c = cb.label(listBinding, value, binding, label);
+	    UIComponent c = cb.label(listVar, value, binding, label);
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 
@@ -908,6 +908,8 @@ public class FacesViewVisitor extends ViewVisitor {
 										createDisabled,
 										zoomRendered,
 										grid.getDisableZoomConditionName(),
+										grid.getSelectedIdBinding(),
+										grid.getSelectedActions(),
 										true,
 										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
@@ -940,14 +942,16 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	private String listBinding;
+	private String listVar;
 	
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// Create the datagrid faces component
-		UIComponent g = cb.dataGrid(grid);
+		listBinding = grid.getBinding();
+		listVar = listBinding.replace('.', '_') + "Row";
+		UIComponent g = cb.dataGrid(listVar, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		currentGrid = grid;
-		listBinding = grid.getBinding();
 		gridColumnExpression = new StringBuilder(512);
 
 		// start rendering if appropriate
@@ -969,13 +973,15 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 
 		current = cb.addDataGridActionColumn(current, 
-												grid, 
+												grid,
+												listVar,
 												gridColumnExpression.toString(), 
 												alias, 
 												Boolean.TRUE.equals(grid.getInline()));
 		
 	    currentGrid = null;
 	    listBinding = null;
+	    listVar = null;
 	    gridColumnExpression = null;
 	    addedToContainer();
 		
@@ -1019,6 +1025,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		current = cb.addDataGridBoundColumn(current, 
 												(DataGrid) currentGrid, 
 												column, 
+												listVar,
 												title, 
 												binding, 
 												gridColumnExpression);
@@ -1081,7 +1088,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.checkBox(listBinding, checkBox, title, required);
+		UIComponentBase c = (UIComponentBase) cb.checkBox(listVar, checkBox, title, required);
 		eventSource = c;
 		addComponent(title,
 						required,
@@ -1129,7 +1136,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.colourPicker(listBinding, colour, title, required);
+		UIComponentBase c = (UIComponentBase) cb.colourPicker(listVar, colour, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
@@ -1159,7 +1166,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase s = (UIComponentBase) cb.combo(listBinding, combo, title, required);
+		UIComponentBase s = (UIComponentBase) cb.combo(listVar, combo, title, required);
 		eventSource = s;
 		addComponent(title, 
 						required, 
@@ -1189,7 +1196,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.contentImage(listBinding, image, title, required);
+		UIComponent c = cb.contentImage(listVar, image, title, required);
         addComponent(title, 
         				false, 
         				image.getInvisibleConditionName(), 
@@ -1211,7 +1218,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.contentLink(listBinding, link, title, required);
+		UIComponent c = cb.contentLink(listVar, link, title, required);
 		addComponent(title, 
 						required, 
 						link.getInvisibleConditionName(), 
@@ -1233,7 +1240,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.html(listBinding, html, title, required);
+		UIComponent c = cb.html(listVar, html, title, required);
         addComponent(title, 
         				required, 
         				html.getInvisibleConditionName(), 
@@ -1283,7 +1290,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.lookupDescription(listBinding, 
+		UIComponentBase c = (UIComponentBase) cb.lookupDescription(listVar, 
 																	lookup, 
 																	title, 
 																	required,
@@ -1342,7 +1349,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.password(listBinding, password, title, required);
+        UIComponentBase c = (UIComponentBase) cb.password(listVar, password, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1372,7 +1379,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
 		boolean required = def.isRequired();
-        UIComponentBase c = (UIComponentBase) cb.radio(listBinding, radio, title, required);
+        UIComponentBase c = (UIComponentBase) cb.radio(listVar, radio, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
@@ -1402,7 +1409,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.richText(listBinding, richText, title, required);
+        UIComponentBase c = (UIComponentBase) cb.richText(listVar, richText, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1460,7 +1467,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.spinner(listBinding, spinner, title, required);
+        UIComponentBase c = (UIComponentBase) cb.spinner(listVar, spinner, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1490,7 +1497,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.textArea(listBinding, text, title, required, def.getLength());
+		UIComponentBase c = (UIComponentBase) cb.textArea(listVar, text, title, required, def.getLength());
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1549,7 +1556,7 @@ public class FacesViewVisitor extends ViewVisitor {
             }
         }
 
-        UIComponentBase c = (UIComponentBase) cb.text(listBinding, 
+        UIComponentBase c = (UIComponentBase) cb.text(listVar, 
         												text, 
         												title, 
         												required,
@@ -1710,33 +1717,16 @@ public class FacesViewVisitor extends ViewVisitor {
 		current = lb.addedToContainer(currentContainer, current);
 	}
 	
-	private void addAjaxBehavior(String eventName, String rerenderSource, List<EventAction> actions) {
-		String actionName = null;
-		boolean rerenderValidate = true;
-		for (EventAction action : actions) {
-			if (action instanceof ServerSideActionEventAction) {
-				actionName = ((ServerSideActionEventAction) action).getActionName();
-				break;
-			}
-			else if (action instanceof RerenderEventAction) {
-				rerenderValidate = ! Boolean.FALSE.equals(((RerenderEventAction) action).getClientValidation());
-				break;
-			}
-		}
-		
-		eventSource.addClientBehavior(eventName, cb.ajax(listBinding, actionName, rerenderSource, rerenderValidate));
-	}
-	
 	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = changeable.getBinding();
 		List<EventAction> changedActions = changeable.getChangedActions();
-		addAjaxBehavior("change", binding, changedActions);
+		cb.addAjaxBehavior(eventSource, "change", listBinding, listVar, binding, changedActions);
 		// Add this special event for date selection on calendar as "changed" doesn't fire on select
 		if (eventSource instanceof Calendar) {
-			addAjaxBehavior("dateSelect", binding, changedActions);
+			cb.addAjaxBehavior(eventSource, "dateSelect", listBinding, listVar, binding, changedActions);
 		}
 	}
 
@@ -1752,7 +1742,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		addAjaxBehavior("focus", binding, blurable.getFocusActions());
+		cb.addAjaxBehavior(eventSource, "focus", listBinding, listVar, binding, blurable.getFocusActions());
 	}
 
 	@Override
@@ -1767,7 +1757,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (blurable instanceof Bound) ? ((Bound) blurable).getBinding() : null;
-		addAjaxBehavior("blur", binding, blurable.getBlurActions());
+		cb.addAjaxBehavior(eventSource, "blur", listBinding, listVar, binding, blurable.getBlurActions());
 	}
 
 	@Override
@@ -1843,7 +1833,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnPickedEventHandler(Lookup lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("itemSelect", lookup.getBinding(), lookup.getPickedActions());
+		cb.addAjaxBehavior(eventSource, "itemSelect", listBinding, listVar, lookup.getBinding(), lookup.getPickedActions());
 	}
 
 	@Override
@@ -1857,7 +1847,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitOnClearedEventHandler(Lookup lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		addAjaxBehavior("itemUnselect", lookup.getBinding(), lookup.getClearedActions());
+		cb.addAjaxBehavior(eventSource, "itemUnselect", listBinding, listVar, lookup.getBinding(), lookup.getClearedActions());
 	}
 
 	@Override
@@ -1915,7 +1905,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
-					toolbarLayout.getChildren().add(cb.action(listBinding, action, null, action.getDisplayName()));
+					toolbarLayout.getChildren().add(cb.action(listBinding, listVar, action, null, action.getDisplayName()));
 				}
 			}
 		}
@@ -1936,7 +1926,7 @@ public class FacesViewVisitor extends ViewVisitor {
 						if (displayName == null) {
 							displayName = name.getDisplayName();
 						}
-						toolbarLayout.getChildren().add(cb.action(listBinding, action, name, displayName));
+						toolbarLayout.getChildren().add(cb.action(listBinding, listVar, action, name, displayName));
 					}
 				}
 			}

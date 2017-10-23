@@ -18,10 +18,12 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
+import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.faces.actions.AddAction;
@@ -230,7 +232,6 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 
 	public void action(String actionName, String listBinding, String bizId) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - EXECUTE ACTION " + actionName + " for grid " + listBinding);
 		new ExecuteActionAction<>(this, 
 									actionName, 
 									UtilImpl.processStringValue(listBinding),
@@ -238,10 +239,45 @@ public class FacesView<T extends Bean> extends Harness {
 	}
 
 	public void rerender(String source, boolean validate) {
-		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - EXECUTE RERENDER with source " + source);
 		new RerenderAction<>(this, source, validate).execute();
 	}
+	
+	/**
+	 * Set the selected row bizId and fire an action or rerender.
+	 * 
+	 * if actionName is null - do nothing - just set the selected row.
+	 * else if actionName is "true" - rerender with validation.
+	 * else if actionName is "false" - rerender with no validation.
+	 * else run the action.
+	 */
+	public void selectGridRow(SelectEvent evt) {
+		UIComponent component = evt.getComponent();
+		Map<String, Object> attributes = component.getAttributes();
+		String selectedIdBinding = (String) attributes.get("selectedIdBinding");
+		String actionName = (String) attributes.get("actionName");
 
+		@SuppressWarnings("unchecked")
+		String bizId = ((BeanMapAdapter<Bean>) evt.getObject()).getBean().getBizId();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - SET "+ selectedIdBinding + " to " + bizId);
+		new FacesAction<Void>() {
+			@Override
+			public Void callback() throws Exception {
+				BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
+				return null;
+			}
+		}.execute();
+
+		if (actionName != null) {
+			if (Boolean.TRUE.toString().equals(actionName) || Boolean.FALSE.toString().equals(actionName)) {
+				String source = (String) attributes.get("source");
+				rerender(source, Boolean.parseBoolean(actionName));
+			}
+			else {
+				action(actionName, null, null);
+			}
+		}
+	}
+	
 	public SkyveLazyDataModel getModel(String moduleName, 
 										String documentName, 
 										String queryName,
