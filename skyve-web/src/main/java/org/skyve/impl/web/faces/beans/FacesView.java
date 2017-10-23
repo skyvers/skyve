@@ -236,10 +236,12 @@ public class FacesView<T extends Bean> extends Harness {
 									actionName, 
 									UtilImpl.processStringValue(listBinding),
 									UtilImpl.processStringValue(bizId)).execute();
+		new SetTitleAction(this).execute();
 	}
 
 	public void rerender(String source, boolean validate) {
 		new RerenderAction<>(this, source, validate).execute();
+		new SetTitleAction(this).execute();
 	}
 	
 	/**

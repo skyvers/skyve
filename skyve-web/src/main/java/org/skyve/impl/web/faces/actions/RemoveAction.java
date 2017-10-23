@@ -69,6 +69,9 @@ public class RemoveAction extends FacesAction<Void> {
 					}
 				}
 			}
+			// Update the edit view title just in case
+			// NB It isn't actually updated as deleting a row only updates the data table.
+			new SetTitleAction(facesView).execute();
 		}
 		else { // Remove on zoomed view
 			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
