@@ -17,6 +17,8 @@ import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 			name = "DocumentUniqueConstraint", 
 			propOrder = {"scope", "description", "message", "fieldReferences"})
 public class UniqueConstraint extends NamedMetaData {
+	private static final long serialVersionUID = -5802589971987905636L;
+
 	private String description;
 	private DocumentScope scope;
 	private String message;

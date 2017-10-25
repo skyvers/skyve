@@ -41,6 +41,8 @@ import org.skyve.util.Util;
 							"homeModule", 
 							"interceptors"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
+	private static final long serialVersionUID = 4281621343439667457L;
+
 	private String language;
 	private UIResources uiResources;
 	private HTMLResources htmlResources;

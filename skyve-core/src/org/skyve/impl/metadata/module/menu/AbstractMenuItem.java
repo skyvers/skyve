@@ -10,9 +10,6 @@ import org.skyve.metadata.module.menu.MenuItem;
  * This class comprises the Leaf part of the GoF composite pattern.
  */
 public abstract class AbstractMenuItem implements MenuItem {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5028812690596668599L;
 
 	/**

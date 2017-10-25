@@ -5,11 +5,14 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
 			name = "document",
 			propOrder = {"ref", "defaultQueryName", "moduleRef"})
-public class ModuleDocument {
+public class ModuleDocument implements MetaData {
+	private static final long serialVersionUID = -5925139560927455582L;
+
 	private String ref;
 	private String defaultQueryName;
 	private String moduleRef;

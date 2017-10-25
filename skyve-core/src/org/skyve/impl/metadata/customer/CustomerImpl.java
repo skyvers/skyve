@@ -52,6 +52,8 @@ import org.skyve.web.WebContext;
 
 @Alternative
 public class CustomerImpl implements Customer {
+	private static final long serialVersionUID = 2926460705821800439L;
+
 	public class ExportedReference implements Serializable {
 		private static final long serialVersionUID = 3054965257788501970L;
 
@@ -156,11 +158,6 @@ public class CustomerImpl implements Customer {
 	 * propagate the changes to every referencing row.
 	 */
 	
-	/**
-	 * For Serialization.
-	 */
-	private static final long serialVersionUID = 2926460705821800439L;
-
 	/**
 	 * Customer name.
 	 */

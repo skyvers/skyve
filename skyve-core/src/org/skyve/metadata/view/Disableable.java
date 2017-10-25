@@ -1,9 +1,11 @@
 package org.skyve.metadata.view;
 
+import org.skyve.metadata.MetaData;
+
 /**
  * 
  */
-public interface Disableable {
+public interface Disableable extends MetaData {
 	/**
 	 * A condition name to evaluate to determine if this is disabled.
 	 * @return

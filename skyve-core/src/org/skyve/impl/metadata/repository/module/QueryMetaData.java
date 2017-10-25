@@ -11,6 +11,8 @@ import org.skyve.impl.util.XMLMetaData;
 			name = "query",
 			propOrder = {"documentation", "description"})
 public abstract class QueryMetaData extends NamedMetaData {
+	private static final long serialVersionUID = 3163827058170250318L;
+
 	private String documentation;
 	private String description;
 

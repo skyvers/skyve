@@ -10,9 +10,6 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ActionReference implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -3467116310017720893L;
 
 	private String actionName;

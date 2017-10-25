@@ -30,12 +30,10 @@ import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -81,8 +79,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 							"selectedActions",
 							"parameters",
 							"properties"})
-public class ListGrid implements MetaData,
-									DecoratedMetaData,
+public class ListGrid implements DecoratedMetaData,
 									RelativeSize,
 									Disableable,
 									Invisible,

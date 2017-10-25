@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
@@ -29,7 +28,7 @@ import org.skyve.metadata.view.Invisible;
 							"postcodeBinding",
 							"countryBinding",
 							"properties"})
-public class GeoLocator implements MetaData, Disableable, Invisible, FormItemWidget {
+public class GeoLocator implements Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 7302870279072305100L;
 
 	private String latitudeBinding;

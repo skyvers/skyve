@@ -4,21 +4,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 /**
@@ -36,7 +32,7 @@ import org.skyve.metadata.view.Invisible;
 							"visibleConditionName"})
 							//"properties"})
 // Blurb markup value cant be an XML value and have properties.
-public class Blurb implements MetaData, Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
+public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, FormItemWidget {
 	private static final long serialVersionUID = -1234525506006033853L;
 
 	/**

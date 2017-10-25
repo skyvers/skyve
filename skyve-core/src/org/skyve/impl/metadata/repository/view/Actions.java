@@ -28,13 +28,12 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "actions")
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, 
 			name = "actions",
 			propOrder = {"widgetId", "actions"})
-public class Actions implements MetaData, Identifiable {
+public class Actions implements Identifiable {
 	private static final long serialVersionUID = 7637506523705376564L;
 
 	private String widgetId;

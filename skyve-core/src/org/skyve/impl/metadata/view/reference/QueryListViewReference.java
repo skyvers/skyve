@@ -15,9 +15,6 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class QueryListViewReference implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1982657919843061491L;
 	
 	private String queryName;

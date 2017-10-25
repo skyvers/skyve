@@ -21,9 +21,6 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 			name = "CollectionUniqueConstraint", 
 			propOrder = {"name", "description", "message", "fieldNames"})
 public class UniqueConstraintImpl implements UniqueConstraint {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1108913028844957459L;
 
 	private String name;

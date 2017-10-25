@@ -10,9 +10,6 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"name", "value"})
 public class ParameterImpl extends AbstractBound implements Parameter {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 3545853099050411888L;
 
 	/**

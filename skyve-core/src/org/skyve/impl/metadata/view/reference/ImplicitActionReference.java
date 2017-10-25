@@ -10,9 +10,6 @@ import org.skyve.metadata.controller.ImplicitActionName;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ImplicitActionReference implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 2492612188970314035L;
 
 	private ImplicitActionName implicitActionName;

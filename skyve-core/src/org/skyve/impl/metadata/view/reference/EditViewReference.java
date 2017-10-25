@@ -17,9 +17,6 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class EditViewReference extends AbstractBound implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5721839106097161459L;
 	
 	private String moduleName;

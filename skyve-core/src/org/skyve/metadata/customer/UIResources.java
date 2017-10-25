@@ -1,9 +1,11 @@
 package org.skyve.metadata.customer;
 
+import org.skyve.metadata.MetaData;
+
 /**
  * 
   */
-public interface UIResources {
+public interface UIResources extends MetaData {
 	/**
 	 * 
 	 * @return

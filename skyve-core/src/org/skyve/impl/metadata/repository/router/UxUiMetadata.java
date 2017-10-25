@@ -11,6 +11,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 public class UxUiMetadata extends NamedMetaData {
+	private static final long serialVersionUID = 7649740185688983705L;
+
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE, name = "route", required = true)
 	private List<Route> routes = new ArrayList<>();
 

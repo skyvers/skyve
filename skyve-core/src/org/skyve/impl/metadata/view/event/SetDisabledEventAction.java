@@ -14,9 +14,6 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setDisabled")
 public class SetDisabledEventAction extends AbstractBound implements EventAction, Disableable {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 749553391893947191L;
 
 	private String disabledConditionName;

@@ -12,9 +12,6 @@ import org.skyve.metadata.customer.InterceptorMetaData;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor")
 public class InterceptorMetaDataImpl implements InterceptorMetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 557157560945069012L;
 
 	/**

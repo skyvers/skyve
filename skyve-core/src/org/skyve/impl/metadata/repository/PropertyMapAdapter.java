@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.repository;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,7 +11,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * JAXB Adapter for Map<String, String> to/from PropertyMapType.
  */
-public class PropertyMapAdapter extends XmlAdapter<PropertyMapType, Map<String, String>> {
+public class PropertyMapAdapter extends XmlAdapter<PropertyMapType, Map<String, String>> implements Serializable {
+	private static final long serialVersionUID = 729761523390093996L;
+
 	@Override
 	public Map<String, String> unmarshal(PropertyMapType v) throws Exception {
 		Map<String, String> result = new TreeMap<>();

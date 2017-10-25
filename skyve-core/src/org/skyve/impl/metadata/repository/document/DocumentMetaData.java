@@ -90,6 +90,8 @@ import org.skyve.metadata.model.document.Relation;
 							"conditions", 
 							"uniqueConstraints"})
 public class DocumentMetaData extends NamedMetaData implements PersistentMetaData<Document> {
+	private static final long serialVersionUID = 222166383815547958L;
+
 	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;

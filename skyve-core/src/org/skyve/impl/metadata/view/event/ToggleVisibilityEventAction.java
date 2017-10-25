@@ -10,8 +10,5 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "toggleVisibility")
 public class ToggleVisibilityEventAction extends AbstractBound implements EventAction {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 7698439970713412634L;
 }

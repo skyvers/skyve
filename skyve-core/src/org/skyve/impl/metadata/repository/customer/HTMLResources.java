@@ -8,6 +8,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 public class HTMLResources implements org.skyve.metadata.customer.HTMLResources {
+	private static final long serialVersionUID = 3982423990945642514L;
+
 	private String cssRelativeFileName;
 	
 	@Override

@@ -11,15 +11,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
-import org.skyve.impl.metadata.repository.PropertyMapAdapter;
-import org.skyve.impl.metadata.view.container.form.FormItem;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-public class FormRow implements MetaData, DecoratedMetaData {
+public class FormRow implements DecoratedMetaData {
 	private static final long serialVersionUID = 6724393610453650734L;
 
 	private List<FormItem> items = new ArrayList<>();

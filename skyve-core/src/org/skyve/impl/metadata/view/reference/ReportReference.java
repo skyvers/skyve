@@ -24,9 +24,6 @@ import org.skyve.report.ReportFormat;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ReportReference implements Reference, Parameterizable {
-	/**
-	 * For Serialzation
-	 */
 	private static final long serialVersionUID = 558858254713666224L;
 
 	private String moduleName;

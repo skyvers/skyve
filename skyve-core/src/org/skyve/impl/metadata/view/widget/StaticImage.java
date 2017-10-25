@@ -15,7 +15,6 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
@@ -33,7 +32,7 @@ import org.skyve.metadata.view.Invisible;
 						"invisibleConditionName",
 						"visibleConditionName",
 						"properties"})
-public class StaticImage implements MetaData, RelativeSize, Invisible, FormItemWidget {
+public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 314857374179338882L;
 
 	private String relativeFile;

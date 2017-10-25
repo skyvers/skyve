@@ -6,9 +6,12 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.COMMON_NAMESPACE)
-public abstract class NamedMetaData {
+public abstract class NamedMetaData implements org.skyve.metadata.NamedMetaData {
+	private static final long serialVersionUID = 3158067742748907120L;
+
 	private String name;
 
+	@Override
 	public String getName() {
 		return name;
 	}

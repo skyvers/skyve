@@ -18,10 +18,8 @@ import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.container.Tab;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -42,7 +40,7 @@ import org.skyve.impl.metadata.view.container.Tab;
 							"selectedTabIndexBinding",
 							"tabs",
 							"properties"})
-public final class TabPane implements MetaData, DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible {
+public final class TabPane implements DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible {
 	private static final long serialVersionUID = -3490366758123216975L;
 
 	private String widgetId;

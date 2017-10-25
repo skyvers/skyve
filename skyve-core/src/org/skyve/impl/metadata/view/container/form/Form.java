@@ -20,11 +20,8 @@ import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.container.form.FormColumn;
-import org.skyve.impl.metadata.view.container.form.FormRow;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
@@ -48,7 +45,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 							"columns", 
 							"rows",
 							"properties"})
-public final class Form implements MetaData, DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible, Bordered {
+public final class Form implements DecoratedMetaData, Identifiable, RelativeSize, Disableable, Invisible, Bordered {
 	private static final long serialVersionUID = 8677483284773272582L;
 
 	private String widgetId;

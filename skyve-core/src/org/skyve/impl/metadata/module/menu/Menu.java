@@ -9,9 +9,6 @@ import org.skyve.metadata.module.menu.MenuItem;
  * Represents a menu.
  */
 public class Menu implements org.skyve.metadata.module.menu.Menu {
-	/**
-	 * For Serialization.
-	 */
 	private static final long serialVersionUID = -8289343836260930093L;
 
 	private List<MenuItem> menuItemList = new ArrayList<>();

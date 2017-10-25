@@ -8,9 +8,12 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class Menu {
+public class Menu implements MetaData {
+	private static final long serialVersionUID = 8381343095222755228L;
+
 	private List<Action> actions = new ArrayList<>();
 
 	@XmlElementRefs({@XmlElementRef(type = Item.class), @XmlElementRef(type = Group.class)})

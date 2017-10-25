@@ -18,7 +18,6 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
@@ -38,7 +37,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"enabledConditionName",
 							"parameters",
 							"properties"})
-public class DialogButton implements MetaData, Parameterizable, Disableable, Invisible, FormItemWidget {
+public class DialogButton implements Parameterizable, Disableable, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 4201233664827983726L;
 
 	private String displayName;

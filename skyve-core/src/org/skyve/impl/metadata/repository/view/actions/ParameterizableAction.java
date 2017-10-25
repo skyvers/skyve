@@ -14,6 +14,8 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ParameterizableAction extends PositionableAction implements Parameterizable {
+	private static final long serialVersionUID = -9222943585683812109L;
+
 	private List<Parameter> parameters = new ArrayList<>();
 
 	@Override

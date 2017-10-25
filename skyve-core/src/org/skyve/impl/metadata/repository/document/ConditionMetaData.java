@@ -14,6 +14,8 @@ import org.skyve.metadata.model.document.Condition;
 			name = "condition",
 			propOrder = {"documentation", "description", "expression"})
 public class ConditionMetaData extends NamedMetaData implements Condition {
+	private static final long serialVersionUID = -4665946292131120118L;
+
 	private String description;
 	private String documentation;
 	private String expression;

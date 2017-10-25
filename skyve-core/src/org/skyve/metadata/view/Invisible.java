@@ -1,9 +1,11 @@
 package org.skyve.metadata.view;
 
+import org.skyve.metadata.MetaData;
+
 /**
  * 
  */
-public interface Invisible {
+public interface Invisible extends MetaData {
 	/**
 	 * A condition name to evaluate to determine if this is invisible.
 	 * @return

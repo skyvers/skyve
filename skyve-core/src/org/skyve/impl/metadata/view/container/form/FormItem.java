@@ -46,7 +46,7 @@ import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "item")
-public class FormItem implements MetaData, DecoratedMetaData {
+public class FormItem implements DecoratedMetaData {
 	private static final long serialVersionUID = 8914657809022150728L;
 
 	private MetaData widget;

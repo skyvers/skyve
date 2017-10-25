@@ -10,6 +10,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(name = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name  = "map", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class MapItem extends Item {
+	private static final long serialVersionUID = -5244934493713612299L;
+
 	private String documentName;
 	private String queryName;
 	private String modelName;

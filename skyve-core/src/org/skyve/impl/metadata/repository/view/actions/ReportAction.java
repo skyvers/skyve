@@ -17,6 +17,8 @@ import org.skyve.report.ReportFormat;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "report")
 public class ReportAction extends ParameterizableAction {
+	private static final long serialVersionUID = 6083685683273669677L;
+
 	public ReportAction() {
 		implicitName = ImplicitActionName.Report;
 	}

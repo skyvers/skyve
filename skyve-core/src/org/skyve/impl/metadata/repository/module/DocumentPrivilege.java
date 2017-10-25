@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, 
@@ -17,7 +18,9 @@ import org.skyve.metadata.user.DocumentPermission;
 							"actions",
 							"contentRestrictions", 
 							"contentPermissions"})
-public class DocumentPrivilege {
+public class DocumentPrivilege implements MetaData {
+	private static final long serialVersionUID = -300528846187141003L;
+
 	private String documentName;
 	private DocumentPermission permission;
 	private List<ActionPrivilege> actions = new ArrayList<>();

@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
-public interface Identifiable {
+import org.skyve.metadata.MetaData;
+
+public interface Identifiable extends MetaData {
 	String getWidgetId();
 }

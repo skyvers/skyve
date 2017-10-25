@@ -16,7 +16,6 @@ import org.skyve.impl.metadata.view.ContentSpecifiedWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 
 /**
  * If button width/height is not specified it sizes to fit it's contents - the label and icon.
@@ -31,7 +30,7 @@ import org.skyve.metadata.MetaData;
 							"minPixelHeight",
 							"maxPixelHeight",
 							"properties"})
-public class Button implements MetaData, AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight, FormItemWidget {
+public class Button implements AbsoluteSize, ContentSpecifiedWidth, ConstrainableHeight, FormItemWidget {
 	private static final long serialVersionUID = -2344473519207771461L;
 
 	private String actionName;

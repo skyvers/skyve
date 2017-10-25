@@ -10,6 +10,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "sql")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, name = "sql", propOrder = {"query"})
 public class SQLMetaData extends QueryMetaData {
+	private static final long serialVersionUID = 2092696254537507474L;
+
 	private String query;
 
 	public String getQuery() {

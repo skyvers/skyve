@@ -8,6 +8,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class PositionableAction extends ActionMetaData {
+	private static final long serialVersionUID = -7322904477575844567L;
+
 	private Boolean inActionPanel;
 
 	public Boolean isInActionPanel() {

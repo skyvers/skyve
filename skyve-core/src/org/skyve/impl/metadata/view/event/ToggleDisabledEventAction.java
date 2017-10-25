@@ -10,8 +10,5 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "toggleDisabled")
 public class ToggleDisabledEventAction extends AbstractBound implements EventAction {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -89146740336444176L;
 }

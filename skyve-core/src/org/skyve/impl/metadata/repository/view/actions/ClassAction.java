@@ -9,6 +9,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class ClassAction extends ValidatableAction {
+	private static final long serialVersionUID = -2913422200090616971L;
+
 	private String className;
 
 	public String getClassName() {

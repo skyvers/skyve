@@ -8,9 +8,6 @@ import java.util.TreeMap;
 import org.skyve.metadata.MetaData;
 
 public abstract class AbstractMetaDataMap implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6544574263967307394L;
 
 	private Map<String, MetaData> metaDataMap = new TreeMap<>();

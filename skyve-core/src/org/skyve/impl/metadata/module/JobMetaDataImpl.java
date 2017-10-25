@@ -13,9 +13,6 @@ import org.skyve.metadata.module.JobMetaData;
 			namespace = XMLMetaData.MODULE_NAMESPACE,
 			propOrder = {"displayName", "className", "description"})
 public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 5214082047746890555L;
 
 	/**

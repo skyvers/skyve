@@ -28,7 +28,6 @@ import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 /**
@@ -43,7 +42,7 @@ import org.skyve.metadata.view.Invisible;
 							"invisibleConditionName",
 							"visibleConditionName",
 							"properties"})
-public class Link implements MetaData, Invisible, AbsoluteWidth, FormItemWidget {
+public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	private static final long serialVersionUID = 2694545058785836920L;
 
 	private Reference reference;

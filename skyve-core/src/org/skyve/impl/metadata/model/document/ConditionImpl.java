@@ -4,6 +4,8 @@ import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
 public class ConditionImpl implements Condition {
+	private static final long serialVersionUID = 4772305611794702365L;
+
 	private String documentation;
 	private String description;
 	private String expression;

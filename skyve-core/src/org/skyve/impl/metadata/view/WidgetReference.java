@@ -25,9 +25,6 @@ import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class WidgetReference implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -4623822506842372448L;
 
 	private InputWidget widget;

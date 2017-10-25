@@ -19,7 +19,6 @@ import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -42,7 +41,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"visibleConditionName",
 							"parameters",
 							"properties"})
-public class DynamicImage implements MetaData, DecoratedMetaData, RelativeSize, Invisible, Parameterizable {
+public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible, Parameterizable {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String name;

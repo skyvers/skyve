@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view.event;
 
-public interface EventSource {
+import org.skyve.metadata.MetaData;
+
+public interface EventSource extends MetaData {
 	public String getSource();
 }

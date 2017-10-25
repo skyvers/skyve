@@ -13,6 +13,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 public class Group extends Action {
+	private static final long serialVersionUID = -8705078693132357242L;
+
 	private List<Action> actions = new ArrayList<>();
 
 	@XmlElementRefs({@XmlElementRef(type = EditItem.class),

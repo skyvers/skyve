@@ -15,11 +15,10 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class Route implements MetaData, DecoratedMetaData {
+public class Route implements DecoratedMetaData {
 	private static final long serialVersionUID = 2672586575464268486L;
 
 	private String outcomeUrl;

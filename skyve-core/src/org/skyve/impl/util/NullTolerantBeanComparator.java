@@ -4,18 +4,17 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.NullTolerantComparator;
 
+@SuppressWarnings("rawtypes")
 public class NullTolerantBeanComparator extends BeanComparator {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 6217533183265925971L;
 
 	/**
 	 * Used for sorting collections.
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"unchecked"})
 	private static final NullTolerantComparator<? extends Comparable<?>> NULL_TOLERANT_COMPARATOR = new NullTolerantComparator();
 
+	@SuppressWarnings("unchecked")
 	public NullTolerantBeanComparator(String property) {
 		super(property, NULL_TOLERANT_COMPARATOR);
 	}

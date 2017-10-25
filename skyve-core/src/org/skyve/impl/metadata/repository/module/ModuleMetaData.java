@@ -49,6 +49,8 @@ import org.skyve.metadata.view.View.ViewType;
 							"menu",
 							"queries"})
 public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<org.skyve.metadata.module.Module> {
+	private static final long serialVersionUID = -6257431975403255783L;
+
 	private String title;
 	private ViewType homeRef;
 	private String homeDocument;

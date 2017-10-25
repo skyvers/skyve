@@ -1,12 +1,11 @@
 package org.skyve.metadata.view.widget.bound;
 
 import org.skyve.impl.metadata.view.event.EventSource;
-import org.skyve.metadata.MetaData;
 
 /**
  * 
  */
-public interface Bound extends MetaData, EventSource {
+public interface Bound extends EventSource {
 	/**
 	 * 
 	 * @return

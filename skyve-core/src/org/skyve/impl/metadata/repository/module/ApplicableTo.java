@@ -5,9 +5,12 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE)
-public class ApplicableTo {
+public class ApplicableTo implements MetaData {
+	private static final long serialVersionUID = 8204068663179740572L;
+
 	private String uxui;
 
 	public String getUxUi() {

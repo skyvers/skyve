@@ -10,9 +10,6 @@ import org.skyve.metadata.view.widget.bound.Bound;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"binding"})
 public abstract class AbstractBound implements Bound {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 8278612580977136162L;
 
 	private String binding;

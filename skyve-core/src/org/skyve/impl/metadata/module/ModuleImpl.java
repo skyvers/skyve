@@ -31,9 +31,6 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
 public class ModuleImpl extends AbstractMetaDataMap implements Module {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5291187014833234045L;
 
 	private String name;

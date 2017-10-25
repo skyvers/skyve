@@ -17,6 +17,8 @@ import org.skyve.impl.util.XMLMetaData;
 			name = "documentQuery",
 			propOrder = {"documentName", "polymorphic", "from", "filter", "columns"})
 public class DocumentQueryMetaData extends QueryMetaData {
+	private static final long serialVersionUID = -7717015766195112054L;
+
 	private String documentName;
 	private Boolean polymorphic;
 	private String from;

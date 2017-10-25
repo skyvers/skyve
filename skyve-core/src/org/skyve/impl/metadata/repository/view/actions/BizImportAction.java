@@ -9,6 +9,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "import")
 public class BizImportAction extends ClassAction {
+	private static final long serialVersionUID = 3329981529910164039L;
+
 	public BizImportAction() {
 		implicitName = ImplicitActionName.BizImport;
 	}

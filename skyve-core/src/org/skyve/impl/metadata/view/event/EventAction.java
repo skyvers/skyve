@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view.event;
 
-public interface EventAction {
+import org.skyve.metadata.MetaData;
+
+public interface EventAction extends MetaData {
 	// nothing to see here
 }

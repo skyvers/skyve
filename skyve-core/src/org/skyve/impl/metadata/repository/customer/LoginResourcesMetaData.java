@@ -9,6 +9,8 @@ import org.skyve.metadata.customer.LoginResources;
 
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "LoginResources")
 public class LoginResourcesMetaData implements LoginResources {
+	private static final long serialVersionUID = -6851698152410454808L;
+
 	private String loginPageURL;
 	private String loginErrorPageURL;
 	private String loggedOutPageURL;

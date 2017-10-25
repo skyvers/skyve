@@ -12,6 +12,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			propOrder = {"schema", "catalog", "strategy", "discriminator"}) 
 public class Persistent extends NamedMetaData {
+	private static final long serialVersionUID = -6359398747055206964L;
+
 	@XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public static enum ExtensionStrategy {
 		single,

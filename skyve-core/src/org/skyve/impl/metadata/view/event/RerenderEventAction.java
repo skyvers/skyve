@@ -10,6 +10,8 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "rerender")
 public class RerenderEventAction implements EventAction {
+	private static final long serialVersionUID = 5047374213555713026L;
+
 	private Boolean clientValidation;
 
 	public Boolean getClientValidation() {

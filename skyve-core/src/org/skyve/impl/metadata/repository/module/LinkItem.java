@@ -10,6 +10,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
 @XmlRootElement(name = "link", namespace = XMLMetaData.MODULE_NAMESPACE)
 public class LinkItem extends Item {
+	private static final long serialVersionUID = 4058261818028726112L;
+
 	private String href;
 
 	public String getHref() {

@@ -9,6 +9,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "download")
 public class DownloadAction extends ClassAction {
+	private static final long serialVersionUID = -3193664397813167826L;
+
 	public DownloadAction() {
 		implicitName = ImplicitActionName.Download;
 	}

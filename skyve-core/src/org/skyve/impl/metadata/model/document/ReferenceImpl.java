@@ -9,13 +9,11 @@ import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Reference;
 
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			propOrder = {"persistentBool", "domainType", "documentName", "queryName"})
-public abstract class ReferenceImpl extends AbstractAttribute implements org.skyve.metadata.model.document.Reference {
-	/**
-	 * For Serialization
-	 */
+public abstract class ReferenceImpl extends AbstractAttribute implements Reference {
 	private static final long serialVersionUID = 5426073638143148421L;
 
 	private boolean persistent = true;

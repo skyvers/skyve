@@ -14,9 +14,6 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ResourceReference implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1726752281166975694L;
 
 	private String relativeFile;

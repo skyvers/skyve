@@ -14,8 +14,5 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class ContentReference extends AbstractBound implements Reference {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -3654900648809959380L;
 }

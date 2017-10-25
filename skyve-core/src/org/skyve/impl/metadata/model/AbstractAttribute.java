@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
@@ -30,10 +31,7 @@ import org.skyve.metadata.model.document.DomainType;
 							"deprecatedBool",
 							"trackChangesBool",
 							"auditedBool"})
-public abstract class AbstractAttribute extends org.skyve.impl.metadata.repository.NamedMetaData implements Attribute {
-	/**
-	 * For Serialization
-	 */
+public abstract class AbstractAttribute extends NamedMetaData implements Attribute {
 	private static final long serialVersionUID = -6632233770237276819L;
 
 	private String displayName;

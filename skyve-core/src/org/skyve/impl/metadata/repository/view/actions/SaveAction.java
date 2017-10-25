@@ -9,6 +9,8 @@ import org.skyve.metadata.controller.ImplicitActionName;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "save")
 public class SaveAction extends ValidatableAction {
+	private static final long serialVersionUID = -3342187550945463414L;
+
 	public SaveAction() {
 		implicitName = ImplicitActionName.Save;
 	}

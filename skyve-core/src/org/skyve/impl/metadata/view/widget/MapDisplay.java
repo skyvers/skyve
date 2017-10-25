@@ -15,7 +15,6 @@ import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "map")
@@ -36,7 +35,7 @@ import org.skyve.metadata.view.Invisible;
 							"invisibleConditionName",
 							"visibleConditionName",
 							"properties"})
-public class MapDisplay implements MetaData, DecoratedMetaData, RelativeSize, Invisible {
+public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	private static final long serialVersionUID = 6664085314805510891L;
 
 	private String modelName;

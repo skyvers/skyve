@@ -13,11 +13,10 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.repository.PersistentMetaData;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 
 @XmlRootElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 @XmlType(namespace = XMLMetaData.ROUTER_NAMESPACE)
-public class Router implements MetaData, PersistentMetaData<Router> {
+public class Router implements PersistentMetaData<Router> {
 	private static final long serialVersionUID = 670690452538129424L;
 
 	private String uxuiSelectorClassName;

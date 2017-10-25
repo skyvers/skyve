@@ -14,6 +14,8 @@ import org.skyve.metadata.DecoratedMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public class FormColumn implements DecoratedMetaData {
+	private static final long serialVersionUID = -2927913876248576162L;
+
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
 	private Integer percentageWidth;

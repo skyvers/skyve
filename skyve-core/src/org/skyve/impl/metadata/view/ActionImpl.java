@@ -34,9 +34,6 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
 public class ActionImpl implements Action {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -133387187684800312L;
 
 	private String name;

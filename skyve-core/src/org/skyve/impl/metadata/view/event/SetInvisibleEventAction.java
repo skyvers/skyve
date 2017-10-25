@@ -14,9 +14,6 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "setInvisible")
 public class SetInvisibleEventAction extends AbstractBound implements EventAction, Invisible {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5686445772703213521L;
 
 	private String invisibleConditionName;

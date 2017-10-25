@@ -10,6 +10,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlRootElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "bizQL")
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE, name = "bizQL", propOrder = {"query"})
 public class BizQLMetaData extends QueryMetaData {
+	private static final long serialVersionUID = -3313909514104053162L;
+
 	private String query;
 
 	public String getQuery() {

@@ -15,13 +15,12 @@ import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.Invisible;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"pixelWidth", "pixelHeight", "invisibleConditionName", "visibleConditionName", "properties"})
-public class Spacer implements AbsoluteSize, MetaData, FormItemWidget, Invisible {
+public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	private static final long serialVersionUID = -3535525299887373582L;
 
 	private Integer pixelWidth;

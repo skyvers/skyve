@@ -10,6 +10,8 @@ import org.skyve.impl.metadata.view.event.EventAction;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "server")
 public class ServerSideActionEventAction implements EventAction {
+	private static final long serialVersionUID = -7029807092282914910L;
+
 	private String actionName;
 	
 	public String getActionName() {
