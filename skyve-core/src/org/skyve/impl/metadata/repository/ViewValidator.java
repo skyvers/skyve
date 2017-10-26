@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -123,16 +124,16 @@ class ViewValidator extends ViewVisitor {
 									boolean compoundBindingInvalid, 
 									boolean domainValuesRequired,
 									boolean scalarBindingOnly,
-									String widgetidentifier,
+									String widgetIdentifier,
 									AttributeType... assertTypes) {
 		if (bindingRequired && (binding == null)) {
-			throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - binding is required.");
+			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - binding is required.");
 		}
 
 		if (binding != null) {
 			if (compoundBindingInvalid) {
 				if (binding.indexOf('.') >= 0) {
-					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - Compound binding is not allowed here");
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Compound binding is not allowed here");
 				}
 			}
 			String bindingToTest = binding;
@@ -156,16 +157,16 @@ class ViewValidator extends ViewVisitor {
 				target = BindUtil.getMetaDataForBinding(customer, module, document, bindingToTest);
 			}
 			catch (MetaDataException e) {
-				throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " has an invalid binding of " + binding, e);
 			}
 			
 			if (target == null) {
-				throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + " - Binding points nowhere");
+				throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " - Binding points nowhere");
 			}
 			Attribute attribute = target.getAttribute();
 			if (((assertTypes != null) && (assertTypes.length > 0)) || domainValuesRequired) {
 				if (attribute == null) {
-					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + 
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 													" - Binding points to an implicit attribute or a condition that cannot have domain values defined.");
 				}
 			}
@@ -181,7 +182,7 @@ class ViewValidator extends ViewVisitor {
 				}
 				if (! typeMatch) {
 					StringBuilder msg = new StringBuilder(128);
-					msg.append(widgetidentifier).append(" in ").append(viewIdentifier);
+					msg.append(widgetIdentifier).append(" in ").append(viewIdentifier);
 					msg.append(" - Binding points to an attribute of type ").append(type).append(", not one of ");
 					for (AttributeType assertType : assertTypes) {
 						msg.append(assertType).append(", ");
@@ -194,7 +195,7 @@ class ViewValidator extends ViewVisitor {
 			
 			if (domainValuesRequired) {
 				if (attribute.getDomainType() == null) {
-					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier + 
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + 
 													" - Binding points to an attribute that does not have domain values defined.");
 				}
 			}
@@ -208,7 +209,7 @@ class ViewValidator extends ViewVisitor {
 						AttributeType.collection.equals(type) || 
 						AttributeType.inverseMany.equals(type) ||
 						AttributeType.inverseOne.equals(type)) {
-					throw new MetaDataException(widgetidentifier + " in " + viewIdentifier +
+					throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier +
 													" - Binding points to an attribute that is not scalar (pointing to an association or collection or inverse)");
 				}
 			}
@@ -363,6 +364,46 @@ class ViewValidator extends ViewVisitor {
 		if ((actionName != null) && (view.getAction(actionName) == null)) {
 			throw new MetaDataException(widgetIdentifier + " in " + viewIdentifier + " references a non-existent action " + actionName);
 		}
+	}
+	
+	/**
+	 * Override to validate the component instead of resolving and including the edit view structure.
+	 */
+	@Override
+	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+		String binding = component.getBinding();
+		String moduleName = component.getModuleName();
+		String documentName = component.getDocumentName();
+		String componentIdentifier = "Component";
+		if (binding != null) {
+			componentIdentifier = "Component for binding " + binding;
+			if ((moduleName != null) || (documentName != null)) {
+				throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a module/document combination, not both.");
+			}
+			validateBinding(null, 
+								binding, 
+								false, 
+								false, 
+								false, 
+								false, 
+								componentIdentifier, 
+								AttributeType.association, 
+								AttributeType.inverseOne);
+		}
+		else if ((moduleName != null) && (documentName != null)) {
+			componentIdentifier = String.format("Component for document %s.%s", moduleName, documentName);
+		}
+		else {
+			throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a module/document combination.");
+		}
+/* TODO validate the component
+		try {
+			component.setContained(uxui, customer, module, document, view.getType());
+		}
+		catch (Exception e) {
+			throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " cannot be resolved.", e);
+		}
+*/
 	}
 	
 	@Override

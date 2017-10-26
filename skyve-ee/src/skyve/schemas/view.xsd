@@ -29,6 +29,10 @@
 
   <xs:element name="comparison" type="tns:comparison"/>
 
+  <xs:element name="component" type="tns:component"/>
+
+  <xs:element name="componentNameMap" type="tns:componentNameMap"/>
+
   <xs:element name="containerColumn" type="tns:dataGridContainerColumn"/>
 
   <xs:element name="contentImage" type="tns:contentImage"/>
@@ -649,6 +653,7 @@
         <xs:element ref="tns:listGrid"/>
         <xs:element ref="tns:treeGrid"/>
         <xs:element ref="tns:inject"/>
+        <xs:element ref="tns:component"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -1616,6 +1621,35 @@
         <xs:attribute name="rootIdBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="component">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractBound">
+        <xs:sequence>
+          <xs:element name="names" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="name" type="tns:componentNameMap" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="module" type="xs:string"/>
+        <xs:attribute name="document" type="xs:string"/>
+        <xs:attribute name="component" type="xs:string"/>
+        <xs:attribute name="widgetId" type="xs:string"/>
+        <xs:attribute name="invisible" type="xs:string"/>
+        <xs:attribute name="visible" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="componentNameMap">
+    <xs:sequence/>
+    <xs:attribute name="fromComponent" type="xs:string" use="required"/>
+    <xs:attribute name="mappedTo" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:simpleType name="viewType">

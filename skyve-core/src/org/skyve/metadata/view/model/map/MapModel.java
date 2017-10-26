@@ -6,9 +6,6 @@ import org.skyve.metadata.MetaData;
 import com.vividsolutions.jts.geom.Envelope;
 
 public abstract class MapModel<T extends Bean> implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 3483411029192491351L;
 
 	private T bean;

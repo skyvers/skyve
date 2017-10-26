@@ -13,9 +13,6 @@ import org.skyve.web.WebContext;
  * @param <T>
  */
 public abstract class DownloadAction<T extends Bean> implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1360787878049667579L;
 
 	/**

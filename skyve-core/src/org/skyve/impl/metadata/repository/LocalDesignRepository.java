@@ -656,7 +656,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		String fullyQualifiedViewName = sb.toString();
 		Map<String, String> vtable = ((CustomerImpl) customer).getVTable();
 		String viewLocation = vtable.get(fullyQualifiedViewName);
-		View result = null;
+		ViewImpl result = null;
 		if (viewLocation == null) { // there DNE a purpose built view for this UX/UI - look for the general view to use.
 			sb.setLength(0);
 			sb.append(document.getOwningModuleName()).append('.').append(document.getName());
@@ -690,6 +690,7 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 							sb.append('.').append(viewType).append(" (").append(customer.getName()).append(')');
 							result = view.convert(sb.toString());
+							result.resolveComponents(uxui, customer, document);
 							if (! UtilImpl.DEV_MODE) {
 								put(viewLocation, result);
 							}
@@ -729,7 +730,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				}
 			}
 		}
-
+		
 		return result;
 	}
 

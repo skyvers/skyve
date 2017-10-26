@@ -81,25 +81,25 @@ public final class BindUtil {
 				String binding = result.substring(openCurlyBraceIndex + 1, closedCurlyBraceIndex);
 				boolean found = false;
 				Exception cause = null;
-					for (Bean bean : beans) {
-						String documentName = bean.getBizDocument();
-						if (documentName != null) {
-							try {
-								// Try to get the value from this bean
-								// Do not use BindUtil.getMetaDataForBinding as it may not be a document
-								// property, it could be a condition or an implicit property.
-								String displayValue = BindUtil.getDisplay(customer, bean, binding);
-								result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
-								openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
-								found = true;
-								
-								break;
-							}
-							catch (Exception e) {
-								cause = e;
-							}
+				for (Bean bean : beans) {
+					String documentName = bean.getBizDocument();
+					if (documentName != null) {
+						try {
+							// Try to get the value from this bean
+							// Do not use BindUtil.getMetaDataForBinding as it may not be a document
+							// property, it could be a condition or an implicit property.
+							String displayValue = BindUtil.getDisplay(customer, bean, binding);
+							result.replace(openCurlyBraceIndex, closedCurlyBraceIndex + 1, displayValue);
+							openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+							found = true;
+							
+							break;
+						}
+						catch (Exception e) {
+							cause = e;
 						}
 					}
+				}
 				
 				if (! found) {
 					StringBuilder exMessage = new StringBuilder();
@@ -196,6 +196,28 @@ public final class BindUtil {
 		return valid;
 	}
 	
+	/**
+	 * Place the bindingPrefix + '.' + <existing expression> wherever a binding expression - {<expression>} occurs.
+	 * @param message	The message to process.
+	 * @param bindingPrefix	The binding prefix to prefix with.
+	 * @return	The prefixed message.
+	 */
+	public static String prefixMessageBindings(String message, String bindingPrefix) {
+		String bindingPrefixAndDot = bindingPrefix + '.';
+		
+		StringBuilder result = new StringBuilder(message);
+		int openCurlyBraceIndex = result.indexOf("{");
+		while (openCurlyBraceIndex >= 0) {
+			if ((openCurlyBraceIndex == 0) || // first char is '{' 
+					// '{' is present and not escaped with a preceding '\' - ie \{ is escaped
+					((openCurlyBraceIndex > 0) && (result.charAt(openCurlyBraceIndex - 1) != '\\'))) {
+				result.insert(openCurlyBraceIndex + 1, bindingPrefixAndDot);
+				openCurlyBraceIndex = result.indexOf("{", openCurlyBraceIndex + 1);
+			}
+		}
+		return result.toString();
+	}
+
 	public static String negateCondition(String condition) {
         String result = null;
 
@@ -228,7 +250,6 @@ public final class BindUtil {
 	 * @param value
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static Object convert(Class<?> type, Object value) {
 		Object result = value;
 

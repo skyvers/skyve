@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -443,22 +444,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 					visitFormItem(item, formVisible, formEnabled);
 					MetaData itemWidget = item.getWidget();
 					if (itemWidget instanceof DefaultWidget) {
-						// determine the widget to use
-						String binding = ((Bound) itemWidget).getBinding();
-						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-						Attribute attribute = target.getAttribute();
-						if (attribute != null) {
-							Bound defaultWidget = attribute.getDefaultInputWidget();
-							String definedBinding = defaultWidget.getBinding();
-							try {
-								// Temporarily set the binding in the default widget binding
-								defaultWidget.setBinding(binding);
-								visitWidget(defaultWidget, parentVisible, parentEnabled);
-							}
-							finally {
-								defaultWidget.setBinding(definedBinding);
-							}
-						}
+						visitDefaultWidget((DefaultWidget) itemWidget, formVisible, formEnabled);
 					}
 					else {
 						visitWidget(itemWidget, formVisible, formEnabled);
@@ -767,11 +753,41 @@ public abstract class ViewVisitor extends ActionVisitor {
 			Inject inject = (Inject) widget;
 			visitInject(inject, parentVisible, parentEnabled);
 		}
+		else if (widget instanceof Component) {
+			Component component = (Component) widget;
+			visitComponent(component, parentVisible, parentEnabled);
+		}
 		else {
 			throw new MetaDataException("Widget " + widget + " not catered for.");
 		}
 	}
 
+	public void visitDefaultWidget(DefaultWidget widget, boolean parentVisible, boolean parentEnabled) {
+		String binding = widget.getBinding();
+
+		// determine the widget to use
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		Attribute attribute = target.getAttribute();
+		if (attribute != null) {
+			Bound defaultWidget = attribute.getDefaultInputWidget();
+			String definedBinding = defaultWidget.getBinding();
+			try {
+				// Temporarily set the binding in the default widget binding
+				defaultWidget.setBinding(binding);
+				visitWidget(defaultWidget, parentVisible, parentEnabled);
+			}
+			finally {
+				defaultWidget.setBinding(definedBinding);
+			}
+		}
+	}
+	
+	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+		for (MetaData widget : component.getContained()) {
+			visitWidget(widget, parentVisible, parentEnabled);
+		}
+	}
+	
 	private void visitContainer(Container container, 
 									boolean parentVisible,
 									boolean parentEnabled) {

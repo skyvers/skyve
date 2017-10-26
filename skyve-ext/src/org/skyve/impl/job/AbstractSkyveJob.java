@@ -24,9 +24,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1272267642792331001L;
 
 	public static final String DISPLAY_NAME_JOB_PARAMETER_KEY = "displayName";

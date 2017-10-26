@@ -24,7 +24,6 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Parameterizable;
-import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
@@ -42,7 +41,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"refreshActionName",
 							"parameters",
 							"properties"})
-public class ViewMetaData extends Container implements PersistentMetaData<View>, Parameterizable, DecoratedMetaData {
+public class ViewMetaData extends Container implements PersistentMetaData<ViewImpl>, Parameterizable, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
 	private ViewType type;
@@ -155,7 +154,7 @@ public class ViewMetaData extends Container implements PersistentMetaData<View>,
 	}
 
 	@Override
-	public org.skyve.metadata.view.View convert(String metaDataName) {
+	public ViewImpl convert(String metaDataName) {
 		ViewImpl result = new ViewImpl();
 		String value = getTitle();
 		if (value == null) {

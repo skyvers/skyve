@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.skyve.impl.metadata.Container;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.component.Component;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -134,5 +141,20 @@ public class ViewImpl extends Container implements View {
 	@Override
 	public Map<String, String> getProperties() {
 		return properties;
+	}
+	
+	/**
+	 * Ensure that any component loaded matches the given UX/UI.
+	 * @param uxui
+	 */
+	public void resolveComponents(String uxui, Customer customer, Document document) {
+		Module module = customer.getModule(document.getOwningModuleName());
+		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this) {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+				component.setContained(uxui, customer, module, document, type);
+			}
+		}.visit();
 	}
 }

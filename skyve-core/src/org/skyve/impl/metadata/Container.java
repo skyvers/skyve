@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -33,9 +34,6 @@ import org.skyve.metadata.MetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE)
 public abstract class Container implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 2633803738970828551L;
 
 	@XmlElementRefs({@XmlElementRef(type = StaticImage.class),
@@ -58,7 +56,8 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = DataGrid.class),
 						@XmlElementRef(type = ListGrid.class),
 						@XmlElementRef(type = TreeGrid.class),
-						@XmlElementRef(type = Inject.class)})
+						@XmlElementRef(type = Inject.class),
+						@XmlElementRef(type = Component.class)})
 	private List<MetaData> contained = new ArrayList<>();
 
 	public List<MetaData> getContained() {

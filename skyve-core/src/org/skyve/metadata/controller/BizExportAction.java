@@ -8,9 +8,6 @@ import org.skyve.web.WebContext;
  * 
  */
 public abstract class BizExportAction implements MetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -8564743907495475560L;
 
 	/**
