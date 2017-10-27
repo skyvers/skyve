@@ -676,7 +676,11 @@ public class SmartClientEditServlet extends HttpServlet {
 			ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
 																		processModule, 
 																		processDocument, 
-																		processDocument.getView(uxui, customer, processBean.isCreated() ? ViewType.edit : ViewType.create),
+																		processDocument.getView(uxui, 
+																									customer, 
+																									processBean.isCreated() ? 
+																										ViewType.edit.toString() : 
+																										ViewType.create.toString()),
 																		processBean,
 																		editIdCounter,
 																		createIdCounter,
@@ -705,7 +709,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	    									SortedMap<String, Object> parameters,
 	    									String uxui)
     throws Exception {
-		View view = processDocument.getView(uxui, customer, processBean.isCreated() ? ViewType.edit : ViewType.create);
+		View view = processDocument.getView(uxui, 
+												customer, 
+												processBean.isCreated() ? 
+													ViewType.edit.toString() : 
+													ViewType.create.toString());
 		TreeMap<String, String> newParameterNamesToBindings = new TreeMap<>();
 		for (Parameter parameter : view.getParameters()) {
 			newParameterNamesToBindings.put(parameter.getName(), parameter.getBinding());
@@ -785,7 +793,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	    	ViewJSONManipulator manipulator = new ViewJSONManipulator(user, 
 																		formModule, 
 																		formDocument, 
-																		formDocument.getView(uxui, customer, formBean.isCreated() ? ViewType.edit : ViewType.create),
+																		formDocument.getView(uxui, 
+																								customer, 
+																								formBean.isCreated() ? 
+																									ViewType.edit.toString() : 
+																									ViewType.create.toString()),
 																		formBean, 
 																		editIdCounter,
 																		createIdCounter,
@@ -909,7 +921,11 @@ public class SmartClientEditServlet extends HttpServlet {
 			beanToRender = processedBean; 
 		}
 		
-		View renderView = formDocument.getView(uxui, customer, beanToRender.isCreated() ? ViewType.edit: ViewType.create);
+		View renderView = formDocument.getView(uxui, 
+												customer, 
+												beanToRender.isCreated() ? 
+													ViewType.edit.toString() : 
+													ViewType.create.toString());
 		pumpOutResponse(webContext, user, formModule, formDocument, renderView, beanToRender, editIdCounter, createIdCounter, pw);
 	}
 

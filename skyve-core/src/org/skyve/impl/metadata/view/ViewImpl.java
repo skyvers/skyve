@@ -22,7 +22,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 public class ViewImpl extends Container implements View {
 	private static final long serialVersionUID = -2621201277538515637L;
 
-	private ViewType type;
+	private String name;
 	private String icon32x32RelativeFileName;
 	private String iconStyleClass;
 	private String title;
@@ -63,12 +63,12 @@ public class ViewImpl extends Container implements View {
 	}
 
 	@Override
-	public ViewType getType() {
-		return type;
+	public String getName() {
+		return name;
 	}
 
-	public void setType(ViewType type) {
-		this.type = type;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class ViewImpl extends Container implements View {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
-				component.setContained(uxui, customer, module, document, type);
+				component.setContained(uxui, customer, module, document, name);
 			}
 		}.visit();
 	}

@@ -13,9 +13,9 @@ import org.skyve.impl.metadata.view.ViewImpl;
 
 public abstract class ActionVisitor {
 	public final void visitActions(ViewImpl view) {
-		ViewType type = view.getType();
+		String name = view.getName();
 		for (org.skyve.metadata.view.Action action : view.getActions()) {
-			visit(type, (ActionImpl) action);
+			visit(name, (ActionImpl) action);
 			visitParameterizable(action, true, true);
 		}
 	}
@@ -65,20 +65,20 @@ public abstract class ActionVisitor {
 												boolean parentVisible,
 												boolean parentEnabled);
 
-	private void visit(ViewType viewType, ActionImpl action) {
+	private void visit(String viewName, ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (implicitName != null) {
-			visit(viewType, implicitName, action);
+			visit(viewName, implicitName, action);
 		}
 		else {
 			visitCustomAction(action);
 		}
 	}
 
-	private void visit(ViewType viewType, ImplicitActionName implicitName, ActionImpl action) {
+	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
 		if (implicitName == ImplicitActionName.DEFAULTS) {
-			if (viewType == ViewType.list) {
-				visit(viewType, ImplicitActionName.New, action);
+			if (ViewType.list.toString().equals(viewName)) {
+				visit(viewName, ImplicitActionName.New, action);
 			}
 			else { // edit view
 				for (ImplicitActionName value : ImplicitActionName.values()) {
@@ -91,7 +91,7 @@ public abstract class ActionVisitor {
 							(value != ImplicitActionName.Download) && 
 							(value != ImplicitActionName.Upload) && 
 							(value != ImplicitActionName.Navigate)) {
-						visit(viewType, value, action);
+						visit(viewName, value, action);
 					}
 				}
 			}

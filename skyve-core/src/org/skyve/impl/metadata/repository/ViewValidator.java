@@ -113,7 +113,7 @@ class ViewValidator extends ViewVisitor {
 	
 	ViewValidator(ViewImpl view, CustomerImpl customer, DocumentImpl document, String uxui) {
 		super(customer, (ModuleImpl) customer.getModule(document.getOwningModuleName()), document, view);
-		viewIdentifier = view.getType() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
+		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 		this.uxui = uxui;
 		visit();
 	}
@@ -372,13 +372,15 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
 		String binding = component.getBinding();
-		String moduleName = component.getModuleName();
-		String documentName = component.getDocumentName();
+		String name = component.getName();
 		String componentIdentifier = "Component";
+		if (name != null) {
+			componentIdentifier += " named " + name;
+		}
 		if (binding != null) {
-			componentIdentifier = "Component for binding " + binding;
-			if ((moduleName != null) || (documentName != null)) {
-				throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a module/document combination, not both.");
+			componentIdentifier += " for binding " + binding;
+			if (name != null) {
+				throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a name, not both.");
 			}
 			validateBinding(null, 
 								binding, 
@@ -390,20 +392,13 @@ class ViewValidator extends ViewVisitor {
 								AttributeType.association, 
 								AttributeType.inverseOne);
 		}
-		else if ((moduleName != null) && (documentName != null)) {
-			componentIdentifier = String.format("Component for document %s.%s", moduleName, documentName);
-		}
-		else {
-			throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a module/document combination.");
-		}
-/* TODO validate the component
+
 		try {
-			component.setContained(uxui, customer, module, document, view.getType());
+			component.setContained(uxui, customer, module, document, view.getName());
 		}
 		catch (Exception e) {
 			throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " cannot be resolved.", e);
 		}
-*/
 	}
 	
 	@Override
@@ -1412,7 +1407,7 @@ class ViewValidator extends ViewVisitor {
 						DocumentImpl targetDocument = (DocumentImpl) targetModule.getDocument(customer, targetReference.getDocumentName());
 						
 						// This is a container column of an existing row in a table/grid - so get the edit view
-						ViewImpl targetView = (ViewImpl) targetDocument.getView(uxui, customer, ViewType.edit);
+						ViewImpl targetView = (ViewImpl) targetDocument.getView(uxui, customer, ViewType.edit.toString());
 						if (targetView.getAction(actionName) == null) {
 							throw new MetaDataException(actionName + " DNE");
 						}

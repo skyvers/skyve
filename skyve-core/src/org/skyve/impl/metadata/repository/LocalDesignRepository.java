@@ -649,10 +649,10 @@ public class LocalDesignRepository extends AbstractRepository {
 	public View getView(String uxui,
 							Customer customer, 
 							Document document, 
-							ViewType viewType) {
+							String name) {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append(document.getOwningModuleName()).append('.').append(document.getName());
-		sb.append(".views.").append(uxui).append('.').append(viewType.toString());
+		sb.append(".views.").append(uxui).append('.').append(name);
 		String fullyQualifiedViewName = sb.toString();
 		Map<String, String> vtable = ((CustomerImpl) customer).getVTable();
 		String viewLocation = vtable.get(fullyQualifiedViewName);
@@ -660,7 +660,7 @@ public class LocalDesignRepository extends AbstractRepository {
 		if (viewLocation == null) { // there DNE a purpose built view for this UX/UI - look for the general view to use.
 			sb.setLength(0);
 			sb.append(document.getOwningModuleName()).append('.').append(document.getName());
-			sb.append(".views.").append(viewType.toString());
+			sb.append(".views.").append(name);
 			fullyQualifiedViewName = sb.toString();
 			viewLocation = vtable.get(fullyQualifiedViewName);
 		}
@@ -681,14 +681,14 @@ public class LocalDesignRepository extends AbstractRepository {
 							sb.append(UtilImpl.getAbsoluteBasePath());
 							sb.append(viewLocation).append(".xml");
 							ViewMetaData view = XMLMetaData.unmarshalView(sb.toString());
-							if (! viewType.equals(view.getType())) {
+							if (! name.equals(view.getName())) {
 								throw new MetaDataException("View is defined with file name of " + sb.toString() + 
-																" but the type attribute is " + view.getType());
+																" but the name attribute is " + view.getName());
 							}
 
 							sb.setLength(0);
 							sb.append(document.getOwningModuleName()).append('.').append(document.getName());
-							sb.append('.').append(viewType).append(" (").append(customer.getName()).append(')');
+							sb.append('.').append(name).append(" (").append(customer.getName()).append(')');
 							result = view.convert(sb.toString());
 							result.resolveComponents(uxui, customer, document);
 							if (! UtilImpl.DEV_MODE) {
@@ -703,13 +703,15 @@ public class LocalDesignRepository extends AbstractRepository {
 			}
 		}
 		else { // there is no view defined on the file system (and not generated previously)
-			if ((viewType == ViewType.edit) || (viewType == ViewType.pick) || (viewType == ViewType.params)) {
+			if (ViewType.edit.toString().equals(name) || 
+					ViewType.pick.toString().equals(name) || 
+					ViewType.params.toString().equals(name)) {
 				synchronized (this) {
 					sb.setLength(0);
 					sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 					String documentLocation = vtable.get(sb.toString());
 					sb.setLength(0);
-					sb.append(documentLocation).append('/').append(VIEWS_NAMESPACE).append(viewType.toString());
+					sb.append(documentLocation).append('/').append(VIEWS_NAMESPACE).append(name);
 					viewLocation = sb.toString();
 					// Consider the scenario where an edit view is not defined for a document.
 					// One customer logs in and the view is generated and cached.
@@ -718,7 +720,7 @@ public class LocalDesignRepository extends AbstractRepository {
 						result = get(viewLocation);
 					}
 					if (result == null) {
-						result = ViewGenerator.generate(customer, document, viewType);
+						result = ViewGenerator.generate(customer, document, name);
 						if (! UtilImpl.DEV_MODE) {
 							put(viewLocation, result);
 						}

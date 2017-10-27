@@ -14,7 +14,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
@@ -81,7 +80,7 @@ public interface Repository {
 	 * @param viewType
 	 * @return
 	 */
-	public View getView(String uxui, Customer customer, Document document, ViewType viewType);
+	public View getView(String uxui, Customer customer, Document document, String name);
 
 	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime);
 	

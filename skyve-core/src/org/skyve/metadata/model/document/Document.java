@@ -8,7 +8,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.View.ViewType;
 
 /**
  * 
@@ -124,10 +123,10 @@ public interface Document extends Model {
 	 * 
 	 * @param uxui
 	 * @param customer
-	 * @param type
+	 * @param name
 	 * @return
 	 */
-	public View getView(String uxui, Customer customer, ViewType type);
+	public View getView(String uxui, Customer customer, String name);
 	
 	/**
 	 * 

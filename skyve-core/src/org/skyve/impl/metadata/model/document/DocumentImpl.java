@@ -474,11 +474,12 @@ public final class DocumentImpl extends ModelImpl implements Document {
 	}
 
 	@Override
-	public View getView(String uxui, Customer customer, ViewType type) {
+	public View getView(String uxui, Customer customer, String name) {
 		AbstractRepository repository = AbstractRepository.get();
-		View view = repository.getView(uxui, customer, this, type);
-		if ((view == null) && (type == ViewType.create)) {
-			view = repository.getView(uxui, customer, this, ViewType.edit);
+		View view = repository.getView(uxui, customer, this, name);
+		// if we want a create view and there isn't one, get the edit view instead
+		if ((view == null) && (ViewType.create.toString().equals(name))) {
+			view = repository.getView(uxui, customer, this, ViewType.edit.toString());
 		}
 
 		return view;

@@ -22,9 +22,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Parameterizable;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "view")
@@ -32,7 +32,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 			name = "view",
 			propOrder = {"documentation",
 							"actions", 
-							"type", 
+							"name", 
 							"title",
 							"iconStyleClass",
 							"icon32x32RelativeFileName",
@@ -41,10 +41,10 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 							"refreshActionName",
 							"parameters",
 							"properties"})
-public class ViewMetaData extends Container implements PersistentMetaData<ViewImpl>, Parameterizable, DecoratedMetaData {
+public class ViewMetaData extends Container implements NamedMetaData, PersistentMetaData<ViewImpl>, Parameterizable, DecoratedMetaData {
 	private static final long serialVersionUID = -1831750070396044584L;
 
-	private ViewType type;
+	private String name;
 	private String title;
 	private String iconStyleClass;
 	private String icon32x32RelativeFileName;
@@ -59,13 +59,14 @@ public class ViewMetaData extends Container implements PersistentMetaData<ViewIm
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
 
-	public ViewType getType() {
-		return type;
+	@Override
+	public String getName() {
+		return name;
 	}
 
 	@XmlAttribute(required = true)
-	public void setType(ViewType type) {
-		this.type = type;
+	public void setName(String name) {
+		this.name = UtilImpl.processStringValue(name);
 	}
 
 	public String getTitle() {
@@ -165,11 +166,11 @@ public class ViewMetaData extends Container implements PersistentMetaData<ViewIm
 		result.setIconStyleClass(getIconStyleClass());
 		result.setIcon32x32RelativeFileName(getIcon32x32RelativeFileName());
 		
-		ViewType theType = getType();
-		if (theType == null) {
-			throw new MetaDataException(metaDataName + " : The view [type] is required for view " + metaDataName);
+		String theName = getName();
+		if (theName == null) {
+			throw new MetaDataException(metaDataName + " : The view [name] is required for view " + metaDataName);
 		}
-		result.setType(theType);
+		result.setName(theName);
 
 		result.getContained().addAll(getContained());
 
@@ -181,29 +182,29 @@ public class ViewMetaData extends Container implements PersistentMetaData<ViewIm
 				if (action.getResourceName() == null) {
 					if (implicitName == null) { // custom action
 						throw new MetaDataException(metaDataName + " : [className] is required for a custom action for " + 
-														getType() + " view " + metaDataName);
+														getName() + " view " + metaDataName);
 					}
 					else if (ImplicitActionName.BizExport.equals(implicitName) || 
 								ImplicitActionName.BizImport.equals(implicitName)) {
 						throw new MetaDataException(metaDataName + " : [className] is required for a BizPort action for " +
-														getType() + " view " + metaDataName);
+														getName() + " view " + metaDataName);
 					}
 					else if (ImplicitActionName.Report.equals(implicitName)) {
 						throw new MetaDataException(metaDataName + " : [reportName] is required for a report action for " + 
-														getType() + " view " + metaDataName);
+														getName() + " view " + metaDataName);
 					}
 				}
 				else {
 					value = actionMetaData.getDisplayName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The view action [displayName] is required for the designer defined action " +
-														action.getResourceName() + " for " + getType() + " view " + metaDataName);
+														action.getResourceName() + " for " + getName() + " view " + metaDataName);
 					}
 				}
 
 				if (result.getAction(action.getName()) != null) {
 					throw new MetaDataException(metaDataName + " : The view action named " + action.getName() + " is defined in the " +
-													getType() + " view multiple times");
+													getName() + " view multiple times");
 				}
 				result.putAction(action);
 			}
@@ -213,17 +214,17 @@ public class ViewMetaData extends Container implements PersistentMetaData<ViewIm
 		value = getRefreshConditionName();
 		if (value != null) {
 			if (result.getRefreshTimeInSeconds() == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshIf] is defined but no [refreshTimeInSeconds] is defined in " + getType() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshIf] is defined but no [refreshTimeInSeconds] is defined in " + getName() + " view " + metaDataName);
 			}
 			result.setRefreshConditionName(value);
 		}
 		value = getRefreshActionName();
 		if (value != null) {
 			if (result.getRefreshTimeInSeconds() == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshAction] is defined but no [refreshTimeInSeconds] is defined in " + getType() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshAction] is defined but no [refreshTimeInSeconds] is defined in " + getName() + " view " + metaDataName);
 			}
 			if (result.getAction(value) == null) {
-				throw new MetaDataException(metaDataName + " : The view [refreshAction] is not a valid action in " + getType() + " view " + metaDataName);
+				throw new MetaDataException(metaDataName + " : The view [refreshAction] is not a valid action in " + getName() + " view " + metaDataName);
 			}
 			result.setRefreshActionName(value);
 		}
@@ -231,10 +232,10 @@ public class ViewMetaData extends Container implements PersistentMetaData<ViewIm
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			for (Parameter parameter : parameters) {
 				if (parameter.getName() == null) {
-					throw new MetaDataException(metaDataName + " : The " + getType() + " view newParameter [name] is required in " + getType() + " view " + metaDataName);
+					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [name] is required in " + getName() + " view " + metaDataName);
 				}
 				if (parameter.getValue() != null) {
-					throw new MetaDataException(metaDataName + " : The " + getType() + " view " + parameter.getName() + " newParameter [value] is not required in " + getType() + " view " + metaDataName);
+					throw new MetaDataException(metaDataName + " : The " + getName() + " view " + parameter.getName() + " newParameter [value] is not required in " + getName() + " view " + metaDataName);
 				}
 			}
 			result.getParameters().addAll(parameters);

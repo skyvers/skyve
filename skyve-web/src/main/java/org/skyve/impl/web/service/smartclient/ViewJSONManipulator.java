@@ -226,11 +226,11 @@ class ViewJSONManipulator extends ViewVisitor {
 		private String generateWidgetId() {
 			StringBuilder id = new StringBuilder(64);
 
-			ViewType type = view.getType();
+			String name = view.getName();
 			id.append(module.getName()).append('_');
 			id.append(document.getName()).append('_');
-			id.append(type).append('_');
-			if (ViewType.create.equals(type)) {
+			id.append(name).append('_');
+			if (ViewType.create.toString().equals(name)) {
 				id.append(createIdCounter);
 			}
 			else {
@@ -1012,7 +1012,7 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// keep this in sync with the generated edit views
-		if (ViewType.create.equals(view.getType())) {
+		if (ViewType.create.toString().equals(view.getName())) {
 			createIdCounter++;
 		}
 		else {
@@ -1533,7 +1533,7 @@ class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// keep this in sync with the generated edit views
-		if (ViewType.create.equals(view.getType())) {
+		if (ViewType.create.toString().equals(view.getName())) {
 			createIdCounter++;
 		}
 		else {
@@ -1546,7 +1546,7 @@ class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// keep this in sync with the generated edit views
-		if (ViewType.create.equals(view.getType())) {
+		if (ViewType.create.toString().equals(view.getName())) {
 			createIdCounter++;
 		}
 		else {
@@ -1559,7 +1559,7 @@ class ViewJSONManipulator extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// keep this in sync with the generated edit views
-		if (ViewType.create.equals(view.getType())) {
+		if (ViewType.create.toString().equals(view.getName())) {
 			createIdCounter++;
 		}
 		else {

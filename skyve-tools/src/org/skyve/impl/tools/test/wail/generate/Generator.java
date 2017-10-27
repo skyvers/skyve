@@ -41,8 +41,8 @@ public class Generator {
 				DocumentRef documentRef = entry.getValue();
 				if (documentRef.getOwningModuleName().equals(module.getName())) {
 					Document document = module.getDocument(customer, entry.getKey());
-					View createView = document.getView("desktop", customer, ViewType.create);
-					View editView = document.getView("desktop", customer, ViewType.edit);
+					View createView = document.getView("desktop", customer, ViewType.create.toString());
+					View editView = document.getView("desktop", customer, ViewType.edit.toString());
 					if (createView != editView) {
 						new GenerateViewVisitor((CustomerImpl) customer,
 													(ModuleImpl) module,

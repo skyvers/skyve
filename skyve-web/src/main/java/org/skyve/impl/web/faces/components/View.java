@@ -109,7 +109,7 @@ public class View extends HtmlPanelGroup {
 		        	layoutBuilder.setUserAgentType(userAgentType);
 
 			        FacesViewVisitor fvv = null;
-			        org.skyve.metadata.view.View view = repository.getView(uxui.getName(), customer, document, ViewType.edit);
+			        org.skyve.metadata.view.View view = repository.getView(uxui.getName(), customer, document, ViewType.edit.toString());
 			        if (view != null) {
 			        	fvv = new FacesViewVisitor(user,
 													(CustomerImpl) customer,
@@ -122,7 +122,7 @@ public class View extends HtmlPanelGroup {
 	                    fvv.visit();
 	                    View.this.getChildren().add(fvv.getFacesView());
 	                }
-	                view = repository.getView(uxui.getName(), customer, document, ViewType.create);
+	                view = repository.getView(uxui.getName(), customer, document, ViewType.create.toString());
 	                if (view != null) {
 	                    fvv = new FacesViewVisitor(user,
 		                                              (CustomerImpl) customer,

@@ -171,8 +171,8 @@ public class FacesViewVisitor extends ViewVisitor {
 							LayoutBuilder lb) {
 		super(customer, module, document, view);
 		this.user = user;
-		ViewType viewType = view.getType();
-		createView = ViewType.create.equals(viewType);
+		String viewName = view.getName();
+		createView = ViewType.create.toString().equals(viewName);
 		this.widgetId = widgetId;
 		this.cb = cb;
 		this.lb = lb;

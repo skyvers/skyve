@@ -64,20 +64,20 @@ public class ViewGenerator {
 		// do nothing
 	}
 
-	public static ViewImpl generate(Customer customer, Document document, ViewType type) {
+	public static ViewImpl generate(Customer customer, Document document, String viewName) {
 		ViewImpl result = null;
 
 		Module module = customer.getModule(document.getOwningModuleName());
 
-		if (type == ViewType.list) {
+		if (ViewType.list.toString().equals(viewName)) {
 			QueryDefinition defaultQuery = module.getDocumentDefaultQuery(customer, document.getName());
 			result = generateListView(customer, document, defaultQuery, null);
 		}
-		else if (type == ViewType.edit) {
+		else if (ViewType.edit.toString().equals(viewName)) {
 			result = generateEditView(customer, module, document);
 		}
 		else {
-			throw new IllegalArgumentException("ViewGenerator : Cannot generate a view of type " + type);
+			throw new IllegalArgumentException("ViewGenerator : Cannot generate a view of type " + viewName);
 		}
 
 		return result;
@@ -90,7 +90,7 @@ public class ViewGenerator {
 												List<Bean> beans,
 												String binding) {
 		ViewImpl result = new ViewImpl();
-		result.setType(ViewType.pick);
+		result.setName(ViewType.pick.toString());
 		result.setTitle("Pick a " + document.getSingularAlias());
 		result.setIconStyleClass(document.getIconStyleClass());
 		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
@@ -150,7 +150,7 @@ public class ViewGenerator {
 	@SuppressWarnings("unused")
 	public static ViewImpl generateListView(Customer customer, Document document, QueryDefinition query, String description) {
 		ViewImpl result = new ViewImpl();
-		result.setType(ViewType.list);
+		result.setName(ViewType.list.toString());
 		StringBuilder title = new StringBuilder(64);
 		String finalDescription = description;
 		if (finalDescription == null) {
@@ -188,7 +188,7 @@ public class ViewGenerator {
 	
 	private static ViewImpl generateEditView(Customer customer, Module module, Document document) {
 		ViewImpl result = new ViewImpl();
-		result.setType(ViewType.edit);
+		result.setName(ViewType.edit.toString());
 
 		result.setTitle(document.getSingularAlias());
 		result.setIconStyleClass(document.getIconStyleClass());
@@ -433,10 +433,10 @@ public class ViewGenerator {
 												Document document,
 												boolean customerOverridden,
 												boolean uxuiOverridden) {
-		ViewImpl view = generate(customer, document, ViewType.edit);
+		ViewImpl view = generate(customer, document, ViewType.edit.toString());
 		
 		ViewMetaData repositoryView = new ViewMetaData();
-		repositoryView.setType(ViewType.edit);
+		repositoryView.setName(ViewType.edit.toString());
 		repositoryView.setTitle(view.getTitle());
 		repositoryView.setIconStyleClass(view.getIconStyleClass());
 		repositoryView.setIcon32x32RelativeFileName(view.getIcon32x32RelativeFileName());

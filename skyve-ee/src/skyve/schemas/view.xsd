@@ -618,7 +618,7 @@
           </xs:element>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
-        <xs:attribute name="type" type="tns:viewType" use="required"/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="title" type="xs:string" use="required"/>
         <xs:attribute name="iconStyleClass" type="xs:string"/>
         <xs:attribute name="icon32x32RelativeFileName" type="xs:string"/>
@@ -1638,7 +1638,7 @@
         </xs:sequence>
         <xs:attribute name="module" type="xs:string"/>
         <xs:attribute name="document" type="xs:string"/>
-        <xs:attribute name="component" type="xs:string"/>
+        <xs:attribute name="name" type="xs:string"/>
         <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="invisible" type="xs:string"/>
         <xs:attribute name="visible" type="xs:string"/>

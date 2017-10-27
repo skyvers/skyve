@@ -23,28 +23,26 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.model.document.Association;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"moduleName", 
 							"documentName", 
-							"componentName",
+							"name",
 							"widgetId",
 							"names",
 							"properties"})
-public class Component extends AbstractBound implements Invisible, DecoratedMetaData {
+public class Component extends AbstractBound implements NamedMetaData, DecoratedMetaData, Invisible {
 	private static final long serialVersionUID = 7882200042806155928L;
 
 	private String moduleName;
 	private String documentName;
-	private String componentName;
+	private String name;
 	private String widgetId;
 
 	private String invisibleConditionName;
@@ -77,13 +75,14 @@ public class Component extends AbstractBound implements Invisible, DecoratedMeta
 		this.documentName = documentName;
 	}
 
-	public String getComponentName() {
-		return componentName;
+	@Override
+	public String getName() {
+		return name;
 	}
 
-	@XmlAttribute(name = "component")
-	public void setComponentName(String componentName) {
-		this.componentName = componentName;
+	@XmlAttribute(name = "name")
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getWidgetId() {
@@ -131,7 +130,7 @@ public class Component extends AbstractBound implements Invisible, DecoratedMeta
 		return contained;
 	}
 
-	public void setContained(String uxui, CustomerImpl customer, Module owningModule, Document owningDocument, ViewType type) {
+	public void setContained(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;
 		DocumentImpl d = null;
@@ -142,12 +141,22 @@ public class Component extends AbstractBound implements Invisible, DecoratedMeta
 			m = (ModuleImpl) customer.getModule(d.getOwningModuleName());
 		}
 		else {
-			m = (ModuleImpl) customer.getModule(moduleName);
-			d = (DocumentImpl) m.getDocument(customer, documentName);
+			if (moduleName != null) {
+				m = (ModuleImpl) customer.getModule(moduleName);
+			}
+			else {
+				m = owningModule;
+			}
+			if (documentName != null) {
+				d = (DocumentImpl) m.getDocument(customer, documentName);
+			}
+			else {
+				d = owningDocument;
+			}
 		}
-		View originalView = (componentName == null) ? 
-								d.getView(uxui, customer, type) : 
-								d.getView(uxui, customer, ViewType.valueOf(componentName));
+		View originalView = (name == null) ? 
+								d.getView(uxui, customer, viewName) : 
+								d.getView(uxui, customer, name);
 		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
 
 		ComponentViewVisitor visitor = new ComponentViewVisitor(customer, m, d, view, binding, names, widgetId);

@@ -237,7 +237,7 @@ public class XMLMetaData {
 			return sos.toString();
 		}
 		catch (JAXBException e) {
-			throw new MetaDataException("Could not marshal " + view.getType() + " view", e);
+			throw new MetaDataException("Could not marshal " + view.getName() + " view", e);
 		}
 	}
 

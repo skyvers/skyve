@@ -177,13 +177,13 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 			if (noCreateView) {
 				containerVariables.push("view");
 			}
-			else if (ViewType.edit.equals(view.getType())) {
+			else if (ViewType.edit.toString().equals(view.getName())) {
 				code.append("var edit = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 				code.append(Bean.NOT_CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("edit");
 			}
-			else if (ViewType.create.equals(view.getType())) {
+			else if (ViewType.create.toString().equals(view.getName())) {
 				code.append("var create = isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
 				code.append(Bean.CREATED_KEY);
 				code.append("'});");
@@ -1933,10 +1933,10 @@ pickListFields:[{name:'value'}],
 		public void visitedView() {
 			containerVariables.pop();
 			if (! noCreateView) {
-				if (ViewType.edit.equals(view.getType())) {
+				if (ViewType.edit.toString().equals(view.getName())) {
 					code.append("view.addContained(edit);");
 				}
-				else if (ViewType.create.equals(view.getType())) {
+				else if (ViewType.create.toString().equals(view.getName())) {
 					code.append("view.addContained(create);");
 				}
 			}
@@ -2490,12 +2490,12 @@ pickListFields:[{name:'value'}],
 			StringBuilder result = new StringBuilder(64);
 			result.append('\'').append(module.getName()).append('_');
 			result.append(document.getName()).append('_');
-			result.append(view.getType()).append('_');
+			result.append(view.getName()).append('_');
 			result.append("'+").append(module.getName()).append('.').append(document.getName());
-			if (ViewType.edit.equals(view.getType())) {
+			if (ViewType.edit.toString().equals(view.getName())) {
 				result.append(SmartClientWebContext.EDIT_ID_COUNTER).append("++");
 			}
-			else if (ViewType.create.equals(view.getType())) {
+			else if (ViewType.create.toString().equals(view.getName())) {
 				result.append(SmartClientWebContext.CREATE_ID_COUNTER).append("++");
 			}
 			
@@ -2713,7 +2713,7 @@ pickListFields:[{name:'value'}],
 					// use double quote string delimiter to allow &quot; HTML character entity
 					code.append("view.add");
 					if (! noCreateView) {
-						code.append(ViewType.edit.equals(view.getType()) ? "Edit" : "Create");
+						code.append(ViewType.edit.toString().equals(view.getName()) ? "Edit" : "Create");
 					}
 					code.append("Action(");
 					code.append(buttonCode).append(");");
@@ -3037,14 +3037,14 @@ pickListFields:[{name:'value'}],
 
 				Module module = customer.getModule(moduleName);
 				Document document = module.getDocument(customer, documentName);
-				View editView = document.getView(uxui.getName(), customer, ViewType.edit);
-				View createView = document.getView(uxui.getName(), customer, ViewType.create);
+				View editView = document.getView(uxui.getName(), customer, ViewType.edit.toString());
+				View createView = document.getView(uxui.getName(), customer, ViewType.create.toString());
 	
 				String editString = null;
 				String createString = null;
 	
 				// create and edit view are the same - use edit view
-				if (ViewType.edit.equals(createView.getType())) {
+				if (ViewType.edit.toString().equals(createView.getName())) {
 					SmartClientViewVisitor visitor = new SmartClientViewVisitor(user, customer, module, document, editView, true);
 					visitor.visit();
 					editString = visitor.getCode().toString();

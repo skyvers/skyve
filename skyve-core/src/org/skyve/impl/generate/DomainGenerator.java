@@ -61,10 +61,10 @@ public abstract class DomainGenerator {
 				for (UxUiMetadata uxui : repository.getRouter().getUxUis()) {
 					String uxuiName = uxui.getName();
 					System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
-					View view = repository.getView(uxuiName, customer, document, ViewType.edit);
+					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
 					System.out.println("Validate edit view for document " + documentName + " and uxui " + uxuiName);
 					repository.validateView(customer, document, view, uxuiName);
-					view = repository.getView(uxuiName, customer, document, ViewType.create);
+					view = repository.getView(uxuiName, customer, document, ViewType.create.toString());
 					if (view != null) {
 						System.out.println("Validate create view for document " + documentName + " and uxui " + uxuiName);
 						repository.validateView(customer, document, view, uxuiName);
