@@ -155,6 +155,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String listVar,
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
+		Map<String, String> properties = button.getProperties();
 		return actionButton(action.getDisplayName(),
 								action.getIconStyleClass(),
 				                action.getToolTip(),
@@ -168,7 +169,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                action.getClientValidation(),
 				                action.getConfirmationText(),
 				                action.getDisabledConditionName(),
-				                action.getInvisibleConditionName());
+				                action.getInvisibleConditionName(),
+				                properties.get(PROCESS_KEY),
+				                properties.get(UPDATE_KEY));
 	}
 	
 	@Override
@@ -597,18 +600,19 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
         AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 		if (selectedActions != null) {
-			String actionName = determineActionName(selectedActions);
-			if (actionName == null) { // when no selected action defined (collection is empty) 
-				ajax.setProcess("@this");
-	        	ajax.setUpdate("@none");
+			ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
+			if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty) 
+				ajax.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
+				ajax.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
 			}
 			else {
-				attributes.put("actionName", actionName);
-				if (Boolean.TRUE.toString().equals(actionName) || Boolean.FALSE.toString().equals(actionName)) {
+				attributes.put("actionName", actionAttributes.actionName);
+				if (Boolean.TRUE.toString().equals(actionAttributes.actionName) || 
+						Boolean.FALSE.toString().equals(actionAttributes.actionName)) {
 					attributes.put("source", source);
 				}
-				ajax.setProcess(process);
-				ajax.setUpdate(update);
+				ajax.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
+				ajax.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
 			}
         }
         else {
@@ -1006,6 +1010,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent actionLink(String listBinding, String listVar, Link link, String actionName) {
 		// TODO do the tooltip and client validation, disabled, invisible thing,
 		// Need the action, not just it's name
+		Map<String, String> properties = link.getProperties();
 		return actionLink(link.getValue(),
 							null,
 							null,
@@ -1018,7 +1023,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							Boolean.FALSE,
 							null,
 							null,
-							link.getInvisibleConditionName());
+							link.getInvisibleConditionName(),
+							properties.get(PROCESS_KEY),
+							properties.get(UPDATE_KEY));
 	}
 	
 	@Override
@@ -1059,6 +1066,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								Action action, 
 								ImplicitActionName name,
 								String title) {
+		Map<String, String> properties = action.getProperties();
 		return actionButton(title,
 								action.getIconStyleClass(),
 								action.getToolTip(),
@@ -1072,7 +1080,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								action.getClientValidation(),
 								action.getConfirmationText(),
 								action.getDisabledConditionName(),
-								action.getInvisibleConditionName());
+								action.getInvisibleConditionName(),
+								properties.get(PROCESS_KEY),
+								properties.get(UPDATE_KEY));
 	}
 	
 	private Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
@@ -1324,7 +1334,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											Boolean clientValidation, 
 											String confirmationText,
 											String disabled, 
-											String invisible) {
+											String invisible,
+											String processOverride,
+											String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -1474,8 +1486,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (! ImplicitActionName.Cancel.equals(implicitActionName)) { // cancel is not ajax
-			result.setProcess(process); // process the current form (by default)
-			result.setUpdate(update); // update all forms (by default)
+			result.setProcess((processOverride == null) ? process : processOverride); // process the current form (by default)
+			result.setUpdate((updateOverride == null) ? update : updateOverride); // update all forms (by default)
 		}
 
 		return result;
@@ -1602,7 +1614,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										Boolean clientValidation, 
 										String confirmationText,
 										String disabled, 
-										String invisible) {
+										String invisible,
+										String processOverride,
+										String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
 		result.setValue(title);
@@ -1620,8 +1634,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setAjax(false);
 		} 
 		else {
-			result.setProcess(process);
-			result.setUpdate(update);
+			result.setProcess((processOverride == null) ? process : processOverride); // process the current form (by default)
+			result.setUpdate((updateOverride == null) ? update : updateOverride); // update all forms (by default)
 		}
 
 		return result;

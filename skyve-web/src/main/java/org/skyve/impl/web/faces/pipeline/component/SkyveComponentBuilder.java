@@ -34,7 +34,9 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 											Boolean clientValidation, 
 											String confirmationText, 
 											String disabled, 
-											String invisible) {
+											String invisible,
+											String processOverride,
+											String updateOverride) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return super.actionButton(title, 
 										iconStyleClass,
@@ -49,7 +51,9 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 										clientValidation, 
 										confirmationText, 
 										disabled, 
-										invisible);
+										invisible,
+										processOverride,
+										updateOverride);
 		}
 
 		return super.actionButton(title, 
@@ -65,6 +69,8 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 									clientValidation, 
 									confirmationText, 
 									disabled, 
-									invisible);
-}
+									invisible,
+									processOverride,
+									updateOverride);
+	}
 }

@@ -20,6 +20,9 @@ public abstract class AbstractFacesBuilder {
 	protected static final Integer NINETY_EIGHT = Integer.valueOf(98);
 	protected static final Integer NINETY_FIVE = Integer.valueOf(95);
 
+	protected static final String PROCESS_KEY = "process";
+	protected static final String UPDATE_KEY = "update";
+
 	protected FacesContext fc = FacesContext.getCurrentInstance();
 	protected Application a = fc.getApplication();
 	protected ExpressionFactory ef = a.getExpressionFactory();

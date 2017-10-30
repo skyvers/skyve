@@ -55,20 +55,22 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public CommandButton actionButton(String title, 
-										String iconStyleClass,
-										String tooltip, 
-										ImplicitActionName implicitActionName,
-										String actionName, 
-										boolean inline, 
-										String listBinding, 
-										String listVar,
-										Integer pixelWidth, 
-										Integer pixelHeight,
-										Boolean clientValidation, 
-										String confirmationText, 
-										String disabled, 
-										String invisible) {
+	protected CommandButton actionButton(String title, 
+											String iconStyleClass,
+											String tooltip, 
+											ImplicitActionName implicitActionName,
+											String actionName, 
+											boolean inline, 
+											String listBinding, 
+											String listVar,
+											Integer pixelWidth, 
+											Integer pixelHeight,
+											Boolean clientValidation, 
+											String confirmationText, 
+											String disabled, 
+											String invisible,
+											String processOverride,
+											String updateOverride) {
 		CommandButton result = super.actionButton(title,
 													iconStyleClass,
 													tooltip, 
@@ -82,7 +84,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 													clientValidation, 
 													null, // confirmation dialogs don't work in mobile
 													disabled, 
-													invisible);
+													invisible,
+													processOverride,
+													updateOverride);
 		result.setIcon(null); // fa is not compatible with PF mobile
 		return result;
 	}
@@ -100,7 +104,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									Boolean clientValidation, 
 									String confirmationText, 
 									String disabled, 
-									String invisible) {
+									String invisible,
+									String processOverride,
+									String updateOverride) {
 		return super.actionLink(title, 
 									tooltip, 
 									implicitActionName, 
@@ -113,7 +119,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									clientValidation, 
 									null, // confirmation dialogs don't work in mobile
 									disabled, 
-									invisible);
+									invisible,
+									processOverride,
+									updateOverride);
 	}
 	
 	@Override
@@ -192,6 +200,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 												null,
 												null,
 												Boolean.TRUE,
+												null,
+												null,
 												null,
 												null,
 												null);

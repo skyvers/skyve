@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.el.MethodExpression;
 import javax.faces.component.UIComponent;
@@ -197,17 +198,32 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		return result;
 	}
 	
-	protected static String determineActionName(List<EventAction> actions) {
-		String result = null;
+	protected static class ActionFacesAttributes {
+		protected String actionName;
+		protected String process;
+		protected String update;
+	}
+	
+	protected static ActionFacesAttributes determineActionFacesAttributes(List<EventAction> actions) {
+		ActionFacesAttributes result = new ActionFacesAttributes();
 		boolean rerenderValidate = true;
 		for (EventAction action : actions) {
+	    	Map<String, String> properties = action.getProperties();
+	    	String processOverride = properties.get(PROCESS_KEY);
+	    	if (processOverride != null) {
+	    		result.process = processOverride;
+	    	}
+	    	String updateOverride = properties.get(UPDATE_KEY);
+	    	if (updateOverride != null) {
+	    		result.update = updateOverride;
+	    	}
 			if (action instanceof ServerSideActionEventAction) {
-				result = ((ServerSideActionEventAction) action).getActionName();
+				result.actionName = ((ServerSideActionEventAction) action).getActionName();
 				break;
 			}
 			else if (action instanceof RerenderEventAction) {
 				rerenderValidate = ! Boolean.FALSE.equals(((RerenderEventAction) action).getClientValidation());
-				result = String.valueOf(rerenderValidate);
+				result.actionName = String.valueOf(rerenderValidate);
 				break;
 			}
 		}
@@ -221,20 +237,25 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 									String listVar,
 									String rerenderSource, 
 									List<EventAction> actions) {
-		String actionName = determineActionName(actions);
+		ActionFacesAttributes attributes = determineActionFacesAttributes(actions);
 		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
-		ajax.setProcess(process);
-		ajax.setUpdate(update);
-		if (Boolean.TRUE.toString().equals(actionName)) {
+		ajax.setProcess((attributes.process == null) ? process : attributes.process);
+		ajax.setUpdate((attributes.update == null) ? update : attributes.update);
+		if (Boolean.TRUE.toString().equals(attributes.actionName)) {
 			MethodExpression me = methodExpressionForRerender(rerenderSource, true);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
-		else if (Boolean.FALSE.toString().equals(actionName)) {
+		else if (Boolean.FALSE.toString().equals(attributes.actionName)) {
 			MethodExpression me = methodExpressionForRerender(rerenderSource, false);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
 		else {
-			MethodExpression me = methodExpressionForAction(null, actionName, collectionBinding, listVar, false, null);
+			MethodExpression me = methodExpressionForAction(null, 
+																attributes.actionName, 
+																collectionBinding, 
+																listVar, 
+																false, 
+																null);
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 		}
 
