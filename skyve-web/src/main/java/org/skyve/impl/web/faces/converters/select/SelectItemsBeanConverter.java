@@ -69,7 +69,7 @@ public class SelectItemsBeanConverter implements Converter {
 					}
 				}
 			}
-			else if (! item.isNoSelectionOption() && value.equals(converter.getAsString(context, component, itemValue))) {
+			else if ((! item.isNoSelectionOption()) && value.equals(converter.getAsString(context, component, itemValue))) {
 				return itemValue;
 			}
 		}

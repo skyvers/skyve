@@ -20,8 +20,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 
 public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private Bean bean;
@@ -81,18 +81,28 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         	for (DomainValue domainValue : domainValues) {
             	String code = domainValue.getCode();
             	Object value = code;
-            	if (targetAttribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
-            		if (type == null) {
-            			type = AbstractRepository.get().getEnum((org.skyve.impl.metadata.model.document.field.Enumeration) targetAttribute); 
+            	if (code != null) {
+	            	if (targetAttribute instanceof org.skyve.impl.metadata.model.document.field.Enumeration) {
+	            		if (type == null) {
+	            			type = AbstractRepository.get().getEnum((org.skyve.impl.metadata.model.document.field.Enumeration) targetAttribute); 
+	            		}
+            			value = Binder.convert(type, code);
             		}
-        			value = Binder.convert(type, code);
-            	}
-            	else if (targetAttribute instanceof AssociationImpl) {
-            		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
-            		value = CORE.getPersistence().retrieve(targetDocument.getOwningModuleName(), 
-                											targetAssociation.getDocumentName(),
-                											code,
-                											false);
+	            	else if (targetAttribute instanceof AssociationImpl) {
+                   		AssociationImpl targetAssociation = (AssociationImpl) targetAttribute;
+                   	 	value = CORE.getPersistence().retrieve(targetDocument.getOwningModuleName(), 
+	                											targetAssociation.getDocumentName(),
+	                											code,
+	                											false);
+	            	}
+	            	else {
+	            		if (type == null) {
+	            			type = targetAttribute.getAttributeType().getImplementingType();
+	            		}
+	            		if (! type.equals(String.class)) {
+	            			value = Binder.fromString(customer, null, type, code, true);
+	            		}
+	            	}
             	}
             	result.add(new SelectItem(value, domainValue.getDescription()));
             }
