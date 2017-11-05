@@ -364,7 +364,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
-		bound(column);
+		// nothing to do here
 	}
 
 	@Override
@@ -489,7 +489,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 	@Override
 	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		visitLookup(lookup, parentVisible, parentEnabled);
-		lookup.setDescriptionBinding(prefixBinding(lookup.getDescriptionBinding()));
 	}
 
 	@Override
