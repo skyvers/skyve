@@ -24,7 +24,6 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
@@ -612,9 +611,12 @@ public class ComponentRenderer {
 		ValueExpression ve = component.getValueExpression(name);
 		if (ve != null) {
 			Object value = ve.getExpressionString();
+// We cannot evaluate the value here as it could cause NPEs in the domain objects (think conditions).
+/*
 			if (value == null) {
 				value = ve.getValue(FacesContext.getCurrentInstance().getELContext());
 			}
+*/
 			attributes.put(name, value);
 		}
 	}
