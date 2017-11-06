@@ -12,14 +12,13 @@ import org.skyve.metadata.model.document.Association;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "association")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE, 
 			name = "association", 
-			propOrder = {"requiredBool", "type", "databaseIndex", "allowCascadeMerge"})
+			propOrder = {"requiredBool", "type", "databaseIndex"})
 public class AssociationImpl extends ReferenceImpl implements Association {
 	private static final long serialVersionUID = -2839713495173145591L;
 
 	private boolean required;
 	private AssociationType type;
 	private Boolean databaseIndex;
-	private Boolean allowCascadeMerge;
 
 	public AssociationImpl() {
 		setAttributeType(AttributeType.association);
@@ -58,15 +57,5 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setDatabaseIndex(Boolean databaseIndex) {
 		this.databaseIndex = databaseIndex;
-	}
-
-	@Override
-	public Boolean getAllowCascadeMerge() {
-		return allowCascadeMerge;
-	}
-
-	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAllowCascadeMerge(Boolean allowCascadeMerge) {
-		this.allowCascadeMerge = allowCascadeMerge;
 	}
 }

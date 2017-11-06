@@ -453,7 +453,6 @@
       <xs:extension base="tns:referenceImpl">
         <xs:sequence>
           <xs:element name="databaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
-          <xs:element name="allowCascadeMerge" type="xs:boolean" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="required" type="xs:boolean"/>
         <xs:attribute name="type" type="tns:associationType" use="required"/>
@@ -490,7 +489,6 @@
           <xs:element name="unique" type="tns:CollectionUniqueConstraint" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
           <xs:element name="ownerDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
           <xs:element name="elementDatabaseIndex" type="xs:boolean" form="qualified" minOccurs="0"/>
-          <xs:element name="allowCascadeMerge" type="xs:boolean" form="qualified" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="type" type="tns:collectionType" use="required"/>
         <xs:attribute name="ordered" type="xs:boolean"/>

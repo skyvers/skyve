@@ -5,6 +5,9 @@
 	<property name="skyve-war-path" value="${skyve-ear-path}/skyve.war" />
 
 	<path id="classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
 		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
 		</fileset>
@@ -52,7 +55,6 @@
 			<arg value="src/skyve/" /> <!-- source path -->
 			<arg value="src/test/" /> <!-- test path -->
 			<arg value="src/generatedTest/" /> <!-- generated test path -->
-			<arg value="true" /> <!-- allow cascade merge -->
 			<arg value="true" /> <!-- debug -->
 			<arg value="true" /> <!-- data store index foreign keys by default -->
 			<arg value="false" /> <!-- data store index names in global namespace -->

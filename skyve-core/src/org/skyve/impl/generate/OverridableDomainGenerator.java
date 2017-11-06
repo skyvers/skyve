@@ -1061,22 +1061,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append("\" table=\"").append(collectionTableName);
 
 					if (type == CollectionType.aggregation) {
-						fw.append("\" cascade=\"persist,save-update,refresh");
-						// Cascade type 'merge' makes many-many relationships within the association
-						// target object update (without the collection being dirty)
-						// and thus causes optimistic lock exceptions when the bizLock
-						// is up-revved from the update statement.
-						// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
-						// all groups are up-revved, even though the collection is not dirty,
-						// causing optimistic lock when Staff are saved.
-						// So if lots of Staff use the same user, we're screwed.
-						Boolean allowCascadeMerge = collection.getAllowCascadeMerge();
-						if ((allowCascadeMerge == null) && ALLOW_CASCADE_MERGE) {
-							fw.append(",merge");
-						} else if (Boolean.TRUE.equals(allowCascadeMerge)) {
-							fw.append(",merge");
-						}
-						fw.append("\">\n");
+						fw.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
 					} else if (type == CollectionType.composition) {
 						fw.append("\" cascade=\"all-delete-orphan\">\n");
 					} else {
@@ -1265,25 +1250,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append(referencedModuleName).append(referencedDocumentName);
 					fw.append("\" column=\"").append(association.getName());
 					if (type == AssociationType.composition) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,delete");
+						fw.append("_id\" cascade=\"persist,save-update,refresh,delete,merge");
 					} else if (type == AssociationType.aggregation) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh");
+						fw.append("_id\" cascade=\"persist,save-update,refresh,merge");
 					} else {
 						throw new IllegalStateException("Association type " + type + " not supported.");
-					}
-					// Cascade type 'merge' makes many-many relationships within the association
-					// target object update (without the collection being dirty)
-					// and thus causes optimistic lock exceptions when the bizLock
-					// is up-revved from the update statement.
-					// Case in point is Staff --many-to-one--> User --many-to-many--> Groups,
-					// all groups are up-revved, even though the collection is not dirty,
-					// causing optimistic lock when Staff are saved.
-					// So if lots of Staff use the same user, we're screwed.
-					Boolean allowCascadeMerge = association.getAllowCascadeMerge();
-					if ((allowCascadeMerge == null) && ALLOW_CASCADE_MERGE) {
-						fw.append(",merge");
-					} else if (Boolean.TRUE.equals(allowCascadeMerge)) {
-						fw.append(",merge");
 					}
 					if (shouldIndex(association.getDatabaseIndex())) {
 						fw.append("\" index=\"");
