@@ -41,7 +41,7 @@ public class TestSend implements ServerSideAction<Communication> {
 		}
 
 		communication.setSendToOverride(me.getEmail1());
-		CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
+		CommunicationUtil.send(webContext, communication, CommunicationUtil.RunMode.ACTION, CommunicationUtil.ResponseMode.EXPLICIT, null, beans.get(0));
 
 		return new ServerSideActionResult<>(communication);
 	}

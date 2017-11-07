@@ -20,6 +20,7 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -32,12 +33,14 @@ import org.skyve.util.Binder;
 import org.skyve.util.FileUtil;
 import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
+import org.skyve.web.WebContext;
 
 public class CommunicationUtil {
 
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
 	public static final String DEFAULT_SENDER = "default.sender@skyve.org";
+	public static final String SENT_SUCCESSFULLY_MESSAGE = "Communication sent";
 
 	/**
 	 * Whether to throw or log an exception if one occurs.
@@ -73,7 +76,9 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	private static void actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+
+		String result = null;
 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
@@ -92,9 +97,13 @@ public class CommunicationUtil {
 		Collections.addAll(beanList, communication, adminUser);
 		Bean[] beans = beanList.toArray(new Bean[beanList.size()]);
 		
-		String sendFrom = communication.getSendFrom();
-		if(communication.getSendFrom()==null){
+		String sendFromExpression = communication.getSendFrom();
+		String sendFrom = null;
+		if(sendFromExpression==null){
 			sendFrom = DEFAULT_SENDER;
+		} else {
+			//resolve biding expression
+			sendFrom =  Binder.formatMessage(customer, sendFromExpression, specificBeans);
 		}
 
 		FormatType format = communication.getFormatType();
@@ -189,8 +198,10 @@ public class CommunicationUtil {
 
 			String customerName = CORE.getUser().getCustomerName();
 			String batchDirPrefix = Util.getContentDirectory() + "batch_" + customerName;
+			String fileName = sendTo.replace("@", "_").replace(".", "_");
 
-			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, sendTo, ".eml", true, subFolder.toString());
+			String filePath = FileUtil.constructSafeFilePath(batchDirPrefix, fileName, ".eml", true, subFolder.toString());
+			result = filePath;
 
 			try (FileOutputStream fos = new FileOutputStream(filePath)) {
 
@@ -226,7 +237,12 @@ public class CommunicationUtil {
 				}
 			}
 			break;
+		
+			
+
 		}
+		
+		return result;
 	}
 
 	/**
@@ -244,6 +260,23 @@ public class CommunicationUtil {
 	}
 
 	/**
+	 * Wrapper specific for sending with growl notification on success
+	 * 
+	 * @param communication
+	 * @param runMode
+	 * @param responseMode
+	 * @param additionalAttachments
+	 * @param specificBeans
+	 * @throws Exception
+	 */
+	public static void send(WebContext webContext, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
+		if(RunMode.ACTION.equals(runMode) && ResponseMode.EXPLICIT.equals(responseMode) && webContext!=null){
+			webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
+		}
+	}
+
+	/**
 	 * Wrapper specific for generating to file
 	 * 
 	 * @param communication
@@ -253,8 +286,8 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
-		actionCommunicationRequest(ActionType.FILE, communication, runMode, responseMode, additionalAttachments, specificBeans);
+	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+		return actionCommunicationRequest(ActionType.FILE, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
 	/**

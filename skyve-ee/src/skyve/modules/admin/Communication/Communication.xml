@@ -57,9 +57,8 @@
 		</text>		
 		<text name="sendFrom">
 			<displayName>From (expression)</displayName>
-			<description>The address to send from.</description>
+			<description>The address to send from. Bindings are allowed relative to the above module document.</description>
 			<length>250</length>
-			<validator type="email" />
 		</text>
 		<boolean name="monitorBcc">
 			<displayName>BCC Me</displayName>

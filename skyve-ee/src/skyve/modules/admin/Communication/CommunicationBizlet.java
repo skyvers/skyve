@@ -53,24 +53,6 @@ public class CommunicationBizlet extends Bizlet<Communication> {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
 
-	@Override
-	public void validate(Communication bean, ValidationException e) throws Exception {
-		Persistence pers = CORE.getPersistence();
-		User user = pers.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(Communication.MODULE_NAME);
-		Document document = module.getDocument(customer, Communication.DOCUMENT_NAME);
-
-		if (!Boolean.TRUE.equals(bean.getSystem()) && bean.getSendFrom() == null) {
-			StringBuilder sb = new StringBuilder(128);
-			sb.append("You must supply a ").append(document.getAttribute(Communication.sendFromPropertyName).getDisplayName());
-			sb.append(" unless ").append(document.getAttribute(Communication.systemPropertyName).getDisplayName());
-			sb.append(" has been set to TRUE");
-			e.getMessages().add(new Message(Communication.sendFromPropertyName, sb.toString()));
-		}
-		super.validate(bean, e);
-	}
-
 	public static void checkForUnsavedData(Communication communication) throws Exception {
 		if (!communication.originalValues().isEmpty()) {
 			// find if any field except results
