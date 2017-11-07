@@ -1,5 +1,6 @@
 package util;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.jboss.weld.environment.se.Weld;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,6 +36,11 @@ public abstract class AbstractH2Test {
 	protected Persistence p;
 
 	private static Weld weld;
+
+	public AbstractH2Test() {
+		// support injected classes in unit tests
+		BeanProvider.injectFields(this);
+	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
