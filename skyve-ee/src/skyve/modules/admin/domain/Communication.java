@@ -312,7 +312,7 @@ public class Communication extends AbstractPersistentBean {
 	/**
 	 * From (expression)
 	 * <br/>
-	 * The address to send from.
+	 * The address to send from. Bindings are allowed relative to the above module document.
 	 **/
 	private String sendFrom;
 	/**
