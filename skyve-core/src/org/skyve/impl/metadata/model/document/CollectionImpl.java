@@ -19,7 +19,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "collection")
 @XmlType(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "collection",
-			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex", "allowCascadeMerge"})
+			propOrder = {"type", "ordered", "minCardinality", "maxCardinality", "ordering", "uniqueConstraints", "ownerDatabaseIndex", "elementDatabaseIndex"})
 public class CollectionImpl extends ReferenceImpl implements Collection {
 	private static final long serialVersionUID = 835190692384615766L;
 
@@ -69,7 +69,6 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	private Integer maxCardinality;
 	private Boolean ownerDatabaseIndex;
 	private Boolean elementDatabaseIndex;
-	private Boolean allowCascadeMerge;
 	private List<org.skyve.metadata.model.document.Collection.Ordering> ordering = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
 
@@ -121,16 +120,6 @@ public class CollectionImpl extends ReferenceImpl implements Collection {
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setElementDatabaseIndex(Boolean elementDatabaseIndex) {
 		this.elementDatabaseIndex = elementDatabaseIndex;
-	}
-
-	@Override
-	public Boolean getAllowCascadeMerge() {
-		return allowCascadeMerge;
-	}
-
-	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAllowCascadeMerge(Boolean allowCascadeMerge) {
-		this.allowCascadeMerge = allowCascadeMerge;
 	}
 
 	@Override
