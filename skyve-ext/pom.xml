@@ -114,5 +114,10 @@
 			<artifactId>elasticsearch</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.coobird</groupId>
+			<artifactId>thumbnailator</artifactId>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>
