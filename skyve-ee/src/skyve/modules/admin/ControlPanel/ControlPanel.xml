@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ControlPanel" 
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Control Panel</singularAlias>
+	<pluralAlias>Control Panels</pluralAlias>
+	<attributes>
+		<text name="designModuleDocumentName">
+			<displayName>Module.Document Name</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<text name="query">
+			<displayName>BizQL</displayName>
+			<length>2048</length>
+		</text>
+		<text name="customerNameToSwapTo">
+			<displayName>Customer Name To Swap To</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<text name="emailFrom">
+			<displayName>Email From</displayName>
+			<length>128</length>
+		</text>
+		<text name="emailTo">
+			<displayName>Email To</displayName>
+			<domain>variant</domain>
+			<length>128</length>
+		</text>
+		<text name="emailSubject">
+			<displayName>Email Subject</displayName>
+			<length>128</length>
+		</text>
+		<markup name="emailContent">
+			<displayName>Email</displayName>
+		</markup>
+		<memo name="results">
+			<displayName>Results</displayName>
+		</memo>
+	</attributes>
+</document>
