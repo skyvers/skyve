@@ -48,6 +48,9 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		// run as the current user
 		EXT.runOneShotJob(job, bean, user);
 
+		// Used to update the UI.
+		bean.setJobScheduledImmediately(true);
+
 		return new ServerSideActionResult<>(bean);
 	}
 }

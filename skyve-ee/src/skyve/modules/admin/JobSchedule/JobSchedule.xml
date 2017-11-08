@@ -465,5 +465,18 @@
 			<documentName>User</documentName>
 			<queryName>qActiveUsers</queryName>
 		</association>
+
+		<boolean name="jobScheduledImmediately" persistent="false">
+			<displayName>Job Scheduled Immediately</displayName>
+			<description>Whether or not the job was scheduled immediately</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
 	</attributes>
+	<conditions>
+		<condition name="scheduledImmediately">
+			<expression>
+				<![CDATA[Boolean.TRUE.equals(getJobScheduledImmediately())]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

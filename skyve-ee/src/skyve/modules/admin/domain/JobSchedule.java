@@ -319,6 +319,8 @@ public class JobSchedule extends AbstractPersistentBean {
 	public static final String endTimePropertyName = "endTime";
 	/** @hidden */
 	public static final String runAsPropertyName = "runAs";
+	/** @hidden */
+	public static final String jobScheduledImmediatelyPropertyName = "jobScheduledImmediately";
 
 	/**
 	 * Job To Run
@@ -902,6 +904,12 @@ public class JobSchedule extends AbstractPersistentBean {
 	 * The user to run the job
 	 **/
 	private User runAs = null;
+	/**
+	 * Job Scheduled Immediately
+	 * <br/>
+	 * Whether or not the job was scheduled immediately
+	 **/
+	private Boolean jobScheduledImmediately = new Boolean(false);
 
 	@Override
 	@XmlTransient
@@ -3525,5 +3533,42 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	public void setRunAs(User runAs) {
 		preset(runAsPropertyName, runAs);
 		this.runAs = runAs;
+	}
+
+	/**
+	 * {@link #jobScheduledImmediately} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getJobScheduledImmediately() {
+		return jobScheduledImmediately;
+	}
+
+	/**
+	 * {@link #jobScheduledImmediately} mutator.
+	 * @param jobScheduledImmediately	The new value.
+	 **/
+	@XmlElement
+	public void setJobScheduledImmediately(Boolean jobScheduledImmediately) {
+		preset(jobScheduledImmediatelyPropertyName, jobScheduledImmediately);
+		this.jobScheduledImmediately = jobScheduledImmediately;
+	}
+
+	/**
+	 * scheduledImmediately
+	 * @return	The condition
+
+	 */
+	@XmlTransient
+	public boolean isScheduledImmediately() {
+		return (Boolean.TRUE.equals(getJobScheduledImmediately()));
+	}
+
+	/**	 * {@link #isScheduledImmediately} negation.
+
+	 * @return	The negated condition
+
+	 */
+	public boolean isNotScheduledImmediately() {
+		return (! isScheduledImmediately());
 	}
 }
