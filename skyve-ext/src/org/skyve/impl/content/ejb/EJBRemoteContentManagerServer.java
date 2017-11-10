@@ -1,14 +1,9 @@
 package org.skyve.impl.content.ejb;
 
-import javax.ejb.Local;
-import javax.ejb.Remote;
-
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.SearchResults;
 
-@Remote
-@Local
 public interface EJBRemoteContentManagerServer {
 	public void put(BeanContent content) throws Exception;
 
