@@ -379,9 +379,6 @@ class ViewValidator extends ViewVisitor {
 		}
 		if (binding != null) {
 			componentIdentifier += " for binding " + binding;
-			if (name != null) {
-				throw new MetaDataException(componentIdentifier + " in " + viewIdentifier + " requires a binding or a name, not both.");
-			}
 			validateBinding(null, 
 								binding, 
 								false, 
