@@ -1388,6 +1388,27 @@ isc.BizLookupDescriptionItem.addMethods({
 			displayField: config.displayField,
 			pickListFields: config.pickListFields,
 			filterFields: config.filterFields,
+			pickListProperties: {
+				filterData: function(criteria, callback, requestProperties) {
+					// ensure summaryType & tagId are sent down in the requestProperties
+					if (requestProperties) {
+						if (requestProperties.params) {} else {
+							requestProperties.params = {};
+						}
+					}
+					else {
+						requestProperties = {};
+						requestProperties.params = {};
+					}
+
+					// both of these are required (if defined) for ListModel.setBean() on server side
+					requestProperties.params._c = me._view.gather(false)._c;
+					if (me._view._b) {
+						requestProperties.params._b = me._view._b;
+					}
+					this.Super("filterData", arguments);
+				}
+			},
 			completeOnTab: true,
 			textMatchStyle: 'substring',
 //			filterWithValue: true,
@@ -1398,7 +1419,7 @@ isc.BizLookupDescriptionItem.addMethods({
 				if (config.params) {
 					result = isc.BizUtil.completeFilterCriteria(result, config.params, me._view);
 				}
-				
+
 				return result;
 			},
 			// This method isn't part of the external API, but is the only place
