@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -292,7 +293,7 @@ public class ESClient extends AbstractContentManager {
 		File old = null;
 		if (file.exists()) {
 			old = new File(path.toString() + "_old");
-			if (! file.renameTo(old)) {
+			if (Files.move(file.toPath(), old.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING) == null) {
 				throw new IOException("Could not rename " + path + " to " + path + "_old before file content store operation");
 			}
 		}
@@ -304,7 +305,7 @@ public class ESClient extends AbstractContentManager {
 		}
 		catch (IOException e) {
 			if ((old != null) && old.exists()) {
-				if (! old.renameTo(file)) {
+				if (Files.move(old.toPath(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING) == null) {
 					throw new IOException("Could not rename " + path + "_old to " + path + "after file content store operation error.", e);
 				}
 			}
