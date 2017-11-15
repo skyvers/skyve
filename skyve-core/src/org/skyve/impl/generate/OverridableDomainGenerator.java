@@ -615,8 +615,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	private static void createMappingFileHeader(FileWriter mappingFileWriter) throws IOException {
 		mappingFileWriter.append("<?xml version=\"1.0\"?>\n");
-		mappingFileWriter.append(
-				"<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd\">\n");
+		mappingFileWriter.append("<!DOCTYPE hibernate-mapping PUBLIC \"-//Hibernate/Hibernate Mapping DTD 3.0//EN\" \"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd\">\n");
 		mappingFileWriter.append("<hibernate-mapping default-access=\"field\">\n\n");
 		mappingFileWriter
 				.append("\t<typedef name=\"OptimisticLock\" class=\"org.skyve.impl.domain.types.OptimisticLockUserType\" />\n");
