@@ -25,7 +25,7 @@
 		<commons-collections.version>3.2.2</commons-collections.version>
 		<commons-fileupload.version>1.3.2</commons-fileupload.version>
 		<commons-io.version>2.2</commons-io.version>
-		<commons-lang3.version>3.1</commons-lang3.version>
+		<commons-lang3.version>3.2</commons-lang3.version>
 		<commons-validator.version>1.5.1</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
 		<ehcache.version>2.0.1</ehcache.version>
