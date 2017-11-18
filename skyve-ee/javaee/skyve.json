@@ -35,7 +35,6 @@
 	url: {
 		// server URL
 		server: "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}",
-		//server: "http://localhost:8080",
 		// web context path
 		context: "/skyve", 
 		// home path
