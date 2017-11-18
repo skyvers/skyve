@@ -25,7 +25,7 @@
 	// Content settings
 	content: {
 		// directory path
-		directory: "/C:/_/skyve/skyve-ee/content/", 
+		directory: "${SKYVE_CONTENT:/C:/_/skyve/skyve-ee/content/}",
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		gcCron: "0 7 0/1 1/1 * ? *", 
 		// Attachments stored on file system or inline
@@ -34,7 +34,8 @@
 	// URL settings - various SKYVE URL/URI fragments - useful for linking and mailing
 	url: {
 		// server URL
-		server: "http://localhost:8080", 
+		server: "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}",
+		//server: "http://localhost:8080",
 		// web context path
 		context: "/skyve", 
 		// home path
