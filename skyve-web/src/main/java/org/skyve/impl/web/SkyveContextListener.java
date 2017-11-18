@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.util.VariableExpander;
 import org.skyve.job.JobScheduler;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
@@ -59,7 +60,8 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> properties = null;
 		try (FileInputStream fis = new FileInputStream(propertiesFilePath)) {
-			properties = UtilImpl.readJSONConfig(fis);
+			final VariableExpander variableExpander = new VariableExpander();
+			properties = variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot open or read " + propertiesFilePath, e);
