@@ -189,6 +189,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		// Query Caching screws up pessimistic locking
 		cfg.put("hibernate.cache.use_query_cache", "false");
 
+		// turn on second level caching
+		cfg.put("hibernate.cache.use_second_level_cache", "true");
+		cfg.put("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
+		cfg.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
+		
 		// JDBC parameters
 		cfg.put("hibernate.jdbc.use_streams_for_binary", "true");
 		cfg.put("hibernate.jdbc.batch_size", "16");
