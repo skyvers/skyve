@@ -1406,6 +1406,7 @@ isc.BizLookupDescriptionItem.addMethods({
 					if (me._view._b) {
 						requestProperties.params._b = me._view._b;
 					}
+					requestProperties.params._cc = ''; // continue conversation
 					this.Super("filterData", arguments);
 				}
 			},

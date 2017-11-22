@@ -1134,7 +1134,7 @@ isc.BizListGrid.addMethods({
 						requestProperties.params._b = me._view._b;
 					}
 				}
-				if (config && config.contConv) { // indicates that the conversation is to be continued
+				if (config && (config.contConv || config.isPickList)) { // indicates that the conversation is to be continued
 					requestProperties.params._cc = '';
 				}
 
