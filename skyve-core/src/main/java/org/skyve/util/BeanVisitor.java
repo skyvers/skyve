@@ -21,7 +21,8 @@ public abstract class BeanVisitor {
 	private boolean visitNulls;
 	private boolean visitInverses;
 	private boolean vectorCyclicDetection;
-	
+	private boolean acceptVisited;
+
 	/**
 	 * Visit the structure of a bean (and it's related graph).
 	 * 
@@ -44,9 +45,17 @@ public abstract class BeanVisitor {
 	public BeanVisitor(boolean visitNulls,
 						boolean visitInverses,
 						boolean vectorCyclicDetection) {
+		this(visitNulls, visitInverses, vectorCyclicDetection, false);
+	}
+
+	public BeanVisitor(boolean visitNulls,
+					   boolean visitInverses,
+					   boolean vectorCyclicDetection,
+					   boolean acceptVisited) {
 		this.visitNulls = visitNulls;
 		this.visitInverses = visitInverses;
 		this.vectorCyclicDetection = vectorCyclicDetection;
+		this.acceptVisited = acceptVisited;
 	}
 	
 	/**
@@ -108,6 +117,15 @@ public abstract class BeanVisitor {
 		else {
 			String key = determineVisitedKey(bean, owningDocument, owningRelation);
 			if (visited.contains(key)) {
+				if (acceptVisited) {
+					try {
+						accept(binding, document, owningDocument, owningRelation, bean);
+					} catch (MetaDataException e) {
+						throw e;
+					} catch (Exception e) {
+						throw new DomainException(e);
+					}
+				}
 				return;
 			}
 			visited.add(key);
