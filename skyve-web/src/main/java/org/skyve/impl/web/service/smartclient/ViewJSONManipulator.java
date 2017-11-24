@@ -1425,12 +1425,17 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
-		addCondition(grid.getDisableAddConditionName());
-		addCondition(grid.getDisableEditConditionName());
-		addCondition(grid.getDisableZoomConditionName());
-		addCondition(grid.getDisableRemoveConditionName());
-		addCondition(grid.getPostRefreshConditionName());
-		addBinding(grid.getSelectedIdBinding(), true);
+		if (parentVisible && visible(grid)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addCondition(grid.getDisableAddConditionName());
+				addCondition(grid.getDisableEditConditionName());
+				addCondition(grid.getDisableZoomConditionName());
+				addCondition(grid.getDisableRemoveConditionName());
+				addCondition(grid.getPostRefreshConditionName());
+				addBinding(grid.getSelectedIdBinding(), true);
+			}
+		}
 	}
 
 	@Override
@@ -1439,13 +1444,18 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(grid.getDisabledConditionName());
 		addCondition(grid.getInvisibleConditionName());
-		addCondition(grid.getDisableAddConditionName());
-		addCondition(grid.getDisableEditConditionName());
-		addCondition(grid.getDisableZoomConditionName());
-		addCondition(grid.getDisableRemoveConditionName());
-		addCondition(grid.getPostRefreshConditionName());
-		addBinding(grid.getSelectedIdBinding(), true);
-		addBinding(grid.getRootIdBinding(), false);
+		if (parentVisible && visible(grid)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addCondition(grid.getDisableAddConditionName());
+				addCondition(grid.getDisableEditConditionName());
+				addCondition(grid.getDisableZoomConditionName());
+				addCondition(grid.getDisableRemoveConditionName());
+				addCondition(grid.getPostRefreshConditionName());
+				addBinding(grid.getSelectedIdBinding(), true);
+				addBinding(grid.getRootIdBinding(), false);
+			}
+		}
 	}
 
 	private boolean visitingDataGrid = false;
@@ -1456,6 +1466,9 @@ class ViewJSONManipulator extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		htmlGuts.setLength(0);
+
+		addCondition(grid.getDisabledConditionName());
+		addCondition(grid.getInvisibleConditionName());
 
 		// NB Allow bindings in a grid with getEditable() false through as there could be 
 		// links with actions that mutate the grid data client-side ie remove implicit action
@@ -1471,6 +1484,13 @@ class ViewJSONManipulator extends ViewVisitor {
 														(evaluateConditionInOppositeSense(grid.getDisableEditConditionName()) ||
 															(Boolean.TRUE.equals(grid.getInline()) && 
 																evaluateConditionInOppositeSense(grid.getDisableAddConditionName())));
+				
+				addCondition(grid.getDisableAddConditionName());
+				addCondition(grid.getDisableZoomConditionName());
+				addCondition(grid.getDisableEditConditionName());
+				addCondition(grid.getDisableRemoveConditionName());
+				addBinding(grid.getSelectedIdBinding(), true, true);
+				
 				String gridBinding = grid.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
@@ -1518,14 +1538,6 @@ class ViewJSONManipulator extends ViewVisitor {
 			// grid is invisible
 			visitedDataGridHasEditableColumns = false;
 		}
-
-		addBinding(grid.getSelectedIdBinding(), true, true);
-		addCondition(grid.getDisabledConditionName());
-		addCondition(grid.getInvisibleConditionName());
-		addCondition(grid.getDisableAddConditionName());
-		addCondition(grid.getDisableZoomConditionName());
-		addCondition(grid.getDisableEditConditionName());
-		addCondition(grid.getDisableRemoveConditionName());
 	}
 	
 	@Override
