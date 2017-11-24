@@ -10,7 +10,7 @@
 	<artifactId>skyve-core</artifactId>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+		<sourceDirectory>src/main/java</sourceDirectory>
 	</build>
 
 	<dependencies>
@@ -62,6 +62,20 @@
 			<artifactId>generex</artifactId>
 			<version>${generex.version}</version>
 			<scope>compile</scope>
+		</dependency>
+
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<version>${hamcrest.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

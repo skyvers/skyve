@@ -35,6 +35,12 @@
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>primefaces-extensions</artifactId>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.coobird</groupId>
@@ -43,7 +49,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache-core</artifactId>
+			<artifactId>ehcache</artifactId>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

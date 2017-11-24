@@ -25,10 +25,10 @@
 		<commons-collections.version>3.2.2</commons-collections.version>
 		<commons-fileupload.version>1.3.2</commons-fileupload.version>
 		<commons-io.version>2.2</commons-io.version>
-		<commons-lang3.version>3.1</commons-lang3.version>
+		<commons-lang3.version>3.2</commons-lang3.version>
 		<commons-validator.version>1.5.1</commons-validator.version>
 		<deltaspike-core.version>1.8.0</deltaspike-core.version>
-		<ehcache.version>2.0.1</ehcache.version>
+		<ehcache.version>2.10.3</ehcache.version>
 		<elasticsearch.version>1.4.2</elasticsearch.version>
 		<geodb.version>0.7</geodb.version>
 		<h2.version>1.3.173</h2.version>
@@ -51,7 +51,7 @@
 		<primefaces-extensions.version>6.1.0</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
 		<quartz.version>1.7.2</quartz.version>
-		<slf4j-api.version>1.5.8</slf4j-api.version>
+		<slf4j-api.version>1.7.25</slf4j-api.version>
 		<spatial4j.version>0.4.1</spatial4j.version>
 		<super-csv.version>2.4.0</super-csv.version>
 		<thumbnailator.version>0.4.8</thumbnailator.version>
@@ -166,7 +166,7 @@
 			</dependency>
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
-				<artifactId>ehcache-core</artifactId>
+				<artifactId>ehcache</artifactId>
 				<version>${ehcache.version}</version>
 			</dependency>
 			<dependency>
@@ -213,6 +213,11 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-spatial</artifactId>
 				<version>${hibernate-spatial.version}</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-ehcache</artifactId>
+			    <version>${hibernate.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>cglib</groupId>

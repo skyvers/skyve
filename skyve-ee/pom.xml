@@ -159,7 +159,7 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache-core</artifactId>
+			<artifactId>ehcache</artifactId>
 			<version>${ehcache.version}</version>
 		</dependency>
 		<dependency>
@@ -207,6 +207,11 @@
 			<artifactId>hibernate-spatial</artifactId>
 			<version>${hibernate-spatial.version}</version>
 		</dependency>
+			<dependency>
+			    <groupId>org.hibernate</groupId>
+			    <artifactId>hibernate-ehcache</artifactId>
+			    <version>${hibernate.version}</version>
+			</dependency>
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib</artifactId>
@@ -310,6 +315,12 @@
 			<groupId>org.primefaces.extensions</groupId>
 			<artifactId>primefaces-extensions</artifactId>
 			<version>${primefaces-extensions.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-lang3</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
@@ -458,8 +469,14 @@
 		<!-- Runtime dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.6</version>
+			<version>${slf4j-api.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
