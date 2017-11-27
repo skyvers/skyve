@@ -7,11 +7,13 @@ import java.util.List;
 import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
+import org.skyve.CORE;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.messages.ReferentialConstraintViolationException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
@@ -35,6 +37,68 @@ public class PersistenceTests extends AbstractSkyveTest {
 		Assert.assertEquals(Integer.valueOf(0), test.getAggregatedCollection().get(1).getBizVersion());
 	}
 
+	/**
+	 * Make a random instance, save it, clone it and save the copy.
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergeOfDetached() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		test = p.save(test);
+		test = Util.cloneToTransientBySerialization(test);
+		test = p.save(test);
+	}
+
+	/**
+	 * Make a random instance, save it, start a new persistence, clone it and save the copy.
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergeOfDetachedWithFreshLoad() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		test = p.save(test);
+		p.evictAllCached();
+		p.commit(true);
+		p = CORE.getPersistence();
+		((AbstractPersistence) p).setUser(u);
+		p.begin();
+		test = p.retrieve(aapd, test.getBizId(), false);
+		test = Util.cloneToTransientBySerialization(test);
+		test = p.save(test);
+	}
+	
+	/**
+	 * Create a hub which is pointed to by 
+	 * intermediate1, pointed to by spoke1 and 
+	 * intermediate2, pointed to by spoke 2.
+	 * Save spoke1 and spoke2.
+	 * Retrieve spoke1, clone it and save it.
+	 * @throws Exception
+	 */
+	@Test
+	public void testMergeOfDetachedWithHubEntityAndTwoLevelsOfIndirection() throws Exception {
+		AllAttributesPersistent hub = Util.constructRandomInstance(u, m, aapd, 0);
+		AllAttributesPersistent intermediate1 = Util.constructRandomInstance(u, m, aapd, 0);
+		intermediate1.setAggregatedAssociation(hub);
+		AllAttributesPersistent spoke1 = Util.constructRandomInstance(u, m, aapd, 0);
+		spoke1.setAggregatedAssociation(intermediate1);
+		spoke1 = p.save(spoke1);
+		hub = spoke1.getAggregatedAssociation();
+		AllAttributesPersistent intermediate2 = Util.constructRandomInstance(u, m, aapd, 0);
+		intermediate2.setAggregatedAssociation(hub);
+		AllAttributesPersistent spoke2 = Util.constructRandomInstance(u, m, aapd, 0);
+		spoke2.setAggregatedAssociation(intermediate2);
+		spoke2 = p.save(spoke2);
+
+		p.evictAllCached();
+		
+		spoke1 = p.retrieve(aapd, spoke1.getBizId(), false);
+		AllAttributesPersistent spoke3 = Util.cloneToTransientBySerialization(spoke1);
+		spoke3 = p.save(spoke3);
+		
+		Assert.assertEquals(hub, spoke3.getAggregatedAssociation());
+	}
+	
 	@Test
 	public void testPersistBizLockEJS() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 3);
