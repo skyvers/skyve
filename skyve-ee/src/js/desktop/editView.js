@@ -710,12 +710,18 @@ isc.EditView.addMethods({
 		
 		// enable/disable, hide/show controls, invalidate caches etc
 		// NB process visibility etc before setting the values in the values manager to ensure they take correctly
-		this._processWidgets(this._editPanel, false, values, valueMaps);
+		var toRerender = [];
+		this._processWidgets(this._editPanel, false, values, valueMaps, toRerender);
 
 		// scatter of the scalar values happens automatically
 		// through this._vm.setValues(); which calls remember values also
 		this._vm.setValues(values);
 
+		// rerender what needs to be rerendered after _processWidgets() and after _vm.setValues().
+		for (var i = 0, l = toRerender.length; i < l; i++) {
+			toRerender[i].rerender();
+		}
+		
 		// scatter the list and membership values
 		for (var gridBinding in this._grids) {
 			var data = values[gridBinding];
@@ -1071,7 +1077,8 @@ isc.EditView.addMethods({
 	_processWidgets: function(container, // a BizContainer
 								invisible, // whether the current container is invisible or not
 								values, // the VM values with the evaluated conditions
-								valueMaps) { // the VM value maps
+								valueMaps, // the VM value maps
+								toRerender) { // a list of items to be rerendered after the _processWidgets() call
 		for (var i = 0, l = container.contained.length; i < l; i++) {
 			var contained = container.contained[i];
 			
@@ -1079,7 +1086,7 @@ isc.EditView.addMethods({
 			var containedInvisible = invisible || this._showHide(contained, container, values, false);
 
 			if (isc.isA.Function(contained.addContained)) {
-				this._processWidgets(contained, containedInvisible, values, valueMaps);
+				this._processWidgets(contained, containedInvisible, values, valueMaps, toRerender);
 			}
 			if (isc.isA.Function(contained.addBizTab)) { // tab pane
 				// hold the current tab pane
@@ -1091,7 +1098,7 @@ isc.EditView.addMethods({
 
 					var tabInvisible = containedInvisible || this._showHide(bizTab, contained, values, false);
 					this._enableDisable(bizTab, contained, values);
-					this._processWidgets(bizTab.pane, tabInvisible, values, valueMaps);
+					this._processWidgets(bizTab.pane, tabInvisible, values, valueMaps, toRerender);
 				}
 				
 				// Determine what is the selected tab
@@ -1162,8 +1169,9 @@ isc.EditView.addMethods({
 					}
 				}
 			}
+			// If this needs a rerender, add it to the list
 			if (isc.isA.Function(contained.rerender)) { // re-render (bound widgets and others that need a refresh)
-				contained.rerender();
+				toRerender.add(contained);
 			}
 		}
 	},
@@ -2239,7 +2247,7 @@ isc.BizDynamicImage.addMethods({
 	resized: function() {
 		this.rerender();
 	},
-	
+
 	rerender: function() {
 		// this was a rerender called when there is no data in the form yet - no web context
 		// this was probably called from the resized event callback and is spurious
