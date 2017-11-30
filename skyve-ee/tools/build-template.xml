@@ -19,6 +19,8 @@
 		</fileset>
 		<!-- don't use a file element here - doesn't work in old ant -->
 		<pathelement path="${ear-path}/apps.jar/" />
+		<!-- add the test classes to the classpath for generated tests -->
+		<pathelement path="bin/" />
 	</path>
 
 	<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask"> 
