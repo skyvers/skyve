@@ -127,10 +127,20 @@
 										<fileset dir="${ear-path}/lib">
 											<include name="**/*.jar"/>
 										</fileset>
+										<fileset dir="bin">
+											<include name="**/*.class"/>
+										</fileset>
 										<!-- don't use a file element here - doesn't work in old ant -->
 										<pathelement path="${ear-path}/apps.jar/" />
 									</classpath>
-									<arg value="${basedir}/src/skyve/" />
+									<arg value="src/skyve/" /> <!-- source path -->
+									<arg value="src/test/" /> <!-- test path -->
+									<arg value="src/generatedTest/" /> <!-- generated test path -->
+									<arg value="true" /> <!-- debug -->
+									<arg value="true" /> <!-- data store index foreign keys by default -->
+									<arg value="false" /> <!-- data store index names in global namespace -->
+									<arg value="0" /> <!-- data store identifier character limit -->
+									<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
 								</java>
 							</tasks>
 						</configuration>
