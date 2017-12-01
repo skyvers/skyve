@@ -148,4 +148,21 @@ public interface Repository {
 	 * @param user
 	 */
 	public void resetMenus(User user);
+	
+	
+	/**
+	 * Populate the permissions available to a user.
+	 * @param user the user to populate permissions for
+	 */
+	public void populatePermissions(User user);
+	
+	
+	/**
+	 * Clear the permissions and menus available to a user, and then re-populate the user with new permissions.
+	 * <br />
+	 * This is equivalent to clearing permissions and menus from a user, and then calling {@link Repository#populatePermissions(User)}
+	 * and {@link Repository#resetMenus(User)}
+	 * @param user the user to reset user permissions for
+	 */
+	public void resetUserPermissions(User user);
 }

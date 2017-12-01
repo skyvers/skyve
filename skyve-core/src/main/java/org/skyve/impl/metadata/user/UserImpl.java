@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.enterprise.inject.Alternative;
-
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import javax.enterprise.inject.Alternative;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -26,11 +25,6 @@ import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.impl.metadata.user.ActionPrivilege;
-import org.skyve.impl.metadata.user.ClientUserData;
-import org.skyve.impl.metadata.user.DocumentPrivilege;
-import org.skyve.impl.metadata.user.Privilege;
-import org.skyve.impl.metadata.user.RoleImpl;
 
 @Alternative
 public class UserImpl implements User {
@@ -72,7 +66,7 @@ public class UserImpl implements User {
 	/**
 	 * To allow SuperUser to set SUPER Role
 	 */
-	protected Set<String> roleNames = new TreeSet<>();
+	private Set<String> roleNames = new TreeSet<>();
 
 	/**
 	 * Document Name -> CRUD permission
@@ -234,44 +228,61 @@ public class UserImpl implements User {
 	}
 
 	public void addRole(RoleImpl role) {
-		StringBuilder sb = new StringBuilder(64);
-
-		sb.append(role.getOwningModule().getName()).append('.').append(role.getName());
-		roleNames.add(sb.toString());
+		//If role is super user, add an early exit
+		if(SUPER_ROLE.equals(role.getName())) {
+			roleNames.add(SUPER_ROLE);
+			return;
+		}
 		
-		for (Privilege privilege : role.getPrivileges()) {
-			if (privilege instanceof DocumentPrivilege) {
-				DocumentPermission permission = ((DocumentPrivilege) privilege).getPermission();
-				putDocumentPermission(role.getOwningModule().getName(), privilege.getName(), permission);
+		StringBuilder sb = new StringBuilder(64);
+		sb.append(role.getOwningModule().getName()).append('.').append(role.getName());
+		
+		// Only continue if role hasn't been added already
+		if(!roleNames.contains(sb.toString())) {
+			roleNames.add(sb.toString());
+			
+			for (Privilege privilege : role.getPrivileges()) {
+				if (privilege instanceof DocumentPrivilege) {
+					DocumentPermission permission = ((DocumentPrivilege) privilege).getPermission();
+					putDocumentPermission(role.getOwningModule().getName(), privilege.getName(), permission);
+				}
+				else if (privilege instanceof ActionPrivilege) {
+					addActionPermission(role.getOwningModule().getName(), (ActionPrivilege) privilege);
+				}
 			}
-			else if (privilege instanceof ActionPrivilege) {
-				// will add to set if not already present
-				sb.setLength(0);
-				sb.append(role.getOwningModule().getName()).append('.');
-				sb.append(((ActionPrivilege) privilege).getDocumentName()).append('.');
-				sb.append(privilege.getName());
-				actions.add(sb.toString());
+			
+			for (ContentRestriction contentRestriction : role.getContentRestrictions()) {
+				addContentRestriction(role.getOwningModule().getName(), contentRestriction);
 			}
-		}
-
-		for (ContentRestriction contentRestriction : role.getContentRestrictions()) {
-			sb.setLength(0);
-			sb.append(role.getOwningModule().getName()).append('.');
-			sb.append(contentRestriction.getDocumentName()).append('.');
-			sb.append(contentRestriction.getAttributeName());
-			contentRestrictions.add(sb.toString());
-		}
-
-		for (ContentPermission contentPermission : role.getContentPermissions()) {
-			sb.setLength(0);
-			sb.append(role.getOwningModule().getName()).append('.');
-			sb.append(contentPermission.getDocumentName()).append('.');
-			sb.append(contentPermission.getAttributeName());
-			contentPermissions.add(sb.toString());
+			
+			for (ContentPermission contentPermission : role.getContentPermissions()) {
+				addContentPermission(role.getOwningModule().getName(), contentPermission);
+			}
 		}
 	}
-
-	private void putDocumentPermission(String moduleName, String documentName, DocumentPermission documentPermission) {
+	
+	
+	/**
+	 * Add a action permission for this user.
+	 * @param moduleName the module the action belongs to
+	 * @param actionPrivilege the action
+	 */
+	protected void addActionPermission(String moduleName, ActionPrivilege actionPrivilege) {
+		// will add to set if not already present
+		StringBuilder sb = new StringBuilder();
+		sb.append(moduleName).append('.');
+		sb.append(actionPrivilege.getDocumentName()).append('.');
+		sb.append(actionPrivilege.getName());
+		actions.add(sb.toString());
+	}
+	
+	/**
+	 * Add a document permission for this user.
+	 * @param moduleName the module the document belongs to
+	 * @param documentName the document
+	 * @param documentPermission the permission
+	 */
+	protected void putDocumentPermission(String moduleName, String documentName, DocumentPermission documentPermission) {
 		DocumentPermission mergedPermission = documentPermission;
 		
 		String fullyQualifiedDocumentName = new StringBuilder(32).append(moduleName).append('.').append(documentName).toString();
@@ -281,6 +292,36 @@ public class UserImpl implements User {
 		}
 
 		documentPermissions.put(fullyQualifiedDocumentName, mergedPermission);
+	}
+	
+	
+	/**
+	 * Add a content restriction for this user.
+	 * @param moduleName the module the content restriction belongs to
+	 * @param contentRestriction the content restriction
+	 */
+	protected void addContentRestriction(String moduleName, ContentRestriction contentRestriction) {
+		// will add to set if not already present
+		StringBuilder sb = new StringBuilder();
+		sb.append(moduleName).append('.');
+		sb.append(contentRestriction.getDocumentName()).append('.');
+		sb.append(contentRestriction.getAttributeName());
+		contentRestrictions.add(sb.toString());
+	}
+	
+	
+	/**
+	 * Add a content permission for this user.
+	 * @param moduleName the module the content permission belongs to
+	 * @param contentPermission the content permission
+	 */
+	protected void addContentPermission(String moduleName, ContentPermission contentPermission) {
+		// will add to set if not already present
+		StringBuilder sb = new StringBuilder();
+		sb.append(moduleName).append('.');
+		sb.append(contentPermission.getDocumentName()).append('.');
+		sb.append(contentPermission.getAttributeName());
+		contentPermissions.add(sb.toString());
 	}
 
 	public Set<String> getFullyQualifiedDocumentNames() {
@@ -297,10 +338,19 @@ public class UserImpl implements User {
 		return moduleMenuMap.get(moduleName);
 	}
 
+	/**
+	 * Put a menu in place for a given module
+	 * @param moduleName the module
+	 * @param menu the menu for that module
+	 */
 	public void putModuleMenu(String moduleName, Menu menu) {
 		moduleMenuMap.put(moduleName, menu);
 	}
 
+	
+	/**
+	 * Clear all module menus
+	 */
 	public void clearModuleMenus() {
 		moduleMenuMap.clear();
 	}
@@ -638,5 +688,20 @@ public class UserImpl implements User {
 		result.setModuleMenuMap(moduleMenuMap);
 
 		return result;
+	}
+	
+	
+	/**
+	 * Clear all the permissions and menus on this user.
+	 * <br />
+	 * This should generally used before re-populating that data against the user.
+	 */
+	public void clearAllPermissionsAndMenus() {
+		roleNames.clear();
+		documentPermissions.clear();
+		actions.clear();
+		contentRestrictions.clear();
+		contentPermissions.clear();
+		moduleMenuMap.clear();
 	}
 }

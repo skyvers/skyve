@@ -5,6 +5,7 @@ import javax.enterprise.inject.Alternative;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.SQLMetaDataUtil;
+import org.skyve.metadata.user.User;
 
 /**
  * Adds security integration to LocalDesignRepository.
@@ -21,12 +22,27 @@ public class LocalSecureRepository extends LocalDesignRepository {
 
 		UserImpl result = AbstractRepository.setCustomerAndUserFromPrincipal(userPrincipal);
 
-		SQLMetaDataUtil.populateUser(result);
-		resetMenus(result);
+		resetUserPermissions(result);
+		
 		if (result.getLanguageTag() == null) {
 			result.setLanguageTag(result.getCustomer().getLanguageTag());
 		}
 		
 		return result;
+	}
+	
+	
+	@Override
+	public void populatePermissions(User user) {
+		SQLMetaDataUtil.populateUser(user);
+	}
+	
+	
+	@Override
+	public void resetUserPermissions(User user) {
+		UserImpl impl = (UserImpl) user;
+		impl.clearAllPermissionsAndMenus();
+		populatePermissions(user);
+		resetMenus(user);
 	}
 }

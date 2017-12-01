@@ -791,6 +791,17 @@ public class LocalDesignRepository extends AbstractRepository {
 	public UserImpl retrieveUser(String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	public void populatePermissions(User user) {
+		throw new UnsupportedOperationException();
+		
+	}
+
+	@Override
+	public void resetUserPermissions(User user) {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public final void resetMenus(User user) {

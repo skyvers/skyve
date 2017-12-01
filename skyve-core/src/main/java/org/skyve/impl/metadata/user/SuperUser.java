@@ -19,7 +19,9 @@ public class SuperUser extends UserImpl {
 	private static final long serialVersionUID = -6233814867322594601L;
 
 	public SuperUser() {
-		roleNames.add(SUPER_ROLE);
+		RoleImpl superRole = new RoleImpl();
+		superRole.setName(SUPER_ROLE);
+		addRole(superRole);
 	}
 	
 	public SuperUser(User user) {
