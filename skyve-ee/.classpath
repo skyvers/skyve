@@ -28,7 +28,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jcommon-1.0.23.jar"/>
-	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-core-5.2.11.Final.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/hibernate-core-5.2.12.Final.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/deltaspike-core-api-1.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

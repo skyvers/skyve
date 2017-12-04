@@ -64,9 +64,9 @@ public final class TagUtil {
 		BindUtil.set(tagged, "taggedBizId", taggedBizId);
 
 		try {
-			persistence.preFlush(taggedDocument, tagged);
+			persistence.preMerge(taggedDocument, tagged);
 			persistence.upsertBeanTuple(tagged);
-			persistence.postFlush(taggedDocument, tagged);
+			persistence.postMerge(taggedDocument, tagged);
 		}
 		catch (DomainException e) {
 			// do nothing - its a duplicate

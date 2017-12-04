@@ -111,6 +111,15 @@ public abstract class AbstractPersistence implements Persistence {
 	}
 
 	@Override
+	public final <T extends PersistentBean> T merge(T bean) {
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		
+		return merge(document, bean);
+	}
+
+	@Override
 	public final <T extends PersistentBean> void delete(T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());

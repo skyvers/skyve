@@ -99,6 +99,33 @@ public class PersistenceTests extends AbstractSkyveTest {
 		Assert.assertEquals(hub, spoke3.getAggregatedAssociation());
 	}
 	
+	/**
+	 * This test should throw as hibernate cannot flush because the result of the merge operation has not been assigned back to its parent object.
+	 * A different object with the same identifier value was already associated with the session : [testAllAttributesPersistent#<bizId>]
+	 * @throws Exception
+	 */
+	@Test(expected = DomainException.class)
+	public void testPartialSave() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		test = p.save(test);
+		test.setAggregatedAssociation(Util.constructRandomInstance(u, m, aapd, 0));
+		test.setAggregatedAssociation(p.save(test.getAggregatedAssociation()));
+	}
+
+	/**
+	 * This test should not throw as the result of the merge has been assigned back to its parent object.
+	 * Then flush is called.
+	 * @throws Exception
+	 */
+	@Test
+	public void testPartialMerge() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 3);
+		test = p.save(test);
+		test.setAggregatedAssociation(Util.constructRandomInstance(u, m, aapd, 0));
+		test.setAggregatedAssociation(p.merge(test.getAggregatedAssociation()));
+		p.flush();
+	}
+
 	@Test
 	public void testPersistBizLockEJS() throws Exception {
 		MappedExtensionJoinedStrategy test = Util.constructRandomInstance(u, m, mejsd, 3);

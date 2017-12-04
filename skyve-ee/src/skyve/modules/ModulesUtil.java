@@ -668,9 +668,9 @@ public class ModulesUtil {
 			nextNumber = incrementAlpha(prefix, lastNumber, numberLength);
 			dN.setDocumentNumber(nextNumber);
 
-			pers.preFlush(document, dN);
+			pers.preMerge(document, dN);
 			pers.upsertBeanTuple(dN);
-			pers.postFlush(document, dN);
+			pers.postMerge(document, dN);
 		} finally {
 			if (dN != null) {
 				pers.evictCached(dN);
@@ -1019,7 +1019,7 @@ public class ModulesUtil {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			try {
-				persistence.preFlush(document, bean);
+				persistence.preMerge(document, bean);
 			} catch (DomainException e) {
 				loader.addError(customer, bean, e);
 			}

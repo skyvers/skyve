@@ -723,6 +723,11 @@ t.printStackTrace();
 		}
 	}
 
+	@Override
+	public void flush() {
+		em.flush();
+	}
+	
 	// populate all implicit mandatory fields required
 	private void setMandatories(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
@@ -773,7 +778,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void preFlush(Document document, Bean beanToSave) {
+	public void preMerge(Document document, Bean beanToSave) {
 		// set bizCustomer, bizLock & bizKey
 		setMandatories(document, beanToSave);
 		
@@ -782,7 +787,7 @@ t.printStackTrace();
 		// This allows preSave events to mutate values and build more object graph nodes on before it is all validated.
 		Customer customer = user.getCustomer();
 		firePreSaveEvents(customer, document, beanToSave);
-		validatePreFlush(customer, document, beanToSave);
+		validatePreMerge(customer, document, beanToSave);
 
 		// set bizCustomer, bizLock & bizKey again in case 
 		// more object hierarchy has been added during preSave()
@@ -834,7 +839,7 @@ t.printStackTrace();
 		}.visit(document, beanToSave, customer);
 	}
 	
-	private void validatePreFlush(final Customer customer, Document document, final Bean beanToSave) {
+	private void validatePreMerge(final Customer customer, Document document, final Bean beanToSave) {
 		new BeanVisitor(false, false, false) {
 			@Override
 			@SuppressWarnings( {"synthetic-access"})
@@ -887,23 +892,34 @@ t.printStackTrace();
 	}
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	public final <T extends PersistentBean> T save(Document document, T bean) {
+		return save(document, bean, true);
+	}
+	
+	@Override
+	public final <T extends PersistentBean> T merge(Document document, T bean) {
+		return save(document, bean, false);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends PersistentBean> T save(Document document, T bean, boolean flush) {
 		T result = null;
 		
 		try {
 			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 			boolean vetoed = false;
 			
-			// We need to replace transient properties before calling postFlush as
+			// We need to replace transient properties before calling postMerge as
 			// Bizlet.postSave() implementations could manipulate these transients for display after save.
 			try {
 				vetoed = internalCustomer.interceptBeforeSave(document, bean);
 				if (! vetoed) {
-					preFlush(document, bean);
+					preMerge(document, bean);
 					String entityName = getDocumentEntityName(document.getOwningModuleName(), document.getName());
 					result = (T) session.merge(entityName, bean);
-					em.flush();
+					if (flush) {
+						em.flush();
+					}
 				}
 			}
 			finally {
@@ -912,7 +928,7 @@ t.printStackTrace();
 				}
 			}
 			if (! vetoed) {
-				postFlush(document, result);
+				postMerge(document, result);
 				internalCustomer.interceptAfterSave(document, result);
 			}
 		}
@@ -924,13 +940,27 @@ t.printStackTrace();
 	}
 
 	@Override
-	public <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
-		return save(Arrays.asList(beans));
+	public final <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
+		return save(Arrays.asList(beans), true);
+	}
+	
+	@Override
+	public final <T extends PersistentBean> List<T> save(List<T> beans) {
+		return save(beans, true);
 	}
 
 	@Override
+	public final <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") T... beans) {
+		return save(Arrays.asList(beans), false);
+	}
+	
+	@Override
+	public final <T extends PersistentBean> List<T> merge(List<T> beans) {
+		return save(beans, false);
+	}
+
 	@SuppressWarnings("unchecked")
-	public <T extends PersistentBean> List<T> save(List<T> beans) {
+	private <T extends PersistentBean> List<T> save(List<T> beans, boolean flush) {
 		List<T> results = new ArrayList<>();
 		PersistentBean currentBean = null; // used in exception handling
 		
@@ -938,7 +968,7 @@ t.printStackTrace();
 			CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
 			boolean vetoed = false;
 			
-			// We need to replace transient properties before calling postFlush as
+			// We need to replace transient properties before calling postMerge as
 			// Bizlet.postSave() implementations could manipulate these transients for display after save.
 			try {
 				// fire any interceptors before any other processing as these are being treated like a batch
@@ -956,7 +986,7 @@ t.printStackTrace();
 						currentBean = bean; // for exception handling
 						Module m = internalCustomer.getModule(bean.getBizModule());
 						Document d = m.getDocument(internalCustomer, bean.getBizDocument());
-						preFlush(d, bean);
+						preMerge(d, bean);
 					}
 					
 					for (PersistentBean bean : beans) {
@@ -967,7 +997,9 @@ t.printStackTrace();
 						String entityName = getDocumentEntityName(d.getOwningModuleName(), d.getName());
 						results.add((T) session.merge(entityName, bean));
 					}
-					em.flush();
+					if (flush) {
+						em.flush();
+					}
 				}
 			}
 			finally {
@@ -988,7 +1020,7 @@ t.printStackTrace();
 					currentBean = result; // for exception handling
 					Module m = internalCustomer.getModule(result.getBizModule());
 					Document d = m.getDocument(internalCustomer, result.getBizDocument());
-					postFlush(d, result);
+					postMerge(d, result);
 				}
 				for (PersistentBean result : results) {
 					currentBean = result; // for exception handling
@@ -1006,7 +1038,7 @@ t.printStackTrace();
 	}
 	
 	@Override
-	public void postFlush(Document document, final Bean beanToSave) {
+	public void postMerge(Document document, final Bean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
 		new BeanVisitor(false, false, false) {

@@ -65,14 +65,16 @@ public interface Persistence extends Serializable {
 	public void refresh(Bean bean);
 	
 	/**
-	 * 
+	 * Processing that occurs before the merging of beans into the persistent context.
+	 * This method can either be hijacked for a Persistence implementation or used in 
+	 * application code to enable the same behaviour as skyve applies pre save/merge - eg before an upsert.
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void preFlush(Document document, Bean beanToSave);
+	public void preMerge(Document document, Bean beanToSave);
 	
 	/**
-	 * 
+	 * Merge and flush.
 	 * @param document
 	 * @param bean
 	 * @return
@@ -80,32 +82,68 @@ public interface Persistence extends Serializable {
 	public <T extends PersistentBean> T save(Document document, T bean);
 	
 	/**
-	 * 
+	 * Merge and flush.
 	 * @param bean
 	 * @return
 	 */
 	public <T extends PersistentBean> T save(T bean);
 
 	/**
-	 * 
+	 * Merge and flush.
 	 * @param beans
 	 * @return
 	 */
 	public <T extends PersistentBean> List<T> save(List<T> beans);
 
 	/**
-	 * 
+	 * Merge and flush.
 	 * @param beans
 	 * @return
 	 */
 	public <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans);
 
 	/**
-	 * 
+	 * Merge the bean into the persistent content (no flush).
+	 * @param document
+	 * @param bean
+	 * @return
+	 */
+	public <T extends PersistentBean> T merge(Document document, T bean);
+	
+	/**
+	 * Merge the bean into the persistent content (no flush).
+	 * @param bean
+	 * @return
+	 */
+	public <T extends PersistentBean> T merge(T bean);
+
+	/**
+	 * Merge the bean into the persistent content (no flush).
+	 * @param beans
+	 * @return
+	 */
+	public <T extends PersistentBean> List<T> merge(List<T> beans);
+
+	/**
+	 * Merge the bean into the persistent content (no flush).
+	 * @param beans
+	 * @return
+	 */
+	public <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") T... beans);
+
+	/**
+	 * Processing that occurs after the merging of beans into the persistent context.
+	 * This method can either be hijacked for a Persistence implementation or used in 
+	 * application code to enable the same behaviour as skyve applies post save/merge - eg after an upsert.
 	 * @param document
 	 * @param beanToSave
 	 */
-	public void postFlush(Document document, Bean beanToSave);
+	public void postMerge(Document document, Bean beanToSave);
+	
+	/**
+	 * Execute the DML to synchronize the persistent context with the data store.
+	 */
+	public void flush();
 	
 	/**
 	 * 
