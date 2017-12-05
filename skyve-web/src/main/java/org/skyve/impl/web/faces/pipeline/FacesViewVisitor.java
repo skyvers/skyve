@@ -542,9 +542,11 @@ public class FacesViewVisitor extends ViewVisitor {
 			return;
 		}
 
-		if (visitingDataGridBoundColumn) { // bound column in a datagrid
+		if (currentDataGridBoundColumn != null) { // bound column in a datagrid
+			// Add editing component if we have an inline data grid and the current column is editable
 			if ((currentGrid instanceof DataGrid) && 
-					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline())) {
+					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline()) &&
+					(! Boolean.FALSE.equals(currentDataGridBoundColumn.getEditable()))) {
 				current.getChildren().add(component);
 			}
 		}
@@ -995,13 +997,13 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	private StringBuilder gridColumnExpression;
-	private boolean visitingDataGridBoundColumn = false;
+	private DataGridBoundColumn currentDataGridBoundColumn = null;
 	
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled) {
-		visitingDataGridBoundColumn = true;
+		currentDataGridBoundColumn = column;
 		String title = column.getTitle();
 		String binding = column.getBinding();
 		if (binding == null) {
@@ -1036,7 +1038,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled) {
 		current = cb.addedDataGridBoundColumn(current);
-		visitingDataGridBoundColumn = false;
+		currentDataGridBoundColumn = null;
 	}
 
 	@Override
@@ -2018,6 +2020,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitParameter(Parameter parameter,
 								boolean parentVisible,
 								boolean parentEnabled) {
+		// nothing to see here
 	}
 	
 	@Override

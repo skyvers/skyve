@@ -27,7 +27,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -138,7 +139,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	@Override
 	public UIComponent addDataGridBoundColumn(UIComponent current, 
 												DataGrid grid,
-												DataGridColumn column,
+												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
 												String columnBinding,
@@ -168,7 +169,9 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent current, DataGrid grid, DataGridColumn column) {
+	public UIComponent addDataGridContainerColumn(UIComponent current, 
+													DataGrid grid, 
+													DataGridContainerColumn column) {
 		return current;
 	}
 	

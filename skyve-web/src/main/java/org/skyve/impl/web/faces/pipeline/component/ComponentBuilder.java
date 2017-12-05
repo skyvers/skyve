@@ -43,7 +43,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -94,7 +95,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent dataGrid(String listVar, DataGrid grid);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 
 														DataGrid grid,
-														DataGridColumn column,
+														DataGridBoundColumn column,
 														String listVar,
 														String columnTitle,
 														String columnBinding,
@@ -102,7 +103,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent addedDataGridBoundColumn(UIComponent current);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent current,
 															DataGrid grid,
-															DataGridColumn column);
+															DataGridContainerColumn column);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent current, 
 															DataGrid grid,

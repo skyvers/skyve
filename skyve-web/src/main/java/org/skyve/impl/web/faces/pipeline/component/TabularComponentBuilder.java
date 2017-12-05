@@ -79,7 +79,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
@@ -293,7 +294,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent addDataGridBoundColumn(UIComponent current, 
 												DataGrid grid,
-												DataGridColumn column,
+												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
 												String columnBinding,
@@ -310,7 +311,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		current.getChildren().add(result);
 
-		if (! Boolean.TRUE.equals(grid.getInline())) {
+		// Output the value as boilerplate text in the table column if 
+		// this is not an inline grid or the column is not editable
+		if ((! Boolean.TRUE.equals(grid.getInline())) || 
+				Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
 	        result.getChildren().add(outputText(listVar, gridColumnExpression.toString()));
@@ -325,7 +329,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent current, DataGrid grid, DataGridColumn column) {
+	public UIComponent addDataGridContainerColumn(UIComponent current, 
+													DataGrid grid, 
+													DataGridContainerColumn column) {
 		Column col = column(grid.getBinding(),
 								null,
 								column.getTitle(),
