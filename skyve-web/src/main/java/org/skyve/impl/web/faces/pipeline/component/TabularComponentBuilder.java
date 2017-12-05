@@ -379,6 +379,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        	button.setTitle("Add a new " + singularDocumentAlias);
 		    	button.setIcon("fa fa-plus");
 				action(button, ImplicitActionName.Add, null, listBinding, listVar, inline, null);
+				// if we are in an inline data grid, update the grid on a new record
+				if (inline) {
+		    		button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+				}
 				String disableAddConditionName = grid.getDisableAddConditionName();
 				String[] createDisabled = (disableAddConditionName == null) ? 
 											((disabledConditionName == null) ? 
