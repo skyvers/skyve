@@ -8,6 +8,7 @@ import modules.admin.domain.Group;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
 
 /**
@@ -53,8 +54,16 @@ public class GroupRole extends AbstractPersistentBean implements ChildBean<Group
 		return GroupRole.DOCUMENT_NAME;
 	}
 
-	public static GroupRole newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static GroupRole newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

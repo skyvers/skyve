@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -55,8 +56,16 @@ public class Hierarchical extends AbstractPersistentBean implements Hierarchical
 		return Hierarchical.DOCUMENT_NAME;
 	}
 
-	public static Hierarchical newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static Hierarchical newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

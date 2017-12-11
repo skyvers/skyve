@@ -8,6 +8,7 @@ import modules.admin.domain.User;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
@@ -69,8 +70,16 @@ public class UserCandidateContact extends AbstractTransientBean implements Child
 		return UserCandidateContact.DOCUMENT_NAME;
 	}
 
-	public static UserCandidateContact newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static UserCandidateContact newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

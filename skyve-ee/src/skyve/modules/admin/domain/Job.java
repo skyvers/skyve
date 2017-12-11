@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
@@ -80,8 +81,16 @@ public class Job extends AbstractPersistentBean {
 		return Job.DOCUMENT_NAME;
 	}
 
-	public static Job newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static Job newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

@@ -2464,6 +2464,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if ((!overridden) || (baseDocumentName == null)) { // not an extension
 			imports.add("javax.xml.bind.annotation.XmlTransient");
 			imports.add("org.skyve.CORE");
+			imports.add("org.skyve.domain.messages.DomainException");
 
 			statics.append("\t/** @hidden */\n");
 			statics.append("\tpublic static final String MODULE_NAME = \"").append(module.getName()).append("\";\n");
@@ -2482,9 +2483,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\treturn ").append(documentName).append(".DOCUMENT_NAME;\n");
 			methods.append("\t}\n");
 
-			methods.append("\n\tpublic static ").append(documentName).append(" newInstance() throws Exception {\n");
-			methods.append(
-					"\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
+			methods.append("\n\tpublic static ").append(documentName).append(" newInstance() {\n");
+			methods.append("\t\ttry {\n");
+			methods.append("\t\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
+			methods.append("\t\t}\n");
+			methods.append("\t\tcatch (RuntimeException e) {\n");
+			methods.append("\t\t\tthrow e;\n");
+			methods.append("\t\t}\n");
+			methods.append("\t\tcatch (Exception e) {\n");
+			methods.append("\t\t\tthrow new DomainException(e);\n");
+			methods.append("\t\t}\n");
 			methods.append("\t}\n");
 
 			String bizKeyMethodCode = ((DocumentImpl) document).getBizKeyMethodCode();

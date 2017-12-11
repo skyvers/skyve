@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 
 /**
  * Mapped Subclassed Joined Strategy
@@ -49,8 +50,16 @@ public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrateg
 		return MappedSubclassedJoinedStrategy.DOCUMENT_NAME;
 	}
 
-	public static MappedSubclassedJoinedStrategy newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static MappedSubclassedJoinedStrategy newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.domain.AbstractTransientBean;
 
 /**
@@ -70,8 +71,16 @@ public class DataMaintenanceModuleDocument extends AbstractTransientBean {
 		return DataMaintenanceModuleDocument.DOCUMENT_NAME;
 	}
 
-	public static DataMaintenanceModuleDocument newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static DataMaintenanceModuleDocument newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

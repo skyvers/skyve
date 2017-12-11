@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlType;
 import modules.test.domain.MappedBase;
 import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
+import org.skyve.domain.messages.DomainException;
 
 /**
  * Mapped Extension
@@ -79,8 +80,16 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 		return MappedExtensionJoinedStrategy.DOCUMENT_NAME;
 	}
 
-	public static MappedExtensionJoinedStrategy newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static MappedExtensionJoinedStrategy newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override

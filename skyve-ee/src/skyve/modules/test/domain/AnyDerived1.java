@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import modules.test.domain.AnyBase;
 import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
 
 /**
  * AnyDerived1
@@ -48,8 +49,16 @@ public class AnyDerived1 extends AnyBase {
 		return AnyDerived1.DOCUMENT_NAME;
 	}
 
-	public static AnyDerived1 newInstance() throws Exception {
-		return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+	public static AnyDerived1 newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
 	}
 
 	@Override
