@@ -47,11 +47,13 @@ public class AddAction extends FacesAction<Void> {
 			return null;
 		}
 		
-		StringBuilder collectionBinding = new StringBuilder(32);
+		StringBuilder newViewBinding = new StringBuilder(32);
+		StringBuilder zoomInBinding = new StringBuilder(32);
 		if (viewBinding != null) {
-			collectionBinding.append(viewBinding).append('.');
+			newViewBinding.append(viewBinding).append('.');
 		}
-		collectionBinding.append(listBinding);
+		newViewBinding.append(listBinding);
+		zoomInBinding.append(listBinding);
 
 		Bean bean = facesView.getBean();
 		String bizModule = bean.getBizModule();
@@ -64,7 +66,7 @@ public class AddAction extends FacesAction<Void> {
     	Bean parentBean = facesView.getCurrentBean().getBean();
     	
     	// Create a new element
-    	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, collectionBinding.toString());
+    	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Collection targetCollection = (Collection) target.getAttribute();
 		Document collectionDocument = module.getDocument(customer, targetCollection.getDocumentName());
 		Bean newBean = collectionDocument.newInstance(user);
@@ -118,13 +120,15 @@ public class AddAction extends FacesAction<Void> {
 
 		// Add the new element to the collection
 		@SuppressWarnings("unchecked")
-		List<Bean> beans = (List<Bean>) Binder.get(bean, collectionBinding.toString());
+		List<Bean> beans = (List<Bean>) Binder.get(bean, newViewBinding.toString());
 		beans.add(newBean);
 
 		if (! inline) {
-			collectionBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+			newViewBinding.append("ElementById(").append(newBean.getBizId()).append(')');
+			zoomInBinding.append("ElementById(").append(newBean.getBizId()).append(')');
 			
-	    	facesView.setViewBinding(collectionBinding.toString());
+	    	facesView.setViewBinding(newViewBinding.toString());
+	    	facesView.setZoomInBinding(zoomInBinding.toString());
 	    	ActionUtil.redirect(facesView, newBean);
 		}
 		

@@ -31,7 +31,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	
 	@Override
 	public Void callback() throws Exception {
-		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction");
+		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("ZoomOutAction by zoom in binding of " + facesView.getZoomInBinding() + " with view binding of " + facesView.getViewBinding());
 
 		if (FacesAction.validateRequiredFields()) {
 			// Call the bizlet
@@ -71,15 +71,31 @@ public class ZoomOutAction extends FacesAction<Void> {
 	
 	static void zoomOut(FacesView<? extends Bean> facesView) throws Exception {
 		String viewBinding = facesView.getViewBinding();
-    	String newViewBinding = null;
+		String zoomInBinding = facesView.getZoomInBinding();
+		String newViewBinding = null;
 
-    	// remove the last binding term if there is a dot,
-		// otherwise remove the view binding altogether as we are at the outer-most level.
-    	if (viewBinding != null) {
-	    	int lastDotIndex = viewBinding.lastIndexOf('.');
-			if (lastDotIndex > 0) {
-				newViewBinding = viewBinding.substring(0, lastDotIndex);
-			}
+		// remove the zoom out binding expression from the view binding
+		if (viewBinding != null) {
+        	// if no zoom out binding, remove the last binding term if there is a dot
+    		if (zoomInBinding == null) {
+	    		int lastDotIndex = viewBinding.lastIndexOf('.');
+				if (lastDotIndex > 0) {
+					newViewBinding = viewBinding.substring(0, lastDotIndex);
+    				if (newViewBinding.isEmpty()) {
+    					newViewBinding = null;
+    				}
+				}
+    			// otherwise remove the view binding altogether as we are at the outer-most level.
+    		}
+    		else { // there is a zoom in binding, remove the binding
+    			if (viewBinding.endsWith(zoomInBinding)) {
+    				newViewBinding = viewBinding.substring(0, viewBinding.length() - zoomInBinding.length());
+    				if (newViewBinding.isEmpty()) {
+    					newViewBinding = null;
+    				}
+    			}
+    			// otherwise remove the view binding altogether as we are at the outer-most level.
+    		}
     	}
     	facesView.setViewBinding(newViewBinding);
 

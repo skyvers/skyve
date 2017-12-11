@@ -58,6 +58,7 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 			if (session.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
 				FacesView<? extends Bean> sessionView = (FacesView<? extends Bean>) session.remove(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				facesView.setViewBinding(sessionView.getViewBinding());
+				facesView.setZoomInBinding(sessionView.getZoomInBinding());
 				facesView.getHistory().addAll(sessionView.getHistory());
 				webContext = sessionView.getWebContext();
 				bean = (T) webContext.getCurrentBean();

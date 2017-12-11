@@ -57,7 +57,12 @@ public class FacesView<T extends Bean> extends Harness {
 	// NB This should be set once on post construct of the bean and it persists during all ajax requests.
 	// NNB hydrate/dehydrate does not clear/set this property
 	private UxUi uxui;
+	// The view binding - where we are zoomed into within the conversation bean.
+	// This could be the same as zoom in binding or it could be deeper.
 	private String viewBinding;
+	// The zoomed in binding of the list (this could be compound)
+	// This could be the same as the view binding or it could be shallower.
+	private String zoomInBinding;
 	// The page title
 	private String title;
 	private AbstractWebContext webContext;
@@ -102,7 +107,14 @@ public class FacesView<T extends Bean> extends Harness {
 	public void setViewBinding(String viewBinding) {
 		this.viewBinding = viewBinding;
 	}
-	
+
+	public String getZoomInBinding() {
+		return zoomInBinding;
+	}
+	public void setZoomInBinding(String zoomInBinding) {
+		this.zoomInBinding = zoomInBinding;
+	}
+
 	public String getTitle() {
 		return title;
 	}
