@@ -184,7 +184,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
+	public void setGroupsElementById(String bizId, Group element) {
 		 setElementById(groups, element);
 	}
 
@@ -211,7 +211,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
+	public void setRolesElementById(String bizId, UserRole element) {
 		 setElementById(roles, element);
 	}
 
@@ -238,7 +238,7 @@ public class UserDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
+	public void setJobsElementById(String bizId, Job element) {
 		 setElementById(jobs, element);
 	}
 }

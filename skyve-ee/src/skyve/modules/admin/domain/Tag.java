@@ -946,18 +946,18 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * Action Set
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isActionSet() {
 		return (getActionModuleName()!=null && getActionDocumentName()!=null && getDocumentAction()!=null);
 	}
 
-	/**	 * {@link #isActionSet} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isActionSet} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotActionSet() {
 		return (! isActionSet());
@@ -965,18 +965,18 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * Attribute Set
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isAttributeSet() {
 		return (getUploadModuleName()!=null && getUploadDocumentName()!=null && getAttributeName()!=null);
 	}
 
-	/**	 * {@link #isAttributeSet} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isAttributeSet} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotAttributeSet() {
 		return (! isAttributeSet());
@@ -984,18 +984,18 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * Explanation exists
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isExplanation() {
 		return (getCombinationExplanation()!=null);
 	}
 
-	/**	 * {@link #isExplanation} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isExplanation} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotExplanation() {
 		return (! isExplanation());
@@ -1003,18 +1003,18 @@ public class Tag extends AbstractPersistentBean {
 
 	/**
 	 * File Loaded
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isFileLoaded() {
 		return (getNumberLoaded().intValue()>0);
 	}
 
-	/**	 * {@link #isFileLoaded} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isFileLoaded} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotFileLoaded() {
 		return (! isFileLoaded());

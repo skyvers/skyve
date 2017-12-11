@@ -368,18 +368,18 @@ return getContact().getName();
 
 	/**
 	 * Can Change
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isCanChange() {
 		return (isManager() || isMe());
 	}
 
-	/**	 * {@link #isCanChange} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isCanChange} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotCanChange() {
 		return (! isCanChange());
@@ -387,18 +387,18 @@ return getContact().getName();
 
 	/**
 	 * Manager
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isManager() {
 		return (isUserInRole("whosin","Manager"));
 	}
 
-	/**	 * {@link #isManager} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isManager} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotManager() {
 		return (! isManager());
@@ -406,18 +406,18 @@ return getContact().getName();
 
 	/**
 	 * Is me
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isMe() {
 		return (modules.whosinIntegrate.Staff.StaffBizlet.staffIsMe(this));
 	}
 
-	/**	 * {@link #isMe} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isMe} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotMe() {
 		return (! isMe());

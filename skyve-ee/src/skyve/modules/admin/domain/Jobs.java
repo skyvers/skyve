@@ -91,7 +91,7 @@ public class Jobs extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRunningJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
+	public void setRunningJobsElementById(String bizId, Job element) {
 		 setElementById(runningJobs, element);
 	}
 }

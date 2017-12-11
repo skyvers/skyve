@@ -1941,7 +1941,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Deprecated");
 			}
 			methods.append("\n\tpublic void set").append(methodName);
-			methods.append("ElementById(@SuppressWarnings(\"unused\") String bizId, ").append(propertyClassName)
+			methods.append("ElementById(String bizId, ").append(propertyClassName)
 					.append(" element) {\n");
 			methods.append("\t\t setElementById(").append(name).append(", element);\n");
 			methods.append("\t}\n");
@@ -2788,8 +2788,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (nothingDocumented) {
 						methods.append("\n\t * ").append(conditionName);
 					}
-					methods.append("\n\t * @return\tThe condition\n");
-					methods.append("\n\t */");
+					methods.append("\n\t *")
+							.append("\n\t * @return The condition")
+							.append("\n\t */");
 
 					methods.append("\n\t@XmlTransient");
 					if (overriddenCondition) {
@@ -2798,22 +2799,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String methodName = String.format("is%s%s", 
 														String.valueOf(conditionName.charAt(0)).toUpperCase(),
 														conditionName.substring(1));
-					methods.append("\n\tpublic boolean ").append(methodName).append("() {\n");
-					methods.append("\t\treturn (").append(condition.getExpression()).append(");\n");
-					methods.append("\t}\n");
+					methods.append("\n\tpublic boolean ").append(methodName).append("() {")
+							.append("\n\t\treturn (").append(condition.getExpression()).append(");")
+							.append("\n\t}\n");
 
-					methods.append("\n\t/**");
-					methods.append("\t * {@link #").append(methodName).append("} negation.\n");
-					methods.append("\n\t * @return\tThe negated condition\n");
-					methods.append("\n\t */");
+					methods.append("\n\t/**")
+							.append("\n\t * {@link #").append(methodName).append("} negation.")
+							.append("\n\t *")
+							.append("\n\t * @return The negated condition")
+							.append("\n\t */");
 					if (overriddenCondition) {
 						methods.append("\n\t@Override");
 					}
-					methods.append("\n\tpublic boolean isNot").append(Character.toUpperCase(conditionName.charAt(0)));
-					methods.append(conditionName.substring(1)).append("() {\n");
-					methods.append("\t\treturn (! is").append(Character.toUpperCase(conditionName.charAt(0)));
-					methods.append(conditionName.substring(1)).append("());\n");
-					methods.append("\t}\n");
+					methods.append("\n\tpublic boolean isNot").append(Character.toUpperCase(conditionName.charAt(0)))
+							.append(conditionName.substring(1)).append("() {")
+							.append("\n\t\treturn (! is").append(Character.toUpperCase(conditionName.charAt(0)))
+							.append(conditionName.substring(1)).append("());")
+							.append("\n\t}\n");
 				}
 			}
 		}

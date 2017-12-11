@@ -3564,18 +3564,18 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 
 	/**
 	 * scheduledImmediately
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isScheduledImmediately() {
 		return (Boolean.TRUE.equals(getJobScheduledImmediately()));
 	}
 
-	/**	 * {@link #isScheduledImmediately} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isScheduledImmediately} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotScheduledImmediately() {
 		return (! isScheduledImmediately());

@@ -1079,18 +1079,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Batch Selected
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isBatchSelected() {
 		return (selectedBatchTimestampFolderName != null);
 	}
 
-	/**	 * {@link #isBatchSelected} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isBatchSelected} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotBatchSelected() {
 		return (! isBatchSelected());
@@ -1098,18 +1098,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Refresh Batches
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isBatchesRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshBatches));
 	}
 
-	/**	 * {@link #isBatchesRefreshRequired} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isBatchesRefreshRequired} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotBatchesRefreshRequired() {
 		return (! isBatchesRefreshRequired());
@@ -1117,18 +1117,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Email type format
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isEmailType() {
 		return (FormatType.email.equals(this.getFormatType()));
 	}
 
-	/**	 * {@link #isEmailType} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isEmailType} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotEmailType() {
 		return (! isEmailType());
@@ -1136,18 +1136,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Includes Calendar
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isIncludesCalendar() {
 		return (Boolean.TRUE.equals(getIncludeCalendar()));
 	}
 
-	/**	 * {@link #isIncludesCalendar} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isIncludesCalendar} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotIncludesCalendar() {
 		return (! isIncludesCalendar());
@@ -1155,18 +1155,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Locked
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isLocked() {
 		return (isPersisted() && Boolean.TRUE.equals(getSystem()));
 	}
 
-	/**	 * {@link #isLocked} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isLocked} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotLocked() {
 		return (! isLocked());
@@ -1174,18 +1174,18 @@ public class Communication extends AbstractPersistentBean {
 
 	/**
 	 * Save for Bulk Send
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isSaveAction() {
 		return (ActionType.saveForBulkSend.equals(this.getActionType()));
 	}
 
-	/**	 * {@link #isSaveAction} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isSaveAction} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotSaveAction() {
 		return (! isSaveAction());

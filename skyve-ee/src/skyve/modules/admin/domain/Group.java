@@ -152,7 +152,7 @@ public class Group extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRolesElementById(@SuppressWarnings("unused") String bizId, GroupRole element) {
+	public void setRolesElementById(String bizId, GroupRole element) {
 		 setElementById(roles, element);
 	}
 }

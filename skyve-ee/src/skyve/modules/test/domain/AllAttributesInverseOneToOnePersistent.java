@@ -357,7 +357,7 @@ public class AllAttributesInverseOneToOnePersistent extends AbstractPersistentBe
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(@SuppressWarnings("unused") String bizId, AllAttributesInverseOneToOnePersistent element) {
+	public void setAggregatedCollectionElementById(String bizId, AllAttributesInverseOneToOnePersistent element) {
 		 setElementById(aggregatedCollection, element);
 	}
 

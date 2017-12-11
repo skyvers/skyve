@@ -372,7 +372,7 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRefreshDocumentsElementById(@SuppressWarnings("unused") String bizId, DataMaintenanceModuleDocument element) {
+	public void setRefreshDocumentsElementById(String bizId, DataMaintenanceModuleDocument element) {
 		 setElementById(refreshDocuments, element);
 	}
 
@@ -768,18 +768,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Attachment Selected
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isAttachmentSelected() {
 		return (contentLink != null);
 	}
 
-	/**	 * {@link #isAttachmentSelected} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isAttachmentSelected} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotAttachmentSelected() {
 		return (! isAttachmentSelected());
@@ -787,18 +787,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Current user is in the role "Audit Manager"
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isAuditManager() {
 		return (isUserInRole("admin","AuditManager"));
 	}
 
-	/**	 * {@link #isAuditManager} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isAuditManager} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotAuditManager() {
 		return (! isAuditManager());
@@ -806,18 +806,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Backup Selected
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isBackupSelected() {
 		return (selectedBackupName != null);
 	}
 
-	/**	 * {@link #isBackupSelected} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isBackupSelected} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotBackupSelected() {
 		return (! isBackupSelected());
@@ -825,18 +825,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Refresh Backups
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isBackupsRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshBackups));
 	}
 
-	/**	 * {@link #isBackupsRefreshRequired} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isBackupsRefreshRequired} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotBackupsRefreshRequired() {
 		return (! isBackupsRefreshRequired());
@@ -844,18 +844,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Content Refresh Required
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isContentRefreshRequired() {
 		return (Boolean.TRUE.equals(refreshContent));
 	}
 
-	/**	 * {@link #isContentRefreshRequired} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isContentRefreshRequired} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotContentRefreshRequired() {
 		return (! isContentRefreshRequired());
@@ -863,18 +863,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Content Selected
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isContentSelected() {
 		return (selectedContentId != null);
 	}
 
-	/**	 * {@link #isContentSelected} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isContentSelected} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotContentSelected() {
 		return (! isContentSelected());
@@ -882,18 +882,18 @@ public class DataMaintenance extends AbstractPersistentBean {
 
 	/**
 	 * Truncation Job has commenced.
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isJobCommenced() {
 		return (auditResponse!=null);
 	}
 
-	/**	 * {@link #isJobCommenced} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isJobCommenced} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotJobCommenced() {
 		return (! isJobCommenced());
