@@ -106,7 +106,7 @@ public class ArcOneToMany extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setArcsElementById(@SuppressWarnings("unused") String bizId, AnyBase element) {
+	public void setArcsElementById(String bizId, AnyBase element) {
 		 setElementById(arcs, element);
 	}
 }

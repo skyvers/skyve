@@ -91,7 +91,7 @@ public class SystemDashboard extends AbstractTransientBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setJobsElementById(@SuppressWarnings("unused") String bizId, Job element) {
+	public void setJobsElementById(String bizId, Job element) {
 		 setElementById(jobs, element);
 	}
 }

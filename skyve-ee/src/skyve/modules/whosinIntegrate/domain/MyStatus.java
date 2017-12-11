@@ -86,18 +86,18 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * My Staff exists
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isExists() {
 		return (getMyStaff()!=null);
 	}
 
-	/**	 * {@link #isExists} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isExists} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotExists() {
 		return (! isExists());
@@ -105,18 +105,18 @@ public class MyStatus extends AbstractTransientBean {
 
 	/**
 	 * Is a Staff Member
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isStaffMember() {
 		return (isUserInRole("whosinIntegrate","StaffMember"));
 	}
 
-	/**	 * {@link #isStaffMember} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isStaffMember} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotStaffMember() {
 		return (! isStaffMember());

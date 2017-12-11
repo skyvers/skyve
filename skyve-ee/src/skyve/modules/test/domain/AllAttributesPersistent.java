@@ -357,7 +357,7 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(@SuppressWarnings("unused") String bizId, AllAttributesPersistent element) {
+	public void setAggregatedCollectionElementById(String bizId, AllAttributesPersistent element) {
 		 setElementById(aggregatedCollection, element);
 	}
 

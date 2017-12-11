@@ -152,7 +152,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(@SuppressWarnings("unused") String bizId, MappedExtensionJoinedStrategy element) {
+	public void setAggregatedCollectionElementById(String bizId, MappedExtensionJoinedStrategy element) {
 		 setElementById(aggregatedCollection, element);
 	}
 
@@ -179,7 +179,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setComposedCollectionElementById(@SuppressWarnings("unused") String bizId, MappedExtensionJoinedStrategy element) {
+	public void setComposedCollectionElementById(String bizId, MappedExtensionJoinedStrategy element) {
 		 setElementById(composedCollection, element);
 	}
 

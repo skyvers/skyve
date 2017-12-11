@@ -573,7 +573,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setGroupsElementById(@SuppressWarnings("unused") String bizId, Group element) {
+	public void setGroupsElementById(String bizId, Group element) {
 		 setElementById(groups, element);
 	}
 
@@ -600,7 +600,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setRolesElementById(@SuppressWarnings("unused") String bizId, UserRole element) {
+	public void setRolesElementById(String bizId, UserRole element) {
 		 setElementById(roles, element);
 	}
 
@@ -681,7 +681,7 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setCandidateContactsElementById(@SuppressWarnings("unused") String bizId, UserCandidateContact element) {
+	public void setCandidateContactsElementById(String bizId, UserCandidateContact element) {
 		 setElementById(candidateContacts, element);
 	}
 
@@ -723,18 +723,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Candidate Contacts is empty
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isCandidateContactsEmpty() {
 		return (candidateContacts.isEmpty());
 	}
 
-	/**	 * {@link #isCandidateContactsEmpty} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isCandidateContactsEmpty} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotCandidateContactsEmpty() {
 		return (! isCandidateContactsEmpty());
@@ -742,18 +742,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Confirm Contact step
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isConfirmContact() {
 		return (WizardState.confirmContact.equals(getWizardState()));
 	}
 
-	/**	 * {@link #isConfirmContact} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isConfirmContact} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotConfirmContact() {
 		return (! isConfirmContact());
@@ -761,18 +761,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Confirm Group Memberships step
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isConfirmGroupMemberships() {
 		return (WizardState.confirmGroupMemberships.equals(getWizardState()));
 	}
 
-	/**	 * {@link #isConfirmGroupMemberships} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isConfirmGroupMemberships} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotConfirmGroupMemberships() {
 		return (! isConfirmGroupMemberships());
@@ -780,18 +780,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Confirm User Name and Password step
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isConfirmUserNameAndPassword() {
 		return (WizardState.confirmUserNameAndPassword.equals(getWizardState()));
 	}
 
-	/**	 * {@link #isConfirmUserNameAndPassword} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isConfirmUserNameAndPassword} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotConfirmUserNameAndPassword() {
 		return (! isConfirmUserNameAndPassword());
@@ -799,18 +799,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Create Contact step
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isCreateContact() {
 		return (WizardState.createContact.equals(getWizardState()));
 	}
 
-	/**	 * {@link #isCreateContact} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isCreateContact} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotCreateContact() {
 		return (! isCreateContact());
@@ -818,8 +818,8 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Created
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	@Override
@@ -827,10 +827,10 @@ return modules.admin.User.UserBizlet.bizKey(this);
 		return (isPersisted());
 	}
 
-	/**	 * {@link #isCreated} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isCreated} negation.
+	 *
+	 * @return The negated condition
 	 */
 	@Override
 	public boolean isNotCreated() {
@@ -839,18 +839,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Designer
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isDesigner() {
 		return (isUserInRole("design", "BizHubDesigner"));
 	}
 
-	/**	 * {@link #isDesigner} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isDesigner} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotDesigner() {
 		return (! isDesigner());
@@ -858,18 +858,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * In Data Group
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isInDataGroup() {
 		return (! isUserInDataGroup(null));
 	}
 
-	/**	 * {@link #isInDataGroup} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isInDataGroup} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotInDataGroup() {
 		return (! isInDataGroup());
@@ -877,18 +877,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Security Administrator
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isSecurityAdministrator() {
 		return (isUserInRole("admin","SecurityAdministrator"));
 	}
 
-	/**	 * {@link #isSecurityAdministrator} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isSecurityAdministrator} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotSecurityAdministrator() {
 		return (! isSecurityAdministrator());
@@ -896,18 +896,18 @@ return modules.admin.User.UserBizlet.bizKey(this);
 
 	/**
 	 * Show Next Button
-	 * @return	The condition
-
+	 *
+	 * @return The condition
 	 */
 	@XmlTransient
 	public boolean isShowNextButton() {
 		return (isCreateContact() || isConfirmUserNameAndPassword());
 	}
 
-	/**	 * {@link #isShowNextButton} negation.
-
-	 * @return	The negated condition
-
+	/**
+	 * {@link #isShowNextButton} negation.
+	 *
+	 * @return The negated condition
 	 */
 	public boolean isNotShowNextButton() {
 		return (! isShowNextButton());
