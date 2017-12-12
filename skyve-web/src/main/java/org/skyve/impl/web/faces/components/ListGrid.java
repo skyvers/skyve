@@ -106,6 +106,7 @@ public class ListGrid extends HtmlPanelGroup {
 				    												name, 
 				    												model, 
 				    												null,
+				    												model.getDescription(),
 				    												user.canCreateDocument(model.getDrivingDocument()),
 				    												createRendered,
 				    												new String[] {String.valueOf(createDisabled)},

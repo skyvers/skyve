@@ -905,6 +905,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										modelName, 
 										model, 
 										grid.getParameters(), 
+										grid.getTitle(),
 										user.canCreateDocument(drivingDocument),
 										createRendered,
 										createDisabled,

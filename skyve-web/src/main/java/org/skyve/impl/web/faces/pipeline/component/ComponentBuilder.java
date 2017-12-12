@@ -116,6 +116,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelName,
 											ListModel<? extends Bean> model, 
 											List<FilterParameter> filterParameters,
+											String title,
 											boolean canCreateDocument,
 											boolean createRendered,
 											String[] createDisabledConditionNames,

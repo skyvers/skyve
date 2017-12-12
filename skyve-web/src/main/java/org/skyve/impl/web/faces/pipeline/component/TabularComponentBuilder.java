@@ -498,6 +498,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									List<FilterParameter> filterParameters,
+									String title,
 									boolean canCreateDocument,
 									boolean createRendered,
 									String[] createDisabledConditionNames,
@@ -582,7 +583,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
 
-        addListGridHeader(model, result);
+		if (title != null) {
+			addListGridHeader(title, result);
+		}
         List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children);
         if ((canCreateDocument && createRendered) || zoomRendered) {
@@ -636,10 +639,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
         table.addClientBehavior("rowSelect", ajax);
 	}
 	
-	private void addListGridHeader(ListModel<? extends Bean> model,
+	private void addListGridHeader(String title,
 									UIComponent componentToAddTo) {
 		UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-        heading.setValue(model.getDescription());
+        heading.setValue(title);
 		componentToAddTo.getFacets().put("header", heading);
 	}
 	
