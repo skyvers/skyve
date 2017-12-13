@@ -2,6 +2,7 @@ package util;
 
 import org.junit.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ServerSideAction;
 
 public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAction<T>> extends AbstractH2Test {
@@ -12,6 +13,10 @@ public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAct
 
 	@Test
 	public void testExecute() throws Exception {
-		getAction().execute(getBean(), null);
+		try {
+			getAction().execute(getBean(), null);
+		} catch (ValidationException e) {
+			// pass - action handled incorrect input
+		}
 	}
 }
