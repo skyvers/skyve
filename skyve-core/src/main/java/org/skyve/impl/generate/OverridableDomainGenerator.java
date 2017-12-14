@@ -2717,6 +2717,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
 				imports.add("org.skyve.domain.ChildBean");
 			}
+
+			// add import for parent setter if there are no attributes in the child
+			if (document.getAttributes().size() == 0) {
+				imports.add("javax.xml.bind.annotation.XmlElement");
+			}
 		}
 
 		boolean polymorphic = testPolymorphic(document);
