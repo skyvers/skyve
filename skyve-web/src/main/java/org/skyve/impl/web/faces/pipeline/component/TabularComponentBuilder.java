@@ -954,6 +954,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							text.getBinding(),
 							title,
 							required,
+							Boolean.FALSE.equals(text.getEditable()),
 							text.getDisabledConditionName(),
 							length,
 							text.getPixelWidth(),
@@ -974,9 +975,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		Format<?> mutableFormat = format;
 		if (converter != null) {
 			AttributeType converterAttributeType = converter.getAttributeType();
-	        useCalendar = (AttributeType.date.equals(converterAttributeType) || 
-			        		AttributeType.dateTime.equals(converterAttributeType) ||
-			        		AttributeType.timestamp.equals(converterAttributeType));
+			// Date type and editable field - use readonly mask if not editable.
+			useCalendar = (! Boolean.FALSE.equals(text.getEditable())) &&
+	        				(AttributeType.date.equals(converterAttributeType) || 
+        						AttributeType.dateTime.equals(converterAttributeType) ||
+        						AttributeType.timestamp.equals(converterAttributeType));
 	        if (mutableFormat == null) {
 		        mutableFormat = converter.getFormat();
 	        }
@@ -997,6 +1000,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								text.getBinding(),
 								title,
 								required,
+								Boolean.FALSE.equals(text.getEditable()),
 								text.getDisabledConditionName(),
 								length,
 								mutableFormat,
@@ -1009,6 +1013,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								text.getBinding(),
 								title,
 								required,
+								Boolean.FALSE.equals(text.getEditable()),
 								text.getDisabledConditionName(),
 								length,
 								facesConverter,
@@ -1127,6 +1132,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String binding, 
 									String title, 
 									boolean required, 
+									boolean readonly,
 									String disabled,
 									Integer maxLength, 
 									Converter converter, 
@@ -1138,6 +1144,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												title, 
 												required,
 												disabled);
+		if (readonly) {
+			result.setReadonly(true);
+		}
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
@@ -1152,6 +1161,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String binding, 
 									String title, 
 									boolean required, 
+									boolean readonly,
 									String disabled,
 									Integer maxLength, 
 									Format<?> format, 
@@ -1166,6 +1176,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 												disabled);
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
+		}
+		if (readonly) {
+			result.setReadonly(true);
 		}
 		result.setMask(determineMask(format));
 		String existingStyle = null;
@@ -1255,8 +1268,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setNavigator(true);
 			result.setShowButtonPanel(true);
 		}
-
 		result.setYearRange("c-100:c+10");
+
 		String converterName = converter.getClass().getSimpleName();
 		if ("DD_MM_YYYY".equals(converterName)) {
 			result.setPattern("dd/MM/yyyy");
@@ -1306,6 +1319,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String binding, 
 										String title, 
 										boolean required, 
+										boolean readonly,
 										String disabled,
 										Integer maxLength, 
 										Integer pixelWidth, 
@@ -1317,6 +1331,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 														title,
 														required, 
 														disabled);
+		if (readonly) {
+			result.setReadonly(true);
+		}
 		if (maxLength != null) {
 			result.setMaxlength(maxLength.intValue());
 		}
