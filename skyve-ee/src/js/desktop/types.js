@@ -2003,7 +2003,7 @@ isc.BizMapPicker.addMethods({
 
 isc.ClassFactory.defineClass("GeometryItem", "TextItem");
 isc.GeometryItem.addClassProperties({
-	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals']
+	validOperators: ['gWithin', 'gContains', 'gOverlaps', 'gDisjoint', 'gIntersects', 'gTouches', 'gCrosses', 'gEquals', 'isNull', 'notNull']
 });
 isc.GeometryItem.addClassMethods({
 	format: function(value) {

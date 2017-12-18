@@ -179,6 +179,8 @@ isc.DataSource.addSearchOperator({ID:'gOverlaps',
 		return -1;
 	}
 });
+isc.DataSource.addSearchOperator('isNull', ['geometry']);
+isc.DataSource.addSearchOperator('notNull', ['geometry']);
 
 isc.ClassFactory.defineClass("BizMap", "Canvas");
 isc.BizMap.addClassMethods({

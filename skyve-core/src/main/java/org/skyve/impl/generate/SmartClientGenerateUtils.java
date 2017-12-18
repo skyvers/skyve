@@ -1163,7 +1163,7 @@ public class SmartClientGenerateUtils {
             	result.append(",width:").append(pixelWidth);
             }
 			if (onlyEqualsFilterOperators) {
-				result.append(",validOperators:['equals','notEqual']");
+				result.append(",validOperators:['equals','notEqual','isNull','notNull']");
 			}
 			else if ("geometry".equals(type)) {
 				result.append(",validOperators:isc.GeometryItem.validOperators");
