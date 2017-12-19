@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
@@ -83,7 +84,7 @@ class HibernateQueryDelegate {
 			// Replace bogus _ property names with the dot
 			String[] aliases = query.getReturnAliases().clone();
 			for (int i = 0, length = aliases.length; i < length; i++) {
-				aliases[i] = aliases[i].replace('_', '.');
+				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
 
 			List<?> results = query.list();
@@ -134,7 +135,7 @@ class HibernateQueryDelegate {
 			// Replace bogus _ property names with the dot
 			String[] aliases = query.getReturnAliases().clone();
 			for (int i = 0, length = aliases.length; i < length; i++) {
-				aliases[i] = aliases[i].replace('_', '.');
+				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
 
 			return new HibernateAutoClosingIterable<>(drivingModuleName, 

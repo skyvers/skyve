@@ -73,7 +73,7 @@ public class SkyveDataSource implements JRDataSource {
 				result = user;
 			}
 			else {
-				binding = binding.replace('_', '.');
+				binding = BindUtil.unsanitiseBinding(binding);
 				if (formatted) {
 					result = BindUtil.getDisplay(user.getCustomer(), currentBean, binding);
 				}

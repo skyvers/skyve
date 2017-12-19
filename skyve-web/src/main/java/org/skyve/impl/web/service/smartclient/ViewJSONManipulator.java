@@ -361,13 +361,13 @@ class ViewJSONManipulator extends ViewVisitor {
 					addBindingsAndFormatValues(bindings, element, elementValues, webId);
 					values.add(elementValues);
 				}
-				json.put(bindingPrefix.replace('.', '_'), values);
+				json.put(BindUtil.sanitiseBinding(bindingPrefix), values);
 			}
 			else {
 				Bean currentBean = (Bean) value;
 				Map<String, Object> beanValues = new TreeMap<>();
 				addBindingsAndFormatValues(bindings, currentBean, beanValues, webId);
-				json.put(bindingPrefix.replace('.', '_'), beanValues);
+				json.put(BindUtil.sanitiseBinding(bindingPrefix), beanValues);
 			}
 		}
 	}
@@ -399,7 +399,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					value = value.toString();
 				}
 			}
-			toAddTo.put(binding.replace('.', '_'), value);
+			toAddTo.put(BindUtil.sanitiseBinding(binding), value);
 		}
 		
 		// Add formats
@@ -482,7 +482,7 @@ class ViewJSONManipulator extends ViewVisitor {
 				// the rows should exist this will be a List of bizId Strings.
 				// If the rows are aggregated/composed (grid widget),
 				// then each row property is updated to add or modify the rows.
-				List<Object> requestList = (List<Object>) BindUtil.get(values, childBindingPrefix.replace('_', '.'));
+				List<Object> requestList = (List<Object>) BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
 				// If the requestList is null then it was not sent from the client - it is irrelevant.
 				// A data grid binding can be struck out of the request when a zoom out occurs.
 				// This ensures that old values are not updated when the view is refreshed - see EditView.js where action == 'ZoomOut'
@@ -622,7 +622,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			else { // relation is an association (or one to one / one to many inverse)
 				// Get the existing bean referenced
 				Bean referencedBean = (Bean) BindUtil.get(appliedTo, childBindingPrefix);
-				Object requestObject = BindUtil.get(values, childBindingPrefix.replace('_', '.'));
+				Object requestObject = BindUtil.get(values, BindUtil.unsanitiseBinding(childBindingPrefix));
 				if (requestObject == null) {
 					if (referencedBean != null) {
 						BindUtil.set(appliedTo, childBindingPrefix, null);
@@ -745,7 +745,7 @@ class ViewJSONManipulator extends ViewVisitor {
 									Bean targetBean,
 									AbstractPersistence persistence) 
 	throws Exception {
-		String valueKey = binding.replace('.', '_');
+		String valueKey = BindUtil.sanitiseBinding(binding);
 		if (! values.containsKey(valueKey)) {
 			return;
 		}
@@ -863,7 +863,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	 * @param binding	The binding for the domain values lookup.
 	 */
 	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) {
-		String safeBinding = binding.replace('.', '_');
+		String safeBinding = BindUtil.sanitiseBinding(binding);
 		if (! valueMaps.containsKey(safeBinding)) {
             TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
             Attribute attribute = target.getAttribute();

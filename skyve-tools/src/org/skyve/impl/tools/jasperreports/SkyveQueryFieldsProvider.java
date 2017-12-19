@@ -52,7 +52,7 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
     			QueryColumn column = columns.get(i);
     			JRDesignField field = new JRDesignField();
     			String binding = column.getBinding();
-    			field.setName(binding.replace('.', '_'));
+    			field.setName(BindUtil.sanitiseBinding(binding));
     			
     			Attribute attribute = BindUtil.getMetaDataForBinding(customer, owningModule, document, binding).getAttribute();
     			Class<?> propertyType = attribute.getAttributeType().getImplementingType();

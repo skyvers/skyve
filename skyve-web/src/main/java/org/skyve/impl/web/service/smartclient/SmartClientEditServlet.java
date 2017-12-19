@@ -131,11 +131,11 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	
 			    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
 			    	if (formBinding != null) {
-			    		formBinding = formBinding.replace('_', '.');
+			    		formBinding = BindUtil.unsanitiseBinding(formBinding);
 			    	}
 			    	String gridBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
 			    	if (gridBinding != null) {
-			    		gridBinding = gridBinding.replace('_', '.');
+			    		gridBinding = BindUtil.unsanitiseBinding(gridBinding);
 			    	}
 			    	String source = request.getParameter(AbstractWebContext.SOURCE_NAME);
 			    	String editIdCounter = request.getParameter(SmartClientWebContext.EDIT_ID_COUNTER);
@@ -153,7 +153,7 @@ public class SmartClientEditServlet extends HttpServlet {
 						String value = request.getParameter(name);
 						if (name.charAt(0) != '_') {
 							// no '.' allowed in smart client field names
-							name = name.replace('_', '.');
+							name = BindUtil.unsanitiseBinding(name);
 							
 							// "null" can be sent by Smart Client
 							if (value != null) {
@@ -419,7 +419,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	    	for (String binding : m.getBindings()) {
 	    		result = true;
 	    		// no '.' or '[' or ']' allowed in JSON identifiers
-	    		sb.append(binding.replace('.', '_').replace('[', '_').replace(']', '_')).append(":\"");
+	    		sb.append(BindUtil.sanitiseBinding(binding)).append(":\"");
 	    		String message = m.getErrorMessage();
 	    		if (message == null) {
 	    			sb.append("An error has occurred");

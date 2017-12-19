@@ -1919,7 +1919,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 													disabled);
 		result.setForceSelection(true);
 		result.setDropdown(true);
-		String var = binding.replace('.', '_') + "Row";
+		String var = BindUtil.sanitiseBinding(binding) + "Row";
 		result.setVar(var);
 		StringBuilder expression = new StringBuilder(32);
 		result.setValueExpression("itemLabel",

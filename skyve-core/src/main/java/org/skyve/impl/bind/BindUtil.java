@@ -669,6 +669,29 @@ public final class BindUtil {
 	}
 
 	/**
+	 * Replace '.', '[' & ']' with '_' to make valid client identifiers.
+	 */
+	public static String sanitiseBinding(String binding) {
+		String result = null;
+		if (binding != null) {
+			result = binding.replace('.', '_').replace('[', '_').replace(']', '_');
+		}
+		return result;
+	}
+
+	/**
+	 * Replace '_' with either '[', ']' or '_' depending on the context to make valid binding expressions from client identifiers.
+	 */
+	public static String unsanitiseBinding(String binding) {
+		String result = null;
+		if (binding != null) {
+			result = binding.replaceAll("\\_(\\d*)\\_", "\\[$1\\]");
+			result = result.replace('_', '.');
+		}
+		return result;
+	}
+	
+	/**
 	 * Check to see if the element is in the list. If not, then add it.
 	 * 
 	 * @param owner
@@ -861,7 +884,7 @@ public final class BindUtil {
 
 	@SuppressWarnings("unchecked")
 	public static Object get(Map<String, Object> map, String binding) {
-		String alias = binding.replace('.', '_');
+		String alias = sanitiseBinding(binding);
 		Object result = null;
 		if (map.containsKey(binding)) {
 			result = map.get(binding);

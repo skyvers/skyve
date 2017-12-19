@@ -125,7 +125,7 @@ public class SmartClientGenerateUtils {
             String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
             displayField = (descriptionBinding == null) ? 
             					Bean.BIZ_KEY : 
-        						descriptionBinding.replace('.', '_');
+        						BindUtil.sanitiseBinding(descriptionBinding);
 
             Document queryDocument = module.getDocument(customer, query.getDocumentName());
             
@@ -242,7 +242,7 @@ public class SmartClientGenerateUtils {
 													String binding,
 													String name) {
 			this.locale = locale;
-			this.name = (name != null) ? name : binding.replace('.', '_');
+			this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 			title = this.name;
 
 			Document bindingDocument = null;
@@ -1589,7 +1589,7 @@ public class SmartClientGenerateUtils {
 		}
 		
 		for (String hiddenBinding : hiddenBindingsList) {
-			toAppendTo.append("{name:'").append(hiddenBinding.replace('.', '_'));
+			toAppendTo.append("{name:'").append(BindUtil.sanitiseBinding(hiddenBinding));
 			toAppendTo.append("',type:'text',hidden:true},");
 		}
 

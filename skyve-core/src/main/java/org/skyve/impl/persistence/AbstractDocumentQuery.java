@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
@@ -133,7 +134,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 			projectionClause.append(", ");
 		}
 		projectionClause.append(THIS_ALIAS).append('.').append(binding);
-		projectionClause.append(" as ").append(alias.replace('.', '_'));
+		projectionClause.append(" as ").append(BindUtil.sanitiseBinding(alias));
 		return this;
 	}
 
@@ -142,7 +143,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
-		projectionClause.append(expression).append(" as ").append(alias.replace('.', '_'));
+		projectionClause.append(expression).append(" as ").append(BindUtil.sanitiseBinding(alias));
 		return this;
 	}
 
@@ -161,7 +162,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		else {
 			projectionClause.append(THIS_ALIAS).append('.').append(binding);
 		}
-		projectionClause.append(") as ").append(alias.replace('.', '_'));
+		projectionClause.append(") as ").append(BindUtil.sanitiseBinding(alias));
 		return this;
 	}
 

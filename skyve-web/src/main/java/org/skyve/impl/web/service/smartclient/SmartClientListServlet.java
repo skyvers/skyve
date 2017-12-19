@@ -192,7 +192,7 @@ public class SmartClientListServlet extends HttpServlet {
 						String value = request.getParameter(name);
 						if ((! name.isEmpty()) && name.charAt(0) != '_') {
 							// no '.' allowed in smart client field names
-							name = name.replace('_', '.');
+							name = BindUtil.unsanitiseBinding(name);
 							
 							// "null" can be sent by Smart Client
 							if (value != null) {
@@ -245,7 +245,7 @@ public class SmartClientListServlet extends HttpServlet {
 								else {
 									sortParameter.setDirection(SortDirection.ascending);
 								}
-								sortParameter.setBy(sortBy.replace('_', '.'));
+								sortParameter.setBy(BindUtil.unsanitiseBinding(sortBy));
 								
 								sortParameters[i] = sortParameter;
 							}
@@ -473,7 +473,7 @@ public class SmartClientListServlet extends HttpServlet {
 				value = null;
 			}
 			
-			binding = binding.replace('_', '.');
+			binding = BindUtil.unsanitiseBinding(binding);
 			boolean queryParameter = (binding.charAt(0) == ':');
 			if (queryParameter) {
 				binding = binding.substring(1); // lose the colon
@@ -604,9 +604,7 @@ public class SmartClientListServlet extends HttpServlet {
 			for (Map<String, Object> criterium : criteria) {
 				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("criterium = " + JSON.marshall(null, criterium, null));
 				String binding = ((String) criterium.get("fieldName"));
-				if (binding != null) {
-					binding = binding.replace('_', '.');
-				}
+				binding = BindUtil.unsanitiseBinding(binding);
 				SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterium.get("operator"));
 
 				if (binding == null) { // advanced criteria

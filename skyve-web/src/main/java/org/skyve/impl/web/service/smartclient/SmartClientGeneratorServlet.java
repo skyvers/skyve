@@ -935,7 +935,7 @@ code.append("_view:view})");
 					code.append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
 				}
 				else {
-					code.append("binding:'").append(binding.replace('.', '_'));
+					code.append("binding:'").append(BindUtil.sanitiseBinding(binding));
 				}
 				
 				code.append("'});\n");
@@ -959,7 +959,7 @@ code.append("_view:view})");
 					code.append("defaultValue:'").append(SmartClientGenerateUtils.processString((value == null) ? Util.i18n(displayName, locale) : Util.i18n(value, locale), false, false));
 				}
 				else {
-					code.append("name:'").append(binding.replace('.', '_'));
+					code.append("name:'").append(BindUtil.sanitiseBinding(binding));
 				}
 				code.append("',");
 				
@@ -1029,7 +1029,7 @@ code.append("_view:view})");
 			code.append(dataGridDocument.getOwningModuleName());
 			code.append("',_doc:'");
 			code.append(dataGridDocument.getName());
-			code.append("',_b:'").append(dataGridBinding.replace('.', '_'));
+			code.append("',_b:'").append(BindUtil.sanitiseBinding(dataGridBinding));
 			code.append("',ID:").append(IDExpression());
 			code.append(",canCreate:").append(user.canCreateDocument(dataGridDocument));
 			code.append(",canUpdate:").append(user.canUpdateDocument(dataGridDocument));
@@ -1067,7 +1067,7 @@ code.append("_view:view})");
 			}
 			String selectedIdBinding = grid.getSelectedIdBinding();
 			if (selectedIdBinding != null) {
-				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
+				code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 			}
 			size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(grid.getDisabledConditionName(), code);
@@ -1238,7 +1238,7 @@ code.append("_view:view})");
 			code.append("var ").append(listGridVariable).append("=isc.BizListGrid.create({");
 			if (tree) {
 				if (rootBinding != null) {
-					code.append("rootIdBinding:'").append(rootBinding.replace('.', '_')).append("',");
+					code.append("rootIdBinding:'").append(BindUtil.sanitiseBinding(rootBinding)).append("',");
 				}
 				code.append("isTree:true,");
 			}
@@ -1257,7 +1257,7 @@ code.append("_view:view})");
 			}
 			String selectedIdBinding = grid.getSelectedIdBinding();
 			if (selectedIdBinding != null) {
-				code.append("selectedIdBinding:'").append(selectedIdBinding.replace('.', '_')).append("',");
+				code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 			}
 			size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 			disabled(grid.getDisabledConditionName(), code);
@@ -1553,7 +1553,7 @@ code.append("_view:view})");
 
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=isc.BizListMembership.create({_b:'");
-			code.append(membershipBinding.replace('.', '_'));
+			code.append(BindUtil.sanitiseBinding(membershipBinding));
 			code.append('\'');
 			String heading = membership.getCandidatesHeading();
 			if (heading != null) {
@@ -1595,7 +1595,7 @@ code.append("_view:view})");
 										boolean parentEnabled) {
 			String variable = "v" + variableCounter++;
 			code.append("var ").append(variable).append("=isc.BizComparison.create({_b:'");
-			code.append(comparison.getBinding().replace('.', '_'));
+			code.append(BindUtil.sanitiseBinding(comparison.getBinding()));
 			code.append("',_view:view,");
 			editable(comparison.getEditable(), code);
 			disabled(comparison.getDisabledConditionName(), code);
@@ -2454,7 +2454,7 @@ pickListFields:[{name:'value'}],
 		public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
 													boolean parentVisible,
 													boolean parentEnabled) {
-			code.append("view.setDisabled('").append(setDisabled.getBinding().replace('.', '_'));
+			code.append("view.setDisabled('").append(BindUtil.sanitiseBinding(setDisabled.getBinding()));
 			code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
 		}
 
@@ -2462,7 +2462,7 @@ pickListFields:[{name:'value'}],
 		public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
 													boolean parentVisible,
 													boolean parentEnabled) {
-			code.append("view.setInvisible('").append(setInvisible.getBinding().replace('.', '_'));
+			code.append("view.setInvisible('").append(BindUtil.sanitiseBinding(setInvisible.getBinding()));
 			code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
 		}
 
@@ -2470,7 +2470,7 @@ pickListFields:[{name:'value'}],
 		public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
 													boolean parentVisible,
 													boolean parentEnabled) {
-			code.append("view.toggleDisabled('").append(toggleDisabled.getBinding().replace('.', '_'));
+			code.append("view.toggleDisabled('").append(BindUtil.sanitiseBinding(toggleDisabled.getBinding()));
 			code.append("');");
 		}
 
@@ -2478,7 +2478,7 @@ pickListFields:[{name:'value'}],
 		public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
 														boolean parentVisible,
 														boolean parentEnabled) {
-			code.append("view.toggleVisibility('").append(toggleVisibility.getBinding().replace('.', '_'));
+			code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
 			code.append("');");
 		}
 
@@ -2924,7 +2924,7 @@ pickListFields:[{name:'value'}],
 			if ((parameters != null) && (! parameters.isEmpty())) {
 				builder.append("params:{");
 				for (Parameter parameter : parameters) {
-					builder.append("'").append(parameter.getName().replace('.', '_')).append("':'");
+					builder.append("'").append(BindUtil.sanitiseBinding(parameter.getName())).append("':'");
 					String binding = parameter.getBinding();
 					if (binding != null) {
 						builder.append('{').append(binding).append("}',");
@@ -2942,7 +2942,7 @@ pickListFields:[{name:'value'}],
 			if ((parameters != null) && (! parameters.isEmpty())) {
 				builder.append("params:[");
 				for (FilterParameter parameter : parameters) {
-					builder.append("{name:'").append(parameter.getName().replace('.', '_')).append("',operator:'");
+					builder.append("{name:'").append(BindUtil.sanitiseBinding(parameter.getName())).append("',operator:'");
 					builder.append(SmartClientFilterOperator.fromFilterOperator(parameter.getOperator())).append("',value:'");
 					String binding = parameter.getBinding();
 					if (binding != null) {

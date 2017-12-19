@@ -136,7 +136,7 @@ public abstract class AbstractFacesBuilder {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("#{");
 		if (expressionPrefix != null) {
-			sb.append(listVar ? expressionPrefix.replace('.', '_') : expressionPrefix);
+			sb.append(listVar ? BindUtil.sanitiseBinding(expressionPrefix) : expressionPrefix);
 			sb.append(map ? "['" : ".");
 		}
 		sb.append(fragment);

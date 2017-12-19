@@ -12,6 +12,7 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientDataGridFieldDefinition;
 import org.skyve.impl.generate.SmartClientGenerateUtils.SmartClientFieldDefinition;
@@ -951,7 +952,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// Create the datagrid faces component
 		listBinding = grid.getBinding();
-		listVar = listBinding.replace('.', '_') + "Row";
+		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
 		UIComponent g = cb.dataGrid(listVar, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		currentGrid = grid;
@@ -1297,7 +1298,7 @@ public class FacesViewVisitor extends ViewVisitor {
 																	lookup, 
 																	title, 
 																	required,
-																	ldef.getDisplayField().replace('_', '.'),
+																	BindUtil.unsanitiseBinding(ldef.getDisplayField()),
 																	ldef.getQuery());
         eventSource = c;
         

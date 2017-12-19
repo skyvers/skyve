@@ -267,7 +267,7 @@ public class JSONWriter {
 						// do nothing - we try and get bogus properties from map beans in the list views - summary rows for instance
 					}
 					add(',');
-					name = name.replace('.', '_');
+					name = BindUtil.sanitiseBinding(name);
 					add(name, value, propertyNames, topLevel);
 				}
 			}
