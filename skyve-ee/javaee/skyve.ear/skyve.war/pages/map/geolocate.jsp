@@ -89,10 +89,11 @@
 	<head> 
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&sensor=false&region=AU&key=<%=UtilImpl.GOOGLE_MAPS_V3_API_KEY%>"></script>
-<%--
-		<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false&region=AU&key=<%=UtilImpl.GOOGLE_MAPS_V3_API_KEY%>"></script> 
---%>
+		<% if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) { %>
+			<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&sensor=false&region=AU"></script>
+		<% } else { %>
+			<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3&sensor=false&region=AU&key=<%=UtilImpl.GOOGLE_MAPS_V3_API_KEY%>"></script>
+		<% } %>
 		<script language="javascript" type="text/javascript" src="<%=path%>/desktop/geolocate-min.js?v=<%=UtilImpl.WEB_RESOURCE_FILE_VERSION%>"></script>
 		<script type="text/javascript">
 			Map.pick = function() {

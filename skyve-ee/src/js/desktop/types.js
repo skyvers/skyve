@@ -1866,8 +1866,13 @@ isc.BizMapPicker.addMethods({
 
 			isc.BizUtil.loadJS('wicket/wicket.js?v=' + isc.BizUtil.version, function() {
 				isc.BizUtil.loadJS('wicket/wicket-gmap3.js?v=' + isc.BizUtil.version, function() {
-					isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
-										isc.BizUtil.googleMapsV3ApiKey);
+					if (isc.BizUtil.googleMapsV3ApiKey) {
+						isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise&key=' + 
+											isc.BizUtil.googleMapsV3ApiKey);
+					}
+					else {
+						isc.BizUtil.loadJS('https://maps.googleapis.com/maps/api/js?v=3&libraries=drawing&callback=isc.BizMapPicker.initialise');
+					}
 				});
 			});
 		}

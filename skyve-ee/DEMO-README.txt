@@ -12,7 +12,7 @@ Installation
 
 Unzip the demo.zip anywhere - it is self contained.
 Edit demo/skyve/javaee/skyve.json,
-find the line = directory: "/C:/demo/skyve/content/", (line 27)
+find the line = directory: "${SKYVE_CONTENT:/C:/demo/skyve/content/}", (line 28)
 and change it to the absolute path to the skyve/content folder within the demo folder.
 Ensure there is a trailing slash (slash can be used on ALL O/Ss)
 
@@ -36,6 +36,13 @@ As per the getting started videos at skyve.org - if you want to see example data
 * Select the Job to load Demonstration Data and select "Run As" admin
 * click the "Schedule Job For Now" button and then Cancel out of the form rather than OK to avoid the Job being permanently scheduled.
 * Expand Whosin module or WhosinIntegrate to see the created data.
+
+If you want to use your own google maps key
+===========================================
+
+Edit demo/skyve/javaee/skyve.json,
+find the line = 		googleMapsV3Key: null, (line 101)
+and change it to your google maps key - eg googleMapsV3Key: "<place_your_key_here>",
 
 To use eclipse to perform development
 =====================================
@@ -62,9 +69,9 @@ Drag "build.xml" file from the [Package Explorer] in the skyve project into the 
 To change WILDFLY port
 ======================
 
-Edit demo/wildfly/wildfly-8.1.0.Final\standalone\configuration\standalone.xml
-Goto line 391 and change the socket binding for http from 8080.
-Edit demo/skyve/javaee/skyve.properties,
-find the line SERVER_URL=http://localhost:8080 (line 26) and change the port to match.
-Restart the server (kill the command prompt running run.bat and then restart run.bat)
+Edit demo/wildfly/wildfly-10.1.0.Final\standalone\configuration\standalone.xml
+Goto line 415 and change the socket binding for http from 8080.
+Edit demo/skyve/javaee/skyve.json,
+find the line 		server: "http://${SKYVE_HOSTNAME:localhost}:${SKYVE_PORT:8080}", (line 37) and change the port to match.
+Restart the server (kill the command prompt running run.bat/run.sh and then restart run.bat/run.sh)
 and hit http://localhost:XXXX/skyve/ in a browser where XXXX is the new port set.

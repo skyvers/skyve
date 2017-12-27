@@ -93,7 +93,12 @@ public class Desktop extends Harness {
 	
 					result.append("isc.BizUtil.customer='").append(customer.getName()).append("';");
 					result.append("isc.BizUtil.version='").append(UtilImpl.WEB_RESOURCE_FILE_VERSION).append("';");
-					result.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
+					if (UtilImpl.GOOGLE_MAPS_V3_API_KEY == null) {
+						result.append("isc.BizUtil.googleMapsV3ApiKey=null;");
+					}
+					else {
+						result.append("isc.BizUtil.googleMapsV3ApiKey='").append(UtilImpl.GOOGLE_MAPS_V3_API_KEY).append("';");
+					}
 					result.append("isc.BizUtil.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
 					
 					WebAction a = Desktop.this.getWebActionParameter();

@@ -167,7 +167,6 @@
 			<fileset dir=".." includes="LICENSE.txt,DEPENDENCIES.txt" />
 		</copy>
 		<copy file="DEMO-README.txt" tofile="${staging.dir}/demo/README.txt" overwrite="true" />
-		<copy file="DEMO-logging.properties" tofile="${staging.dir}/demo/wildfly-8.1.0.Final/standalone/configuration/logging.properties" overwrite="true" />
 	</target>
 	<target name="demoZip">
 		<delete dir="." includes="demo.zip" failonerror="false" />
