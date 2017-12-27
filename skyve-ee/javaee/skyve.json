@@ -14,7 +14,7 @@
 		// generated SQL statements
 		sql: false, 
 		// content manipulation
-		content: true, 
+		content: false, 
 		// application security denials
 		security: true, 
 		// bizlet callbacks
