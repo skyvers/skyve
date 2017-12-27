@@ -43,6 +43,9 @@ public class SkyvePhaseListener implements PhaseListener {
 			else if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
 				afterRestoreView(event);
 			}
+			else if (PhaseId.UPDATE_MODEL_VALUES.equals(phaseId)) {
+				afterUpdateModelValues(event);
+			}
 			// The bean issued a HTTP redirect response
 			else if (event.getFacesContext().getResponseComplete()) {
 				afterResponseRendered(event);
@@ -70,14 +73,14 @@ public class SkyvePhaseListener implements PhaseListener {
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - SET PERSISTENCE FROM SESSION");
 			FacesView<?> view = (FacesView<?>) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
-			restore(view);
+			restore(view, ec);
 		}
 		else if (vr != null) {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
 				if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - SET PERSISTENCE FROM VIEW");
 				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
-				restore(view);
+				restore(view, ec);
 			}
 		}
 
@@ -90,13 +93,12 @@ public class SkyvePhaseListener implements PhaseListener {
     	WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
 	}
 
-	private static void restore(FacesView<?> view)
+	private static void restore(FacesView<?> view, ExternalContext ec)
 	throws Exception {
 		// restore the context
-		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		AbstractWebContext webContext = WebUtil.getCachedConversation(view.getDehydratedWebId(),
-																	(HttpServletRequest) ec.getRequest(),
-																	(HttpServletResponse) ec.getResponse());
+																		(HttpServletRequest) ec.getRequest(),
+																		(HttpServletResponse) ec.getResponse());
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
@@ -105,7 +107,19 @@ public class SkyvePhaseListener implements PhaseListener {
 			persistence.setForThread();
 		}
 	}
-	
+
+	private static void afterUpdateModelValues(PhaseEvent event) {
+		UIViewRoot vr = event.getFacesContext().getViewRoot();
+		if (vr != null) {
+			// Gather an dual list models in the view.
+			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
+			if (managedBeanName != null) {
+				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
+				view.getDualListModels().gather();
+			}
+		}
+	}
+
 	private static void afterResponseRendered(PhaseEvent event)
 	throws Exception {
 		try {

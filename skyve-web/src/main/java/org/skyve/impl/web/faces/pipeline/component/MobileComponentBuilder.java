@@ -393,12 +393,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 // Lazy data models don't seem to work on mobile data lists 		
 /*
 		String value = (model instanceof DocumentQueryListModel) ? 
-        					String.format("#{%s.getModel('%s','%s','%s',null)}",
+        					String.format("#{%s.getLazyDataModel('%s','%s','%s',null)}",
 											managedBeanName, 
 											moduleName, 
 											drivingDocumentName, 
 											modelName) :
-    						String.format("#{%s.getModel('%s','%s',null,'%s')}", 
+    						String.format("#{%s.getLazyDataModel('%s','%s',null,'%s')}", 
 										managedBeanName, 
 										moduleName, 
 										modelDocumentName, 

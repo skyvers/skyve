@@ -9,10 +9,7 @@ import java.util.TreeMap;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
@@ -102,6 +99,7 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
@@ -527,7 +525,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	
 						if (thisBean == null) { // DNE in beanList
 							if (thisMap == null) { // reference
-								thisBean = findReferencedBean(relatedDocument, thisBizId, persistence);
+								thisBean = WebUtil.findReferencedBean(relatedDocument, thisBizId, persistence);
 							}
 							else {
 								// create a new one with new Instance
@@ -655,7 +653,7 @@ class ViewJSONManipulator extends ViewVisitor {
 						// find the existing bean with retrieve if not the same as in the request
 						if ((referencedBean == null) || (! referencedBean.getBizId().equals(requestBizId))) {
 							Bean oldReferencedBean = referencedBean;
-							referencedBean = findReferencedBean(relatedDocument, requestBizId, persistence);
+							referencedBean = WebUtil.findReferencedBean(relatedDocument, requestBizId, persistence);
 							BindUtil.set(appliedTo, childBindingPrefix, referencedBean);
 
 							// Determine whether to set the other side of an inverse
@@ -720,25 +718,6 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	// find the existing bean with retrieve
-	private Bean findReferencedBean(Document referenceDocument, String bizId, AbstractPersistence persistence) {
-		Bean result = persistence.retrieve(referenceDocument, bizId, false);
-		if (result == null) {
-			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
-																		referenceDocument.getSingularAlias())));
-		}
-		if (! user.canReadBean(bizId, 
-								result.getBizModule(), 
-								result.getBizDocument(), 
-								result.getBizCustomer(), 
-								result.getBizDataGroupId(), 
-								result.getBizUserId())) {
-			throw new SecurityException("read this data", user.getName());
-		}
-		
-		return result;
-	}
-	
 	private void applyJSONProperty(Document startingDocument,
 									String binding, 
 									Map<String, Object> values, 
@@ -776,7 +755,7 @@ class ViewJSONManipulator extends ViewVisitor {
 					String relatedId = (String) relatedValue;
 					// old value id and new value id are different
 					if ((oldRelatedBean == null) || (! oldRelatedBean.getBizId().equals(relatedId))) {
-						newRelatedBean = findReferencedBean(relatedDocument, relatedId, persistence);
+						newRelatedBean = WebUtil.findReferencedBean(relatedDocument, relatedId, persistence);
 						dirty = true;
 					}
 				}

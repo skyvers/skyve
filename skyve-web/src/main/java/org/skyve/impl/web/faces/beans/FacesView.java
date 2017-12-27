@@ -16,7 +16,6 @@ import javax.faces.context.FacesContext;
 
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
-import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
@@ -39,10 +38,10 @@ import org.skyve.impl.web.faces.actions.SetTitleAction;
 import org.skyve.impl.web.faces.actions.ZoomInAction;
 import org.skyve.impl.web.faces.actions.ZoomOutAction;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
+import org.skyve.impl.web.faces.models.SkyveDualListModelMap;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.metadata.FilterOperator;
-import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
@@ -70,8 +69,8 @@ public class FacesView<T extends Bean> extends Harness {
 	private BeanMapAdapter<T> currentBean = null;
 	// A stack of referring urls set as we edit beans from a list grid
 	private Stack<String> history = new Stack<>();
-	private Map<String, SkyveLazyDataModel> models = new TreeMap<>();
- 	private Map<String, DualListModel<DomainValue>> listMembershipModels = new TreeMap<>();
+	private Map<String, SkyveLazyDataModel> lazyDataModels = new TreeMap<>();
+ 	private SkyveDualListModelMap dualListModels = new SkyveDualListModelMap(this);
 	private Map<String, List<BeanMapAdapter<Bean>>> beans = new TreeMap<>();
 
 	@PostConstruct
@@ -292,11 +291,11 @@ public class FacesView<T extends Bean> extends Harness {
 		}
 	}
 	
-	public SkyveLazyDataModel getModel(String moduleName, 
-										String documentName, 
-										String queryName,
-										String modelName,
-										List<List<String>> filterCriteria) {
+	public SkyveLazyDataModel getLazyDataModel(String moduleName, 
+												String documentName, 
+												String queryName,
+												String modelName,
+												List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
 			key = String.format("%s.%s", moduleName, queryName);
@@ -309,7 +308,7 @@ public class FacesView<T extends Bean> extends Harness {
 				key = String.format("%s.%s", moduleName, documentName);
 			}
 		}
-		SkyveLazyDataModel result = models.get(key);
+		SkyveLazyDataModel result = lazyDataModels.get(key);
 
 		if (result == null) {
 			// Collect the filter parameters from the criteria sent
@@ -326,7 +325,7 @@ public class FacesView<T extends Bean> extends Harness {
 			}
 			
 			result = new SkyveLazyDataModel(this, moduleName, documentName, queryName, modelName, filterParameters);
-			models.put(key, result);
+			lazyDataModels.put(key, result);
 		}
  		
 		return result;
@@ -363,30 +362,11 @@ public class FacesView<T extends Bean> extends Harness {
  		
 		return result;
 	}
- 	
- 	private static List<DomainValue> domainValues = null;
- 	private DualListModel<DomainValue> listMembershipModel = new DualListModel<>();
- 	public DualListModel<DomainValue> getListMembershipModel() {
- 		if (domainValues == null) {
- 			domainValues = new ArrayList<>();
- 			domainValues.add(new DomainValue("FUCKED"));
- 		}
- 		return listMembershipModel;
+
+	public SkyveDualListModelMap getDualListModels() {
+		return dualListModels;
  	}
-	public void setListMembershipModel(DualListModel<DomainValue> listMembershipModel) {
-		this.listMembershipModel = listMembershipModel;
-	}
-/*
-	public Map<String, DomainValueDualListModel> getListMembershipModels() {
- 		DomainValueDualListModel result = listMembershipModels.get(binding);
- 		if (result == null) {
- 			result = new DomainValueDualListModel(new ArrayList<DomainValue>(), new ArrayList<DomainValue>());
- 			listMembershipModels.put(binding, result);
- 		}
- 		
- 		return result;
- 	}
-*/ 	
+
  	public String getContentUrl(final String binding) {
 		return new GetContentURLAction(getBean(), binding).execute();
  	}
@@ -465,8 +445,8 @@ public class FacesView<T extends Bean> extends Harness {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - dehydratedWebId=" + dehydratedWebId);
 		}
 		webContext = null;
-		models.clear();
-		listMembershipModels.clear();
+		lazyDataModels.clear();
+		dualListModels.clear();
 		beans.clear();
 		currentBean = null;
 	}

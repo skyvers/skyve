@@ -83,6 +83,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
+import org.skyve.impl.web.faces.converters.select.AssociationPickListConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
@@ -90,6 +91,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -550,9 +552,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	        result.addClientBehavior("rowSelect", ajax);
     	}
     	
-        // Write out getModel call as the value
+        // Write out getLazyDataModel call as the value
         StringBuilder value = new StringBuilder(64);
-		value.append("#{").append(managedBeanName).append(".getModel('").append(moduleName).append("','");
+		value.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
 		if (model instanceof DocumentQueryListModel) {
 			value.append(drivingDocumentName).append("','").append(modelName).append("',null,");
 		}
@@ -560,7 +562,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			value.append(modelDocumentName).append("',null,'").append(modelName).append("',");
 		}
 
-		// Add filter parameters to getModel call
+		// Add filter parameters to getLazyDataModel call
 		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
 			value.append('[');
 			for (FilterParameter param : filterParameters) {
@@ -766,20 +768,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		result.setShowTargetFilter(false);
 		
         StringBuilder value = new StringBuilder(128);
-        /*
-        value.append("#{").append(managedBeanName).append(".getListMembershipModel('");
-        value.append(membership.getBinding()).append("')}");
-        result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), DomainValueDualListModel.class));
-		*/
-        value.append("#{").append(managedBeanName).append(".listMembershipModel");
-        value.append("}");
+        value.append("#{").append(managedBeanName).append(".dualListModels['");
+        value.append(membership.getBinding()).append("']}");
         result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), DualListModel.class));
+		result.setConverter(new AssociationPickListConverter());
 
         result.setVar("item");
-        result.setValueExpression("itemValue", ef.createValueExpression(elc, "#{item.code}", String.class));
+        result.setValueExpression("itemValue", ef.createValueExpression(elc, "#{item}", DomainValue.class));
         result.setValueExpression("itemLabel", ef.createValueExpression(elc, "#{item.description}", String.class));
-        
-        // TODO add a converter for domain values - can I use select converter shit?
         
         Map<String, UIComponent> facets = result.getFacets();
 		String heading = membership.getCandidatesHeading();

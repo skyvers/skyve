@@ -16,6 +16,7 @@ import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -27,6 +28,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.StateUtil;
 import org.skyve.web.WebContext;
 
@@ -255,5 +257,27 @@ public class WebUtil {
 		}
 		
 		return errorMessage;
+	}
+	
+	// find the existing bean with retrieve
+	public static Bean findReferencedBean(Document referenceDocument, 
+											String bizId, 
+											Persistence persistence) {
+		Bean result = persistence.retrieve(referenceDocument, bizId, false);
+		if (result == null) {
+			throw new ValidationException(new Message(String.format("Failed to retrieve this %s as it has been deleted.", 
+																		referenceDocument.getSingularAlias())));
+		}
+		User user = persistence.getUser();
+		if (! user.canReadBean(bizId, 
+								result.getBizModule(), 
+								result.getBizDocument(), 
+								result.getBizCustomer(), 
+								result.getBizDataGroupId(), 
+								result.getBizUserId())) {
+			throw new SecurityException("read this data", user.getName());
+		}
+		
+		return result;
 	}
 }
