@@ -1,7 +1,7 @@
 Dependencies
 ============
 
-This demo requires at least Java 7 is installed (Older java versions are currently unsupported).
+This demo requires at least Java 8 is installed (Older java versions are currently unsupported).
 You can test this by issuing "java -version" at a command prompt.
 If java is not found, ensure that it is installed and that java is in your path.
 See https://www.java.com/en/download/help/download_options.xml for installing java.
