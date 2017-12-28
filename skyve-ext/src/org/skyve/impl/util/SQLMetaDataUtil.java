@@ -26,15 +26,34 @@ public class SQLMetaDataUtil {
 		// no implementation
 	}
 
+	public static final String ADMIN_MODULE_NAME = "admin";
+	public static final String CHANGE_PASSWORD_DOCUMENT_NAME = "ChangePassword";
+	public static final String CONTACT_DOCUMENT_NAME = "Contact";
+	public static final String USER_DOCUMENT_NAME = "User";
+	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
+	
+	public static final String CONFIRM_PASSWORD_PROPERTY_NAME = "confirmPassword";
+	public static final String CONTACT_PROPERTY_NAME = "contact";
+	public static final String CONTACT_TYPE_PROPERTY_NAME = "contactType";
+	public static final String EMAIL1_PROPERTY_NAME = "email1";
+	public static final String NAME_PROPERTY_NAME = "name";
+	public static final String NEW_PASSWORD_PROPERTY_NAME = "newPassword";
+	public static final String PASSWORD_PROPERTY_NAME = "password";
+	public static final String ROLE_NAME_PROPERTY_NAME = "roleName";
+	public static final String ROLES_PROPERTY_NAME = "roles";
+	public static final String USER_NAME_PROPERTY_NAME = "userName";
+	
+	public static final String MAKE_PASSWORD_CHANGE_ACTION_NAME = "MakePasswordChange";
+	
 	public static void populateUser(User user) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
 			AbstractRepository repository = AbstractRepository.get();
-			Module admin = repository.getModule(customer, "admin");
-			String ADM_SecurityUser = admin.getDocument(customer, "User").getPersistent().getPersistentIdentifier();
-			String ADM_SecurityUserRole = admin.getDocument(customer, "UserRole").getPersistent().getPersistentIdentifier();
-			String ADM_Contact = admin.getDocument(customer, "Contact").getPersistent().getPersistentIdentifier();
+			Module admin = repository.getModule(customer, ADMIN_MODULE_NAME);
+			String ADM_SecurityUser = admin.getDocument(customer, USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_SecurityUserRole = admin.getDocument(customer, USER_ROLE_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
+			String ADM_Contact = admin.getDocument(customer, CONTACT_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 			String ADM_SecurityUser_groups = ADM_SecurityUser + "_groups";
 			String ADM_SecurityGroup = admin.getDocument(customer, "Group").getPersistent().getPersistentIdentifier();
 			String ADM_SecurityGroupRole = admin.getDocument(customer, "GroupRole").getPersistent().getPersistentIdentifier();

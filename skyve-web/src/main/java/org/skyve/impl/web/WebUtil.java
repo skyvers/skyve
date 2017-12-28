@@ -20,6 +20,7 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.impl.web.AbstractWebContext;
@@ -226,18 +227,18 @@ public class WebUtil {
 		String errorMessage = null;
 		
 		Customer c = user.getCustomer();
-		Module admin = c.getModule("admin");
-		Document changePassword = admin.getDocument(c, "ChangePassword");
+		Module admin = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
+		Document changePassword = admin.getDocument(c, SQLMetaDataUtil.CHANGE_PASSWORD_DOCUMENT_NAME);
 		Bean bean = changePassword.newInstance(user);
-		BindUtil.set(bean, "newPassword", newPassword);
-		BindUtil.set(bean, "confirmPassword", newPassword);
+		BindUtil.set(bean, SQLMetaDataUtil.NEW_PASSWORD_PROPERTY_NAME, newPassword);
+		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, newPassword);
 		AbstractRepository r = AbstractRepository.get();
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
-			r.getServerSideAction(c, changePassword, "MakePasswordChange", true).execute(bean, null);
+			r.getServerSideAction(c, changePassword, SQLMetaDataUtil.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
 		}
 		catch (ValidationException e) {
 			persistence.rollback();

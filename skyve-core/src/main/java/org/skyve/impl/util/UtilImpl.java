@@ -142,6 +142,11 @@ public class UtilImpl {
 	// Password hash algorithm
 	public static String PASSWORD_HASHING_ALGORITHM = "MD5";
 
+	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
+	public static String BOOTSTRAP_CUSTOMER = null;
+	public static String BOOTSTRAP_USER = null;
+	public static String BOOTSTRAP_PASSWORD = null;
+	
 	// For versioning javascript/css etc for web site
 	public static final String WEB_RESOURCE_FILE_VERSION = "20171205";
 	public static final String SKYVE_VERSION = "20171205";

@@ -53,7 +53,7 @@ public class WebStatsUtil {
 
 		try {
 			Customer customer = user.getCustomer();
-			Module admin = customer.getModule("admin");
+			Module admin = customer.getModule(WEB_STATS_MODULE_NAME);
 			String ADM_UserMonthlyHits = admin.getDocument(customer, "UserMonthlyHits").getPersistent().getPersistentIdentifier();
 
 			Date now = new Date();

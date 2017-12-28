@@ -113,5 +113,11 @@
 		jobScheduler: true,
 		// Password hashing algorithm - usually MD5 (obsolete) or SHA1 etc
 		passwordHashingAlgorithm: "SHA1"
+	},
+	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
+	bootstrap: {
+		customer: "demo",
+		user: "admin",
+		password: "admin"
 	}
 }
