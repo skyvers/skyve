@@ -61,13 +61,15 @@ public class SkyveFilter implements Filter {
 						UtilImpl.LOGGER.info(parameterName + "=***PASSWORD***");
 					}
 					else {
-						String parameterValue = request.getParameter(parameterName);
-						if (parameterValue != null) {
-							if (parameterValue.toLowerCase().contains("password")) {
-								UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
-							}
-							else {
-								UtilImpl.LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
+						String[] parameterValues = request.getParameterValues(parameterName);
+						if (parameterValues != null) {
+							for (String parameterValue : parameterValues) {
+								if (parameterValue.toLowerCase().contains("password")) {
+									UtilImpl.LOGGER.info(parameterName + "=***CONTAINS PASSWORD***");
+								}
+								else {
+									UtilImpl.LOGGER.info(String.format("%s=%s", parameterName, parameterValue));
+								}
 							}
 						}
 					}
