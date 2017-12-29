@@ -158,11 +158,11 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>MapServlet</servlet-name>
+		<servlet-name>SmartClientTextSearchServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
-		<servlet-name>TextSearchServlet</servlet-name>
+		<servlet-name>MapServlet</servlet-name>
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>SkyveFilter</filter-name>
@@ -353,15 +353,6 @@
 	</servlet-mapping>
 
 	<servlet>
-		<servlet-name>TextSearchServlet</servlet-name>
-		<servlet-class>org.skyve.impl.web.TextSearchServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>TextSearchServlet</servlet-name>
-		<url-pattern>/search</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
 		<servlet-name>CustomerResourceServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.CustomerResourceServlet</servlet-class>
 	</servlet>
@@ -413,6 +404,15 @@
 	<servlet-mapping>
 		<servlet-name>SmartClientPrevServlet</servlet-name>
 		<url-pattern>/smartprev</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>SmartClientTextSearchServlet</servlet-name>
+		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientTextSearchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SmartClientTextSearchServlet</servlet-name>
+		<url-pattern>/smartsearch</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

@@ -1,4 +1,4 @@
-package org.skyve.impl.web;
+package org.skyve.impl.web.service.smartclient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,7 +29,7 @@ import org.skyve.util.JSON;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-public class TextSearchServlet extends HttpServlet {
+public class SmartClientTextSearchServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -61,6 +61,7 @@ public class TextSearchServlet extends HttpServlet {
 
 	            try (PrintWriter pw = response.getWriter()) {
 		            StringBuilder message = new StringBuilder(512);
+			    	message.append(SmartClientListServlet.ISC_JSON_PREFIX);
 		            message.append("{response:{data:[");
 		
 		            Iterator<SearchResult> resultIterator = results.getResults().iterator();
@@ -139,6 +140,7 @@ public class TextSearchServlet extends HttpServlet {
 					message.append(",totalRows:");
 					message.append(results.getResults().size());
 					message.append("}}");
+			    	message.append(SmartClientListServlet.ISC_JSON_SUFFIX);
 	
 					pw.append(message);
 					pw.flush();

@@ -560,7 +560,7 @@ isc.BizListGrid.addMethods({
 		    data: []
 		});
 
-		var snapMenuButton = isc.MenuButton.create({
+		var snapMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
 		    title: "No Snapshot",
@@ -712,7 +712,7 @@ isc.BizListGrid.addMethods({
 		    data: []
 		});
 
-		var tagsMenuButton = isc.MenuButton.create({
+		var tagsMenuButton = isc.ToolStripMenuButton.create({
 			autoFit: true,
 			padding: 3,
 		    title: "No Tag",

@@ -4,8 +4,8 @@ import org.skyve.metadata.FilterOperator;
 
 public enum SmartClientFilterOperator {
 	// text match style for filtering
-	substring, startsWith, exact, // both case insensitive
-	
+	substring, startsWith, exact, // all case insensitive
+
 	// advanced filter criteria operators
 	equals, // exactly equal to
 	iEquals, // exactly equal to (ignore case)

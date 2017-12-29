@@ -71,6 +71,8 @@ public class SmartClientListServlet extends HttpServlet {
 	static final String ISC_DATA_FORMAT = "isc_dataFormat";
 	static final String OLD_VALUES = "_oldValues";
 	static final String ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX = "$";
+	static final String ISC_JSON_PREFIX = "<SCRIPT>//'\"]]>>isc_JSONResponseStart>>";
+	static final String ISC_JSON_SUFFIX = "//isc_JSONResponseEnd";
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -186,7 +188,10 @@ public class SmartClientListServlet extends HttpServlet {
 								ISC_DATA_FORMAT.equals(name) ||
 								// $ is sent down when list grid is in expander mode with hidden columns
 								// and a record flag is cleared
-								name.startsWith(ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX)) {
+								name.startsWith(ISC_INTERNAL_GRID_COLUMN_NAME_PREFIX) ||
+								// don't need to add the criteria parameter to the internal parameters map
+								// as these are processed specifically by fetch...
+								name.equals("criteria")) {
 							continue;
 						}
 						String value = request.getParameter(name);
@@ -393,7 +398,7 @@ public class SmartClientListServlet extends HttpServlet {
 		message.append(JSON.marshall(customer, beans, projections));
 		message.append("}}");
 		pw.append(message);
-	}
+    }
     
 	private static void addFilterCriteriaToQuery(Module module,
 													Document document,
@@ -408,7 +413,14 @@ public class SmartClientListServlet extends HttpServlet {
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
     	String operatorParameter = (String) mutableParameters.get("operator");
     	if (operatorParameter != null) { // advanced criteria
-    		compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
+    		try {
+    			compoundFilterOperator = CompoundFilterOperator.valueOf(operatorParameter);
+    		}
+    		catch (Exception e) {
+    			// NB Smart Client sometimes sends extraneous half-arsed requests 
+    			// through the advanced filter builder with a compound filter parameter of 'equals'.
+    			// Ignore these and leave compound filter criteria set to 'and'.
+    		}
     		// Produce advanced criteria parameter
     		List<Map<String, Object>> advancedCriteria = null;
     		if (criteria == null) {
@@ -1236,9 +1248,8 @@ public class SmartClientListServlet extends HttpServlet {
 		Bean bean = model.update(bizId, properties);
 
 		// return the updated row
-		
 		pw.append(returnUpdatedMessage(customer, model, bean, rowIsTagged));
-	}
+    }
 
 	private static void tag(Customer customer,
 								Module module,

@@ -1,6 +1,5 @@
 package org.skyve.impl.web.service.smartclient;
 
-public enum CompoundFilterOperator 
-{
+public enum CompoundFilterOperator {
 	and, or, not
 }

@@ -62,9 +62,6 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 public class SmartClientEditServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
