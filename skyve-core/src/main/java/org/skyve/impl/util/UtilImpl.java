@@ -95,6 +95,9 @@ public class UtilImpl {
 	// This is the path on the server file system of the web context root
 	public static String SKYVE_CONTEXT_REAL_PATH = null;
 
+	// This is the path on the server file system of the properties file
+	public static String PROPERTIES_FILE_PATH = null;
+	
 	// Implementations of Key SKYVE classes
 	public static String SKYVE_REPOSITORY_CLASS = null;
 	public static String SKYVE_PERSISTENCE_CLASS = null;

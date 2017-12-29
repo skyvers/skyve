@@ -42,7 +42,6 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 
 public class SkyveContextListener implements ServletContextListener {
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public void contextInitialized(ServletContextEvent evt) {
@@ -55,11 +54,11 @@ public class SkyveContextListener implements ServletContextListener {
 		// is derived from the ear file - ie <app-name>.ear -> <app-name>.properties in the same directory.
 		// Some app server's dont like a properties file in their deployment directories or some people 
 		// wish to deploy a zipped archive.
-		String propertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
-		if (propertiesFilePath == null) {
-			propertiesFilePath = ctx.getInitParameter("PROPERTIES_FILE_PATH");
+		UtilImpl.PROPERTIES_FILE_PATH = System.getProperty("PROPERTIES_FILE_PATH");
+		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
+			UtilImpl.PROPERTIES_FILE_PATH = ctx.getInitParameter("PROPERTIES_FILE_PATH");
 		}
-		if (propertiesFilePath == null) {
+		if (UtilImpl.PROPERTIES_FILE_PATH == null) {
 			UtilImpl.LOGGER.info("SKYVE CONTEXT REAL PATH = " + UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			File archive = new File(UtilImpl.SKYVE_CONTEXT_REAL_PATH);
 			String archiveName = null;
@@ -71,16 +70,16 @@ public class SkyveContextListener implements ServletContextListener {
 				archiveName = archive.getName();
 			}
 			archiveName = archiveName.substring(0, archiveName.length() - 4);
-			propertiesFilePath = archive.getParent() + '/' + archiveName + ".json";
+			UtilImpl.PROPERTIES_FILE_PATH = archive.getParent() + '/' + archiveName + ".json";
 		}
 
 		Map<String, Object> properties = null;
-		try (FileInputStream fis = new FileInputStream(propertiesFilePath)) {
+		try (FileInputStream fis = new FileInputStream(UtilImpl.PROPERTIES_FILE_PATH)) {
 			final VariableExpander variableExpander = new VariableExpander();
 			properties = variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
 		}
 		catch (Exception e) {
-			throw new IllegalStateException("Cannot open or read " + propertiesFilePath, e);
+			throw new IllegalStateException("Cannot open or read " + UtilImpl.PROPERTIES_FILE_PATH, e);
 		}
 		UtilImpl.CONFIGURATION = properties;
 		
@@ -291,6 +290,10 @@ public class SkyveContextListener implements ServletContextListener {
 		WebUtil.initConversationsCache();
 	}
 
+	public static void populate(ServletContext ctx) {
+		
+	}
+	
 	private static void bootstrap(Persistence p) throws Exception {
 		User u = p.getUser();
 		Customer c = u.getCustomer();
