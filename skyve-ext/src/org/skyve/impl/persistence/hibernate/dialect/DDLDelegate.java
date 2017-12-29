@@ -26,11 +26,19 @@ import org.hibernate.tool.schema.internal.exec.JdbcContext;
 import org.skyve.EXT;
 import org.skyve.impl.util.UtilImpl;
 
+import geodb.GeoDB;
+
 public class DDLDelegate {
 	public static void migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect)
 	throws SQLException {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(true);
+
+			// Ensure that a H2 database is spatially enabled
+			if (skyveDialect instanceof H2SpatialDialect) {
+				GeoDB.InitGeoDB(connection);
+			}
+
 			final DdlTransactionIsolator ddlTransactionIsolator = new DdlTransactionIsolator() {
 				@Override
 				public void release() {
