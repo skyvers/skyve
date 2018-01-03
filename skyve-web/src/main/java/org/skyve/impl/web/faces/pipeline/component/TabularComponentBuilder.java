@@ -213,6 +213,33 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent blurb(String listVar, String value, String binding, Blurb blurb) {
+		return outputText(listVar,
+							value,
+							binding,
+							blurb.getTextAlignment(),
+							blurb.getPixelWidth(),
+							blurb.getPixelHeight(),
+							blurb.getInvisibleConditionName());
+	}
+	
+	@Override
+	public UIComponent label(String listVar, String value, String binding, Label label) {
+		return outputText(listVar,
+							value,
+							binding,
+							label.getTextAlignment(),
+							label.getPixelWidth(),
+							label.getPixelHeight(),
+							label.getInvisibleConditionName());
+	}
+
+	private HtmlOutputText outputText(String listVar, 
+										String value, 
+										String binding,
+										HorizontalAlignment textAlignment,
+										Integer pixelWidth,
+										Integer pixelHeight,
+										String invisibleConditionName) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(result, null);
 		if (value != null) {
@@ -230,30 +257,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setEscape(false);
 
-		setTextAlign(result, blurb.getTextAlignment());
-		setSize(result, null, blurb.getPixelWidth(), null, null, blurb.getPixelHeight(), null, null);
-		setInvisible(result, blurb.getInvisibleConditionName(), null);
+		setTextAlign(result, textAlignment);
+		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
+		setInvisible(result, invisibleConditionName, null);
 
 		return result;
 	}
 	
-	@Override
-	public UIComponent label(String listVar, String value, String binding, Label label) {
-		HtmlOutputLabel result = (HtmlOutputLabel) a.createComponent(HtmlOutputLabel.COMPONENT_TYPE);
-		setId(result, null);
-		if (value != null) {
-			result.setValue(value);
-		} 
-		else {
-			// escape bindings with ' as \' as the binding could be for blurb expressions
-			String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
-			result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, sanitisedBinding, true, null, Object.class));
-		}
-
-		setTextAlign(result,label.getTextAlignment());
-		return result;
-	}
-
 	private int columnPriority;
 	
 	@Override

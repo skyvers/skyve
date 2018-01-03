@@ -831,7 +831,21 @@ public class FacesViewVisitor extends ViewVisitor {
 	                        boolean parentEnabled) {
 		String value = label.getValue();
 		String binding = label.getBinding();
-		if ((value != null) && value.indexOf('{') > -1) {
+		if ((value == null) && (binding == null)) {
+			// Find the display name if applicable
+			value = "Label";
+			String displayBinding = label.getFor();
+			if (displayBinding != null) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, displayBinding);
+				if (target != null) {
+					Attribute attribute = target.getAttribute();
+					if (attribute != null) {
+						value = String.format("%s %s:", attribute.getDisplayName(), attribute.isRequired() ? "*" : ""); 
+					}
+				}
+			}
+		}
+		else if ((value != null) && value.indexOf('{') > -1) {
 			binding = value;
 			value = null;
 		}
