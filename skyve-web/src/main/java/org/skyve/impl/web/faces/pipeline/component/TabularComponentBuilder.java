@@ -230,19 +230,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		result.setEscape(false);
 
-		HorizontalAlignment textAlignment = blurb.getTextAlignment();
-		String style = null;
-		if (HorizontalAlignment.left.equals(textAlignment)) {
-			style = "text-align:left;";
-		} 
-		else if (HorizontalAlignment.centre.equals(textAlignment)) {
-			style = "text-align:center;";
-		} 
-		else if (HorizontalAlignment.right.equals(textAlignment)) {
-			style = "text-align:right;";
-		}
-
-		setSize(result, style, blurb.getPixelWidth(), null, null, blurb.getPixelHeight(), null, null);
+		setTextAlign(result, blurb.getTextAlignment());
+		setSize(result, null, blurb.getPixelWidth(), null, null, blurb.getPixelHeight(), null, null);
 		setInvisible(result, blurb.getInvisibleConditionName(), null);
 
 		return result;
@@ -261,6 +250,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			result.setValueExpression("value", createValueExpressionFromFragment(listVar, true, sanitisedBinding, true, null, Object.class));
 		}
 
+		setTextAlign(result,label.getTextAlignment());
 		return result;
 	}
 

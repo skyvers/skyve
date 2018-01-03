@@ -10,6 +10,7 @@ import javax.faces.context.FacesContext;
 
 import org.primefaces.component.column.Column;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
@@ -70,6 +71,22 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
+	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
+		String styleClass = null;
+		if (HorizontalAlignment.left.equals(textAlignment)) {
+			styleClass = "left";
+		} 
+		else if (HorizontalAlignment.centre.equals(textAlignment)) {
+			styleClass = "center";
+		} 
+		else if (HorizontalAlignment.right.equals(textAlignment)) {
+			styleClass = "right";
+		}
+		if (styleClass != null) {
+			component.setValueExpression("styleClass", ef.createValueExpression(styleClass, String.class));
+		}
+	}
+	
 	protected void setSize(UIComponent component, 
 							String existingStyle, 
 							Integer pixelWidth, 
