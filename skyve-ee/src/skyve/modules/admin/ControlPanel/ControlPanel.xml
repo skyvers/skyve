@@ -5,7 +5,52 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<singularAlias>Control Panel</singularAlias>
 	<pluralAlias>Control Panels</pluralAlias>
+	<iconStyleClass>fa fa-sliders</iconStyleClass>
 	<attributes>
+		<boolean name="xmlTrace">
+			<displayName>XML</displayName>
+			<description>Log XML metadata parse operations</description>
+		</boolean>
+		<boolean name="httpTrace">
+			<displayName>HTTP</displayName>
+			<description>Log request information including headers, parameters, cache state and timings.</description>
+		</boolean>
+		<boolean name="queryTrace">
+			<displayName>Query</displayName>
+			<description>Log BizQL, Document Queries, Metadata Queries generated and executed during processing.</description>
+		</boolean>
+		<boolean name="commandTrace">
+			<displayName>Command</displayName>
+			<description>Log command information such as filter criteria and paging row counts.</description>
+		</boolean>
+		<boolean name="facesTrace">
+			<displayName>Faces</displayName>
+			<description>Log the faces phases and the xhtml generated.</description>
+		</boolean>
+		<boolean name="sqlTrace">
+			<displayName>SQL</displayName>
+			<description>Log any SQL DML or DDL generated and executed during processing.</description>
+		</boolean>
+		<boolean name="contentTrace">
+			<displayName>Content</displayName>
+			<description>Log information on content fetched and stored.</description>
+		</boolean>
+		<boolean name="securityTrace">
+			<displayName>Security</displayName>
+			<description>Log information on security denials.</description>
+		</boolean>
+		<boolean name="bizletTrace">
+			<displayName>Bizlet</displayName>
+			<description>Log every bizlet callback made (verbose).</description>
+		</boolean>
+		<boolean name="dirtyTrace">
+			<displayName>Dirty</displayName>
+			<description>Log the dirty state of domain objects (verbose).</description>
+		</boolean>
+		<boolean name="prettySqlOutput">
+			<displayName>Pretty SQL</displayName>
+			<description>Output any SQL logged in a more readable multiline format.</description>
+		</boolean>
 		<text name="designModuleDocumentName">
 			<displayName>Module.Document Name</displayName>
 			<domain>variant</domain>
@@ -22,13 +67,16 @@
 		</text>
 		<text name="emailFrom">
 			<displayName>Email From</displayName>
-			<length>128</length>
+			<length>254</length>
 		</text>
 		<text name="emailTo">
 			<displayName>Email To</displayName>
-			<domain>variant</domain>
-			<length>128</length>
+			<length>254</length>
 		</text>
+		<association name="emailToContact" type="aggregation">
+			<displayName>Email To Contact</displayName>
+			<documentName>Contact</documentName>
+		</association>
 		<text name="emailSubject">
 			<displayName>Email Subject</displayName>
 			<length>128</length>
@@ -39,5 +87,12 @@
 		<memo name="results">
 			<displayName>Results</displayName>
 		</memo>
+		<integer name="tabIndex">
+			 <documentation>
+			 	The index of the tab in the edit view.
+			 	This is set to the results tab when there is results to display.
+			 </documentation>
+			<displayName>TabIndex</displayName>
+		</integer>
 	</attributes>
 </document>

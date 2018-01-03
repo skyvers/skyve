@@ -19,7 +19,7 @@ import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
- * Bean Report Design
+ * Report Design
  * 
  * @depend - - - Mode
  * @depend - - - DefinitionSource

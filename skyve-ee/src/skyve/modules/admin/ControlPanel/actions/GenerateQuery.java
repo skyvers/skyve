@@ -57,6 +57,7 @@ public class GenerateQuery implements ServerSideAction<ControlPanelExtension> {
 			catch (Exception e) {
 				bean.trapException(e);
 			}
+			bean.setTabIndex(Integer.valueOf(1));
 		}
 		else {
 			bean.setResults(null);

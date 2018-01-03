@@ -30,7 +30,7 @@ public class ExecuteQuery implements ServerSideAction<ControlPanelExtension> {
 		catch (Exception e) {
 			bean.trapException(e);
 		}
-		
+		bean.setTabIndex(Integer.valueOf(1));
 		return new ServerSideActionResult<>(bean);
 	}
 }

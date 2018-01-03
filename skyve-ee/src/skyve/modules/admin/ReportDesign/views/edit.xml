@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<view name="edit" 
-		title="Bean Report Design" 
-		icon32x32RelativeFileName="shared/icons/DefaultDocument32x32.png" 
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+<view xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 		xmlns="http://www.skyve.org/xml/view" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		name="edit" 
+		title="Report Design">
 	<tabPane>
 		<tab title="General">
 			<hbox shrinkWrap="height">
