@@ -135,7 +135,6 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
@@ -2062,7 +2061,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 			else {
 				TargetMetaData target = Binder.getMetaDataForBinding(customer, targetModule, targetDocument, listBinding);
-				targetDocument = (DocumentImpl) module.getDocument(customer, ((Reference) target.getAttribute()).getDocumentName());
+				targetDocument = (DocumentImpl) module.getDocument(customer, ((Relation) target.getAttribute()).getDocumentName());
 				targetModule = (ModuleImpl) customer.getModule(targetDocument.getOwningModuleName());
 				result = SmartClientGenerateUtils.getDataGridField(user, customer, targetModule, targetDocument, inputWidget, null);
 			}
