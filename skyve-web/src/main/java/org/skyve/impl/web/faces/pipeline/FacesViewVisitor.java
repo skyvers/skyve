@@ -92,12 +92,14 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractListWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.web.faces.converters.date.DD_MMM_YYYY;
 import org.skyve.impl.web.faces.converters.date.DD_MM_YYYY;
@@ -878,32 +880,16 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	private MetaData currentGrid;
 
+	private String listWidgetModelDocumentName;
+	private String listWidgetModelName;
+	private ListModel<? extends Bean> listWidgetModel;
+	private Document listWidgetDrivingDocument;
+	
 	@Override
 	public void visitListGrid(ListGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		String queryName = grid.getQueryName();
-		String modelName = grid.getModelName();
-		String modelDocumentName = null;
-		
-		ListModel<? extends Bean> model = null;
-		Document drivingDocument = null;
-		if ((queryName == null) && (modelName != null)) {
-			model = CORE.getRepository().getListModel(customer, document, modelName, true);
-			modelDocumentName = document.getName();
-			drivingDocument = model.getDrivingDocument();
-		}
-		else {
-			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-			if (query == null) {
-				query = module.getDocumentDefaultQuery(customer, queryName);
-			}
-			drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
-	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
-	        queryModel.setQuery(query);
-			modelName = queryName;
-	        model = queryModel;
-		}
+		visitListWidget(grid);
 		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
@@ -915,12 +901,12 @@ public class FacesViewVisitor extends ViewVisitor {
 										new String[] {disableAddConditionName} : 
 										new String[] {disableAddConditionName, disabledConditionName});
 		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
-		UIComponent l = cb.listGrid(modelDocumentName, 
-										modelName, 
-										model, 
+		UIComponent l = cb.listGrid(listWidgetModelDocumentName, 
+										listWidgetModelName, 
+										listWidgetModel, 
 										grid.getParameters(), 
 										grid.getTitle(),
-										user.canCreateDocument(drivingDocument),
+										user.canCreateDocument(listWidgetDrivingDocument),
 										createRendered,
 										createDisabled,
 										zoomRendered,
@@ -930,14 +916,75 @@ public class FacesViewVisitor extends ViewVisitor {
 										true,
 										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
-		currentGrid = grid;
+	}
+	
+	@Override
+	public void visitListRepeater(ListRepeater repeater,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		visitListWidget(repeater);
+		UIComponent r = cb.listGrid(listWidgetModelDocumentName, 
+										listWidgetModelName, 
+										listWidgetModel, 
+										repeater.getParameters(), 
+										repeater.getTitle(),
+										false,
+										false,
+										null,
+										false,
+										null,
+										null,
+										null,
+										true,
+										false);
+		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 	}
 
+	private void visitListWidget(AbstractListWidget widget) {
+		String queryName = widget.getQueryName();
+		String modelName = widget.getModelName();
+		
+		if ((queryName == null) && (modelName != null)) {
+			listWidgetModelName = modelName;
+			listWidgetModelDocumentName = document.getName();
+			listWidgetModel = CORE.getRepository().getListModel(customer, document, listWidgetModelName, true);
+			listWidgetDrivingDocument = listWidgetModel.getDrivingDocument();
+		}
+		else {
+			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			if (query == null) {
+				query = module.getDocumentDefaultQuery(customer, queryName);
+			}
+			listWidgetModelName = queryName;
+			listWidgetModelDocumentName = query.getDocumentName();
+			listWidgetDrivingDocument = query.getDocumentModule(customer).getDocument(customer, listWidgetModelDocumentName);
+	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+	        queryModel.setQuery(query);
+	        listWidgetModel = queryModel;
+		}
+		currentGrid = widget;		
+	}
+	
 	@Override
 	public void visitedListGrid(ListGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
+		visitedListWidget();
+	}
+
+	@Override
+	public void visitedListRepeater(ListRepeater repeater,
+										boolean parentVisible,
+										boolean parentEnabled) {
+		visitedListWidget();
+	}
+	
+	private void visitedListWidget() {
 		currentGrid = null;
+		listWidgetModelDocumentName = null;
+		listWidgetModelName = null;
+		listWidgetModel = null;
+		listWidgetDrivingDocument = null;
 		addedToContainer();
 	}
 
@@ -978,10 +1025,35 @@ public class FacesViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// Create the data repeater faces component
+		listBinding = repeater.getBinding();
+		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
+		UIComponent r = cb.dataRepeater(listVar, repeater);
+        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+		currentGrid = repeater;
+		gridColumnExpression = new StringBuilder(512);
+
+		// start rendering if appropriate
+		if ((widgetId != null) && (widgetId.equals(repeater.getWidgetId()))) {
+			fragment = r;
+		}
+	}
+	
+	@Override
 	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+		visitedDataWidget(grid);
+	}
+	
+	@Override
+	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		visitedDataWidget(repeater);
+	}
+
+	private void visitedDataWidget(AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
-		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, grid.getBinding());
+		TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, widget.getBinding());
 		if (target != null) {
 			Relation targetRelation = (Relation) target.getAttribute();
 			if (targetRelation != null) {
@@ -989,13 +1061,15 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 
-		current = cb.addDataGridActionColumn(current, 
-												grid,
-												listVar,
-												gridColumnExpression.toString(), 
-												alias, 
-												Boolean.TRUE.equals(grid.getInline()));
-		
+		if (widget instanceof DataGrid) {
+			DataGrid grid = (DataGrid) widget;
+			current = cb.addDataGridActionColumn(current, 
+													grid,
+													listVar,
+													gridColumnExpression.toString(), 
+													alias, 
+													Boolean.TRUE.equals(grid.getInline()));
+		}
 	    currentGrid = null;
 	    listBinding = null;
 	    listVar = null;
@@ -1003,7 +1077,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	    addedToContainer();
 		
 		// stop rendering if appropriate
-		if ((widgetId != null) && (widgetId.equals(grid.getWidgetId()))) {
+		if ((widgetId != null) && (widgetId.equals(widget.getWidgetId()))) {
 			current.getChildren().remove(fragment);
 			fragment.setParent(null);
 			facesView.getChildren().add(fragment);
@@ -1068,28 +1142,6 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled) {
 		current = cb.addedDataGridContainerColumn(current);
-	}
-
-	@Override
-	public void visitPickList(PickList list,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		UIComponent l = cb.label("pickList");
-		addToContainer(l, list.getPixelWidth(), list.getResponsiveWidth(), list.getPercentageWidth(), list.getInvisibleConditionName()); // TODO picklist
-	}
-
-	@Override
-	public void visitedPickList(PickList list,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		addedToContainer();
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn column,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		// TODO pick list column
 	}
 
 	// A reference to the current widget that is the source of events

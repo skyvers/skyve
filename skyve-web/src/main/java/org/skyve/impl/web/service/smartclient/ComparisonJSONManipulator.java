@@ -21,6 +21,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite;
+import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -103,23 +104,26 @@ public final class ComparisonJSONManipulator {
 		entry.put(BINDING_KEY, node.getReferenceName());
 		entry.put(REFERENCE_TYPE_KEY, referenceType);
 		entry.put(PARENT_KEY, (parent == null) ? null : parent.getBizId());
-		switch (node.getMutation()) {
-		case added:
-			entry.put(ICON_KEY, ADDED_ICON);
-			entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
-			break;
-		case deleted:
-			entry.put(ICON_KEY, DELETED_ICON);
-			entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
-			break;
-		case unchanged:
-			entry.put(ICON_KEY, UNCHANGED_ICON);
-			entry.put(Bean.BIZ_KEY, node.getBusinessKeyDescription());
-			break;
-		case updated:
-			entry.put(ICON_KEY, UPDATED_ICON);
-			entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
-			break;
+		Mutation mutation = node.getMutation();
+		if (mutation != null) { // should never be null but just in case
+			switch (mutation) {
+			case added:
+				entry.put(ICON_KEY, ADDED_ICON);
+				entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
+				break;
+			case deleted:
+				entry.put(ICON_KEY, DELETED_ICON);
+				entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
+				break;
+			case unchanged:
+				entry.put(ICON_KEY, UNCHANGED_ICON);
+				entry.put(Bean.BIZ_KEY, node.getBusinessKeyDescription());
+				break;
+			case updated:
+				entry.put(ICON_KEY, UPDATED_ICON);
+				entry.put(Bean.BIZ_KEY, showDirty(node.getBusinessKeyDescription()));
+				break;
+			}
 		}
 		entry.put(RELATIONSHIP_KEY, node.getRelationshipDescription());
 		entry.put(PROPERTIES_KEY, listOfMapOfProperties(node.getProperties(), nodeDocument));

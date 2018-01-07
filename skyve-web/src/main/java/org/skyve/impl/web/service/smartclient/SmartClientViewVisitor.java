@@ -83,13 +83,15 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractListWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -99,8 +101,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
@@ -109,8 +111,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.util.Util;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.Util;
 
 class SmartClientViewVisitor extends ViewVisitor {
 	private static final Integer DEFAULT_MIN_HEIGHT_IN_PIXELS = Integer.valueOf(100);
@@ -643,8 +645,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitGeometry(Geometry geometry, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = geometry;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = geometry;
 			return;
 		}
 
@@ -697,7 +699,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// markup is generated in the JSON data for a data grid container column dynamic image
-		if (dataGridVariable != null) {
+		if (dataWidgetVariable != null) {
 			return;
 		}
 
@@ -738,7 +740,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// markup is generated in the JSON data for a data grid container column static image
-		if (dataGridVariable != null) {
+		if (dataWidgetVariable != null) {
 			return;
 		}
 
@@ -793,7 +795,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 							boolean parentVisible, 
 							boolean parentEnabled) {
 		// markup is generated in the JSON data for a data grid container column link
-		if (dataGridVariable != null) {
+		if (dataWidgetVariable != null) {
 			return;
 		}
 
@@ -834,7 +836,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
-		if (dataGridVariable != null) {
+		if (dataWidgetVariable != null) {
 			return;
 		}
 		
@@ -860,7 +862,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 		// does the value have binding expressions in them? - (?s) means mutliline match
 		boolean dynamic = (value != null) && BindUtil.messageIsBound(value); 
 		if (dynamic) {
-			if ((dataGridBinding == null) && (formVariable == null)) {
+			if ((dataWidgetBinding == null) && (formVariable == null)) {
 				throw new MetaDataException("Label or blurb with a value of [" + value + 
 												"] contains a binding expression and must be declared within a form element or a data grid container column to be able to bind correctly");
 			}
@@ -958,36 +960,18 @@ class SmartClientViewVisitor extends ViewVisitor {
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
-	private String dataGridVariable = null;
-	private Document dataGridDocument = null;
-	private String dataGridBinding = null;
+	private String dataWidgetVariable = null;
+	private Document dataWidgetDocument = null;
+	private String dataWidgetBinding = null;
 	// Indicates whether the field definition array has been completed and closed off
 	// Its used to ensure the last ']' is appended before adding events or closing the grid definition
-	private boolean dataGridFieldsIncomplete = false;
+	private boolean dataWidgetFieldsIncomplete = false;
 	
 	@Override
 	public void visitDataGrid(DataGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		dataGridBinding = grid.getBinding();
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
-																module,
-																document,
-																dataGridBinding);
-		Relation relation = (Relation) target.getAttribute();
-		String documentName = relation.getDocumentName();
-
-		dataGridDocument = module.getDocument(customer, documentName);
-		dataGridVariable = "v" + variableCounter++;
-		code.append("var ").append(dataGridVariable).append("=isc.BizDataGrid.create({_mod:'");
-		code.append(dataGridDocument.getOwningModuleName());
-		code.append("',_doc:'");
-		code.append(dataGridDocument.getName());
-		code.append("',_b:'").append(BindUtil.sanitiseBinding(dataGridBinding));
-		code.append("',ID:").append(IDExpression());
-		code.append(",canCreate:").append(user.canCreateDocument(dataGridDocument));
-		code.append(",canUpdate:").append(user.canUpdateDocument(dataGridDocument));
-		code.append(",canDelete:").append(user.canDeleteDocument(dataGridDocument)).append(',');
+		visitDataWidget(grid);
 		if (Boolean.FALSE.equals(grid.getShowAdd())) {
 			code.append("showAdd:false,");
 		}
@@ -1010,26 +994,61 @@ class SmartClientViewVisitor extends ViewVisitor {
 			code.append("wordWrap:true,");
 		}
 		disableCRUD(grid, code);
-		if ((relation instanceof Collection) && 
-				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
-			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
-		}
-		String title = grid.getTitle();
-		if (title != null) {
-			code.append("title:'");
-			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
-		}
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 		}
-		size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(grid.getDisabledConditionName(), code);
-		invisible(grid.getInvisibleConditionName(), code);
 		editable(grid.getEditable(), code);
-		dataGridFieldsIncomplete = true;
 		code.append("_fields:[");
-		
+	}
+	
+	@Override
+	public void visitDataRepeater(DataRepeater repeater,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		visitDataWidget(repeater);
+		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
+			code.append("showColumnHeaders:false,");
+		}
+		if (Boolean.FALSE.equals(repeater.getShowGrid())) {
+			code.append("showGrid:false,");
+		}
+		code.append("_fields:[");
+	}
+	
+	private void visitDataWidget(AbstractDataWidget widget) {
+		dataWidgetBinding = widget.getBinding();
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer,
+																module,
+																document,
+																dataWidgetBinding);
+		Relation relation = (Relation) target.getAttribute();
+		String documentName = relation.getDocumentName();
+
+		dataWidgetDocument = module.getDocument(customer, documentName);
+		dataWidgetVariable = "v" + variableCounter++;
+		code.append("var ").append(dataWidgetVariable).append("=isc.BizDataGrid.create({_mod:'");
+		code.append(dataWidgetDocument.getOwningModuleName());
+		code.append("',_doc:'");
+		code.append(dataWidgetDocument.getName());
+		code.append("',_b:'").append(BindUtil.sanitiseBinding(dataWidgetBinding));
+		code.append("',ID:").append(IDExpression());
+		code.append(",canCreate:").append(user.canCreateDocument(dataWidgetDocument));
+		code.append(",canUpdate:").append(user.canUpdateDocument(dataWidgetDocument));
+		code.append(",canDelete:").append(user.canDeleteDocument(dataWidgetDocument)).append(',');
+		String title = widget.getTitle();
+		if (title != null) {
+			code.append("title:'");
+			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
+		}
+		if ((relation instanceof Collection) && 
+				Boolean.TRUE.equals(((Collection) relation).getOrdered())) {
+			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
+		}
+		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
+		invisible(widget.getInvisibleConditionName(), code);
+		dataWidgetFieldsIncomplete = true;
 		eventsWithNoForm = true;
 	}
 
@@ -1037,20 +1056,31 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitedDataGrid(DataGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (dataGridFieldsIncomplete) {
+		visitedDataWidget();
+	}
+
+	@Override
+	public void visitedDataRepeater(DataRepeater repeater,
+										boolean parentVisible,
+										boolean parentEnabled) {
+		visitedDataWidget();
+	}
+	
+	private void visitedDataWidget() {
+		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1); // remove trailing comma from list grid field definition
 			code.append("],");
 		}
 		code.append("_view:view});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(dataGridVariable).append(");\n");
-		dataGridVariable = null;
-		dataGridDocument = null;
-		dataGridBinding = null;
-		dataGridFieldsIncomplete = false;
+		code.append(containerVariables.peek()).append(".addContained(").append(dataWidgetVariable).append(");\n");
+		dataWidgetVariable = null;
+		dataWidgetDocument = null;
+		dataWidgetBinding = null;
+		dataWidgetFieldsIncomplete = false;
 		eventsWithNoForm = false;
 	}
-
-	private InputWidget dataGridColumnInputWidget;
+	
+	private InputWidget dataWidgetColumnInputWidget;
 	
 	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column,
@@ -1063,7 +1093,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		if (dataGridColumnInputWidget != null) {
+		if (dataWidgetColumnInputWidget != null) {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
 			if (binding == null) { // column bound to collection for the grid
@@ -1071,15 +1101,15 @@ class SmartClientViewVisitor extends ViewVisitor {
 																	customer,
 																	module, 
 																	document, 
-																	dataGridColumnInputWidget, 
-																	dataGridBinding);
+																	dataWidgetColumnInputWidget, 
+																	dataWidgetBinding);
 			} 
 			else {
 				def = SmartClientGenerateUtils.getDataGridField(user,
 																	customer,
 																	module, 
-																	dataGridDocument, 
-																	dataGridColumnInputWidget, 
+																	dataWidgetDocument, 
+																	dataWidgetColumnInputWidget, 
 																	null);
 			}
 
@@ -1104,13 +1134,13 @@ class SmartClientViewVisitor extends ViewVisitor {
 																		customer, 
 																		lookup.getQuery(),
 																		optionDataSource,
-																		(Lookup) dataGridColumnInputWidget, 
+																		(Lookup) dataWidgetColumnInputWidget, 
 																		false,
 																		ds,
 																		null);
 				code.insert(0, ds);
 			}
-			dataGridColumnInputWidget = null;
+			dataWidgetColumnInputWidget = null;
 		}
 	}
 
@@ -1141,25 +1171,43 @@ class SmartClientViewVisitor extends ViewVisitor {
 		// do nothing
 	}
 	
-	private String listGridVariable = null;
+	private String listWidgetVariable = null;
 
 	@Override
 	public void visitListGrid(ListGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		visitGrid(grid, false, null);
+		visitListWidget(grid);
+		visitGrid(grid);
 	}
 
+	@Override
+	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		visitListWidget(repeater);
+		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
+			code.append("showColumnHeaders:false,");
+		}
+		if (Boolean.FALSE.equals(repeater.getShowGrid())) {
+			code.append("showGrid:false,");
+		}
+	}
+	
 	@Override
 	public void visitTreeGrid(TreeGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		visitGrid(grid, true, grid.getRootIdBinding());
+		visitListWidget(grid);
+		visitGrid(grid);
+		String rootBinding = grid.getRootIdBinding();
+		if (rootBinding != null) {
+			code.append("rootIdBinding:'").append(BindUtil.sanitiseBinding(rootBinding)).append("',");
+		}
+		code.append("isTree:true,");
 	}
 
-	private void visitGrid(ListGrid grid, boolean tree, String rootBinding) {
-		String queryName = grid.getQueryName();
-		String modelName = grid.getModelName();
+	private void visitListWidget(AbstractListWidget widget) {
+		String queryName = widget.getQueryName();
+		String modelName = widget.getModelName();
 		String dataSourceId = null;
 		if (queryName != null) { // its a query
 			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
@@ -1188,34 +1236,33 @@ class SmartClientViewVisitor extends ViewVisitor {
 			}
 		}
 		
-		listGridVariable = "v" + variableCounter++;
-		code.append("var ").append(listGridVariable).append("=isc.BizListGrid.create({");
-		if (tree) {
-			if (rootBinding != null) {
-				code.append("rootIdBinding:'").append(BindUtil.sanitiseBinding(rootBinding)).append("',");
-			}
-			code.append("isTree:true,");
-		}
+		listWidgetVariable = "v" + variableCounter++;
+		code.append("var ").append(listWidgetVariable).append("=isc.BizListGrid.create({");
 		code.append("ID:").append(IDExpression()).append(',');
-		String title = grid.getTitle();
+		code.append("dataSource:'").append(dataSourceId).append("',");
+		code.append("name:'").append(listWidgetVariable).append("',");
+		String title = widget.getTitle();
 		if (title != null) {
 			code.append("title:'");
 			code.append(SmartClientGenerateUtils.processString(Util.i18n(title, locale))).append("',");
 		}
-		code.append("dataSource:'").append(dataSourceId).append("',");
-		code.append("name:'").append(listGridVariable).append("',");
-		code.append("contConv:").append(grid.getContinueConversation()).append(",");
-		String postRefreshConditionName = grid.getPostRefreshConditionName();
+		String postRefreshConditionName = widget.getPostRefreshConditionName();
 		if (postRefreshConditionName != null) {
 			code.append("postRefreshConditionName:'").append(postRefreshConditionName).append("',");
 		}
+		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
+		invisible(widget.getInvisibleConditionName(), code);
+		
+		eventsWithNoForm = true;
+	}
+	
+	private void visitGrid(ListGrid grid) {
+		code.append("contConv:").append(grid.getContinueConversation()).append(",");
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
 			code.append("selectedIdBinding:'").append(BindUtil.sanitiseBinding(selectedIdBinding)).append("',");
 		}
-		size(grid, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		disabled(grid.getDisabledConditionName(), code);
-		invisible(grid.getInvisibleConditionName(), code);
 		disableCRUD(grid, code);
 		if (Boolean.FALSE.equals(grid.getShowAdd())) {
 			code.append("showAdd:false,");
@@ -1247,67 +1294,44 @@ class SmartClientViewVisitor extends ViewVisitor {
 		if (Boolean.FALSE.equals(grid.getShowTag())) {
 			code.append("showTag:false,");
 		}
-		
-		eventsWithNoForm = true;
 	}
-	
+
 	@Override
 	public void visitedListGrid(ListGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		visitedGrid(grid);
+		appendFilterParameters(grid.getParameters(), code);
+		visitedListWidget();
 	}
 
+	@Override
+	public void visitedListRepeater(ListRepeater repeater, 
+										boolean parentVisible,
+										boolean parentEnabled) {
+		visitedListWidget();
+	}
+	
 	@Override
 	public void visitedTreeGrid(TreeGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		visitedGrid(grid);
-	}
-
-	private void visitedGrid(ListGrid grid) {
 		appendFilterParameters(grid.getParameters(), code);
+		visitedListWidget();
+	}
+
+	private void visitedListWidget() {
 		code.append("_view:view});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(listGridVariable).append(");\n");
-		listGridVariable = null;
+		code.append(containerVariables.peek()).append(".addContained(").append(listWidgetVariable).append(");\n");
+		listWidgetVariable = null;
 		eventsWithNoForm = false;
-	}
-	
-	@Override
-	public void visitPickList(PickList list,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
-		code.append(SmartClientGenerateUtils.processString(Util.i18n(list.getTitle(), locale)));
-		code.append("'});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
-	}
-
-	@Override
-	public void visitedPickList(PickList list,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn column,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
-		code.append(SmartClientGenerateUtils.processString(Util.i18n(column.getTitle(), locale)));
-		code.append("'});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 	}
 
 	@Override
 	public void visitCheckBox(CheckBox checkBox,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = checkBox;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = checkBox;
 			return;
 		}
 		
@@ -1351,8 +1375,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitColourPicker(ColourPicker colour,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = colour;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = colour;
 			return;
 		}
 
@@ -1377,8 +1401,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitCombo(Combo combo,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = combo;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = combo;
 			return;
 		}
 
@@ -1404,8 +1428,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 									boolean parentVisible, 
 									boolean parentEnabled) {
 		// markup is generated in the JSON data for a data grid container column content image
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = image;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = image;
 			return;
 		}
 
@@ -1424,8 +1448,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitContentLink(ContentLink link,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = link;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = link;
 			return;
 		}
 
@@ -1447,8 +1471,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitRichText(RichText text,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = text;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = text;
 			return;
 		}
 
@@ -1473,8 +1497,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitHTML(HTML html,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = html;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = html;
 			return;
 		}
 
@@ -1564,8 +1588,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitLookupDescription(LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = lookup;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = lookup;
 			return;
 		}
 
@@ -1611,8 +1635,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitLookup(Lookup lookup,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = lookup;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = lookup;
 			return;
 		}
 
@@ -1637,8 +1661,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitPassword(Password password, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = password;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = password;
 			return;
 		}
 
@@ -1663,8 +1687,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitRadio(Radio radio,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = radio;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = radio;
 			return;
 		}
 
@@ -1692,8 +1716,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitSlider(Slider slider, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = slider;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = slider;
 			return;
 		}
 
@@ -1737,8 +1761,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitSpinner(Spinner spinner, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = spinner;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = spinner;
 			return;
 		}
 
@@ -1775,8 +1799,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitTextArea(TextArea text, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = text;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = text;
 			return;
 		}
 
@@ -1808,8 +1832,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitTextField(TextField text,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (dataGridVariable != null) {
-			dataGridColumnInputWidget = text;
+		if (dataWidgetVariable != null) {
+			dataWidgetColumnInputWidget = text;
 			return;
 		}
 
@@ -2239,10 +2263,10 @@ pickListFields:[{name:'value'}],
 	public void visitOnAddedEventHandler(Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		if (dataGridFieldsIncomplete) {
+		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
-			dataGridFieldsIncomplete = false;
+			dataWidgetFieldsIncomplete = false;
 		}
 		inOnAddedEventHandler = true;
 		if (eventsWithNoForm) {
@@ -2268,10 +2292,10 @@ pickListFields:[{name:'value'}],
 	public void visitOnEditedEventHandler(Editable editable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		if (dataGridFieldsIncomplete) {
+		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
-			dataGridFieldsIncomplete = false;
+			dataWidgetFieldsIncomplete = false;
 		}
 		inOnEditedEventHandler = true;
 		if (eventsWithNoForm) {
@@ -2297,10 +2321,10 @@ pickListFields:[{name:'value'}],
 	public void visitOnRemovedEventHandler(Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled) {
-		if (dataGridFieldsIncomplete) {
+		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
-			dataGridFieldsIncomplete = false;
+			dataWidgetFieldsIncomplete = false;
 		}
 		inOnRemovedEventHandler = true;
 		if (eventsWithNoForm) {
@@ -2323,10 +2347,10 @@ pickListFields:[{name:'value'}],
 	public void visitOnSelectedEventHandler(Selectable selectable,
 												boolean parentVisible,
 												boolean parentEnabled) {
-		if (dataGridFieldsIncomplete) {
+		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
-			dataGridFieldsIncomplete = false;
+			dataWidgetFieldsIncomplete = false;
 		}
 		code.append("bizSelected:function(){var view=this._view;");
 	}

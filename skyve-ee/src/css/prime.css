@@ -49,6 +49,32 @@ span.right {
 	}
 }
 
+.repeater .ui-datatable-tablewrapper table tbody tr {
+	background: none !important;
+	background-color: transparent !important;
+}
+.repeater-no-border {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-tablewrapper {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-tablewrapper table {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-tablewrapper table tbody {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-tablewrapper table tbody tr {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-tablewrapper table tbody tr td {
+	border: none !important;
+}
+.repeater-no-headers .ui-datatable-tablewrapper table thead {
+	display: none !important;
+}
+
 /* popup wheel of death style */
 #busy {
 	display: none;

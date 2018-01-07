@@ -66,12 +66,13 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
@@ -891,21 +892,30 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDataGrid(DataGrid arg0, boolean arg1, boolean arg2) {
-		Util.LOGGER.info("DATA GRID WITH BINDING" + arg0.getBinding());
-		addContainer(arg0.getWidgetId()
-				, arg0.getTitle()
-				, (arg0.getTitle()==null?Boolean.FALSE: Boolean.TRUE)
-				, arg0.getPixelWidth()
-				, arg0.getPercentageWidth()
-				, arg0.getResponsiveWidth()
+	public void visitDataGrid(DataGrid grid, boolean arg1, boolean arg2) {
+		visitDataWidget(grid);
+	}
+	
+	@Override
+	public void visitDataRepeater(DataRepeater repeater, boolean arg1, boolean arg2) {
+		visitDataWidget(repeater);
+	}
+	
+	public void visitDataWidget(AbstractDataWidget widget) {
+		Util.LOGGER.info("DATA GRID WITH BINDING" + widget.getBinding());
+		addContainer(widget.getWidgetId()
+				, widget.getTitle()
+				, (widget.getTitle()==null?Boolean.FALSE: Boolean.TRUE)
+				, widget.getPixelWidth()
+				, widget.getPercentageWidth()
+				, widget.getResponsiveWidth()
 				, Boolean.FALSE
 				, ContainerType.subreport
-				, arg0.getInvisibleConditionName());
+				, widget.getInvisibleConditionName());
 		
 		
 		// add a subreport element to the report
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.subreport, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
+		addElementFromItem(widget.getBinding(), ReportElement.ElementType.subreport, widget.getPixelWidth(), widget.getPercentageWidth(), widget.getResponsiveWidth(), widget.getPixelHeight(), null, widget.getInvisibleConditionName());
 
 		//construct the subreport itself
 		ReportElement subE  = currentContainer.getElements().get(currentContainer.getElements().size()-1);
@@ -1057,6 +1067,11 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitListRepeater(ListRepeater repeater, boolean arg1, boolean arg2) {
+		subreport = true;
+	}
+
+	@Override
 	public void visitListMembership(ListMembership arg0, boolean arg1, boolean arg2) {
 		subreport = true;
 	}
@@ -1134,18 +1149,6 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitPassword(Password arg0, boolean arg1, boolean arg2) {
 		addElementFromItem(arg0.getBinding(), ElementType.textField);
-	}
-
-	@Override
-	public void visitPickList(PickList arg0, boolean arg1, boolean arg2) {
-		// Not supported
-
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn arg0, boolean arg1, boolean arg2) {
-		// Not supported
-
 	}
 
 	@Override
@@ -1288,6 +1291,12 @@ public class ReportViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitedDataRepeater(DataRepeater repeater, boolean arg1, boolean arg2) {
+		subreport = false;
+		handleEndContainer();
+	}
+
+	@Override
 	public void visitedDataGridBoundColumn(DataGridBoundColumn arg0, boolean arg1, boolean arg2) {
 		// No action required
 
@@ -1353,6 +1362,11 @@ public class ReportViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedListGrid(ListGrid arg0, boolean arg1, boolean arg2) {
+		subreport = false;
+	}
+
+	@Override
+	public void visitedListRepeater(ListRepeater repeater, boolean arg1, boolean arg2) {
 		subreport = false;
 	}
 
@@ -1429,12 +1443,6 @@ public class ReportViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedPassword(Password arg0, boolean arg1, boolean arg2) {
-		// No action required
-
-	}
-
-	@Override
-	public void visitedPickList(PickList arg0, boolean arg1, boolean arg2) {
 		// No action required
 
 	}

@@ -87,13 +87,14 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -180,7 +181,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		public void processImplicitActionReference(ImplicitActionReference reference) {
 			ImplicitActionName implicitAction = reference.getImplicitActionName();
 
-			if (visitingDataGrid) {
+			if (visitingDataWidget) {
 				if (ImplicitActionName.Remove.equals(implicitAction)) {
 					htmlGuts.append("javascript:").append(generateWidgetId());
 					htmlGuts.append(".remove('{bizId}')");
@@ -1053,7 +1054,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitGeometry(Geometry geometry,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 		
@@ -1086,7 +1087,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitDynamicImage(DynamicImage image,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1132,7 +1133,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitStaticImage(StaticImage image,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1150,7 +1151,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitContentImage(ContentImage image,
 									boolean parentVisible, 
 									boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1180,7 +1181,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitBlurb(Blurb blurb,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1217,7 +1218,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitLabel(Label label,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1277,7 +1278,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitLink(Link link,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (htmlGuts.length() > 0) {
 				htmlGuts.append("&nbsp;");
 			}
@@ -1286,7 +1287,7 @@ class ViewJSONManipulator extends ViewVisitor {
 		htmlGuts.append("<a href=\"");
 		hrefProcessor.process(link.getReference());
 		htmlGuts.append('"');
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			appendHtmlGutsStyle(link.getPixelWidth(), null,  null, link.getInvisibleConditionName());
 		}
 		
@@ -1309,7 +1310,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append("/>");
 		}
 		
-		if (! visitingDataGrid) {
+		if (! visitingDataWidget) {
 			addFormat(htmlGuts.toString());
 			htmlGuts.setLength(0);
 			
@@ -1349,7 +1350,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitContentLink(ContentLink link, 
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -1418,6 +1419,19 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitListRepeater(ListRepeater repeater,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		addCondition(repeater.getInvisibleConditionName());
+		if (parentVisible && visible(repeater)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled)) {
+				addCondition(repeater.getPostRefreshConditionName());
+			}
+		}
+	}
+
+	@Override
 	public void visitTreeGrid(TreeGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
@@ -1437,44 +1451,75 @@ class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	private boolean visitingDataGrid = false;
-	private boolean visitedDataGridHasEditableColumns = false;
+	private boolean visitingDataWidget = false;
+	private boolean visitedDataWidgetHasEditableColumns = false;
 
 	@Override
 	public void visitDataGrid(DataGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
+		// The grid columns are editable if the grid is editable, and either the edit function is enabled or 
+		// the add function is enabled for an inline grid
+		// NB The zoom operation can be disabled and not affect whether the columns are editable because 
+		// the changed values are posted in the zoomed-in page, not from the grid.
+		boolean dataWidgetHasEditableColumns = (! Boolean.FALSE.equals(grid.getEditable())) &&
+												(evaluateConditionInOppositeSense(grid.getDisableEditConditionName()) ||
+													(Boolean.TRUE.equals(grid.getInline()) && 
+														evaluateConditionInOppositeSense(grid.getDisableAddConditionName())));
+
+		visitDataWidget(grid, 
+							parentVisible,
+							parentEnabled,
+							enabled(grid),
+							dataWidgetHasEditableColumns,
+							grid.getDisableAddConditionName(),
+							grid.getDisableZoomConditionName(),
+							grid.getDisableEditConditionName(),
+							grid.getDisableRemoveConditionName(),
+							grid.getSelectedIdBinding());
+		addCondition(grid.getDisabledConditionName());
+	}
+	
+	@Override
+	public void visitDataRepeater(DataRepeater repeater,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		visitDataWidget(repeater, parentVisible, parentEnabled, true, true, null, null, null, null, null);
+	}
+	
+	private void visitDataWidget(AbstractDataWidget widget,
+									boolean parentVisible,
+									boolean parentEnabled,
+									boolean enabled,
+									boolean dataWidgetHasEditableColumns,
+									String disableAddConditionName,
+									String disableZoomConditionName,
+									String disableEditConditionName,
+									String disableRemoveConditionName,
+									String selectedIdBinding) {	
 		htmlGuts.setLength(0);
 
-		addCondition(grid.getDisabledConditionName());
-		addCondition(grid.getInvisibleConditionName());
+		addCondition(widget.getInvisibleConditionName());
 
 		// NB Allow bindings in a grid with getEditable() false through as there could be 
 		// links with actions that mutate the grid data client-side ie remove implicit action
-		if (parentVisible && visible(grid)) {
+		if (parentVisible && visible(widget)) {
 			if ((! forApply) || 
-					(forApply && parentEnabled && enabled(grid))) {
-				visitingDataGrid = true;
-				// The grid columns are editable if the grid is editable, and either the edit function is enabled or 
-				// the add function is enabled for an inline grid
-				// NB The zoom operation can be disabled and not affect whether the columns are editable because 
-				// the changed values are posted in the zoomed-in page, not from the grid.
-				visitedDataGridHasEditableColumns = (! Boolean.FALSE.equals(grid.getEditable())) &&
-														(evaluateConditionInOppositeSense(grid.getDisableEditConditionName()) ||
-															(Boolean.TRUE.equals(grid.getInline()) && 
-																evaluateConditionInOppositeSense(grid.getDisableAddConditionName())));
+					(forApply && parentEnabled && enabled)) {
+				visitingDataWidget = true;
+				visitedDataWidgetHasEditableColumns = dataWidgetHasEditableColumns;
 				
-				addCondition(grid.getDisableAddConditionName());
-				addCondition(grid.getDisableZoomConditionName());
-				addCondition(grid.getDisableEditConditionName());
-				addCondition(grid.getDisableRemoveConditionName());
-				addBinding(grid.getSelectedIdBinding(), true, true);
+				addCondition(disableAddConditionName);
+				addCondition(disableZoomConditionName);
+				addCondition(disableEditConditionName);
+				addCondition(disableRemoveConditionName);
+				addBinding(selectedIdBinding, true, true);
 				
-				String gridBinding = grid.getBinding();
+				String gridBinding = widget.getBinding();
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
-		        currentBindings = currentBindings.putOrGetChild(grid.getBinding(), relatedDocument);
+		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
 		        
 		        // Add these for polymorphic zooming on data grids
 		        addBinding(Bean.MODULE_KEY, false);
@@ -1489,9 +1534,9 @@ class ViewJSONManipulator extends ViewVisitor {
 		        }
 		        
 				// Cater for the case where this is a grid with a lookup description representing the entire row
-				List<DataGridColumn> gridColumns = grid.getColumns();
+				List<? extends TabularColumn> gridColumns = widget.getColumns();
 				if (gridColumns.size() == 1) {
-					DataGridColumn gridColumn = gridColumns.get(0);
+					TabularColumn gridColumn = gridColumns.get(0);
 					if (gridColumn instanceof DataGridBoundColumn) {
 						DataGridBoundColumn boundGridColumn = (DataGridBoundColumn) gridColumn;
 						if (boundGridColumn.getBinding() == null) {
@@ -1510,12 +1555,12 @@ class ViewJSONManipulator extends ViewVisitor {
 			}
 			else {
 				// grid is disabled
-				visitedDataGridHasEditableColumns = false;
+				visitedDataWidgetHasEditableColumns = false;
 			}
 		}
 		else {
 			// grid is invisible
-			visitedDataGridHasEditableColumns = false;
+			visitedDataWidgetHasEditableColumns = false;
 		}
 	}
 	
@@ -1523,20 +1568,41 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitedListGrid(ListGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		// keep this in sync with the generated edit views
-		if (ViewType.create.toString().equals(view.getName())) {
-			createIdCounter++;
-		}
-		else {
-			editIdCounter++;
-		}
+		incrementCounter();
+	}
+
+	@Override
+	public void visitedListRepeater(ListRepeater repeater,
+										boolean parentVisible,
+										boolean parentEnabled) {
+		incrementCounter();
 	}
 
 	@Override
 	public void visitedTreeGrid(TreeGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		// keep this in sync with the generated edit views
+		incrementCounter();
+	}
+
+	@Override
+	public void visitedDataGrid(DataGrid grid,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		incrementCounter();
+		visitedDataWidget();
+	}
+
+	@Override
+	public void visitedDataRepeater(DataRepeater repeater,
+										boolean parentVisible,
+										boolean parentEnabled) {
+		incrementCounter();
+		visitedDataWidget();
+	}
+
+	// keep this in sync with the generated edit views
+	private void incrementCounter() {
 		if (ViewType.create.toString().equals(view.getName())) {
 			createIdCounter++;
 		}
@@ -1544,22 +1610,12 @@ class ViewJSONManipulator extends ViewVisitor {
 			editIdCounter++;
 		}
 	}
-
-	@Override
-	public void visitedDataGrid(DataGrid grid,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// keep this in sync with the generated edit views
-		if (ViewType.create.toString().equals(view.getName())) {
-			createIdCounter++;
-		}
-		else {
-			editIdCounter++;
-		}
-		if (visitingDataGrid) {
+	
+	private void visitedDataWidget() {
+		if (visitingDataWidget) {
 		    currentBindings = currentBindings.getParent();
 		}
-		visitingDataGrid = false;
+		visitingDataWidget = false;
 		htmlGuts.setLength(0);
 	}
 	
@@ -1571,7 +1627,7 @@ class ViewJSONManipulator extends ViewVisitor {
 			if ((! forApply) || 
 					(forApply && 
 						parentEnabled && 
-						visitedDataGridHasEditableColumns && 
+						visitedDataWidgetHasEditableColumns && 
 						(! Boolean.FALSE.equals(column.getEditable())))) {
 				addBinding(column.getBinding(), true);
 			}
@@ -1599,54 +1655,11 @@ class ViewJSONManipulator extends ViewVisitor {
 		addFormat(UtilImpl.processStringValue(htmlGuts.toString()));
 	}
 
-	private boolean visitingPickList = false;
-
-	@Override
-	public void visitPickList(PickList list,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (parentVisible && visible(list)) {
-			if ((! forApply) || 
-					(forApply && parentEnabled)) {
-				String binding = list.getBinding();
-				if (binding != null) {
-					visitingPickList = true;
-					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				    Document relatedDocument = module.getDocument(customer, ((Relation) target.getAttribute()).getDocumentName());
-			    	currentBindings = currentBindings.putOrGetChild(binding, relatedDocument);
-				}
-			}
-		}
-		addCondition(list.getInvisibleConditionName());
-	}
-
-	@Override
-	public void visitedPickList(PickList list,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		if (visitingPickList) {
-			currentBindings = currentBindings.getParent();
-		}
-		visitingPickList = false;
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn column,
-										boolean parentVisible,
-										boolean parentEnabled) {
-		if (parentVisible) {
-			if ((! forApply) || 
-					(forApply && parentEnabled)) {
-				addBinding(column.getBinding(), false);
-			}
-		}
-	}
-
 	@Override
 	public void visitCheckBox(CheckBox checkBox,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -1705,7 +1718,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitColourPicker(ColourPicker colour,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -1730,7 +1743,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitCombo(Combo combo,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			if (parentVisible) {
 				if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -1766,7 +1779,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitRichText(RichText text,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -1791,7 +1804,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitHTML(HTML html,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 		if (parentVisible && visible(html)) {
@@ -1907,7 +1920,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitLookupDescription(LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			// Can be no lookup binding if the lookup is in a data grid and represents the entire data grid row
 			String lookupBinding = lookup.getBinding();
 			if ((! forApply) && (lookupBinding != null)) {
@@ -1962,7 +1975,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitLookup(Lookup lookup,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -1991,7 +2004,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitPassword(Password password, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -2016,7 +2029,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitRadio(Radio radio,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 		if (parentVisible && visible(radio)) {
@@ -2040,7 +2053,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitSlider(Slider slider, 
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -2065,7 +2078,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitSpinner(Spinner spinner,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -2090,7 +2103,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitTextArea(TextArea text,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 
@@ -2115,7 +2128,7 @@ class ViewJSONManipulator extends ViewVisitor {
 	public void visitTextField(TextField text,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		if (visitingDataGrid) {
+		if (visitingDataWidget) {
 			return;
 		}
 

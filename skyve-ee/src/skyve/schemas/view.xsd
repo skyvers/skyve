@@ -43,6 +43,8 @@
 
   <xs:element name="dataGrid" type="tns:dataGrid"/>
 
+  <xs:element name="dataRepeater" type="tns:dataRepeater"/>
+
   <xs:element name="default" type="tns:defaultWidget"/>
 
   <xs:element name="defaultListViewReference" type="tns:defaultListViewReference"/>
@@ -92,6 +94,8 @@
   <xs:element name="listGrid" type="tns:listGrid"/>
 
   <xs:element name="listMembership" type="tns:listMembership"/>
+
+  <xs:element name="listRepeater" type="tns:listRepeater"/>
 
   <xs:element name="lookup" type="tns:lookup"/>
 
@@ -664,6 +668,8 @@
         <xs:element ref="tns:dataGrid"/>
         <xs:element ref="tns:listGrid"/>
         <xs:element ref="tns:treeGrid"/>
+        <xs:element ref="tns:dataRepeater"/>
+        <xs:element ref="tns:listRepeater"/>
         <xs:element ref="tns:inject"/>
         <xs:element ref="tns:component"/>
       </xs:choice>
@@ -1408,7 +1414,7 @@
 
   <xs:complexType name="dataGrid">
     <xs:complexContent>
-      <xs:extension base="tns:tabularWidget">
+      <xs:extension base="tns:abstractDataWidget">
         <xs:sequence>
           <xs:choice minOccurs="0" maxOccurs="unbounded">
             <xs:element ref="tns:boundColumn"/>
@@ -1464,7 +1470,6 @@
           </xs:element>
           <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
         </xs:sequence>
-        <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="inline" type="xs:boolean"/>
         <xs:attribute name="editable" type="xs:boolean"/>
         <xs:attribute name="wrap" type="xs:boolean"/>
@@ -1488,10 +1493,11 @@
     </xs:complexContent>
   </xs:complexType>
 
-  <xs:complexType name="tabularWidget" abstract="true">
+  <xs:complexType name="abstractDataWidget" abstract="true">
     <xs:complexContent>
       <xs:extension base="tns:abstractBound">
         <xs:sequence/>
+        <xs:attribute name="widgetId" type="xs:string"/>
         <xs:attribute name="title" type="xs:string"/>
         <xs:attribute name="pixelWidth" type="xs:int"/>
         <xs:attribute name="responsiveWidth" type="xs:int"/>
@@ -1547,47 +1553,81 @@
   </xs:complexType>
 
   <xs:complexType name="listGrid">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractListWidget">
+        <xs:sequence>
+          <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onDeletedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="onSelectedHandlers" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                  <xs:element ref="tns:rerender"/>
+                  <xs:element ref="tns:server"/>
+                  <xs:element ref="tns:setDisabled"/>
+                  <xs:element ref="tns:setInvisible"/>
+                </xs:choice>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="disabled" type="xs:string"/>
+        <xs:attribute name="enabled" type="xs:string"/>
+        <xs:attribute name="disableAdd" type="xs:string"/>
+        <xs:attribute name="enableAdd" type="xs:string"/>
+        <xs:attribute name="disableZoom" type="xs:string"/>
+        <xs:attribute name="enableZoom" type="xs:string"/>
+        <xs:attribute name="disableEdit" type="xs:string"/>
+        <xs:attribute name="enableEdit" type="xs:string"/>
+        <xs:attribute name="disableRemove" type="xs:string"/>
+        <xs:attribute name="enableRemove" type="xs:string"/>
+        <xs:attribute name="showAdd" type="xs:boolean"/>
+        <xs:attribute name="showZoom" type="xs:boolean"/>
+        <xs:attribute name="showEdit" type="xs:boolean"/>
+        <xs:attribute name="showRemove" type="xs:boolean"/>
+        <xs:attribute name="showDeselect" type="xs:boolean"/>
+        <xs:attribute name="showFilter" type="xs:boolean"/>
+        <xs:attribute name="showSummary" type="xs:boolean"/>
+        <xs:attribute name="showExport" type="xs:boolean"/>
+        <xs:attribute name="showSnap" type="xs:boolean"/>
+        <xs:attribute name="showTag" type="xs:boolean"/>
+        <xs:attribute name="selectedIdBinding" type="xs:string"/>
+        <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractListWidget" abstract="true">
     <xs:sequence>
-      <xs:element name="onEditedHandlers" form="qualified" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="tns:rerender"/>
-              <xs:element ref="tns:server"/>
-              <xs:element ref="tns:setDisabled"/>
-              <xs:element ref="tns:setInvisible"/>
-            </xs:choice>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="onDeletedHandlers" form="qualified" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="tns:rerender"/>
-              <xs:element ref="tns:server"/>
-              <xs:element ref="tns:setDisabled"/>
-              <xs:element ref="tns:setInvisible"/>
-            </xs:choice>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="onSelectedHandlers" form="qualified" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="tns:rerender"/>
-              <xs:element ref="tns:server"/>
-              <xs:element ref="tns:setDisabled"/>
-              <xs:element ref="tns:setInvisible"/>
-            </xs:choice>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="filterParameter" type="tns:filterParameterImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="title" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="postRefresh" type="xs:string"/>
     <xs:attribute name="pixelWidth" type="xs:int"/>
     <xs:attribute name="responsiveWidth" type="xs:int"/>
     <xs:attribute name="percentageWidth" type="xs:int"/>
@@ -1597,33 +1637,8 @@
     <xs:attribute name="percentageHeight" type="xs:int"/>
     <xs:attribute name="minPixelHeight" type="xs:int"/>
     <xs:attribute name="maxPixelHeight" type="xs:int"/>
-    <xs:attribute name="disabled" type="xs:string"/>
-    <xs:attribute name="enabled" type="xs:string"/>
     <xs:attribute name="invisible" type="xs:string"/>
     <xs:attribute name="visible" type="xs:string"/>
-    <xs:attribute name="disableAdd" type="xs:string"/>
-    <xs:attribute name="enableAdd" type="xs:string"/>
-    <xs:attribute name="disableZoom" type="xs:string"/>
-    <xs:attribute name="enableZoom" type="xs:string"/>
-    <xs:attribute name="disableEdit" type="xs:string"/>
-    <xs:attribute name="enableEdit" type="xs:string"/>
-    <xs:attribute name="disableRemove" type="xs:string"/>
-    <xs:attribute name="enableRemove" type="xs:string"/>
-    <xs:attribute name="showAdd" type="xs:boolean"/>
-    <xs:attribute name="showZoom" type="xs:boolean"/>
-    <xs:attribute name="showEdit" type="xs:boolean"/>
-    <xs:attribute name="showRemove" type="xs:boolean"/>
-    <xs:attribute name="showDeselect" type="xs:boolean"/>
-    <xs:attribute name="showFilter" type="xs:boolean"/>
-    <xs:attribute name="showSummary" type="xs:boolean"/>
-    <xs:attribute name="showExport" type="xs:boolean"/>
-    <xs:attribute name="showSnap" type="xs:boolean"/>
-    <xs:attribute name="showTag" type="xs:boolean"/>
-    <xs:attribute name="query" type="xs:string"/>
-    <xs:attribute name="model" type="xs:string"/>
-    <xs:attribute name="selectedIdBinding" type="xs:string"/>
-    <xs:attribute name="postRefresh" type="xs:string"/>
-    <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="treeGrid">
@@ -1631,6 +1646,34 @@
       <xs:extension base="tns:listGrid">
         <xs:sequence/>
         <xs:attribute name="rootIdBinding" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dataRepeater">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractDataWidget">
+        <xs:sequence>
+          <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="tns:boundColumn"/>
+            <xs:element ref="tns:containerColumn"/>
+          </xs:choice>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="showColumnHeaders" type="xs:boolean"/>
+        <xs:attribute name="showGrid" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="listRepeater">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractListWidget">
+        <xs:sequence>
+          <xs:element name="properties" type="ns1:propertyMapType" form="qualified" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="showColumnHeaders" type="xs:boolean"/>
+        <xs:attribute name="showGrid" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

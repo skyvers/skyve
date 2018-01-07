@@ -27,7 +27,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -56,6 +58,8 @@ public abstract class Container implements MetaData {
 						@XmlElementRef(type = DataGrid.class),
 						@XmlElementRef(type = ListGrid.class),
 						@XmlElementRef(type = TreeGrid.class),
+						@XmlElementRef(type = DataRepeater.class),
+						@XmlElementRef(type = ListRepeater.class),
 						@XmlElementRef(type = Inject.class),
 						@XmlElementRef(type = Component.class)})
 	private List<MetaData> contained = new ArrayList<>();

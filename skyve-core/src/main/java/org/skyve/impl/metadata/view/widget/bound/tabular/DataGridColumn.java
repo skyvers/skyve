@@ -17,9 +17,6 @@ import org.skyve.metadata.DecoratedMetaData;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"title", "alignment", "pixelWidth", "properties"})
 public abstract class DataGridColumn implements TabularColumn, DecoratedMetaData {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -5532364729219436008L;
 
 	private String title;

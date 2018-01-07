@@ -6,16 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
-import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.view.Actions;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.container.Tab;
@@ -27,11 +23,9 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
@@ -44,10 +38,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
-import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.module.query.DocumentQueryDefinition;
-import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
@@ -79,70 +70,6 @@ public class ViewGenerator {
 		else {
 			throw new IllegalArgumentException("ViewGenerator : Cannot generate a view of type " + viewName);
 		}
-
-		return result;
-	}
-
-	public static ViewImpl generatePickView(Customer customer,
-												Module module,
-												Document document,
-												Reference reference,
-												List<Bean> beans,
-												String binding) {
-		ViewImpl result = new ViewImpl();
-		result.setName(ViewType.pick.toString());
-		result.setTitle("Pick a " + document.getSingularAlias());
-		result.setIconStyleClass(document.getIconStyleClass());
-		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-
-		ActionImpl action = new ActionImpl();
-		action.setImplicitName(ImplicitActionName.Cancel);
-		result.putAction(action);
-
-		PickList pickList = new PickList();
-		pickList.setPickAssociationBinding(binding);
-
-		if (beans.size() > 0) {
-			DocumentQueryDefinition query = module.getDocumentQuery(reference.getQueryName());
-			for (QueryColumn queryColumn : query.getColumns()) {
-				if (! queryColumn.isProjected()) {
-					continue;
-				}
-
-				String columnBinding = queryColumn.getBinding();
-				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
-																		module, 
-																		document,
-																		columnBinding);
-				Attribute attribute = target.getAttribute();
-				if ((! columnBinding.equals(Bean.DOCUMENT_ID)) && 
-						(! columnBinding.equals(Bean.CUSTOMER_NAME)) &&
-						(! columnBinding.equals(PersistentBean.LOCK_NAME)) && 
-						(attribute instanceof Field)) {
-					PickListColumn column = new PickListColumn();
-					column.setTitle(attribute.getDisplayName());
-					// check if this column is part of the bindings
-					// that is, it's a description field which is copied to the source document
-					// if (pickBindings.contains(columnName))
-					// {
-					// column.setPickBinding(pickBindingPrefix + columnName);
-					column.setPickBinding(columnBinding);
-					// }
-					column.setBinding(columnBinding);
-
-					pickList.getColumns().add(column);
-				}
-			}
-		}
-		else {
-			PickListColumn column = new PickListColumn();
-			column.setTitle("No Data Found...");
-			column.setAlignment(HorizontalAlignment.left);
-
-			pickList.getColumns().add(column);
-		}
-
-		result.getContained().add(pickList);
 
 		return result;
 	}
@@ -259,9 +186,9 @@ public class ViewGenerator {
 				tab = new Tab();
 				tab.setTitle(detail.title);
 				MetaData detailWidget = detail.widget;
-				if (detailWidget instanceof TabularWidget) {
-					TabularWidget tw = (TabularWidget) detailWidget;
-					tw.setTitle(null);
+				if (detailWidget instanceof AbstractDataWidget) {
+					AbstractDataWidget adw = (AbstractDataWidget) detailWidget;
+					adw.setTitle(null);
 				}
 				tab.getContained().add(detailWidget);
 				tabPane.getTabs().add(tab);

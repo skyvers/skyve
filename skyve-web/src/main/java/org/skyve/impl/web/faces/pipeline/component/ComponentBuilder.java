@@ -45,6 +45,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -93,6 +94,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent label(String listVar, String value, String binding, Label label);
 
 	public abstract UIComponent dataGrid(String listVar, DataGrid grid);
+
+	/*
+	 * Data Repeater is just like a data grid but...
+	 * The grid column headers can be turned off.
+	 * The grid (borders) can be turned off.
+	 * Any bound columns are editable inline.
+	 * There is no action column.
+	 */
+	public abstract UIComponent dataRepeater(String listVar, DataRepeater repeater);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 
 														DataGrid grid,
 														DataGridBoundColumn column,
@@ -126,6 +136,24 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											List<EventAction> selectedActions,
 											boolean showPaginator,
 											boolean stickyHeader);
+
+	/*
+	 * List Repeater is just like a list grid but...
+	 * The grid column headers can be turned off.
+	 * The grid (borders) can be turned off.
+	 * It implements infinite scrolling instead of the page controls.
+	 * Any bound columns are editable inline.
+	 * There is no action column.
+	 * No CRUD.
+	 */
+	public abstract UIComponent listRepeater(String modelDocumentName,
+												String modelName,
+												ListModel<? extends Bean> model, 
+												List<FilterParameter> filterParameters,
+												String title,
+												boolean showColumnHeaders,
+												boolean showGrid,
+												boolean stickyHeader);
 
 	public abstract UIComponent listMembership(ListMembership membership);
 	

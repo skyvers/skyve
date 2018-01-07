@@ -1,20 +1,27 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.RelativeSize;
-import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
+import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.Invisible;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"title", 
+							"queryName",
+							"modelName",
+							"postRefreshConditionName",
+							"parameters",
 							"pixelWidth",
 							"responsiveWidth",
 							"percentageWidth",
@@ -26,10 +33,16 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 							"maxPixelHeight", 
 							"invisibleConditionName",
 							"visibleConditionName"})
-public abstract class TabularWidget extends AbstractBound implements RelativeSize, Invisible {
-	private static final long serialVersionUID = 8143928198512212919L;
+public abstract class AbstractListWidget implements RelativeSize, Filterable, Invisible {
+	private static final long serialVersionUID = 9068940194810436542L;
 
 	private String title;
+	
+	private String queryName;
+	private String modelName;
+	private String postRefreshConditionName;
+	
+	private List<FilterParameter> parameters = new ArrayList<>();
 	
 	private Integer pixelWidth;
 	private Integer responsiveWidth;
@@ -44,8 +57,6 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 	
 	private String invisibleConditionName;
 
-	public abstract List<? extends TabularColumn> getColumns();
-
 	public String getTitle() {
 		return title;
 	}
@@ -55,6 +66,42 @@ public abstract class TabularWidget extends AbstractBound implements RelativeSiz
 		this.title = UtilImpl.processStringValue(title);
 	}
 
+	public String getQueryName() {
+		return queryName;
+	}
+
+	@XmlAttribute(name = "query")
+	public void setQueryName(String queryName) {
+		this.queryName = UtilImpl.processStringValue(queryName);
+	}
+
+	public String getModelName() {
+		return modelName;
+	}
+
+	@XmlAttribute(name = "model")
+	public void setModelName(String modelName) {
+		this.modelName = UtilImpl.processStringValue(modelName);
+	}
+
+	public String getPostRefreshConditionName() {
+		return postRefreshConditionName;
+	}
+
+	@XmlAttribute(name = "postRefresh")
+	public void setPostRefreshConditionName(String refresh) {
+		this.postRefreshConditionName = refresh;
+	}
+
+	@Override
+	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, 
+					name = "filterParameter",
+					type = FilterParameterImpl.class,
+					required = false)
+	public List<FilterParameter> getParameters() {
+		return parameters;
+	}
+	
 	@Override
 	public Integer getPixelWidth() {
 		return pixelWidth;

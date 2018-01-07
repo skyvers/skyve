@@ -16,7 +16,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
-import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.metadata.view.event.Addable;
 import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.event.Removable;
@@ -30,16 +29,10 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DisableableCRUDGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"widgetId",
-							"inline", 
+			propOrder = {"inline", 
 							"editable",
 							"wordWrap",
 							"disabledConditionName", 
@@ -64,8 +57,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TabularWidget;
 							"removedActions",
 							"selectedActions",
 							"properties"})
-public class DataGrid extends TabularWidget implements DecoratedMetaData,
-														Identifiable,
+public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 														Disableable,
 														Editable,
 														DisableableCRUDGrid, 
@@ -75,8 +67,6 @@ public class DataGrid extends TabularWidget implements DecoratedMetaData,
 														Selectable {
 	private static final long serialVersionUID = 5341133860997684429L;
 
-	private String widgetId;
-	
 	private String disabledConditionName;
 	
 	private String disableAddConditionName;
@@ -108,16 +98,6 @@ public class DataGrid extends TabularWidget implements DecoratedMetaData,
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new TreeMap<>();
-
-	@Override
-	public String getWidgetId() {
-		return widgetId;
-	}
-
-	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
-		this.widgetId = UtilImpl.processStringValue(widgetId);
-	}
 
 	public Boolean getInline() {
 		return inline;

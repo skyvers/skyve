@@ -12,7 +12,6 @@ import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
-import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGroup;
@@ -81,6 +80,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.AssociationPickListConverter;
@@ -291,6 +291,30 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							grid.getSelectedIdBinding(),
 							grid.getSelectedActions(),
 							grid.getWidgetId());
+	}
+
+	/*
+	 * Data Repeater is just like a data grid - a data table but...
+	 * The grid column headers can be turned off (uses prime.css)
+	 * The grid (borders) can be turned off (uses prime.css)
+	 * Any bound columns are editable inline.
+	 */
+	@Override
+	public UIComponent dataRepeater(String listVar, DataRepeater repeater) {
+		columnPriority = 1;
+
+		DataTable result = dataTable(repeater.getBinding(),
+										listVar,
+										repeater.getTitle(),
+										repeater.getInvisibleConditionName(),
+										false,
+										null,
+										null,
+										null,
+										repeater.getWidgetId());
+        result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()), 
+        											Boolean.TRUE.equals(repeater.getShowGrid())));
+		return result;
 	}
 	
 	@Override
@@ -756,6 +780,94 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			column.getChildren().add(button);
         }
 		componentChildrenToAddTo.add(column);
+	}
+	
+	/*
+	 * List Repeater is just like a list grid - a data table but...
+	 * The grid column headers can be turned off (uses prime.css)
+	 * The grid (borders) can be turned off (uses prime.css)
+	 * It implements infinite scrolling instead of the page controls.
+	 * Any bound columns are editable inline.
+	 * There is no action column.
+	 * No CRUD.
+	 */
+	@Override
+	public UIComponent listRepeater(String modelDocumentName,
+										String modelName,
+										ListModel<? extends Bean> model,
+										List<FilterParameter> filterParameters,
+										String title,
+										boolean showColumnHeaders,
+										boolean showGrid,
+										boolean stickyHeader) {
+		Document drivingDocument =  model.getDrivingDocument();
+		String moduleName = drivingDocument.getOwningModuleName();
+		String drivingDocumentName = drivingDocument.getName();
+
+		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
+        result.setVar("row");
+        result.setPaginator(false);
+        result.setLazy(true);
+        result.setEmptyMessage("");
+        result.setStickyHeader(stickyHeader);
+        
+        setId(result, null);
+    	result.setWidgetVar(result.getId());
+    	    	
+        // Write out getLazyDataModel call as the value
+        StringBuilder value = new StringBuilder(64);
+		value.append("#{").append(managedBeanName).append(".getLazyDataModel('").append(moduleName).append("','");
+		if (model instanceof DocumentQueryListModel) {
+			value.append(drivingDocumentName).append("','").append(modelName).append("',null,");
+		}
+		else {
+			value.append(modelDocumentName).append("',null,'").append(modelName).append("',");
+		}
+
+		// Add filter parameters to getLazyDataModel call
+		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
+			value.append('[');
+			for (FilterParameter param : filterParameters) {
+				value.append("['").append(param.getName()).append("','");
+				value.append(param.getOperator()).append("','");
+				String binding = param.getBinding();
+				if (binding != null) {
+					value.append('{').append(binding).append("}'],");
+				}
+				else {
+					value.append(param.getValue()).append("'],");
+				}
+			}
+			value.setLength(value.length() - 1); // remove last comma
+			value.append("])}");
+		}
+		else {
+			value.append("null)}");
+		}
+		
+		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
+
+		if (title != null) {
+			addListGridHeader(title, result);
+		}
+        List<UIComponent> children = result.getChildren();
+        addListGridDataColumns(model, children);
+
+        result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
+        
+        return result;
+	}
+
+	private static String repeaterStyleClass(boolean showColumnHeaders, boolean showGrid) {
+        StringBuilder result = new StringBuilder(64);
+        result.append("repeater");
+        if (! showColumnHeaders) {
+        	result.append(" repeater-no-headers");
+        }
+        if (! showGrid) {
+        	result.append(" repeater-no-border");
+        }
+		return result.toString();
 	}
 	
 	@Override

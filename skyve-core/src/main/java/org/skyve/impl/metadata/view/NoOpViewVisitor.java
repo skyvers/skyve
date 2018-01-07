@@ -57,9 +57,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -225,6 +225,16 @@ public class NoOpViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitedListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
 	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
@@ -245,6 +255,16 @@ public class NoOpViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
+	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// no-op
+	}
+
+	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
@@ -261,21 +281,6 @@ public class NoOpViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	@Override
-	public void visitPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	@Override
-	public void visitedPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
-		// no-op
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn column, boolean parentVisible, boolean parentEnabled) {
 		// no-op
 	}
 

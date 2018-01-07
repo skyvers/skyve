@@ -63,13 +63,14 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -193,6 +194,12 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedListGrid(ListGrid grid,
 											boolean parentVisible,
 											boolean parentEnabled);
+	public abstract void visitListRepeater(ListRepeater repeater,
+											boolean parentVisible,
+											boolean parentEnabled);
+	public abstract void visitedListRepeater(ListRepeater repeater,
+												boolean parentVisible,
+												boolean parentEnabled);
 	public abstract void visitTreeGrid(TreeGrid grid,
 										boolean parentVisible,
 										boolean parentEnabled);
@@ -205,6 +212,12 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedDataGrid(DataGrid grid,
 											boolean parentVisible,
 											boolean parentEnabled);
+	public abstract void visitDataRepeater(DataRepeater repeater,
+											boolean parentVisible,
+											boolean parentEnabled);
+	public abstract void visitedDataRepeater(DataRepeater repeater,
+												boolean parentVisible,
+												boolean parentEnabled);
 	public abstract void visitDataGridBoundColumn(DataGridBoundColumn column,
 													boolean parentVisible,
 													boolean parentEnabled);
@@ -217,16 +230,6 @@ public abstract class ViewVisitor extends ActionVisitor {
 	public abstract void visitedDataGridContainerColumn(DataGridContainerColumn column,
 															boolean parentVisible,
 															boolean parentEnabled);
-	public abstract void visitPickList(PickList list,
-										boolean parentVisible,
-										boolean parentEnabled);
-	public abstract void visitedPickList(PickList list,
-											boolean parentVisible,
-											boolean parentEnabled);
-	public abstract void visitPickListColumn(PickListColumn column,
-												boolean parentVisible,
-												boolean parentEnabled);
-
 	// input widgets
 	public abstract void visitCheckBox(CheckBox checkBox,
 										boolean parentVisible,
@@ -536,6 +539,12 @@ public abstract class ViewVisitor extends ActionVisitor {
 			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedListGrid(grid, parentVisible, parentEnabled);
 		}
+		else if (widget instanceof ListRepeater) {
+			ListRepeater repeater = (ListRepeater) widget;
+			visitListRepeater(repeater, parentVisible, parentEnabled);
+			visitFilterable(repeater, parentVisible, parentEnabled);
+			visitedListRepeater(repeater, parentVisible, parentEnabled);
+		}
 		else if (widget instanceof DataGrid) {
 			DataGrid grid = (DataGrid) widget;
 			String gridBindingPrefix = grid.getBinding();
@@ -551,87 +560,29 @@ public abstract class ViewVisitor extends ActionVisitor {
 			// change the grid data client-side
 			boolean gridEnabled = parentEnabled && enabled(grid);
 
-			for (DataGridColumn column : grid.getColumns()) {
-				if (column instanceof DataGridBoundColumn) {
-					DataGridBoundColumn boundColumn = (DataGridBoundColumn) column;
-					visitDataGridBoundColumn(boundColumn, gridVisible, gridEnabled);
-	
-					boolean gridColumnEnabled = gridEnabled && (! Boolean.FALSE.equals(boundColumn.getEditable())); // can be true or null
-	
-					InputWidget inputWidget = null;
-					String columnBinding = boundColumn.getBinding();
-					WidgetReference widgetRef = boundColumn.getInputWidget();
-					if (widgetRef != null) {
-						inputWidget = widgetRef.getWidget();
-					}
-					else {
-						// determine the widget to use
-						String fullyQualifiedColumnBinding = columnBinding;
-						if (fullyQualifiedColumnBinding == null) {
-							fullyQualifiedColumnBinding = grid.getBinding();
-						}
-						else {
-							fullyQualifiedColumnBinding = gridBindingPrefix + fullyQualifiedColumnBinding;
-						}
-		
-						if (fullyQualifiedColumnBinding.endsWith(Bean.BIZ_KEY)) {
-							inputWidget = DocumentImpl.getBizKeyAttribute().getDefaultInputWidget();
-						}
-						else if (fullyQualifiedColumnBinding.endsWith(Bean.ORDINAL_NAME)) {
-							inputWidget = DocumentImpl.getBizOrdinalAttribute().getDefaultInputWidget();
-						}
-						else {
-							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
-																					module, 
-																					document, 
-																					fullyQualifiedColumnBinding);
-							Attribute attribute = target.getAttribute();
-							if (attribute != null) {
-								inputWidget = attribute.getDefaultInputWidget();
-							}
-						}
-					}
-					
-					if (inputWidget == null) {
-						throw new MetaDataException("Could not determine the input widget to use from grid column " + grid.getBinding() + '.' + columnBinding);
-					}
-	
-					String definedBinding = inputWidget.getBinding();
-					try {
-						// Temporarily set the binding to the datagrid column binding
-						inputWidget.setBinding(columnBinding);
-						visitWidget(inputWidget, gridVisible, gridColumnEnabled);
-						visitedDataGridBoundColumn(boundColumn, gridVisible, gridEnabled);
-					}
-					finally {
-						inputWidget.setBinding(definedBinding);
-					}
-				}
-				else {
-					DataGridContainerColumn containerColumn = (DataGridContainerColumn) column;
-					visitDataGridContainerColumn(containerColumn, parentVisible, parentEnabled);
-					
-					for (MetaData containedWidget : containerColumn.getWidgets()) {
-						visitWidget(containedWidget, parentVisible, parentEnabled);
-					}
-					
-					visitedDataGridContainerColumn(containerColumn, parentVisible, parentEnabled);
-				}
-			}
+			visitDataWidgetColumns(grid, gridBindingPrefix, gridVisible, gridEnabled, parentVisible, parentEnabled);
+
 			visitAddableActions(grid, parentVisible, parentEnabled);
 			visitEditableActions(grid, parentVisible, parentEnabled);
 			visitRemovableActions(grid, parentVisible, parentEnabled);
 			visitSelectableActions(grid, parentVisible, parentEnabled);
 			visitedDataGrid(grid, parentVisible, parentEnabled);
 		}
-		else if (widget instanceof PickList) {
-			PickList list = (PickList) widget;
-			visitPickList(list, parentVisible, parentEnabled);
-			boolean listVisible = parentVisible && visible(list);
-			for (PickListColumn column : list.getColumns()) {
-				visitPickListColumn(column, listVisible, parentEnabled);
+		else if (widget instanceof DataRepeater) {
+			DataRepeater repeater = (DataRepeater) widget;
+			String repeaterBindingPrefix = repeater.getBinding();
+			if (repeaterBindingPrefix == null) {
+				repeaterBindingPrefix = "";
 			}
-			visitedPickList(list, parentVisible, parentEnabled);
+			else {
+				repeaterBindingPrefix += '.';
+			}
+			visitDataRepeater(repeater, parentVisible, parentEnabled);
+			boolean repeaterVisible = parentVisible && visible(repeater);
+
+			visitDataWidgetColumns(repeater, repeaterBindingPrefix, repeaterVisible, true, parentVisible, parentEnabled);
+
+			visitedDataRepeater(repeater, parentVisible, parentEnabled);
 		}
 		// input
 		else if (widget instanceof CheckBox) {
@@ -829,6 +780,81 @@ public abstract class ViewVisitor extends ActionVisitor {
 		}
 		else {
 			throw new MetaDataException("Container " + container + " not catered for.");
+		}
+	}
+	
+	private void visitDataWidgetColumns(AbstractDataWidget widget,
+											String widgetBindingPrefix,
+											boolean widgetVisible,
+											boolean widgetEnabled,
+											boolean parentVisible,
+											boolean parentEnabled) {
+		for (TabularColumn column : widget.getColumns()) {
+			if (column instanceof DataGridBoundColumn) {
+				DataGridBoundColumn boundColumn = (DataGridBoundColumn) column;
+				visitDataGridBoundColumn(boundColumn, widgetVisible, widgetEnabled);
+
+				boolean widgetColumnEnabled = widgetEnabled && (! Boolean.FALSE.equals(boundColumn.getEditable())); // can be true or null
+
+				InputWidget inputWidget = null;
+				String columnBinding = boundColumn.getBinding();
+				WidgetReference widgetRef = boundColumn.getInputWidget();
+				if (widgetRef != null) {
+					inputWidget = widgetRef.getWidget();
+				}
+				else {
+					// determine the widget to use
+					String fullyQualifiedColumnBinding = columnBinding;
+					if (fullyQualifiedColumnBinding == null) {
+						fullyQualifiedColumnBinding = widget.getBinding();
+					}
+					else {
+						fullyQualifiedColumnBinding = widgetBindingPrefix + fullyQualifiedColumnBinding;
+					}
+	
+					if (fullyQualifiedColumnBinding.endsWith(Bean.BIZ_KEY)) {
+						inputWidget = DocumentImpl.getBizKeyAttribute().getDefaultInputWidget();
+					}
+					else if (fullyQualifiedColumnBinding.endsWith(Bean.ORDINAL_NAME)) {
+						inputWidget = DocumentImpl.getBizOrdinalAttribute().getDefaultInputWidget();
+					}
+					else {
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
+																				module, 
+																				document, 
+																				fullyQualifiedColumnBinding);
+						Attribute attribute = target.getAttribute();
+						if (attribute != null) {
+							inputWidget = attribute.getDefaultInputWidget();
+						}
+					}
+				}
+				
+				if (inputWidget == null) {
+					throw new MetaDataException("Could not determine the input widget to use from grid column " + widget.getBinding() + '.' + columnBinding);
+				}
+
+				String definedBinding = inputWidget.getBinding();
+				try {
+					// Temporarily set the binding to the datagrid column binding
+					inputWidget.setBinding(columnBinding);
+					visitWidget(inputWidget, widgetVisible, widgetColumnEnabled);
+					visitedDataGridBoundColumn(boundColumn, widgetVisible, widgetEnabled);
+				}
+				finally {
+					inputWidget.setBinding(definedBinding);
+				}
+			}
+			else {
+				DataGridContainerColumn containerColumn = (DataGridContainerColumn) column;
+				visitDataGridContainerColumn(containerColumn, parentVisible, parentEnabled);
+				
+				for (MetaData containedWidget : containerColumn.getWidgets()) {
+					visitWidget(containedWidget, parentVisible, parentEnabled);
+				}
+				
+				visitedDataGridContainerColumn(containerColumn, parentVisible, parentEnabled);
+			}
 		}
 	}
 	

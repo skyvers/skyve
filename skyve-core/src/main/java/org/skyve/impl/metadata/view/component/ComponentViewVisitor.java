@@ -73,9 +73,9 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickList;
-import org.skyve.impl.metadata.view.widget.bound.tabular.PickListColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
@@ -341,6 +341,17 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		invisible(repeater);
+		repeater.setPostRefreshConditionName(translate(repeater.getPostRefreshConditionName()));
+	}
+
+	@Override
+	public void visitedListRepeater(ListRepeater grid, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+
+	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		bound(grid);
 		disable(grid);
@@ -363,6 +374,22 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	@Override
+	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		bound(repeater);
+		invisible(repeater);
+
+		// capture the targeted widget, if applicable
+		if ((widgetId != null) && (widgetId.equals(repeater.getWidgetId()))) {
+			identifiable = repeater;
+		}
+	}
+
+	@Override
+	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+		// nothing to do here
+	}
+
+	@Override
 	public void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
@@ -380,21 +407,6 @@ public class ComponentViewVisitor extends ViewVisitor {
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
-	}
-
-	@Override
-	public void visitPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
-		// not used
-	}
-
-	@Override
-	public void visitedPickList(PickList list, boolean parentVisible, boolean parentEnabled) {
-		// not used
-	}
-
-	@Override
-	public void visitPickListColumn(PickListColumn column, boolean parentVisible, boolean parentEnabled) {
-		// not used
 	}
 
 	@Override
