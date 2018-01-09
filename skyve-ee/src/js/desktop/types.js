@@ -1099,7 +1099,11 @@ isc.BizTimeDurationItem.addClassMethods({
 			decimalMinutes = Math.abs(value - hours);
 		}
 		var stringMinutes = Math.round(decimalMinutes * 60).toString();
-		if (stringMinutes.length == 1) {
+		if (stringMinutes == '60') {
+			hours = (value >= 0) ? (hours + 1) : (hours - 1);
+			stringMinutes = '00';
+		}
+		else if (stringMinutes.length == 1) {
 			stringMinutes = '0' + stringMinutes;
 		}
 		return hours + ':' + stringMinutes;
