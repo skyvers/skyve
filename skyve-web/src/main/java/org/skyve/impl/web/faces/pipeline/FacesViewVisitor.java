@@ -546,10 +546,14 @@ public class FacesViewVisitor extends ViewVisitor {
 
 		if (currentDataGridBoundColumn != null) { // bound column in a datagrid
 			// Add editing component if we have an inline data grid and the current column is editable
-			if ((currentGrid instanceof DataGrid) && 
-					Boolean.TRUE.equals(((DataGrid) currentGrid).getInline()) &&
-					(! Boolean.FALSE.equals(currentDataGridBoundColumn.getEditable()))) {
-				current.getChildren().add(component);
+			boolean columnEditable = ! Boolean.FALSE.equals(currentDataGridBoundColumn.getEditable());
+			if (columnEditable) { // NB short circuit test
+				boolean inline = (currentGrid instanceof DataGrid) ? 
+									Boolean.TRUE.equals(((DataGrid) currentGrid).getInline()) :
+									true;
+				if (inline) {
+					current.getChildren().add(component);
+				}
 			}
 		}
 		else { // not a bound column in a datagrid
@@ -923,19 +927,13 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		visitListWidget(repeater);
-		UIComponent r = cb.listGrid(listWidgetModelDocumentName, 
+		UIComponent r = cb.listRepeater(listWidgetModelDocumentName, 
 										listWidgetModelName, 
 										listWidgetModel, 
 										repeater.getParameters(), 
 										repeater.getTitle(),
-										false,
-										false,
-										null,
-										false,
-										null,
-										null,
-										null,
-										true,
+										Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
+										Boolean.TRUE.equals(repeater.getShowGrid()),
 										false);
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 	}
@@ -1114,7 +1112,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			}
 		}
 		current = cb.addDataGridBoundColumn(current, 
-												(DataGrid) currentGrid, 
+												(AbstractDataWidget) currentGrid,
 												column, 
 												listVar,
 												title, 

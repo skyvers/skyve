@@ -77,6 +77,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -314,12 +315,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										repeater.getWidgetId());
         result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()), 
         											Boolean.TRUE.equals(repeater.getShowGrid())));
-		return result;
+        result.setReflow(true);
+        return result;
 	}
 	
 	@Override
 	public UIComponent addDataGridBoundColumn(UIComponent current, 
-												DataGrid grid,
+												AbstractDataWidget widget,
 												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
@@ -339,8 +341,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		// Output the value as boilerplate text in the table column if 
 		// this is not an inline grid or the column is not editable
-		if ((! Boolean.TRUE.equals(grid.getInline())) || 
-				Boolean.FALSE.equals(column.getEditable())) {
+		boolean inline = (widget instanceof DataGrid) ? 
+							Boolean.TRUE.equals(((DataGrid) widget).getInline()) :
+							true;
+		if ((! inline) || Boolean.FALSE.equals(column.getEditable())) {
 	        gridColumnExpression.setLength(0);
 	        gridColumnExpression.append('{').append(columnBinding).append('}');
 	        result.getChildren().add(outputText(listVar, gridColumnExpression.toString()));
@@ -854,7 +858,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
         addListGridDataColumns(model, children);
 
         result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
+        result.setEmptyMessage("");
+        result.setReflow(true);
         
+        result.setScrollable(true);
+        result.setScrollRows(50);
+		result.setLiveScroll(true);
+		//result.setScrollHeight(200);
+		
         return result;
 	}
 

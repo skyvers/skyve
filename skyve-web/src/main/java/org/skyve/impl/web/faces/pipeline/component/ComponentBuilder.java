@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -104,7 +105,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 */
 	public abstract UIComponent dataRepeater(String listVar, DataRepeater repeater);
 	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 
-														DataGrid grid,
+														AbstractDataWidget widget,
 														DataGridBoundColumn column,
 														String listVar,
 														String columnTitle,

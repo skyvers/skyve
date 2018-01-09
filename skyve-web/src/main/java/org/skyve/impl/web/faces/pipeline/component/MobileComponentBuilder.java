@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
@@ -138,14 +139,14 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	
 	@Override
 	public UIComponent addDataGridBoundColumn(UIComponent current, 
-												DataGrid grid,
+												AbstractDataWidget widget,
 												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
 		UIComponent result = current;
-		String gridBinding = grid.getBinding();
+		String gridBinding = widget.getBinding();
 
     	boolean first = false;
     	if (gridColumnExpression.length() == 0) { // no columns processed yet
