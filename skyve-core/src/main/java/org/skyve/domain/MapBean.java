@@ -279,4 +279,27 @@ public class MapBean extends LazyDynaMap implements Bean {
 	public int compareTo(Bean other) {
 		return AbstractBean.compareTo(this, other);
 	}
+	
+	/**
+	 * Determine equality by bizId.
+	 */
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof MapBean) {
+			String thisBizId = this.getBizId();
+			String otherBizId = ((MapBean) other).getBizId();
+			return (thisBizId != null) && thisBizId.equals(otherBizId);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 0;
+		String bizId = this.getBizId();
+		if (bizId != null) {
+			result = bizId.hashCode();
+		}
+		return result;
+	}
 }
