@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.content.Disposition;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -37,80 +38,90 @@ public class DownloadServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {
-			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
+				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+	        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+	        	if (webContext == null) {
+	        		throw new ConversationEndedException();
+	        	}
+	        	
+	    		AbstractPersistence persistence = webContext.getConversation();
+	    		persistence.setForThread();
 				try {
-					persistence.begin();
-					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
-					if (user == null) {
-						throw new SessionEndedException();
-					}
-					persistence.setUser(user);
-
-					AbstractRepository repository = AbstractRepository.get();
-					CustomerImpl customer = (CustomerImpl) user.getCustomer();
-		
-					String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
-					int dotIndex = documentName.indexOf('.');
-					String moduleName = documentName.substring(0, dotIndex);
-					documentName = documentName.substring(dotIndex + 1);
-					Module module = customer.getModule(moduleName);
-					Document document = module.getDocument(customer, documentName);
-					String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
-					if (! user.canExecuteAction(document, resourceName)) {
-						throw new SecurityException(resourceName, user.getName());
-					}
-					DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
-																						document, 
-																						resourceName,
-																						true);
-					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
-		        	Bean bean = context.getCurrentBean();
-		        	
-					boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, context);
-					Download result = null;
-		        	byte[] bytes = null;
-					if (! vetoed) {
-						result = downloadAction.download(bean, context);
-						customer.interceptAfterDownloadAction(document, resourceName, bean, result, context);
-
-						try (BufferedInputStream bis = new BufferedInputStream(result.getInputStream())) {
-							try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-								bytes = new byte[1024]; // 1K
-								int bytesRead = 0;
-								while ((bytesRead = bis.read(bytes)) > 0) {
-									baos.write(bytes, 0, bytesRead);
+					try {
+						persistence.begin();
+						User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+						if (user == null) {
+							throw new SessionEndedException();
+						}
+						persistence.setUser(user);
+	
+						AbstractRepository repository = AbstractRepository.get();
+						CustomerImpl customer = (CustomerImpl) user.getCustomer();
+			
+						String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+						int dotIndex = documentName.indexOf('.');
+						String moduleName = documentName.substring(0, dotIndex);
+						documentName = documentName.substring(dotIndex + 1);
+						Module module = customer.getModule(moduleName);
+						Document document = module.getDocument(customer, documentName);
+						String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+						if (! user.canExecuteAction(document, resourceName)) {
+							throw new SecurityException(resourceName, user.getName());
+						}
+						DownloadAction<Bean> downloadAction = repository.getDownloadAction(customer, 
+																							document, 
+																							resourceName,
+																							true);
+			        	Bean bean = webContext.getCurrentBean();
+			        	
+						boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);
+						Download result = null;
+			        	byte[] bytes = null;
+						if (! vetoed) {
+							result = downloadAction.download(bean, webContext);
+							customer.interceptAfterDownloadAction(document, resourceName, bean, result, webContext);
+	
+							try (BufferedInputStream bis = new BufferedInputStream(result.getInputStream())) {
+								try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+									bytes = new byte[1024]; // 1K
+									int bytesRead = 0;
+									while ((bytesRead = bis.read(bytes)) > 0) {
+										baos.write(bytes, 0, bytesRead);
+									}
+									bytes = baos.toByteArray();
 								}
-								bytes = baos.toByteArray();
 							}
 						}
+			            
+			            if (result != null) {
+							response.setContentType(result.getMimeType().toString());
+							response.setCharacterEncoding(Util.UTF8);
+							StringBuilder header = new StringBuilder(64);
+							Disposition disposition = result.getDisposition();
+							header.append((disposition == null) ? 
+											Disposition.attachment.toString() : 
+											disposition.toString());
+							header.append("; filename=\"").append(result.getFileName()).append('"');
+							response.setHeader("Content-Disposition",  header.toString());
+			            }
+			
+			            response.setContentLength((bytes != null) ? bytes.length : 0);
+			            
+			    		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
+			    		response.setHeader("Cache-Control", "cache");
+			            response.setHeader("Pragma", "cache");
+			            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
+			
+			            out.write(bytes);
+			            out.flush();
 					}
-		            
-		            if (result != null) {
-						response.setContentType(result.getMimeType().toString());
-						response.setCharacterEncoding(Util.UTF8);
-						StringBuilder header = new StringBuilder(64);
-						Disposition disposition = result.getDisposition();
-						header.append((disposition == null) ? 
-										Disposition.attachment.toString() : 
-										disposition.toString());
-						header.append("; filename=\"").append(result.getFileName()).append('"');
-						response.setHeader("Content-Disposition",  header.toString());
-		            }
-		
-		            response.setContentLength((bytes != null) ? bytes.length : 0);
-		            
-		    		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
-		    		response.setHeader("Cache-Control", "cache");
-		            response.setHeader("Pragma", "cache");
-		            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-		
-		            out.write(bytes);
-		            out.flush();
+					catch (InvocationTargetException e) {
+						throw e.getTargetException();
+					}
 				}
-				catch (InvocationTargetException e) {
-					throw e.getTargetException();
+				finally {
+					persistence.commit(true);
 				}
 			}
 			catch (Throwable t) {
@@ -121,9 +132,6 @@ public class DownloadServlet extends HttpServlet {
 				out.write("<html><head/><body><h3>".getBytes(Util.UTF8));
 				out.write("An error occured whilst processing your report.".getBytes(Util.UTF8));
 				out.write("</body></html>".getBytes(Util.UTF8));
-			}
-			finally {
-				persistence.commit(true);
 			}
 		}
 	}

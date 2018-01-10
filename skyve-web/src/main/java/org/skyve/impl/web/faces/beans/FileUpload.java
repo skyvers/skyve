@@ -117,22 +117,24 @@ public class FileUpload extends Localisable {
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
 		UploadedFile file = event.getFile();
+
+		AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
+		if (webContext == null) {
+			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
+			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
+	        FacesContext.getCurrentInstance().addMessage(null, msg);
+	        return;
+		}
+
+		AbstractPersistence persistence = webContext.getConversation();
+		persistence.setForThread();
 		
-		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		persistence.setUser(user);
 		persistence.begin();
 		try {
 			AbstractRepository repository = AbstractRepository.get();
 			CustomerImpl customer = (CustomerImpl) user.getCustomer();
-	
-			AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
-			if (webContext == null) {
-				UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
-				FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
-		        FacesContext.getCurrentInstance().addMessage(null, msg);
-		        return;
-			}
 	
 			Bean currentBean = webContext.getCurrentBean();
 

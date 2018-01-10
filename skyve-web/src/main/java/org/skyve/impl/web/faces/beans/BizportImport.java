@@ -117,22 +117,24 @@ public class BizportImport extends Localisable {
 
 		UploadedFile file = event.getFile();
 		
-		AbstractPersistence persistence = AbstractPersistence.get();
+		AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
+		if (webContext == null) {
+			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
+			FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
+	        FacesContext.getCurrentInstance().addMessage(null, msg);
+	        return;
+		}
+
+		AbstractPersistence persistence = webContext.getConversation();
+		persistence.setForThread();
+		
 		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		persistence.setUser(user);
 		persistence.begin();
 		try {
 			AbstractRepository repository = AbstractRepository.get();
 			Customer customer = user.getCustomer();
-	
-			AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
-			if (webContext == null) {
-				UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Upload Action - context does not exist");
-				FacesMessage msg = new FacesMessage("Failure", "Malformed URL");
-		        FacesContext.getCurrentInstance().addMessage(null, msg);
-		        return;
-			}
-	
+		
 			Bean currentBean = webContext.getCurrentBean();
 			Bean bean = currentBean;
 

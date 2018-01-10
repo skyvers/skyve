@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
@@ -97,20 +98,24 @@ public class SmartClientEditServlet extends HttpServlet {
 	        boolean commandSuccessful = true;
 	        try {
 				try {
-					AbstractWebContext webContext = WebUtil.continueSmartClientConversation(request, response);
-			
-			        if (webContext.getConversation() != null) {
+					// Start or continue a smartclient conversation
+					AbstractWebContext webContext = null;
+			        String key = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+			        if (key != null) {
+			        	webContext = WebUtil.getCachedConversation(key, request, response);
 			        	UtilImpl.LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
 			            persistence.setForThread();
 			        }
-			        else {
+			    	else {
+			            webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
 			        	UtilImpl.LOGGER.info("START NEW CONVERSATION!!!!");
 			            persistence = AbstractPersistence.get();
 			            persistence.evictAllCached();
 			            webContext.setConversation(persistence);
-			        }
-
+			    	}
+			        webContext.setAction(request.getParameter(AbstractWebContext.ACTION_NAME));
+			
 					UserAgentType userAgentType = UserAgent.getType(request);
 			        Router router = CORE.getRepository().getRouter();
 					UxUi uxui = ((UxUiSelector) router.getUxuiSelector()).select(userAgentType, request);

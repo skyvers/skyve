@@ -1,15 +1,10 @@
 package org.skyve.impl.web;
 
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -23,8 +18,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
-import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -32,6 +25,10 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.StateUtil;
 import org.skyve.web.WebContext;
+
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+import net.sf.ehcache.Element;
 
 public class WebUtil {
 	private static final String CONVERSATIONS_CACHE_NAME = "conversations";
@@ -72,6 +69,8 @@ public class WebUtil {
 	throws Exception {
 		AbstractWebContext result = null;
 
+        // Context key here is a UUID with a bizId smashed together
+        // The first 1 is the web context ID, the second 1 is the bizId of the context bean to use
 		// NB - Can't check for 72 char webId as bizIds could be non UUIDs for legacy data stores...
 		// So check that they are > 36 (UUID length + something at least)
 		if ((webId != null) && (webId.length() > 36)) {
@@ -90,26 +89,6 @@ public class WebUtil {
 		}
 		
 		return result;
-	}
-	
-	public static AbstractWebContext continueSmartClientConversation(HttpServletRequest request,
-																		HttpServletResponse response)
-	throws Exception {
-        AbstractWebContext result = null;
-        
-        // Context key here is 2 UUIDs smashed together
-        // The first 1 is the web context ID, the second 1 is the bizId of the context bean to use
-        String key = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-        if (key != null) {
-        	result = getCachedConversation(key, request, response);
-        }
-    	else {
-            result = new SmartClientWebContext(UUID.randomUUID().toString(), request, response);
-    	}
-
-        result.setAction(request.getParameter(AbstractWebContext.ACTION_NAME));
-
-        return result;
 	}
 	
 	public static void logConversationsStats() {

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -34,75 +35,85 @@ public class BizportExportServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {
-			AbstractPersistence persistence = AbstractPersistence.get();
 			try {
+				String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+	        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+	        	if (webContext == null) {
+	        		throw new ConversationEndedException();
+	        	}
+	
+	    		AbstractPersistence persistence = webContext.getConversation();
+	    		persistence.setForThread();
 				try {
-					persistence.begin();
-					User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
-					if (user == null) {
-						throw new SessionEndedException();
-					}
-					persistence.setUser(user);
-
-					AbstractRepository repository = AbstractRepository.get();
-					CustomerImpl customer = (CustomerImpl) user.getCustomer();
-		
-					String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
-					int dotIndex = documentName.indexOf('.');
-					String moduleName = documentName.substring(0, dotIndex);
-					documentName = documentName.substring(dotIndex + 1);
-					Module module = customer.getModule(moduleName);
-					Document document = module.getDocument(customer, documentName);
-
-					String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
-					if (! user.canExecuteAction(document, resourceName)) {
-						throw new SecurityException(resourceName, user.getName());
-					}
-
-					BizExportAction bizPortAction = repository.getBizExportAction(customer, 
-																					document, 
-																					resourceName,
-																					true);
-					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-		        	AbstractWebContext context = WebUtil.getCachedConversation(contextKey, request, response);
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-					boolean vetoed = customer.interceptBeforeBizExportAction(document, resourceName, context);
-					BizPortWorkbook result = null;
-					if (! vetoed) {
-						result = bizPortAction.bizExport(context);
-						customer.interceptAfterBizExportAction(document, resourceName, result, context);
-						if (result != null) {
-							result.write(baos);
+					try {
+						persistence.begin();
+						User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+						if (user == null) {
+							throw new SessionEndedException();
 						}
-					}
-		            byte[] bytes = baos.toByteArray();
-		            
-		            if (result != null) {
-						switch (result.getFormat()) {
-						case xls:
-							response.setContentType(MimeType.excel.toString());
-							response.setCharacterEncoding(Util.UTF8);
-							response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
-							break;
-						case xlsx:
-							break;
-						default:
+						persistence.setUser(user);
+	
+						AbstractRepository repository = AbstractRepository.get();
+						CustomerImpl customer = (CustomerImpl) user.getCustomer();
+			
+						String documentName = request.getParameter(AbstractWebContext.DOCUMENT_NAME);
+						int dotIndex = documentName.indexOf('.');
+						String moduleName = documentName.substring(0, dotIndex);
+						documentName = documentName.substring(dotIndex + 1);
+						Module module = customer.getModule(moduleName);
+						Document document = module.getDocument(customer, documentName);
+	
+						String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
+						if (! user.canExecuteAction(document, resourceName)) {
+							throw new SecurityException(resourceName, user.getName());
 						}
-		            }
-		
-		            response.setContentLength(bytes.length);
-		            
-		    		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
-		    		response.setHeader("Cache-Control", "cache");
-		            response.setHeader("Pragma", "cache");
-		            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
-		
-		            out.write(bytes);
-		            out.flush();
+	
+						BizExportAction bizPortAction = repository.getBizExportAction(customer, 
+																						document, 
+																						resourceName,
+																						true);
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+						boolean vetoed = customer.interceptBeforeBizExportAction(document, resourceName, webContext);
+						BizPortWorkbook result = null;
+						if (! vetoed) {
+							result = bizPortAction.bizExport(webContext);
+							customer.interceptAfterBizExportAction(document, resourceName, result, webContext);
+							if (result != null) {
+								result.write(baos);
+							}
+						}
+			            byte[] bytes = baos.toByteArray();
+			            
+			            if (result != null) {
+							switch (result.getFormat()) {
+							case xls:
+								response.setContentType(MimeType.excel.toString());
+								response.setCharacterEncoding(Util.UTF8);
+								response.setHeader("Content-Disposition", "attachment; filename=\"bizport.xls\"");
+								break;
+							case xlsx:
+								break;
+							default:
+							}
+			            }
+			
+			            response.setContentLength(bytes.length);
+			            
+			    		// NEED TO KEEP THIS FOR IE TO SHOW PDFs ACTIVE-X temp files required
+			    		response.setHeader("Cache-Control", "cache");
+			            response.setHeader("Pragma", "cache");
+			            response.addDateHeader("Expires", System.currentTimeMillis() + (60000)); // 1 minute
+			
+			            out.write(bytes);
+			            out.flush();
+					}
+					catch (InvocationTargetException e) {
+						throw e.getTargetException();
+					}
 				}
-				catch (InvocationTargetException e) {
-					throw e.getTargetException();
+				finally {
+					persistence.commit(true);
 				}
 			}
 			catch (Throwable t) {
@@ -113,9 +124,6 @@ public class BizportExportServlet extends HttpServlet {
 				out.write("<html><head/><body><h3>".getBytes(Util.UTF8));
 				out.write("An error occured whilst processing your report.".getBytes(Util.UTF8));
 				out.write("</body></html>".getBytes(Util.UTF8));
-			}
-			finally {
-				persistence.commit(true);
 			}
 		}
 	}
