@@ -2,6 +2,7 @@ package org.skyve.impl.generate;
 
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
@@ -28,9 +29,7 @@ public abstract class DomainGenerator {
 	protected static String GENERATED_TEST_PATH;
 	protected static String[] EXCLUDED_MODULES;
 
-	protected static boolean DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE = false;
-	protected static int DATA_STORE_IDENTIFIER_CHARACTER_LIMIT = 0;
-	protected static boolean DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT = true;
+	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.MSSQL_2016;
 
 	public static final void validate(String customerName) throws Exception {
 		AbstractRepository repository = AbstractRepository.get();
@@ -134,37 +133,17 @@ public abstract class DomainGenerator {
 		}
 
 		if (args.length >= 5) {
-			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
-				DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT = Boolean.parseBoolean(args[4]);
-			}
-			else {
-				System.err.println("The fifth argument DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT should be true or false");
-				System.exit(1);
-			}
-		}
-		if (args.length >= 6) {
-			if ("true".equalsIgnoreCase(args[5]) || "false".equalsIgnoreCase(args[5])) {
-				DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE = Boolean.parseBoolean(args[5]);
-			}
-			else {
-				System.err.println("The sixth argument DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE should be true or false");
-				System.exit(1);
-			}
-		}
-		if (args.length >= 7) {
 			try {
-				DATA_STORE_IDENTIFIER_CHARACTER_LIMIT = Integer.parseInt(args[6]);
-			}
-			catch (NumberFormatException e) {
-				System.err.println("The seventh argument DATA_STORE_IDENTIFIER_CHARACTER_LIMIT should be an integer (0 for unlimited)");
+				DIALECT_OPTIONS = DialectOptions.valueOf(args[4]);
+			} catch (IllegalArgumentException e) {
+				System.err.println("The fifth argument DIALECT_OPTIONS should be one of the following " + StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);
 			}
 		}
-		
-		
-		if (args.length == 8) {
-			if ((args[7] != null) && (! args[7].isEmpty())) {
-				EXCLUDED_MODULES = args[7].toLowerCase().split(",");
+
+		if (args.length == 6) {
+			if ((args[5] != null) && (! args[5].isEmpty())) {
+				EXCLUDED_MODULES = args[5].toLowerCase().split(",");
 			}
 		}
 
@@ -172,10 +151,8 @@ public abstract class DomainGenerator {
 		System.out.println("TEST_PATH=" + TEST_PATH);
 		System.out.println("GENERATED_TEST_PATH=" + GENERATED_TEST_PATH);
 		System.out.println("DEBUG=" + (args.length >= 4 ? args[3] : "false"));
-		System.out.println("DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT=" + (args.length >= 5 ? args[4] : "true"));
-		System.out.println("DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE=" + (args.length >= 6 ? args[5] : "false"));
-		System.out.println("DATA_STORE_IDENTIFIER_CHARACTER_LIMIT=" + (args.length >= 7 ? args[6] : "0"));
-		System.out.println("EXCLUDED_MODULES=" + (args.length == 8 ? args[7] : ""));
+		System.out.println("DIALECT_OPTIONS=" + DIALECT_OPTIONS.toString());
+		System.out.println("EXCLUDED_MODULES=" + (args.length == 6 ? args[5] : ""));
 
 		DomainGenerator foo = UtilImpl.USING_JPA ? new JPADomainGenerator() : new OverridableDomainGenerator();
 		AbstractRepository repository = new LocalDesignRepository();
