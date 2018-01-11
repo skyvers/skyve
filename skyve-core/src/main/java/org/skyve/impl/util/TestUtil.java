@@ -86,12 +86,16 @@ public class TestUtil {
 				BindUtil.set(bean, name, "#FFFFFF");
 				break;
 			case date:
+				Date futureDate = new Date();
+				TimeUtil.addDays(futureDate, random.nextInt(10 + 1));
+				BindUtil.convertAndSet(bean, name, futureDate);
+				break;
 			case dateTime:
 			case time:
 			case timestamp:
-				Date futureDate = new Date();
-				TimeUtil.addHours(futureDate, random.nextInt(10 + 1));
-				BindUtil.convertAndSet(bean, name, futureDate);
+				Date futureTime = new Date();
+				TimeUtil.addHours(futureTime, random.nextInt(10 + 1));
+				BindUtil.convertAndSet(bean, name, futureTime);
 				break;
 			case decimal10:
 			case decimal2:
