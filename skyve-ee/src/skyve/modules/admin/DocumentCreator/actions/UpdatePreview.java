@@ -19,25 +19,31 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 
 	@Override
 	public ServerSideActionResult<DocumentCreator> execute(DocumentCreator bean, WebContext webContext) throws Exception {
-
-		Parser parser = Parser.builder().build();
-		Node document = parser.parse(bean.getScript());
-
-		// create a markdown to HTML renderer for the markdown preview tab
-		HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
-
-		// create a markdown to document XML renderer for the document preview tab
-		HtmlRenderer documentRenderer = HtmlRenderer.builder().nodeRendererFactory(new HtmlNodeRendererFactory() {
-			@Override
-			public NodeRenderer create(HtmlNodeRendererContext context) {
-				return new SkyveDocumentNodeRenderer(context);
-			}
-		}).build();
-
-		// update the previews
-		bean.setMarkdownPreview(htmlRenderer.render(document));
-		bean.setDocumentPreview(documentRenderer.render(document));
-
+		String script = bean.getScript();
+		if (script == null) {
+			bean.setMarkdownPreview(null);
+			bean.setDocumentPreview(null);
+		}
+		else {
+			Parser parser = Parser.builder().build();
+			Node document = parser.parse(script);
+	
+			// create a markdown to HTML renderer for the markdown preview tab
+			HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
+	
+			// create a markdown to document XML renderer for the document preview tab
+			HtmlRenderer documentRenderer = HtmlRenderer.builder().nodeRendererFactory(new HtmlNodeRendererFactory() {
+				@Override
+				public NodeRenderer create(HtmlNodeRendererContext context) {
+					return new SkyveDocumentNodeRenderer(context);
+				}
+			}).build();
+	
+			// update the previews
+			bean.setMarkdownPreview(htmlRenderer.render(document));
+			bean.setDocumentPreview(documentRenderer.render(document));
+		}
+		
 		return new ServerSideActionResult<>(bean);
 	}
 
