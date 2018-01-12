@@ -73,6 +73,7 @@
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element ref="tns:extends" minOccurs="0"/>
+          <xs:element name="abstract" type="xs:boolean" form="qualified" minOccurs="0"/>
           <xs:element ref="tns:persistent" minOccurs="0"/>
           <xs:element name="singularAlias" type="xs:string" form="qualified"/>
           <xs:element name="pluralAlias" type="xs:string" form="qualified"/>

@@ -174,6 +174,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String documentName = document.getName();
 					DomainClass domainClass = new DomainClass();
 					domainClass.attributes = generateDocumentPropertyNames(document);
+					domainClass.isAbstract = document.isAbstract();
 					documentClasses.put(documentName, domainClass);
 
 					populateModocDerivations(repository, module, document, null);

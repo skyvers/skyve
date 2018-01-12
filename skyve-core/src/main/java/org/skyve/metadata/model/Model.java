@@ -62,6 +62,13 @@ public interface Model extends NamedMetaData {
 	 * @return
 	 */
 	public Extends getExtends();
+
+	/**
+	 * Should this document be abstract.
+	 *
+	 * @return
+	 */
+	public boolean isAbstract();
 	
 	/**
 	 * Should this document be audited.

@@ -26,6 +26,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	private String singularAlias;
 	private Persistent persistent;
 	private Extends inherits;
+	private boolean abstractClass;
 	private String pluralAlias;
 	private String icon16x16RelativeFileName;
 	private String icon32x32RelativeFileName;
@@ -163,5 +164,14 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return abstractClass;
+	}
+
+	public void setAbstract(boolean abstractClass) {
+		this.abstractClass = abstractClass;
 	}
 }

@@ -76,6 +76,7 @@ import org.skyve.metadata.model.document.Relation;
 			name = "document",
 			propOrder = {"documentation",
 							"extends",
+							"abstract",
 							"persistent", 
 							"singularAlias", 
 							"pluralAlias",
@@ -85,7 +86,7 @@ import org.skyve.metadata.model.document.Relation;
 							"icon32x32RelativeFilePath",
 							"description",
 							"parentDocument", 
-							"bizKey", 
+							"bizKey",
 							"attributes", 
 							"conditions", 
 							"uniqueConstraints"})
@@ -95,6 +96,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;
+	private java.lang.Boolean abstractClass;
 	private Persistent persistent;
 	private String singularAlias;
 	private String pluralAlias;
@@ -117,6 +119,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
+	}
+
+	public java.lang.Boolean getAbstract() {
+		return abstractClass;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setAbstract(java.lang.Boolean abstractClass) {
+		this.abstractClass = abstractClass;
 	}
 
 	public Persistent getPersistent() {
@@ -269,6 +280,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		}
 		result.setName(value);
 		result.setExtends(getExtends());
+		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
 		value = getSingularAlias();
 		if (value == null) {
