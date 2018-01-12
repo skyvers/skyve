@@ -6,6 +6,7 @@
 	<persistent name="ADM_Audit" />
 	<singularAlias>Audit</singularAlias>
 	<pluralAlias>Audits</pluralAlias>
+	<audited>false</audited>
 	<iconStyleClass>fa fa-check</iconStyleClass>
 	<icon16x16RelativeFilePath>icons/document/audit16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/audit32.png</icon32x32RelativeFilePath>
