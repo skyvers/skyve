@@ -1,7 +1,5 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -12,19 +10,15 @@ import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
-import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
-import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
-import org.skyve.metadata.view.Filterable;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
 
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"showColumnHeaders",
 							"showGrid",
 							"properties"})
-public class ListRepeater extends AbstractListWidget implements DecoratedMetaData, Filterable {
+public class ListRepeater extends AbstractListWidget implements DecoratedMetaData {
 	private static final long serialVersionUID = 7695416579584031128L;
 
 	private Boolean showColumnHeaders;
