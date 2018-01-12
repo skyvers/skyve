@@ -14,6 +14,8 @@
 		<javaee-path>${basedir}/javaee</javaee-path>
 		<ear-path>${javaee-path}/skyve.ear</ear-path>
 		<war-path>${ear-path}/skyve.war</war-path>
+		
+		<commonmark.version>0.10.0</commonmark.version>
 	</properties>
 
  	<build>
@@ -139,7 +141,7 @@
 									<arg value="src/test/" /> <!-- test path -->
 									<arg value="src/generatedTest/" /> <!-- generated test path -->
 									<arg value="true" /> <!-- debug -->
-									<arg value="true" /> <!-- data store index foreign keys by default -->
+									<arg value="H2" /> <!-- data store index foreign keys by default -->
 									<arg value="false" /> <!-- data store index names in global namespace -->
 									<arg value="0" /> <!-- data store identifier character limit -->
 									<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
@@ -704,6 +706,11 @@
 			<artifactId>h2</artifactId>
 			<version>${h2.version}</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.commonmark</groupId>
+			<artifactId>commonmark</artifactId>
+			<version>${commonmark.version}</version>
 		</dependency>
 	</dependencies>
 </project>

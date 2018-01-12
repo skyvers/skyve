@@ -23,6 +23,7 @@
 		<document ref="DataGroup" />
 		<document ref="DataMaintenance" />
 		<document ref="DataMaintenanceModuleDocument" />
+		<document ref="DocumentCreator" />
 		<document ref="SystemDashboard" />
 		<document ref="DocumentNumber" />
 		<document ref="Group" />
@@ -301,6 +302,10 @@
 					<action name="UploadBackup" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
+				<document name="DocumentCreator" permission="_____">
+					<action name="Submit" />
+					<action name="UpdatePreview" />
+				</document>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
 				</document>
@@ -349,6 +354,11 @@
 				<role name="DevOps" />
 			</edit>
 			<edit document="DataMaintenance" name="Data Maintenance">
+				<uxui name="desktop" />
+				<uxui name="tablet" />
+				<role name="DevOps" />
+			</edit>
+			<edit name="Create Documents" document="DocumentCreator">
 				<uxui name="desktop" />
 				<uxui name="tablet" />
 				<role name="DevOps" />

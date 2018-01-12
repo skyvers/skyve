@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DocumentCreator"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<singularAlias>Document Creator</singularAlias>
+	<pluralAlias>Document Creator</pluralAlias>
+	<iconStyleClass>fa fa-pencil-square-o</iconStyleClass>
+	<bizKey expression="Document Creator"/>
+	<attributes>
+		<memo name="script">
+			<displayName>Script</displayName>
+		</memo>
+		<markup name="documentPreview">
+			<displayName>Document Preview</displayName>
+		</markup>
+		<markup name="markdownPreview">
+			<displayName>Markdown Preview</displayName>
+		</markup>
+	</attributes>
+</document>
