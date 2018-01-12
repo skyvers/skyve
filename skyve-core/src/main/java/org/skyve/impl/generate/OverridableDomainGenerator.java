@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
@@ -54,6 +55,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
@@ -3012,13 +3014,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
 
+		final String interfacesCommaSeparated = document.getInterfaces().stream()
+				.map(Interface::getInterfaceName)
+				.collect(Collectors.joining(", "));
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
 			} else {
 				fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
 			}
+
+			if (!document.getInterfaces().isEmpty()) {
+				fw.append(", ").append(interfacesCommaSeparated);
+			}
+		} else if (!document.getInterfaces().isEmpty()) {
+			fw.append(" implements ").append(interfacesCommaSeparated);
 		}
+
 		fw.append(" {\n");
 
 		fw.append("\t/**\n");

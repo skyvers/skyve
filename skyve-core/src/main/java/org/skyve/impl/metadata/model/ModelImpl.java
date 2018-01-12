@@ -12,6 +12,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Model;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.module.Module;
 
 public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
@@ -19,6 +20,10 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 
 	private String owningModuleName;
 
+	/**
+	 * The list of interfaces for this model in the order they are added.
+	 */
+	private List<Interface> interfaces = new ArrayList<>();
 	/**
 	 * The list of attributes for this model in the order they are added.
 	 */
@@ -52,6 +57,15 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	public void putAttribute(Attribute attribute) {
 		putMetaData(attribute.getName(), attribute);
 		attributes.add(attribute);
+	}
+
+	public void putInterface(Interface i) {
+		interfaces.add(i);
+	}
+
+	@Override
+	public List<Interface> getInterfaces() {
+		return Collections.unmodifiableList(interfaces);
 	}
 
 	@Override
