@@ -735,7 +735,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												" in document " + document.getName() + 
 												" in module " + module.getName() +
 												" is longer than the allowed data store identifier character limit of " +
-												DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+												DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 			}
 			if (baseDocumentName != null) {
 				if (ExtensionStrategy.joined.equals(strategy)) {
@@ -815,8 +815,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"1024\" index=\"%s\" not-null=\"true\" />\n", 
-														Bean.BIZ_KEY, 
+				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
+														Bean.BIZ_KEY, DIALECT_OPTIONS.getDataStoreBizKeyLength(),
 														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
 				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
 														Bean.CUSTOMER_NAME, 
@@ -1054,7 +1054,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + document.getName() + 
 														" in module " + module.getName() +
 														" is longer than the allowed data store identifier character limit of " +
-														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 					}
 					
 					fw.append("\" table=\"").append(collectionTableName);
@@ -1110,7 +1110,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 															" in document " + document.getName() + 
 															" in module " + module.getName() +
 															" is longer than the allowed data store identifier character limit of " +
-															DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + collection.getName() + "_type)");
+															DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + collection.getName() + "_type)");
 						}
 
 						// Even though it would be better index wise to put the bizId column first
@@ -1208,7 +1208,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + document.getName() + 
 														" in module " + module.getName() +
 														" is longer than the allowed data store identifier character limit of " +
-														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + association.getName() + "_type)");
+														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + association.getName() + "_type)");
 					}
 
 					// Even though it would be better index wise to put the bizId column first
@@ -1237,7 +1237,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														" in document " + document.getName() + 
 														" in module " + module.getName() +
 														" is longer than the allowed data store identifier character limit of " +
-														DATA_STORE_IDENTIFIER_CHARACTER_LIMIT + "(" + association.getName() + "_id)");
+														DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() + "(" + association.getName() + "_id)");
 					}
 
 					fw.append(indentation).append("\t\t<many-to-one name=\"");
@@ -1279,7 +1279,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													" in document " + document.getName() + 
 													" in module " + module.getName() +
 													" is longer than the allowed data store identifier character limit of " +
-													DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 				}
 
 				fw.append(indentation).append("\t\t<property name=\"").append(enumerationName);
@@ -1415,7 +1415,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 													" in document " + document.getName() + 
 													" in module " + module.getName() +
 													" is longer than the allowed data store identifier character limit of " +
-													DATA_STORE_IDENTIFIER_CHARACTER_LIMIT);
+													DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit());
 				}
 
 				fw.append(indentation).append("\t\t<property name=\"").append(fieldName);
@@ -1479,8 +1479,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 	// check identifier length if required
 	private static boolean identifierIsTooLong(String identifier) {
-		return ((DATA_STORE_IDENTIFIER_CHARACTER_LIMIT > 0) && 
-				(identifier.length() > DATA_STORE_IDENTIFIER_CHARACTER_LIMIT));
+		return ((DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit() > 0) &&
+				(identifier.length() > DIALECT_OPTIONS.getDataStoreIdentifierCharacterLimit()));
 	}
 	
 	private void populateArcs(Document document, Map<String, Document> result) {
@@ -1637,7 +1637,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private static String generateDataStoreName(DataStoreType type, String tableName, String columnName) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(type).append('_');
-		if (DATA_STORE_INDEX_NAMES_IN_GLOBAL_NAMESPACE || DataStoreType.FK.equals(type)) {
+		if (DIALECT_OPTIONS.isDataStoreIndexNamesInGlobalNamespace() || DataStoreType.FK.equals(type)) {
 			result.append(tableName).append('_');
 		}
 		result.append(columnName);
@@ -1666,7 +1666,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	
 	private static boolean shouldIndex(Boolean index) {
 		if (index == null) {
-			return DATA_STORE_INDEX_FOREIGN_KEYS_BY_DEFAULT;
+			return DIALECT_OPTIONS.isDataStoreIndexForeignKeys();
 		}
 
 		return index.booleanValue();
@@ -3113,7 +3113,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Checks if a domain extension class exists for the given document name in the specified package
 	 * and module path.
 	 * 
-	 * @param packagePathPrefix The package path prefix, e.g.
 	 * @param modulePath the path to the document's module; e.g. modules.admin
 	 * @param documentName The name of the document, e.g. Audit
 	 * @return true if the extension class exists in the expected location, false otherwise
