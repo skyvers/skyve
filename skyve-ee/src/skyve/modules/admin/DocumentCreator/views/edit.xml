@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit" title="Document Creator" iconStyleClass="fa fa-pencil-square-o" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+	xmlns="http://www.skyve.org/xml/view" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    <tabPane>
+    	<tab title="Input">
+    		<form responsiveWidth="12" percentageWidth="100" border="true">
+		        <column percentageWidth="10" responsiveWidth="2"/>
+		        <column/>
+		        <row>
+		            <item>
+		            	<textArea binding="script" minPixelHeight="500">
+		            		<onBlurHandlers>
+		            			<server action="UpdatePreview" />
+		            		</onBlurHandlers>
+		            	</textArea>
+		            </item>
+		        </row>
+		    </form>
+    	</tab>
+    	<tab title="Markdown Preview">
+    		<form>
+    			<column />
+    			<row>
+    				<item>
+    					<blurb>{markdownPreview}</blurb>
+    				</item>
+    			</row>
+    		</form>
+    	</tab>
+    	<tab title="Document Preview">
+    		<form>
+    			<column />
+    			<row>
+    				<item>
+    					<blurb>{documentPreview}</blurb>
+    				</item>
+    			</row>
+    		</form>
+    	</tab>
+    	<tab title="Help">
+    		<component name="help" />
+    	</tab>
+    </tabPane>
+    <actions>
+        <defaults/>
+        
+        <!-- <action className="Submit" clientValidation="true" displayName="Create Documents"/> -->
+        <action className="UpdatePreview" displayName="Update Preview" clientValidation="true" inActionPanel="false" />
+    </actions>
+    <newParameters/>
+</view>

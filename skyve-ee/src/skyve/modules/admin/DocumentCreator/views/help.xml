@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="help" title="Document Creator" iconStyleClass="fa fa-pencil-square-o" 
+	xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd" 
+	xmlns="http://www.skyve.org/xml/view" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    
+    
+	<blurb>
+		<![CDATA[
+			<h2>Skyve Script Help</h2>
+			<span style="font-size: 1.1rem">
+				<p>Skyve Script uses markdown to specify domain models for developers in a non-technical format. 
+					By placing your markdown in the <em>Input</em> tab, the system will preview the markdown and
+					generated document when you change tab. Any errors should be highlighted in red in the <em>
+					Document Preview</em> tab.</p>
+				<p>Skyve Script has a few specific syntax requirements it is looking for when generating domain models:</p>
+				<ul>
+					<li>New modules should be specified with a level 1 heading (#), followed by a space, then the module name
+					<ul>
+						<li>e.g. <code># Admin</code>
+					</ul>
+					<li>New domain models (documents), should be specified with a level 2 heading (##), followed by a space, then the document name
+					<ul>
+						<li>e.g. <code>## User</code>
+						<li>If the document is to be persisted, the persistent name should follow the document name surrounded by backticks (`), e.g. <code>## User `ADM_User`</code>
+					</ul>
+					<li>Domain attributes (fields) should be specified as a list below the domain heading, by using a dash (-), followed by a space, then the attribute definition
+					<ul>
+						<li>Attribute definitions should start with the attribute name in camel case (no spaces, first letter lowercase, uppercase for new words), e.g. <code>firstName</code>
+						<li>Required attributes should have their name surrounded by asterisks, e.g. <code>- *firstName*</code>
+						<li>The type should follow the attribute name
+						<li>If the type is text, the length should follow the type, e.g. <code>- *firstName* text 150</code>
+						<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)</code>
+					</ul>
+				</ul>
+				<p>A complete document specification would then look like this:</p>
+				<pre>
+	## Address `ADM_Address`<br>
+	- *addressLine1* text 200<br>
+	- addressLine2 text 200<br>
+	- addressLine3 text 200<br>
+	- *suburb* text 200<br>
+	- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)<br>
+	- verified boolean<br>
+				</pre>
+			</span>
+		]]>
+	</blurb>
+</view>
