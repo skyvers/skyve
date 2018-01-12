@@ -35,7 +35,12 @@ isc.BizGrid.addProperties({
 	canAdd: true,
 	canEdit: true,
 	canZoom: true,
-	canRemove: true
+	canRemove: true,
+	
+	// Repeater switches
+	isRepeater: false,
+	showColumnHeaders: true,
+	showGrid: true
 });
 
 isc.BizGrid.addMethods({
@@ -959,12 +964,18 @@ isc.BizListGrid.addMethods({
         if (me.title) {
 			me.addMember(isc.HTMLFlow.create({contents: '<div class="dataGridTitle">' + me.title + '</div>'}));
 		}
-		me.addMember(me._toolbar);
-		me.addMember(me._advancedFilter);
+        if (me._config.isRepeater) {} else {
+            me.addMember(me._toolbar);
+        }
+        if (me._config.isRepeater) {} else {
+        	me.addMember(me._advancedFilter);
+        }
 		me.addMember(me.grid);
 		if (me._config.isTree) {} else {
-			if ( me.showSummary) {
-				me.addMember(me._summaryGrid);
+			if (me._config.isRepeater) {} else {
+				if (me.showSummary) {
+					me.addMember(me._summaryGrid);
+				}
 			}
 		}
 		
@@ -1001,7 +1012,7 @@ isc.BizListGrid.addMethods({
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
-			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._advancedFilter.toggleButton.selected)),
+			showFilterEditor: (me.showFilter && (! me._config.isTree) && (! me._config.isRepeater) && (! me._advancedFilter.toggleButton.selected)),
 			selectionType: "single",
 			alternateRecordStyles:true,
 			canEdit: true,
@@ -1024,43 +1035,55 @@ isc.BizListGrid.addMethods({
 //			autoFitWidthApproach: 'both', - The summary row doesn't scroll in sync with the list
 //gridComponents:[isc.Canvas.create({width: '100%', height:1}), "header", "filterEditor", "body"],
 			rowClick: function(record, rowNum, colNum) {
-				if (record && record.bizId) { // not a group by row
-					me._eventRecord = record;
-					me._eventRowNum = rowNum;
-					me._eventColNum = colNum;
+				if (me.isRepeater) {} else {
+					if (record && record.bizId) { // not a group by row
+						me._eventRecord = record;
+						me._eventRowNum = rowNum;
+						me._eventColNum = colNum;
+					}
 				}
 	
 				// ensure that recordClick() on the data source fields get called
 				return this.Super("rowClick", arguments);
 			},
 			rowContextClick: function(record, rowNum, colNum) {
-				if (record && record.bizId) { // not a group by row
-					this.deselectAllRecords();
-					me._eventRecord = record;
-					me._eventRowNum = rowNum;
-					me._eventColNum = colNum;
-					this.selectSingleRecord(record);
-					return true;
+				if (me.isRepeater) {} else {
+					if (record && record.bizId) { // not a group by row
+						this.deselectAllRecords();
+						me._eventRecord = record;
+						me._eventRowNum = rowNum;
+						me._eventColNum = colNum;
+						this.selectSingleRecord(record);
+						return true;
+					}
 				}
 	
 				return false; // stop normal context menu
 			},
 			rowDoubleClick: function(record, rowNum, colNum) {
-				if (record && record.bizId) { // not a group by row
-					me._eventRecord = record;
-					me._eventRowNum = rowNum;
-					me._eventColNum = colNum;
-					if (config && config.isPickList) {
-						me.pick(me._lookup);
-					}
-					else {
-						if (me.showZoom && me.canZoom) {
-							me._zoomItem.click();
+				if (me.isRepeater) {} else {
+					if (record && record.bizId) { // not a group by row
+						me._eventRecord = record;
+						me._eventRowNum = rowNum;
+						me._eventColNum = colNum;
+						if (config && config.isPickList) {
+							me.pick(me._lookup);
+						}
+						else {
+							if (me.showZoom && me.canZoom) {
+								me._zoomItem.click();
+							}
 						}
 					}
 				}
 	
 				return true; // allow normal click processing - ie expand/collapse group row etc
+			},
+			canSelectRecord: function(record) {
+				if (me.isRepeater) {
+					return false;
+				}
+				return true;
 			},
 			selectionChanged: function(record, state) { // state is true for selected or false for deselected
 				if (this.anySelected()) {
@@ -1262,11 +1285,20 @@ isc.BizListGrid.addMethods({
 				}
 			},
 			getCellCSSText: function (record, rowNum, colNum) {
-				if (record) {
+				if (me.isRepeater) {
+					if (me.showGrid) {
+						return 'border-bottom:solid 1px #cccccc;border-left:solid 1px #cccccc;border-right:solid 1px #cccccc';
+					}
+					else {
+						return 'border:none';
+					}
+				}
+				else if (record) {
 					if (record.bizTagged) {
 			        	return "font-weight:bold;background-color:#B8D1EA;";
 			        }
 				}
+				return this.Super("getCellCSSText", arguments);
 		    }
 /*
 			showRollOverCanvas:true,
@@ -1293,6 +1325,17 @@ isc.BizListGrid.addMethods({
 */
 			
 		};
+		
+		if (config.isRepeater) {
+			gridConfig.showRollOver = false;
+			gridConfig.showSelectedStyle = false;
+			gridConfig.showEmptyMessage = false;
+			gridConfig.baseStyle = '';
+			gridConfig.border = 'none';
+			if (config.showColumnHeaders) {} else {
+				gridConfig.showHeader = false;
+			}
+		}
 		
 		if (config.gridConfig) {
 			isc.addProperties(gridConfig, config.gridConfig);
@@ -1378,7 +1421,10 @@ isc.BizListGrid.addMethods({
 		me.canDelete = me._dataSource.canDelete;
 
 		var fields = [];
-		if (me.showTag) {
+		if (me.isRepeater) {
+			fields.add({name: "bizTagged", hidden: true, canHide: false});
+		}
+		else if (me.showTag) {
 			fields.add(
 				{name: "bizTagged",
 					width: 30,
@@ -1424,46 +1470,51 @@ isc.BizListGrid.addMethods({
 		else {
 			fields.add({name: "bizTagged", hidden: true, canHide: false});
 		}
-		fields.add(
-			{name: "bizFlagComment", 
-				// extend the width of the flag column to allow the sumary grid dropdown to display nicely
-				// if we are not showing the tag column and we have the summary row showing
-				width: ((! me.showTag) && me.showSummary) ? 60 : 40, 
-				align: 'center',
-				// Cant hide this field as the summary type
-				// relies on the real-estate this column uses.
-				canHide: false,
-//				frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
-				formatCellValue: function(value) {
-					if (value) {
-						return '<img src="images/flag.gif">';
+		if (me.isRepeater) {
+			fields.add({name: "bizFlagComment", hidden: true, canHide: false});
+		}
+		else {
+			fields.add(
+				{name: "bizFlagComment", 
+					// extend the width of the flag column to allow the sumary grid dropdown to display nicely
+					// if we are not showing the tag column and we have the summary row showing
+					width: ((! me.showTag) && me.showSummary) ? 60 : 40, 
+					align: 'center',
+					// Cant hide this field as the summary type
+					// relies on the real-estate this column uses.
+					canHide: false,
+//					frozen: false, // Like it to be true but group by descriptions are clipped when group by a grid column
+					formatCellValue: function(value) {
+						if (value) {
+							return '<img src="images/flag.gif">';
+						}
+						else {
+							return '';
+						}
+					},
+					recordClick: function(viewer, // the parent list grid 
+											record, 
+											recordNum, 
+											field, 
+											fieldNum, 
+											value, 
+											rawValue) {
+						if (me.canUpdate && me.canEdit) {
+							me._eventRecord = record;
+							me._eventRowNum = recordNum;
+							me._eventColNum = fieldNum;
+							me._flagForm.editRecord(record);
+							me._flagDialog.show();
+						}
+						return false; // do not allow list grid level record click event to fire
+					},
+					hoverHTML: function(record, value, rowNum, colNum, grid) {
+						return record.bizFlagComment;
 					}
-					else {
-						return '';
-					}
-				},
-				recordClick: function(viewer, // the parent list grid 
-										record, 
-										recordNum, 
-										field, 
-										fieldNum, 
-										value, 
-										rawValue) {
-					if (me.canUpdate && me.canEdit) {
-						me._eventRecord = record;
-						me._eventRowNum = recordNum;
-						me._eventColNum = fieldNum;
-						me._flagForm.editRecord(record);
-						me._flagDialog.show();
-					}
-					return false; // do not allow list grid level record click event to fire
-				},
-				hoverHTML: function(record, value, rowNum, colNum, grid) {
-					return record.bizFlagComment;
 				}
-			}
-		);
-
+			);
+		}
+		
 		var fieldNames = me._dataSource.getFieldNames(true);
 		var hasDetailFields = false;
 		var treeFieldNotSet = true;
@@ -1501,7 +1552,7 @@ isc.BizListGrid.addMethods({
 		me._createGrid(me._config, fields);
 		// Set if the grid can expand based on whether there are detail fields defined
 		me.grid.setCanExpandRecords(hasDetailFields);
-		if (me._config.isTree || (! me.showSummary)) {
+		if (me._config.isTree || me._config.isRepeater || (! me.showSummary)) {
 			me.addMember(me.grid); // add to the end - no summary row
 		}
 		else {
@@ -1654,7 +1705,7 @@ isc.BizDataGrid.addProperties({
 	showEdit: true,
 	showRemove: true,
 	showDeselect: true,
-
+	
 	_mod: null, // module name
 	_doc: null, // document name
 	_b: null, // binding
@@ -1750,8 +1801,14 @@ isc.BizDataGrid.addMethods({
 			height: "*",
 			minHeight: me.minHeight,
 			autoFetchData: false,
+			showHeader: me.isRepeater && me.showColumnHeaders,
 			headerHeight: 30,
 			showFilterEditor: false,
+			showRollOver: (! me.isRepeater),
+			showSelectedStyle: (! me.isRepeater),
+			showEmptyMessage: (! me.isRepeater),
+			baseStyle: me.isRepeater ? '' : null,
+			border: me.isRepeater ? (me.showGrid ? null : 'none') : null,
 			fields: me._fields,
 			selectionType: "single",
 			alternateRecordStyles:true,
@@ -1876,7 +1933,18 @@ isc.BizDataGrid.addMethods({
 				if (me.bizEdited) {
 					me.bizEdited();
 				}
-			}
+			},
+			
+		    // Set the css for showGrid on repeaters
+			getCellCSSText: function(record, rowNum, colNum) {
+				if (me.isRepeater) {
+					if (me.showGrid) {
+			    		return 'border-bottom:solid 1px #cccccc;border-left:solid 1px #cccccc;border-right:solid 1px #cccccc';
+					}
+					return 'border:none';
+		    	}
+	    		return this.Super("getCellCSSText", arguments);
+		    },
 
 /*
 			showRollOverCanvas:true,
@@ -1916,35 +1984,38 @@ isc.BizDataGrid.addMethods({
 		}
 		
 		if (config.editable) {
-			var toolStripMembers = [];
-			if (me.showAdd) {
-				toolStripMembers.add(me._newButton);
-			}
-			if (me.showZoom) {
-				toolStripMembers.add(me._zoomButton);
-			}
-			if (me.showEdit) {
-				toolStripMembers.add(me._editButton);
-			}
-			if (me.showRemove) {
-				toolStripMembers.add(me.deleteSelectionButton);
-			}
-			if (me.showDeselect) {
-				if (toolStripMembers.length > 0) {
-					toolStripMembers.add("separator");
+			if (config.isRepeater) {} else {
+				var toolStripMembers = [];
+				if (me.showAdd) {
+					toolStripMembers.add(me._newButton);
 				}
-				toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
-																	false,
-																	"<b>Deselect</b> all.",
-																	me.clearSelectionItem.click));
-			}
-			if (toolStripMembers.length > 0) {
-				me.addMember(isc.ToolStrip.create({
-					membersMargin: 2,
-					layoutMargin: 2,
-				    width: '100%',
-					members: toolStripMembers
-				}));
+				if (me.showZoom) {
+					toolStripMembers.add(me._zoomButton);
+				}
+				if (me.showEdit) {
+					toolStripMembers.add(me._editButton);
+				}
+				if (me.showRemove) {
+					toolStripMembers.add(me.deleteSelectionButton);
+				}
+				if (me.showDeselect) {
+					if (toolStripMembers.length > 0) {
+						toolStripMembers.add("separator");
+					}
+					toolStripMembers.add(isc.BizUtil.createImageButton(me.clearSelectionItem.icon, 
+																		false,
+																		"<b>Deselect</b> all.",
+																		me.clearSelectionItem.click));
+				}
+
+				if (toolStripMembers.length > 0) {
+					me.addMember(isc.ToolStrip.create({
+						membersMargin: 2,
+						layoutMargin: 2,
+					    width: '100%',
+						members: toolStripMembers
+					}));
+				}
 			}
 		}
 		me.addMember(me.grid);

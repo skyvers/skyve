@@ -1008,6 +1008,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		visitDataWidget(repeater);
+		code.append("isRepeater:true,");
 		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
 			code.append("showColumnHeaders:false,");
 		}
@@ -1184,6 +1185,7 @@ class SmartClientViewVisitor extends ViewVisitor {
 	@Override
 	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		visitListWidget(repeater);
+		code.append("isRepeater:true,");
 		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
 			code.append("showColumnHeaders:false,");
 		}
