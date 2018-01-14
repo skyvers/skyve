@@ -35,7 +35,7 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 			HtmlRenderer documentRenderer = HtmlRenderer.builder().nodeRendererFactory(new HtmlNodeRendererFactory() {
 				@Override
 				public NodeRenderer create(HtmlNodeRendererContext context) {
-					return new SkyveDocumentNodeRenderer(context);
+					return new SkyveDocumentNodeRenderer(context, true);
 				}
 			}).build();
 	
