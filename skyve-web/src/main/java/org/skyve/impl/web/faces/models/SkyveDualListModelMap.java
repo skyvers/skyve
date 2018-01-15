@@ -119,7 +119,17 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * Effect the changes required to keep the model lists and the domain model collection in sync.
 	 */
 	public void gather() {
-		Bean bean = view.getCurrentBean().getBean();
+		if (view == null) {
+			return;
+		}
+		BeanMapAdapter<? extends Bean> currentBean = view.getCurrentBean();
+		if (currentBean == null) {
+			return;
+		}
+		Bean bean = currentBean.getBean();
+		if (bean == null) {
+			return;
+		}
 		Persistence p = CORE.getPersistence();
 		Customer c = p.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());

@@ -1285,15 +1285,7 @@ isc.BizListGrid.addMethods({
 				}
 			},
 			getCellCSSText: function (record, rowNum, colNum) {
-				if (me.isRepeater) {
-					if (me.showGrid) {
-						return 'border-bottom:solid 1px #cccccc;border-left:solid 1px #cccccc;border-right:solid 1px #cccccc';
-					}
-					else {
-						return 'border:none';
-					}
-				}
-				else if (record) {
+				if (record) {
 					if (record.bizTagged) {
 			        	return "font-weight:bold;background-color:#B8D1EA;";
 			        }
@@ -1323,7 +1315,6 @@ isc.BizListGrid.addMethods({
 				]
 			}
 */
-			
 		};
 		
 		if (config.isRepeater) {
@@ -1331,9 +1322,14 @@ isc.BizListGrid.addMethods({
 			gridConfig.showSelectedStyle = false;
 			gridConfig.showEmptyMessage = false;
 			gridConfig.baseStyle = '';
-			gridConfig.border = 'none';
-			if (config.showColumnHeaders) {} else {
+			gridConfig.showHeader = true;
+			if (! config.showColumnHeaders) {} else {
 				gridConfig.showHeader = false;
+			}
+			gridConfig.bodyBackgroundColor = 'white';
+			if (config.showGrid) {} else {
+				gridConfig.border = 'none';
+				gridConfig.bodyBackgroundColor = '#F9F9F9';
 			}
 		}
 		
@@ -1797,11 +1793,17 @@ isc.BizDataGrid.addMethods({
 		}
 		var contextMenu = isc.Menu.create({showShadow: true, shadowDepth: 10, data: contextMenuData});
 		
+		var showHeader = true;
+		if (me.isRepeater) {
+			if (me.showColumnHeaders) {} else {
+				showHeader = false;
+			}
+		}
 		me.grid = isc.ListGrid.create({
 			height: "*",
 			minHeight: me.minHeight,
 			autoFetchData: false,
-			showHeader: me.isRepeater && me.showColumnHeaders,
+			showHeader: showHeader,
 			headerHeight: 30,
 			showFilterEditor: false,
 			showRollOver: (! me.isRepeater),
@@ -1809,6 +1811,7 @@ isc.BizDataGrid.addMethods({
 			showEmptyMessage: (! me.isRepeater),
 			baseStyle: me.isRepeater ? '' : null,
 			border: me.isRepeater ? (me.showGrid ? null : 'none') : null,
+			bodyBackgroundColor: me.isRepeater ? (me.showGrid ? 'white' : '#F9F9F9') : 'white',
 			fields: me._fields,
 			selectionType: "single",
 			alternateRecordStyles:true,
@@ -1933,19 +1936,8 @@ isc.BizDataGrid.addMethods({
 				if (me.bizEdited) {
 					me.bizEdited();
 				}
-			},
+			}
 			
-		    // Set the css for showGrid on repeaters
-			getCellCSSText: function(record, rowNum, colNum) {
-				if (me.isRepeater) {
-					if (me.showGrid) {
-			    		return 'border-bottom:solid 1px #cccccc;border-left:solid 1px #cccccc;border-right:solid 1px #cccccc';
-					}
-					return 'border:none';
-		    	}
-	    		return this.Super("getCellCSSText", arguments);
-		    },
-
 /*
 			showRollOverCanvas:true,
     		rollOverCanvasConstructor:isc.HLayout,
