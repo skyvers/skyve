@@ -32,15 +32,26 @@
 						<li>If the type is text, the length should follow the type, e.g. <code>- *firstName* text 150</code>
 						<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)</code>
 					</ul>
+					<li>Assoications should be specified as a list item by using a dash (-), followed by a space, then the association name in camel case, then the association document in title case
+					<ul>
+						<li>e.g. <code>- country Country</code>
+						<li>Required associations should have their name surrounded by asterisks, e.g. <code>- *country* Country</code>
+					</ul>
+					<li>Collections should be specified as an ordered list item by using a number followed by a period (1.), followed by a space, then the collection name in camel case, then the collection document in title case
+					<ul>
+						<li>e.g. <code>1. roles Role</code>
+						<li>Required collections should have their name surrounded by asterisks, e.g. <code>1. *roles* Role</code>
+					</ul>
 				</ul>
 				<p>A complete document specification would then look like this:</p>
 				<pre>
 	## Address `ADM_Address`<br>
-	- *addressLine1* text 200<br>
-	- addressLine2 text 200<br>
-	- addressLine3 text 200<br>
-	- *suburb* text 200<br>
+	- *addressLine1* text 100<br>
+	- addressLine2 text 100<br>
+	- addressLine3 text 100<br>
+	- *suburb* text 50<br>
 	- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)<br>
+	- *country* Country<br>
 	- verified boolean<br>
 				</pre>
 			</span>
