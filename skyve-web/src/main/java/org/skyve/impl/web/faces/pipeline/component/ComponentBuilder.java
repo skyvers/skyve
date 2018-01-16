@@ -113,7 +113,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														StringBuilder gridColumnExpression);
 	public abstract UIComponent addedDataGridBoundColumn(UIComponent current);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent current,
-															DataGrid grid,
+															AbstractDataWidget widget,
 															DataGridContainerColumn column);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent current, 

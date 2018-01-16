@@ -361,9 +361,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent addDataGridContainerColumn(UIComponent current, 
-													DataGrid grid, 
+													AbstractDataWidget widget,
 													DataGridContainerColumn column) {
-		Column col = column(grid.getBinding(),
+		Column col = column(widget.getBinding(),
 								null,
 								column.getTitle(),
 				                column.getAlignment(),

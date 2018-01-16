@@ -1132,7 +1132,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled) {
-        current = cb.addDataGridContainerColumn(current, (DataGrid) currentGrid, column);
+        current = cb.addDataGridContainerColumn(current, (AbstractDataWidget) currentGrid, column);
 	}
 
 	@Override
