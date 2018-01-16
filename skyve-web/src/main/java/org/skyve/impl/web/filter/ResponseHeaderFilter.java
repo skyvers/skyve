@@ -38,8 +38,10 @@ public class ResponseHeaderFilter implements Filter {
 				httpResponse.addDateHeader("Expires", System.currentTimeMillis() + Long.parseLong(fc.getInitParameter(headerName)));
 			}
 			// only apply HSTS header if defined and we are using TLS
-			else if (Util.isSecureUrl() && "Strict-Transport-Security".equals(headerName)) {
-				httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
+			else if ("Strict-Transport-Security".equals(headerName)) {
+				if (Util.isSecureUrl()) {
+					httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
+				}
 			}
 			else {
 				httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
