@@ -172,7 +172,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
 	public UIComponent addDataGridContainerColumn(UIComponent current, 
-													DataGrid grid, 
+													AbstractDataWidget widget, 
 													DataGridContainerColumn column) {
 		return current;
 	}

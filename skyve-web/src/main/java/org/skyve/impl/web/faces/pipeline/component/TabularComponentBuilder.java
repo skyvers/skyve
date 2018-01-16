@@ -314,10 +314,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										null,
 										null,
 										repeater.getWidgetId());
-        result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()), 
-        											Boolean.TRUE.equals(repeater.getShowGrid())));
-        result.setReflow(true);
-        return result;
+		result.setEmptyMessage("");
+		result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
+													Boolean.TRUE.equals(repeater.getShowGrid())));
+		result.setReflow(true);
+		return result;
 	}
 	
 	@Override
@@ -361,9 +362,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent addDataGridContainerColumn(UIComponent current, 
-													DataGrid grid, 
+													AbstractDataWidget widget,
 													DataGridContainerColumn column) {
-		Column col = column(grid.getBinding(),
+		Column col = column(widget.getBinding(),
 								null,
 								column.getTitle(),
 				                column.getAlignment(),

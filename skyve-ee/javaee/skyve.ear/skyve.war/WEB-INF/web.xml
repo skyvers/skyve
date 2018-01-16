@@ -252,6 +252,24 @@
 		<url-pattern>/j_security_check</url-pattern>
 	</filter-mapping>
 
+	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
+	<filter>
+		<filter-name>HSTSHeaderFilter</filter-name>
+		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
+		<init-param>
+			<param-name>Strict-Transport-Security</param-name>
+			<param-value>max-age=31536000; includeSubDomains</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>HSTSHeaderFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>HSTSHeaderFilter</filter-name>
+		<url-pattern>/j_security_check</url-pattern>
+	</filter-mapping>
+
 	<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.WebServlet</servlet-class>
