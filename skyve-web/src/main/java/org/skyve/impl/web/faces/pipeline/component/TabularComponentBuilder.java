@@ -313,10 +313,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										null,
 										null,
 										repeater.getWidgetId());
-        result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()), 
-        											Boolean.TRUE.equals(repeater.getShowGrid())));
-        result.setReflow(true);
-        return result;
+		result.setEmptyMessage("");
+		result.setStyleClass(repeaterStyleClass(Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
+													Boolean.TRUE.equals(repeater.getShowGrid())));
+		result.setReflow(true);
+		return result;
 	}
 	
 	@Override

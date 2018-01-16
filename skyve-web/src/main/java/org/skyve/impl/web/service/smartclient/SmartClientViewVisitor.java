@@ -1009,13 +1009,9 @@ class SmartClientViewVisitor extends ViewVisitor {
 									boolean parentEnabled) {
 		visitDataWidget(repeater);
 		code.append("isRepeater:true,");
-		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
-			code.append("showColumnHeaders:false,");
-		}
-		if (Boolean.FALSE.equals(repeater.getShowGrid())) {
-			code.append("showGrid:false,");
-		}
-		code.append("_fields:[");
+		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders()));
+		code.append(",showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid()));
+		code.append(",_fields:[");
 	}
 	
 	private void visitDataWidget(AbstractDataWidget widget) {
@@ -1186,12 +1182,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		visitListWidget(repeater);
 		code.append("isRepeater:true,");
-		if (Boolean.FALSE.equals(repeater.getShowColumnHeaders())) {
-			code.append("showColumnHeaders:false,");
-		}
-		if (Boolean.FALSE.equals(repeater.getShowGrid())) {
-			code.append("showGrid:false,");
-		}
+		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders())).append(',');
+		code.append("showGrid:").append(Boolean.TRUE.equals(repeater.getShowGrid())).append(',');
 	}
 	
 	@Override

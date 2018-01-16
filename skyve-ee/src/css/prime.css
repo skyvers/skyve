@@ -49,6 +49,7 @@ span.right {
 	}
 }
 
+/* data repeater */
 .repeater .ui-datatable-tablewrapper table tbody tr {
 	background: none !important;
 	background-color: transparent !important;
@@ -72,6 +73,29 @@ span.right {
 	border: none !important;
 }
 .repeater-no-headers .ui-datatable-tablewrapper table thead {
+	display: none !important;
+}
+/* list repeater */
+.repeater .ui-datatable-scrollable-header .ui-datatable-scrollable-header-box table tbody tr {
+	background: none !important;
+	background-color: transparent !important;
+}
+.repeater-no-border .ui-datatable-scrollable-body {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-scrollable-body table {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-scrollable-body table tbody {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-scrollable-body table tbody tr {
+	border: none !important;
+}
+.repeater-no-border .ui-datatable-scrollable-body table tbody tr td {
+	border: none !important;
+}
+.repeater-no-headers .ui-datatable-scrollable-header .ui-datatable-scrollable-header-box table thead {
 	display: none !important;
 }
 
