@@ -119,6 +119,7 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPerce
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
+import org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator;
 import org.skyve.impl.web.faces.converters.integer.SimplePercentage;
 import org.skyve.impl.web.faces.converters.lang.Decimal10;
 import org.skyve.impl.web.faces.converters.lang.Decimal2;
@@ -1691,6 +1692,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	        else if ("IntegerSeparator".equals(converterName)) {
 	            result = new IntegerSeparator();
 	        }
+			else if ("LongIntegerSeparator".equals(converterName)) {
+				result = new LongIntegerSeparator();
+			}
 	        else if ("HH_MI".equals(converterName)) {
 	            result = new HH_MI();
 	        }
