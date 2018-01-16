@@ -30,6 +30,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
@@ -366,17 +367,22 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	public UIComponent listGrid(String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
-									List<FilterParameter> filterParameters,
-									String title,
+									ListGrid grid,
 									boolean canCreateDocument,
-									boolean createRendered,
-									String[] createDisabledConditionNames,
-									boolean zoomRendered,
-									String zoomDisabledConditionName,
-									String selectedIdBinding,
-									List<EventAction> selectedActions,
 									boolean showPaginator,
 									boolean stickyHeader) {
+		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		String disableAddConditionName = grid.getDisableAddConditionName();
+		String disabledConditionName = grid.getDisabledConditionName();
+		String[] createDisabledConditionNames = (disableAddConditionName == null) ?
+				((disabledConditionName == null) ?
+						null :
+						new String[] {disabledConditionName}) :
+				((disabledConditionName == null) ?
+						new String[] {disableAddConditionName} :
+						new String[] {disableAddConditionName, disabledConditionName});
+		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
+
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, null);
 		result.setVar("row");
@@ -415,7 +421,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		if (canCreateDocument && createRendered) {
         	addListGridHeader(result, moduleName, drivingDocumentName, createDisabledConditionNames);
         }
-		addListGridBoundColumns(model, result.getChildren(), zoomRendered, zoomDisabledConditionName);
+		addListGridBoundColumns(model, result.getChildren(), zoomRendered, grid.getDisableZoomConditionName());
 		
 		return result;
 	}

@@ -82,6 +82,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.AssociationPickListConverter;
@@ -527,20 +528,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent listGrid(String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
-									List<FilterParameter> filterParameters,
-									String title,
+									ListGrid grid,
 									boolean canCreateDocument,
-									boolean createRendered,
-									String[] createDisabledConditionNames,
-									boolean zoomRendered,
-									String zoomDisabledConditionName,
-									String selectedIdBinding,
-									List<EventAction> selectedActions,
 									boolean showPaginator,
 									boolean stickyHeader) {
 		Document drivingDocument =  model.getDrivingDocument();
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
+
+		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
+		String disableAddConditionName = grid.getDisableAddConditionName();
+		String disabledConditionName = grid.getDisabledConditionName();
+		String[] createDisabled = (disableAddConditionName == null) ?
+				((disabledConditionName == null) ?
+						null :
+						new String[] {disabledConditionName}) :
+				((disabledConditionName == null) ?
+						new String[] {disableAddConditionName} :
+						new String[] {disableAddConditionName, disabledConditionName});
+		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         result.setVar("row");
@@ -557,17 +563,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
         setId(result, null);
     	result.setWidgetVar(result.getId());
     	
-    	if (selectedIdBinding != null) {
-    		addDataTableSelection(result, selectedIdBinding, selectedActions, modelName);
+    	if (grid.getSelectedIdBinding() != null) {
+    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName);
     	}
     	else if (zoomRendered) {
-    		if (zoomDisabledConditionName == null) {
+    		if (grid.getDisableZoomConditionName() == null) {
 	    		result.setSelectionMode("single"); 
     		}
     		else {
 	    		result.setValueExpression("selectionMode", 
 	    									ef.createValueExpression(elc, String.format("#{(%s) ? '' : 'single'}", 
-	    																					createOredValueExpressionFragmentFromConditions(new String[] {zoomDisabledConditionName})),
+	    																					createOredValueExpressionFragmentFromConditions(new String[] {grid.getDisableZoomConditionName()})),
 	    																					String.class));
     		}
 	        result.setValueExpression("rowKey", ef.createValueExpression(elc, "&i=#{row['bizId']}&d=#{row['bizDocument']}&m=#{row['bizModule']}", String.class));
@@ -591,9 +597,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		// Add filter parameters to getLazyDataModel call
-		if ((filterParameters != null) && (! filterParameters.isEmpty())) {
+		if ((grid.getParameters() != null) && (! grid.getParameters().isEmpty())) {
 			value.append('[');
-			for (FilterParameter param : filterParameters) {
+			for (FilterParameter param : grid.getParameters()) {
 				value.append("['").append(param.getName()).append("','");
 				value.append(param.getOperator()).append("','");
 				String binding = param.getBinding();
@@ -613,26 +619,27 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		
 		result.setValueExpression("value", ef.createValueExpression(elc, value.toString(), SkyveLazyDataModel.class));
 
-		if (title != null) {
-			addListGridHeader(title, result);
+		if (grid.getTitle() != null) {
+			addListGridHeader(grid.getTitle(), result);
 		}
         List<UIComponent> children = result.getChildren();
         addListGridDataColumns(model, children);
         if ((canCreateDocument && createRendered) || zoomRendered) {
-        	addListGridActionColumn(moduleName, 
+        	final UIComponent actionColumn = createListGridActionColumn(moduleName,
         								drivingDocumentName, 
         								canCreateDocument,
         								createRendered, 
-        								createDisabledConditionNames, 
+        								createDisabled,
         								zoomRendered,
-        								zoomDisabledConditionName,
-        								children);
+        								grid.getDisableZoomConditionName(),
+										grid.getProperties());
+			children.add(actionColumn);
         }
     	
     	return result;
 	}
 	
-	private void addDataTableSelection(DataTable table, 
+	protected void addDataTableSelection(DataTable table,
 										String selectedIdBinding, 
 										List<EventAction> selectedActions,
 										String source) {
@@ -668,15 +675,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
         table.addClientBehavior("rowSelect", ajax);
 	}
-	
-	private void addListGridHeader(String title,
+
+	protected void addListGridHeader(String title,
 									UIComponent componentToAddTo) {
 		UIOutput heading = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
         heading.setValue(title);
 		componentToAddTo.getFacets().put("header", heading);
 	}
-	
-	private void addListGridDataColumns(ListModel<? extends Bean> model,
+
+	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
@@ -737,55 +744,61 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
-	private void addListGridActionColumn(String moduleName,
-											String documentName,
-											boolean canCreateDocument,
-											boolean createRendered,
-											String[] createDisabledConditionNames,
-											boolean zoomRendered,
-											String zoomDisabledConditionName,
-											List<UIComponent> componentChildrenToAddTo) {
+	protected UIComponent createListGridActionColumn(String moduleName,
+										   String documentName,
+										   boolean canCreateDocument,
+										   boolean createRendered,
+										   String[] createDisabledConditionNames,
+										   boolean zoomRendered,
+										   String zoomDisabledConditionName,
+										   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
 		column.setWidth("40");
 		column.setStyle("text-align:center !important");
-        if (canCreateDocument && createRendered) {
-	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
-	    	button.setValue(null);
-        	button.setTitle("New record");
-	    	button.setIcon("fa fa-plus");
-	    	ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
-	    	if (disabled != null) {
-	    		button.setValueExpression("disabled", disabled);
-	    	}
-        	StringBuilder value = new StringBuilder(128);
-        	value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
-        	value.append("&d=").append(documentName);
-        	button.setHref(value.toString());
-
-	        column.getFacets().put("header", button);
-        }
-        else {
-    		column.setHeaderText("");
-        }
-        if (zoomRendered) {
-	    	Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
-	    	button.setValue(null);
-	    	button.setTitle("View Detail");
-	    	button.setIcon("fa fa-chevron-right");
-	    	if (zoomDisabledConditionName != null) {
-		    	button.setValueExpression("disabled",
-											createValueExpressionFromCondition(zoomDisabledConditionName, null));
-	    	}
+		if (canCreateDocument && createRendered) {
+			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+			button.setValue(null);
+			button.setTitle("New record");
+			button.setIcon("fa fa-plus");
+			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
+			if (disabled != null) {
+				button.setValueExpression("disabled", disabled);
+			}
 			StringBuilder value = new StringBuilder(128);
-			value.append("./?a=").append(WebAction.e.toString());
-			value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
-			button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+			value.append("./?a=").append(WebAction.e.toString()).append("&m=").append(moduleName);
+			value.append("&d=").append(documentName);
+			button.setHref(value.toString());
+
+			column.getFacets().put("header", button);
+		}
+		else {
+			column.setHeaderText("");
+		}
+		if (zoomRendered) {
+			final UIComponent button = createListGridZoomButton(zoomDisabledConditionName, properties);
 			column.getChildren().add(button);
-        }
-		componentChildrenToAddTo.add(column);
+		}
+		return column;
 	}
-	
+
+	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		button.setValue(null);
+		button.setTitle("View Detail");
+		button.setIcon("fa fa-chevron-right");
+		if (zoomDisabledConditionName != null) {
+			button.setValueExpression("disabled",
+					createValueExpressionFromCondition(zoomDisabledConditionName, null));
+		}
+		StringBuilder value = new StringBuilder(128);
+		value.append("./?a=").append(WebAction.e.toString());
+		value.append("&m=#{row['bizModule']}&d=#{row['bizDocument']}&i=#{row['bizId']}");
+		button.setValueExpression("href", ef.createValueExpression(elc, value.toString(), String.class));
+
+		return button;
+	}
+
 	/*
 	 * List Repeater is just like a list grid - a data table but...
 	 * The grid column headers can be turned off (uses prime.css)
@@ -1337,7 +1350,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * This method escapes anything that should be literal and then converts the
 	 * expression taking into consideration the case setting.
 	 * 
-	 * @param text
+	 * @param format
 	 * @return
 	 */
 	private static String determineMask(Format<?> format) {

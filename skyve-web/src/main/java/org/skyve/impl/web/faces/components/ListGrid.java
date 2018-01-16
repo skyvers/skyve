@@ -101,21 +101,21 @@ public class ListGrid extends HtmlPanelGroup {
 					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
 					componentBuilder.setManagedBeanName(managedBeanName);
 		        	componentBuilder.setUserAgentType(userAgentType);
-				    
-				    UIComponent grid = componentBuilder.listGrid(documentName, 
-				    												name, 
-				    												model, 
-				    												null,
-				    												model.getDescription(),
-				    												user.canCreateDocument(model.getDrivingDocument()),
-				    												createRendered,
-				    												new String[] {String.valueOf(createDisabled)},
-				    												zoomRendered,
-				    												String.valueOf(zoomDisabled),
-				    												null,
-				    												null,
-				    												paginator, 
-				    												stickyHeader);
+
+					org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
+					listGrid.setTitle(model.getDescription());
+					listGrid.setShowAdd(createRendered);
+					listGrid.setDisabledConditionName(String.valueOf(createDisabled));
+					listGrid.setShowZoom(zoomRendered);
+					listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
+
+					UIComponent grid = componentBuilder.listGrid(documentName,
+							name,
+							model,
+							listGrid,
+							user.canCreateDocument(model.getDrivingDocument()),
+							true,
+							false);
 				    ListGrid.this.getChildren().add(grid);
 				    
 					return null;
