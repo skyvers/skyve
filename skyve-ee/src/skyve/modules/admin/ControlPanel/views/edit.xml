@@ -142,6 +142,7 @@
 						</checkBox>
 					</item>
 				</row>
+<!-- Cant influence these 2 settings as they are set in the hibernate session factory
 				<row>
 					<item>
 						<checkBox binding="sqlTrace" triState="false">
@@ -158,6 +159,7 @@
 						</checkBox>
 					</item>
 				</row>
+-->
 				<row>
 					<item>
 						<checkBox binding="contentTrace" triState="false">
