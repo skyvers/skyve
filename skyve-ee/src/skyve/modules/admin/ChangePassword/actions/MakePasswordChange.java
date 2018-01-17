@@ -24,9 +24,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -4317908281075686229L;
 
 	@Override
@@ -80,6 +77,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);
 		userBean.setPasswordLastChanged(new DateTime());
+		userBean.setPasswordResetToken(null);
 
 		userBean = persistence.save(userDocument, userBean);
 
