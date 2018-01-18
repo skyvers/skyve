@@ -134,6 +134,7 @@ public class UtilImpl {
 
 	// API Keys etc
 	public static String GOOGLE_MAPS_V3_API_KEY = null;
+	public static String GOOGLE_RECAPTCHA_SITE_KEY = null;
 	public static String CKEDITOR_CONFIG_FILE_URL = "";
 
 	// null = prod, could be dev, test, uat or another arbitrary environment

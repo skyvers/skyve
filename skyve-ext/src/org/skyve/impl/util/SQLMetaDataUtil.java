@@ -29,6 +29,7 @@ public class SQLMetaDataUtil {
 	public static final String ADMIN_MODULE_NAME = "admin";
 	public static final String CHANGE_PASSWORD_DOCUMENT_NAME = "ChangePassword";
 	public static final String CONTACT_DOCUMENT_NAME = "Contact";
+	public static final String CONFIGURATION_DOCUMENT_NAME = "Configuration";
 	public static final String USER_DOCUMENT_NAME = "User";
 	public static final String USER_ROLE_DOCUMENT_NAME = "UserRole";
 	
@@ -36,9 +37,13 @@ public class SQLMetaDataUtil {
 	public static final String CONTACT_PROPERTY_NAME = "contact";
 	public static final String CONTACT_TYPE_PROPERTY_NAME = "contactType";
 	public static final String EMAIL1_PROPERTY_NAME = "email1";
+	public static final String FROM_EMAIL_PROPERTY_NAME = "fromEmail";
 	public static final String NAME_PROPERTY_NAME = "name";
 	public static final String NEW_PASSWORD_PROPERTY_NAME = "newPassword";
 	public static final String PASSWORD_PROPERTY_NAME = "password";
+	public static final String PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME = "passwordResetEmailBody";
+	public static final String PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME = "passwordResetEmailSubject";
+	public static final String PASSWORD_RESET_TOKEN_PROPERTY_NAME = "passwordResetToken";
 	public static final String ROLE_NAME_PROPERTY_NAME = "roleName";
 	public static final String ROLES_PROPERTY_NAME = "roles";
 	public static final String USER_NAME_PROPERTY_NAME = "userName";

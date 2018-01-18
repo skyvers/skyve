@@ -101,6 +101,9 @@
 				<param name="enumClass">modules.admin.domain.Configuration$PasswordComplexityModel</param>
 			</type>
 		</property>
+		<property name="fromEmail" length="254" />
+		<property name="passwordResetEmailSubject" length="250" />
+		<property name="passwordResetEmailBody" type="text" />
 		<filter name="adminConfigurationNoneFilter" condition="1=0"/>
 		<filter name="adminConfigurationCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminConfigurationDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -395,6 +398,7 @@
 		<property name="legacyId" length="100" />
 		<property name="passwordExpired" />
 		<property name="passwordLastChanged" type="DateTime" />
+		<property name="passwordResetToken" length="56" />
 		<many-to-one name="contact" entity-name="adminContact" column="contact_id" cascade="persist,save-update,refresh,merge" index="IDX_contact" foreign-key="FK_ADM_SecurityUser_contact" />
 		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" index="IDX_dataGroup" foreign-key="FK_ADM_SecurityUser_dataGroup" />
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
