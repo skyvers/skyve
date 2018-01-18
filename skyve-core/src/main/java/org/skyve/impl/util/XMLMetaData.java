@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.ListIterator;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -20,6 +22,13 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.Visitor;
+import org.dom4j.VisitorSupport;
+import org.dom4j.io.SAXReader;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
@@ -29,6 +38,24 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.util.Util;
 import org.xml.sax.SAXException;
 
+/**
+ * Marshal and unmarshal XML.
+ * 
+ * Note:-
+ * It should be possible to control the namespace prefixes genreated in the XML with the JAXB RI implementation like this...
+ *			marshaller.setProperty("com.sun.xml.internal.bind.namespacePrefixMapper", new NamespacePrefixMapper() {
+ *				@Override
+ *				public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
+ *					if (ROUTER_NAMESPACE.equals(namespaceUri)) {
+ *						return "";
+ *					}
+ *					return suggestion;
+ *				}
+ *			});
+ * but because it is class loaded by the module class loader in wildfly (via CXF) this class extension 
+ * can't be seen and generates a linkage error.
+ * Therefore we have to resort to post processing the output with DOM4J.
+ */
 public class XMLMetaData {
 	public static final String COMMON_NAMESPACE = "http://www.skyve.org/xml/common";
 	public static final String ROUTER_NAMESPACE = "http://www.skyve.org/xml/router";
@@ -86,9 +113,13 @@ public class XMLMetaData {
 									ROUTER_NAMESPACE + " ../schemas/router.xsd");
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(router, sos);
-			return sos.toString();
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new NamespaceChangingVisitor(ROUTER_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal router", e);
 		}
 	}
@@ -120,9 +151,13 @@ public class XMLMetaData {
 									CUSTOMER_NAMESPACE + " ../../schemas/customer.xsd");
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(customer, sos);
-			return sos.toString();
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new NamespaceChangingVisitor(CUSTOMER_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal customer " + customer.getName(), e);
 		}
 	}
@@ -156,9 +191,13 @@ public class XMLMetaData {
 										MODULE_NAMESPACE + " ../../schemas/module.xsd"));
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(module, sos);
-			return sos.toString();
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new NamespaceChangingVisitor(MODULE_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal module " + module.getName(), e);
 		}
 	}
@@ -192,9 +231,13 @@ public class XMLMetaData {
 										DOCUMENT_NAMESPACE + " ../../../schemas/document.xsd"));
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(document, sos);
-			return sos.toString();
+
+			Document doc = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new NamespaceChangingVisitor(DOCUMENT_NAMESPACE);
+			doc.accept(visitor);
+			return doc.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document " + document.getName(), e);
 		}
 	}
@@ -234,9 +277,13 @@ public class XMLMetaData {
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, location.toString());
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(view, sos);
-			return sos.toString();
+
+			Document document = new SAXReader().read(new StringReader(sos.toString()));
+			Visitor visitor = new NamespaceChangingVisitor(VIEW_NAMESPACE);
+			document.accept(visitor);
+			return document.asXML();
 		}
-		catch (JAXBException e) {
+		catch (Exception e) {
 			throw new MetaDataException("Could not marshal " + view.getName() + " view", e);
 		}
 	}
@@ -311,5 +358,65 @@ public class XMLMetaData {
 		        return result;
 			}
 		});
+	}
+
+	private static class NamespaceChangingVisitor extends VisitorSupport {
+		private static final Namespace COMMON = Namespace.get("c", COMMON_NAMESPACE);
+		private static final Namespace MODULE = Namespace.get("d", MODULE_NAMESPACE);
+		private static final Namespace DOCUMENT = Namespace.get("d", DOCUMENT_NAMESPACE);
+		private static final Namespace VIEW = Namespace.get("v", VIEW_NAMESPACE);
+
+		private Namespace target;
+		private String targetUri;
+
+		NamespaceChangingVisitor(String targetNamespaceUri) {
+			target = Namespace.get("", targetNamespaceUri);
+			targetUri = targetNamespaceUri;
+		}
+
+		@Override
+		public void visit(Element node) {
+			Namespace ns = node.getNamespace();
+
+			String uri = ns.getURI();
+			if (uri.equals(targetUri)) {
+				QName newQName = new QName(node.getName(), target);
+				node.setQName(newQName);
+			}
+			else if (uri.equals(COMMON_NAMESPACE)) {
+				QName newQName = new QName(node.getName(), COMMON);
+				node.setQName(newQName);
+			}
+			else if (uri.equals(MODULE_NAMESPACE)) {
+				QName newQName = new QName(node.getName(), MODULE);
+				node.setQName(newQName);
+			}
+			else if (uri.equals(DOCUMENT_NAMESPACE)) {
+				QName newQName = new QName(node.getName(), DOCUMENT);
+				node.setQName(newQName);
+			}
+			else if (uri.equals(VIEW_NAMESPACE)) {
+				QName newQName = new QName(node.getName(), VIEW);
+				node.setQName(newQName);
+			}
+
+			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
+			while (namespaces.hasNext()) {
+				Namespace additionalNamespace = (Namespace) namespaces.next();
+				String additionalNamespaceUri = additionalNamespace.getURI();
+				if (additionalNamespaceUri.equals(COMMON_NAMESPACE)) {
+					namespaces.remove();
+				}
+				else if (additionalNamespaceUri.equals(MODULE_NAMESPACE)) {
+					namespaces.remove();
+				}
+				else if (additionalNamespaceUri.equals(DOCUMENT_NAMESPACE)) {
+					namespaces.remove();
+				}
+				else if (additionalNamespaceUri.equals(VIEW_NAMESPACE)) {
+					namespaces.remove();
+				}
+			}
+		}
 	}
 }
