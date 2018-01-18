@@ -2,11 +2,9 @@ package modules.admin.DataMaintenance.actions;
 
 import java.io.File;
 
-import modules.admin.DataMaintenance.DataMaintenanceBizlet;
-import modules.admin.domain.DataMaintenance;
-
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.backup.DDL;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -17,6 +15,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import modules.admin.DataMaintenance.DataMaintenanceBizlet;
+import modules.admin.domain.DataMaintenance;
 
 public class Restore implements ServerSideAction<DataMaintenance> {
 	private static final long serialVersionUID = 8521252561712649481L;
@@ -115,6 +116,7 @@ public class Restore implements ServerSideAction<DataMaintenance> {
 		Util.LOGGER.info("Delete extracted folder " + extractDir.getAbsolutePath());
 		FileUtil.delete(extractDir);
 		Util.LOGGER.info("DONE");
+		webContext.growl(MessageSeverity.info, "Restore completed successfully");
 
 		return new ServerSideActionResult<>(bean);
 	}
