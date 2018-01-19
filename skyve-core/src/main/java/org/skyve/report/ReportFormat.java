@@ -40,7 +40,7 @@ public enum ReportFormat {
 	rtf, 
 	
 	/**
-	 * jrxml format 
+	 * jrpxml format 
 	 */
 	xml,
 	
