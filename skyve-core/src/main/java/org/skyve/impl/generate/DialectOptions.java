@@ -2,6 +2,7 @@ package org.skyve.impl.generate;
 
 public enum DialectOptions {
 	H2(true, false, 0, 1024),
+	H2_NO_INDEXES(false, false, 0, 1024),
 	MYSQL(true, false, 0, 1024),
 	MSSQL_2014(true, true, 0, 900), // SQL Server 2014 and below limits indexes to 900
 	MSSQL_2016(true, true, 0, 1024);
