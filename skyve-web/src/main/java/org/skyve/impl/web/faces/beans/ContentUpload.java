@@ -125,55 +125,14 @@ public class ContentUpload extends Localisable {
 		persistence.setUser(user);
 		persistence.begin();
 		try {
-			Customer customer = user.getCustomer();
-	
 			Bean currentBean = webContext.getCurrentBean();
 			Bean bean = currentBean;
 
 			if (binding != null) {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
-
-			String fileName = FilenameUtils.getName(file.getFileName());
-			String customerName = customer.getName();
-			Bean contentOwner = bean;
-			String contentAttributeName = contentBinding;
-			int contentBindingLastDotIndex = contentBinding.lastIndexOf('.');
-			if (contentBindingLastDotIndex >= 0) { // compound binding
-				contentOwner = (Bean) BindUtil.get(bean, contentBinding.substring(0, contentBindingLastDotIndex));
-				contentAttributeName = contentBinding.substring(contentBindingLastDotIndex + 1);
-			}
-
-			// Always insert a new attachment content node into the content repository on upload.
-			// That way, if the change is discarded (not committed), it'll still point to the original attachment.
-			// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
-			String contentId = null;
-			try (ContentManager cm = EXT.newContentManager()) {
-				AttachmentContent content = new AttachmentContent(customerName, 
-																	contentOwner.getBizModule(), 
-																	contentOwner.getBizDocument(),
-																	contentOwner.getBizDataGroupId(), 
-																	contentOwner.getBizUserId(), 
-																	contentOwner.getBizId(),
-																	contentAttributeName,
-																	fileName,
-																	file.getInputstream());
-
-				// Determine if we should index the content or not
-				boolean index = true; // default
-				Module module = customer.getModule(contentOwner.getBizModule());
-				// NB - Could be a base document attribute
-				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, module.getDocument(customer, contentOwner.getBizDocument()), contentAttributeName);
-				Attribute attribute = target.getAttribute();
-				if (attribute instanceof Content) {
-					IndexType indexType = ((Content) attribute).getIndex();
-					index = ((indexType == null) || IndexType.textual.equals(indexType) || IndexType.both.equals(indexType));
-				}
-
-				// NB Don't set the content id as we always want a new one
-				cm.put(content, index);
-				contentId = content.getContentId();
-			}
+			
+			String contentId = FacesContentUtil.handleFileUpload(event, bean, contentBinding);
 
 			// only put conversation in cache if we have been successful in executing
 			WebUtil.putConversationInCache(webContext);

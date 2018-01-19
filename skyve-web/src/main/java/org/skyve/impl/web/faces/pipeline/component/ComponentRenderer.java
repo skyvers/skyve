@@ -234,6 +234,11 @@ public class ComponentRenderer {
 			FileUpload fu = (FileUpload) component;
 			putValue(attributes, "style", fu.getStyle());
 			putValue(attributes, "styleClass", fu.getStyleClass());
+			putValue(attributes, "onStart", fu.getOnstart());
+			putValue(attributes, "update", fu.getUpdate());
+			putValue(attributes, "fileLimit", fu.getFileLimit());
+			putValue(attributes, "fileLimitMessage", fu.getFileLimitMessage());
+			putMethodExpression(attributes, "fileUploadListener", fu.getFileUploadListener());
 		}
 		else if (component instanceof GraphicImage) {
 			tagName = "p:graphicImage";
