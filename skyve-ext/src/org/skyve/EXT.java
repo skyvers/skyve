@@ -33,6 +33,7 @@ import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.util.MailUtil;
+import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.ReportUtil;
 import org.skyve.impl.util.TagUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -429,7 +430,20 @@ public class EXT {
 	}
 
 	/**
-	 * 
+	 *
+	 * @param user
+	 * @param reportParameters
+	 * @param format
+	 * @param out
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<JasperPrint> runReport(User user, List<ReportParameters> reportParameters, ReportFormat format, OutputStream out) throws Exception {
+		return ReportUtil.runReport(user, reportParameters, format, out);
+	}
+
+	/**
+	 *
 	 * @param jasperPrint
 	 * @param format
 	 * @param out
@@ -437,6 +451,17 @@ public class EXT {
 	 */
 	public static void runReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out) throws JRException {
 		ReportUtil.runReport(jasperPrint, format, out);
+	}
+
+	/**
+	 *
+	 * @param jasperPrintList
+	 * @param format
+	 * @param out
+	 * @throws JRException
+	 */
+	public static void runReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out) throws JRException {
+		ReportUtil.runReport(jasperPrintList, format, out);
 	}
 
 	/**
@@ -548,6 +573,33 @@ public class EXT {
 		byte[] reportBytes = out.toByteArray();
 
 		result.setAttachmentFileName(reportName);
+		result.setAttachment(reportBytes);
+		result.setAttachmentMimeType(MimeType.pdf);
+
+		return result;
+	}
+
+	/**
+	 * Returns a mail attachment from a Jasper report as a PDF
+	 *
+	 * @param reportParameters
+	 */
+	public static MailAttachment getMailAttachmentFromReport(List<ReportParameters> reportParameters) throws Exception {
+		if (reportParameters.isEmpty()) {
+			throw new IllegalArgumentException("There must be at least 1 report to generate.");
+		}
+
+		MailAttachment result = new MailAttachment();
+
+		Persistence persistence = CORE.getPersistence();
+		User user = persistence.getUser();
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+		EXT.runReport(user, reportParameters, ReportFormat.pdf, out);
+		byte[] reportBytes = out.toByteArray();
+
+		result.setAttachmentFileName(reportParameters.get(0).getReportName());
 		result.setAttachment(reportBytes);
 		result.setAttachmentMimeType(MimeType.pdf);
 
