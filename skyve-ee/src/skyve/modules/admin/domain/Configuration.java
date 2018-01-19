@@ -35,12 +35,6 @@ public class Configuration extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String passwordComplexityModelPropertyName = "passwordComplexityModel";
-	/** @hidden */
-	public static final String fromEmailPropertyName = "fromEmail";
-	/** @hidden */
-	public static final String passwordResetEmailSubjectPropertyName = "passwordResetEmailSubject";
-	/** @hidden */
-	public static final String passwordResetEmailBodyPropertyName = "passwordResetEmailBody";
 
 	/**
 	 * Password Complexity
@@ -128,24 +122,6 @@ public class Configuration extends AbstractPersistentBean {
 	 * The security level/complexity model for user passwords
 	 **/
 	private PasswordComplexityModel passwordComplexityModel;
-	/**
-	 * Sender/From Email Address
-	 * <br/>
-	 * Email Address that all email's that the system sends will be sent from.
-	 **/
-	private String fromEmail;
-	/**
-	 * Password Reset Email Subject
-	 * <br/>
-	 * The subject of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
-	 **/
-	private String passwordResetEmailSubject;
-	/**
-	 * Password Reset Email Body
-	 * <br/>
-	 * The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.
-	 **/
-	private String passwordResetEmailBody;
 
 	@Override
 	@XmlTransient
@@ -206,59 +182,5 @@ public class Configuration extends AbstractPersistentBean {
 	public void setPasswordComplexityModel(PasswordComplexityModel passwordComplexityModel) {
 		preset(passwordComplexityModelPropertyName, passwordComplexityModel);
 		this.passwordComplexityModel = passwordComplexityModel;
-	}
-
-	/**
-	 * {@link #fromEmail} accessor.
-	 * @return	The value.
-	 **/
-	public String getFromEmail() {
-		return fromEmail;
-	}
-
-	/**
-	 * {@link #fromEmail} mutator.
-	 * @param fromEmail	The new value.
-	 **/
-	@XmlElement
-	public void setFromEmail(String fromEmail) {
-		preset(fromEmailPropertyName, fromEmail);
-		this.fromEmail = fromEmail;
-	}
-
-	/**
-	 * {@link #passwordResetEmailSubject} accessor.
-	 * @return	The value.
-	 **/
-	public String getPasswordResetEmailSubject() {
-		return passwordResetEmailSubject;
-	}
-
-	/**
-	 * {@link #passwordResetEmailSubject} mutator.
-	 * @param passwordResetEmailSubject	The new value.
-	 **/
-	@XmlElement
-	public void setPasswordResetEmailSubject(String passwordResetEmailSubject) {
-		preset(passwordResetEmailSubjectPropertyName, passwordResetEmailSubject);
-		this.passwordResetEmailSubject = passwordResetEmailSubject;
-	}
-
-	/**
-	 * {@link #passwordResetEmailBody} accessor.
-	 * @return	The value.
-	 **/
-	public String getPasswordResetEmailBody() {
-		return passwordResetEmailBody;
-	}
-
-	/**
-	 * {@link #passwordResetEmailBody} mutator.
-	 * @param passwordResetEmailBody	The new value.
-	 **/
-	@XmlElement
-	public void setPasswordResetEmailBody(String passwordResetEmailBody) {
-		preset(passwordResetEmailBodyPropertyName, passwordResetEmailBody);
-		this.passwordResetEmailBody = passwordResetEmailBody;
 	}
 }

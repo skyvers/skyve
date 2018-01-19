@@ -63,8 +63,6 @@ public class User extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String passwordLastChangedPropertyName = "passwordLastChanged";
 	/** @hidden */
-	public static final String passwordResetTokenPropertyName = "passwordResetToken";
-	/** @hidden */
 	public static final String contactPropertyName = "contact";
 	/** @hidden */
 	public static final String dataGroupPropertyName = "dataGroup";
@@ -232,14 +230,6 @@ public class User extends AbstractPersistentBean {
 	 **/
 	private DateTime passwordLastChanged;
 	/**
-	 * Password Reset Token
-	 * <br/>
-	 * The password reset token emailed to the user on pass reset request.
-	 * <br/>
-	 * This contains a token (UUID + time in millis) which when submitted by the user will enable them to reset their password.
-	 **/
-	private String passwordResetToken;
-	/**
 	 * Contact
 	 * <br/>
 	 * The contact details for the user.
@@ -302,8 +292,6 @@ public class User extends AbstractPersistentBean {
 	private Boolean contactSelected = new Boolean(false);
 	/**
 	 * Inactive
-	 * <br/>
-	 * Indicates that this account has been marked as inactive and no longer in use.
 	 **/
 	private Boolean inactive;
 
@@ -524,24 +512,6 @@ return modules.admin.User.UserBizlet.bizKey(this);
 	public void setPasswordLastChanged(DateTime passwordLastChanged) {
 		preset(passwordLastChangedPropertyName, passwordLastChanged);
 		this.passwordLastChanged = passwordLastChanged;
-	}
-
-	/**
-	 * {@link #passwordResetToken} accessor.
-	 * @return	The value.
-	 **/
-	public String getPasswordResetToken() {
-		return passwordResetToken;
-	}
-
-	/**
-	 * {@link #passwordResetToken} mutator.
-	 * @param passwordResetToken	The new value.
-	 **/
-	@XmlElement
-	public void setPasswordResetToken(String passwordResetToken) {
-		preset(passwordResetTokenPropertyName, passwordResetToken);
-		this.passwordResetToken = passwordResetToken;
 	}
 
 	/**
