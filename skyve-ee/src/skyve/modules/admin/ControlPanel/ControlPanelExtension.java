@@ -86,6 +86,7 @@ public class ControlPanelExtension extends ControlPanel {
 		UtilImpl.HTTP_TRACE = Boolean.TRUE.equals(httpTrace);
 	}
 	
+/* Cant influence this setting as it is set in the hibernate session factory	
 	@Override
 	public Boolean getPrettySqlOutput() {
 		return Boolean.valueOf(UtilImpl.PRETTY_SQL_OUTPUT);
@@ -95,7 +96,7 @@ public class ControlPanelExtension extends ControlPanel {
 	public void setPrettySqlOutput(Boolean prettySqlOutput) {
 		UtilImpl.PRETTY_SQL_OUTPUT = Boolean.TRUE.equals(prettySqlOutput);
 	}
-	
+*/	
 	@Override
 	public Boolean getQueryTrace() {
 		return Boolean.valueOf(UtilImpl.QUERY_TRACE);
@@ -115,7 +116,7 @@ public class ControlPanelExtension extends ControlPanel {
 	public void setSecurityTrace(Boolean securityTrace) {
 		UtilImpl.SECURITY_TRACE = Boolean.TRUE.equals(securityTrace);
 	}
-	
+/* Cant influence this setting as it is set in the hibernate session factory	
 	@Override
 	public Boolean getSqlTrace() {
 		return Boolean.valueOf(UtilImpl.SQL_TRACE);
@@ -125,7 +126,7 @@ public class ControlPanelExtension extends ControlPanel {
 	public void setSqlTrace(Boolean sqlTrace) {
 		UtilImpl.SQL_TRACE = Boolean.TRUE.equals(sqlTrace);
 	}
-	
+*/
 	@Override
 	public Boolean getXmlTrace() {
 		return Boolean.valueOf(UtilImpl.XML_TRACE);

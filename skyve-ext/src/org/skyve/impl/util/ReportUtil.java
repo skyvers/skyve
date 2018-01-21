@@ -3,7 +3,10 @@ package org.skyve.impl.util;
 import java.io.File;
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -120,7 +123,69 @@ public final class ReportUtil {
 		
 		return result;
 	}
-	
+
+	public static List<JasperPrint> runReport(User user,
+										List<ReportParameters> reportParameters,
+										ReportFormat format,
+										OutputStream out)
+			throws Exception {
+		final Customer customer = user.getCustomer();
+
+		final List<JasperPrint> result = new ArrayList<>();
+		for (ReportParameters reportParameter : reportParameters) {
+			final String reportFileName = preProcess(customer, reportParameter);
+			final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
+			final String queryLanguage = jasperReport.getQuery().getLanguage();
+
+
+			UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
+			if ("sql".equalsIgnoreCase(queryLanguage)) {
+				@SuppressWarnings("resource")
+				Connection connection = EXT.getDataStoreConnection();
+				try {
+					UtilImpl.LOGGER.info("FILL REPORT");
+					result.add(JasperFillManager.fillReport(jasperReport,
+							reportParameter.getParameters(),
+							connection));
+					UtilImpl.LOGGER.info("PUMP REPORT");
+					runReport(result, format, out);
+					UtilImpl.LOGGER.info("PUMPED REPORT");
+				}
+				finally {
+					SQLUtil.disconnect(connection);
+				}
+			}
+			else if ("document".equalsIgnoreCase(queryLanguage)) {
+				Bean reportBean = reportParameter.getBean();
+				// if we have no bean then see if there is a bizId parameter
+				if (reportBean == null) {
+					String id = (String) reportParameter.getParameters().get(AbstractWebContext.ID_NAME);
+					// if we have a bizId then assume its persistent and load it
+					if (id != null) {
+						reportBean = AbstractPersistence.get().retrieve(reportParameter.getDocument(), id, false);
+					}
+				}
+				UtilImpl.LOGGER.info("FILL REPORT");
+				result.add(JasperFillManager.fillReport(jasperReport,
+						reportParameter.getParameters(),
+						new SkyveDataSource(user, reportBean)));
+			}
+		}
+
+		UtilImpl.LOGGER.info("PUMP REPORT");
+		runReport(result, format, out);
+		UtilImpl.LOGGER.info("PUMPED REPORT");
+
+		return result;
+	}
+
+	private static String preProcess(Customer customer, ReportParameters reportParameters) {
+		return preProcess(customer,
+				reportParameters.getDocument(),
+				reportParameters.getReportName(),
+				reportParameters.getParameters());
+	}
+
 	/**
 	 * Adds intrinsic parameters and returns the report file name
 	 * @param customer
@@ -153,60 +218,77 @@ public final class ReportUtil {
 									ReportFormat format,
 									OutputStream out)
 	throws JRException {
-		JRAbstractExporter exporter = null;
-		switch (format) {
-		case txt:
-			exporter = new JRTextExporter();
-			exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, new Integer(80));
-			exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, new Integer(24));
-			break;
-		case csv:
-			exporter = new JRCsvExporter();
-			break;
-		case html:
-			exporter = new JRHtmlExporter();
-			exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
-			break;
-		case xhtml:
-			exporter = new JRXhtmlExporter();
-			exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
-			break;
-		case pdf:
-			exporter = new JRPdfExporter();
-			break;
-		case xls:
-			exporter = new JExcelApiExporter(); // JRXlsExporter(); POI doesn't handle embedded images very well
-			exporter.setParameter(JRXlsAbstractExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
-			exporter.setParameter(JRXlsAbstractExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
-			break;
-		case rtf:
-			exporter = new JRRtfExporter();
-			break;
-		case odt:
-			exporter = new JROdtExporter();
-			break;
-		case ods:
-			exporter = new JROdsExporter();
-			break;
-		case docx:
-			exporter = new JRDocxExporter();
-			break;
-		case xlsx:
-			exporter = new JRXlsxExporter();
-			break;
-		case pptx:
-			exporter = new JRPptxExporter();
-			break;
-		case xml:
-			exporter = new JRXmlExporter();
-//			exporter.setParameter(JRXmlExporterParameter.DTD_LOCATION, "");
-			break;
-		default:
-			throw new IllegalStateException("Report format " + format + " not catered for.");
-		}
+		final JRAbstractExporter exporter = getExporter(format);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
 		exporter.exportReport();
+	}
+
+	public static void runReport(List<JasperPrint> jasperPrintList,
+								 ReportFormat format,
+								 OutputStream out)
+			throws JRException {
+		final JRAbstractExporter exporter = getExporter(format);
+
+		exporter.setParameter(JRExporterParameter.JASPER_PRINT_LIST, jasperPrintList);
+		exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, out);
+		exporter.exportReport();
+	}
+
+	private static JRAbstractExporter getExporter(ReportFormat format) {
+		JRAbstractExporter exporter;
+		switch (format) {
+			case txt:
+				exporter = new JRTextExporter();
+				exporter.setParameter(JRTextExporterParameter.PAGE_WIDTH, new Integer(80));
+				exporter.setParameter(JRTextExporterParameter.PAGE_HEIGHT, new Integer(24));
+				break;
+			case csv:
+				exporter = new JRCsvExporter();
+				break;
+			case html:
+				exporter = new JRHtmlExporter();
+				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
+				break;
+			case xhtml:
+				exporter = new JRXhtmlExporter();
+				exporter.setParameter(JRHtmlExporterParameter.IMAGES_URI, "image?image=");
+				break;
+			case pdf:
+				exporter = new JRPdfExporter();
+				break;
+			case xls:
+				exporter = new JExcelApiExporter(); // JRXlsExporter(); POI doesn't handle embedded images very well
+				exporter.setParameter(JRXlsAbstractExporterParameter.IS_ONE_PAGE_PER_SHEET, Boolean.FALSE);
+				exporter.setParameter(JRXlsAbstractExporterParameter.IS_WHITE_PAGE_BACKGROUND, Boolean.FALSE);
+				break;
+			case rtf:
+				exporter = new JRRtfExporter();
+				break;
+			case odt:
+				exporter = new JROdtExporter();
+				break;
+			case ods:
+				exporter = new JROdsExporter();
+				break;
+			case docx:
+				exporter = new JRDocxExporter();
+				break;
+			case xlsx:
+				exporter = new JRXlsxExporter();
+				break;
+			case pptx:
+				exporter = new JRPptxExporter();
+				break;
+			case xml:
+				exporter = new JRXmlExporter();
+//			exporter.setParameter(JRXmlExporterParameter.DTD_LOCATION, "");
+				break;
+			default:
+				throw new IllegalStateException("Report format " + format + " not catered for.");
+		}
+
+		return exporter;
 	}
 }

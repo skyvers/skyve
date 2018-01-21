@@ -177,6 +177,13 @@
 									<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" />
 								</div>
 							</div>
+							<div class="row">
+								<div class="col-1 col-2-sm"></div>
+								<div class="col-10 col-8-sm center" style="font-size: 11px;">
+									<%=Util.i18n("page.login.reset.label", locale)%>
+									<a href="<%=basePath%>pages/requestPasswordReset.jsp"><%=Util.i18n("page.login.reset.link.label", locale)%></a>
+								</div>
+							</div>
 						</div>
 					</form>
 				</div>

@@ -27,10 +27,12 @@
 			<displayName>Faces</displayName>
 			<description>Log the faces phases and the xhtml generated.</description>
 		</boolean>
+<!-- Cant influence this setting as it is set in the hibernate session factory
 		<boolean name="sqlTrace">
 			<displayName>SQL</displayName>
 			<description>Log any SQL DML or DDL generated and executed during processing.</description>
 		</boolean>
+-->
 		<boolean name="contentTrace">
 			<displayName>Content</displayName>
 			<description>Log information on content fetched and stored.</description>
@@ -47,10 +49,12 @@
 			<displayName>Dirty</displayName>
 			<description>Log the dirty state of domain objects (verbose).</description>
 		</boolean>
+<!-- Cant influence this setting as it is set in the hibernate session factory
 		<boolean name="prettySqlOutput">
 			<displayName>Pretty SQL</displayName>
 			<description>Output any SQL logged in a more readable multiline format.</description>
 		</boolean>
+-->
 		<text name="designModuleDocumentName">
 			<displayName>Module.Document Name</displayName>
 			<domain>variant</domain>

@@ -39,8 +39,6 @@ public class ControlPanel extends AbstractTransientBean {
 	/** @hidden */
 	public static final String facesTracePropertyName = "facesTrace";
 	/** @hidden */
-	public static final String sqlTracePropertyName = "sqlTrace";
-	/** @hidden */
 	public static final String contentTracePropertyName = "contentTrace";
 	/** @hidden */
 	public static final String securityTracePropertyName = "securityTrace";
@@ -48,8 +46,6 @@ public class ControlPanel extends AbstractTransientBean {
 	public static final String bizletTracePropertyName = "bizletTrace";
 	/** @hidden */
 	public static final String dirtyTracePropertyName = "dirtyTrace";
-	/** @hidden */
-	public static final String prettySqlOutputPropertyName = "prettySqlOutput";
 	/** @hidden */
 	public static final String designModuleDocumentNamePropertyName = "designModuleDocumentName";
 	/** @hidden */
@@ -102,12 +98,6 @@ public class ControlPanel extends AbstractTransientBean {
 	 **/
 	private Boolean facesTrace;
 	/**
-	 * SQL
-	 * <br/>
-	 * Log any SQL DML or DDL generated and executed during processing.
-	 **/
-	private Boolean sqlTrace;
-	/**
 	 * Content
 	 * <br/>
 	 * Log information on content fetched and stored.
@@ -131,12 +121,6 @@ public class ControlPanel extends AbstractTransientBean {
 	 * Log the dirty state of domain objects (verbose).
 	 **/
 	private Boolean dirtyTrace;
-	/**
-	 * Pretty SQL
-	 * <br/>
-	 * Output any SQL logged in a more readable multiline format.
-	 **/
-	private Boolean prettySqlOutput;
 	/**
 	 * Module.Document Name
 	 **/
@@ -302,24 +286,6 @@ public class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
-	 * {@link #sqlTrace} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getSqlTrace() {
-		return sqlTrace;
-	}
-
-	/**
-	 * {@link #sqlTrace} mutator.
-	 * @param sqlTrace	The new value.
-	 **/
-	@XmlElement
-	public void setSqlTrace(Boolean sqlTrace) {
-		preset(sqlTracePropertyName, sqlTrace);
-		this.sqlTrace = sqlTrace;
-	}
-
-	/**
 	 * {@link #contentTrace} accessor.
 	 * @return	The value.
 	 **/
@@ -389,24 +355,6 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setDirtyTrace(Boolean dirtyTrace) {
 		preset(dirtyTracePropertyName, dirtyTrace);
 		this.dirtyTrace = dirtyTrace;
-	}
-
-	/**
-	 * {@link #prettySqlOutput} accessor.
-	 * @return	The value.
-	 **/
-	public Boolean getPrettySqlOutput() {
-		return prettySqlOutput;
-	}
-
-	/**
-	 * {@link #prettySqlOutput} mutator.
-	 * @param prettySqlOutput	The new value.
-	 **/
-	@XmlElement
-	public void setPrettySqlOutput(Boolean prettySqlOutput) {
-		preset(prettySqlOutputPropertyName, prettySqlOutput);
-		this.prettySqlOutput = prettySqlOutput;
 	}
 
 	/**
