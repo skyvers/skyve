@@ -26,7 +26,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
-public class DocumentQueryListModel extends ListModel<Bean> {
+public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private static final long serialVersionUID = 8905939302545321358L;
 
 	private String description;
