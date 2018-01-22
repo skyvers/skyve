@@ -8,6 +8,12 @@
 		<column percentageWidth="50" responsiveWidth="4" />
 		<column />
 		<row>
+			<!-- Old password is required in this view (only not required for reset password function) -->
+			<item required="true">
+				<password binding="oldPassword" />
+			</item>
+		</row>
+		<row>
 			<item>
 				<password binding="newPassword" />
 			</item>

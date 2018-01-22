@@ -19,7 +19,7 @@
 
 	String passwordChangeErrorMessage = null;
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
-	String confirmPasswordValue = request.getParameter(newPasswordFieldName);
+	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
 	String passwordResetToken = request.getParameter("t");
 
 	if (passwordResetToken == null) {
@@ -27,7 +27,7 @@
 	}
 	// This is a postback, process it and move on
 	else if ((newPasswordValue != null) && (confirmPasswordValue != null)) {
-		passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue);
+		passwordChangeErrorMessage = WebUtil.resetPassword(passwordResetToken, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
 			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
 			return;

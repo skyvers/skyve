@@ -40,6 +40,7 @@ public class SQLMetaDataUtil {
 	public static final String FROM_EMAIL_PROPERTY_NAME = "fromEmail";
 	public static final String NAME_PROPERTY_NAME = "name";
 	public static final String NEW_PASSWORD_PROPERTY_NAME = "newPassword";
+	public static final String OLD_PASSWORD_PROPERTY_NAME = "oldPassword";
 	public static final String PASSWORD_PROPERTY_NAME = "password";
 	public static final String PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME = "passwordResetEmailBody";
 	public static final String PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME = "passwordResetEmailSubject";

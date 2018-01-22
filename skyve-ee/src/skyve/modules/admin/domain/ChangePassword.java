@@ -28,12 +28,23 @@ public class ChangePassword extends AbstractTransientBean {
 	public static final String DOCUMENT_NAME = "ChangePassword";
 
 	/** @hidden */
+	public static final String oldPasswordPropertyName = "oldPassword";
+	/** @hidden */
 	public static final String newPasswordPropertyName = "newPassword";
 	/** @hidden */
 	public static final String confirmPasswordPropertyName = "confirmPassword";
 	/** @hidden */
 	public static final String responsePropertyName = "response";
 
+	/**
+	 * Old Password
+	 * <br/>
+	 * Enter your old password
+	 * <br/>
+	 * The old password is not always required to change the password as the
+					self service reset password function cannot demand the user for their old password.
+	 **/
+	private String oldPassword;
 	/**
 	 * New Password
 	 * <br/>
@@ -79,6 +90,24 @@ public class ChangePassword extends AbstractTransientBean {
 	public boolean equals(Object o) {
 		return ((o instanceof ChangePassword) && 
 					this.getBizId().equals(((ChangePassword) o).getBizId()));
+	}
+
+	/**
+	 * {@link #oldPassword} accessor.
+	 * @return	The value.
+	 **/
+	public String getOldPassword() {
+		return oldPassword;
+	}
+
+	/**
+	 * {@link #oldPassword} mutator.
+	 * @param oldPassword	The new value.
+	 **/
+	@XmlElement
+	public void setOldPassword(String oldPassword) {
+		preset(oldPasswordPropertyName, oldPassword);
+		this.oldPassword = oldPassword;
 	}
 
 	/**
