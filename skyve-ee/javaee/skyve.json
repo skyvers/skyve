@@ -99,6 +99,7 @@
 	// API Settings
 	api: {
 		googleMapsV3Key: "AIzaSyDcDHNxHUVAF-CMqvI0TIAPlye9g4Wr4Dg",
+		googleRecaptchaSiteKey: null,
 		ckEditorConfigFileUrl: null
 	},
 	// Environment settings
