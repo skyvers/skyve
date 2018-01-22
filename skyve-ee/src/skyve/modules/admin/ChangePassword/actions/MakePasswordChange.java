@@ -73,7 +73,6 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			if (! oldHashedPassword.equals(userBean.getPassword())) {
 				Message message = new Message(ChangePassword.oldPasswordPropertyName,
 						"The old password is incorrect.  Please re-enter the old/existing password.");
-				message.addBinding(ChangePassword.oldPasswordPropertyName);
 				throw new ValidationException(message);
 			}
 		}
