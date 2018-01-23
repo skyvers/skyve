@@ -81,7 +81,7 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 			ps.setNull(index, Types.TIMESTAMP);
 		}
 		else {
-			ps.setTimestamp(index, new Timestamp(((org.skyve.domain.types.Timestamp) value).getTime()));
+			ps.setTimestamp(index, new Timestamp(((Date) value).getTime()));
 		}
 	}
 

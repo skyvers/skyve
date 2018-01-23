@@ -531,11 +531,11 @@ public class SmartClientListServlet extends HttpServlet {
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
-						type = String.class;
-						StringBuilder sb = new StringBuilder(64);
-						sb.append(binding).append('.').append(Bean.DOCUMENT_ID);
-						binding = sb.toString();
 						equalsOperatorRequired = true;
+						if (! parameter) {
+							type = String.class;
+							binding = String.format("%s.%s", binding, Bean.DOCUMENT_ID);
+						}
 					}
 				}
 			}

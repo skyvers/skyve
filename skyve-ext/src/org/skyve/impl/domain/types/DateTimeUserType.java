@@ -82,7 +82,7 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 			ps.setNull(index, Types.TIMESTAMP);
 		}
 		else {
-			ps.setTimestamp(index, new Timestamp(((DateTime) value).getTime()));
+			ps.setTimestamp(index, new Timestamp(((Date) value).getTime()));
 		}
 	}
 
