@@ -39,6 +39,10 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 		return required;
 	}
 	
+	public Boolean getRequiredBool() {
+		return Boolean.valueOf(required);
+	}
+
 	@XmlTransient
 	public void setRequired(boolean required) {
 		this.required = required;

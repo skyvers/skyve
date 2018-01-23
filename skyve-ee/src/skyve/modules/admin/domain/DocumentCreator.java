@@ -28,12 +28,21 @@ public class DocumentCreator extends AbstractTransientBean {
 	public static final String DOCUMENT_NAME = "DocumentCreator";
 
 	/** @hidden */
+	public static final String outputLocationPropertyName = "outputLocation";
+	/** @hidden */
 	public static final String scriptPropertyName = "script";
 	/** @hidden */
 	public static final String documentPreviewPropertyName = "documentPreview";
 	/** @hidden */
 	public static final String markdownPreviewPropertyName = "markdownPreview";
 
+	/**
+	 * Output Location
+	 * <br/>
+	 * Absolute path on the filesystem to the source directory where modules live. 
+					E.g. c:/workspace/project/src/main/java
+	 **/
+	private String outputLocation;
 	/**
 	 * Script
 	 **/
@@ -75,6 +84,24 @@ public class DocumentCreator extends AbstractTransientBean {
 	public boolean equals(Object o) {
 		return ((o instanceof DocumentCreator) && 
 					this.getBizId().equals(((DocumentCreator) o).getBizId()));
+	}
+
+	/**
+	 * {@link #outputLocation} accessor.
+	 * @return	The value.
+	 **/
+	public String getOutputLocation() {
+		return outputLocation;
+	}
+
+	/**
+	 * {@link #outputLocation} mutator.
+	 * @param outputLocation	The new value.
+	 **/
+	@XmlElement
+	public void setOutputLocation(String outputLocation) {
+		preset(outputLocationPropertyName, outputLocation);
+		this.outputLocation = outputLocation;
 	}
 
 	/**

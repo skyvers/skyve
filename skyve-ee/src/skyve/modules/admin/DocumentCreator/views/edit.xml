@@ -18,6 +18,11 @@
 		            	</textArea>
 		            </item>
 		        </row>
+		        <row>
+		        	<item>
+		        		<default binding="outputLocation" />
+		        	</item>
+		        </row>
 		    </form>
     	</tab>
     	<tab title="Markdown Preview">
@@ -47,7 +52,8 @@
     <actions>
         <defaults/>
         
-        <!-- <action className="Submit" clientValidation="true" displayName="Create Documents"/> -->
+        <action className="Submit" clientValidation="true" displayName="Create Files" iconStyleClass="fa fa-file-code-o"
+        	confirm="Are you sure you wish to create files for this script? Any existing files will be overwritten."/>
         <action className="UpdatePreview" displayName="Update Preview" clientValidation="true" inActionPanel="false" />
     </actions>
     <newParameters/>
