@@ -114,12 +114,19 @@ public class ContentModel extends ListModel<DataMaintenance> {
 
 	@Override
 	public Filter getFilter() throws Exception {
+		// not required
 		return null;
 	}
 
 	@Override
 	public Filter newFilter() throws Exception {
+		// not required
 		return null;
+	}
+	
+	@Override
+	public void putParameter(String name, Object value) {
+		// not required
 	}
 
 	@Override

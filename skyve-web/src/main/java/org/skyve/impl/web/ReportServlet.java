@@ -37,7 +37,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
-import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
@@ -332,7 +331,7 @@ public class ReportServlet extends HttpServlet {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
-					DocumentQueryListModel queryModel = new DocumentQueryListModel();
+					DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 					queryModel.setQuery(query);
 					model = queryModel;
 				}
@@ -357,14 +356,13 @@ public class ReportServlet extends HttpServlet {
 																					model);
 					}
 					else { // simple criteria
-						Filter filter = model.getFilter();
 						SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
 																				drivingDocument,
 																				customer,
 																				SmartClientFilterOperator.substring,
 																				criteria,
 																				tagId,
-																				filter);
+																				model);
 					}
 				}
 
