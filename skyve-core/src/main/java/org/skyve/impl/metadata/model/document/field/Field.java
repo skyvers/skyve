@@ -65,6 +65,10 @@ public abstract class Field extends AbstractAttribute {
 		this.required = required;
 	}
 	
+	public Boolean getRequiredBool() {
+		return Boolean.valueOf(required);
+	}
+
 	@XmlAttribute(name = "required")
 	public void setRequiredBool(Boolean required) {
 		this.required = required.booleanValue();
@@ -78,6 +82,10 @@ public abstract class Field extends AbstractAttribute {
 	@XmlTransient
 	public void setPersistent(boolean persistent) {
 		this.persistent = persistent;
+	}
+
+	public Boolean getPersistentBool() {
+		return Boolean.valueOf(persistent);
 	}
 
 	@XmlAttribute(name = "persistent")
