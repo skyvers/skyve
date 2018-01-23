@@ -40,8 +40,6 @@ import org.skyve.util.Util;
 
 public class SkyveScriptInterpreter {
 
-	private static final String ROLE_MAINTAINER = "Maintainer";
-	private static final String ROLE_VIEWER = "Viewer";
 	private List<DocumentMetaData> documents;
 	private List<ModuleMetaData> modules;
 	private Parser parser;
@@ -51,11 +49,18 @@ public class SkyveScriptInterpreter {
 	private static DocumentMetaData currentDocument = null;
 	private ModuleMetaData currentModule = null;
 
-	private static String DISPLAY_NAME_PATTERN = "['\"](.+)['\"]";
+	private static final String ROLE_MAINTAINER = "Maintainer";
+	private static final String ROLE_VIEWER = "Viewer";
+
+	private static String DISPLAY_NAME_PATTERN = "['\"]([^'\"]+)['\"]";
 	/**
 	 * Matches a markdown enum declaration missing the word enum
 	 */
 	private static String ENUM_SHORTHAND_PATTERN = "^[-|+]\\s\\*?['\"]?\\w+['\"]?\\*?\\s\\(.+\\)";
+	/**
+	 * Matches a markdown heading declaration missing the space after #
+	 */
+	private static String HEADING_SHORTHAND_PATTERN = "^(#{1,2})['\"]?\\w+['\"]?$";
 	/**
 	 * Matches a markdown list declaration missing the space after the - or +
 	 */
@@ -65,12 +70,6 @@ public class SkyveScriptInterpreter {
 	 */
 	private static String REQUIRED_SHORTHAND_PATTERN = "^[-|+]\\s(\\*{1}['\"]?\\w+['\"]?)\\s.*";
 
-	/*public SkyveScriptInterpreter(Node document) {
-		super();
-		this.document = document;
-		this.documents = new ArrayList<>();
-		this.modules = new ArrayList<>();
-	}*/
 
 	/**
 	 * Creates a new SkyveScriptInterpreter instance with the
@@ -107,6 +106,7 @@ public class SkyveScriptInterpreter {
 	 * replaces them with correct markdown which conforms to the specification.
 	 * Looks to replace:
 	 * <ul>
+	 * <li>missing spaces for headings, e.g. <code>#Admin</code> instead of <code># Admin</code>
 	 * <li>missing spaces for list items, e.g. <code>-address</code> instead of <code>- address</code>
 	 * <li>unterminated asterisks for required fields
 	 * <li>missing enum declarations
@@ -120,9 +120,20 @@ public class SkyveScriptInterpreter {
 			StringBuilder newScript = new StringBuilder();
 
 			for (String line : lines) {
-				// look for missing list item spaces
-				Pattern p = Pattern.compile(LIST_SHORTHAND_PATTERN);
+				// look for missing heading spaces
+				Pattern p = Pattern.compile(HEADING_SHORTHAND_PATTERN);
 				Matcher m = p.matcher(line);
+
+				while (m.find()) {
+					final String match = m.group(1);
+					if (match != null) {
+						line = line.replace(match, match + " ");
+					}
+				}
+
+				// look for missing list item spaces
+				p = Pattern.compile(LIST_SHORTHAND_PATTERN);
+				m = p.matcher(line);
 
 				if (m.matches()) {
 					line = line.replaceFirst("^-", "- ").replaceFirst("^\\+", "+ ");
@@ -209,7 +220,7 @@ public class SkyveScriptInterpreter {
 
 					String documentName = null, singularAlias = null;
 
-					if (isDisplayName(text.getLiteral())) {
+					if (isDisplayName(text.getLiteral().trim())) {
 						singularAlias = extractDisplayName(text.getLiteral());
 						documentName = BindUtil.toJavaTypeIdentifier(singularAlias);
 					} else {
@@ -217,20 +228,24 @@ public class SkyveScriptInterpreter {
 						singularAlias = toTitleCase(documentName);
 					}
 
-					currentDocument.setName(documentName);
-					currentDocument.setSingularAlias(singularAlias);
-					currentDocument.setPluralAlias(singularAlias + "s");
+					if (documentName != null) {
+						currentDocument.setName(documentName);
+						currentDocument.setSingularAlias(singularAlias);
+						currentDocument.setPluralAlias(singularAlias + "s");
 
-					Code persistentName = null;
-					if (text.getNext() != null && text.getNext() instanceof Code) {
-						persistentName = (Code) text.getNext();
-					}
+						Code persistentName = null;
+						if (text.getNext() != null && text.getNext() instanceof Code) {
+							persistentName = (Code) text.getNext();
+						}
 
-					// insert persistent name if provided
-					if (persistentName != null) {
-						Persistent persistent = new Persistent();
-						persistent.setName(persistentName.getLiteral());
-						currentDocument.setPersistent(persistent);
+						// insert persistent name if provided
+						if (persistentName != null) {
+							Persistent persistent = new Persistent();
+							persistent.setName(persistentName.getLiteral());
+							currentDocument.setPersistent(persistent);
+						}
+					} else {
+						Util.LOGGER.warning(String.format("Unsupported document name declaratation: %s", text.getLiteral()));
 					}
 				}
 

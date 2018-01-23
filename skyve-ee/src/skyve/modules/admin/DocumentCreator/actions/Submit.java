@@ -31,48 +31,23 @@ public class Submit implements ServerSideAction<DocumentCreator> {
 
 	@SuppressWarnings("boxing")
 	private static void parseScript(DocumentCreator bean, WebContext webContext) {
-		// disect the script into documents, attributes, associations and collections
-		// split the string into lines
-		// String[] lines = bean.getScript().split("\n");
-
-		// DocumentMetaData currentDocument = null;
-
-		/*for (String line : lines) {
-			System.out.println("current line: " + line);
-			if (line.startsWith("##")) {
-				if (currentDocument == null) {
-					// create a new document
-					currentDocument = new DocumentMetaData();
-					line = line.replace("##", "").trim();
-					currentDocument.setName(line);
-				}
-			}
-		}*/
-
 		SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript());
 		i.preProcess();
 		i.process();
 
 		if (i.getModules().size() > 0) {
-			StringBuilder output = new StringBuilder();
 			final String sourceDirectory = bean.getOutputLocation();
 
 			for(ModuleMetaData m : i.getModules()) {
-				output.append(XMLMetaData.marshalModule(m, false));
 				XMLMetaData.marshalModule(m, sourceDirectory);
 				final String moduleDirectory = String.format("%s/modules/%s", sourceDirectory, m.getName());
 						
 				if (i.getDocuments().size() > 0) {
 					for (DocumentMetaData d : i.getDocuments()) {
-						output.append("<br>");
-						output.append(XMLMetaData.marshalDocument(d, false));
 						XMLMetaData.marshalDocument(d, moduleDirectory);
 					}
 				}
 			}
-
-			// System.out.println(output);
-			// bean.setDocumentPreview(output.toString());
 
 			webContext.growl(MessageSeverity.info, String.format("Wrote %d modules and %d documents to %s",
 					i.getModules().size(),

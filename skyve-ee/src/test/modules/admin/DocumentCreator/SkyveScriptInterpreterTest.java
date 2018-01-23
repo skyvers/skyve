@@ -109,6 +109,51 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("boxing")
+	public void testDocumentHeadingWithDisplayName() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## 'Address Title'";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document.getName(), is("AddressTitle"));
+		assertThat(document.getSingularAlias(), is("Address Title"));
+		assertThat(document.getPluralAlias(), is("Address Titles"));
+		assertThat(document.getPersistent(), is(nullValue()));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	public void testDocumentHeadingWithDisplayNameAndPersistentName() throws Exception {
+		// setup the test data
+		String script = "# Admin\n## 'Address Title' `ADM_Address`";
+
+		// perform the method under test
+		i = new SkyveScriptInterpreter(script);
+		i.process();
+
+		// verify the result
+		assertThat(i.getModules().size(), is(1));
+		assertThat(i.getDocuments().size(), is(1));
+
+		DocumentMetaData document = i.getDocuments().get(0);
+
+		assertThat(document.getName(), is("AddressTitle"));
+		assertThat(document.getSingularAlias(), is("Address Title"));
+		assertThat(document.getPluralAlias(), is("Address Titles"));
+		assertThat(document.getPersistent(), is(notNullValue()));
+		assertThat(document.getPersistent().getPersistentIdentifier(), is("ADM_Address"));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
 	public void testAssociation() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n- country Country";
@@ -240,7 +285,21 @@ public class SkyveScriptInterpreterTest {
 	}
 	
 	@Test
-	public void testPreProcessAddsMissingListItemSpaceAndEnumDefinition() throws Exception {
+	public void testPreProcessAddsMissingHeadingSpace() throws Exception {
+		// setup the test data
+		String script = "#Admin\n##Address\n- active boolean\n- completionDate date";
+		i = new SkyveScriptInterpreter(script);
+
+		// perform the method under test
+		String result = i.preProcess();
+
+		// verify the result
+		String expected = "# Admin\n## Address\n- active boolean\n- completionDate date";
+		assertThat(result, is(expected));
+	}
+
+	@Test
+	public void testPreProcessAddsMissingListItemSpace() throws Exception {
 		// setup the test data
 		String script = "# Admin\n## Address\n-active boolean\n- completionDate date";
 		i = new SkyveScriptInterpreter(script);
