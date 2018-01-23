@@ -117,6 +117,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		establishQueries();
 		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
 	}
+	
+	@Override
+	public void putParameter(String name, Object value) {
+		establishQueries();
+		detailQuery.putParameter(name, value);
+		summaryQuery.putParameter(name, value);
+	}
 
 	@Override
 	public Page fetch() throws Exception {

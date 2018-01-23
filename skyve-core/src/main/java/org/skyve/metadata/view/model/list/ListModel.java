@@ -91,6 +91,10 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 		
 		for (FilterParameter param : filterParameters) {
 			String parameterName = param.getName();
+			boolean parameter = parameterName.charAt(0) == ':';
+			if (parameter) {
+				parameterName = parameterName.substring(1);
+			}
 			String parameterBinding = param.getBinding();
 			String parameterValue = param.getValue();
 
@@ -114,6 +118,11 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 				value = ((Bean) value).getBizId();
 			}
 
+			if (parameter) {
+				putParameter(parameterName, value);
+				continue;
+			}
+			
 			// Determine the parameter name to use
 			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, 
 																	drivingModule, 
@@ -251,6 +260,7 @@ public abstract class ListModel<T extends Bean> implements MetaData {
 	
 	public abstract Filter getFilter() throws Exception;
 	public abstract Filter newFilter() throws Exception;
+	public abstract void putParameter(String name, Object value);
 	public abstract Page fetch() throws Exception;
 	public abstract AutoClosingIterable<Bean> iterate() throws Exception;
 	

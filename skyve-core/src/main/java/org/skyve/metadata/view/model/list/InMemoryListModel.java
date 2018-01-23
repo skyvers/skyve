@@ -31,6 +31,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	private Customer customer;
 	private Module module;
 	private Document drivingDocument;
+	private Map<String, Object> parameters;
 	private List<Bean> rows;
 	
 	/**
@@ -106,6 +107,14 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		return new InMemoryFilter();
 	}
 
+	@Override
+	public void putParameter(String name, Object value) {
+		if (parameters == null) {
+			parameters = new TreeMap<>();
+		}
+		parameters.put(name, value);
+	}
+	
 	private void filterAndSort() {
 		if (filter != null) {
 			filter.filter(rows);
