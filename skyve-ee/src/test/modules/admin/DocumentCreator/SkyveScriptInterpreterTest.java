@@ -77,8 +77,10 @@ public class SkyveScriptInterpreterTest {
 
 		assertThat(document.getName(), is("Address"));
 		assertThat(document.getSingularAlias(), is("Address"));
-		assertThat(document.getPluralAlias(), is("Addresss"));
+		assertThat(document.getPluralAlias(), is("Addresses"));
 		assertThat(document.getPersistent(), is(nullValue()));
+		assertThat(document.getBizKey(), is(notNullValue()));
+		assertThat(document.getBizKey().getExpression(), is(("Address")));
 
 		assertThat(module.getHomeDocument(), is(notNullValue()));
 		assertThat(module.getHomeRef(), is(notNullValue()));
@@ -102,7 +104,7 @@ public class SkyveScriptInterpreterTest {
 
 		assertThat(document.getName(), is("Address"));
 		assertThat(document.getSingularAlias(), is("Address"));
-		assertThat(document.getPluralAlias(), is("Addresss"));
+		assertThat(document.getPluralAlias(), is("Addresses"));
 		assertThat(document.getPersistent(), is(notNullValue()));
 		assertThat(document.getPersistent().getPersistentIdentifier(), is("ADM_Address"));
 	}
@@ -172,8 +174,11 @@ public class SkyveScriptInterpreterTest {
 		assertThat(document.getAttributes().size(), is(1));
 
 		assertThat(document.getAttributes().get(0) instanceof Association, is(true));
-		assertThat(document.getAttributes().get(0).getName(), is("country"));
-		assertThat(document.getAttributes().get(0).getDisplayName(), is("Country"));
+
+		Association a = (Association) document.getAttributes().get(0);
+		assertThat(a.getName(), is("country"));
+		assertThat(a.getDisplayName(), is("Country"));
+		assertThat(a.getDocumentName(), is("Country"));
 	}
 
 	@Test
@@ -196,9 +201,13 @@ public class SkyveScriptInterpreterTest {
 		assertThat(document.getAttributes().size(), is(1));
 
 		assertThat(document.getAttributes().get(0) instanceof Association, is(true));
-		assertThat(document.getAttributes().get(0).getName(), is("country"));
-		assertThat(document.getAttributes().get(0).getDisplayName(), is("Country"));
-		assertThat(document.getAttributes().get(0).isRequired(), is(true));
+
+		Association a = (Association) document.getAttributes().get(0);
+
+		assertThat(a.getName(), is("country"));
+		assertThat(a.getDisplayName(), is("Country"));
+		assertThat(a.isRequired(), is(true));
+		assertThat(a.getDocumentName(), is("Country"));
 	}
 
 	@Test
@@ -226,6 +235,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(collection.getName(), is("roles"));
 		assertThat(collection.getDisplayName(), is("Roles"));
 		assertThat(collection.getMinCardinality(), is(0));
+		assertThat(collection.getDocumentName(), is("Role"));
 	}
 
 	@Test
@@ -253,6 +263,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(collection.getName(), is("roles"));
 		assertThat(collection.getDisplayName(), is("Roles"));
 		assertThat(collection.getMinCardinality(), is(1));
+		assertThat(collection.getDocumentName(), is("Role"));
 	}
 
 	@Test

@@ -80,7 +80,7 @@ public class VariableExpanderTest {
 				(Map<String, Object>) expandedFirstLevelPropertyMap.get(secondLevelMapPropertyKey);
 		final String expandedSecondLevelProperty = (String) expandedSecondLevelPropertyMap.get(propertyKey);
 		Assert.assertThat(expandedSecondLevelProperty, is(variableValue));
-;	}
+	}
 
 	/**
 	 * Tests that the default value is used when the variable is not defined.

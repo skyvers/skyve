@@ -22,9 +22,11 @@ import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.Action;
 import org.skyve.impl.metadata.repository.module.DocumentPrivilege;
+import org.skyve.impl.metadata.repository.module.EditItem;
 import org.skyve.impl.metadata.repository.module.GrantedTo;
 import org.skyve.impl.metadata.repository.module.Menu;
 import org.skyve.impl.metadata.repository.module.ModuleDocument;
@@ -231,7 +233,12 @@ public class SkyveScriptInterpreter {
 					if (documentName != null) {
 						currentDocument.setName(documentName);
 						currentDocument.setSingularAlias(singularAlias);
-						currentDocument.setPluralAlias(singularAlias + "s");
+						currentDocument.setPluralAlias(
+								singularAlias + (singularAlias != null && singularAlias.endsWith("s") ? "es" : "s"));
+
+						BizKey bizKey = new BizKey();
+						bizKey.setExpression(singularAlias);
+						currentDocument.setBizKey(bizKey);
 
 						Code persistentName = null;
 						if (text.getNext() != null && text.getNext() instanceof Code) {
@@ -261,7 +268,7 @@ public class SkyveScriptInterpreter {
 				// set the module home document if not set
 				if (currentModule.getHomeDocument() == null) {
 					currentModule.setHomeDocument(currentDocument.getName());
-					currentModule.setHomeRef(ViewType.edit);
+					currentModule.setHomeRef(currentDocument.getPersistent() != null ? ViewType.list : ViewType.edit);
 				}
 
 				process(heading.getNext());
@@ -302,22 +309,33 @@ public class SkyveScriptInterpreter {
 			module.setMenu(menu);
 		}
 
-		List<Action> actions = menu.getActions();
-
-		org.skyve.impl.metadata.repository.module.ListItem action = new org.skyve.impl.metadata.repository.module.ListItem();
-		action.setDocumentName(document.getName());
-		action.setName(document.getPluralAlias());
-
 		GrantedTo maintainer = new GrantedTo();
 		maintainer.setRoleName(ROLE_MAINTAINER);
 
 		GrantedTo viewer = new GrantedTo();
 		viewer.setRoleName(ROLE_VIEWER);
 
-		action.getRoles().add(maintainer);
-		action.getRoles().add(viewer);
+		List<Action> actions = menu.getActions();
 
-		actions.add(action);
+		if (document.getPersistent() != null) {
+			org.skyve.impl.metadata.repository.module.ListItem action = new org.skyve.impl.metadata.repository.module.ListItem();
+			action.setDocumentName(document.getName());
+			action.setName(document.getPluralAlias());
+
+			action.getRoles().add(maintainer);
+			action.getRoles().add(viewer);
+
+			actions.add(action);
+		} else {
+			EditItem action = new EditItem();
+			action.setDocumentName(document.getName());
+			action.setName(document.getPluralAlias());
+
+			action.getRoles().add(maintainer);
+			action.getRoles().add(viewer);
+
+			actions.add(action);
+		}
 	}
 
 	/**
@@ -365,12 +383,13 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Creates a new Association ready to be added to the current Document.
 	 */
-	private static Association createAssociation(boolean required, String name, String displayName) {
+	private static Association createAssociation(boolean required, String type, String name, String displayName) {
 		AssociationImpl association = new AssociationImpl();
 		association.setName(name);
 		association.setDisplayName(displayName);
 		association.setRequired(required);
 		association.setType(AssociationType.aggregation);
+		association.setDocumentName(type);
 		return association;
 	}
 
@@ -485,10 +504,10 @@ public class SkyveScriptInterpreter {
 				default:
 					// did not match scalar attribute, check if association or collection definition
 					if (isAssociationDefinition(line, type, parts)) {
-						Association association = createAssociation(required, name, displayName);
+						Association association = createAssociation(required, type, name, displayName);
 						currentDocument.getAttributes().add(association);
 					} else if (isCollectionDefinition(line, type, parts)) {
-						CollectionImpl collection = createCollection(required, name, displayName);
+						CollectionImpl collection = createCollection(required, type, name, displayName);
 						currentDocument.getAttributes().add(collection);
 					} else {
 						Util.LOGGER.warning(String.format("Unsupported attribute: %s [%s]", attributeName, parts[0]));
@@ -506,11 +525,12 @@ public class SkyveScriptInterpreter {
 	 * Creates a new Collection ready to be added to the current document.
 	 */
 	@SuppressWarnings("boxing")
-	private static CollectionImpl createCollection(boolean required, String name, String displayName) {
+	private static CollectionImpl createCollection(boolean required, String type, String name, String displayName) {
 		CollectionImpl collection = new CollectionImpl();
 		collection.setName(name);
 		collection.setDisplayName(displayName);
 		collection.setMinCardinality(required ? 1 : 0);
+		collection.setDocumentName(type);
 		collection.setType(CollectionType.aggregation);
 		return collection;
 	}
