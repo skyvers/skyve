@@ -60,6 +60,10 @@ public abstract class ReferenceImpl extends AbstractAttribute implements Referen
 		this.persistent = persistent;
 	}
 
+	public Boolean getPersistentBool() {
+		return Boolean.valueOf(persistent);
+	}
+
 	@XmlAttribute(name="persistent", required = false)
 	public void setPersistentBool(Boolean persistent) {
 		this.persistent = persistent.booleanValue();

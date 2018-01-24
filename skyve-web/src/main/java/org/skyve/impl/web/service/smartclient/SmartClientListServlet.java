@@ -170,7 +170,7 @@ public class SmartClientListServlet extends HttpServlet {
 							if (query == null) {
 								throw new ServletException("DataSource does not reference a valid query " + documentOrQueryName);
 							}
-					        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+					        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 					        queryModel.setQuery(query);
 					        model = queryModel;
 					        drivingDocument = module.getDocument(customer, query.getDocumentName());
@@ -407,7 +407,7 @@ public class SmartClientListServlet extends HttpServlet {
 		    										String[] criteria,
 		    										SortedMap<String, Object> parameters,
 		    										String tagId,
-													ListModel<?> model) 
+													ListModel<Bean> model) 
     throws Exception {
     	SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
     	CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
@@ -454,7 +454,7 @@ public class SmartClientListServlet extends HttpServlet {
 										filterOperator,
 										mutableParameters,
 										tagId,
-										model.getFilter());
+										model);
     }
 
     /**
@@ -474,8 +474,10 @@ public class SmartClientListServlet extends HttpServlet {
 			    										SmartClientFilterOperator filterOperator,
 			    										Map<String, Object> criteria,
 			    										String tagId,
-		    											Filter filter) 
+		    											ListModel<Bean> model) 
     throws Exception {
+    	Filter filter = model.getFilter();
+    	
     	// This doesn't need to set up a sub-filter as its just ANDing criteria
     	// and the other criteria already added should have taken care of bracketing
     	// for correct operator precedence.
@@ -486,8 +488,8 @@ public class SmartClientListServlet extends HttpServlet {
 			}
 			
 			binding = BindUtil.unsanitiseBinding(binding);
-			boolean queryParameter = (binding.charAt(0) == ':');
-			if (queryParameter) {
+			boolean parameter = (binding.charAt(0) == ':');
+			if (parameter) {
 				binding = binding.substring(1); // lose the colon
 			}
 			
@@ -507,7 +509,7 @@ public class SmartClientListServlet extends HttpServlet {
 															binding);
     		}
     		catch (MetaDataException e ) {
-    			if (! queryParameter) {
+    			if (! parameter) {
     				throw e;
     			}
     		}
@@ -529,11 +531,11 @@ public class SmartClientListServlet extends HttpServlet {
 						converter = field.getConverterForCustomer(customer);
 					}
 					else if (attribute instanceof Association) {
-						type = String.class;
-						StringBuilder sb = new StringBuilder(64);
-						sb.append(binding).append('.').append(Bean.DOCUMENT_ID);
-						binding = sb.toString();
 						equalsOperatorRequired = true;
+						if (! parameter) {
+							type = String.class;
+							binding = String.format("%s.%s", binding, Bean.DOCUMENT_ID);
+						}
 					}
 				}
 			}
@@ -547,7 +549,10 @@ public class SmartClientListServlet extends HttpServlet {
 									type);
 			}
 
-			if (! queryParameter) {
+			if (parameter) {
+				model.putParameter(binding, value);
+			}
+			else {
 				equalsOperatorRequired = equalsOperatorRequired || 
 											(value instanceof Date) ||
 											(value instanceof Number) ||
@@ -651,8 +656,8 @@ public class SmartClientListServlet extends HttpServlet {
 			    		}
 		    		}
 	
-		    		boolean queryParameter = (binding.charAt(0) == ':');
-		    		if (queryParameter) {
+		    		boolean parameter = (binding.charAt(0) == ':');
+		    		if (parameter) {
 		    			binding = binding.substring(1);
 		    		}
 		    		
@@ -669,7 +674,7 @@ public class SmartClientListServlet extends HttpServlet {
 																	binding);
 		    		}
 		    		catch (MetaDataException e) {
-		    			if (! queryParameter) {
+		    			if (! parameter) {
 		    				throw e;
 		    			}
 		    		}
@@ -707,7 +712,8 @@ public class SmartClientListServlet extends HttpServlet {
 	    			
 	    			value = fromString(binding, "value", valueString, customer, converter, type);
 	
-	    			if (queryParameter) {
+	    			if (parameter) {
+	    				model.putParameter(binding, value);
 						continue;
 	    			}
 	

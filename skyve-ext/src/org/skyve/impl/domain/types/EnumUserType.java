@@ -103,6 +103,9 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
             if (value == null) {
             	ps.setNull(index, Types.VARCHAR);
             }
+            else if (value instanceof String) {
+            	ps.setString(index, (String) value);
+            }
             else {
                 String code = (String) toCodeMethod.invoke(value, new Object[0]);
                 ps.setString(index, code);

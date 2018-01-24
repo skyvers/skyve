@@ -1,7 +1,6 @@
 package modules.admin.DocumentCreator.actions;
 
 import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
 import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlNodeRendererFactory;
@@ -11,6 +10,7 @@ import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 import modules.admin.DocumentCreator.SkyveDocumentNodeRenderer;
+import modules.admin.DocumentCreator.SkyveScriptInterpreter;
 import modules.admin.domain.DocumentCreator;
 
 public class UpdatePreview implements ServerSideAction<DocumentCreator> {
@@ -25,8 +25,12 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 			bean.setDocumentPreview(null);
 		}
 		else {
-			Parser parser = Parser.builder().build();
-			Node document = parser.parse(script);
+			SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript());
+			i.preProcess();
+			Node document = i.parse();
+
+			// Parser parser = Parser.builder().build();
+			// Node document = parser.parse(script);
 	
 			// create a markdown to HTML renderer for the markdown preview tab
 			HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();

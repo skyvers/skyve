@@ -212,7 +212,7 @@ public class WebUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String makePasswordChange(User user, String newPassword) 
+	public static String makePasswordChange(User user, String oldPassword, String newPassword, String confirmPassword) 
 	throws Exception {
 		String errorMessage = null;
 		
@@ -220,8 +220,9 @@ public class WebUtil {
 		Module admin = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
 		Document changePassword = admin.getDocument(c, SQLMetaDataUtil.CHANGE_PASSWORD_DOCUMENT_NAME);
 		Bean bean = changePassword.newInstance(user);
+		BindUtil.set(bean, SQLMetaDataUtil.OLD_PASSWORD_PROPERTY_NAME, oldPassword);
 		BindUtil.set(bean, SQLMetaDataUtil.NEW_PASSWORD_PROPERTY_NAME, newPassword);
-		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, newPassword);
+		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, confirmPassword);
 		AbstractRepository r = AbstractRepository.get();
 
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -298,7 +299,8 @@ public class WebUtil {
 	 * @param passwordResetToken
 	 * @param newPassword
 	 */
-	public static String resetPassword(String passwordResetToken, String newPassword) throws Exception {
+	public static String resetPassword(String passwordResetToken, String newPassword, String confirmPassword)
+	throws Exception {
 		String customerName = null;
 		String userName = null;
 		try (Connection c = EXT.getDataStoreConnection()) {
@@ -321,7 +323,7 @@ public class WebUtil {
 
 		AbstractRepository r = AbstractRepository.get();
 		org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
-		return makePasswordChange(u, newPassword);
+		return makePasswordChange(u, null, newPassword, confirmPassword);
 	}
 	
 	// find the existing bean with retrieve

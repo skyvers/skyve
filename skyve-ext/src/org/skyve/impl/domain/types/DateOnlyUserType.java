@@ -80,7 +80,7 @@ public class DateOnlyUserType implements UserType, LiteralType<Date>, Serializab
 			ps.setNull(index, Types.DATE);
 		}
 		else {
-			ps.setDate(index, new Date(((DateOnly) value).getTime()));
+			ps.setDate(index, new Date(((java.util.Date) value).getTime()));
 		}
 	}
 

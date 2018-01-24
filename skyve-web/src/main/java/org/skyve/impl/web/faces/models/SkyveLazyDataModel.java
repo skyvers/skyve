@@ -83,7 +83,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 					throw new MetaDataException(documentName + " is not a valid document for a default query.");
 				}
 			}
-	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
 	        model = queryModel;
 		}

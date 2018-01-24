@@ -35,6 +35,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Document changePasswordDocument = module.getDocument(customer, ChangePassword.DOCUMENT_NAME);
 		BeanValidator.validateBeanAgainstDocument(changePasswordDocument, bean);
 
+		String oldPassword = bean.getOldPassword();
 		String newPassword = bean.getNewPassword();
 		String confirmPassword = bean.getConfirmPassword();
 
@@ -65,6 +66,17 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
 		Base64 base64Codec = new Base64();
+
+		// check old password matches if it is defined
+		if (oldPassword != null) {
+			String oldHashedPassword = new String(base64Codec.encode(md.digest(oldPassword.getBytes())));
+			if (! oldHashedPassword.equals(userBean.getPassword())) {
+				Message message = new Message(ChangePassword.oldPasswordPropertyName,
+						"The old password is incorrect.  Please re-enter the old/existing password.");
+				throw new ValidationException(message);
+			}
+		}
+		
 		String hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
 
 		if(hashedPassword.equals(userBean.getPassword())){
@@ -82,6 +94,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		userBean = persistence.save(userDocument, userBean);
 
 		// clear out the passwords since the change was successful
+		bean.setOldPassword(null);
 		bean.setNewPassword(null);
 		bean.setConfirmPassword(null);
 

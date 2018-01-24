@@ -87,14 +87,14 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 			ps.setNull(index, Types.TIME);
 		}
 		else {
-			ps.setTime(index, new Time(((TimeOnly) value).getTime()));
+			ps.setTime(index, new Time(((Date) value).getTime()));
 		}
 	}
 
 	@Override
 	public Object deepCopy(Object value)
 	throws HibernateException {
-		return (value == null) ? null : new TimeOnly(((java.util.Date) value).getTime());
+		return (value == null) ? null : new TimeOnly(((Date) value).getTime());
 	}
 
 	@Override

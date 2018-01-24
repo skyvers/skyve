@@ -57,8 +57,17 @@ public class Decimal10UserType implements UserType, Serializable, LiteralType<Nu
 		if (value == null) {
 			ps.setNull(index, Types.NUMERIC);
 		}
-		else {
+		else if (value instanceof Decimal10) {
 			ps.setBigDecimal(index, ((Decimal10) value).bigDecimalValue());
+		}
+		else if (value instanceof Decimal) {
+			ps.setBigDecimal(index, new Decimal10((Decimal) value).bigDecimalValue());
+		}
+		else if (value instanceof BigDecimal) {
+			ps.setBigDecimal(index, new Decimal10((BigDecimal) value).bigDecimalValue());
+		}
+		else {
+			ps.setBigDecimal(index, new Decimal10(((Number) value).doubleValue()).bigDecimalValue());
 		}
 	}
 
