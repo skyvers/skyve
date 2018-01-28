@@ -28,13 +28,15 @@ public class ComparisonComposite {
 	public ComparisonComposite(String bizId,
 								String businessKeyDescription,
 								String referenceName,
+								String relationshipDescription,
 								Mutation mutation,
-								String relationshipDescription) {
+								Document document) {
 		this.bizId = bizId;
 		this.businessKeyDescription = businessKeyDescription;
 		this.referenceName = referenceName;
-		this.mutation = mutation;
 		this.relationshipDescription = relationshipDescription;
+		this.mutation = mutation;
+		this.document = document;
 	}
 
 
