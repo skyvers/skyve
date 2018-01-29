@@ -586,8 +586,8 @@
 			<!-- Secure customer resource servlet -->
 			<url-pattern>/resource/*</url-pattern>
 			<url-pattern>/content/*</url-pattern>
-			<!-- Secure text search -->
-			<url-pattern>/search/*</url-pattern>
+			<!-- Secure text search servlet -->
+			<url-pattern>/smartsearch/*</url-pattern>
 			<!-- Secure list view servlet -->
 			<url-pattern>/smartlist/*</url-pattern>
 			<!-- Secure snap servlet -->
