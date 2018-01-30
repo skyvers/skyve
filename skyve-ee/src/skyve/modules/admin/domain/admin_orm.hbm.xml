@@ -403,7 +403,7 @@
 		<many-to-one name="dataGroup" entity-name="adminDataGroup" column="dataGroup_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_SecurityUser_dataGroup" />
 		<bag name="groups" table="ADM_SecurityUser_groups" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" foreign-key="FK_ADM_SecurityUser_groups_owner_id" />
-			<many-to-many entity-name="adminGroup" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
+			<many-to-many entity-name="adminGroup" order-by="name asc" foreign-key="FK_ADM_SecurityUser_groups_element_id" column="element_id" />
 		</bag>
 		<bag name="roles" order-by="roleName asc" cascade="all-delete-orphan">
 			<key column="parent_id" />

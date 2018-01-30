@@ -1002,8 +1002,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				StringBuilder orderBy = null;
 				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
-				if ((!((CollectionImpl) collection).isComplexOrdering()) &&
-						(!collection.getOrdering().isEmpty())) {
+				if ((! ((CollectionImpl) collection).isComplexOrdering()) &&
+						(! collection.getOrdering().isEmpty())) {
 					orderBy = new StringBuilder(64);
 					for (Ordering ordering : collection.getOrdering()) {
 						String byBinding = ordering.getBy();
@@ -1036,7 +1036,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
-					} else if (orderBy != null) {
+					} 
+					else if (orderBy != null) {
 						fw.append("\" order-by=\"").append(orderBy);
 					}
 					fw.append("\" cascade=\"all-delete-orphan\">\n");
@@ -1049,10 +1050,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName).append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
-				} else {
+				} 
+				else {
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t<list name=\"").append(collection.getName());
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					}
 
@@ -1095,7 +1098,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																			collectionTableName, 
 																			PersistentBean.OWNER_COLUMN_NAME)));
 						fw.append(indentation).append("\t\t\t</key>\n");
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 						fw.append("\" foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
@@ -1153,13 +1157,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t</many-to-any>\n");
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
 							fw.append(customerName);
 						}
 						fw.append(referencedModuleName).append(referencedDocumentName);
+						if (orderBy != null) {
+							fw.append("\" order-by=\"").append(orderBy);
+						}
 						fw.append("\" foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
 						if (shouldIndex(collection.getElementDatabaseIndex())) {
@@ -1169,7 +1177,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
 							fw.append("\" />\n");
 							fw.append("\t\t\t</many-to-many>\n");
-						} else {
+						} 
+						else {
 							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
 							fw.append("\" />\n");
 						}
@@ -1177,11 +1186,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t</list>\n");
-					} else {
+					}
+					else {
 						fw.append(indentation).append("\t\t</bag>\n");
 					}
 				}
-			} else if (attribute instanceof Association) {
+			}
+			else if (attribute instanceof Association) {
 				Association association = (Association) attribute;
 
 				String referencedDocumentName = association.getDocumentName();
