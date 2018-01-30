@@ -172,7 +172,7 @@ public class Backup {
 												}
 											}
 											else if (AttributeType.date.equals(attributeType)) {
-												Date date = resultSet.getDate(name);
+												Date date = resultSet.getDate(name, BackupUtil.GMT);
 												if (resultSet.wasNull()) {
 													value = "";
 												}
@@ -181,7 +181,7 @@ public class Backup {
 												}
 											}
 											else if (AttributeType.time.equals(attributeType)) {
-												Time time = resultSet.getTime(name);
+												Time time = resultSet.getTime(name, BackupUtil.GMT);
 												if (resultSet.wasNull()) {
 													value = "";
 												}
@@ -191,7 +191,7 @@ public class Backup {
 											}
 											else if (AttributeType.dateTime.equals(attributeType) ||
 														AttributeType.timestamp.equals(attributeType)) {
-												Timestamp timestamp = resultSet.getTimestamp(name);
+												Timestamp timestamp = resultSet.getTimestamp(name, BackupUtil.GMT);
 												if (resultSet.wasNull()) {
 													value = "";
 												}
