@@ -41,16 +41,16 @@ public class ListGrid extends HtmlPanelGroup {
 			final String modelName = (String) attributes.get("model");
 			final String managedBeanName = (String) attributes.get("managedBean");
 			Object createRenderedAttribute = attributes.get("createRendered");
-			final boolean createRendered = (createRenderedAttribute == null) || 
-											String.valueOf(true).equals(createRenderedAttribute) || // literal "true"
-											Boolean.TRUE.equals(createRenderedAttribute); // evaluated EL expression
+			final Boolean createRendered = Boolean.valueOf((createRenderedAttribute == null) || 
+															String.valueOf(true).equals(createRenderedAttribute) || // literal "true"
+															Boolean.TRUE.equals(createRenderedAttribute)); // evaluated EL expression
 			Object createDisabledAttribute = attributes.get("createDisabled");
 			final boolean createDisabled = String.valueOf(true).equals(createDisabledAttribute) || // literal true
 												Boolean.TRUE.equals(createDisabledAttribute); // evaluated EL Expression
 			Object zoomRenderedAttribute = attributes.get("zoomRendered");
-			final boolean zoomRendered = (zoomRenderedAttribute == null) ||
-											String.valueOf(true).equals(zoomRenderedAttribute) || // literal "true"
-											Boolean.TRUE.equals(zoomRenderedAttribute); // evaluated EL expression
+			final Boolean zoomRendered = Boolean.valueOf((zoomRenderedAttribute == null) ||
+															String.valueOf(true).equals(zoomRenderedAttribute) || // literal "true"
+															Boolean.TRUE.equals(zoomRenderedAttribute)); // evaluated EL expression
 			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
 			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
 											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
@@ -86,7 +86,7 @@ public class ListGrid extends HtmlPanelGroup {
 						if (query == null) {
 							query = module.getDocumentDefaultQuery(customer, queryName);
 						}
-						DocumentQueryListModel queryModel = new DocumentQueryListModel();
+						DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 						queryModel.setQuery(query);
 						model = queryModel;
 						name = queryName;

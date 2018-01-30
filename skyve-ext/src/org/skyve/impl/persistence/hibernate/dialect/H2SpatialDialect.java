@@ -15,6 +15,14 @@ import com.vividsolutions.jts.geom.Geometry;
 public class H2SpatialDialect extends GeoDBDialect implements SkyveDialect {
 	private static final long serialVersionUID = 2491505869930720627L;
 
+	/**
+	 * Set the H2 Geometry SQL type to BLOB.
+	 * It is set to GEOMETRY in the GeoDBDialect but this doesn't allow insert of JTS types.
+	 */
+	public H2SpatialDialect() {
+		registerColumnType(GeoDBGeometryTypeDescriptor.INSTANCE.getSqlType(), "BLOB");
+	}
+	
 	private JTSGeometryType geometryType = new JTSGeometryType(GeoDBGeometryTypeDescriptor.INSTANCE);
 
 	@Override
