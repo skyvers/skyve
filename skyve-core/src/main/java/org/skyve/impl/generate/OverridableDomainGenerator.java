@@ -818,17 +818,33 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.BIZ_KEY, DIALECT_OPTIONS.getDataStoreBizKeyLength(),
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.CUSTOMER_NAME, 
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
+				if (shouldIndex(null)) {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.BIZ_KEY, 
+															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength()),
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.CUSTOMER_NAME, 
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
+				}
+				else {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" not-null=\"true\" />\n",
+															Bean.BIZ_KEY, 
+															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength())));
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" not-null=\"true\" />\n",
+															Bean.CUSTOMER_NAME));
+				}
 				fw.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
 				fw.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.USER_ID,
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
+				if (shouldIndex(null)) {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.USER_ID,
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
+				}
+				else {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" not-null=\"true\" />\n",
+															Bean.USER_ID));
+				}
 			}
 
 			// map the parent property, if parent document is persistent
