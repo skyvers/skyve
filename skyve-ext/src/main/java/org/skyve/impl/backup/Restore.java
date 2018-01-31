@@ -188,14 +188,14 @@ public class Restore {
 										statement.setBoolean(index++, Boolean.parseBoolean(stringValue));
 									}
 									else if (AttributeType.date.equals(attributeType)) {
-										statement.setDate(index++, new Date(Long.parseLong(stringValue)));
+										statement.setDate(index++, new Date(Long.parseLong(stringValue)), BackupUtil.GMT);
 									}
 									else if (AttributeType.time.equals(attributeType)) {
-										statement.setTime(index++, new Time(Long.parseLong(stringValue)));
+										statement.setTime(index++, new Time(Long.parseLong(stringValue)), BackupUtil.GMT);
 									}
 									else if (AttributeType.dateTime.equals(attributeType) ||
 												AttributeType.timestamp.equals(attributeType)) {
-										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)));
+										statement.setTimestamp(index++, new Timestamp(Long.parseLong(stringValue)), BackupUtil.GMT);
 									}
 									else if (AttributeType.decimal2.equals(attributeType) ||
 												AttributeType.decimal5.equals(attributeType) ||

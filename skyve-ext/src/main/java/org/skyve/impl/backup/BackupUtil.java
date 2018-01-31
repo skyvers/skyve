@@ -6,10 +6,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import org.skyve.CORE;
@@ -41,7 +43,9 @@ final class BackupUtil {
 	private BackupUtil() {
 		// nothing to see here
 	}
-	
+
+	static Calendar GMT = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
 	static void initialise(String customerName,
 							String contentDirectory,
 							String contentFileStorage,

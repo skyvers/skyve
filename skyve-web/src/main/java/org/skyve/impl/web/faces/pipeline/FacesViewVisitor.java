@@ -119,6 +119,7 @@ import org.skyve.impl.web.faces.converters.decimal.Decimal5TwoDecimalPlacesPerce
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.web.faces.converters.decimal.currency.Decimal5DollarsAndCents;
 import org.skyve.impl.web.faces.converters.integer.IntegerSeparator;
+import org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator;
 import org.skyve.impl.web.faces.converters.integer.SimplePercentage;
 import org.skyve.impl.web.faces.converters.lang.Decimal10;
 import org.skyve.impl.web.faces.converters.lang.Decimal2;
@@ -894,31 +895,13 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		visitListWidget(grid);
-		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
-		String disableAddConditionName = grid.getDisableAddConditionName();
-		String disabledConditionName = grid.getDisabledConditionName();
-		String[] createDisabled = (disableAddConditionName == null) ? 
-									((disabledConditionName == null) ? 
-										null : 
-										new String[] {disabledConditionName}) :
-									((disabledConditionName == null) ? 
-										new String[] {disableAddConditionName} : 
-										new String[] {disableAddConditionName, disabledConditionName});
-		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
-		UIComponent l = cb.listGrid(listWidgetModelDocumentName, 
-										listWidgetModelName, 
-										listWidgetModel, 
-										grid.getParameters(), 
-										grid.getTitle(),
-										user.canCreateDocument(listWidgetDrivingDocument),
-										createRendered,
-										createDisabled,
-										zoomRendered,
-										grid.getDisableZoomConditionName(),
-										grid.getSelectedIdBinding(),
-										grid.getSelectedActions(),
-										true,
-										false);
+		UIComponent l = cb.listGrid(listWidgetModelDocumentName,
+				listWidgetModelName,
+				listWidgetModel,
+				grid,
+				user.canCreateDocument(listWidgetDrivingDocument),
+				true,
+				false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 	
@@ -1709,6 +1692,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	        else if ("IntegerSeparator".equals(converterName)) {
 	            result = new IntegerSeparator();
 	        }
+			else if ("LongIntegerSeparator".equals(converterName)) {
+				result = new LongIntegerSeparator();
+			}
 	        else if ("HH_MI".equals(converterName)) {
 	            result = new HH_MI();
 	        }
