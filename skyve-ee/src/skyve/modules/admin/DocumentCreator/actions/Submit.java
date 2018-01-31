@@ -5,12 +5,12 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
-import modules.admin.DocumentCreator.SkyveScriptInterpreter;
 import modules.admin.domain.DocumentCreator;
 
 public class Submit implements ServerSideAction<DocumentCreator> {

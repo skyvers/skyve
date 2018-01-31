@@ -9,8 +9,13 @@
 	<artifactId>skyve-ext</artifactId>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
+		<sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+		<testSourceDirectory>${project.basedir}/src/test/java</testSourceDirectory>
 	</build>
+	
+	<properties>
+		<commonmark.version>0.10.0</commonmark.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -118,6 +123,24 @@
 			<groupId>net.coobird</groupId>
 			<artifactId>thumbnailator</artifactId>
 			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.atlassian.commonmark</groupId>
+			<artifactId>commonmark</artifactId>
+			<version>${commonmark.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<!-- Test dependencies -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

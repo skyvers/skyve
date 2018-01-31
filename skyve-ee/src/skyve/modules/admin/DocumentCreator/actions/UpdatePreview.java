@@ -5,12 +5,12 @@ import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlNodeRendererFactory;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
 import modules.admin.DocumentCreator.SkyveDocumentNodeRenderer;
-import modules.admin.DocumentCreator.SkyveScriptInterpreter;
 import modules.admin.domain.DocumentCreator;
 
 public class UpdatePreview implements ServerSideAction<DocumentCreator> {

@@ -1,8 +1,10 @@
-package modules.admin.DocumentCreator;
+package org.skyve.impl.script;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +26,7 @@ import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
+import org.skyve.impl.metadata.repository.document.ParentDocument;
 import org.skyve.impl.metadata.repository.module.Action;
 import org.skyve.impl.metadata.repository.module.DocumentPrivilege;
 import org.skyve.impl.metadata.repository.module.EditItem;
@@ -50,11 +53,16 @@ public class SkyveScriptInterpreter {
 
 	private static DocumentMetaData currentDocument = null;
 	private ModuleMetaData currentModule = null;
+	private static Map<String, String> parentDocuments = new HashMap<>();
 
 	private static final String ROLE_MAINTAINER = "Maintainer";
 	private static final String ROLE_VIEWER = "Viewer";
 
 	private static String DISPLAY_NAME_PATTERN = "['\"]([^'\"]+)['\"]";
+	/**
+	 * Matches a markdown collection declaration using square brackets instead of backticks
+	 */
+	private static String COLLECTION_SHORTHAND_PATTERN = ".*\\s\\[\\w+\\]";
 	/**
 	 * Matches a markdown enum declaration missing the word enum
 	 */
@@ -160,6 +168,13 @@ public class SkyveScriptInterpreter {
 					line = line.replace("(", "enum (");
 				}
 
+				// look for collection type shorthand
+				p = Pattern.compile(COLLECTION_SHORTHAND_PATTERN);
+				m = p.matcher(line);
+				if (m.matches()) {
+					line = line.replace("[", "`").replace("]", "`");
+				}
+
 				if (newScript.length() > 0) {
 					newScript.append("\n");
 				}
@@ -183,6 +198,18 @@ public class SkyveScriptInterpreter {
 			Node node = document.getFirstChild();
 
 			process(node);
+		}
+
+		// update the parent of any child collections
+		for (Map.Entry<String, String> e : parentDocuments.entrySet()) {
+			for (DocumentMetaData d : getDocuments()) {
+				if (d.getName().equals(e.getKey())) {
+					ParentDocument parent = new ParentDocument();
+					parent.setParentDocumentName(e.getValue());
+					d.setParentDocument(parent);
+					break;
+				}
+			}
 		}
 	}
 
@@ -279,11 +306,6 @@ public class SkyveScriptInterpreter {
 			// is this a scalar or association, or a collection
 			BulletList list = (BulletList) node.getParent();
 			if (list.getBulletMarker() != '-' && list.getBulletMarker() != '+') {
-				/*html.tag("span", alertText);
-				html.text(
-						String.format("Unknown list item type: \"%s\". Please use either \"-\" or \"+\".", list.getBulletMarker()));
-				html.tag("/span");
-				linebreak();*/
 				Util.LOGGER.warning(
 						String.format("Unknown list item type: \"%s\". Please use either \"-\" or \"+\".", list.getBulletMarker()));
 			} else {
@@ -383,12 +405,15 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Creates a new Association ready to be added to the current Document.
 	 */
-	private static Association createAssociation(boolean required, String type, String name, String displayName) {
+	private static Association createAssociation(boolean required, String type, String name, String displayName, Node line) {
+		// check if this association definition includes the AssociationType
+		AssociationType assocType = extractAssociationType(line);
+
 		AssociationImpl association = new AssociationImpl();
 		association.setName(name);
 		association.setDisplayName(displayName);
 		association.setRequired(required);
-		association.setType(AssociationType.aggregation);
+		association.setType(assocType);
 		association.setDocumentName(type);
 		return association;
 	}
@@ -504,10 +529,10 @@ public class SkyveScriptInterpreter {
 				default:
 					// did not match scalar attribute, check if association or collection definition
 					if (isAssociationDefinition(line, type, parts)) {
-						Association association = createAssociation(required, type, name, displayName);
+						Association association = createAssociation(required, type, name, displayName, line);
 						currentDocument.getAttributes().add(association);
 					} else if (isCollectionDefinition(line, type, parts)) {
-						CollectionImpl collection = createCollection(required, type, name, displayName);
+						CollectionImpl collection = createCollection(required, type, name, displayName, line);
 						currentDocument.getAttributes().add(collection);
 					} else {
 						Util.LOGGER.warning(String.format("Unsupported attribute: %s [%s]", attributeName, parts[0]));
@@ -525,13 +550,18 @@ public class SkyveScriptInterpreter {
 	 * Creates a new Collection ready to be added to the current document.
 	 */
 	@SuppressWarnings("boxing")
-	private static CollectionImpl createCollection(boolean required, String type, String name, String displayName) {
+	private static CollectionImpl createCollection(boolean required, String type, String name, String displayName, Node line) {
+		CollectionType collectionType = extractCollectionType(line);
+
+		// if the collection type is child, store it for processing the parent at the end
+		parentDocuments.put(type, currentDocument.getName());
+
 		CollectionImpl collection = new CollectionImpl();
 		collection.setName(name);
 		collection.setDisplayName(displayName);
 		collection.setMinCardinality(required ? 1 : 0);
 		collection.setDocumentName(type);
-		collection.setType(CollectionType.aggregation);
+		collection.setType(collectionType);
 		return collection;
 	}
 
@@ -633,6 +663,38 @@ public class SkyveScriptInterpreter {
 	private static Field createFieldTimestamp(boolean required, String name, String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Timestamp();
 		return setCommonFieldAttributes(field, required, name, displayName);
+	}
+
+	/**
+	 * Returns the AssociationType for the supplied node, or defaults
+	 * to Aggregation if none was found.
+	 */
+	private static AssociationType extractAssociationType(final Node line) {
+		Node node = line;
+		while (node.getNext() != null) {
+			node = node.getNext();
+			if (node instanceof Code) {
+				return AssociationType.valueOf(((Code) node).getLiteral());
+			}
+		}
+
+		return AssociationType.aggregation;
+	}
+
+	/**
+	 * Returns the CollectionType for the supplied node, or defaults
+	 * to Aggregation if none was found.
+	 */
+	private static CollectionType extractCollectionType(final Node line) {
+		Node node = line;
+		while (node.getNext() != null) {
+			node = node.getNext();
+			if (node instanceof Code) {
+				return CollectionType.valueOf(((Code) node).getLiteral());
+			}
+		}
+
+		return CollectionType.aggregation;
 	}
 
 	/**

@@ -39,11 +39,13 @@
 					<ul>
 						<li>e.g. <code>- country Country</code>
 						<li>Required associations should have their name surrounded by asterisks, e.g. <code>- *country* Country</code>
+						<li>Association type can be specified surrounded by backticks after the document name, e.g. <code>- country Country `composition`</code>
 					</ul>
 					<li>Collections should be specified as a list item by using a plus (+), followed by a space, then the collection name in camel case, then the collection document in title case
 					<ul>
 						<li>e.g. <code>+ roles Role</code>
 						<li>Required collections should have their name surrounded by asterisks, e.g. <code>+ *roles* Role</code>
+						<li>Collection type can be specified surrounded by backticks after the document name, e.g. <code>- roles Role `child`</code>
 					</ul>
 				</ul>
 				<p>A complete document specification would then look like this:</p>
