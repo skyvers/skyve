@@ -25,7 +25,7 @@
 	// Content settings
 	content: {
 		// directory path
-		directory: "${SKYVE_CONTENT:/Users/benpetito/workspace/content/skyve-ee/}",
+		directory: "${SKYVE_CONTENT:/C:/_/skyve/skyve-ee/content/}",
 		// CRON Expression for CMS Garbage Collection job - run at 7 past the hour every hour
 		gcCron: "0 7 0/1 1/1 * ? *", 
 		// Attachments stored on file system or inline
