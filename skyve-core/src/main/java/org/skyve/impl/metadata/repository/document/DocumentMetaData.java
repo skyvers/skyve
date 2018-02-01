@@ -16,6 +16,7 @@ import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.AbstractAttribute;
+import org.skyve.impl.metadata.model.InterfaceImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.ConditionImpl;
@@ -69,6 +70,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 
 @XmlRootElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "document")
@@ -76,7 +78,8 @@ import org.skyve.metadata.model.document.Relation;
 			name = "document",
 			propOrder = {"documentation",
 							"extends",
-							"persistent", 
+							"abstract",
+							"persistent",
 							"singularAlias", 
 							"pluralAlias",
 							"audited",
@@ -85,7 +88,8 @@ import org.skyve.metadata.model.document.Relation;
 							"icon32x32RelativeFilePath",
 							"description",
 							"parentDocument", 
-							"bizKey", 
+							"bizKey",
+							"implements",
 							"attributes", 
 							"conditions", 
 							"uniqueConstraints"})
@@ -95,6 +99,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private static final String DEFAULT_DOCUMENT_ICON_STYLE_CLASS = "fa fa-file-o";
 
 	private Extends inherits;
+	private java.lang.Boolean abstractClass;
 	private Persistent persistent;
 	private String singularAlias;
 	private String pluralAlias;
@@ -105,6 +110,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	private String description;
 	private ParentDocument parentDocument;
 	private BizKey bizKey;
+	private List<Interface> interfaces = new ArrayList<>();
 	private List<Attribute> attributes = new ArrayList<>();
 	private List<ConditionMetaData> conditions = new ArrayList<>();
 	private List<UniqueConstraint> uniqueConstraints = new ArrayList<>();
@@ -117,6 +123,15 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	public void setExtends(Extends inherits) {
 		this.inherits = inherits;
+	}
+
+	public java.lang.Boolean getAbstract() {
+		return abstractClass;
+	}
+
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
+	public void setAbstract(java.lang.Boolean abstractClass) {
+		this.abstractClass = abstractClass;
 	}
 
 	public Persistent getPersistent() {
@@ -209,6 +224,14 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		this.bizKey = bizKey;
 	}
 
+	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "implements")
+	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
+			name = "interface",
+			type = InterfaceImpl.class)
+	public List<Interface> getImplements() {
+		return interfaces;
+	}
+
 	// Keep this in sync with ViewModelMetaData
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "attributes", required = true)
 	@XmlElementRefs({@XmlElementRef(type = Text.class),
@@ -269,6 +292,7 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 		}
 		result.setName(value);
 		result.setExtends(getExtends());
+		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
 		value = getSingularAlias();
 		if (value == null) {
@@ -348,6 +372,21 @@ public class DocumentMetaData extends NamedMetaData implements PersistentMetaDat
 			throw new MetaDataException(metaDataName + " : The document [parentDocument.index] CANNOT be true for a transient document");
 		}
 		Set<String> attributeNames = new TreeSet<>();
+
+		// Set interfaces metadata
+		if (interfaces != null) {
+			for (Interface interfaceMetaData : interfaces) {
+				String interfaceName = interfaceMetaData.getInterfaceName();
+				if (interfaceName == null || interfaceName.length() < 1) {
+					throw new MetaDataException(metaDataName + " : Fully qualified interface name is required.");
+				}
+
+				final InterfaceImpl interfaceImpl = new InterfaceImpl();
+				interfaceImpl.setInterfaceName(interfaceName);
+
+				result.putInterface(interfaceImpl);
+			}
+		}
 
 		// Set attribute metadata
 		if (attributes != null) {

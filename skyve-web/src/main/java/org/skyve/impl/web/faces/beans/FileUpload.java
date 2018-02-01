@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.beans;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bind.BindUtil;
@@ -184,10 +186,13 @@ public class FileUpload extends Localisable {
 					}
 				}
 			}
-			catch(UploadException e){
+			catch (UploadException e) {
 				e.printStackTrace();
 				persistence.rollback();
 				exception = e;
+			}
+			catch (IOException e) { // hide any file system paths from file operation problems encountered
+				throw new DomainException("File Upload could not be processed", e);
 			}
 			
 			// only put conversation in cache if we have been successful in executing

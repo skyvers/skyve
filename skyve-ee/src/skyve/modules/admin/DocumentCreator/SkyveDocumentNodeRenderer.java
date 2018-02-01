@@ -117,29 +117,21 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				}
 			}
 		} else if (node instanceof BulletList) {
-			tab();
-			html.text("<attributes>");
-			linebreak();
-
-			// get all the list items for this list
-			if (node.getFirstChild() != null && node.getFirstChild() instanceof ListItem) {
-				ListItem item = (ListItem) node.getFirstChild();
-				parseListItem(item);
-
-				while (item.getNext() != null) {
-					item = (ListItem) item.getNext();
-					parseListItem(item);
-				}
+			if (node.getPrevious() instanceof Heading) {
+				tab();
+				html.text("<attributes>");
+				linebreak();
 			}
-
-			// end the attributes when we run out
-			if (node.getNext() == null || isNodeHeading2(node.getNext())) {
-				writeDocumentEnd();
-			}
-		} else if (node instanceof OrderedList) {
-			// check if the previous node was a bullet list (scalar attribute or association)
-			// or a heading (document definition)
-			if (isNodeHeading2(node.getPrevious()) || isNodeBulletList(node.getPrevious())) {
+			
+			// is this a scalar or association, or a collection
+			BulletList list = (BulletList) node;
+			if (list.getBulletMarker() != '-' && list.getBulletMarker() != '+') {
+				html.tag("span", alertText);
+				html.text(
+						String.format("Unknown list item type: \"%s\". Please use either \"-\" or \"+\".", list.getBulletMarker()));
+				html.tag("/span");
+				linebreak();
+			} else {
 				// get all the list items for this list
 				if (node.getFirstChild() != null && node.getFirstChild() instanceof ListItem) {
 					ListItem item = (ListItem) node.getFirstChild();
@@ -156,6 +148,33 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 					writeDocumentEnd();
 				}
 			}
+		} else if (node instanceof OrderedList) {
+			// check if the previous node was a bullet list (scalar attribute or association)
+			// or a heading (document definition)
+			/*if (isNodeHeading2(node.getPrevious()) || isNodeBulletList(node.getPrevious())) {
+				// get all the list items for this list
+				if (node.getFirstChild() != null && node.getFirstChild() instanceof ListItem) {
+					ListItem item = (ListItem) node.getFirstChild();
+					parseListItem(item);
+			
+					while (item.getNext() != null) {
+						item = (ListItem) item.getNext();
+						parseListItem(item);
+					}
+				}
+			
+				// end the attributes when we run out
+				if (node.getNext() == null || isNodeHeading2(node.getNext())) {
+					writeDocumentEnd();
+				}
+			}*/
+			OrderedList list = (OrderedList) node;
+			html.tag("span", alertText);
+			html.text(
+					String.format("Unknown list item type: \"%s%s\". Please use either \"-\" or \"+\".", list.getStartNumber(),
+							list.getDelimiter()));
+			html.tag("/span");
+			linebreak();
 		}
 	}
 
@@ -305,7 +324,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return true if an association, false otherwise
 	 */
 	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
-		if (isChildOfBulletList(line)) {
+		if (isChildOfDashMarkerList(line)) {
+			// if (isChildOfBulletList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}
@@ -344,6 +364,23 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 
 	/**
 	 * Recursively checks the parent of the specified node
+	 * to see if it is a descendant of an a bullet list (
+	 * <ul>
+	 * ) specified with a -.
+	 */
+	private static boolean isChildOfDashMarkerList(Node node) {
+		if (node.getParent() != null) {
+			if (node.getParent() instanceof BulletList) {
+				BulletList list = (BulletList) node.getParent();
+				return list.getBulletMarker() == '-';
+			}
+			return isChildOfDashMarkerList(node.getParent());
+		}
+		return false;
+	}
+
+	/**
+	 * Recursively checks the parent of the specified node
 	 * to see if it is a descendant of an ordered list (
 	 * <ol>
 	 * ).
@@ -359,6 +396,23 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	}
 
 	/**
+	 * Recursively checks the parent of the specified node
+	 * to see if it is a descendant of an a bullet list (
+	 * <ul>
+	 * ) specified with a +.
+	 */
+	private static boolean isChildOfPlusMarkerList(Node node) {
+		if (node.getParent() != null) {
+			if (node.getParent() instanceof BulletList) {
+				BulletList list = (BulletList) node.getParent();
+				return list.getBulletMarker() == '+';
+			}
+			return isChildOfPlusMarkerList(node.getParent());
+		}
+		return false;
+	}
+
+	/**
 	 * Returns true if the specified type describes a acollection:
 	 * <ul>
 	 * <li>the attribute belongs to an ordered list
@@ -369,7 +423,8 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return true if a collection, false otherwise
 	 */
 	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
-		if (isChildOfOrderedList(line)) {
+		if (isChildOfPlusMarkerList(line)) {
+			// if (isChildOfOrderedList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
 			}

@@ -10,6 +10,7 @@
 <%@ page import="org.skyve.util.Util"%>
 <%@ page import="org.skyve.web.WebContext"%>
 <%
+	final String oldPasswordFieldName = "oldPassword";
 	final String newPasswordFieldName = "newPassword";
 	final String confirmPasswordFieldName = "confirmPassword";
 	
@@ -31,10 +32,11 @@
 
 	// This is a postback, process it and move on
 	String passwordChangeErrorMessage = null;
+	String oldPasswordValue = request.getParameter(oldPasswordFieldName);
 	String newPasswordValue = request.getParameter(newPasswordFieldName);
-	String confirmPasswordValue = request.getParameter(newPasswordFieldName);
-	if ((newPasswordValue != null) && (confirmPasswordValue != null)) {
-		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, newPasswordValue);
+	String confirmPasswordValue = request.getParameter(confirmPasswordFieldName);
+	if ((oldPasswordValue != null) && (newPasswordValue != null) && (confirmPasswordValue != null)) {
+		passwordChangeErrorMessage = WebUtil.makePasswordChange(user, oldPasswordValue, newPasswordValue, confirmPasswordValue);
 		if (passwordChangeErrorMessage == null) {
 			request.getSession().setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, user);
 			response.sendRedirect(response.encodeRedirectURL(Util.getHomeUrl() + "home.jsp"));
@@ -73,9 +75,15 @@
 		<script type="text/javascript">
 			<!--
 			function testMandatoryFields(form) {
+				var oldPasswordValue = form.<%=oldPasswordFieldName%>.value;
 				var newPasswordValue = form.<%=newPasswordFieldName%>.value;
 				var confirmPasswordValue = form.<%=confirmPasswordFieldName%>.value;
-				if (newPasswordValue.length < 1) {
+				if (oldPasswordValue.length < 1) {
+					alert('<%=Util.i18n("page.changePassword.oldPassword.error.required", locale)%>');
+					form.<%=oldPasswordFieldName%>.focus();
+					return false;
+				}
+				else if (newPasswordValue.length < 1) {
 					alert('<%=Util.i18n("page.changePassword.newPassword.error.required", locale)%>');
 					form.<%=newPasswordFieldName%>.focus();
 					return false;
@@ -95,9 +103,9 @@
 		</script>
 	</head>
 	<% if (passwordChangeErrorMessage != null) { %>
-	<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
+	<body onload="document.forms['changeForm'].elements['<%=oldPasswordFieldName%>'].focus();alert('<%=passwordChangeErrorMessage%>');">
 	<% } else { %>
-	<body onload="document.forms['changeForm'].elements['<%=newPasswordFieldName%>'].focus()">
+	<body onload="document.forms['changeForm'].elements['<%=oldPasswordFieldName%>'].focus()">
 	<% } %>
 	
 		<div class="container">
@@ -111,6 +119,14 @@
 							<div class="row">
 								<div class="col-12 center">
 									<span class="subhead"><%=Util.i18n("page.changePassword.message", locale)%></span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-4-sm right">
+									<label for="oldPassword"><%=Util.i18n("page.changePassword.oldPassword.label", locale)%></label>
+								</div>
+								<div class="col-6-sm">
+									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="<%=oldPasswordFieldName%>">
 								</div>
 							</div>
 							<div class="row">

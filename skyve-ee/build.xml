@@ -18,9 +18,7 @@
 			<arg value="src/test/" /> <!-- test path -->
 			<arg value="src/generatedTest/" /> <!-- generated test path -->
 			<arg value="true" /> <!-- debug -->
-			<arg value="true" /> <!-- data store index foreign keys by default -->
-			<arg value="false" /> <!-- data store index names in global namespace -->
-			<arg value="0" /> <!-- data store identifier character limit -->
+			<arg value="H2_NO_INDEXES" /> <!-- Dialect options -->
 			<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
 		</java>
 	</target>

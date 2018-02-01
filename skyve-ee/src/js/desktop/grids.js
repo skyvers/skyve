@@ -1323,7 +1323,7 @@ isc.BizListGrid.addMethods({
 			gridConfig.showEmptyMessage = false;
 			gridConfig.baseStyle = '';
 			gridConfig.showHeader = true;
-			if (! config.showColumnHeaders) {} else {
+			if (config.showColumnHeaders) {} else {
 				gridConfig.showHeader = false;
 			}
 			gridConfig.bodyBackgroundColor = 'white';

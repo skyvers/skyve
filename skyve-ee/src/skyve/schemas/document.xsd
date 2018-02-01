@@ -73,6 +73,7 @@
         <xs:sequence>
           <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element ref="tns:extends" minOccurs="0"/>
+          <xs:element name="abstract" type="xs:boolean" form="qualified" minOccurs="0"/>
           <xs:element ref="tns:persistent" minOccurs="0"/>
           <xs:element name="singularAlias" type="xs:string" form="qualified"/>
           <xs:element name="pluralAlias" type="xs:string" form="qualified"/>
@@ -83,6 +84,13 @@
           <xs:element name="description" type="xs:string" form="qualified" minOccurs="0"/>
           <xs:element name="parentDocument" type="tns:parentDocument" form="qualified" minOccurs="0"/>
           <xs:element name="bizKey" type="tns:bizKey" form="qualified" minOccurs="0"/>
+          <xs:element name="implements" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="interface" type="tns:interfaceImpl" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="attributes" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -164,6 +172,10 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+
+  <xs:simpleType name="interfaceImpl">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
 
   <xs:complexType name="text">
     <xs:complexContent>

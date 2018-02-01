@@ -40,6 +40,7 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private String description;
 	protected DomainType domainType;
 	private InputWidget defaultInputWidget;
+	private WidgetReference defaultWidgetReference;
 	private boolean deprecated;
 	private Boolean trackChanges;
 	private boolean audited = true;
@@ -138,8 +139,14 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		this.defaultInputWidget = defaultInputWidget;
 	}
 	
+	public WidgetReference getDefaultWidgetReference() {
+		return defaultWidgetReference;
+	}
+
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name="defaultWidget")
 	public void setDefaultWidgetReference(WidgetReference widgetRef) {
+		this.defaultWidgetReference = widgetRef;
+
 		if (widgetRef != null) {
 			defaultInputWidget = widgetRef.getWidget();
 			defaultInputWidget.setBinding(getName());
@@ -154,6 +161,10 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	@XmlTransient
 	public void setDeprecated(boolean deprecated) {
 		this.deprecated = deprecated;
+	}
+
+	public Boolean getDeprecatedBool() {
+		return Boolean.valueOf(deprecated);
 	}
 
 	@XmlAttribute(name="deprecated", required = false)

@@ -153,6 +153,10 @@
 		<converter-class>org.skyve.impl.web.faces.converters.integer.IntegerSeparator</converter-class>
 	</converter>
 	<converter>
+		<converter-id>LongIntegerSeparator</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.integer.LongIntegerSeparator</converter-class>
+	</converter>
+	<converter>
 		<converter-id>HH_MI</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.time.HH_MI</converter-class>
 	</converter>

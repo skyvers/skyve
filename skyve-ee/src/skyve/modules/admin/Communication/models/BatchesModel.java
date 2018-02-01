@@ -78,6 +78,11 @@ public class BatchesModel extends ListModel<Communication> {
 		// not required
 		return null;
 	}
+	
+	@Override
+	public void putParameter(String name, Object value) {
+		// not required
+	}
 
 	@Override
 	public Page fetch() throws Exception {

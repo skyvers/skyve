@@ -244,6 +244,7 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString("api", "googleRecaptchaSiteKey", api, false);
 		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString("api", "ckEditorConfigFileUrl", api, false);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
@@ -261,7 +262,7 @@ public class SkyveContextListener implements ServletContextListener {
 		// ensure that the schema is created before trying to init the job scheduler
 		AbstractPersistence p = null;
 		try {
-			p = (AbstractPersistence) CORE.getPersistence();
+			p = (AbstractPersistence) CORE.getPersistence(); // syncs the schema if required
 			p.begin();
 			if (bootstrap != null) { // we have a bootstrap stanza
 				SuperUser u = new SuperUser();
@@ -278,6 +279,9 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 		catch (Exception e) {
+			if (p != null) {
+				p.rollback();
+			}
 			throw new IllegalStateException("Cannot initialise either the data schema or the bootstrap user.", e);
 		}
 		finally {
@@ -290,10 +294,6 @@ public class SkyveContextListener implements ServletContextListener {
 		WebUtil.initConversationsCache();
 	}
 
-	public static void populate(ServletContext ctx) {
-		
-	}
-	
 	private static void bootstrap(Persistence p) throws Exception {
 		User u = p.getUser();
 		Customer c = u.getCustomer();

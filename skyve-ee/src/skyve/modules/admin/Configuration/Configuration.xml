@@ -20,5 +20,20 @@
 				<value code="MAXIMUM" description="Maximum - min 8 chars, upper, lower, numeric and punctuation"/>
 			</values>
 		</enum>
+		<text name="fromEmail" required="true">
+			<displayName>Sender/From Email Address</displayName>
+			<description>Email Address that all email's that the system sends will be sent from.</description>
+			<length>254</length>
+			<validator type="email" />
+		</text>
+		<text name="passwordResetEmailSubject" required="true">
+			<displayName>Password Reset Email Subject</displayName>
+			<description>The subject of the password reset email to be sent to clients.  Bindings are allowed relative to the User.</description>
+			<length>250</length>
+		</text>
+		<markup name="passwordResetEmailBody" required="true">
+			<displayName>Password Reset Email Body</displayName>
+			<description>The body of the password reset email to be sent to clients.  Bindings are allowed relative to the User.</description>
+		</markup>
 	</attributes>
 </document>

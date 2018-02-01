@@ -11,6 +11,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.util.Util;
+
 public class ResponseHeaderFilter implements Filter {
 	FilterConfig fc;
 
@@ -34,6 +36,12 @@ public class ResponseHeaderFilter implements Filter {
 			String headerName = (String) e.nextElement();
 			if ("Expires".equals(headerName)) {
 				httpResponse.addDateHeader("Expires", System.currentTimeMillis() + Long.parseLong(fc.getInitParameter(headerName)));
+			}
+			// only apply HSTS header if defined and we are using TLS
+			else if ("Strict-Transport-Security".equals(headerName)) {
+				if (Util.isSecureUrl()) {
+					httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
+				}
 			}
 			else {
 				httpResponse.addHeader(headerName, fc.getInitParameter(headerName));

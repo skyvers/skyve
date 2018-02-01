@@ -3,6 +3,7 @@ package org.skyve.metadata.model;
 import java.util.List;
 
 import org.skyve.metadata.NamedMetaData;
+import org.skyve.metadata.model.document.Interface;
 
 /**
  * 
@@ -20,6 +21,12 @@ public interface Model extends NamedMetaData {
 	 * @return
 	 */
 	public Attribute getAttribute(String name);
+
+	/**
+	 *
+	 * @return
+	 */
+	public List<? extends Interface> getInterfaces();
 
 	/**
 	 * 
@@ -62,6 +69,13 @@ public interface Model extends NamedMetaData {
 	 * @return
 	 */
 	public Extends getExtends();
+
+	/**
+	 * Should this document be abstract.
+	 *
+	 * @return
+	 */
+	public boolean isAbstract();
 	
 	/**
 	 * Should this document be audited.

@@ -180,8 +180,13 @@ public class Util {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}
 
+	private static Boolean secureUrl = null;
+	
 	public static boolean isSecureUrl() {
-		return (UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://");
+		if (secureUrl == null) {
+			secureUrl = Boolean.valueOf((UtilImpl.SERVER_URL == null) ? false : UtilImpl.SERVER_URL.startsWith("https://"));
+		}
+		return secureUrl.booleanValue();
 	}
 	
 	public static String getServerUrl() {

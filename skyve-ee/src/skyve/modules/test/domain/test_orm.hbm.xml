@@ -15,20 +15,16 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" index="IDX_aggregatedAssociation" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedAssociation" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesInverseOneToOnePersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedAssociation" />
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<key foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-			</key>
-			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesInverseOneToOnePersistent" foreign-key="FK_TEST_AllAttributesInverseOneToOnePersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
 		<property name="colour" />
 		<property name="date" type="DateOnly" />
@@ -61,20 +57,16 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" index="IDX_aggregatedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation" />
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<key foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-			</key>
-			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
 		<property name="colour" />
 		<property name="date" type="DateOnly" />
@@ -110,20 +102,16 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesRequiredPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" index="IDX_aggregatedAssociation" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedAssociation" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testAllAttributesRequiredPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedAssociation" />
 		<property name="booleanFlag" />
 		<bag name="aggregatedCollection" table="TEST_AllAttributesRequiredPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-			<key foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-			</key>
-			<many-to-many entity-name="testAllAttributesRequiredPersistent" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_owner_id" />
+			<many-to-many entity-name="testAllAttributesRequiredPersistent" foreign-key="FK_TEST_AllAttributesRequiredPersistent_aggregatedCollection_element_id" column="element_id" />
 		</bag>
 		<property name="colour" />
 		<property name="date" type="DateOnly" />
@@ -159,11 +147,11 @@
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-			<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
 			<property name="bizFlagComment" length="1024" />
 			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+			<property name="bizUserId" length="36" not-null="true" />
 			<property name="text" length="20" />
 			<property name="text1" length="20" />
 			<filter name="testAnyDerived1NoneFilter" condition="1=0"/>
@@ -176,11 +164,11 @@
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-			<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
 			<property name="bizFlagComment" length="1024" />
 			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+			<property name="bizUserId" length="36" not-null="true" />
 			<property name="text" length="20" />
 			<property name="text2" length="20" />
 			<filter name="testAnyDerived2NoneFilter" condition="1=0"/>
@@ -193,15 +181,13 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<bag name="arcs" table="TEST_ArcOneToMany_arcs" cascade="persist,save-update,refresh,merge">
-			<key foreign-key="FK_TEST_ArcOneToMany_arcs_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-			</key>
+			<key column="owner_id" foreign-key="FK_TEST_ArcOneToMany_arcs_owner_id" />
 		<many-to-any meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
 			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
@@ -219,11 +205,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<any name="arc" meta-type="string" id-type="string">
 			<meta-value value="test.AnyDerived1" class="testAnyDerived1" />
 			<meta-value value="test.AnyDerived2" class="testAnyDerived2" />
@@ -240,12 +226,12 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
-		<property name="bizParentId" length="36" index="IDX_bizParentId" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizParentId" length="36" />
 		<property name="text" length="20" />
 		<filter name="testHierarchicalNoneFilter" condition="1=0"/>
 		<filter name="testHierarchicalCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -257,11 +243,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="text" length="255" />
 		<filter name="testInjectedDocumentNoneFilter" condition="1=0"/>
 		<filter name="testInjectedDocumentCustomerFilter" condition="bizCustomer=:customerParam"/>
@@ -274,11 +260,11 @@
 			<discriminator column="bizDiscriminator" type="string" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-			<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
 			<property name="bizFlagComment" length="1024" />
 			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+			<property name="bizUserId" length="36" not-null="true" />
 			<property name="booleanFlag" />
 			<property name="colour" />
 			<property name="date" type="DateOnly" />
@@ -300,23 +286,15 @@
 			<property name="text" length="255" />
 			<property name="time" type="TimeOnly" />
 			<property name="timestamp" type="Timestamp" />
-			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" index="IDX_composedAssociation" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedAssociation" />
-			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionSingleStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" index="IDX_aggregatedAssociation" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedAssociation" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedAssociation" />
+			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionSingleStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedAssociation" />
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionSingleStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<key foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-				</key>
-				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_owner_id" />
+				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_aggregatedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="composedCollection" table="TEST_MappedExtensionSingleStrategy_composedCollection" cascade="all-delete-orphan">
-				<key foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-				</key>
-				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_owner_id" />
+				<many-to-many entity-name="testMappedExtensionSingleStrategy" foreign-key="FK_TEST_MappedExtensionSingleStrategy_composedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="inverseAggregatedAssociation" inverse="true">
 				<key column="aggregatedAssociation_id" />
@@ -335,11 +313,11 @@
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-			<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-			<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+			<property name="bizKey" length="1024" not-null="true" />
+			<property name="bizCustomer" length="50" not-null="true" />
 			<property name="bizFlagComment" length="1024" />
 			<property name="bizDataGroupId" length="36" />
-			<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+			<property name="bizUserId" length="36" not-null="true" />
 			<property name="booleanFlag" />
 			<property name="colour" />
 			<property name="date" type="DateOnly" />
@@ -361,23 +339,15 @@
 			<property name="text" length="255" />
 			<property name="time" type="TimeOnly" />
 			<property name="timestamp" type="Timestamp" />
-			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" index="IDX_composedAssociation" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedAssociation" />
-			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionJoinedStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" index="IDX_aggregatedAssociation" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedAssociation" />
+			<many-to-one name="composedAssociation" entity-name="testMappedExtensionSingleStrategy" column="composedAssociation_id" cascade="persist,save-update,refresh,delete,merge" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedAssociation" />
+			<many-to-one name="aggregatedAssociation" entity-name="testMappedExtensionJoinedStrategy" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedAssociation" />
 			<bag name="aggregatedCollection" table="TEST_MappedExtensionJoinedStrategy_aggregatedCollection" cascade="persist,save-update,refresh,merge">
-				<key foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-				</key>
-				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_owner_id" />
+				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_aggregatedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="composedCollection" table="TEST_MappedExtensionJoinedStrategy_composedCollection" cascade="all-delete-orphan">
-				<key foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_owner_id">
-				<column name="owner_id" index="IDX_owner_id" />
-				</key>
-				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_element_id">
-				<column name="element_id" index="IDX_element_id" />
-			</many-to-many>
+				<key column="owner_id" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_owner_id" />
+				<many-to-many entity-name="testMappedExtensionJoinedStrategy" foreign-key="FK_TEST_MappedExtensionJoinedStrategy_composedCollection_element_id" column="element_id" />
 			</bag>
 			<bag name="inverseAggregatedAssociation" inverse="true">
 				<key column="aggregatedAssociation_id" />
@@ -397,11 +367,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="booleanFlag" />
 		<property name="enum3" length="5">
 			<type name="Enum">
@@ -419,11 +389,11 @@
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
-		<property name="bizKey" length="1024" index="IDX_bizKey" not-null="true" />
-		<property name="bizCustomer" length="50" index="IDX_bizCustomer" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
 		<property name="bizFlagComment" length="1024" />
 		<property name="bizDataGroupId" length="36" />
-		<property name="bizUserId" length="36" index="IDX_bizUserId" not-null="true" />
+		<property name="bizUserId" length="36" not-null="true" />
 		<property name="booleanFlag" />
 		<property name="enum3" length="5">
 			<type name="Enum">

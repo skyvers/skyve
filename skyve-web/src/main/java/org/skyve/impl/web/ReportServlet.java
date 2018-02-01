@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.Principal;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -16,30 +15,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRReport;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.design.JRDesignBand;
-import net.sf.jasperreports.engine.design.JRDesignExpression;
-import net.sf.jasperreports.engine.design.JRDesignField;
-import net.sf.jasperreports.engine.design.JRDesignLine;
-import net.sf.jasperreports.engine.design.JRDesignParameter;
-import net.sf.jasperreports.engine.design.JRDesignSection;
-import net.sf.jasperreports.engine.design.JRDesignStaticText;
-import net.sf.jasperreports.engine.design.JRDesignTextField;
-import net.sf.jasperreports.engine.design.JRValidationException;
-import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
-import net.sf.jasperreports.engine.type.HorizontalAlignEnum;
-import net.sf.jasperreports.engine.type.ModeEnum;
-import net.sf.jasperreports.engine.type.PositionTypeEnum;
-import net.sf.jasperreports.engine.type.StretchTypeEnum;
-import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -62,12 +37,35 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
-import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRReport;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignExpression;
+import net.sf.jasperreports.engine.design.JRDesignField;
+import net.sf.jasperreports.engine.design.JRDesignLine;
+import net.sf.jasperreports.engine.design.JRDesignParameter;
+import net.sf.jasperreports.engine.design.JRDesignSection;
+import net.sf.jasperreports.engine.design.JRDesignStaticText;
+import net.sf.jasperreports.engine.design.JRDesignTextField;
+import net.sf.jasperreports.engine.design.JRValidationException;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
+import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
+import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.PositionTypeEnum;
+import net.sf.jasperreports.engine.type.StretchTypeEnum;
+import net.sf.jasperreports.j2ee.servlets.BaseHttpServlet;
 
 public class ReportServlet extends HttpServlet {
 	/**
@@ -77,6 +75,10 @@ public class ReportServlet extends HttpServlet {
 
 	public static final String REPORT_PATH = "/report";
 	public static final String EXPORT_PATH = "/export";
+	
+	private static final Float FONT_TEN = Float.valueOf(10f);
+	private static final Float FONT_TWELVE = Float.valueOf(12f);
+	private static final Float FONT_TWENTY_SIX = Float.valueOf(26f);
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -329,7 +331,7 @@ public class ReportServlet extends HttpServlet {
 						throw new ServletException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
 					}
 					drivingDocument = module.getDocument(customer, query.getDocumentName());
-					DocumentQueryListModel queryModel = new DocumentQueryListModel();
+					DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 					queryModel.setQuery(query);
 					model = queryModel;
 				}
@@ -354,14 +356,13 @@ public class ReportServlet extends HttpServlet {
 																					model);
 					}
 					else { // simple criteria
-						Filter filter = model.getFilter();
 						SmartClientListServlet.addSimpleFilterCriteriaToQuery(module,
 																				drivingDocument,
 																				customer,
 																				SmartClientFilterOperator.substring,
 																				criteria,
 																				tagId,
-																				filter);
+																				model);
 					}
 				}
 
@@ -450,6 +451,10 @@ public class ReportServlet extends HttpServlet {
 	private static JasperDesign createJasperDesign(ReportDesignParameters params)
 	throws JRException {
 		int reportColumnWidth = params.getPageWidth() - params.getLeftMargin() - params.getRightMargin();
+		ReportFormat format = params.getReportFormat();
+		boolean wideStaticTexts = ReportFormat.csv.equals(format) || 
+									ReportFormat.txt.equals(format) ||
+									ReportFormat.xml.equals(format);
 		
 		// JasperDesign
 		JasperDesign jasperDesign = new JasperDesign();
@@ -516,16 +521,16 @@ public class ReportServlet extends HttpServlet {
 			designField.setValueClass(String.class);
 			jasperDesign.addField(designField);
 			
-			HorizontalAlignEnum alignment = null;
+			HorizontalTextAlignEnum alignment = null;
 			switch (column.getAlignment()) {
 			case left:
-				alignment = HorizontalAlignEnum.LEFT;
+				alignment = HorizontalTextAlignEnum.LEFT;
 				break;
 			case center:
-				alignment = HorizontalAlignEnum.CENTER;
+				alignment = HorizontalTextAlignEnum.CENTER;
 				break;
 			case right:
-				alignment = HorizontalAlignEnum.RIGHT;
+				alignment = HorizontalTextAlignEnum.RIGHT;
 				break;
 			default:
 			}
@@ -537,12 +542,12 @@ public class ReportServlet extends HttpServlet {
 				staticText.setMode(ModeEnum.OPAQUE);
 				staticText.setX(xPos);
 				staticText.setY(0);
-				staticText.setWidth(column.getWidth());
+				staticText.setWidth(wideStaticTexts ? 1000 : column.getWidth());
 				staticText.setHeight(18);
-				staticText.setHorizontalAlignment(HorizontalAlignEnum.CENTER);
+				staticText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
 				staticText.setForecolor(Color.white);
 				staticText.setBackcolor(new Color(0x99, 0x99, 0x99));
-				staticText.setFontSize(12);
+				staticText.setFontSize(FONT_TWELVE);
 				staticText.setText(column.getTitle());
 				columnHeaderBand.addElement(staticText);
 
@@ -553,12 +558,11 @@ public class ReportServlet extends HttpServlet {
 				textField.setY(0);
 				textField.setWidth(column.getWidth());
 				textField.setHeight(20);
-				textField.setHorizontalAlignment(alignment);
-				textField.setFontSize(12);
+				textField.setHorizontalTextAlign(alignment);
+				textField.setFontSize(FONT_TWELVE);
 				textField.setStretchWithOverflow(true);
-				textField.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
+				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
 				expression = new JRDesignExpression();
-				expression.setValueClass(String.class);
 				expression.setText("$F{" + column.getName() + "}");
 				textField.setExpression(expression);
 				detailBand.addElement(textField);
@@ -568,9 +572,10 @@ public class ReportServlet extends HttpServlet {
 				staticText = new JRDesignStaticText();
 				staticText.setX(0);
 				staticText.setY(yPos);
-				staticText.setWidth(columnarLabelWidth);
+				staticText.setWidth(wideStaticTexts ? 1000 : columnarLabelWidth);
 				staticText.setHeight(20);
-				staticText.setFontSize(12);
+				staticText.setFontSize(FONT_TWELVE);
+				staticText.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
 				staticText.setItalic(true);
 				staticText.setText(column.getTitle());
 				detailBand.addElement(staticText);
@@ -582,12 +587,11 @@ public class ReportServlet extends HttpServlet {
 				textField.setY(yPos);
 				textField.setWidth(reportColumnWidth - columnarLabelWidth);
 				textField.setHeight(20);
-				textField.setHorizontalAlignment(HorizontalAlignEnum.LEFT);
-				textField.setFontSize(12);
+				textField.setHorizontalTextAlign(HorizontalTextAlignEnum.LEFT);
+				textField.setFontSize(FONT_TWELVE);
 				textField.setStretchWithOverflow(true);
-				textField.setStretchType(StretchTypeEnum.RELATIVE_TO_TALLEST_OBJECT);
+				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
 				expression = new JRDesignExpression();
-				expression.setValueClass(String.class);
 				expression.setText("$F{" + column.getName() + "}");
 				textField.setExpression(expression);
 				detailBand.addElement(textField);
@@ -622,11 +626,10 @@ public class ReportServlet extends HttpServlet {
 			textField.setY(13);
 			textField.setWidth(reportColumnWidth);
 			textField.setHeight(35);
-			textField.setHorizontalAlignment(HorizontalAlignEnum.CENTER);
-			textField.setFontSize(26);
+			textField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+			textField.setFontSize(FONT_TWENTY_SIX);
 			textField.setBold(true);
 			expression = new JRDesignExpression();
-			expression.setValueClass(String.class);
 			expression.setText("$P{TITLE}");
 			textField.setExpression(expression);
 			band.addElement(textField);
@@ -648,7 +651,6 @@ public class ReportServlet extends HttpServlet {
 		jasperDesign.setColumnHeader(columnHeaderBand);
 		
 		// Detail
-// TODO remove		jasperDesign.setDetail(detailBand);
 		((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
 		
 		// Column footer
@@ -672,9 +674,8 @@ public class ReportServlet extends HttpServlet {
 			textField.setHeight(19);
 			textField.setForecolor(Color.black);
 			textField.setBackcolor(Color.white);
-			textField.setFontSize(10);
+			textField.setFontSize(FONT_TEN);
 			expression = new JRDesignExpression();
-			expression.setValueClass(Date.class);
 			expression.setText("new Date()");
 			textField.setExpression(expression);
 			band.addElement(textField);
@@ -689,10 +690,9 @@ public class ReportServlet extends HttpServlet {
 			textField.setHeight(19);
 			textField.setForecolor(Color.black);
 			textField.setBackcolor(Color.white);
-			textField.setHorizontalAlignment(HorizontalAlignEnum.RIGHT);
-			textField.setFontSize(10);
+			textField.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
+			textField.setFontSize(FONT_TEN);
 			expression = new JRDesignExpression();
-			expression.setValueClass(String.class);
 			expression.setText("\"Page \" + $V{PAGE_NUMBER} + \" of\"");
 			textField.setExpression(expression);
 			band.addElement(textField);
@@ -708,9 +708,8 @@ public class ReportServlet extends HttpServlet {
 			textField.setHeight(19);
 			textField.setForecolor(Color.black);
 			textField.setBackcolor(Color.white);
-			textField.setFontSize(10);
+			textField.setFontSize(FONT_TEN);
 			expression = new JRDesignExpression();
-			expression.setValueClass(String.class);
 			expression.setText("$V{PAGE_NUMBER}");
 			textField.setExpression(expression);
 			band.addElement(textField);

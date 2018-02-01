@@ -1,18 +1,26 @@
 package org.skyve.impl.web;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.skyve.EXT;
+import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
@@ -22,8 +30,11 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.StateUtil;
+import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import net.sf.ehcache.Cache;
@@ -201,7 +212,7 @@ public class WebUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String makePasswordChange(User user, String newPassword) 
+	public static String makePasswordChange(User user, String oldPassword, String newPassword, String confirmPassword) 
 	throws Exception {
 		String errorMessage = null;
 		
@@ -209,8 +220,9 @@ public class WebUtil {
 		Module admin = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
 		Document changePassword = admin.getDocument(c, SQLMetaDataUtil.CHANGE_PASSWORD_DOCUMENT_NAME);
 		Bean bean = changePassword.newInstance(user);
+		BindUtil.set(bean, SQLMetaDataUtil.OLD_PASSWORD_PROPERTY_NAME, oldPassword);
 		BindUtil.set(bean, SQLMetaDataUtil.NEW_PASSWORD_PROPERTY_NAME, newPassword);
-		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, newPassword);
+		BindUtil.set(bean, SQLMetaDataUtil.CONFIRM_PASSWORD_PROPERTY_NAME, confirmPassword);
 		AbstractRepository r = AbstractRepository.get();
 
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -237,6 +249,81 @@ public class WebUtil {
 		}
 		
 		return errorMessage;
+	}
+	
+	/**
+	 * Called from the requestPasswordReset.jsp.
+	 * 
+	 * @param userName
+	 */
+	public static void requestPasswordReset(String customer, String email) throws Exception {
+		SuperUser u = new SuperUser();
+		u.setCustomerName(customer);
+		Customer c = u.getCustomer();
+		AbstractPersistence p = AbstractPersistence.get();
+		try {
+			p.begin();
+			p.setUser(u);
+			DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
+			q.getFilter().addEquals(Binder.createCompoundBinding(SQLMetaDataUtil.CONTACT_PROPERTY_NAME, SQLMetaDataUtil.EMAIL1_PROPERTY_NAME), email);
+			PersistentBean user = q.beanResult();
+			if (user != null) { // this is a user
+				String passwordResetToken = UUID.randomUUID().toString() + Long.toString(System.currentTimeMillis());
+				Binder.set(user, SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME, passwordResetToken);
+				p.upsertBeanTuple(user);
+
+				Module m = c.getModule(SQLMetaDataUtil.ADMIN_MODULE_NAME);
+				Document d = m.getDocument(c, SQLMetaDataUtil.CONFIGURATION_DOCUMENT_NAME);
+				Bean configuration = d.newInstance(u);
+				String subject = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_SUBJECT_PROPERTY_NAME);
+				subject = Binder.formatMessage(c, subject, user);
+				String body = (String) Binder.get(configuration, SQLMetaDataUtil.PASSWORD_RESET_EMAIL_BODY_PROPERTY_NAME); 
+				body = body.replace("{url}", Util.getSkyveContextUrl());
+				body = Binder.formatMessage(c, body, user);
+				String fromEmail = (String) Binder.get(configuration, SQLMetaDataUtil.FROM_EMAIL_PROPERTY_NAME);
+				EXT.sendMail(new String[] {email}, null, null, fromEmail, subject, body, MimeType.html);
+			}
+		}
+		catch (Exception t) {
+			p.rollback();
+			throw t;
+		}
+		finally {
+			p.commit(true);
+		}
+	}
+
+	/**
+	 * Called from the resetPassword.jsp.
+	 * 
+	 * @param passwordResetToken
+	 * @param newPassword
+	 */
+	public static String resetPassword(String passwordResetToken, String newPassword, String confirmPassword)
+	throws Exception {
+		String customerName = null;
+		String userName = null;
+		try (Connection c = EXT.getDataStoreConnection()) {
+			try (PreparedStatement s = c.prepareStatement(String.format("select %s, %s from ADM_SecurityUser where %s = ?",
+																			Bean.CUSTOMER_NAME,
+																			SQLMetaDataUtil.USER_NAME_PROPERTY_NAME,
+																			SQLMetaDataUtil.PASSWORD_RESET_TOKEN_PROPERTY_NAME))) {
+				s.setString(1, passwordResetToken);
+				try (ResultSet rs = s.executeQuery()) {
+					if (rs.next()) {
+						customerName = rs.getString(1);
+						userName = rs.getString(2);
+					}
+					else {
+						return "Reset link used is invalid";
+					}
+				}
+			}
+		}
+
+		AbstractRepository r = AbstractRepository.get();
+		org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+		return makePasswordChange(u, null, newPassword, confirmPassword);
 	}
 	
 	// find the existing bean with retrieve

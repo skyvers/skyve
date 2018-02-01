@@ -47,6 +47,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.AbstractFacesBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -113,7 +114,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 														StringBuilder gridColumnExpression);
 	public abstract UIComponent addedDataGridBoundColumn(UIComponent current);
 	public abstract UIComponent addDataGridContainerColumn(UIComponent current,
-															DataGrid grid,
+															AbstractDataWidget widget,
 															DataGridContainerColumn column);
 	public abstract UIComponent addedDataGridContainerColumn(UIComponent current);
 	public abstract UIComponent addDataGridActionColumn(UIComponent current, 
@@ -125,16 +126,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	
 	public abstract UIComponent listGrid(String modelDocumentName,
 											String modelName,
-											ListModel<? extends Bean> model, 
-											List<FilterParameter> filterParameters,
-											String title,
+											ListModel<? extends Bean> model,
+											ListGrid listGrid,
 											boolean canCreateDocument,
-											boolean createRendered,
-											String[] createDisabledConditionNames,
-											boolean zoomRendered,
-											String zoomDisabledConditionName,
-											String selectedIdBinding,
-											List<EventAction> selectedActions,
 											boolean showPaginator,
 											boolean stickyHeader);
 

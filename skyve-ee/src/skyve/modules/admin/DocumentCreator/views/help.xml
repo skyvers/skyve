@@ -9,19 +9,21 @@
 		<![CDATA[
 			<h2>Skyve Script Help</h2>
 			<span style="font-size: 1.1rem">
-				<p>Skyve Script uses markdown to specify domain models for developers in a non-technical format. 
+				<p>Skyve Script uses markdown to allow developers to specify domain models in a non-technical format. 
 					By placing your markdown in the <em>Input</em> tab, the system will preview the markdown and
 					generated document when you change tab. Any errors should be highlighted in red in the <em>
 					Document Preview</em> tab.</p>
 				<p>Skyve Script has a few specific syntax requirements it is looking for when generating domain models:</p>
 				<ul>
-					<li>New modules should be specified with a level 1 heading (#), followed by a space, then the module name
+					<li>New modules should be specified with a level 1 heading (#), followed by a space, then the module name in title case
 					<ul>
 						<li>e.g. <code># Admin</code>
+						<li>If a specific module title is required, it can be encapsulated in single or double quotes, e.g. <code># 'My Module'</code>
 					</ul>
-					<li>New domain models (documents), should be specified with a level 2 heading (##), followed by a space, then the document name
+					<li>New domain models (documents), should be specified with a level 2 heading (##), followed by a space, then the document name in title case
 					<ul>
 						<li>e.g. <code>## User</code>
+						<li>If a specific document title is required, it can be encapsulated in single or double quotes, e.g. <code>## 'My Document'</code>
 						<li>If the document is to be persisted, the persistent name should follow the document name surrounded by backticks (`), e.g. <code>## User `ADM_User`</code>
 					</ul>
 					<li>Domain attributes (fields) should be specified as a list below the domain heading, by using a dash (-), followed by a space, then the attribute definition
@@ -31,16 +33,19 @@
 						<li>The type should follow the attribute name
 						<li>If the type is text, the length should follow the type, e.g. <code>- *firstName* text 150</code>
 						<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)</code>
+						<li>If a specific display name is required, it can be encapsulated in single or double quotes, e.g. <code>- 'Yes/No'</code>
 					</ul>
 					<li>Assoications should be specified as a list item by using a dash (-), followed by a space, then the association name in camel case, then the association document in title case
 					<ul>
 						<li>e.g. <code>- country Country</code>
 						<li>Required associations should have their name surrounded by asterisks, e.g. <code>- *country* Country</code>
+						<li>Association type can be specified surrounded by backticks after the document name, e.g. <code>- country Country `composition`</code>
 					</ul>
-					<li>Collections should be specified as an ordered list item by using a number followed by a period (1.), followed by a space, then the collection name in camel case, then the collection document in title case
+					<li>Collections should be specified as a list item by using a plus (+), followed by a space, then the collection name in camel case, then the collection document in title case
 					<ul>
-						<li>e.g. <code>1. roles Role</code>
-						<li>Required collections should have their name surrounded by asterisks, e.g. <code>1. *roles* Role</code>
+						<li>e.g. <code>+ roles Role</code>
+						<li>Required collections should have their name surrounded by asterisks, e.g. <code>+ *roles* Role</code>
+						<li>Collection type can be specified surrounded by backticks after the document name, e.g. <code>- roles Role `child`</code>
 					</ul>
 				</ul>
 				<p>A complete document specification would then look like this:</p>

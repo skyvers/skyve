@@ -8,6 +8,16 @@
 	<iconStyleClass>fa fa-pencil-square-o</iconStyleClass>
 	<bizKey expression="Document Creator"/>
 	<attributes>
+		<text name="outputLocation">
+			<displayName>Output Location</displayName>
+			<description>
+				<![CDATA[
+					Absolute path on the filesystem to the source directory where modules live. 
+					E.g. c:/workspace/project/src/main/java
+				]]>
+			</description>
+			<length>255</length>
+		</text>
 		<memo name="script">
 			<displayName>Script</displayName>
 		</memo>

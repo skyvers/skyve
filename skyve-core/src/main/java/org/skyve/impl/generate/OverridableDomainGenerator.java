@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
@@ -54,6 +55,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Collection.Ordering;
 import org.skyve.metadata.model.document.Condition;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
@@ -174,6 +176,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					String documentName = document.getName();
 					DomainClass domainClass = new DomainClass();
 					domainClass.attributes = generateDocumentPropertyNames(document);
+					domainClass.isAbstract = document.isAbstract();
 					documentClasses.put(documentName, domainClass);
 
 					populateModocDerivations(repository, module, document, null);
@@ -815,17 +818,33 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				// bizKey must be nullable as the Hibernate NOT NULL constraint check happens before
 				// HibernateListener.preInsert() and HibernateListener.preUpdate() are fired - ie before bizKey is populated.
 				// HibernateListener checks for null bizKeys manually.
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.BIZ_KEY, DIALECT_OPTIONS.getDataStoreBizKeyLength(),
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.CUSTOMER_NAME, 
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
+				if (shouldIndex(null)) {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.BIZ_KEY, 
+															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength()),
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.BIZ_KEY)));
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.CUSTOMER_NAME, 
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.CUSTOMER_NAME)));
+				}
+				else {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"%d\" not-null=\"true\" />\n",
+															Bean.BIZ_KEY, 
+															Integer.valueOf(DIALECT_OPTIONS.getDataStoreBizKeyLength())));
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"50\" not-null=\"true\" />\n",
+															Bean.CUSTOMER_NAME));
+				}
 				fw.append(indent).append("\t\t<property name=\"bizFlagComment\" length=\"1024\" />\n");
 				fw.append(indent).append("\t\t<property name=\"bizDataGroupId\" length=\"36\" />\n");
-				fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
-														Bean.USER_ID,
-														generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
+				if (shouldIndex(null)) {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" index=\"%s\" not-null=\"true\" />\n",
+															Bean.USER_ID,
+															generateDataStoreName(DataStoreType.IDX, persistent.getName(), Bean.USER_ID)));
+				}
+				else {
+					fw.append(indent).append(String.format("\t\t<property name=\"%s\" length=\"36\" not-null=\"true\" />\n",
+															Bean.USER_ID));
+				}
 			}
 
 			// map the parent property, if parent document is persistent
@@ -983,8 +1002,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				StringBuilder orderBy = null;
 				// Add order by clause to hibernate ORM only if the bindings are simple and the ordering clause has columns
-				if ((!((CollectionImpl) collection).isComplexOrdering()) &&
-						(!collection.getOrdering().isEmpty())) {
+				if ((! ((CollectionImpl) collection).isComplexOrdering()) &&
+						(! collection.getOrdering().isEmpty())) {
 					orderBy = new StringBuilder(64);
 					for (Ordering ordering : collection.getOrdering()) {
 						String byBinding = ordering.getBy();
@@ -1017,7 +1036,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append("\" order-by=\"").append(Bean.ORDINAL_NAME);
-					} else if (orderBy != null) {
+					} 
+					else if (orderBy != null) {
 						fw.append("\" order-by=\"").append(orderBy);
 					}
 					fw.append("\" cascade=\"all-delete-orphan\">\n");
@@ -1030,10 +1050,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName).append("\" />\n");
 					fw.append(indentation).append("\t\t</bag>\n");
-				} else {
+				} 
+				else {
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t<list name=\"").append(collection.getName());
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t<bag name=\"").append(collection.getName());
 					}
 
@@ -1076,7 +1098,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																			collectionTableName, 
 																			PersistentBean.OWNER_COLUMN_NAME)));
 						fw.append(indentation).append("\t\t\t</key>\n");
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t\t<key column=\"").append(PersistentBean.OWNER_COLUMN_NAME);
 						fw.append("\" foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.OWNER_COLUMN_NAME));
@@ -1134,13 +1157,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 						fw.append(" />\n");
 						fw.append(indentation).append("\t\t</many-to-any>\n");
-					} else {
+					} 
+					else {
 						fw.append(indentation).append("\t\t\t<many-to-many entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(referencedModuleName + '.' + referencedDocumentName)) {
 							fw.append(customerName);
 						}
 						fw.append(referencedModuleName).append(referencedDocumentName);
+						if (orderBy != null) {
+							fw.append("\" order-by=\"").append(orderBy);
+						}
 						fw.append("\" foreign-key=\"");
 						fw.append(generateDataStoreName(DataStoreType.FK, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
 						if (shouldIndex(collection.getElementDatabaseIndex())) {
@@ -1150,7 +1177,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							fw.append(generateDataStoreName(DataStoreType.IDX, collectionTableName, PersistentBean.ELEMENT_COLUMN_NAME));
 							fw.append("\" />\n");
 							fw.append("\t\t\t</many-to-many>\n");
-						} else {
+						} 
+						else {
 							fw.append("\" column=\"").append(PersistentBean.ELEMENT_COLUMN_NAME);
 							fw.append("\" />\n");
 						}
@@ -1158,11 +1186,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					if (Boolean.TRUE.equals(collection.getOrdered())) {
 						fw.append(indentation).append("\t\t</list>\n");
-					} else {
+					}
+					else {
 						fw.append(indentation).append("\t\t</bag>\n");
 					}
 				}
-			} else if (attribute instanceof Association) {
+			}
+			else if (attribute instanceof Association) {
 				Association association = (Association) attribute;
 
 				String referencedDocumentName = association.getDocumentName();
@@ -3011,13 +3041,23 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			fw.append(" extends Abstract").append((persistent == null) ? "TransientBean" : "PersistentBean");
 		}
 
+		final String interfacesCommaSeparated = document.getInterfaces().stream()
+				.map(Interface::getInterfaceName)
+				.collect(Collectors.joining(", "));
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
 			} else {
 				fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
 			}
+
+			if (!document.getInterfaces().isEmpty()) {
+				fw.append(", ").append(interfacesCommaSeparated);
+			}
+		} else if (!document.getInterfaces().isEmpty()) {
+			fw.append(" implements ").append(interfacesCommaSeparated);
 		}
+
 		fw.append(" {\n");
 
 		fw.append("\t/**\n");

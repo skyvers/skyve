@@ -42,6 +42,7 @@
       <xs:enumeration value="Decimal5TwoDecimalPlacesPercentage"/>
       <xs:enumeration value="SimplePercentage"/>
       <xs:enumeration value="IntegerSeparator"/>
+      <xs:enumeration value="LongIntegerSeparator"/>
       <xs:enumeration value="HH_MI"/>
       <xs:enumeration value="HH24_MI"/>
       <xs:enumeration value="HH_MI_SS"/>

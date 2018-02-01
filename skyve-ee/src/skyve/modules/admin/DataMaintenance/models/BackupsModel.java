@@ -80,6 +80,11 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	}
 
 	@Override
+	public void putParameter(String name, Object value) {
+		// not required
+	}
+	
+	@Override
 	public Page fetch() throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		String backupDirPrefix = Util.getContentDirectory() + "backup_" + customerName;
