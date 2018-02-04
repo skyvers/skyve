@@ -35,6 +35,7 @@ import org.skyve.impl.metadata.repository.module.Menu;
 import org.skyve.impl.metadata.repository.module.ModuleDocument;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.Role;
+import org.skyve.impl.script.SkyveScriptException.ExceptionType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
@@ -47,12 +48,16 @@ public class SkyveScriptInterpreter {
 
 	private List<DocumentMetaData> documents;
 	private List<ModuleMetaData> modules;
+	private List<SkyveScriptException> errors;
+	private String defaultModule;
 	private Parser parser;
 	private Node document;
 	private String script;
 
 	private static DocumentMetaData currentDocument = null;
+	private int currentLine = 0;
 	private ModuleMetaData currentModule = null;
+
 	private static Map<String, String> parentDocuments = new HashMap<>();
 
 	private static final String ROLE_MAINTAINER = "Maintainer";
@@ -80,7 +85,6 @@ public class SkyveScriptInterpreter {
 	 */
 	private static String REQUIRED_SHORTHAND_PATTERN = "^[-|+]\\s(\\*{1}['\"]?\\w+['\"]?)\\s.*";
 
-
 	/**
 	 * Creates a new SkyveScriptInterpreter instance with the
 	 * specified script ready to be pre-processed and parsed.
@@ -90,13 +94,32 @@ public class SkyveScriptInterpreter {
 	public SkyveScriptInterpreter(String script) {
 		super();
 		parser = Parser.builder().build();
+
 		this.documents = new ArrayList<>();
+		this.errors = new ArrayList<>();
 		this.modules = new ArrayList<>();
 		this.script = script;
 	}
 
+	/**
+	 * Creates a new SkyveScriptInterpreter instance with the
+	 * specified script ready to be pre-processed and parsed.
+	 * 
+	 * @param script The initial skyve script String to be processed
+	 * @param defaultModule The default module name to use if no module is specified
+	 */
+	public SkyveScriptInterpreter(String script, String defaultModule) {
+		this(script);
+
+		this.defaultModule = defaultModule;
+	}
+
 	public List<DocumentMetaData> getDocuments() {
 		return documents;
+	}
+
+	public List<SkyveScriptException> getErrors() {
+		return errors;
 	}
 
 	public List<ModuleMetaData> getModules() {
@@ -198,18 +221,17 @@ public class SkyveScriptInterpreter {
 			Node node = document.getFirstChild();
 
 			process(node);
+
+			// update the parent of any child collections
+			processParentDocuments();
+		} else {
+			throw new IllegalArgumentException(
+					"Invalid markdown supplied, please consult the documentation to supply valid Skyve script.");
 		}
 
-		// update the parent of any child collections
-		for (Map.Entry<String, String> e : parentDocuments.entrySet()) {
-			for (DocumentMetaData d : getDocuments()) {
-				if (d.getName().equals(e.getKey())) {
-					ParentDocument parent = new ParentDocument();
-					parent.setParentDocumentName(e.getValue());
-					d.setParentDocument(parent);
-					break;
-				}
-			}
+		// error if multiple modules found, not currently supported
+		if (getModules().size() > 1) {
+			addCritical("Multiple modules added, please supply a single module.");
 		}
 	}
 
@@ -218,6 +240,7 @@ public class SkyveScriptInterpreter {
 		if (isHeading(node)) {
 			Heading heading = (Heading) node;
 			if (isHeading1(heading)) {
+				currentLine++;
 				// new module
 				currentModule = new ModuleMetaData();
 
@@ -236,11 +259,14 @@ public class SkyveScriptInterpreter {
 
 					currentModule.setName(moduleName);
 					currentModule.setTitle(moduleTitle);
+				} else {
+					addCritical("Invalid module definition supplied");
 				}
 
 				getModules().add(currentModule);
 				process(heading.getNext());
 			} else if (isHeading2(heading)) {
+				currentLine++;
 				// new document
 				currentDocument = new DocumentMetaData();
 
@@ -279,13 +305,18 @@ public class SkyveScriptInterpreter {
 							currentDocument.setPersistent(persistent);
 						}
 					} else {
-						Util.LOGGER.warning(String.format("Unsupported document name declaratation: %s", text.getLiteral()));
+						addError(String.format("Unsupported document name declaratation: %s", text.getLiteral()));
 					}
 				}
 
 				getDocuments().add(currentDocument);
 
+
 				// add this document to the module
+				if (currentModule == null) {
+					initialiseDefaultModule();
+				}
+
 				ModuleDocument md = new ModuleDocument();
 				md.setRef(currentDocument.getName());
 				currentModule.getDocuments().add(md);
@@ -303,10 +334,11 @@ public class SkyveScriptInterpreter {
 		} else if (isBulletList(node)) {
 			process(node.getFirstChild());
 		} else if (isListItem(node)) {
+			currentLine++;
 			// is this a scalar or association, or a collection
 			BulletList list = (BulletList) node.getParent();
 			if (list.getBulletMarker() != '-' && list.getBulletMarker() != '+') {
-				Util.LOGGER.warning(
+				addError(
 						String.format("Unknown list item type: \"%s\". Please use either \"-\" or \"+\".", list.getBulletMarker()));
 			} else {
 				processListItem(node);
@@ -318,6 +350,25 @@ public class SkyveScriptInterpreter {
 				process(node.getParent().getNext());
 			}
 		}
+	}
+
+	/**
+	 * Adds a new critical error to the list of errors for this script.
+	 */
+	private void addCritical(String message) {
+		Util.LOGGER.warning(message);
+		getErrors().add(new SkyveScriptException(ExceptionType.critical, message, currentLine));
+
+	}
+
+	private void addError(String message) {
+		Util.LOGGER.warning(message);
+		getErrors().add(new SkyveScriptException(ExceptionType.error, message, currentLine));
+	}
+
+	private void addWarning(String message) {
+		Util.LOGGER.info(message);
+		getErrors().add(new SkyveScriptException(ExceptionType.warning, message, currentLine));
 	}
 
 	/**
@@ -418,7 +469,7 @@ public class SkyveScriptInterpreter {
 		return association;
 	}
 
-	private static void createAttribute(String[] parts, Node line) {
+	private void createAttribute(String[] parts, Node line) {
 		// first we have to get the attribute name
 		if (parts != null && parts.length > 1) {
 			String attributeName = parts[0];
@@ -431,7 +482,7 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
-	private static void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
+	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
 		// identify the type from the parts
 		String type = null;
 		if (parts.length == 1 || parts.length == 2) {
@@ -506,7 +557,7 @@ public class SkyveScriptInterpreter {
 							Enumeration e = createFieldEnum(required, name, displayName, brackets);
 							currentDocument.getAttributes().add(e);
 						} else {
-							Util.LOGGER.warning(String.format("Enum attribute: %s missing required value array", attributeName));
+							addError(String.format("Enum attribute: %s missing required value array", attributeName));
 						}
 					}
 					break;
@@ -519,11 +570,11 @@ public class SkyveScriptInterpreter {
 									length);
 							currentDocument.getAttributes().add(text);
 						} catch (NumberFormatException nfe) {
-							Util.LOGGER.warning(
+							addError(
 									String.format("Text attribute: %s length [%s] was not an integer", attributeName, parts[1]));
 						}
 					} else {
-						Util.LOGGER.warning(String.format("Text attribute: %s missing required field length", attributeName));
+						addError(String.format("Text attribute: %s missing required field length", attributeName));
 					}
 					break;
 				default:
@@ -535,7 +586,7 @@ public class SkyveScriptInterpreter {
 						CollectionImpl collection = createCollection(required, type, name, displayName, line);
 						currentDocument.getAttributes().add(collection);
 					} else {
-						Util.LOGGER.warning(String.format("Unsupported attribute: %s [%s]", attributeName, parts[0]));
+						addWarning(String.format("Unsupported attribute: %s [%s]", attributeName, parts[0]));
 					}
 					break;
 			}
@@ -730,6 +781,26 @@ public class SkyveScriptInterpreter {
 	}
 
 	/**
+	 * Sets up the current module to add documents to if the module
+	 * has not been specified as part of the script.
+	 */
+	private void initialiseDefaultModule() {
+		currentModule = new ModuleMetaData();
+
+		if (defaultModule != null) {
+			String moduleName = null, moduleTitle = null;
+
+			moduleName = defaultModule;
+			moduleTitle = toTitleCase(moduleName);
+
+			currentModule.setName(moduleName);
+			currentModule.setTitle(moduleTitle);
+		} else {
+			addCritical("Default module required but not supplied");
+		}
+	}
+
+	/**
 	 * Returns true if the specified type describes an association:
 	 * <ul>
 	 * <li>the attribute belongs to an unordered list
@@ -889,7 +960,7 @@ public class SkyveScriptInterpreter {
 		return false;
 	}
 
-	private static void parseAttribute(Node node) {
+	private void parseAttribute(Node node) {
 		if (node.getFirstChild() != null && node.getFirstChild() instanceof Emphasis) {
 			// required attribute
 			Emphasis em = (Emphasis) node.getFirstChild();
@@ -901,7 +972,7 @@ public class SkyveScriptInterpreter {
 				String[] parts = remainingDefinition.trim().split("\\s");
 				createAttribute(attributeName, parts, true, em);
 			} else {
-				Util.LOGGER.warning("Invalid attribute definition: " + node.getLastChild().toString());
+				addWarning("Invalid attribute definition: " + node.getLastChild().toString());
 			}
 
 		} else if (node.getFirstChild() != null && node.getFirstChild() instanceof Text) {
@@ -911,7 +982,7 @@ public class SkyveScriptInterpreter {
 		}
 	}
 
-	private static void processListItem(Node item) {
+	private void processListItem(Node item) {
 		if (item.getFirstChild() != null
 				&& (item.getFirstChild() instanceof Text || item.getFirstChild() instanceof Paragraph)) {
 			if (item.getFirstChild() instanceof Paragraph) {
@@ -919,6 +990,19 @@ public class SkyveScriptInterpreter {
 				parseAttribute(paragraph);
 			} else {
 				parseAttribute(item);
+			}
+		}
+	}
+
+	private void processParentDocuments() {
+		for (Map.Entry<String, String> e : parentDocuments.entrySet()) {
+			for (DocumentMetaData d : getDocuments()) {
+				if (d.getName().equals(e.getKey())) {
+					ParentDocument parent = new ParentDocument();
+					parent.setParentDocumentName(e.getValue());
+					d.setParentDocument(parent);
+					break;
+				}
 			}
 		}
 	}
