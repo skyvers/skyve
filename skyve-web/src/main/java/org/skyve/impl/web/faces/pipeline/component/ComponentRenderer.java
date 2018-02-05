@@ -236,7 +236,7 @@ public class ComponentRenderer {
 			putValue(attributes, "styleClass", fu.getStyleClass());
 			putValue(attributes, "onStart", fu.getOnstart());
 			putValue(attributes, "update", fu.getUpdate());
-			putValue(attributes, "fileLimit", fu.getFileLimit());
+			putValue(attributes, "fileLimit", Integer.valueOf(fu.getFileLimit()));
 			putValue(attributes, "fileLimitMessage", fu.getFileLimitMessage());
 			putMethodExpression(attributes, "fileUploadListener", fu.getFileUploadListener());
 		}
