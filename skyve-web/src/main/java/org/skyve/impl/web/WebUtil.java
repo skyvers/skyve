@@ -40,6 +40,7 @@ import org.skyve.web.WebContext;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+import net.sf.ehcache.statistics.StatisticsGateway;
 
 public class WebUtil {
 	private static final String CONVERSATIONS_CACHE_NAME = "conversations";
@@ -92,7 +93,7 @@ public class WebUtil {
 				throw new ConversationEndedException();
 			}
 
-        	result = StateUtil.decode64((String) element.getValue());
+        	result = StateUtil.decode64((String) element.getObjectValue());
     		result.setHttpServletRequest(request);
             result.setHttpServletResponse(response);
             result.setKey(conversationKey);
@@ -105,9 +106,12 @@ public class WebUtil {
 	public static void logConversationsStats() {
 		Cache conversations = WebUtil.getConversations();
 		UtilImpl.LOGGER.info("Count = " + conversations.getSize());
-		UtilImpl.LOGGER.info("Count in memory = " + conversations.getMemoryStoreSize());
-		UtilImpl.LOGGER.info("Count on disk = " + conversations.getDiskStoreSize());
-		UtilImpl.LOGGER.info("In-Memory (MB) = " + (conversations.calculateInMemorySize() / 1048576.0));
+		StatisticsGateway statistics = conversations.getStatistics();
+		if (statistics != null) {
+			UtilImpl.LOGGER.info("Count in memory = " + statistics.getLocalHeapSize());
+			UtilImpl.LOGGER.info("Count on disk = " + statistics.getLocalDiskSize());
+			UtilImpl.LOGGER.info("In-Memory (MB) = " + (statistics.getLocalHeapSizeInBytes() / 1048576.0));
+		}
 		UtilImpl.LOGGER.info("**************************************************************");
 	}
 	

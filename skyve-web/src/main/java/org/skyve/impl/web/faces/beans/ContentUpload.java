@@ -9,32 +9,17 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.FilenameUtils;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
 import org.skyve.CORE;
-import org.skyve.EXT;
-import org.skyve.content.AttachmentContent;
-import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.Content;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.Attribute;
-import org.skyve.metadata.module.Module;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
-import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.web.WebContext;
 
 @ManagedBean(name = "_skyveContent")
 @RequestScoped
@@ -108,8 +93,6 @@ public class ContentUpload extends Localisable {
 		HttpServletRequest request = (HttpServletRequest) ec.getRequest();
 		HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 
-		UploadedFile file = event.getFile();
-		
 		AbstractWebContext webContext = WebUtil.getCachedConversation(context, request, response);
 		if (webContext == null) {
 			UtilImpl.LOGGER.warning("FileUpload - Malformed URL on Content Upload - context does not exist");
@@ -118,12 +101,8 @@ public class ContentUpload extends Localisable {
 	        return;
 		}
 
-		AbstractPersistence persistence = webContext.getConversation();
-		persistence.setForThread();
-		
-		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		persistence.setUser(user);
-		persistence.begin();
+		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
+		Persistence persistence = CORE.getPersistence();
 		try {
 			Bean currentBean = webContext.getCurrentBean();
 			Bean bean = currentBean;
@@ -150,8 +129,6 @@ public class ContentUpload extends Localisable {
 			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
 	        fc.addMessage(null, msg);
 		}
-		finally {
-			persistence.commit(true);
-		}
+		// NB No need to disconnect Persistence as it is done in the SkyvePhaseListener after the response is rendered.
     }
 }

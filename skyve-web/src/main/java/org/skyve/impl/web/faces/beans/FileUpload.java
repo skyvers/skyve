@@ -28,7 +28,6 @@ import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -39,7 +38,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
-import org.skyve.web.WebContext;
 
 @ManagedBean(name = "_skyveUpload")
 @RequestScoped
@@ -128,14 +126,11 @@ public class FileUpload extends Localisable {
 	        return;
 		}
 
-		AbstractPersistence persistence = webContext.getConversation();
-		persistence.setForThread();
-		
-		User user = (User) request.getSession().getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		persistence.setUser(user);
-		persistence.begin();
+		// NB Persistence has been set with the restore processing inside the SkyvePhaseListener
+		Persistence persistence = CORE.getPersistence();
 		try {
 			AbstractRepository repository = AbstractRepository.get();
+			User user = persistence.getUser();
 			CustomerImpl customer = (CustomerImpl) user.getCustomer();
 	
 			Bean currentBean = webContext.getCurrentBean();
@@ -249,8 +244,6 @@ public class FileUpload extends Localisable {
 			FacesMessage msg = new FacesMessage("Failure", e.getMessage());
 	        fc.addMessage(null, msg);
 		}
-		finally {
-			persistence.commit(true);
-		}
+		// NB No need to disconnect Persistence as it is done in the SkyvePhaseListener after the response is rendered.
     }
 }

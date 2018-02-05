@@ -17,14 +17,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.SelectEvent;
-import org.primefaces.model.UploadedFile;
-import org.skyve.CORE;
-import org.skyve.EXT;
-import org.skyve.content.AttachmentContent;
-import org.skyve.content.ContentManager;
-import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
-import org.skyve.domain.types.DateTime;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.FilterParameterImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -52,9 +45,7 @@ import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
-import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
-import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
 @ViewScoped
@@ -504,8 +495,6 @@ public class FacesView<T extends Bean> extends Harness {
 	
 	/**
 	 * Upload the file to the content management. 
-	 * <br />
-	 * Must call {@link FacesView#setUploadBinding(String)} before this event is fired.
 	 * @param event the file upload event
 	 */
 	public void handleFileUpload(FileUploadEvent event) throws Exception {
