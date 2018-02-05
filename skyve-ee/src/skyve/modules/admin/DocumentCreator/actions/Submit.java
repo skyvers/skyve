@@ -31,7 +31,7 @@ public class Submit implements ServerSideAction<DocumentCreator> {
 
 	@SuppressWarnings("boxing")
 	private static void parseScript(DocumentCreator bean, WebContext webContext) {
-		SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript());
+		SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript(), bean.getDefaultModule());
 		i.preProcess();
 		i.process();
 
@@ -54,7 +54,8 @@ public class Submit implements ServerSideAction<DocumentCreator> {
 					i.getDocuments().size(),
 					bean.getOutputLocation()));
 		} else {
-			webContext.growl(MessageSeverity.warn, "No modules were detected, please check your script or refer to the Help tab.");
+			throw new ValidationException(new Message(DocumentCreator.defaultModulePropertyName,
+					"No module was specified in the script, a default module is required."));
 		}
 	}
 }

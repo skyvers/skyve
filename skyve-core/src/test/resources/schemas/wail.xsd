@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/wail" xmlns:tns="http://www.skyve.org/xml/wail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="action" type="tns:action"/>
+
+  <xs:element name="call" type="tns:call"/>
+
+  <xs:element name="menu" type="tns:menu"/>
+
+  <xs:element name="module" type="tns:module"/>
+
+  <xs:element name="navigate" type="tns:navigate"/>
+
+  <xs:element name="reload" type="tns:reload"/>
+
+  <xs:element name="setup" type="tns:setup"/>
+
+  <xs:element name="tearDown" type="tns:tearDown"/>
+
+  <xs:element name="testCase" type="tns:testCase"/>
+
+  <xs:element name="testSuite" type="tns:testSuite"/>
+
+  <xs:complexType name="testSuite">
+    <xs:sequence>
+      <xs:element ref="tns:setup" minOccurs="0"/>
+      <xs:element ref="tns:testCase" maxOccurs="unbounded"/>
+      <xs:element ref="tns:tearDown" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="setup">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:call"/>
+        <xs:element ref="tns:module"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:menu"/>
+        <xs:element ref="tns:navigate"/>
+        <xs:element ref="tns:reload"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="call">
+    <xs:sequence/>
+    <xs:attribute name="identifier" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="module">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="action">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="menu">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="navigate">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="reload">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="testCase">
+    <xs:sequence>
+      <xs:element ref="tns:setup" minOccurs="0"/>
+      <xs:element name="method" form="qualified" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+              <xs:element ref="tns:call"/>
+              <xs:element ref="tns:module"/>
+              <xs:element ref="tns:action"/>
+              <xs:element ref="tns:menu"/>
+              <xs:element ref="tns:navigate"/>
+              <xs:element ref="tns:reload"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element ref="tns:tearDown" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="identifier" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="tearDown">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="tns:call"/>
+        <xs:element ref="tns:module"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:menu"/>
+        <xs:element ref="tns:navigate"/>
+        <xs:element ref="tns:reload"/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
