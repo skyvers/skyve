@@ -37,17 +37,17 @@ public class SkyvePhaseListener implements PhaseListener {
 		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
 		try {
-			if (PhaseId.RENDER_RESPONSE.equals(phaseId)) {
-				afterResponseRendered(event);
-			}
-			else if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
+			if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
 				afterRestoreView(event);
 			}
 			else if (PhaseId.UPDATE_MODEL_VALUES.equals(phaseId)) {
 				afterUpdateModelValues(event);
 			}
-			// The bean issued a HTTP redirect response
-			else if (event.getFacesContext().getResponseComplete()) {
+			else if (PhaseId.RENDER_RESPONSE.equals(phaseId) || // response rendered
+					// Usually the bean issued a HTTP redirect response, but this can happen
+					// after most phases along the way in the lifecycle...
+					// See https://docs.oracle.com/javaee/7/tutorial/jsf-intro006.htm
+					event.getFacesContext().getResponseComplete()) {
 				afterResponseRendered(event);
 			}
 		}
