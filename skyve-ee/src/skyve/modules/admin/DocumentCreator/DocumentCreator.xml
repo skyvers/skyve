@@ -27,5 +27,23 @@
 		<markup name="markdownPreview">
 			<displayName>Markdown Preview</displayName>
 		</markup>
+		<markup name="errors">
+			<displayName>Errors</displayName>
+		</markup>
+		<text name="defaultModule">
+			<displayName>Default Module</displayName>
+			<description>The module documents will be added to if none is specified in the script.</description>
+			<domain>variant</domain>
+			<length>255</length>
+		</text>
 	</attributes>
+	<conditions>
+		<condition name="hasErrors">
+			<expression>
+				<![CDATA[
+					getErrors() != null && getErrors().length() > 0
+				]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

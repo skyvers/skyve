@@ -9,8 +9,9 @@
     		<form responsiveWidth="12" percentageWidth="100" border="true">
 		        <column percentageWidth="10" responsiveWidth="2"/>
 		        <column/>
+		        <column/>
 		        <row>
-		            <item>
+		            <item colspan="2">
 		            	<textArea binding="script" minPixelHeight="500">
 		            		<onBlurHandlers>
 		            			<server action="UpdatePreview" />
@@ -23,6 +24,11 @@
 		        		<default binding="outputLocation" />
 		        	</item>
 		        </row>
+		        <row>
+					<item>
+						<combo binding="defaultModule" />
+					</item>
+		        </row>
 		    </form>
     	</tab>
     	<tab title="Markdown Preview">
@@ -34,13 +40,27 @@
     				</item>
     			</row>
     		</form>
+    		<form border="true" borderTitle="Errors" visible="hasErrors">
+    			<column />
+    			<row>
+    				<item>
+    					<blurb>{errors}</blurb>
+    				</item>
+    			</row>
+    		</form>
     	</tab>
     	<tab title="Document Preview">
     		<form>
     			<column />
     			<row>
     				<item>
-    					<blurb>{documentPreview}</blurb>
+    					<blurb>
+    						<![CDATA[
+    						<pre>
+{documentPreview}
+    						</pre>
+    						]]>
+   						</blurb>
     				</item>
     			</row>
     		</form>

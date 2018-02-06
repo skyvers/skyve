@@ -37,17 +37,19 @@ public class SkyvePhaseListener implements PhaseListener {
 		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - AFTER " + phaseId + " : responseComplete=" + event.getFacesContext().getResponseComplete());
 		try {
-			if (PhaseId.RENDER_RESPONSE.equals(phaseId)) {
-				afterResponseRendered(event);
-			}
-			else if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
+			if (PhaseId.RESTORE_VIEW.equals(phaseId)) {
 				afterRestoreView(event);
 			}
 			else if (PhaseId.UPDATE_MODEL_VALUES.equals(phaseId)) {
 				afterUpdateModelValues(event);
 			}
-			// The bean issued a HTTP redirect response
-			else if (event.getFacesContext().getResponseComplete()) {
+			
+			// Not an else as response can be completed in many phases
+			if (PhaseId.RENDER_RESPONSE.equals(phaseId) || // response rendered
+					// Usually the bean issued a HTTP redirect response, but this can happen
+					// after most phases along the way in the lifecycle...
+					// See https://docs.oracle.com/javaee/7/tutorial/jsf-intro006.htm
+					event.getFacesContext().getResponseComplete()) {
 				afterResponseRendered(event);
 			}
 		}
@@ -66,15 +68,16 @@ public class SkyvePhaseListener implements PhaseListener {
 		FacesContext fc = event.getFacesContext();
 		ExternalContext ec = fc.getExternalContext();
 		Map<String, Object> s = ec.getSessionMap();
+		String webId = ec.getRequestParameterMap().get(AbstractWebContext.CONTEXT_NAME);
 		UIViewRoot vr = fc.getViewRoot();
 
 		// restore from the session - used when http redirect is used to navigate to a new view
-		// restore from the view root - used when within the same view-scoped bean
 		if (s.containsKey(FacesUtil.MANAGED_BEAN_NAME_KEY)) {
 			if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("SkyvePhaseListener - SET PERSISTENCE FROM SESSION");
 			FacesView<?> view = (FacesView<?>) s.get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			restore(view, ec);
 		}
+		// restore from the view root - used when within the same view-scoped bean
 		else if (vr != null) {
 			String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 			if (managedBeanName != null) {
@@ -82,6 +85,10 @@ public class SkyvePhaseListener implements PhaseListener {
 				FacesView<?> view = FacesUtil.getManagedBean(managedBeanName);
 				restore(view, ec);
 			}
+		}
+		// use the conversation given if there is a conversation parameter
+		else if (webId != null) {
+			restore(webId, ec);
 		}
 
 		// initialise the conversation
@@ -102,6 +109,19 @@ public class SkyvePhaseListener implements PhaseListener {
 		if (webContext != null) { // should always be the case
 			view.hydrate(webContext);
 	
+			// place the conversation into the thread
+			AbstractPersistence persistence = webContext.getConversation();
+			persistence.setForThread();
+		}
+	}
+
+	private static void restore(String webId, ExternalContext ec)
+	throws Exception {
+		// restore the context
+		AbstractWebContext webContext = WebUtil.getCachedConversation(webId,
+																		(HttpServletRequest) ec.getRequest(),
+																		(HttpServletResponse) ec.getResponse());
+		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
 			persistence.setForThread();

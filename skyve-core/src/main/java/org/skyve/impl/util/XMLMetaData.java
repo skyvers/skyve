@@ -15,7 +15,10 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -27,6 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
@@ -200,7 +204,9 @@ public class XMLMetaData {
 			Document document = new SAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(MODULE_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			
+			String xml = cleanup(document.asXML());
+			return xml;
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal module " + module.getName(), e);
@@ -281,7 +287,9 @@ public class XMLMetaData {
 			Document doc = new SAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(DOCUMENT_NAMESPACE);
 			doc.accept(visitor);
-			return doc.asXML();
+
+			String xml = cleanup(doc.asXML());
+			return xml;
 		} catch (Exception e) {
 			throw new MetaDataException("Could not marshal document " + document.getName(), e);
 		}
@@ -395,6 +403,17 @@ public class XMLMetaData {
 		}
 	}
 
+	/**
+	 * Cleans the XML string by removing any empty lines left by removing
+	 * nodes during the {@link JAXBFixingVisitor}.
+	 * 
+	 * @param xml The xml to clean
+	 * @return The cleansed string
+	 */
+	private static String cleanup(String xml) {
+		return xml != null ? xml.replaceAll("\n\\s{4,}\n", "\n") : null;
+	}
+
 	/*
 	 * returns a JAXP 1.3 schema by parsing the specified resource.
 	 */
@@ -504,6 +523,17 @@ public class XMLMetaData {
 				if (node.getParent() == null) {
 					removeEmptyChildElements(node, new String[] { "conditions", "implements", "uniqueConstraints" });
 				}
+
+				if (node.getParent() != null && node.getParent().getName().equals("attributes")) {
+					if (node.attributeCount() > 0) {
+						Map<String, Boolean> attributesToRemove = new HashMap<>();
+						attributesToRemove.put("deprecated", Boolean.FALSE);
+						attributesToRemove.put("persistent", Boolean.TRUE);
+						attributesToRemove.put("required", Boolean.FALSE);
+
+						removeDefaultAttributes(node, attributesToRemove);
+					}
+				}
 			}
 
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
@@ -525,6 +555,19 @@ public class XMLMetaData {
 			}
 		}
 
+		private static void removeDefaultAttributes(Element node, Map<String, Boolean> attributesToRemove) {
+			Iterator<?> attributes = node.attributes().iterator();
+			while (attributes.hasNext()) {
+				Attribute a = (Attribute) attributes.next();
+
+				if (attributesToRemove.keySet().contains(a.getName())) {
+					if (Boolean.valueOf(a.getValue()).equals(attributesToRemove.get(a.getName()))) {
+						attributes.remove();
+					}
+				}
+			}
+		}
+
 		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
 			ListIterator<?> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
@@ -532,7 +575,7 @@ public class XMLMetaData {
 
 				if (Arrays.asList(nodesToRemove).contains(child.getName())) {
 					if (child.isTextOnly() && child.elements().size() == 0) {
-						child.getParent().remove(child);
+						childNodes.remove();
 					}
 				}
 			}

@@ -35,6 +35,10 @@ public class DocumentCreator extends AbstractTransientBean {
 	public static final String documentPreviewPropertyName = "documentPreview";
 	/** @hidden */
 	public static final String markdownPreviewPropertyName = "markdownPreview";
+	/** @hidden */
+	public static final String errorsPropertyName = "errors";
+	/** @hidden */
+	public static final String defaultModulePropertyName = "defaultModule";
 
 	/**
 	 * Output Location
@@ -55,6 +59,16 @@ public class DocumentCreator extends AbstractTransientBean {
 	 * Markdown Preview
 	 **/
 	private String markdownPreview;
+	/**
+	 * Errors
+	 **/
+	private String errors;
+	/**
+	 * Default Module
+	 * <br/>
+	 * The module documents will be added to if none is specified in the script.
+	 **/
+	private String defaultModule;
 
 	@Override
 	@XmlTransient
@@ -156,5 +170,60 @@ public class DocumentCreator extends AbstractTransientBean {
 	public void setMarkdownPreview(String markdownPreview) {
 		preset(markdownPreviewPropertyName, markdownPreview);
 		this.markdownPreview = markdownPreview;
+	}
+
+	/**
+	 * {@link #errors} accessor.
+	 * @return	The value.
+	 **/
+	public String getErrors() {
+		return errors;
+	}
+
+	/**
+	 * {@link #errors} mutator.
+	 * @param errors	The new value.
+	 **/
+	@XmlElement
+	public void setErrors(String errors) {
+		preset(errorsPropertyName, errors);
+		this.errors = errors;
+	}
+
+	/**
+	 * {@link #defaultModule} accessor.
+	 * @return	The value.
+	 **/
+	public String getDefaultModule() {
+		return defaultModule;
+	}
+
+	/**
+	 * {@link #defaultModule} mutator.
+	 * @param defaultModule	The new value.
+	 **/
+	@XmlElement
+	public void setDefaultModule(String defaultModule) {
+		preset(defaultModulePropertyName, defaultModule);
+		this.defaultModule = defaultModule;
+	}
+
+	/**
+	 * hasErrors
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasErrors() {
+		return (getErrors() != null && getErrors().length() > 0);
+	}
+
+	/**
+	 * {@link #isHasErrors} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasErrors() {
+		return (! isHasErrors());
 	}
 }

@@ -887,6 +887,8 @@ public class SkyveScriptInterpreterTest {
 
 		assertThat(document, is(notNullValue()));
 		assertThat("No attribtes should be added to the document", document.getAttributes().size(), is(0));
+		assertThat("1 error should be returned by the interpreter", i.getErrors().size(), is(1));
+		assertThat(i.getErrors().get(0).getLineNumber(), is(3));
 	}
 
 	@Test

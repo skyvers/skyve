@@ -32,6 +32,7 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.editor.Editor;
+import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
@@ -48,6 +49,7 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -994,15 +996,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	
 	@Override
 	public UIComponent contentLink(String listVar, ContentLink link, String title, boolean required) {
-		String text = link.getValue();
-		if (text == null) {
-			text = "Content";
-		}
-
 		UIComponent result = panelGroup(true, true, false, null, null);
-		result.getChildren().add(contentLink(link.getPixelWidth(), text, link.getBinding()));
+		result.getChildren().add(contentLink(link.getPixelWidth(), link.getBinding()));
 		if (! Boolean.FALSE.equals(link.getEditable())) {
-			result.getChildren().add(label("Upload"));
+			FileUpload fileUpload = (FileUpload)a.createComponent(FileUpload.COMPONENT_TYPE);
+			fileUpload.setFileUploadListener(ef.createMethodExpression(elc, String.format("#{%s.handleFileUpload}", managedBeanName), Void.class, new Class<?> [] {FileUploadEvent.class}));
+			fileUpload.setUpdate("@form");
+			fileUpload.setMultiple(false);
+			fileUpload.setFileLimit(1);
+			fileUpload.setFileLimitMessage(String.format("#{%s.i18n['page.contentUpload.error']}", managedBeanName));
+			fileUpload.getAttributes().put("uploadBinding", link.getBinding());
+			fileUpload.setMode("advanced");
+			result.getChildren().add(fileUpload);
 		}
 		
 		return result;
@@ -1949,20 +1954,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlOutputLink contentLink(Integer pixelWidth, String text, String binding) {
+	private HtmlOutputLink contentLink(Integer pixelWidth, String binding) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
-
+		
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append(".getContentUrl('");
 		expression.append(binding).append("')}");
 		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
 
-		if (text != null) {
-			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-			outputText.setValue(text);
-			result.getChildren().add(outputText);
-		}
-
+		StringBuilder textExpression = new StringBuilder(64);
+		textExpression.append("#{").append(managedBeanName).append(".getContentFileName('");
+		textExpression.append(binding).append("')}");
+		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
+		outputText.setValueExpression("value", ef.createValueExpression(elc, textExpression.toString(), String.class));
+		result.getChildren().add(outputText);
+			
 		result.setTarget("_blank");
 		setSize(result, null, pixelWidth, null, null, null, null, null);
 		setId(result, null);
