@@ -22,12 +22,15 @@ import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 
 import net.sf.jasperreports.engine.JRBand;
+import net.sf.jasperreports.engine.JRBoxContainer;
 import net.sf.jasperreports.engine.JRElement;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.base.JRBaseLineBox;
+import net.sf.jasperreports.engine.base.JRBoxPen;
 import net.sf.jasperreports.engine.design.JRDesignBand;
 import net.sf.jasperreports.engine.design.JRDesignElement;
 import net.sf.jasperreports.engine.design.JRDesignExpression;
@@ -40,6 +43,7 @@ import net.sf.jasperreports.engine.design.JRDesignRectangle;
 import net.sf.jasperreports.engine.design.JRDesignSection;
 import net.sf.jasperreports.engine.design.JRDesignStaticText;
 import net.sf.jasperreports.engine.design.JRDesignSubreport;
+import net.sf.jasperreports.engine.design.JRDesignSubreportParameter;
 import net.sf.jasperreports.engine.design.JRDesignTextElement;
 import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
@@ -55,7 +59,7 @@ import net.sf.jasperreports.engine.type.StretchTypeEnum;
 import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
-public class InMemoryRenderer {
+public class JasperReportRenderer {
 
     protected final JasperDesign jasperDesign;
     protected final DesignSpecification designSpecification;
@@ -80,34 +84,34 @@ public class InMemoryRenderer {
         imports.add("net.sf.jasperreports.engine.data.*");
     }
 
-    public InMemoryRenderer(DesignSpecification designSpecification) {
+    public JasperReportRenderer(DesignSpecification designSpecification) {
         this.designSpecification = designSpecification;
         jasperDesign = new JasperDesign();
     }
 
     public JasperReport getReport() throws Exception {
         if (!rendered) {
-            renderDesign(designSpecification);
+            renderDesign();
         }
         return JasperCompileManager.compileReport(jasperDesign);
     }
 
-    public String renderDesign(DesignSpecification design) throws Exception {
+    public String renderDesign() throws Exception {
         if (rendered) {
             throw new IllegalStateException("Report has already been rendered.");
         }
 
-        if (design.getModuleName() != null && design.getDocumentName() != null) {
-            configureReportProperties(design);
+        if (designSpecification.getModuleName() != null && designSpecification.getDocumentName() != null) {
+            configureReportProperties(designSpecification);
 
             addProperties();
             addImports();
-            addParameters(design);
+            addParameters(designSpecification);
             // TODO: Fix issue with query executor.
-            //addQuery(design);
-            addFields(design);
-            addVariables(design);
-            addBands(design);
+            //addQuery(designSpecification);
+            addFields(designSpecification);
+            addVariables(designSpecification);
+            addBands(designSpecification);
 
             final String jrxml = JRXmlWriter.writeReport(jasperDesign, "UTF-8");
             rendered = true;
@@ -343,7 +347,7 @@ public class InMemoryRenderer {
 
         reportBand.getElements().stream()
                 .map(this::createElement)
-                .filter(Objects::nonNull) // not all elements are supported
+                .filter(Objects::nonNull)
                 .forEach(jrBand::addElement);
 
         return jrBand;
@@ -422,7 +426,7 @@ public class InMemoryRenderer {
                 configureDimensions(jrDynamicImage, reportElement);
                 jrDynamicImage.setExpression(createImageElementExpression(reportElement));
 
-                // TODO: Render box.
+                wrapInBox(reportElement, jrDynamicImage);
 
                 return jrDynamicImage;
             case geometry:
@@ -451,7 +455,32 @@ public class InMemoryRenderer {
                 final JRDesignSubreport jrSubreport = new JRDesignSubreport(null);
 
                 configureDimensions(jrSubreport, reportElement);
-                // TODO:
+
+                if (Mode.bean.equals(designSpecification.getMode())) {
+                    final JRDesignExpression dataSourceExpression = new JRDesignExpression();
+                    dataSourceExpression.setText(String.format("new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{%s})", reportElement.getName()));
+                    jrSubreport.setDataSourceExpression(dataSourceExpression);
+                } else {
+                    final JRDesignSubreportParameter subReportParameter = new JRDesignSubreportParameter();
+                    subReportParameter.setName("ID");
+
+                    final JRDesignExpression parameterExpression = new JRDesignExpression();
+                    parameterExpression.setText("$P{ID}");
+                    subReportParameter.setExpression(parameterExpression);
+                    try {
+                        jrSubreport.addParameter(subReportParameter);
+                    } catch (JRException e) {
+                        e.printStackTrace();
+                    }
+
+                    final JRDesignExpression connectionExpression = new JRDesignExpression();
+                    connectionExpression.setText("$P{REPORT_CONNECTION}");
+                    jrSubreport.setConnectionExpression(connectionExpression);
+                }
+
+                final JRDesignExpression subReportExpression = new JRDesignExpression();
+                subReportExpression.setText(String.format("$P{SUBREPORT_DIR} + \"%s.jasper", reportElement.getReportFileName()));
+                jrSubreport.setExpression(subReportExpression);
 
                 return jrSubreport;
             case slider:
@@ -475,6 +504,46 @@ public class InMemoryRenderer {
         }
     }
 
+    private void wrapInBox(ReportElement reportElement, JRBoxContainer jrDynamicImage) {
+        final JRBaseLineBox box = new JRBaseLineBox(jrDynamicImage);
+        box.setTopPadding(reportElement.getTopPadding());
+        box.setBottomPadding(reportElement.getBottomPadding());
+        box.setLeftPadding(reportElement.getLeftPadding());
+        box.setRightPadding(reportElement.getRightPadding());
+
+        final JRBoxPen boxPen = box.getPen();
+        if (Boolean.TRUE.equals(reportElement.getElementBorder())) {
+            final Float lineWidth = Optional.ofNullable(reportElement.getBorderLineWidth()).map(Decimal2::floatValue).orElse(1f);
+            boxPen.setLineWidth(lineWidth);
+            boxPen.setLineColor(Color.getColor(reportElement.getBorderColour()));
+            if (Boolean.TRUE.equals(reportElement.getBorderTop())) {
+                box.getTopPen().setLineStyle(LineStyleEnum.SOLID);
+                box.getTopPen().setLineWidth(lineWidth);
+                box.getTopPen().setLineColor(Color.getColor(reportElement.getBorderColour()));
+            }
+            if (Boolean.TRUE.equals(reportElement.getBorderLeft())) {
+                box.getLeftPen().setLineStyle(LineStyleEnum.SOLID);
+                box.getLeftPen().setLineWidth(lineWidth);
+                box.getLeftPen().setLineColor(Color.getColor(reportElement.getBorderColour()));
+            }
+            if (Boolean.TRUE.equals(reportElement.getBorderBottom())) {
+                box.getBottomPen().setLineStyle(LineStyleEnum.SOLID);
+                box.getBottomPen().setLineWidth(lineWidth);
+                box.getBottomPen().setLineColor(Color.getColor(reportElement.getBorderColour()));
+            }
+            if (Boolean.TRUE.equals(reportElement.getBorderRight())) {
+                box.getRightPen().setLineStyle(LineStyleEnum.SOLID);
+                box.getRightPen().setLineWidth(lineWidth);
+                box.getRightPen().setLineColor(Color.getColor(reportElement.getBorderColour()));
+            }
+        } else {
+            box.getTopPen().setLineStyle(LineStyleEnum.SOLID);
+            box.getLeftPen().setLineStyle(LineStyleEnum.SOLID);
+            box.getBottomPen().setLineStyle(LineStyleEnum.SOLID);
+            box.getRightPen().setLineStyle(LineStyleEnum.SOLID);
+        }
+    }
+
     protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
         textElement.setKey(String.format("%s_%s", reportElement.getElementType().toString(),
                 (reportElement.getOrdinal() == null ? "1" : reportElement.getOrdinal())));
@@ -495,7 +564,7 @@ public class InMemoryRenderer {
                 .map(this::getPrintWhenExpressionFromInvisibleCondition)
                 .ifPresent(textElement::setPrintWhenExpression);
 
-        // TODO: Render box.
+        wrapInBox(reportElement, textElement);
 
         Optional.ofNullable(reportElement.getElementAlignment())
                 .map(a -> HorizontalTextAlignEnum.getByName(a.toString()))

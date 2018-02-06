@@ -666,7 +666,7 @@ public class DesignSpecification {
 
 	public String getJrxml() {
 		try {
-			return new InMemoryRenderer(this).renderDesign(this);
+			return new JasperReportRenderer(this).renderDesign();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
