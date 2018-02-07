@@ -392,7 +392,9 @@ public class JasperReportRenderer {
 
                 configureCommonTextFieldProperties(staticTextElement, reportElement);
 
-                staticTextElement.setText("");
+                staticTextElement.setText(Optional.ofNullable(reportElement.getElementValue()).orElse("\"\""));
+
+                wrapInBox(reportElement, staticTextElement);
 
                 return staticTextElement;
             case textField:
@@ -407,6 +409,8 @@ public class JasperReportRenderer {
                         .ifPresent(textElement::setEvaluationTime);
                 textElement.setBlankWhenNull(true);
                 textElement.setExpression(createTextElementExpression(reportElement));
+
+                wrapInBox(reportElement, textElement);
 
                 return textElement;
             case checkBox:
@@ -479,7 +483,7 @@ public class JasperReportRenderer {
                 }
 
                 final JRDesignExpression subReportExpression = new JRDesignExpression();
-                subReportExpression.setText(String.format("$P{SUBREPORT_DIR} + \"%s.jasper", reportElement.getReportFileName()));
+                subReportExpression.setText(String.format("$P{SUBREPORT_DIR} + \"%s.jasper\"", reportElement.getReportFileName()));
                 jrSubreport.setExpression(subReportExpression);
 
                 return jrSubreport;
@@ -504,7 +508,7 @@ public class JasperReportRenderer {
         }
     }
 
-    private void wrapInBox(ReportElement reportElement, JRBoxContainer jrDynamicImage) {
+    private JRBaseLineBox wrapInBox(ReportElement reportElement, JRBoxContainer jrDynamicImage) {
         final JRBaseLineBox box = new JRBaseLineBox(jrDynamicImage);
         box.setTopPadding(reportElement.getTopPadding());
         box.setBottomPadding(reportElement.getBottomPadding());
@@ -542,6 +546,8 @@ public class JasperReportRenderer {
             box.getBottomPen().setLineStyle(LineStyleEnum.SOLID);
             box.getRightPen().setLineStyle(LineStyleEnum.SOLID);
         }
+
+        return box;
     }
 
     protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
@@ -563,8 +569,6 @@ public class JasperReportRenderer {
         Optional.ofNullable(reportElement.getInvisibleConditionName())
                 .map(this::getPrintWhenExpressionFromInvisibleCondition)
                 .ifPresent(textElement::setPrintWhenExpression);
-
-        wrapInBox(reportElement, textElement);
 
         Optional.ofNullable(reportElement.getElementAlignment())
                 .map(a -> HorizontalTextAlignEnum.getByName(a.toString()))
