@@ -10,9 +10,11 @@ import org.skyve.util.Util;
 public class GetContentURLAction extends FacesAction<String> {
 	private Bean bean;
 	private String binding;
-	public GetContentURLAction(Bean bean, String binding) {
+	private boolean image;
+	public GetContentURLAction(Bean bean, String binding, boolean image) {
 		this.bean = bean;
 		this.binding = binding;
+		this.image = image;
 	}
 	
 	@Override
@@ -21,7 +23,10 @@ public class GetContentURLAction extends FacesAction<String> {
 
 		String contentId = (String) Binder.get(bean, binding);
 		if (contentId == null) {
-			return "images/blank.gif";
+			if (image) {
+				return "images/blank.gif";
+			}
+			return "javascript:void(0)";
 		}
 
 		StringBuilder result = new StringBuilder(128);

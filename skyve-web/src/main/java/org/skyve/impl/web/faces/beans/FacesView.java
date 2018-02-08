@@ -15,7 +15,6 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 
 import org.primefaces.component.datatable.DataTable;
-import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.SelectEvent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -46,7 +45,7 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
-import org.skyve.util.Binder;
+import org.skyve.util.Util;
 
 @ViewScoped
 @ManagedBean(name = "skyve")
@@ -370,8 +369,20 @@ public class FacesView<T extends Bean> extends Harness {
 		return dualListModels;
  	}
 
- 	public String getContentUrl(final String binding) {
-		return new GetContentURLAction(getCurrentBean().getBean(), binding).execute();
+	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
+	public String getContentUploadUrl(String sanitisedBinding) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/contentUpload.xhtml?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		return result.toString();
+	}
+	
+	public String getContentUrl(final String binding, final boolean image) {
+ 		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
  	}
  	
  	public String getContentFileName(final String binding) {
@@ -491,15 +502,5 @@ public class FacesView<T extends Bean> extends Harness {
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
 		formStyles.get(formIndex).reset();
 		return "ui-g-12 ui-g-nopad";
-	}
-	
-	/**
-	 * Upload the file to the content management. 
-	 * @param event the file upload event
-	 */
-	public void handleFileUpload(FileUploadEvent event) throws Exception {
-		String binding = event.getComponent().getAttributes().get("uploadBinding").toString();
-		String contentId = FacesContentUtil.handleFileUpload(event, getCurrentBean().getBean(), binding);
-		Binder.set(getCurrentBean().getBean(), binding, contentId);
 	}
 }

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.primefaces.context.RequestContext;
 import org.primefaces.event.FileUploadEvent;
 import org.skyve.CORE;
+import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -47,7 +48,6 @@ public class ContentUpload extends Localisable {
 			}
 		}.execute();
 	}
-	
 
     public String getContext() {
 		return context;
@@ -111,7 +111,8 @@ public class ContentUpload extends Localisable {
 				bean = (Bean) BindUtil.get(bean, binding);
 			}
 			
-			String contentId = FacesContentUtil.handleFileUpload(event, bean, contentBinding);
+			AttachmentContent content = FacesContentUtil.handleFileUpload(event, bean, contentBinding);
+			String contentId = content.getContentId();
 
 			// only put conversation in cache if we have been successful in executing
 			WebUtil.putConversationInCache(webContext);
@@ -119,8 +120,16 @@ public class ContentUpload extends Localisable {
 			// update the content UUID value on the client and popoff the window on the stack
 			RequestContext rc = RequestContext.getCurrentInstance();
 			StringBuilder js = new StringBuilder(128);
-			js.append("top.isc.WindowStack.getOpener()._vm.setValue('").append(BindUtil.sanitiseBinding(contentBinding));
-			js.append("','").append(contentId).append("');top.isc.WindowStack.popoff(false);");
+			String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBinding);
+			// if top.isc is defined then we are using smart client, set the value in the values manager
+			js.append("if(top.isc){");
+			js.append("top.isc.WindowStack.getOpener()._vm.setValue('").append(sanitisedContentBinding);
+			js.append("','").append(contentId).append("');top.isc.WindowStack.popoff(false)");
+			// otherwise we are using prime faces, set the hidden input element that ends with "_<binding>"
+			js.append("}else if(top.SKYVE){top.SKYVE.afterContentUpload('").append(sanitisedContentBinding);
+			js.append("','").append(contentId).append("','");
+			js.append(bean.getBizModule()).append('.').append(bean.getBizDocument()).append("','");
+			js.append(content.getFileName()).append("')}");
 	        rc.execute(js.toString());
 		}
 		catch (Exception e) {
