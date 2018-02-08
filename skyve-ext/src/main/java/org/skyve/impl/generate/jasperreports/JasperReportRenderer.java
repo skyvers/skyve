@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
@@ -21,6 +22,7 @@ import org.skyve.util.Util;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRBand;
 import net.sf.jasperreports.engine.JRBoxContainer;
 import net.sf.jasperreports.engine.JRElement;
@@ -29,6 +31,7 @@ import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.base.JRBaseLineBox;
 import net.sf.jasperreports.engine.base.JRBoxPen;
 import net.sf.jasperreports.engine.design.JRDesignBand;
@@ -48,6 +51,7 @@ import net.sf.jasperreports.engine.design.JRDesignTextElement;
 import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
 import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
 import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
 import net.sf.jasperreports.engine.type.IncrementTypeEnum;
@@ -104,11 +108,14 @@ public class JasperReportRenderer {
         if (designSpecification.getModuleName() != null && designSpecification.getDocumentName() != null) {
             configureReportProperties(designSpecification);
 
+            // support document queries
+            JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
+            jasperReportsContext.setProperty(JRQueryExecuterFactory.QUERY_EXECUTER_FACTORY_PREFIX + "document", SkyveDocumentExecuterFactory.class.getCanonicalName());
+
             addProperties();
             addImports();
             addParameters(designSpecification);
-            // TODO: Fix issue with query executor.
-            //addQuery(designSpecification);
+            addQuery(designSpecification);
             addFields(designSpecification);
             addVariables(designSpecification);
             addBands(designSpecification);
@@ -237,8 +244,10 @@ public class JasperReportRenderer {
 
     private void addFields(DesignSpecification designSpecification) throws JRException {
         for (ReportField reportField : designSpecification.getFields()) {
-            JRField field = createField(reportField);
-            jasperDesign.addField(field);
+            final JRField field = createField(reportField);
+            if (field != null) {
+                jasperDesign.addField(field);
+            }
         }
     }
 
@@ -253,10 +262,12 @@ public class JasperReportRenderer {
                 if (!Mode.sql.equals(reportField.getParent().getMode())) {
                     jrField.setDescription(reportField.getName());
                 }
+
+                return jrField;
             }
         }
 
-        return jrField;
+        return null;
     }
 
     private void addVariables(DesignSpecification designSpecification) throws JRException {
@@ -299,7 +310,7 @@ public class JasperReportRenderer {
 
     private void addBands(DesignSpecification designSpecification) {
         getBandByType(designSpecification, BandType.background).ifPresent(jasperDesign::setBackground);
-        getBandByType(designSpecification, BandType.title).ifPresent(jasperDesign::setTitle);
+        //getBandByType(designSpecification, BandType.title).ifPresent(jasperDesign::setTitle);
         getBandByType(designSpecification, BandType.pageHeader).ifPresent(jasperDesign::setPageHeader);
         getBandByType(designSpecification, BandType.columnHeader).ifPresent(jasperDesign::setColumnHeader);
         getDetailBands(designSpecification).forEach(this::addDetailBand);
