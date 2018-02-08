@@ -310,7 +310,7 @@ public class JasperReportRenderer {
 
     private void addBands(DesignSpecification designSpecification) {
         getBandByType(designSpecification, BandType.background).ifPresent(jasperDesign::setBackground);
-        //getBandByType(designSpecification, BandType.title).ifPresent(jasperDesign::setTitle);
+        getBandByType(designSpecification, BandType.title).ifPresent(jasperDesign::setTitle);
         getBandByType(designSpecification, BandType.pageHeader).ifPresent(jasperDesign::setPageHeader);
         getBandByType(designSpecification, BandType.columnHeader).ifPresent(jasperDesign::setColumnHeader);
         getDetailBands(designSpecification).forEach(this::addDetailBand);
@@ -344,6 +344,10 @@ public class JasperReportRenderer {
     }
 
     protected JRBand createBand(ReportBand reportBand) {
+        if (reportBand.getElements().isEmpty()) {
+            return null;
+        }
+
         final JRDesignBand jrBand = new JRDesignBand();
 
         jrBand.setHeight(Optional.ofNullable(reportBand.getHeight()).orElse(0));
