@@ -34,7 +34,7 @@ import org.skyve.impl.metadata.repository.module.GrantedTo;
 import org.skyve.impl.metadata.repository.module.Menu;
 import org.skyve.impl.metadata.repository.module.ModuleDocument;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
-import org.skyve.impl.metadata.repository.module.Role;
+import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.script.SkyveScriptException.ExceptionType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
@@ -415,19 +415,19 @@ public class SkyveScriptInterpreter {
 	 * Appends a viewer and manager role permission for the document to the specified module.
 	 */
 	private static void appendRole(ModuleMetaData module, DocumentMetaData document) {
-		Role viewer = null, maintainer = null;
+		ModuleRoleMetaData viewer = null, maintainer = null;
 		if (module.getRoles().size() == 0) {
-			viewer = new Role();
+			viewer = new ModuleRoleMetaData();
 			viewer.setName(ROLE_VIEWER);
 			viewer.setDescription(String.format("Enough privileges to view %s documents.", module.getTitle()));
 			module.getRoles().add(viewer);
 
-			maintainer = new Role();
+			maintainer = new ModuleRoleMetaData();
 			maintainer.setName(ROLE_MAINTAINER);
 			maintainer.setDescription(String.format("Enough privileges to create and edit %s documents.", module.getTitle()));
 			module.getRoles().add(maintainer);
 		} else {
-			for (Role r : module.getRoles()) {
+			for (ModuleRoleMetaData r : module.getRoles()) {
 				if (r.getName().equals(ROLE_VIEWER)) {
 					viewer = r;
 					continue;
