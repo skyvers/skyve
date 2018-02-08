@@ -24,15 +24,14 @@ import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 
 import net.sf.jasperreports.engine.DefaultJasperReportsContext;
 import net.sf.jasperreports.engine.JRBand;
-import net.sf.jasperreports.engine.JRBoxContainer;
 import net.sf.jasperreports.engine.JRElement;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExpression;
 import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRLineBox;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.JasperReportsContext;
-import net.sf.jasperreports.engine.base.JRBaseLineBox;
 import net.sf.jasperreports.engine.base.JRBoxPen;
 import net.sf.jasperreports.engine.design.JRDesignBand;
 import net.sf.jasperreports.engine.design.JRDesignElement;
@@ -409,7 +408,7 @@ public class JasperReportRenderer {
 
                 staticTextElement.setText(Optional.ofNullable(reportElement.getElementValue()).orElse("\"\""));
 
-                wrapInBox(reportElement, staticTextElement);
+                wrapInBox(reportElement, staticTextElement.getLineBox());
 
                 return staticTextElement;
             case textField:
@@ -425,7 +424,7 @@ public class JasperReportRenderer {
                 textElement.setBlankWhenNull(true);
                 textElement.setExpression(createTextElementExpression(reportElement));
 
-                wrapInBox(reportElement, textElement);
+                wrapInBox(reportElement, textElement.getLineBox());
 
                 return textElement;
             case checkBox:
@@ -445,7 +444,7 @@ public class JasperReportRenderer {
                 configureDimensions(jrDynamicImage, reportElement);
                 jrDynamicImage.setExpression(createImageElementExpression(reportElement));
 
-                wrapInBox(reportElement, jrDynamicImage);
+                wrapInBox(reportElement, jrDynamicImage.getLineBox());
 
                 return jrDynamicImage;
             case geometry:
@@ -523,8 +522,7 @@ public class JasperReportRenderer {
         }
     }
 
-    private JRBaseLineBox wrapInBox(ReportElement reportElement, JRBoxContainer jrDynamicImage) {
-        final JRBaseLineBox box = new JRBaseLineBox(jrDynamicImage);
+    private void wrapInBox(ReportElement reportElement, JRLineBox box) {
         box.setTopPadding(reportElement.getTopPadding());
         box.setBottomPadding(reportElement.getBottomPadding());
         box.setLeftPadding(reportElement.getLeftPadding());
@@ -561,8 +559,6 @@ public class JasperReportRenderer {
             box.getBottomPen().setLineStyle(LineStyleEnum.SOLID);
             box.getRightPen().setLineStyle(LineStyleEnum.SOLID);
         }
-
-        return box;
     }
 
     protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
