@@ -5,15 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import modules.admin.Configuration.ComplexityModel;
-import modules.admin.domain.ChangePassword;
-import modules.admin.domain.Configuration;
-import modules.admin.domain.Contact;
-import modules.admin.domain.DataGroup;
-import modules.admin.domain.Group;
-import modules.admin.domain.User;
-import modules.admin.domain.User.WizardState;
-
 import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -22,6 +13,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
@@ -29,6 +21,15 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
+
+import modules.admin.Configuration.ComplexityModel;
+import modules.admin.domain.ChangePassword;
+import modules.admin.domain.Configuration;
+import modules.admin.domain.Contact;
+import modules.admin.domain.DataGroup;
+import modules.admin.domain.Group;
+import modules.admin.domain.User;
+import modules.admin.domain.User.WizardState;
 
 public class UserBizlet extends Bizlet<User> {
 	/**
@@ -120,12 +121,24 @@ public class UserBizlet extends Bizlet<User> {
 
 	public static List<DomainValue> getCustomerRoleValues(org.skyve.metadata.user.User user) {
 		List<DomainValue> result = new ArrayList<>();
-		for (Module module : user.getCustomer().getModules()) {
-			for (Role role : module.getRoles()) {
-				result.add(new DomainValue(module.getName() + '.' + role.getName(), module.getTitle() + " - " + role.getName()));
+		
+		Customer customer = user.getCustomer();
+		
+		// Add customer roles
+		for (CustomerRole role : customer.getRoles()) {
+			result.add(new DomainValue(role.getName()));
+		}
+		
+		if (customer.isAllowModuleRoles()) {
+			for (Module module : customer.getModules()) {
+				for (Role role : module.getRoles()) {
+					String roleName = role.getName();
+					result.add(new DomainValue(String.format("%s.%s", module.getName(), roleName), 
+												String.format("%s - %s", module.getTitle(), roleName)));
+				}
 			}
 		}
-
+		
 		return result;
 	}
 

@@ -178,7 +178,7 @@ public class CustomerImpl implements Customer {
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
 	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
-	private boolean allowModuleRoles;
+	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();

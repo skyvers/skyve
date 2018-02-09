@@ -10,11 +10,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -131,9 +131,9 @@ public class SQLMetaDataUtil {
 				}
 				else {
 					String roleName = moduleDotRoleName;
-					CustomerRole customerRole = customer.getRole(roleName);
+					CustomerRoleMetaData customerRole = (CustomerRoleMetaData) customer.getRole(roleName);
 					if (customerRole != null) {
-						for (Role role : customerRole.getModuleRoles()) {
+						for (Role role : customerRole.getModuleRoles(customer)) {
 							internalUser.addRole((RoleImpl) role);
 						}
 					}

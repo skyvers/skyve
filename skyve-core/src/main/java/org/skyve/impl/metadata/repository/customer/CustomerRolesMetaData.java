@@ -12,7 +12,7 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "roles")
 public class CustomerRolesMetaData {
 	private List<CustomerRoleMetaData> roles = new ArrayList<>();
-	private boolean allowModuleRoles;
+	private boolean allowModuleRoles = true;
 	
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
 	public List<CustomerRoleMetaData> getRoles() {

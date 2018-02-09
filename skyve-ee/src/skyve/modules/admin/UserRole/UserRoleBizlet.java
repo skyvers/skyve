@@ -8,19 +8,13 @@ import org.skyve.metadata.model.document.Bizlet;
 import modules.admin.User.UserBizlet;
 import modules.admin.domain.UserRole;
 
-public class UserRoleBizlet extends Bizlet<UserRole>
-{
-	/**
-	 * For Serialization.
-	 */
+public class UserRoleBizlet extends Bizlet<UserRole> {
 	private static final long serialVersionUID = 5564167901887188133L;
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName) 
-	throws Exception
-	{
-		if (fieldName.equals(UserRole.roleNamePropertyName))
-		{
+	throws Exception {
+		if (fieldName.equals(UserRole.roleNamePropertyName)) {
 			return UserBizlet.getCustomerRoleValues(CORE.getUser());
 		}
 

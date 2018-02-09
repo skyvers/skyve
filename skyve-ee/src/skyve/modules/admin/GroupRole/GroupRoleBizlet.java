@@ -8,19 +8,13 @@ import org.skyve.metadata.model.document.Bizlet;
 import modules.admin.User.UserBizlet;
 import modules.admin.domain.GroupRole;
 
-public class GroupRoleBizlet extends Bizlet<GroupRole> 
-{
-	/**
-	 * For Serialization.
-	 */
+public class GroupRoleBizlet extends Bizlet<GroupRole> {
 	private static final long serialVersionUID = -3329006728591283654L;
 
 	@Override
 	public List<DomainValue> getVariantDomainValues(String fieldName)
-	throws Exception 
-	{
-		if (fieldName.equals(GroupRole.roleNamePropertyName)) 
-		{
+	throws Exception {
+		if (fieldName.equals(GroupRole.roleNamePropertyName)) {
 			return UserBizlet.getCustomerRoleValues(CORE.getUser());
 		}
 

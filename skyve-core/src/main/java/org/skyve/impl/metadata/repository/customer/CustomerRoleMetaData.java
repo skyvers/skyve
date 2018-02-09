@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -52,10 +51,8 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
-	@Override
-	public List<Role> getModuleRoles() {
+	public List<Role> getModuleRoles(Customer customer) {
 		List<Role> result = new ArrayList<>(roles.size());
-		Customer customer = CORE.getUser().getCustomer();
 		for (CustomerModuleRoleMetaData role : roles) {
 			Module module = customer.getModule(role.getModuleName());
 			result.add(module.getRole(role.getName()));
