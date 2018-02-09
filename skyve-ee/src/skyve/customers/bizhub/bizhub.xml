@@ -8,9 +8,8 @@
 	<defaultTimeConverter>HH24_MI</defaultTimeConverter>
 	<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>
 	<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>
-	<modules>
+	<modules homeModule="admin">
 		<module name="admin" />
 		<module name="test" />
 	</modules>
-	<homeModule>admin</homeModule>
 </customer>

@@ -177,7 +177,7 @@ public class CustomerImpl implements Customer {
 	private Converter<Timestamp> defaultTimestampConverter;
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
-	private List<CustomerRoleMetaData> roles = new ArrayList<>();
+	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
 	private boolean allowModuleRoles;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
@@ -316,13 +316,18 @@ public class CustomerImpl implements Customer {
 		return result;
 	}
 
-	public void setRoles(List<CustomerRoleMetaData> roles) {
-		this.roles = roles;
+	public boolean putRole(CustomerRoleMetaData role) {
+		return (roles.put(role.getName(), role) == null);
 	}
 
 	@Override
-	public List<CustomerRole> getRoles() {
-		return Collections.unmodifiableList(roles);
+	public java.util.Collection<CustomerRole> getRoles() {
+		return Collections.unmodifiableCollection(roles.values());
+	}
+	
+	@Override
+	public CustomerRole getRole(String roleName) {
+		return roles.get(roleName);
 	}
 	
 	@Override

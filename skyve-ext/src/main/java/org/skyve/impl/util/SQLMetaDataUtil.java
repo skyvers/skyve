@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
@@ -119,12 +120,23 @@ public class SQLMetaDataUtil {
 
 				String moduleDotRoleName = (String) userRoleRow.get("rolename");
 				int dotIndex = moduleDotRoleName.indexOf('.');
-				String moduleName = moduleDotRoleName.substring(0, dotIndex);
-				String roleName = moduleDotRoleName.substring(dotIndex + 1);
-				Module module = user.getCustomer().getModule(moduleName);
-				Role role = module.getRole(roleName);
-				if (role != null) {
-					internalUser.addRole((RoleImpl) role);
+				if (dotIndex > 0) {
+					String moduleName = moduleDotRoleName.substring(0, dotIndex);
+					String roleName = moduleDotRoleName.substring(dotIndex + 1);
+					Module module = customer.getModule(moduleName);
+					Role role = module.getRole(roleName);
+					if (role != null) {
+						internalUser.addRole((RoleImpl) role);
+					}
+				}
+				else {
+					String roleName = moduleDotRoleName;
+					CustomerRole customerRole = customer.getRole(roleName);
+					if (customerRole != null) {
+						for (Role role : customerRole.getModuleRoles()) {
+							internalUser.addRole((RoleImpl) role);
+						}
+					}
 				}
 			}
 			if (firstRow) { // no data for this user

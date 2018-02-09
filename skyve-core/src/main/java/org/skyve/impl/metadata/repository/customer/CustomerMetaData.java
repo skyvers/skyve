@@ -249,8 +249,8 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 														" for customer role " + customerRoleName + " is not a valid module");
 					}
 				}
+				result.putRole(role);
 			}
-			result.setRoles(roles.getRoles());
 			result.setAllowModuleRoles(roles.isAllowModuleRoles());
 		}
 

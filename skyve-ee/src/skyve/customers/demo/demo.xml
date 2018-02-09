@@ -8,12 +8,11 @@
 	<defaultTimeConverter>HH24_MI</defaultTimeConverter>
 	<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>
 	<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>
-	<modules>
+	<modules homeModule="whosin">
 		<module name="admin" />
 		<module name="whosin"/>
 		<module name="whosinIntegrate" />
 	</modules>
-	<homeModule>whosin</homeModule>
 	<interceptors>
 		<interceptor className="modules.RDBMSAuditInterceptor" />
 	</interceptors>
