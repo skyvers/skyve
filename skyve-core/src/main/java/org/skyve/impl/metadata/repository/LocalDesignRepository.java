@@ -23,6 +23,8 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
+import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
+import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
@@ -42,6 +44,7 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
@@ -881,6 +884,24 @@ public class LocalDesignRepository extends AbstractRepository {
 												" does not reference a module in customer " + customer.getName(), e);
 			}
 		}
+		
+		// Validate the role metadata module roles point to valid module roles
+		// NB We don't need to check the module name of the role as this is checked when the metadata
+		// is converted and we know all module names are correct from the validation performed above.
+		for (CustomerRole role : customer.getRoles()) {
+			for (CustomerModuleRoleMetaData moduleRole : ((CustomerRoleMetaData) role).getRoles()) {
+				String moduleName = moduleRole.getModuleName();
+				Module module = getModule(customer, moduleName);
+				if (module.getRole(moduleRole.getName()) == null) {
+					throw new MetaDataException("Module role " + moduleRole.getName() + 
+													" for module " + moduleName +
+													" for customer role " + role.getName() +
+													" in customer " + customer.getName() +
+													" does not reference a valid module role");
+				}
+			}
+		}
+		
 		// TODO check the converter type corresponds to the type required.
 	}
 

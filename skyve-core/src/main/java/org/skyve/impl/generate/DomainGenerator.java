@@ -29,7 +29,7 @@ public abstract class DomainGenerator {
 	protected static String GENERATED_TEST_PATH;
 	protected static String[] EXCLUDED_MODULES;
 
-	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.MSSQL_2016;
+	protected static DialectOptions DIALECT_OPTIONS = DialectOptions.H2_NO_INDEXES;
 
 	public static final void validate(String customerName) throws Exception {
 		AbstractRepository repository = AbstractRepository.get();

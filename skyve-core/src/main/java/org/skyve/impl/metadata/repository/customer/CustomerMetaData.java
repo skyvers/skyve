@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.repository.customer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -39,6 +41,7 @@ import org.skyve.util.Util;
 							"defaultTimestampConverter", 
 							"modules", 
 							"homeModule", 
+							"roles",
 							"interceptors"})
 public class CustomerMetaData extends NamedMetaData implements PersistentMetaData<Customer> {
 	private static final long serialVersionUID = 4281621343439667457L;
@@ -52,6 +55,7 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	private ConverterName defaultDateTimeConverter;
 	private ConverterName defaultTimestampConverter;
 	private List<CustomerModuleMetaData> modules = new ArrayList<>();
+	private List<CustomerRoleMetaData> roles = new ArrayList<>();
 	private List<InterceptorMetaDataImpl> interceptors = new ArrayList<>();
 	private String homeModule;
 
@@ -132,6 +136,12 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "module", required = true)
 	public List<CustomerModuleMetaData> getModules() {
 		return modules;
+	}
+
+	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "roles")
+	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
+	public List<CustomerRoleMetaData> getRoles() {
+		return roles;
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
@@ -220,6 +230,33 @@ public class CustomerMetaData extends NamedMetaData implements PersistentMetaDat
 			throw new MetaDataException(metaDataName + " : The customer [homeModule] is required");
 		}
 		result.setHomeModuleName(value);
+
+		// Populate Roles
+		if (roles != null) {
+			Set<String> roleNames = new TreeSet<>();
+			for (CustomerRoleMetaData role : roles) {
+				value = role.getName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
+				}
+				if (! roleNames.add(value)) {
+					throw new MetaDataException(metaDataName + " : Duplicate role " + value);
+				}
+				String customerRoleName = value;
+				for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
+					value = moduleRole.getName();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The [name] of module role for customer role " + 
+														customerRoleName + " is required");
+					}
+					if (! moduleNames.contains(moduleRole.getModuleName())) {
+						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleRole.getModuleName() + 
+														" for customer role " + customerRoleName + " is not a valid module");
+					}
+				}
+			}
+			result.setRoles(roles);
+		}
 
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();
