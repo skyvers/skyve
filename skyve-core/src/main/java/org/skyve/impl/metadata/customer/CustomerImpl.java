@@ -178,6 +178,7 @@ public class CustomerImpl implements Customer {
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
 	private List<CustomerRoleMetaData> roles = new ArrayList<>();
+	private boolean allowModuleRoles;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
@@ -322,6 +323,15 @@ public class CustomerImpl implements Customer {
 	@Override
 	public List<CustomerRole> getRoles() {
 		return Collections.unmodifiableList(roles);
+	}
+	
+	@Override
+	public boolean isAllowModuleRoles() {
+		return allowModuleRoles;
+	}
+	
+	public void setAllowModuleRoles(boolean allowModuleRoles) {
+		this.allowModuleRoles = allowModuleRoles;
 	}
 	
 	public boolean putInterceptor(InterceptorMetaData interceptor) {
