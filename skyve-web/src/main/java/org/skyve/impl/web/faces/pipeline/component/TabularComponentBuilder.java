@@ -464,19 +464,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");
-
-		    	// If the remove button is vanilla, no events, just update the table as we know there'll
-		    	// be no side effects, but if there is an action on it, update the forms to render
-		    	// any side effects
-		    	List<EventAction> removedActions = grid.getRemovedActions();
-		    	if ((removedActions != null) && (! removedActions.isEmpty())) {
-					button.setUpdate(update); // update all forms (by default)
-		    	}
-		    	else {
-		    		button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
-		    	}
-
-		    	action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, removedActions);
+		    	// We cannot just update the data table ever when removing a row as 
+		    	// the grid may go invisible if the last row is removed.
+		    	// There is no performance shortcut we can do as we dont know what is going on
+		    	button.setUpdate(update); // update all forms (by default)
+		    	
+		    	action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, grid.getRemovedActions());
 				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 				String[] removeDisabled = (disableRemoveConditionName == null) ? 
 											((disabledConditionName == null) ? 
