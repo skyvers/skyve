@@ -1086,7 +1086,9 @@ public class FacesViewVisitor extends ViewVisitor {
 			if (target != null) {
 				Attribute targetAttribute = target.getAttribute();
 				if (targetAttribute != null) {
-					title = targetAttribute.getDisplayName();
+					if (title == null) {
+						title = targetAttribute.getDisplayName();
+					}
 					if (targetAttribute instanceof Association) {
 						sb.setLength(0);
 						binding = sb.append(binding).append('.').append(Bean.BIZ_KEY).toString();
