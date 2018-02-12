@@ -35,16 +35,16 @@ public class ResponseHeaderFilter implements Filter {
 		for (Enumeration<?> e = fc.getInitParameterNames(); e.hasMoreElements();) {
 			String headerName = (String) e.nextElement();
 			if ("Expires".equals(headerName)) {
-				httpResponse.addDateHeader("Expires", System.currentTimeMillis() + Long.parseLong(fc.getInitParameter(headerName)));
+				httpResponse.setDateHeader(headerName, System.currentTimeMillis() + Long.parseLong(fc.getInitParameter(headerName)));
 			}
 			// only apply HSTS header if defined and we are using TLS
 			else if ("Strict-Transport-Security".equals(headerName)) {
 				if (Util.isSecureUrl()) {
-					httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
+					httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 				}
 			}
 			else {
-				httpResponse.addHeader(headerName, fc.getInitParameter(headerName));
+				httpResponse.setHeader(headerName, fc.getInitParameter(headerName));
 			}
 		}
 
