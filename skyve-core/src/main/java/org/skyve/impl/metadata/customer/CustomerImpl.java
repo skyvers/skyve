@@ -25,12 +25,14 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.DownloadAction.Download;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.UploadAction.UploadedFile;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.InterceptorMetaData;
 import org.skyve.metadata.customer.LoginResources;
@@ -175,6 +177,8 @@ public class CustomerImpl implements Customer {
 	private Converter<Timestamp> defaultTimestampConverter;
 	private List<String> moduleNames = new ArrayList<>();
 	private String homeModuleName;
+	private LinkedHashMap<String, CustomerRoleMetaData> roles = new LinkedHashMap<>();
+	private boolean allowModuleRoles = true;
 	private Map<String, InterceptorMetaData> interceptors = new LinkedHashMap<>();
 	private List<InterceptorMetaData> reversedInterceptors = new ArrayList<>();
 	private Map<String, Action> defaultActions = new TreeMap<>();
@@ -312,6 +316,29 @@ public class CustomerImpl implements Customer {
 		return result;
 	}
 
+	public boolean putRole(CustomerRoleMetaData role) {
+		return (roles.put(role.getName(), role) == null);
+	}
+
+	@Override
+	public java.util.Collection<CustomerRole> getRoles() {
+		return Collections.unmodifiableCollection(roles.values());
+	}
+	
+	@Override
+	public CustomerRole getRole(String roleName) {
+		return roles.get(roleName);
+	}
+	
+	@Override
+	public boolean isAllowModuleRoles() {
+		return allowModuleRoles;
+	}
+	
+	public void setAllowModuleRoles(boolean allowModuleRoles) {
+		this.allowModuleRoles = allowModuleRoles;
+	}
+	
 	public boolean putInterceptor(InterceptorMetaData interceptor) {
 		boolean result = (interceptors.put(interceptor.getClassName(), interceptor) == null);
 		if (result) {
@@ -320,6 +347,7 @@ public class CustomerImpl implements Customer {
 		return result;
 	}
 	
+
 	@Override
 	public java.util.Collection<InterceptorMetaData> getInterceptors() {
 		return Collections.unmodifiableCollection(interceptors.values());

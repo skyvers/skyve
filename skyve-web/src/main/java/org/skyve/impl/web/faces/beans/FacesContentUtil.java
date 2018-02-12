@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
@@ -20,14 +21,14 @@ import org.skyve.util.Binder.TargetMetaData;
 public class FacesContentUtil {
 	
 	/**
-	 * Handle a file upload event and return the content id once uploaded.
+	 * Handle a file upload event and return the content once uploaded.
 	 * @param event the event to handle
 	 * @param bean the driving bean
 	 * @param binding the binding to upload
-	 * @return the id of the uploaded content
+	 * @return the uploaded content
 	 * @throws Exception
 	 */
-	public static String handleFileUpload(FileUploadEvent event, Bean bean, String binding) throws Exception {
+	public static AttachmentContent handleFileUpload(FileUploadEvent event, Bean bean, String binding) throws Exception {
 		UploadedFile file = event.getFile();
 		Customer customer = CORE.getCustomer();
 		
@@ -41,35 +42,35 @@ public class FacesContentUtil {
 			contentAttributeName = binding.substring(contentBindingLastDotIndex + 1);
 		}
 
-		// Always insert a new attachment content node into the content
-		// repository on upload.
-		// That way, if the change is discarded (not committed), it'll still
-		// point to the original attachment.
-		// Also, browser caching is simple as the URL is changed (as a
-		// consequence of the content id change)
-		String contentId = null;
+		// Always insert a new attachment content node into the content repository on upload.
+		// That way, if the change is discarded (not committed), it'll still point to the original attachment.
+		// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
+		AttachmentContent content = new AttachmentContent(customerName, 
+															contentOwner.getBizModule(),
+															contentOwner.getBizDocument(), 
+															contentOwner.getBizDataGroupId(), contentOwner.getBizUserId(),
+															contentOwner.getBizId(), 
+															contentAttributeName, 
+															fileName, 
+															file.getInputstream());
 		try (ContentManager cm = EXT.newContentManager()) {
-			AttachmentContent content = new AttachmentContent(customerName, contentOwner.getBizModule(),
-					contentOwner.getBizDocument(), contentOwner.getBizDataGroupId(), contentOwner.getBizUserId(),
-					contentOwner.getBizId(), contentAttributeName, fileName, file.getInputstream());
-
 			// Determine if we should index the content or not
 			boolean index = true; // default
 			Module module = customer.getModule(contentOwner.getBizModule());
+			Document document = module.getDocument(customer, contentOwner.getBizDocument());
 			// NB - Could be a base document attribute
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module,
-					module.getDocument(customer, contentOwner.getBizDocument()), contentAttributeName);
+			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, contentAttributeName);
 			Attribute attribute = target.getAttribute();
 			if (attribute instanceof Content) {
 				IndexType indexType = ((Content) attribute).getIndex();
-				index = ((indexType == null) || IndexType.textual.equals(indexType)
-						|| IndexType.both.equals(indexType));
+				index = ((indexType == null) || 
+							IndexType.textual.equals(indexType) ||
+							IndexType.both.equals(indexType));
 			}
 
 			// NB Don't set the content id as we always want a new one
 			cm.put(content, index);
-			contentId = content.getContentId();
 		}
-		return contentId;
+		return content; // NB now has a new content id
 	}
 }

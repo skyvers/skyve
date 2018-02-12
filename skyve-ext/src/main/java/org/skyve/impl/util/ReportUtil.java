@@ -77,26 +77,37 @@ public final class ReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		Customer customer = user.getCustomer();
-		String reportFileName = preProcess(customer, document, reportName, parameters);
+		final Customer customer = user.getCustomer();
+		final String reportFileName = preProcess(customer, document, reportName, parameters);
 
-        JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
+        final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
+
+		return runReport(jasperReport, user, document, parameters, bean, format, out);
+	}
+
+	public static JasperPrint runReport(JasperReport jasperReport,
+	                                    User user,
+	                                    Document document,
+	                                    Map<String, Object> parameters,
+	                                    Bean bean,
+	                                    ReportFormat format,
+	                                    OutputStream out) throws JRException {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
-		
+
 		JasperPrint result = null;
-		
+
 		UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
 			@SuppressWarnings("resource")
 			Connection connection = EXT.getDataStoreConnection();
 			try {
 				UtilImpl.LOGGER.info("FILL REPORT");
-				result = JasperFillManager.fillReport(jasperReport, 
-														parameters, 
-														connection);
+				result = JasperFillManager.fillReport(jasperReport,
+						parameters,
+						connection);
 				UtilImpl.LOGGER.info("PUMP REPORT");
-		    	runReport(result, format, out);
-		    	UtilImpl.LOGGER.info("PUMPED REPORT");
+				runReport(result, format, out);
+				UtilImpl.LOGGER.info("PUMPED REPORT");
 			}
 			finally {
 				SQLUtil.disconnect(connection);
@@ -114,13 +125,13 @@ public final class ReportUtil {
 			}
 			UtilImpl.LOGGER.info("FILL REPORT");
 			result = JasperFillManager.fillReport(jasperReport,
-													parameters,
-													new SkyveDataSource(user, reportBean));
+					parameters,
+					new SkyveDataSource(user, reportBean));
 			UtilImpl.LOGGER.info("PUMP REPORT");
 			runReport(result, format, out);
 			UtilImpl.LOGGER.info("PUMPED REPORT");
 		}
-		
+
 		return result;
 	}
 

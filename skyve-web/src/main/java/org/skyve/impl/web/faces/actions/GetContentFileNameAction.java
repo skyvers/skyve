@@ -22,11 +22,11 @@ public class GetContentFileNameAction extends FacesAction<String> {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetContentFileNameAction - binding=" + binding);
 
 		String contentId = (String) Binder.get(bean, binding);
-		String fileName = "";
+		String fileName = "&lt;Empty&gt;";
 		if (contentId != null) {
 			try (ContentManager cm = EXT.newContentManager()) {
 				AttachmentContent content = cm.get(contentId);
-				if(content != null) {
+				if (content != null) {
 					fileName = content.getFileName();
 				}
 			}

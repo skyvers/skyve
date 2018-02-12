@@ -57,7 +57,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 	private List<JobMetaDataImpl> jobs = new ArrayList<>();
 	private List<ModuleDocument> documents = new ArrayList<>();
 	private List<QueryMetaData> queries = new ArrayList<>();
-	private List<Role> roles = new ArrayList<>();
+	private List<ModuleRoleMetaData> roles = new ArrayList<>();
 	private Menu menu;
 	private String documentation;
 
@@ -110,7 +110,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
-	public List<Role> getRoles() {
+	public List<ModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
@@ -353,9 +353,9 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 
 		// Populate Roles
 		Set<String> roleNames = new TreeSet<>();
-		List<Role> repositoryRoles = getRoles();
+		List<ModuleRoleMetaData> repositoryRoles = getRoles();
 		if (repositoryRoles != null) {
-			for (Role roleMetaData : repositoryRoles) {
+			for (ModuleRoleMetaData roleMetaData : repositoryRoles) {
 				RoleImpl role = new RoleImpl();
 				value = roleMetaData.getName();
 				if (value == null) {

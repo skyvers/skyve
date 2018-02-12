@@ -105,6 +105,17 @@ final class BackupUtil {
 
 		return result.values();
 	}
+
+	static Collection<Table> getTables(Collection<Document> documents) {
+		Map<String, Table> result = new TreeMap<>();
+		Customer customer = AbstractPersistence.get().getUser().getCustomer();
+
+		for (Document document : documents) {
+			addOrUpdate(result, customer, document);
+		}
+
+		return result.values();
+	}
 	
 	static void writeTables(Collection<Table> tables, File toWriteTo)
 	throws Exception {

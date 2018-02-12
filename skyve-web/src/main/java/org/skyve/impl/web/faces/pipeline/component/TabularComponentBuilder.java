@@ -12,8 +12,10 @@ import javax.faces.component.UIComponentBase;
 import javax.faces.component.UIInput;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
+import javax.faces.component.html.HtmlInputHidden;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
+import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.component.html.HtmlSelectOneMenu;
 import javax.faces.convert.Converter;
@@ -32,12 +34,12 @@ import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.editor.Editor;
-import org.primefaces.component.fileupload.FileUpload;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.outputlabel.OutputLabel;
+import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
@@ -49,7 +51,6 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
-import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -463,19 +464,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		    	button.setValue(null);
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");
-
-		    	// If the remove button is vanilla, no events, just update the table as we know there'll
-		    	// be no side effects, but if there is an action on it, update the forms to render
-		    	// any side effects
-		    	List<EventAction> removedActions = grid.getRemovedActions();
-		    	if ((removedActions != null) && (! removedActions.isEmpty())) {
-					button.setUpdate(update); // update all forms (by default)
-		    	}
-		    	else {
-		    		button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
-		    	}
-
-		    	action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, removedActions);
+		    	// We cannot just update the data table ever when removing a row as 
+		    	// the grid may go invisible if the last row is removed.
+		    	// There is no performance shortcut we can do as we dont know what is going on
+		    	button.setUpdate(update); // update all forms (by default)
+		    	
+		    	action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, grid.getRemovedActions());
 				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
 				String[] removeDisabled = (disableRemoveConditionName == null) ? 
 											((disabledConditionName == null) ? 
@@ -979,38 +973,123 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	public UIComponent contentImage(String listVar, ContentImage image, String title, boolean required) {
-		UIComponent result = panelGroup(true, true, false, null, null);
-		result.getChildren().add(contentGraphicImage(image.getPixelWidth(), 
-														null,
-														null, 
-														image.getPixelHeight(), 
-														null, 
-														image.getBinding(), 
-														null));
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(5);
+		String id = result.getId();
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		String binding = image.getBinding();
+		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
+		HtmlPanelGroup contentImage = contentGraphicImage(image.getPixelWidth(), 
+															null,
+															null, 
+															image.getPixelHeight(), 
+															null, 
+															binding);
+		// Set the id of the inner image element
+		contentImage.getChildren().get(0).setId(String.format("%s_%s_image", id, sanitisedBinding));
+		toAddTo.add(contentImage);
 		if (! Boolean.FALSE.equals(image.getEditable())) {
-			result.getChildren().add(label("Upload"));
+			editableContent(toAddTo, id, binding, sanitisedBinding, true);
 		}
 		
 		return result;
 	}
 	
+	/**
+	 * Content link in faces looks like...
+	 * 				<h:outputLink href="SHITE">shiter</p:link>
+	 * 				... then the buttons etc ...
+	 */
 	@Override
 	public UIComponent contentLink(String listVar, ContentLink link, String title, boolean required) {
-		UIComponent result = panelGroup(true, true, false, null, null);
-		result.getChildren().add(contentLink(link.getPixelWidth(), link.getBinding()));
+		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
+		setId(result, null);
+		result.setColumns(5);
+		String id = result.getId();
+		List<UIComponent> toAddTo = result.getChildren();
+		
+		String binding = link.getBinding();
+		String sanitisedBinding = BindUtil.sanitiseBinding(binding);
+		HtmlOutputLink contentLink = contentLink(link.getPixelWidth(), binding);
+		contentLink.setId(String.format("%s_%s_link", id, sanitisedBinding));
+		toAddTo.add(contentLink);
 		if (! Boolean.FALSE.equals(link.getEditable())) {
-			FileUpload fileUpload = (FileUpload)a.createComponent(FileUpload.COMPONENT_TYPE);
-			fileUpload.setFileUploadListener(ef.createMethodExpression(elc, String.format("#{%s.handleFileUpload}", managedBeanName), Void.class, new Class<?> [] {FileUploadEvent.class}));
-			fileUpload.setUpdate("@form");
-			fileUpload.setMultiple(false);
-			fileUpload.setFileLimit(1);
-			fileUpload.setFileLimitMessage(String.format("#{%s.i18n['page.contentUpload.error']}", managedBeanName));
-			fileUpload.getAttributes().put("uploadBinding", link.getBinding());
-			fileUpload.setMode("advanced");
-			result.getChildren().add(fileUpload);
+			editableContent(toAddTo, id, binding, sanitisedBinding, false);
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Add the buttons and overlays etc
+	 * 			<h:panelGrid> (from caller)
+	 * 				...
+	 *				<h:inputHidden id="s01_hidden" value="#{skyve.poo}" />
+	 *			    <p:commandButton id="s03" icon="fa fa-upload" title="Upload Content" type="button" onclick="$(PrimeFaces.escapeClientId('s06')).attr('src', '/skyve/contentUpload.xhtml')" />
+	 *			    <p:overlayPanel id="s04" for="s03" hideEffect="fade" dynamic="true" showCloseIcon="true" modal="true" style="width:50%;height:300px">
+	 *					<iframe id="s01_iframe" src="/skyve/contentUpload.xhtml" style="width:100%;height:280px;border:none"></iframe>
+	 *			    </p:overlayPanel>
+	 *				<p:commandButton id="s05" icon="fa fa-trash" title="Clear Content" type="button" onclick="$(PrimeFaces.escapeClientId('s01_hidden')).val('')" />
+	 *				...
+	 *			</h:panelGrid>
+	 * 
+	 * @param toAddTo
+	 * @param binding
+	 */
+	private void editableContent(List<UIComponent> toAddTo, String id, String binding, String sanitisedBinding, boolean image) {
+		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, null, binding, null, false, null);
+		setId(hidden, String.format("%s_%s", id, sanitisedBinding));
+		toAddTo.add(hidden);
+		
+		CommandButton uploadButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(uploadButton, null);
+		String uploadButtonId = uploadButton.getId();
+		uploadButton.setIcon("fa fa-upload");
+		uploadButton.setTitle("Upload Content");
+		uploadButton.setType("button");
+		toAddTo.add(uploadButton);
+
+		OverlayPanel overlay = (OverlayPanel) a.createComponent(OverlayPanel.COMPONENT_TYPE);
+		setId(overlay, null);
+		overlay.setWidgetVar(sanitisedBinding + "Overlay");
+		overlay.setFor(uploadButtonId);
+		overlay.setHideEffect("fade");
+		overlay.setDynamic(false);
+		overlay.setShowCloseIcon(true);
+		overlay.setModal(true);
+		overlay.setStyle("width:50%;height:300px");
+		// clear the iframe src on hide so there is no flash next open
+		overlay.setOnHide(String.format("SKYVE.contentOverlayOnHide('%s')", id));
+
+		// $(PrimeFaces.escapeClientId('<id>')).attr('src', '<url>')
+		StringBuilder value = new StringBuilder(64);
+		value.append("#{'SKYVE.contentOverlayOnShow(\\'").append(id).append("\\',\\''.concat(");
+		value.append(managedBeanName).append(".getContentUploadUrl('").append(sanitisedBinding).append("')).concat('\\')')}");
+		overlay.setValueExpression("onShow", ef.createValueExpression(elc, value.toString(), String.class));
+		toAddTo.add(overlay);
+
+		// <iframe id="s06" src="" style="width:100%;height:280px;border:none"></iframe>
+		HtmlOutputText iframe = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
+		iframe.setEscape(false);
+		iframe.setValue(String.format("<iframe id=\"%s_iframe\" src=\"\" style=\"width:100%%;height:280px;border:none\"></iframe>", id));
+		setId(iframe, null);
+		overlay.getChildren().add(iframe);
+		
+		CommandButton clearButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(clearButton, null);
+		clearButton.setIcon("fa fa-trash");
+		clearButton.setValue(null);
+		clearButton.setTitle("Clear Content");
+		clearButton.setType("button");
+		if (image) {
+			clearButton.setOnclick(String.format("SKYVE.clearContentImage('%s','%s')", id, sanitisedBinding));
+		}
+		else {
+			clearButton.setOnclick(String.format("SKYVE.clearContentLink('%s','%s')", id, sanitisedBinding));
+		}
+		toAddTo.add(clearButton);
 	}
 	
 	@Override
@@ -1934,39 +2013,38 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 	
-	private GraphicImage contentGraphicImage(Integer pixelWidth, 
+	// To enable a scaled image to keep its aspect ratio, construct something like
+	// <div><img/></div> & set the size of the div to what is required
+	// and set the image as width:100%;height:100%;object-fit:contain;
+	private HtmlPanelGroup contentGraphicImage(Integer pixelWidth, 
 												Integer responsiveWidth,
 												Integer percentageWidth, 
 												Integer pixelHeight,
 												Integer percentageHeight, 
-												String binding, 
-												String invisible) {
-		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
-
-		StringBuilder expression = new StringBuilder(64);
-		expression.append("#{").append(managedBeanName).append(".getContentUrl('");
-		expression.append(binding).append("')}");
-
-		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
-		setSize(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
-		setInvisible(result, invisible, null);
+												String binding) {
+		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
+		setSize(result, "border:1px solid gray;", pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, null);
+
+		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
+		setId(image, null);
+		String expression = String.format("#{%s.getContentUrl('%s', true)}", managedBeanName, binding);
+		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
+		image.setStyle("width:100%;height:100%;object-fit:contain;");
+		result.getChildren().add(image);
+		
 		return result;
 	}
 
 	private HtmlOutputLink contentLink(Integer pixelWidth, String binding) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		
-		StringBuilder expression = new StringBuilder(64);
-		expression.append("#{").append(managedBeanName).append(".getContentUrl('");
-		expression.append(binding).append("')}");
-		result.setValueExpression("value", ef.createValueExpression(elc, expression.toString(), String.class));
+		String expression = String.format("#{%s.getContentUrl('%s', false)}", managedBeanName, binding);
+		result.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 
-		StringBuilder textExpression = new StringBuilder(64);
-		textExpression.append("#{").append(managedBeanName).append(".getContentFileName('");
-		textExpression.append(binding).append("')}");
+		expression = String.format("#{%s.getContentFileName('%s')}", managedBeanName, binding);
 		UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
-		outputText.setValueExpression("value", ef.createValueExpression(elc, textExpression.toString(), String.class));
+		outputText.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
 		result.getChildren().add(outputText);
 			
 		result.setTarget("_blank");
@@ -2256,9 +2334,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));
 		}
-		result.setValueExpression("title",
-									ef.createValueExpression(elc, required ? title + " *" : title, String.class));
-
+		if (title != null) {
+			result.setValueExpression("title",
+										ef.createValueExpression(elc, required ? title + " *" : title, String.class));
+		}
+		
 		// Cannot utilise the faces required attributes as some requests need to ignore required-ness.
 		// eg - triggered actions on widget events.
 		// Setting required attribute to an expression worked server-side but the client-side message integration didn't.

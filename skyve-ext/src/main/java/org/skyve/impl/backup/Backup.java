@@ -34,6 +34,7 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.util.ThreadSafeFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -56,13 +57,19 @@ public class Backup {
 	private Backup() {
 		// nothing to see here
 	}
-	
+
 	public static File backup() throws Exception {
+		return backup(BackupUtil.getTables());
+	}
+
+	public static File backupDocuments(Collection<Document> documents) throws Exception {
+		return backup(BackupUtil.getTables(documents));
+	}
+	
+	public static File backup(Collection<Table> tables) throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		
-		Collection<Table> tables = BackupUtil.getTables();
-
-		String backupDir = String.format("%sbackup_%s%s%s%s", 
+		String backupDir = String.format("%sbackup_%s%s%s%s",
 											UtilImpl.CONTENT_DIRECTORY, 
 											customerName, 
 											File.separator, 

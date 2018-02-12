@@ -665,7 +665,13 @@ public class DesignSpecification {
 	}
 
 	public String getJrxml() {
-		return Renderer.renderDesign(this);
+		try {
+			return new JasperReportRenderer(this).renderDesign();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	public int getAlias() {

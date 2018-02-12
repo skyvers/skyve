@@ -67,6 +67,25 @@ public interface Customer extends NamedMetaData {
 	 * 
 	 * @return
 	 */
+	public Collection<CustomerRole> getRoles();
+	
+	/**
+	 * 
+	 * @param roleName
+	 * @return
+	 */
+	public CustomerRole getRole(String roleName);
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isAllowModuleRoles();
+
+	/**
+	 * 
+	 * @return
+	 */
 	public Collection<InterceptorMetaData> getInterceptors();
 
 	/**

@@ -68,6 +68,7 @@
 		<copy tofile="javaee/skyve.ear/skyve.war/css/prime-min.css" file="src/css/prime.css" overwrite="true"/>
 		<copy tofile="javaee/skyve.ear/skyve.war/desktop/geolocate-min.js" file="src/js/desktop/geolocate.js" overwrite="true"/>
 		<copy tofile="javaee/skyve.ear/skyve.war/mobile/skyve-min.js" file="src/js/mobile/skyve.js" overwrite="true"/>
+		<copy tofile="javaee/skyve.ear/skyve.war/external/skyve-min.js" file="src/js/external/skyve.js" overwrite="true"/>
 	</target>
 	<target name="compressJavascript" depends="concatSkyveJavascript">
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
@@ -92,6 +93,9 @@
 		</java>
 		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
 			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/mobile/skyve-min.js src/js/mobile/skyve.js"/>
+		</java>
+		<java jar="lib/yuicompressor-2.4.8.jar" fork="true">
+			<arg line="-o ../skyve-web/src/main/resources/META-INF/resources/external/skyve-min.js src/js/external/skyve.js"/>
 		</java>
 	</target>
 	<target name="mavenLibs" xmlns:artifact="urn:maven-artifact-ant">

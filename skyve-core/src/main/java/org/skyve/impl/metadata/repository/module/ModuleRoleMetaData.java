@@ -12,8 +12,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 @XmlType(namespace = XMLMetaData.MODULE_NAMESPACE,
+			name = "role",
 			propOrder = {"documentation", "description", "privileges"})
-public class Role extends NamedMetaData {
+public class ModuleRoleMetaData extends NamedMetaData {
 	private static final long serialVersionUID = -7824222183005636350L;
 
 	private String description;
