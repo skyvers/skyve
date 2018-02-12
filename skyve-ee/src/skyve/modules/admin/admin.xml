@@ -344,7 +344,7 @@
 				<uxui name="tablet" />
 				<role name="SecurityAdministrator" />
 			</list>
-			<edit document="Configuration" name="Password Complexity">
+			<edit document="Configuration" name="Configuration">
 				<role name="SecurityAdministrator" />
 			</edit>
 		</group>

@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.skyve.util.Util;
 
 public class ResponseHeaderFilter implements Filter {
-	FilterConfig fc;
+	private FilterConfig fc;
 
 	@Override
 	public void init(FilterConfig config) throws ServletException {
