@@ -32,10 +32,10 @@
 						<li>Required attributes should have their name surrounded by asterisks, e.g. <code>- *firstName*</code>
 						<li>The type should follow the attribute name
 						<li>If the type is text, the length should follow the type, e.g. <code>- *firstName* text 150</code>
-						<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)</code>
+						<li>If the type is enum, the values should follow the type in brackets, e.g. <code>- state enum ("Not Started", 'In Progress', Complete)</code>
 						<li>If a specific display name is required, it can be encapsulated in single or double quotes, e.g. <code>- 'Yes/No'</code>
 					</ul>
-					<li>Assoications should be specified as a list item by using a dash (-), followed by a space, then the association name in camel case, then the association document in title case
+					<li>Associations should be specified as a list item by using a dash (-), followed by a space, then the association name in camel case, then the association document in title case
 					<ul>
 						<li>e.g. <code>- country Country</code>
 						<li>Required associations should have their name surrounded by asterisks, e.g. <code>- *country* Country</code>
