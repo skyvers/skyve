@@ -269,7 +269,6 @@
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
-<!-- Don't use on bizhub.com.au as we need the http version to resolve still.
 	<filter>
 		<filter-name>HSTSHeaderFilter</filter-name>
 		<filter-class>org.skyve.impl.web.filter.ResponseHeaderFilter</filter-class>
@@ -298,7 +297,7 @@
 		<filter-name>HSTSHeaderFilter</filter-name>
 		<url-pattern>/j_security_check</url-pattern>
 	</filter-mapping>
--->
+
 	<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.WebServlet</servlet-class>
