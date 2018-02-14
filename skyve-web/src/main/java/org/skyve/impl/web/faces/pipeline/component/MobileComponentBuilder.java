@@ -16,11 +16,9 @@ import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
-import org.primefaces.component.spacer.Spacer;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.impl.metadata.view.container.TabPane;
-import org.skyve.impl.metadata.view.event.EventAction;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
@@ -36,23 +34,34 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.web.WebAction;
 
 public class MobileComponentBuilder extends TabularComponentBuilder {
 
 	@Override
-	public List<UIComponent> toolbars(String widgetId) {
+	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+		if (components != null) {
+			return components;
+		}
+
 		return null; // no toolbars for mobile
 	}
 
 	@Override
-	public UIComponent tabPane(TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+		if (component != null) {
+			return component;
+		}
+
 		return accordionPanel(tabPane.getInvisibleConditionName(), tabPane.getWidgetId());
 	}
 	
 	@Override
-	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public UIComponent spacer(UIComponent component, org.skyve.impl.metadata.view.widget.Spacer spacer) {
+		if (component != null) {
+			return component;
+		}
+
 		// Don't add spacers to the mobile UI as they just leave a space and a line which sux
 		return null;
 	}
@@ -128,7 +137,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent dataGrid(String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+		if (component != null) {
+			return component;
+		}
+
 		DataList result = dataList(grid.getBinding(), 
 									listVar,
 		                			grid.getTitle(),
@@ -139,13 +152,18 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addDataGridBoundColumn(UIComponent current, 
+	public UIComponent addDataGridBoundColumn(UIComponent component,
+												UIComponent current, 
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
+		if (component != null) {
+			return component;
+		}
+
 		UIComponent result = current;
 		String gridBinding = widget.getBinding();
 
@@ -166,29 +184,47 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent current) {
+	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
+		if (component != null) {
+			return component;
+		}
+
 		return current;
 	}
 
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent current, 
+	public UIComponent addDataGridContainerColumn(UIComponent component,
+													UIComponent current, 
 													AbstractDataWidget widget, 
 													DataGridContainerColumn column) {
+		if (component != null) {
+			return component;
+		}
+
 		return current;
 	}
 	
 	@Override
-	public UIComponent addedDataGridContainerColumn(UIComponent current) {
+	public UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current) {
+		if (component != null) {
+			return component;
+		}
+
 		return current.getParent();
 	}
 	
 	@Override
-	public UIComponent addDataGridActionColumn(UIComponent current, 
+	public UIComponent addDataGridActionColumn(UIComponent component,
+												UIComponent current, 
 												DataGrid grid, 
 												String listVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
+		if (component != null) {
+			return component;
+		}
+
 		UIComponent result = current;
 		String listBinding = grid.getBinding();
 		
@@ -232,7 +268,15 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 
 
 	@Override
-	public UIComponent checkBox(String listVar, CheckBox checkBox, String title, boolean required) {
+	public UIComponent checkBox(UIComponent component,
+									String listVar,
+									CheckBox checkBox,
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		SelectBooleanCheckbox result = checkbox(listVar,
 												checkBox.getBinding(), 
 												title,
@@ -243,7 +287,15 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent colourPicker(String listVar, ColourPicker colour, String title, boolean required) {
+	public UIComponent colourPicker(UIComponent component,
+										String listVar,
+										ColourPicker colour,
+										String title,
+										boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return colourPicker(listVar, 
 								colour.getBinding(), 
 								title, 
@@ -253,12 +305,17 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent lookupDescription(String listVar, 
+	public UIComponent lookupDescription(UIComponent component,
+											String listVar, 
 											LookupDescription lookup, 
 											String title, 
 											boolean required,
 											String displayBinding,
 											QueryDefinition query) {
+		if (component != null) {
+			return component;
+		}
+
 		UIComponent c = autoComplete(listVar,
 										lookup.getBinding(),
 										title,
@@ -294,10 +351,15 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent password(String listVar, 
+	public UIComponent password(UIComponent component,
+									String listVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
 									String title, 
 									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return password(listVar,
 							password.getBinding(), 
 			                title,
@@ -308,12 +370,17 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent textArea(String listVar, 
+	public UIComponent textArea(UIComponent component,
+									String listVar, 
 									TextArea text, 
 									String title, 
 									boolean required,
 									Integer length) {
-        return textArea(listVar,
+		if (component != null) {
+			return component;
+		}
+
+		return textArea(listVar,
 							text.getBinding(),
 							title,
 							required,
@@ -326,7 +393,8 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent text(String listVar, 
+	public UIComponent text(UIComponent component,
+								String listVar, 
 								TextField text, 
 								String title, 
 								boolean required,
@@ -334,7 +402,11 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 								org.skyve.domain.types.converters.Converter<?> converter,
 								Format<?> format,
 								Converter facesConverter) {
-        return textField(listVar,
+		if (component != null) {
+			return component;
+		}
+
+		return textField(listVar,
 							text.getBinding(),
 							title,
 							required,
@@ -364,13 +436,18 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		</p:dataList>
 	 */
 	@Override
-	public UIComponent listGrid(String modelDocumentName,
+	public UIComponent listGrid(UIComponent component,
+									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid grid,
 									boolean canCreateDocument,
 									boolean showPaginator,
 									boolean stickyHeader) {
+		if (component != null) {
+			return component;
+		}
+
 		boolean createRendered = (! Boolean.FALSE.equals(grid.getShowAdd()));
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();

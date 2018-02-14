@@ -11,7 +11,11 @@ import org.primefaces.component.toolbar.Toolbar;
 
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
-	public HtmlPanelGroup view(String invisibleConditionName) {
+	public UIComponent view(UIComponent component, String invisibleConditionName) {
+		if (component != null) {
+			return component;
+		}
+
 		HtmlPanelGroup result = panelGroup(false, false, true, invisibleConditionName, null);
 		result.setStyleClass("ui-g");
 		return result;
@@ -20,7 +24,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Overridden to not set the toolbar style width to 100% since it's wrapped in a ui-g-12
 	// for the responsive renderer.
 	@Override
-	public List<UIComponent> toolbars(String widgetId) {
+	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+		if (components != null) {
+			return components;
+		}
+
 		Toolbar toolbar = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
 		setId(toolbar, widgetId);
 		
@@ -30,7 +38,14 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent border(String borderTitle, String invisibleConditionName, Integer pixelWidth) {
+	public UIComponent border(UIComponent component, 
+								String borderTitle,
+								String invisibleConditionName,
+								Integer pixelWidth) {
+		if (component != null) {
+			return component;
+		}
+		
 /*
 		HtmlPanelGroup card = panelGroup(false, false, true, invisibleConditionName);
 		card.setStyleClass("card");

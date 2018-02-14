@@ -113,12 +113,20 @@ import org.skyve.web.WebAction;
 public class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
-	public HtmlPanelGroup view(String invisibleConditionName) {
+	public UIComponent view(UIComponent component, String invisibleConditionName) {
+		if (component != null) {
+			return component;
+		}
+		
 		return panelGroup(true, false, false, invisibleConditionName, null);
 	}
 
 	@Override
-	public List<UIComponent> toolbars(String widgetId) {
+	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+		if (components != null) {
+			return components;
+		}
+
 		Toolbar toolbar = (Toolbar) a.createComponent(Toolbar.COMPONENT_TYPE);
 		setId(toolbar, widgetId);
 		toolbar.setStyle("width:100%");
@@ -129,14 +137,22 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(TabPane tabPane) {
+	public UIComponent tabPane(UIComponent component, TabPane tabPane) {
+		if (component != null) {
+			return component;
+		}
+
 		return tabView(tabPane.getInvisibleConditionName(), 
 						tabPane.getSelectedTabIndexBinding(),
 						tabPane.getWidgetId());
 	}
 	
 	@Override
-	public UIComponent tab(org.skyve.impl.metadata.view.container.Tab tab) {
+	public UIComponent tab(UIComponent component, org.skyve.impl.metadata.view.container.Tab tab) {
+		if (component != null) {
+			return component;
+		}
+
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
 		result.setTitle(tab.getTitle());
 		setDisabled(result, tab.getDisabledConditionName());
@@ -146,12 +162,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent border(String borderTitle, String invisibleConditionName, Integer pixelWidth) {
+	public UIComponent border(UIComponent component, String borderTitle, String invisibleConditionName, Integer pixelWidth) {
+		if (component != null) {
+			return component;
+		}
+
 		return panel(borderTitle, invisibleConditionName, pixelWidth, null);
 	}
 	
 	@Override
-	public UIComponent label(String value) {
+	public UIComponent label(UIComponent component, String value) {
+		if (component != null) {
+			return component;
+		}
+
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(value);
@@ -159,10 +183,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent actionButton(String listBinding, 
+	public UIComponent actionButton(UIComponent component, 
+										String listBinding, 
 										String listVar,
 										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
+		if (component != null) {
+			return component;
+		}
+
 		Map<String, String> properties = button.getProperties();
 		return actionButton(action.getDisplayName(),
 								action.getIconStyleClass(),
@@ -183,8 +212,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent reportButton(org.skyve.impl.metadata.view.widget.Button button, 
+	public UIComponent reportButton(UIComponent component, 
+										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action) {
+		if (component != null) {
+			return component;
+		}
+
 		return reportButton(action.getDisplayName(), 
 								action.getIconStyleClass(),
 								action.getToolTip(), 
@@ -198,10 +232,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent downloadButton(org.skyve.impl.metadata.view.widget.Button button, 
+	public UIComponent downloadButton(UIComponent component, 
+										org.skyve.impl.metadata.view.widget.Button button, 
 										Action action,
 										String moduleName, 
 										String documentName) {
+		if (component != null) {
+			return component;
+		}
+
 		return downloadButton(action.getDisplayName(),
 								action.getIconStyleClass(),
 								action.getToolTip(),
@@ -217,7 +256,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent blurb(String listVar, String value, String binding, Blurb blurb) {
+	public UIComponent blurb(UIComponent component, 
+								String listVar,
+								String value,
+								String binding,
+								Blurb blurb) {
+		if (component != null) {
+			return component;
+		}
+
 		return outputText(listVar,
 							value,
 							binding,
@@ -228,7 +275,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent label(String listVar, String value, String binding, Label label) {
+	public UIComponent label(UIComponent component, 
+								String listVar,
+								String value,
+								String binding,
+								Label label) {
+		if (component != null) {
+			return component;
+		}
+
 		return outputText(listVar,
 							value,
 							binding,
@@ -272,7 +327,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	private int columnPriority;
 	
 	@Override
-	public UIComponent dataGrid(String listVar, DataGrid grid) {
+	public UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid) {
+		if (component != null) {
+			return component;
+		}
+
 		columnPriority = 1;
 		
 		String disabledConditionName = grid.getDisabledConditionName();
@@ -305,7 +364,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * Any bound columns are editable inline.
 	 */
 	@Override
-	public UIComponent dataRepeater(String listVar, DataRepeater repeater) {
+	public UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater) {
+		if (component != null) {
+			return component;
+		}
+
 		columnPriority = 1;
 
 		DataTable result = dataTable(repeater.getBinding(),
@@ -325,13 +388,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addDataGridBoundColumn(UIComponent current, 
+	public UIComponent addDataGridBoundColumn(UIComponent component,
+												UIComponent current, 
 												AbstractDataWidget widget,
 												DataGridBoundColumn column,
 												String listVar,
 												String columnTitle,
 												String columnBinding,
 												StringBuilder gridColumnExpression) {
+		if (component != null) {
+			return component;
+		}
+
 		Column result = column(listVar,
 								(columnBinding == null) ? Bean.BIZ_KEY : columnBinding,
 								columnTitle,
@@ -359,14 +427,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent current) {
+	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
+		if (component != null) {
+			return component;
+		}
+
 		return current.getParent(); // move from column to table
 	}
 
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent current, 
+	public UIComponent addDataGridContainerColumn(UIComponent component,
+													UIComponent current, 
 													AbstractDataWidget widget,
 													DataGridContainerColumn column) {
+		if (component != null) {
+			return component;
+		}
+
 		Column col = column(widget.getBinding(),
 								null,
 								column.getTitle(),
@@ -382,17 +459,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addedDataGridContainerColumn(UIComponent current) {
+	public UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current) {
+		if (component != null) {
+			return component;
+		}
+
 		return current.getParent(); // move from column to table
 	}
 	
 	@Override
-	public UIComponent addDataGridActionColumn(UIComponent current, 
+	public UIComponent addDataGridActionColumn(UIComponent component,
+												UIComponent current, 
 												DataGrid grid, 
 												String listVar,
 												String gridColumnExpression,
 												String singularDocumentAlias,
 												boolean inline) {
+		if (component != null) {
+			return component;
+		}
+
 		// only add a column if grid is editable
 		if (! Boolean.FALSE.equals(grid.getEditable())) {
 			String listBinding = grid.getBinding();
@@ -457,7 +543,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			if (! Boolean.FALSE.equals(grid.getShowRemove())) {
 				// Conditionally add some whitespace between buttons
 				if (! col.getChildren().isEmpty()) {
-					children.add(label(" "));
+					children.add(label(null, " "));
 				}
 	
 				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
@@ -522,13 +608,18 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		</p:dataTable>
 	*/
 	@Override
-	public UIComponent listGrid(String modelDocumentName,
+	public UIComponent listGrid(UIComponent component,
+									String modelDocumentName,
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid grid,
 									boolean canCreateDocument,
 									boolean showPaginator,
 									boolean stickyHeader) {
+		if (component != null) {
+			return component;
+		}
+
 		Document drivingDocument =  model.getDrivingDocument();
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
@@ -806,7 +897,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * No CRUD.
 	 */
 	@Override
-	public UIComponent listRepeater(String modelDocumentName,
+	public UIComponent listRepeater(UIComponent component,
+										String modelDocumentName,
 										String modelName,
 										ListModel<? extends Bean> model,
 										List<FilterParameter> filterParameters,
@@ -814,6 +906,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										boolean showColumnHeaders,
 										boolean showGrid,
 										boolean stickyHeader) {
+		if (component != null) {
+			return component;
+		}
+
 		Document drivingDocument =  model.getDrivingDocument();
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
@@ -892,7 +988,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent listMembership(ListMembership membership) {
+	public UIComponent listMembership(UIComponent component, ListMembership membership) {
+		if (component != null) {
+			return component;
+		}
+
 		PickList result = (PickList) a.createComponent(PickList.COMPONENT_TYPE);
 		result.setVar("item");
 		result.setShowSourceControls(false);
@@ -925,7 +1025,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent checkBox(String listVar, CheckBox checkBox, String title, boolean required) {
+	public UIComponent checkBox(UIComponent component,
+									String listVar,
+									CheckBox checkBox,
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 /* TODO Why don't tri state checkboxes work???
 		UIComponentBase c = Boolean.FALSE.equals(checkBox.getTriState()) ?
 								b.checkbox(listVar,
@@ -947,7 +1055,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent colourPicker(String listVar, ColourPicker colour, String title, boolean required) {
+	public UIComponent colourPicker(UIComponent component,
+										String listVar,
+										ColourPicker colour,
+										String title,
+										boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return colourPicker(listVar, 
 								colour.getBinding(), 
 								title, 
@@ -957,7 +1073,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent combo(String listVar, Combo combo, String title, boolean required) {
+	public UIComponent combo(UIComponent component,
+								String listVar,
+								Combo combo,
+								String title,
+								boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		String binding = combo.getBinding();
 		HtmlSelectOneMenu s = selectOneMenu(listVar,
 												binding,
@@ -972,7 +1096,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent contentImage(String listVar, ContentImage image, String title, boolean required) {
+	public UIComponent contentImage(UIComponent component, 
+										String listVar,
+										ContentImage image,
+										String title,
+										boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		result.setColumns(5);
@@ -1003,7 +1135,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	 * 				... then the buttons etc ...
 	 */
 	@Override
-	public UIComponent contentLink(String listVar, ContentLink link, String title, boolean required) {
+	public UIComponent contentLink(UIComponent component, 
+									String listVar,
+									ContentLink link,
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		result.setColumns(5);
@@ -1093,17 +1233,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent html(String listVar, HTML html, String title, boolean required) {
+	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return editor(listVar, html.getBinding(), title, required, html.getDisabledConditionName());
 	}
 	
 	@Override
-	public UIComponent lookupDescription(String listVar, 
+	public UIComponent lookupDescription(UIComponent component,
+											String listVar, 
 											LookupDescription lookup, 
 											String title, 
 											boolean required,
 											String displayBinding,
 											QueryDefinition query) {
+		if (component != null) {
+			return component;
+		}
+
 		return autoComplete(listVar,
 							lookup.getBinding(),
 							title,
@@ -1116,10 +1265,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent password(String listVar, 
+	public UIComponent password(UIComponent component,
+									String listVar, 
 									org.skyve.impl.metadata.view.widget.bound.input.Password password,
 									String title, 
 									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return password(listVar,
 							password.getBinding(), 
 			                title,
@@ -1130,7 +1284,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent radio(String listVar, Radio radio, String title, boolean required) {
+	public UIComponent radio(UIComponent component,
+								String listVar,
+								Radio radio,
+								String title,
+								boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		String binding = radio.getBinding();
         UIComponent result = selectOneRadio(listVar,
 												binding,
@@ -1144,15 +1306,28 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent richText(String listVar, RichText text, String title, boolean required) {
-        return editor(listVar, text.getBinding(), title, required, text.getDisabledConditionName());
+	public UIComponent richText(UIComponent component, 
+									String listVar, 
+									RichText text, 
+									String title,
+									boolean required) {
+		if (component != null) {
+			return component;
+		}
+
+		return editor(listVar, text.getBinding(), title, required, text.getDisabledConditionName());
 	}
 
 	@Override
-	public UIComponent spinner(String listVar, 
+	public UIComponent spinner(UIComponent component,
+								String listVar, 
 								org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
 								String title, 
 								boolean required) {
+		if (component != null) {
+			return component;
+		}
+
 		return spinner(listVar, 
 						spinner.getBinding(), 
 						title, 
@@ -1162,12 +1337,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent textArea(String listVar, 
+	public UIComponent textArea(UIComponent component,
+									String listVar, 
 									TextArea text, 
 									String title, 
 									boolean required,
 									Integer length) {
-        return textArea(listVar,
+		if (component != null) {
+			return component;
+		}
+
+		return textArea(listVar,
 							text.getBinding(),
 							title,
 							required,
@@ -1180,7 +1360,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent text(String listVar, 
+	public UIComponent text(UIComponent component,
+								String listVar, 
 								TextField text, 
 								String title, 
 								boolean required,
@@ -1188,6 +1369,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								org.skyve.domain.types.converters.Converter<?> converter,
 								Format<?> format,
 								Converter facesConverter) {
+		if (component != null) {
+			return component;
+		}
+
 		boolean useCalendar = false;
 		Format<?> mutableFormat = format;
 		if (converter != null) {
@@ -1242,7 +1427,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent actionLink(String listBinding, String listVar, Link link, String actionName) {
+	public UIComponent actionLink(UIComponent component,
+									String listBinding,
+									String listVar,
+									Link link,
+									String actionName) {
+		if (component != null) {
+			return component;
+		}
+
 		// TODO do the tooltip and client validation, disabled, invisible thing,
 		// Need the action, not just it's name
 		Map<String, String> properties = link.getProperties();
@@ -1264,7 +1457,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent report(Action action) {
+	public UIComponent report(UIComponent component, Action action) {
+		if (component != null) {
+			return component;
+		}
+
 		return reportButton(action.getDisplayName(), 
 								action.getIconStyleClass(),
 								action.getToolTip(), 
@@ -1278,9 +1475,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent download(Action action,
+	public UIComponent download(UIComponent component,
+									Action action,
 									String moduleName,
 									String documentName) {
+		if (component != null) {
+			return component;
+		}
+	
 		return downloadButton(action.getDisplayName(), 
 								action.getIconStyleClass(),
 								action.getToolTip(), 
@@ -1296,11 +1498,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent action(String listBinding,
+	public UIComponent action(UIComponent component,
+								String listBinding,
 								String listVar,
 								Action action, 
 								ImplicitActionName name,
 								String title) {
+		if (component != null) {
+			return component;
+		}
+
 		Map<String, String> properties = action.getProperties();
 		return actionButton(title,
 								action.getIconStyleClass(),
@@ -1953,7 +2160,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public UIComponent spacer(UIComponent component, org.skyve.impl.metadata.view.widget.Spacer spacer) {
+		if (component != null) {
+			return component;
+		}
+
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
 		setSize(result, null, spacer.getPixelWidth(), null, null, spacer.getPixelHeight(), null, null);
 		setInvisible(result, spacer.getInvisibleConditionName(), null);
@@ -1963,7 +2174,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public GraphicImage staticImage(StaticImage image) {
+	public UIComponent staticImage(UIComponent component, StaticImage image) {
+		if (component != null) {
+			return component;
+		}
+
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		result.setUrl("images/" + image.getRelativeFile());
 		setSize(result, 
@@ -1980,7 +2195,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName) {
+	public UIComponent dynamicImage(UIComponent component, 
+										DynamicImage image,
+										String moduleName,
+										String documentName) {
+		if (component != null) {
+			return component;
+		}
+
 		GraphicImage result = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 
 		String name = image.getName();
@@ -2292,7 +2514,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (noWrap) {
 			style.append("white-space:nowrap;");
 		}
-		if ((alignment != null) && (!HorizontalAlignment.left.equals(alignment))) {
+		if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
 			style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
 		}
 		if (style.length() > 0) {

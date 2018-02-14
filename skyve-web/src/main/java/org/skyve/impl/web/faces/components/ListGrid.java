@@ -109,13 +109,14 @@ public class ListGrid extends HtmlPanelGroup {
 					listGrid.setShowZoom(zoomRendered);
 					listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
 
-					UIComponent grid = componentBuilder.listGrid(documentName,
-							name,
-							model,
-							listGrid,
-							user.canCreateDocument(model.getDrivingDocument()),
-							true,
-							false);
+					UIComponent grid = componentBuilder.listGrid(null,
+																	documentName,
+																	name,
+																	model,
+																	listGrid,
+																	user.canCreateDocument(model.getDrivingDocument()),
+																	paginator,
+																	stickyHeader);
 				    ListGrid.this.getChildren().add(grid);
 				    
 					return null;

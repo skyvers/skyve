@@ -188,14 +188,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	@Override
 	public void visitView() {
 	    // Ensure visibility is set for both create and edit views
-        current = cb.view(createView ? "created" : "notCreated");
+        current = cb.view(null, createView ? "created" : "notCreated");
         facesView = current;
         
 		// Create the toolbar(s)
-    	toolbarLayouts = lb.toolbarLayouts();
+    	toolbarLayouts = lb.toolbarLayouts(null);
 
         // Add the view layout if defined
-    	UIComponent layout = lb.viewLayout();
+    	UIComponent layout = lb.viewLayout(null);
     	if (layout != null) {
 			if (widgetId == null) {
 				current.getChildren().add(layout);
@@ -216,7 +216,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			// Add the toolbar(s) if it/they has/have contents
         	if ((toolbarLayouts != null) && (! toolbarLayouts.isEmpty()) && (! toolbarLayouts.get(0).getChildren().isEmpty())) {
 				// If we get any toolbars back, add the toolbar layouts to it
-				List<UIComponent> toolbars = cb.toolbars(view.getActionsWidgetId());
+				List<UIComponent> toolbars = cb.toolbars(null, view.getActionsWidgetId());
 				if (toolbars != null) {
 					if (toolbars.size() != toolbarLayouts.size()) {
 						throw new IllegalStateException(String.format("The component Builder %s yielded %d toolbars but Layout Builder %s yielded %d toolbar layouts", 
@@ -239,7 +239,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitTabPane(TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		UIComponent component = cb.tabPane(tabPane);
+		UIComponent component = cb.tabPane(null, tabPane);
         addToContainer(component, 
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
@@ -271,12 +271,12 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitTab(Tab tab,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		UIComponent component = cb.tab(tab);
+		UIComponent component = cb.tab(null, tab);
 		lb.addTab(current, component);
 		current = component;
-		UIComponent layout = lb.tabLayout();
+		UIComponent layout = lb.tabLayout(null);
 		if (layout != null) {
-			current = lb.addTabLayout(component, layout);
+			current = lb.addTabLayout(null, component, layout);
 		}
 
 		currentContainers.push(tab);
@@ -287,7 +287,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							boolean parentVisible,
 							boolean parentEnabled) {
 		currentContainers.pop();
-		current = lb.addedTab(current);
+		current = lb.addedTab(null, current);
 	}
 
 	@Override
@@ -297,7 +297,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			border = cb.border(vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			border = cb.border(null, vbox.getBorderTitle(), vbox.getInvisibleConditionName(), vbox.getPixelWidth());
 			addToContainer(border, 
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
@@ -305,7 +305,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							vbox.getInvisibleConditionName());
 		}
 
-		UIComponent layout = lb.vboxLayout(vbox);
+		UIComponent layout = lb.vboxLayout(null, vbox);
 
 		// Cater for border if defined
 		if (border != null) {
@@ -341,7 +341,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			current = lb.addedBorderLayout(current);
+			current = lb.addedBorderLayout(null, current);
 		}
 		addedToContainer();
 		
@@ -361,7 +361,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			border = cb.border(hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			border = cb.border(null, hbox.getBorderTitle(), hbox.getInvisibleConditionName(), hbox.getPixelWidth());
 			addToContainer(border, 
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
@@ -369,7 +369,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							hbox.getInvisibleConditionName());
 		}
 
-		UIComponent layout = lb.hboxLayout(hbox);
+		UIComponent layout = lb.hboxLayout(null, hbox);
 
 		// Cater for border if defined
 		if (border != null) {
@@ -405,7 +405,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			current = lb.addedBorderLayout(current);
+			current = lb.addedBorderLayout(null, current);
 		}
 		addedToContainer();
 		
@@ -428,7 +428,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Cater for a border if this thing has a border
 		UIComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			border = cb.border(form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
+			border = cb.border(null, form.getBorderTitle(), form.getInvisibleConditionName(), form.getPixelWidth());
 			addToContainer(border, 
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
@@ -436,7 +436,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							form.getInvisibleConditionName());
 		}
 
-		UIComponent layout = lb.formLayout(form);
+		UIComponent layout = lb.formLayout(null, form);
 
 		// Cater for border if defined
 		if (border != null) {
@@ -473,7 +473,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			current = lb.addedBorderLayout(current);
+			current = lb.addedBorderLayout(null, current);
 		}
 		addedToContainer();
 
@@ -499,9 +499,9 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitFormRow(FormRow row,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		formRowLayout = lb.formRowLayout(row);
+		formRowLayout = lb.formRowLayout(null, row);
 		if (formRowLayout != null) {
-			current = lb.addFormRowLayout(current, formRowLayout);
+			current = lb.addFormRowLayout(null, current, formRowLayout);
 		}
 		currentFormColumn = 0;
 	}
@@ -527,7 +527,7 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (formRowLayout != null) {
-			current = lb.addedFormRowLayout(formRowLayout);
+			current = lb.addedFormRowLayout(null, formRowLayout);
 		}
 		formRowLayout = null;
 	}
@@ -569,7 +569,7 @@ public class FacesViewVisitor extends ViewVisitor {
 					// add a spacer, if required
 					List<UIComponent> children = current.getChildren();
 					if (! children.isEmpty()) {
-						children.add(cb.label(" "));
+						children.add(cb.label(null, " "));
 					}
 					children.add(component);
 				}
@@ -597,13 +597,13 @@ public class FacesViewVisitor extends ViewVisitor {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
-			c = cb.reportButton(button, action);
+			c = cb.reportButton(null, button, action);
 		}
 		else if (ImplicitActionName.Download.equals(name)) {
-			c = cb.downloadButton(button, action, module.getName(), document.getName());
+			c = cb.downloadButton(null, button, action, module.getName(), document.getName());
 		}
 		else {
-			c = cb.actionButton(listBinding, listVar, button, action);
+			c = cb.actionButton(null, listBinding, listVar, button, action);
 		}
 	    addComponent(null, 
 	    				false, 
@@ -620,7 +620,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitGeoLocator(GeoLocator locator,
 									boolean parentVisible,
 									boolean parentEnabled) {
-	    UIComponent l = cb.label("geoLocator"); // TODO geolocator
+	    UIComponent l = cb.label(null, "geoLocator"); // TODO geolocator
 	    addComponent(null, 
 	    				false, 
 	    				locator.getInvisibleConditionName(), 
@@ -636,7 +636,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitGeometry(Geometry geometry,
 									boolean parentVisible,
 									boolean parentEnabled) {
-	    UIComponent l = cb.label("geometry"); // TODO geometry
+	    UIComponent l = cb.label(null, "geometry"); // TODO geometry
 	    addComponent(null, 
 	    				false, 
 	    				geometry.getInvisibleConditionName(), 
@@ -652,7 +652,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitMap(MapDisplay map,
 							boolean parentVisible,
 							boolean parentEnabled) {
-	    UIComponent l = cb.label("map"); // TODO map
+	    UIComponent l = cb.label(null, "map"); // TODO map
 	    addComponent(null, 
 	    				false, 
 	    				map.getInvisibleConditionName(), 
@@ -668,7 +668,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDialogButton(DialogButton button,
 									boolean parentVisible,
 									boolean parentEnabled) {
-	    UIComponent bn = cb.label("dialogButton"); // TODO dialog button
+	    UIComponent bn = cb.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
 	    				false, 
 	    				button.getInvisibleConditionName(), 
@@ -684,7 +684,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDynamicImage(DynamicImage image,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		UIComponent i = cb.dynamicImage(image, module.getName(), document.getName());
+		UIComponent i = cb.dynamicImage(null, image, module.getName(), document.getName());
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
@@ -698,7 +698,7 @@ public class FacesViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitSpacer(Spacer spacer) {
-		UIComponent component = cb.spacer(spacer);
+		UIComponent component = cb.spacer(null, spacer);
 		if (component != null) {
 			addComponent(null, 
 							false, 
@@ -716,7 +716,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitStaticImage(StaticImage image,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		UIComponent i = cb.staticImage(image);
+		UIComponent i = cb.staticImage(null, image);
 		addComponent(null, 
 						false, 
 						image.getInvisibleConditionName(), 
@@ -741,7 +741,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		else {
 			value = markup;
 		}
-		UIComponent c = cb.blurb(listVar, value, binding, blurb);
+		UIComponent c = cb.blurb(null, listVar, value, binding, blurb);
 		addComponent(null, 
 						false, 
 						blurb.getInvisibleConditionName(), 
@@ -764,31 +764,31 @@ public class FacesViewVisitor extends ViewVisitor {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processResourceReference(ResourceReference reference) {
-				c.set(cb.label("resource link")); // TODO link
+				c.set(cb.label(null, "resource link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processReportReference(ReportReference reference) {
-				c.set(cb.label("report link")); // TODO link
+				c.set(cb.label(null, "report link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processQueryListViewReference(QueryListViewReference reference) {
-				c.set(cb.label("list view link")); // TODO link
+				c.set(cb.label(null, "list view link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processImplicitActionReference(ImplicitActionReference reference) {
-				c.set(cb.label("implicit action link")); // TODO link
+				c.set(cb.label(null, "implicit action link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processExternalReference(ExternalReference reference) {
-				c.set(cb.label("external link")); // TODO link
+				c.set(cb.label(null, "external link")); // TODO link
 			}
 			
 			@Override
@@ -804,19 +804,19 @@ public class FacesViewVisitor extends ViewVisitor {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processDefaultListViewReference(DefaultListViewReference reference) {
-				c.set(cb.label("default list view link")); // TODO link
+				c.set(cb.label(null, "default list view link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processContentReference(ContentReference reference) {
-				c.set(cb.label("content link")); // TODO link
+				c.set(cb.label(null, "content link")); // TODO link
 			}
 			
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				c.set(cb.actionLink(listBinding, listVar, link, reference.getActionName()));
+				c.set(cb.actionLink(null, listBinding, listVar, link, reference.getActionName()));
 			}
 		}.process(outerReference);
 
@@ -855,7 +855,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			binding = value;
 			value = null;
 		}
-	    UIComponent c = cb.label(listVar, value, binding, label);
+	    UIComponent c = cb.label(null, listVar, value, binding, label);
 	    addComponent(null, 
 	    				false, 
 	    				label.getInvisibleConditionName(), 
@@ -871,7 +871,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitProgressBar(ProgressBar progressBar,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-	    UIComponent p = cb.label("progressBar"); // TODO progress bar
+	    UIComponent p = cb.label(null, "progressBar"); // TODO progress bar
 	    addComponent(null, 
 	    				false, 
 	    				progressBar.getInvisibleConditionName(), 
@@ -895,13 +895,14 @@ public class FacesViewVisitor extends ViewVisitor {
 								boolean parentVisible,
 								boolean parentEnabled) {
 		visitListWidget(grid);
-		UIComponent l = cb.listGrid(listWidgetModelDocumentName,
-				listWidgetModelName,
-				listWidgetModel,
-				grid,
-				user.canCreateDocument(listWidgetDrivingDocument),
-				true,
-				false);
+		UIComponent l = cb.listGrid(null,
+										listWidgetModelDocumentName,
+										listWidgetModelName,
+										listWidgetModel,
+										grid,
+										user.canCreateDocument(listWidgetDrivingDocument),
+										true,
+										false);
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 	
@@ -910,14 +911,15 @@ public class FacesViewVisitor extends ViewVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		visitListWidget(repeater);
-		UIComponent r = cb.listRepeater(listWidgetModelDocumentName, 
-										listWidgetModelName, 
-										listWidgetModel, 
-										repeater.getParameters(), 
-										repeater.getTitle(),
-										Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
-										Boolean.TRUE.equals(repeater.getShowGrid()),
-										false);
+		UIComponent r = cb.listRepeater(null,
+											listWidgetModelDocumentName, 
+											listWidgetModelName, 
+											listWidgetModel, 
+											repeater.getParameters(), 
+											repeater.getTitle(),
+											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
+											Boolean.TRUE.equals(repeater.getShowGrid()),
+											false);
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 	}
 
@@ -939,7 +941,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			listWidgetModelName = queryName;
 			listWidgetModelDocumentName = query.getDocumentName();
 			listWidgetDrivingDocument = query.getDocumentModule(customer).getDocument(customer, listWidgetModelDocumentName);
-	        DocumentQueryListModel queryModel = new DocumentQueryListModel();
+	        DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
 	        queryModel.setQuery(query);
 	        listWidgetModel = queryModel;
 		}
@@ -973,7 +975,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitTreeGrid(TreeGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		UIComponent l = cb.label("treeGrid");
+		UIComponent l = cb.label(null, "treeGrid");
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
 		currentGrid = grid;
 	}
@@ -994,7 +996,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Create the datagrid faces component
 		listBinding = grid.getBinding();
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent g = cb.dataGrid(listVar, grid);
+		UIComponent g = cb.dataGrid(null, listVar, grid);
         addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 		currentGrid = grid;
 		gridColumnExpression = new StringBuilder(512);
@@ -1010,7 +1012,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		// Create the data repeater faces component
 		listBinding = repeater.getBinding();
 		listVar = BindUtil.sanitiseBinding(listBinding) + "Row";
-		UIComponent r = cb.dataRepeater(listVar, repeater);
+		UIComponent r = cb.dataRepeater(null, listVar, repeater);
         addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 		currentGrid = repeater;
 		gridColumnExpression = new StringBuilder(512);
@@ -1044,7 +1046,8 @@ public class FacesViewVisitor extends ViewVisitor {
 
 		if (widget instanceof DataGrid) {
 			DataGrid grid = (DataGrid) widget;
-			current = cb.addDataGridActionColumn(current, 
+			current = cb.addDataGridActionColumn(null,
+													current, 
 													grid,
 													listVar,
 													gridColumnExpression.toString(), 
@@ -1096,7 +1099,8 @@ public class FacesViewVisitor extends ViewVisitor {
 				}
 			}
 		}
-		current = cb.addDataGridBoundColumn(current, 
+		current = cb.addDataGridBoundColumn(null,
+												current, 
 												(AbstractDataWidget) currentGrid,
 												column, 
 												listVar,
@@ -1109,7 +1113,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
 	                                        boolean parentVisible,
 	                                        boolean parentEnabled) {
-		current = cb.addedDataGridBoundColumn(current);
+		current = cb.addedDataGridBoundColumn(null, current);
 		currentDataGridBoundColumn = null;
 	}
 
@@ -1117,14 +1121,14 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled) {
-        current = cb.addDataGridContainerColumn(current, (AbstractDataWidget) currentGrid, column);
+        current = cb.addDataGridContainerColumn(null, current, (AbstractDataWidget) currentGrid, column);
 	}
 
 	@Override
 	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
 	                                            boolean parentVisible,
 	                                            boolean parentEnabled) {
-		current = cb.addedDataGridContainerColumn(current);
+		current = cb.addedDataGridContainerColumn(null, current);
 	}
 
 	// A reference to the current widget that is the source of events
@@ -1140,7 +1144,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.checkBox(listVar, checkBox, title, required);
+		UIComponentBase c = (UIComponentBase) cb.checkBox(null, listVar, checkBox, title, required);
 		eventSource = c;
 		addComponent(title,
 						required,
@@ -1165,7 +1169,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                    boolean parentVisible,
 	                                    boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
-        UIComponentBase c = (UIComponentBase) cb.label("checkMembership"); // TODO check membership
+        UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
         addToContainer(c, null, null, null, membership.getInvisibleConditionName());
 	}
@@ -1188,7 +1192,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.colourPicker(listVar, colour, title, required);
+		UIComponentBase c = (UIComponentBase) cb.colourPicker(null, listVar, colour, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
@@ -1218,7 +1222,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase s = (UIComponentBase) cb.combo(listVar, combo, title, required);
+		UIComponentBase s = (UIComponentBase) cb.combo(null, listVar, combo, title, required);
 		eventSource = s;
 		addComponent(title, 
 						required, 
@@ -1248,7 +1252,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.contentImage(listVar, image, title, required);
+		UIComponent c = cb.contentImage(null, listVar, image, title, required);
         addComponent(title, 
         				false, 
         				image.getInvisibleConditionName(), 
@@ -1270,7 +1274,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.contentLink(listVar, link, title, required);
+		UIComponent c = cb.contentLink(null, listVar, link, title, required);
 		addComponent(title, 
 						required, 
 						link.getInvisibleConditionName(), 
@@ -1292,7 +1296,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponent c = cb.html(listVar, html, title, required);
+		UIComponent c = cb.html(null, listVar, html, title, required);
         addComponent(title, 
         				required, 
         				html.getInvisibleConditionName(), 
@@ -1308,7 +1312,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitListMembership(ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		UIComponentBase c = (UIComponentBase) cb.listMembership(membership);
+		UIComponentBase c = (UIComponentBase) cb.listMembership(null, membership);
 		eventSource = c;
 		addToContainer(c, membership.getListWidthInPixels(), null, null, membership.getInvisibleConditionName());
 	}
@@ -1326,7 +1330,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
 		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
-        UIComponent c = cb.label("comparison"); // TODO comparison
+        UIComponent c = cb.label(null, "comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
         addedToContainer();
 	}
@@ -1342,7 +1346,8 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.lookupDescription(listVar, 
+		UIComponentBase c = (UIComponentBase) cb.lookupDescription(null,
+																	listVar, 
 																	lookup, 
 																	title, 
 																	required,
@@ -1372,7 +1377,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitLookup(Lookup lookup,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		UIComponent c = cb.label("lookup"); // TODO lookup
+		UIComponent c = cb.label(null, "lookup"); // TODO lookup
 		addComponent(null, 
 						false, 
 						lookup.getInvisibleConditionName(), 
@@ -1401,7 +1406,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.password(listVar, password, title, required);
+        UIComponentBase c = (UIComponentBase) cb.password(null, listVar, password, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1431,7 +1436,7 @@ public class FacesViewVisitor extends ViewVisitor {
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
 		boolean required = def.isRequired();
-        UIComponentBase c = (UIComponentBase) cb.radio(listVar, radio, title, required);
+        UIComponentBase c = (UIComponentBase) cb.radio(null, listVar, radio, title, required);
 		eventSource = c;
 		addComponent(title, 
 						required, 
@@ -1461,7 +1466,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.richText(listVar, richText, title, required);
+        UIComponentBase c = (UIComponentBase) cb.richText(null, listVar, richText, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1489,7 +1494,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-       UIComponentBase c = (UIComponentBase) cb.label("slider"); // TODO slider
+       UIComponentBase c = (UIComponentBase) cb.label(null, "slider"); // TODO slider
         eventSource = c;
         addComponent(def.getTitle(), 
         				def.isRequired(), 
@@ -1519,7 +1524,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-        UIComponentBase c = (UIComponentBase) cb.spinner(listVar, spinner, title, required);
+        UIComponentBase c = (UIComponentBase) cb.spinner(null, listVar, spinner, title, required);
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1549,7 +1554,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		String helpText = (def instanceof SmartClientFieldDefinition) ?
 							((SmartClientFieldDefinition) def).getHelpText() :
 							null;
-		UIComponentBase c = (UIComponentBase) cb.textArea(listVar, text, title, required, def.getLength());
+		UIComponentBase c = (UIComponentBase) cb.textArea(null, listVar, text, title, required, def.getLength());
         eventSource = c;
         addComponent(title, 
         				required, 
@@ -1608,7 +1613,8 @@ public class FacesViewVisitor extends ViewVisitor {
             }
         }
 
-        UIComponentBase c = (UIComponentBase) cb.text(listVar, 
+        UIComponentBase c = (UIComponentBase) cb.text(null,
+        												listVar, 
         												text, 
         												title, 
         												required,
@@ -1755,7 +1761,8 @@ public class FacesViewVisitor extends ViewVisitor {
 		}
 		Container currentContainer = currentContainers.peek();
 
-		current = lb.addToContainer(currentContainer, 
+		current = lb.addToContainer(null,
+										currentContainer, 
 										current, 
 										component, 
 										pixelWidth, 
@@ -1769,7 +1776,7 @@ public class FacesViewVisitor extends ViewVisitor {
 			throw new IllegalStateException("Trying to complete the add to a container but there is nothing in the stack of currentContainers!!");
 		}
 		Container currentContainer = currentContainers.peek();
-		current = lb.addedToContainer(currentContainer, current);
+		current = lb.addedToContainer(null, currentContainer, current);
 	}
 	
 	@Override
@@ -1960,7 +1967,12 @@ public class FacesViewVisitor extends ViewVisitor {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
-					toolbarLayout.getChildren().add(cb.action(listBinding, listVar, action, null, action.getDisplayName()));
+					toolbarLayout.getChildren().add(cb.action(null,
+																listBinding,
+																listVar,
+																action,
+																null,
+																action.getDisplayName()));
 				}
 			}
 		}
@@ -1971,17 +1983,25 @@ public class FacesViewVisitor extends ViewVisitor {
 			if (toolbarLayouts != null) {
 				for (UIComponent toolbarLayout : toolbarLayouts) {
 					if (ImplicitActionName.Report.equals(name)) {
-						toolbarLayout.getChildren().add(cb.report(action));
+						toolbarLayout.getChildren().add(cb.report(null, action));
 					}
 					else if (ImplicitActionName.Download.equals(name)) {
-						toolbarLayout.getChildren().add(cb.download(action, module.getName(), document.getName()));
+						toolbarLayout.getChildren().add(cb.download(null,
+																		action,
+																		module.getName(),
+																		document.getName()));
 					}
 					else {
 						String displayName = action.getDisplayName();
 						if (displayName == null) {
 							displayName = name.getDisplayName();
 						}
-						toolbarLayout.getChildren().add(cb.action(listBinding, listVar, action, name, displayName));
+						toolbarLayout.getChildren().add(cb.action(null,
+																	listBinding,
+																	listVar,
+																	action,
+																	name,
+																	displayName));
 					}
 				}
 			}

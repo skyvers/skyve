@@ -49,33 +49,54 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
-	public UIComponent viewLayout() {
+	public UIComponent viewLayout(UIComponent component) {
+		if (component != null) {
+			return component;
+		}
+
 		return responsiveColumn(null, Integer.valueOf(12), null, null, true);
 	}
 	
 	@Override
-	public UIComponent tabLayout() {
+	public UIComponent tabLayout(UIComponent component) {
+		if (component != null) {
+			return component;
+		}
+
 		return responsiveContainer(null, null);
 	}
 	
 	@Override
-	public UIComponent vboxLayout(VBox vbox) {
+	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
+		if (component != null) {
+			return component;
+		}
+
 		return responsiveContainer(vbox.getInvisibleConditionName(), vbox.getWidgetId());
 	}
 	
 	@Override
-	public UIComponent hboxLayout(HBox hbox) {
+	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+		if (component != null) {
+			return component;
+		}
+
 		return responsiveContainer(hbox.getInvisibleConditionName(), hbox.getWidgetId());
 	}
 
 	@Override
-	public UIComponent addToContainer(Container viewContainer, 
+	public UIComponent addToContainer(UIComponent component,
+										Container viewContainer, 
 										UIComponent container, 
 										UIComponent componentToAdd,
 										Integer pixelWidth, 
 										Integer responsiveWidth,
 										Integer percentageWidth,
 										String widgetInvisible) {
+		if (component != null) {
+			return component;
+		}
+
 		Integer mutablePercentageWidth = percentageWidth;
 		boolean nopad = false;
 
@@ -130,12 +151,20 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent addedToContainer(Container viewContainer, UIComponent container) {
+	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+		if (component != null) {
+			return component;
+		}
+
 		return container.getParent().getParent(); // account for the previously pushed component, and the grid css div
 	}
 	
 	@Override
-	public UIComponent formLayout(Form form) {
+	public UIComponent formLayout(UIComponent component, Form form) {
+		if (component != null) {
+			return component;
+		}
+
 		// Add the set of form column styles to the Faces ViewRoot.
 		ResponsiveGridStyle[] formColumnStyles = responsiveFormStyleClasses(form.getColumns());
 		ResponsiveFormGrid grid = new ResponsiveFormGrid(formColumnStyles);
@@ -168,7 +197,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
-	public UIComponent formRowLayout(FormRow row) {
+	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+		if (component != null) {
+			return component;
+		}
+
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		// style="<repsonsive column reset method call>"
 		String expression = String.format("#{%s.resetResponsiveFormStyle(%s)}", 
@@ -180,7 +213,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent rowLayout) {
+	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+		if (component != null) {
+			return component;
+		}
+
 		return rowLayout.getParent();
 	}
 

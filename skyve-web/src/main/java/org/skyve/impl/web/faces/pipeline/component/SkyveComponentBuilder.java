@@ -1,7 +1,8 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import javax.faces.component.UIComponent;
+
 import org.primefaces.component.commandbutton.CommandButton;
-import org.primefaces.component.spacer.Spacer;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.metadata.controller.ImplicitActionName;
 
@@ -10,11 +11,15 @@ public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
 	 * No spacers rendered for phones.
 	 */
 	@Override
-	public Spacer spacer(org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public UIComponent spacer(UIComponent component, org.skyve.impl.metadata.view.widget.Spacer spacer) {
+		if (component != null) {
+			return component;
+		}
+
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return null;
 		}
-		return super.spacer(spacer);
+		return super.spacer(component, spacer);
 	}
 	
 	/**

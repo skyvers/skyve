@@ -13,22 +13,38 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 
 public class MobileLayoutBuilder extends TabularLayoutBuilder {
 	@Override
-	public UIComponent viewLayout() {
+	public UIComponent viewLayout(UIComponent component) {
+		if (component != null) {
+			return component;
+		}
+
 		return null;
 	}
 
 	@Override
-	public UIComponent tabLayout() {
+	public UIComponent tabLayout(UIComponent component) {
+		if (component != null) {
+			return component;
+		}
+
 		return null;
 	}
 	
 	@Override
-	public UIComponent addedTab(UIComponent component) {
-		return component.getParent();
+	public UIComponent addedTab(UIComponent component, UIComponent tab) {
+		if (component != null) {
+			return component;
+		}
+
+		return tab.getParent();
 	}
 	
 	@Override
-	public UIComponent hboxLayout(HBox hbox) {
+	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+		if (component != null) {
+			return component;
+		}
+
 		// HBox is a Panel grid with 1 column when mobile
 		PanelGrid result = panelGrid(hbox.getPixelWidth(),
 										null,
@@ -42,23 +58,39 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
-	public UIComponent formLayout(Form form) {
+	public UIComponent formLayout(UIComponent component, Form form) {
+		if (component != null) {
+			return component;
+		}
+
 		return panelGroup(false, false, true, form.getInvisibleConditionName(), form.getWidgetId());
 	}
 	
 	@Override
-	public UIComponent formRowLayout(FormRow row) {
+	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+		if (component != null) {
+			return component;
+		}
+
 		return null;
 	}
 	
 	@Override
-	public UIComponent addFormRowLayout(UIComponent formLayout, UIComponent rowLayout) {
+	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
+		if (component != null) {
+			return component;
+		}
+
 		formLayout.getChildren().add(rowLayout);
 		return rowLayout;
 	}
 
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent rowLayout) {
+	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+		if (component != null) {
+			return component;
+		}
+
 		return null;
 	}
 
@@ -97,19 +129,28 @@ public class MobileLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent addToContainer(Container viewContainer,
+	public UIComponent addToContainer(UIComponent component,
+										Container viewContainer,
 										UIComponent container, 
 										UIComponent componentToAdd, 
 										Integer pixelWidth, 
 										Integer responsiveWidth,
 										Integer percentageWidth,
 										String widgetInvisible) {
+		if (component != null) {
+			return component;
+		}
+
 		container.getChildren().add(componentToAdd);
 		return componentToAdd;
 	}
 	
 	@Override
-	public UIComponent addedToContainer(Container viewContainer, UIComponent container) {
+	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+		if (component != null) {
+			return component;
+		}
+
 		return container.getParent(); // account for the previously pushed component
 	}
 

@@ -61,41 +61,63 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param invisibleConditionName
 	 * @return
 	 */
-	public abstract UIComponent view(String invisibleConditionName);
+	public abstract UIComponent view(UIComponent component, String invisibleConditionName);
 
 	/**
 	 * 
 	 * @return	The toolbar components, or null if there is no toolbar components required for this renderer.
 	 */
-	public abstract List<UIComponent> toolbars(String widgetId);
+	public abstract List<UIComponent> toolbars(List<UIComponent> components, String widgetId);
 	
 	/**
 	 * 
 	 * @param invisible
 	 * @return
 	 */
-	public abstract UIComponent tabPane(TabPane tabPane);
+	public abstract UIComponent tabPane(UIComponent component, TabPane tabPane);
 	
-	public abstract UIComponent tab(Tab tab);
+	public abstract UIComponent tab(UIComponent component, Tab tab);
 	
-	public abstract UIComponent border(String title,
+	public abstract UIComponent border(UIComponent component,
+										String title,
 										String invisibileConditionName,
 										Integer pixelWidth);
-	public abstract UIComponent label(String value);
+	public abstract UIComponent label(UIComponent component, String value);
 	
-	public abstract UIComponent spacer(Spacer spacer);
+	public abstract UIComponent spacer(UIComponent component, Spacer spacer);
 	
-	public abstract UIComponent actionButton(String listBinding, String listVar, Button button, Action action);
-	public abstract UIComponent reportButton(Button button, Action action);
-	public abstract UIComponent downloadButton(Button button, Action action, String moduleName, String documentName);
+	public abstract UIComponent actionButton(UIComponent component,
+												String listBinding, 
+												String listVar, 
+												Button button, 
+												Action action);
+	public abstract UIComponent reportButton(UIComponent component, 
+												Button button, 
+												Action action);
+	public abstract UIComponent downloadButton(UIComponent component,
+												Button button, 
+												Action action, 
+												String moduleName, 
+												String documentName);
 	
-	public abstract UIComponent staticImage(StaticImage image);
-	public abstract UIComponent dynamicImage(DynamicImage image, String moduleName, String documentName);
+	public abstract UIComponent staticImage(UIComponent component, StaticImage image);
+	public abstract UIComponent dynamicImage(UIComponent component, 
+												DynamicImage image, 
+												String moduleName, 
+												String documentName);
 	
-	public abstract UIComponent blurb(String listVar, String value, String binding, Blurb blurb);
-	public abstract UIComponent label(String listVar, String value, String binding, Label label);
+	public abstract UIComponent blurb(UIComponent component, 
+										String listVar, 
+										String value, 
+										String binding, 
+										Blurb blurb);
+	public abstract UIComponent label(UIComponent component,
+										String listVar,
+										String value,
+										String binding,
+										Label label);
 
-	public abstract UIComponent dataGrid(String listVar, DataGrid grid);
+	public abstract UIComponent dataGrid(UIComponent component, String listVar, DataGrid grid);
 
 	/*
 	 * Data Repeater is just like a data grid but...
@@ -104,27 +126,31 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * Any bound columns are editable inline.
 	 * There is no action column.
 	 */
-	public abstract UIComponent dataRepeater(String listVar, DataRepeater repeater);
-	public abstract UIComponent addDataGridBoundColumn(UIComponent current, 
+	public abstract UIComponent dataRepeater(UIComponent component, String listVar, DataRepeater repeater);
+	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
+														UIComponent current, 
 														AbstractDataWidget widget,
 														DataGridBoundColumn column,
 														String listVar,
 														String columnTitle,
 														String columnBinding,
 														StringBuilder gridColumnExpression);
-	public abstract UIComponent addedDataGridBoundColumn(UIComponent current);
-	public abstract UIComponent addDataGridContainerColumn(UIComponent current,
+	public abstract UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current);
+	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
+															UIComponent current,
 															AbstractDataWidget widget,
 															DataGridContainerColumn column);
-	public abstract UIComponent addedDataGridContainerColumn(UIComponent current);
-	public abstract UIComponent addDataGridActionColumn(UIComponent current, 
+	public abstract UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current);
+	public abstract UIComponent addDataGridActionColumn(UIComponent component,
+															UIComponent current, 
 															DataGrid grid,
 															String listVar,
 															String gridColumnExpression,
 															String singluarDocumentAlias,
 															boolean inline);
 	
-	public abstract UIComponent listGrid(String modelDocumentName,
+	public abstract UIComponent listGrid(UIComponent component,
+											String modelDocumentName,
 											String modelName,
 											ListModel<? extends Bean> model,
 											ListGrid listGrid,
@@ -141,7 +167,8 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * There is no action column.
 	 * No CRUD.
 	 */
-	public abstract UIComponent listRepeater(String modelDocumentName,
+	public abstract UIComponent listRepeater(UIComponent component,
+												String modelDocumentName,
 												String modelName,
 												ListModel<? extends Bean> model, 
 												List<FilterParameter> filterParameters,
@@ -150,38 +177,85 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												boolean showGrid,
 												boolean stickyHeader);
 
-	public abstract UIComponent listMembership(ListMembership membership);
+	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	
-	public abstract UIComponent checkBox(String listVar, CheckBox checkBox, String title, boolean required);
+	public abstract UIComponent checkBox(UIComponent component, 
+											String listVar, 
+											CheckBox checkBox, 
+											String title, 
+											boolean required);
 
-	public abstract UIComponent colourPicker(String listVar, ColourPicker colour, String title, boolean required);
+	public abstract UIComponent colourPicker(UIComponent component, 
+												String listVar, 
+												ColourPicker colour, 
+												String title, 
+												boolean required);
 	
-	public abstract UIComponent combo(String listVar, Combo combo, String title, boolean required);
+	public abstract UIComponent combo(UIComponent component, 
+										String listVar, 
+										Combo combo, 
+										String title, 
+										boolean required);
 
-	public abstract UIComponent contentImage(String listVar, ContentImage image, String title, boolean required);
+	public abstract UIComponent contentImage(UIComponent component, 
+												String listVar, 
+												ContentImage image, 
+												String title, 
+												boolean required);
 
-	public abstract UIComponent contentLink(String listVar, ContentLink link, String title, boolean required);
+	public abstract UIComponent contentLink(UIComponent component, 
+												String listVar, 
+												ContentLink link, 
+												String title, 
+												boolean required);
 	
-	public abstract UIComponent html(String listVar, HTML html, String title, boolean required);
+	public abstract UIComponent html(UIComponent component, 
+										String listVar, 
+										HTML html, 
+										String title, 
+										boolean required);
 
-	public abstract UIComponent lookupDescription(String listVar,
+	public abstract UIComponent lookupDescription(UIComponent component, 
+													String listVar,
 													LookupDescription lookup,
 													String title,
 													boolean required,
 													String displayBinding,
 													QueryDefinition query);
 	
-	public abstract UIComponent password(String listVar, Password password, String title, boolean required);
+	public abstract UIComponent password(UIComponent component, 
+											String listVar,
+											Password password,
+											String title,
+											boolean required);
 
-	public abstract UIComponent radio(String listVar, Radio radio, String title, boolean required);
+	public abstract UIComponent radio(UIComponent component, 
+										String listVar,
+										Radio radio,
+										String title,
+										boolean required);
 	
-	public abstract UIComponent richText(String listVar, RichText text, String title, boolean required);
+	public abstract UIComponent richText(UIComponent component, 
+											String listVar,
+											RichText text,
+											String title,
+											boolean required);
 	
-	public abstract UIComponent spinner(String listVar, Spinner spinner, String title, boolean required);
+	public abstract UIComponent spinner(UIComponent component, 
+											String listVar,
+											Spinner spinner,
+											String title,
+											boolean required);
 	
-	public abstract UIComponent textArea(String listVar, TextArea text, String title, boolean required, Integer length);
+	public abstract UIComponent textArea(UIComponent component, 
+											String listVar,
+											TextArea text,
+											String title,
+											boolean required,
+											Integer length);
 	
-	public abstract UIComponent text(String listVar, 
+	public abstract UIComponent text(UIComponent component, 
+										String listVar, 
 										TextField text, 
 										String title, 
 										boolean required,
@@ -287,12 +361,21 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		component.addClientBehavior(eventName, ajax);
 	}
 
-	public abstract UIComponent actionLink(String listBinding, String listVar, Link link, String actionName);
+	public abstract UIComponent actionLink(UIComponent component, 
+											String listBinding,
+											String listVar,
+											Link link,
+											String actionName);
 
-	public abstract UIComponent report(Action action);
-	public abstract UIComponent download(Action action, String moduleName, String documentName);
+	public abstract UIComponent report(UIComponent component, Action action);
 	
-	public abstract UIComponent action(String listBinding, 
+	public abstract UIComponent download(UIComponent component, 
+											Action action,
+											String moduleName,
+											String documentName);
+	
+	public abstract UIComponent action(UIComponent component, 
+										String listBinding, 
 										String listVar,
 										Action action, 
 										ImplicitActionName name, 
