@@ -239,7 +239,7 @@ public abstract class AbstractBean implements Bean {
 	 */
 	@Override
 	public boolean isNotCreated() {
-		return false;
+		return ! isCreated();
 	}
 
 	/**
