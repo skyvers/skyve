@@ -1,12 +1,9 @@
 package org.skyve.impl.web.service.rest;
 
-import java.lang.reflect.InvocationTargetException;
-import java.security.Principal;
 import java.util.List;
-import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -15,13 +12,19 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
-import org.skyve.domain.messages.SessionEndedException;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.web.WebUtil;
+import org.skyve.domain.messages.NoResultsException;
+import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.web.filter.rest.AbstractRestFilter;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -29,107 +32,53 @@ import org.skyve.util.Util;
 @RequestScoped
 public class RestService {
 	@Context
-	private HttpServletRequest request;
-	  
-	/**
-	 * Return a specific item as at a given date
-	 * 
-	 * @param inDate
-	 *            Date to get list for
-	 */
+	private HttpServletResponse response;
+	
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Bean retrieveJSON(@PathParam("module") String module, 
-									@PathParam("document") String document,
-									@PathParam("id") String id) throws Throwable {
-		AbstractPersistence persistence = null;
-		Bean result = null;
-		
-		try {
-			try {
-				persistence = AbstractPersistence.get();
-				persistence.evictAllCached();
-
-		        persistence.begin();
-		    	Principal userPrincipal = request.getUserPrincipal();
-		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
-				if (user == null) {
-					throw new SessionEndedException();
-				}
-		    	persistence.setUser(user);
-		    	
-		    	result = persistence.retrieve(module, document,  id, false);
-		    	Util.populateFully(result);
-			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
-			}
-		}
-		catch (Throwable t) {
-	    	t.printStackTrace();
-	    	if (persistence != null) {
-	    		persistence.rollback();
-	    	}
-	    	throw t;
-		}
-	    finally {
-	    	if (persistence != null) {
-	    		persistence.commit(true);
-	    	}
-	    }
-		
-		return result;
+								@PathParam("document") String document,
+								@PathParam("id") String id) {
+		response.setContentType(MediaType.APPLICATION_JSON);
+		return retrieve(module, document, id);
 	}
-	
-	
-	/**
-	 * Return a specific item as at a given date
-	 * 
-	 * @param inDate
-	 *            Date to get list for
-	 */
+
 	@GET
 	@Path("/xml/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_XML)
-	public PersistentBean retrieveXML(@PathParam("module") String module, 
+	public Bean retrieveXML(@PathParam("module") String module, 
 										@PathParam("document") String document,
-										@PathParam("id") String id) throws Throwable {
-		AbstractPersistence persistence = null;
-		PersistentBean result = null;
+										@PathParam("id") String id) {
+		response.setContentType(MediaType.APPLICATION_XML);
+		return retrieve(module, document, id);
+	}
+	
+	private Bean retrieve(String module, String document, String id) {
+		Bean result = null;
 		
+		Persistence p = null;
 		try {
-			try {
-				persistence = AbstractPersistence.get();
-				persistence.evictAllCached();
-
-		        persistence.begin();
-		    	Principal userPrincipal = request.getUserPrincipal();
-		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
-				if (user == null) {
-					throw new SessionEndedException();
-				}
-		    	persistence.setUser(user);
-		    	
-		    	result = persistence.retrieve(module, document, id, false);
-		    	Util.populateFully(result);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule(module);
+			Document d = m.getDocument(c, document);
+			
+			if (! u.canReadDocument(d)) {
+				throw new SecurityException("read this data", u.getName());
 			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
-			}
+	
+	    	result = p.retrieve(d, id, false);
+	    	if (result == null) {
+	    		throw new NoResultsException();
+	    	}
+	    	Util.populateFully(result);
 		}
 		catch (Throwable t) {
-	    	t.printStackTrace();
-	    	if (persistence != null) {
-	    		persistence.rollback();
-	    	}
-	    	throw t;
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
 		}
-	    finally {
-	    	if (persistence != null) {
-	    		persistence.commit(true);
-	    	}
-	    }
 		
 		return result;
 	}
@@ -138,57 +87,99 @@ public class RestService {
 	@Path("/json/{module}/{document}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String retrieveJSON(@PathParam("module") String module, 
-									@PathParam("document") String document,
-									@QueryParam("start") int start,
-									@QueryParam("end") int end) throws Throwable {
-		AbstractPersistence persistence = null;
+								@PathParam("document") String document,
+								@QueryParam("start") int start,
+								@QueryParam("end") int end) {
 		String result = null;
 		
+		Persistence p = null;
 		try {
-			try {
-				persistence = AbstractPersistence.get();
-				persistence.evictAllCached();
+			response.setContentType(MediaType.APPLICATION_JSON);
 
-		        persistence.begin();
-		    	Principal userPrincipal = request.getUserPrincipal();
-		    	User user = WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName(), true);
-				if (user == null) {
-					throw new SessionEndedException();
-				}
-		    	persistence.setUser(user);
-		    	
-		    	DocumentQuery q = persistence.newDocumentQuery(module, document);
-		    	q.setFirstResult(start);
-		    	q.setMaxResults(end - start - 1);
-		    	List<Bean> beans = q.projectedResults();
-		    	for (Bean bean : beans) {
-		    		Util.populateFully(bean);
-		    	}
-		    	
-//		    	Map<String, Object> props = new TreeMap<>();
-//		    	props.put(DocumentQuery.THIS_ALIAS, bean);
-//		    	bean = new MapBean(bean.getBizModule(), bean.getBizDocument(), props);
-		    	Set<String> projection = null; // new TreeSet<>();
-//		    	projection.add("dateOfBirth");
-//		    	projection.add("dueBack");
-		    	result = JSON.marshall(user.getCustomer(), beans, projection);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule(module);
+			Document d = m.getDocument(c, document);
+			
+			if (! u.canReadDocument(d)) {
+				throw new SecurityException("read this data", u.getName());
 			}
-			catch (InvocationTargetException e) {
-				throw e.getTargetException();
-			}
+			
+	    	DocumentQuery q = p.newDocumentQuery(d);
+	    	q.setFirstResult(start);
+	    	q.setMaxResults(end - start - 1);
+	    	List<Bean> beans = q.projectedResults();
+	    	for (Bean bean : beans) {
+	    		Util.populateFully(bean);
+	    	}
+			result = JSON.marshall(CORE.getUser().getCustomer(), beans, null);
 		}
 		catch (Throwable t) {
-	    	t.printStackTrace();
-	    	if (persistence != null) {
-	    		persistence.rollback();
-	    	}
-	    	throw t;
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
 		}
-	    finally {
-	    	if (persistence != null) {
-	    		persistence.commit(true);
-	    	}
-	    }
+		
+		return result;
+	}
+
+/* Doesn't work Failed executing GET /xml/admin/Contact: org.jboss.resteasy.core.NoMessageBodyWriterFoundFailure: Could not find MessageBodyWriter for response object of type: java.util.ArrayList of media type: application/xml
+	@GET
+	@Path("/xml/{module}/{document}")
+	@Produces(MediaType.APPLICATION_XML)
+	public List<Bean> retrieveXML(@PathParam("module") String module, 
+								@PathParam("document") String document,
+								@QueryParam("start") int start,
+								@QueryParam("end") int end) throws Throwable {
+		response.setContentType(MediaType.APPLICATION_XML);
+		return retrieve(module, document, start, end);
+	}
+*/
+
+	@GET
+	@Path("/json/query/{module}/{documentOrQuery}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String query(@PathParam("module") String module,
+							@PathParam("documentOrQuery") String documentOrQuery,
+							@QueryParam("start") int start,
+							@QueryParam("end") int end) {
+		String result = null;
+		
+		Persistence p = null;
+		try {
+			response.setContentType(MediaType.APPLICATION_JSON);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule(module);
+	
+			DocumentQueryDefinition q = null;
+			q = m.getDocumentQuery(documentOrQuery);
+			// not a query, could be a document
+			if (q == null) {
+				q = m.getDocumentDefaultQuery(c, documentOrQuery);
+			}
+			if (q == null) {
+				throw new IllegalArgumentException(documentOrQuery + " is not a valid query or document.");
+			}
+	 
+			DocumentQueryListModel<Bean> qm = new DocumentQueryListModel<>();
+	        qm.setQuery(q);
+	        qm.setStartRow(start);
+	        qm.setEndRow(end);
+	
+	        Document d = qm.getDrivingDocument();
+			if (! u.canReadDocument(d)) {
+				throw new SecurityException("read this data", u.getName());
+			}
+	        
+	        List<Bean> beans = qm.fetch().getRows();
+	        result = JSON.marshall(c, beans, qm.getProjections());
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+		}
 		
 		return result;
 	}

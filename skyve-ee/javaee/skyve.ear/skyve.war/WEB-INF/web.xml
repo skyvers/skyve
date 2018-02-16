@@ -298,6 +298,16 @@
 		<url-pattern>/j_security_check</url-pattern>
 	</filter-mapping>
 
+    <filter>
+        <display-name>RestFilter</display-name>
+        <filter-name>RestFilter</filter-name>
+        <filter-class>org.skyve.impl.web.filter.rest.ForbiddenFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RestFilter</filter-name>
+		<url-pattern>/rest/*</url-pattern>
+    </filter-mapping>
+	
 	<servlet>
 		<servlet-name>H2Console</servlet-name>
 		<servlet-class>org.h2.server.web.WebServlet</servlet-class>
@@ -606,7 +616,6 @@
 			<url-pattern>/smartgen/*</url-pattern>
 			<!-- Secure map servlet -->
 			<url-pattern>/map/*</url-pattern>
-			<!-- Secure rest services -->
 			<url-pattern>/rest/*</url-pattern>
 			<!-- Secure the Bizport Export Servlet -->
 			<url-pattern>/bizexport.xls</url-pattern>
