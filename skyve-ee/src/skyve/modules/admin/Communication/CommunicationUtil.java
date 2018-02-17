@@ -581,13 +581,14 @@ public class CommunicationUtil {
 
 	/**
 	 * Returns a String with wrapped with <html><body> tags
+	 * and replaces \n with <br/>
 	 * 
 	 * @param html
 	 * @return
 	 */
 	private static String htmlEnclose(String html) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<html><body>").append(html).append("</body></html>");
+		sb.append("<html><body>").append(html.replace("\n","<br/>")).append("</body></html>");
 		return sb.toString();
 	}
 }
