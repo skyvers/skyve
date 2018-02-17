@@ -3,6 +3,7 @@ package org.skyve.impl.web.service.rest;
 import java.util.List;
 
 import javax.enterprise.context.RequestScoped;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,9 +14,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.impl.domain.messages.SecurityException;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.filter.rest.AbstractRestFilter;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -31,6 +36,8 @@ import org.skyve.util.Util;
 @Path("/")
 @RequestScoped
 public class RestService {
+	@Context
+	private HttpServletRequest request;
 	@Context
 	private HttpServletResponse response;
 	
@@ -181,6 +188,51 @@ public class RestService {
 			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
 		}
 		
+		return result;
+	}
+	
+	@GET
+	@Path("/content/{contentId}")
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public byte[] query(@PathParam("contentId") String contentId) {
+		byte[] result = null;
+		
+		try {
+			try (ContentManager cm = EXT.newContentManager()) {
+				AttachmentContent content = cm.get(contentId);
+				
+				if (content == null) {
+					UtilImpl.LOGGER.info(request.getRequestURI() + " not found");
+					response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+					return result;
+				}
+				
+				User u = CORE.getUser();
+				if (! u.canAccessContent(content.getBizId(),
+											content.getBizModule(),
+											content.getBizDocument(),
+											content.getBizCustomer(),
+											content.getBizDataGroupId(),
+											content.getBizUserId(),
+											content.getAttributeName())) {
+					throw new SecurityException(content.getBizModule() + '.' + content.getBizDocument() + '.' + content.getAttributeName(), u.getName());
+				}
+
+				result = content.getContentBytes();
+				
+				// Set headers
+				response.setContentType(content.getMimeType().toString());
+				response.setCharacterEncoding(Util.UTF8);
+				response.setHeader("Content-Disposition", 
+									String.format("attachment; filename=\"%s\"", content.getFileName()));
+				UtilImpl.LOGGER.info(request.getRequestURI() + " served as binary");
+			}				
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(null, response, t.getLocalizedMessage());
+		}
+			
 		return result;
 	}
 }
