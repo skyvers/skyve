@@ -166,7 +166,7 @@
 	</target>
 	
 	<target name="umlJavadoc">
-        <javadoc sourcepath="src\skyve" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
+        <javadoc sourcepath="src/skyve" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
 			<classpath refid="classpath"/>
             <doclet name="org.skyve.impl.tools.javadoc.SkyveDoclet" path="tools/lib/UMLGraph.jar:tools/lib/skyve-tools.jar">
                     <param name="-hide" value="org.skyve.*|java.*|org.skyve.impl.*"/>

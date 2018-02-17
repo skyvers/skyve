@@ -147,6 +147,53 @@
 							</tasks>
 						</configuration>
 					</execution>
+					<execution>
+						<id>generate-javadoc</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<path id="classpath">
+									<fileset dir="lib">
+										<include name="**/*.jar"/>
+									</fileset>
+									<fileset dir="tools/lib">
+										<include name="**/*.jar"/>
+									</fileset>
+									<fileset dir="${ear-path}/lib">
+										<include name="**/*.jar"/>
+									</fileset>
+									<fileset dir="${war-path}/WEB-INF/lib">
+										<include name="**/*.jar"/>
+									</fileset>
+									<!-- don't use a file element here - doesn't work in old ant -->
+									<pathelement path="${ear-path}/apps.jar/" />
+									<!-- add the test classes to the classpath for generated tests -->
+									<pathelement path="bin/" />
+								</path>
+								<java fork="true" classname="org.skyve.impl.tools.javadoc.doctor.DoctorUtil">
+									<classpath refid="classpath"/>
+									<arg value="src/skyve/" /> <!-- source path -->
+									<arg value="bizhub" /> <!-- customerName -->
+									<!-- list all modules as arguments here -->
+									<arg value="admin" />
+								</java>
+						        <javadoc sourcepath="src/skyve" packagenames="modules.*.domain" destdir="../javadoc" private="true" verbose="false">
+									<classpath refid="classpath"/>
+						            <doclet name="org.skyve.impl.tools.javadoc.SkyveDoclet" path="tools/lib/umlgraph-5.6.6.jar:tools/lib/skyve-tools.jar">
+						                    <param name="-hide" value="org.skyve.*|java.*|org.skyve.impl.*"/>
+						
+						            		<param name="-nodefontsize" value="9"/>
+						                    <param name="-nodefontpackagesize" value="7"/>
+						                    <param name="-link" value="http://docs.oracle.com/javase/1.5.0/docs/guide/javadoc/doclet/spec/"/>
+						                    <param name="-link" value="http://docs.oracle.com/javase/8/docs/api/"/>
+						            </doclet>
+						        </javadoc>
+								<delete dir="src/skyve" includes="**/package.html" />
+							</tasks>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
  		</plugins>
