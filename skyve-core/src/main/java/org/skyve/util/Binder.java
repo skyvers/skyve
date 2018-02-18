@@ -284,6 +284,16 @@ public class Binder {
 	}
 
 	/**
+	 * Copies all the attribute values of the from bean onto the to bean.
+	 * 
+	 * @param from Bean to copy (source bean)
+	 * @param to Bean to copy to (destination bean).
+	 */
+	public static void copy(final Bean from, final Bean to) {
+		BindUtil.copy(from, to);
+	}
+	
+	/**
 	 * 
 	 */
 	public static class TargetMetaData {

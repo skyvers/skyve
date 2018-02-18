@@ -13,6 +13,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.comparators.ComparatorChain;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -46,6 +47,7 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
@@ -56,6 +58,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
+import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -1254,6 +1257,38 @@ public final class BindUtil {
 		return -1;
 	}
 
+	public static void copy(final Bean from, final Bean to) {
+		final Customer c = CORE.getUser().getCustomer();
+		final Module m = c.getModule(from.getBizModule());
+		final Document d = m.getDocument(c, from.getBizDocument());
+
+		for (final Attribute attribute : d.getAllAttributes()) {
+			final String attributeName = attribute.getName();
+
+			if (attribute.getAttributeType() == AttributeType.collection) {
+				copyCollection(from, to, attributeName);
+				continue;
+			}
+
+			if (attribute.getAttributeType() == AttributeType.inverseMany) {
+				copyCollection(from, to, attributeName);
+				continue;
+			}
+
+			Binder.set(to, attributeName, Binder.get(from, attributeName));
+		}
+	}
+
+	// TODO clearing colTo issues a delete statement in hibernate, this method should process each collection item.
+	@SuppressWarnings("unchecked")
+	private static void copyCollection(final Bean from, final Bean to, final String attributeName) {
+		List<Bean> colFrom = (List<Bean>) BindUtil.get(from, attributeName);
+		List<Bean> colTo = (List<Bean>) BindUtil.get(to, attributeName);
+		colTo.clear();
+		colTo.addAll(colFrom);
+	}
+
+	
 	/**
 	 * Get the parent document and attribute for a binding expression.
 	 * This will traverse the binding (across documents and references
