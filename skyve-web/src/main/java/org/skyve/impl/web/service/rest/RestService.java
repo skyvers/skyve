@@ -5,7 +5,10 @@ import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -18,6 +21,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.util.UtilImpl;
@@ -30,6 +34,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
@@ -130,6 +135,81 @@ public class RestService {
 		return result;
 	}
 
+	@GET
+	@Path("/json/update/{bean}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String updateJSONGet(@PathParam("bean") String json) {
+		return updateJSON(json);
+	}
+
+	@POST
+	@Path("/json/update")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String updateJSONPost(String json) {
+		return updateJSON(json);
+	}
+	
+	private String updateJSON(String json) {
+		String result = null;
+		
+		Persistence p = null;
+		try {
+			response.setContentType(MediaType.APPLICATION_JSON);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			
+			PersistentBean bean = (PersistentBean) JSON.unmarshall(u, json);
+			PersistentBean beanToUpdate = p.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), true);
+			Binder.copy(bean, beanToUpdate);
+			beanToUpdate = p.save(beanToUpdate);
+			result = JSON.marshall(u.getCustomer(), beanToUpdate, null);
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+		}
+		
+		return result;
+	}
+
+	@GET
+	@Path("/json/delete/{bean}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String deleteJSONGet(@PathParam("bean") String json) {
+		return deleteJSON(json);
+	}
+	
+	@DELETE
+	@Path("/json/delete")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public String deleteJSONDelete(String json) {
+		return deleteJSON(json);
+	}
+
+	private String deleteJSON(String json) {
+		String result = null;
+		
+		Persistence p = null;
+		try {
+			response.setContentType(MediaType.APPLICATION_JSON);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			
+			PersistentBean bean = (PersistentBean) JSON.unmarshall(u, json);
+			PersistentBean beanToDelete = p.retrieve(bean.getBizModule(), bean.getBizDocument(), bean.getBizId(), true);
+			p.delete(beanToDelete);
+			result = "{}";
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+		}
+		
+		return result;
+	}
+	
 /* Doesn't work Failed executing GET /xml/admin/Contact: org.jboss.resteasy.core.NoMessageBodyWriterFoundFailure: Could not find MessageBodyWriter for response object of type: java.util.ArrayList of media type: application/xml
 	@GET
 	@Path("/xml/{module}/{document}")
