@@ -205,7 +205,16 @@ public class UtilImpl {
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
 		T clone = (T) SerializationHelper.clone(object);
-		
+		// try {
+		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		// new ObjectOutputStream(baos).writeObject(object);
+		// ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
+		// return (T) ois.readObject();
+		// }
+		// catch (Exception e) {
+		// throw new IllegalArgumentException(e);
+		// }		
+
 		// We need to re-inject any injected fields on the cloned object as they will have been cleared
 		// when the bean was serialised.
 		BeanProvider.injectFields(object);
