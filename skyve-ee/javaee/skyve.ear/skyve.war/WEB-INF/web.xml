@@ -616,6 +616,7 @@
 			<url-pattern>/smartgen/*</url-pattern>
 			<!-- Secure map servlet -->
 			<url-pattern>/map/*</url-pattern>
+			<!-- Secure rest services -->
 			<url-pattern>/rest/*</url-pattern>
 			<!-- Secure the Bizport Export Servlet -->
 			<url-pattern>/bizexport.xls</url-pattern>
