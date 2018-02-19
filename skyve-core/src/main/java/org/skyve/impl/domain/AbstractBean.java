@@ -267,12 +267,26 @@ public abstract class AbstractBean implements Bean {
 			return thisOne.getBizId().compareTo(otherOne.getBizId());
 		}
 	}
-	
+
+	/**
+	 * Injects any {@link Injected} fields after de-serialisation.
+	 * @return this
+	 * @throws Exception
+	 * @see BeanProvider#injectFields(Object)
+	 */
 	protected Object readResolve() throws Exception {
 	    BeanProvider.injectFields(this);
 	    return this;
 	}
-	
+
+	/**
+	 * Clears out any {@link Injected} fields before serialising.
+	 * {@link Injected} fields are re-injected in {@link #writeObject()} for this
+	 * object and in {@link #readResolve()} for any new instances that are de-serialised.
+	 * @return this
+	 * @throws Exception
+	 * @see CDIProvider#clearInjectedFields(Object)
+	 */
 	protected Object writeReplace() throws Exception {
 	    CDIProvider.clearInjectedFields(this);
 	    return this;

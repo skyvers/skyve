@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
@@ -203,16 +204,13 @@ public class UtilImpl {
 
 	@SuppressWarnings("unchecked")
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
-		return (T) SerializationHelper.clone(object);
-		// try {
-		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		// new ObjectOutputStream(baos).writeObject(object);
-		// ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));
-		// return (T) ois.readObject();
-		// }
-		// catch (Exception e) {
-		// throw new IllegalArgumentException(e);
-		// }
+		T clone = (T) SerializationHelper.clone(object);
+		
+		// We need to re-inject any injected fields on the cloned object as they will have been cleared
+		// when the bean was serialised.
+		BeanProvider.injectFields(object);
+		
+		return clone;
 	}
 
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
