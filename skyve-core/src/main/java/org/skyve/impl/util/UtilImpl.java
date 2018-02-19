@@ -203,7 +203,7 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <T extends Serializable> T cloneBySerialization(T object) {
+	public static final <T extends Serializable> T cloneBySerialization(T object, boolean runtime) {
 		T clone = (T) SerializationHelper.clone(object);
 		// try {
 		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -217,13 +217,15 @@ public class UtilImpl {
 
 		// We need to re-inject any injected fields on the cloned object as they will have been cleared
 		// when the bean was serialised.
-		BeanProvider.injectFields(object);
+		if (runtime) {
+			BeanProvider.injectFields(object);
+		}
 		
 		return clone;
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
-			throws Exception {
+	public static final <T extends Serializable> T cloneToTransientBySerialization(T object, boolean runtime)
+	throws Exception {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
 				if (element instanceof AbstractPersistentBean) {
@@ -234,7 +236,7 @@ public class UtilImpl {
 			populateFully((AbstractPersistentBean) object);
 		}
 
-		T result = cloneBySerialization(object);
+		T result = cloneBySerialization(object, runtime);
 		setTransient(result);
 
 		return result;

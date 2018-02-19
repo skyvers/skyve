@@ -157,7 +157,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		View originalView = (name == null) ? 
 								d.getView(uxui, customer, viewName) : 
 								d.getView(uxui, customer, name);
-		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView);
+		ViewImpl view = (ViewImpl) UtilImpl.cloneBySerialization(originalView, false);
 
 		ComponentViewVisitor visitor = new ComponentViewVisitor(customer, m, d, view, binding, names, widgetId);
 		visitor.visit();
