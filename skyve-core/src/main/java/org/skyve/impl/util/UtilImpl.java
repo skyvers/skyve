@@ -19,6 +19,7 @@ import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.AbstractBean;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -224,11 +225,33 @@ public class UtilImpl {
 
 		// We need to re-inject any injected fields on the cloned object as they will have been cleared
 		// when the bean was serialised.
-		if (runtime) {
-			BeanProvider.injectFields(object);
+		if (runtime && object instanceof AbstractBean) {
+			injectFully((AbstractBean)object);
 		}
 		
 		return clone;
+	}
+
+	/**
+	 * Inject the bean and all it's children
+	 * @param bean
+	 */
+	private static void injectFully(AbstractBean bean) {
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		new BeanVisitor(false, true, false) {
+			@Override
+			protected boolean accept(String binding,
+					Document documentAccepted,
+					Document owningDocument,
+					Relation owningRelation,
+					Bean beanAccepted) {
+				BeanProvider.injectFields(beanAccepted);
+				return true;
+			}
+		}.visit(document, bean, customer);
 	}
 
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object, boolean runtime)
