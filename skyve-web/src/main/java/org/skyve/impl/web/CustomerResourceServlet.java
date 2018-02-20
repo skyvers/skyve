@@ -58,7 +58,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			}
 		}
 
-		protected long getLastModified() {
+		public long getLastModified() {
 			long result = -1;
 
 			if (file != null) {
@@ -71,7 +71,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 
-		protected byte[] getBytes() 
+		public byte[] getBytes() 
 		throws FileNotFoundException, IOException {
 			byte[] result = null;
 
@@ -120,19 +120,19 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 
-		protected boolean isContent() {
+		public boolean isContent() {
 			return (content != null);
 		}
 		
-		protected AttachmentContent getContent() {
+		public AttachmentContent getContent() {
 			return content;
 		}
 		
-		protected File getFile() {
+		public File getFile() {
 			return file;
 		}
 
-		protected MimeType getMimeType() {
+		public MimeType getMimeType() {
 			MimeType result = MimeType.plain;
 
 			if ((imageWidth > 0) && (imageHeight > 0)) {
@@ -148,7 +148,7 @@ public class CustomerResourceServlet extends HttpServlet {
 			return result;
 		}
 		
-		protected String getFileName() {
+		public String getFileName() {
 			String result = null;
 			
 			if ((imageWidth > 0) && (imageHeight > 0)) {

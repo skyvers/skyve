@@ -1109,8 +1109,8 @@ isc.EditView.addMethods({
 					}
 				}
 
-				// restore the current tab
-				if (selectedTabNumber) {
+				// restore the current tab (careful - tab 0 is valid but is falsey)
+				if ((selectedTabNumber !== undefined) && (selectedTabNumber != null)) {
 					contained.selectTab(selectedTabNumber);
 				}
 			}

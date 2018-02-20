@@ -18,6 +18,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
@@ -44,9 +45,9 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		
 		// Authorization: Basic base64credentials
 		final String base64Credentials = authorization.substring("Basic".length()).trim();
+		String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), Util.UTF8);
 
-		String credentials = new String(Base64.getDecoder().decode(base64Credentials), Util.UTF8);
-		// credentials = username:password
+		// credentials = username:password or customer/username:password
 		final String[] values = credentials.split(":", 2);
 		final String username = UtilImpl.processStringValue(values[0]);
 		final String password = UtilImpl.processStringValue(values[1]);
@@ -56,7 +57,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			return;
 		}
 		
-		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Basic Auth for username: {} URI: {}", username, httpRequest.getRequestURI()));
+		if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info(String.format("Basic Auth for username: %s URI: %s", username, httpRequest.getRequestURI()));
 
 		AbstractPersistence persistence = null;
 		try {
@@ -79,6 +80,12 @@ public class BasicAuthFilter extends AbstractRestFilter {
 				throw e.getTargetException();
 			}
 		}
+		catch (SecurityException e) {
+			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+		}
+		catch (MetaDataException e) {
+			error(persistence, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, "Unable to authenticate with the provided credentials");
+		}
 		catch (Throwable t) {
 			t.printStackTrace();
 			UtilImpl.LOGGER.log(Level.SEVERE, t.getLocalizedMessage(), t);
@@ -99,7 +106,18 @@ public class BasicAuthFilter extends AbstractRestFilter {
 
 		DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
 		DocumentFilter f = q.getFilter();
-		f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, username);
+		final String[] customerAndUser = username.split("/");
+		if (customerAndUser.length == 1) {
+			if (UtilImpl.CUSTOMER == null) {
+				throw new SecurityException("Invalid username/password");
+			}
+			f.addEquals(Bean.CUSTOMER_NAME, UtilImpl.CUSTOMER);
+			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, username);
+		}
+		else {
+			f.addEquals(Bean.CUSTOMER_NAME, customerAndUser[0]);
+			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[1]);
+		}
 		f.addEquals(SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, hashedPassword);
 		Bean user = q.beanResult();
 		if (user == null) {
