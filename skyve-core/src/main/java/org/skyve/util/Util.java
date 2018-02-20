@@ -176,6 +176,10 @@ public class Util {
 		return UtilImpl.CONTENT_DIRECTORY;
 	}
 
+	public static String getModuleDirectory() {
+		return UtilImpl.MODULE_DIRECTORY;
+	}
+
 	public static String getPasswordHashingAlgorithm() {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}

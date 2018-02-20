@@ -619,7 +619,9 @@ public class SkyveScriptInterpreter {
 		CollectionType collectionType = extractCollectionType(line);
 
 		// if the collection type is child, store it for processing the parent at the end
-		parentDocuments.put(type, currentDocument.getName());
+		if (CollectionType.child.equals(collectionType)) {
+			parentDocuments.put(type, currentDocument.getName());
+		}
 
 		CollectionImpl collection = new CollectionImpl();
 		collection.setName(name);

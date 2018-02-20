@@ -262,17 +262,17 @@ public class XMLMetaData {
 	 * 
 	 * @param module The module to output to a file
 	 * @param overridden Should be true if this module is a customer override, false otherwise
-	 * @param sourceDirectory The root source directory, e.g. <code>src/main/java</code>
+	 * @param modulesDirectory The root source modules directory, e.g. <code>src/main/java/modules</code>
 	 */
-	public static void marshalModule(ModuleMetaData module, boolean overridden, String sourceDirectory) {
+	public static void marshalModule(ModuleMetaData module, boolean overridden, String modulesDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
-		filePath.append(sourceDirectory);
-		if (!sourceDirectory.endsWith("/") && !sourceDirectory.endsWith("\\")) {
+		filePath.append(modulesDirectory);
+		if (!modulesDirectory.endsWith("/") && !modulesDirectory.endsWith("\\")) {
 			filePath.append('/');
 		}
-		filePath.append("modules/").append(module.getName()).append('/');
+		filePath.append(module.getName()).append('/');
 		File file = new File(filePath.toString());
 		file.mkdirs();
 		filePath.append(module.getName()).append(".xml");
@@ -344,14 +344,14 @@ public class XMLMetaData {
 	 * 
 	 * @param document The document to output to a file
 	 * @param overridden Should be true if this document is a customer override, false otherwise
-	 * @param moduleDirectory The location of the module this file belongs to
+	 * @param documentModuleDirectory The path to the module this document belongs to
 	 */
-	public static void marshalDocument(DocumentMetaData document, boolean overridden, String moduleDirectory) {
+	public static void marshalDocument(DocumentMetaData document, boolean overridden, String documentModuleDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
-		filePath.append(moduleDirectory);
-		if (!moduleDirectory.endsWith("/") && !moduleDirectory.endsWith("\\")) {
+		filePath.append(documentModuleDirectory);
+		if (!documentModuleDirectory.endsWith("/") && !documentModuleDirectory.endsWith("\\")) {
 			filePath.append('/');
 		}
 		filePath.append(document.getName()).append('/');

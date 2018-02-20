@@ -36,11 +36,11 @@ public class Submit implements ServerSideAction<DocumentCreator> {
 		i.process();
 
 		if (i.getModules().size() > 0) {
-			final String sourceDirectory = bean.getOutputLocation();
+			String sourceDirectory = bean.getOutputLocation();
 
 			for(ModuleMetaData m : i.getModules()) {
 				XMLMetaData.marshalModule(m, false, sourceDirectory);
-				final String moduleDirectory = String.format("%s/modules/%s", sourceDirectory, m.getName());
+				final String moduleDirectory = String.format("%s/%s/", sourceDirectory, m.getName());
 						
 				if (i.getDocuments().size() > 0) {
 					for (DocumentMetaData d : i.getDocuments()) {

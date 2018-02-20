@@ -6,10 +6,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeSet;
 
-import modules.admin.DownloadFolder.DownloadFolderBizlet;
-import modules.admin.domain.DataMaintenance;
-import modules.admin.domain.DownloadFolder;
-
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -22,6 +18,10 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.Util;
+
+import modules.admin.DownloadFolder.DownloadFolderBizlet;
+import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.DownloadFolder;
 
 public class BackupsModel extends ListModel<DataMaintenance> {
 	private static final long serialVersionUID = -7192916420761744760L;
