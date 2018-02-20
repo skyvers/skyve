@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.skyve</groupId>
 		<artifactId>skyve-parent</artifactId>
-		<version>20180219</version>
+		<version>20180220</version>
 	</parent>
 	<artifactId>skyve-ee</artifactId>
 
@@ -139,9 +139,7 @@
 									<arg value="src/test/" /> <!-- test path -->
 									<arg value="src/generatedTest/" /> <!-- generated test path -->
 									<arg value="true" /> <!-- debug -->
-									<arg value="H2" /> <!-- data store index foreign keys by default -->
-									<arg value="false" /> <!-- data store index names in global namespace -->
-									<arg value="0" /> <!-- data store identifier character limit -->
+									<arg value="H2_NO_INDEXES" /> <!-- dialect options -->
 									<arg value="test,whosin,whosinintegrate" /> <!-- excluded modules -->
 								</java>
 							</tasks>

@@ -810,7 +810,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	public final void resetMenus(User user) {
 		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
-			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
+			Menu menu = UtilImpl.cloneBySerialization(module.getMenu(), false);
 			removeInaccessibleItems(module.getName(), menu, user);
 			internalUser.putModuleMenu(module.getName(), menu);
 		}

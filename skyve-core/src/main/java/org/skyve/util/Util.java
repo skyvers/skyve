@@ -38,7 +38,7 @@ public class Util {
 	 * @return
 	 */
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
-		return UtilImpl.cloneBySerialization(object);
+		return UtilImpl.cloneBySerialization(object, true);
 	}
 
 	/**
@@ -48,8 +48,8 @@ public class Util {
 	 * @throws Exception
 	 */
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
-			throws Exception {
-		return UtilImpl.cloneToTransientBySerialization(object);
+	throws Exception {
+		return UtilImpl.cloneToTransientBySerialization(object, true);
 	}
 
 	/**
@@ -174,6 +174,10 @@ public class Util {
 
 	public static String getContentDirectory() {
 		return UtilImpl.CONTENT_DIRECTORY;
+	}
+
+	public static String getModuleDirectory() {
+		return UtilImpl.MODULE_DIRECTORY;
 	}
 
 	public static String getPasswordHashingAlgorithm() {

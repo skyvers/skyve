@@ -358,7 +358,7 @@
 				<uxui name="tablet" />
 				<role name="DevOps" />
 			</edit>
-			<edit name="Create Documents" document="DocumentCreator">
+			<edit name="Document Creator" document="DocumentCreator">
 				<uxui name="desktop" />
 				<uxui name="tablet" />
 				<role name="DevOps" />

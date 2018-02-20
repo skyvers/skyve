@@ -97,22 +97,22 @@ public class SkyveContextListener implements ServletContextListener {
 
 		Map<String, Object> content = getObject(null, "content", properties, true);
 		UtilImpl.CONTENT_DIRECTORY = getString("content", "directory", content, true);
+		// clean up the content directory path
+		UtilImpl.CONTENT_DIRECTORY = cleanupContentDirectory(UtilImpl.CONTENT_DIRECTORY);
 		File contentDirectory = new File(UtilImpl.CONTENT_DIRECTORY);
-		if (! contentDirectory.exists()) {
+		if (!contentDirectory.exists()) {
 			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " does not exist.");
 		}
-		if (! contentDirectory.isDirectory()) {
+		if (!contentDirectory.isDirectory()) {
 			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not a directory.");
 		}
 		// Check the content directory is writable
 		File testFile = new File(contentDirectory, "SKYVE_TEST_WRITE_" + UUID.randomUUID().toString());
 		try {
 			testFile.createNewFile();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException("content.directory " + UtilImpl.CONTENT_DIRECTORY + " is not writeable.");
-		}
-		finally {
+		} finally {
 			testFile.delete();
 		}
 		UtilImpl.CONTENT_GC_CRON = getString("content", "gcCron", content, true);
@@ -241,6 +241,20 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.JOB_SCHEDULER = getBoolean("environment", "jobScheduler", environment);
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString("environment", "passwordHashingAlgorithm", environment, true);
 		UtilImpl.APPS_JAR_DIRECTORY = getString("environment", "appsJarDirectory", environment, false);
+		UtilImpl.MODULE_DIRECTORY = getString("environment", "moduleDirectory", environment, false);
+		if (UtilImpl.MODULE_DIRECTORY != null) {
+			// clean up the module directory path
+			UtilImpl.MODULE_DIRECTORY = cleanupModuleDirectory(UtilImpl.MODULE_DIRECTORY);
+
+			File moduleDirectory = new File(UtilImpl.MODULE_DIRECTORY);
+			if (!moduleDirectory.exists()) {
+				throw new IllegalStateException("environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " does not exist.");
+			}
+			if (!moduleDirectory.isDirectory()) {
+				throw new IllegalStateException(
+						"environment.moduleDirectory " + UtilImpl.MODULE_DIRECTORY + " is not a directory.");
+			}
+		}
 
 		Map<String, Object> api = getObject(null, "api", properties, true);
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString("api", "googleMapsV3Key", api, false);
@@ -393,5 +407,61 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.LOGGER.info("Could not close or dispose of the content manager - this is probably OK although resources may be left hanging or locked");
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Checks that the content directory:
+	 * <ul>
+	 * <li>ends with a trailing slash
+	 * </ul>
+	 * 
+	 * @param path The supplied content path
+	 * @return The updated path if any slashes need to be added
+	 */
+	static String cleanupContentDirectory(final String path) {
+		if (path != null && path.length() > 0) {
+			String updatedPath = path.replace("\\", "/");
+
+			if (!updatedPath.endsWith("/")) {
+				updatedPath = updatedPath + "/";
+			}
+
+			return updatedPath;
+		}
+
+		return path;
+	}
+
+	/**
+	 * Checks that the module directory:
+	 * <ul>
+	 * <li>ends with a trailing slash
+	 * <li>ends with modules
+	 * </ul>
+	 * 
+	 * @param path The supplied content path
+	 * @return The updated path if any slashes or <code>/modules</code> need to be added
+	 */
+	static String cleanupModuleDirectory(final String path) {
+		if (path != null && path.length() > 0) {
+			String updatedPath = path;
+
+			// strip the trailing slash if any
+			if (path.endsWith("/") || path.endsWith("\\")) {
+				updatedPath = path.substring(0, path.length() - 1);
+			}
+
+			if (!updatedPath.endsWith("modules")) {
+				updatedPath = updatedPath + "/modules/";
+			}
+
+			if (!updatedPath.endsWith("/") && !updatedPath.endsWith("\\")) {
+				updatedPath = updatedPath + "/";
+			}
+
+			return updatedPath;
+		}
+
+		return path;
 	}
 }

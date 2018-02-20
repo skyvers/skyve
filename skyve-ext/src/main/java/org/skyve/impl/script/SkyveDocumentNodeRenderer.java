@@ -1,4 +1,4 @@
-package modules.admin.DocumentCreator;
+package org.skyve.impl.script;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +73,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	}
 
 	@Override
+	@SuppressWarnings("boxing")
 	public void render(Node node) {
 		if (node instanceof Heading) {
 			Heading heading = (Heading) node;
@@ -335,34 +336,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	}
 
 	/**
-	 * Returns true if the specified node is a BulletList (
-	 * <ul>
-	 * ).
-	 */
-	private static boolean isNodeBulletList(Node node) {
-		if (node instanceof BulletList) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Recursively checks the parent of the specified node
-	 * to see if it is a descendant of a bullet list (
-	 * <ul>
-	 * ).
-	 */
-	private static boolean isChildOfBulletList(Node node) {
-		if (node.getParent() != null) {
-			if (node.getParent() instanceof BulletList) {
-				return true;
-			}
-			return isChildOfBulletList(node.getParent());
-		}
-		return false;
-	}
-
-	/**
 	 * Recursively checks the parent of the specified node
 	 * to see if it is a descendant of an a bullet list (
 	 * <ul>
@@ -375,22 +348,6 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 				return list.getBulletMarker() == '-';
 			}
 			return isChildOfDashMarkerList(node.getParent());
-		}
-		return false;
-	}
-
-	/**
-	 * Recursively checks the parent of the specified node
-	 * to see if it is a descendant of an ordered list (
-	 * <ol>
-	 * ).
-	 */
-	private static boolean isChildOfOrderedList(Node node) {
-		if (node.getParent() != null) {
-			if (node.getParent() instanceof OrderedList) {
-				return true;
-			}
-			return isChildOfOrderedList(node.getParent());
 		}
 		return false;
 	}
