@@ -32,24 +32,13 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 			i.preProcess();
 			Node document = i.parse();
 
-			// Parser parser = Parser.builder().build();
-			// Node document = parser.parse(script);
-	
 			// create a markdown to HTML renderer for the markdown preview tab
 			HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
 	
-			// create a markdown to document XML renderer for the document preview tab
-			/*HtmlRenderer documentRenderer = HtmlRenderer.builder().nodeRendererFactory(new HtmlNodeRendererFactory() {
-				@Override
-				public NodeRenderer create(HtmlNodeRendererContext context) {
-					return new SkyveDocumentNodeRenderer(context, true);
-				}
-			}).build();*/
-	
-			// update the previews
+			// update the markdown preview
 			bean.setMarkdownPreview(htmlRenderer.render(document));
-			// bean.setDocumentPreview(documentRenderer.render(document));
 
+			// create a module and document.xml preview
 			i.process();
 			if (i.getModules().size() > 0) {
 				StringBuilder out = new StringBuilder();
@@ -63,7 +52,7 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 						}
 					}
 				}
-				// escape html
+				// escape html and set the document preview
 				bean.setDocumentPreview(out.toString().replace("<", "&lt;").replace(">", "&gt;"));
 			} else {
 				throw new ValidationException(new Message(DocumentCreator.defaultModulePropertyName,

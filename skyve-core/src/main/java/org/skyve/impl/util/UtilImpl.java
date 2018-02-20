@@ -157,6 +157,13 @@ public class UtilImpl {
 	public static final String SKYVE_VERSION = "20180220";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
+	// for skyve script
+	/**
+	 * Absolute path on the filesystem to the source directory where modules live.
+	 * E.g. c:/workspace/project/src/main/java
+	 */
+	public static String MODULE_DIRECTORY = null;
+
 	private static String absoluteBasePath;
 
 	public static String getAbsoluteBasePath() {

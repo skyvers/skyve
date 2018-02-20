@@ -8,6 +8,7 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
+import org.skyve.util.Util;
 
 import modules.ModulesUtil.DomainValueSortByDescription;
 import modules.admin.domain.DataMaintenanceModuleDocument;
@@ -37,6 +38,16 @@ public class DocumentCreatorBizlet extends Bizlet<DocumentCreator> {
 		}
 
 		return super.getVariantDomainValues(attributeName);
+	}
+
+	@Override
+	public DocumentCreator newInstance(DocumentCreator bean) throws Exception {
+		// populate the output directory from the JSON if provided
+		if (Util.getModuleDirectory() != null) {
+			bean.setOutputLocation(Util.getModuleDirectory());
+		}
+
+		return bean;
 	}
 
 }
