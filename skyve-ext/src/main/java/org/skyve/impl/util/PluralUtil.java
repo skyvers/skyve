@@ -38,6 +38,9 @@ public class PluralUtil {
 			{ "turf", "turfs" } };
 	private static final String[][] feExceptions = new String[][] {
 			{ "safe", "safes" } };
+	private static String[][] ffExceptions = new String[][] {
+			{ "staff", "staff" }
+	};
 	private static final String[][] oExceptions = new String[][] { { "albino", "albinos" },
 			{ "armadillo", "armadillos" },
 			{ "auto", "autos" },
@@ -119,6 +122,16 @@ public class PluralUtil {
 			"trousers",
 			"trout",
 			"wheat" };
+	private static final String[] onlySingular = new String[] {
+			"equipment",
+			"glass",
+			"information",
+			"luggage",
+			"oil",
+			"paper",
+			"steel",
+			"sugar",
+			"wood" };
 	private static final String[] onlyPlurals = new String[] { "barracks",
 			"bellows",
 			"cattle",
@@ -167,9 +180,16 @@ public class PluralUtil {
 					return str;
 				}
 			}
-			// check onlyPlurals
+			// check only plural
 			for (int i = 0; i < onlyPlurals.length; i++) {
 				if (str == onlyPlurals[i]) {
+					return str;
+				}
+			}
+
+			// check only singular
+			for (int i = 0; i < onlySingular.length; i++) {
+				if (str == onlySingular[i]) {
 					return str;
 				}
 			}
@@ -235,6 +255,12 @@ public class PluralUtil {
 			}
 			// ends with 'ff' or 'ffe'
 			else if (str.endsWith("ff") || str.endsWith("ffe")) {
+				// look for exceptions first ffExceptions
+				for (int i = 0; i < ffExceptions.length; i++) {
+					if (str == ffExceptions[i][0]) {
+						return ffExceptions[i][1];
+					}
+				}
 				out.append("s");
 			}
 			// ends with 'f' (but not 'ff')

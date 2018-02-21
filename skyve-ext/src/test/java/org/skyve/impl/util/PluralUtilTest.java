@@ -112,13 +112,15 @@ public class PluralUtilTest {
 	@SuppressWarnings("static-method")
 	public void testPluraliseEndsWithFF() throws Exception {
 		// setup the test data
-		final String singular = "boff";
+		final String singular = "boff", singularException = "staff";
 
 		// perform the method under test
 		final String result1 = PluralUtil.pluralise(singular);
+		final String result2 = PluralUtil.pluralise(singularException);
 
 		// verify the result
 		assertThat(result1, is("boffs"));
+		assertThat(result2, is("staff"));
 	}
 
 	@Test
@@ -247,9 +249,24 @@ public class PluralUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPluralisePlurals() throws Exception {
+	public void testPluraliseOnlyPlurals() throws Exception {
 		// setup the test data
 		final String singular1 = "species", singular2 = "series";
+
+		// perform the method under test
+		final String result1 = PluralUtil.pluralise(singular1);
+		final String result2 = PluralUtil.pluralise(singular2);
+
+		// verify the result
+		assertThat(result1, is(singular1));
+		assertThat(result2, is(singular2));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testPluraliseOnlySingular() throws Exception {
+		// setup the test data
+		final String singular1 = "wood", singular2 = "equipment";
 
 		// perform the method under test
 		final String result1 = PluralUtil.pluralise(singular1);
