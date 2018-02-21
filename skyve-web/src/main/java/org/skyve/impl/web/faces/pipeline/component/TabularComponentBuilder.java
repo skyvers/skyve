@@ -38,6 +38,7 @@ import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
@@ -430,6 +431,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent addedDataGridBoundColumn(UIComponent component, UIComponent current) {
 		if (component != null) {
 			return component;
+		}
+
+		// Insert <p:message> before the contents of the data grid column
+		List<UIComponent> currentChildren = current.getChildren();
+		if (! currentChildren.isEmpty()) {
+			String forId = currentChildren.get(0).getId();
+
+			Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
+			setId(message, null);
+			message.setFor(forId);
+			message.setShowDetail(true);
+			message.setShowSummary(false);
+			message.setDisplay("icon");
+			message.setStyle("float:left");
+			currentChildren.add(0, message);
 		}
 
 		return current.getParent(); // move from column to table
