@@ -36,6 +36,7 @@ import org.skyve.impl.metadata.repository.module.ModuleDocument;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleMetaData;
 import org.skyve.impl.script.SkyveScriptException.ExceptionType;
+import org.skyve.impl.util.PluralUtil;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
@@ -291,8 +292,7 @@ public class SkyveScriptInterpreter {
 					if (documentName != null) {
 						currentDocument.setName(documentName);
 						currentDocument.setSingularAlias(singularAlias);
-						currentDocument.setPluralAlias(
-								singularAlias + (singularAlias != null && singularAlias.endsWith("s") ? "es" : "s"));
+						currentDocument.setPluralAlias(PluralUtil.pluralise(singularAlias));
 
 						BizKey bizKey = new BizKey();
 						bizKey.setExpression(singularAlias);
@@ -308,6 +308,9 @@ public class SkyveScriptInterpreter {
 							Persistent persistent = new Persistent();
 							persistent.setName(persistentName.getLiteral());
 							currentDocument.setPersistent(persistent);
+						} else {
+							// set plural alias to singular if non-persistent
+							currentDocument.setPluralAlias(singularAlias);
 						}
 					} else {
 						addError(String.format("Unsupported document name declaratation: %s", text.getLiteral()));
@@ -315,7 +318,6 @@ public class SkyveScriptInterpreter {
 				}
 
 				getDocuments().add(currentDocument);
-
 
 				// add this document to the module
 				if (currentModule == null) {
