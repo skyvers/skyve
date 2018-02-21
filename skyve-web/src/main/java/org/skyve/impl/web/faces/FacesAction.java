@@ -91,6 +91,33 @@ public abstract class FacesAction<T> {
 					context.addMessage(component.getClientId(), msg);
 				}
 			}
+
+			// find components if this is an indexed compound binding
+			// eg listBinding[\d*].simpleBinding or listBinding[\d*].compound.binding etc
+			int lastOpeningSquareBraceIndex = binding.lastIndexOf('[');
+			int lastClosingSquareBraceIndex = binding.lastIndexOf(']');
+			if ((lastOpeningSquareBraceIndex > 0) && 
+					(lastClosingSquareBraceIndex > lastOpeningSquareBraceIndex)) {
+				if ((lastClosingSquareBraceIndex < (binding.length() - 1)) && // not the end of the binding expression
+						(binding.charAt(lastClosingSquareBraceIndex + 1) == '.')) { // followed by a '.' - eg [100].
+					String simpleBinding = binding.substring(lastClosingSquareBraceIndex + 2);
+					components = findComponentsByBinding(context.getViewRoot(), simpleBinding);
+
+					// We have an indexed binding match that will probably match a data grid
+					for (UIComponent component : components) {
+						if (component.isRendered()) {
+							// We will set s1:s2:s3 to s1:s2:<index>:s3 so it matches the row in the grid
+							String clientId = component.getClientId();
+							int lastColonIndex = clientId.lastIndexOf(':');
+							clientId = String.format("%s:%s%s", 
+														clientId.substring(0, lastColonIndex),
+														binding.substring(lastOpeningSquareBraceIndex + 1, lastClosingSquareBraceIndex),
+														clientId.substring(lastColonIndex));
+							context.addMessage(clientId, msg);
+						}
+					}
+				}
+			}
 		}
 
 		// only add distinct error messages globally
@@ -199,11 +226,13 @@ public abstract class FacesAction<T> {
 		findComponentsByBinding(base, binding, result);
 
 		// check the last part of a compound binding
+		// eg compound.binding
 		if (result.isEmpty()) {
 			int lastDotIndex = binding.lastIndexOf('.');
 			if (lastDotIndex > 0) { // compound binding
-				String simpleBinding = binding.substring(lastDotIndex);
-				findComponentsByBinding(base, simpleBinding, result);
+				// This is the simple binding prepended with a dot (in case we have some compound bindings in the UI)
+				String dotSimpleBinding = binding.substring(lastDotIndex);
+				findComponentsByBinding(base, dotSimpleBinding, result);
 			}
 		}
 		

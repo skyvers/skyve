@@ -49,6 +49,7 @@ import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
 import org.primefaces.component.outputpanel.OutputPanel;
+import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
 import org.primefaces.component.password.Password;
@@ -360,6 +361,20 @@ public class ComponentRenderer {
 			putValue(attributes, "columns", Integer.valueOf(grid.getColumns()));
 			putValue(attributes, "style", grid.getStyle());
 			putValue(attributes, "styleClass", grid.getStyleClass());
+		}
+		else if (component instanceof OverlayPanel) {
+			tagName = "p:overlayPanel";
+			
+			OverlayPanel overlay = (OverlayPanel) component;
+			putValue(attributes, "widgetVar", overlay.getWidgetVar());
+			putValue(attributes, "for", overlay.getFor());
+			putValue(attributes, "hideEffect", overlay.getHideEffect());
+			putValue(attributes, "dynamic", String.valueOf(overlay.isDynamic()));
+			putValue(attributes, "showCloseIcon", String.valueOf(overlay.isShowCloseIcon()));
+			putValue(attributes, "modal", String.valueOf(overlay.isModal()));
+			putValue(attributes, "style", overlay.getStyle());
+			putValue(attributes, "onHide", overlay.getOnHide());
+			putValueExpression(attributes, "onShow", component);
 		}
 		else if (component instanceof Password) {
 			tagName = "p:password";
