@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
@@ -79,7 +77,6 @@ import org.skyve.util.Binder.TargetMetaData;
  * 
  * @author Mike
  */
-@Alternative
 public class LocalDesignRepository extends AbstractRepository {
 	/**
 	 * The cache. MetaData File Location -> MetaData
@@ -810,7 +807,7 @@ public class LocalDesignRepository extends AbstractRepository {
 	public final void resetMenus(User user) {
 		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
-			Menu menu = UtilImpl.cloneBySerialization(module.getMenu(), false);
+			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
 			removeInaccessibleItems(module.getName(), menu, user);
 			internalUser.putModuleMenu(module.getName(), menu);
 		}

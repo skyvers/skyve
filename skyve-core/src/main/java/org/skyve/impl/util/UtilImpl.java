@@ -13,13 +13,11 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.domain.AbstractBean;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -211,8 +209,8 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <T extends Serializable> T cloneBySerialization(T object, boolean runtime) {
-		T clone = (T) SerializationHelper.clone(object);
+	public static final <T extends Serializable> T cloneBySerialization(T object) {
+		return (T) SerializationHelper.clone(object);
 		// try {
 		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		// new ObjectOutputStream(baos).writeObject(object);
@@ -222,39 +220,9 @@ public class UtilImpl {
 		// catch (Exception e) {
 		// throw new IllegalArgumentException(e);
 		// }		
-
-		// We need to re-inject any injected fields on the cloned object as they will have been cleared
-		// when the bean was serialised.
-		if (runtime && object instanceof AbstractBean) {
-			injectFully((AbstractBean)object);
-		}
-		
-		return clone;
 	}
 
-	/**
-	 * Inject the bean and all it's children
-	 * @param bean
-	 */
-	private static void injectFully(AbstractBean bean) {
-		User user = CORE.getUser();
-		Customer customer = user.getCustomer();
-		Module module = customer.getModule(bean.getBizModule());
-		Document document = module.getDocument(customer, bean.getBizDocument());
-		new BeanVisitor(false, true, false) {
-			@Override
-			protected boolean accept(String binding,
-					Document documentAccepted,
-					Document owningDocument,
-					Relation owningRelation,
-					Bean beanAccepted) {
-				BeanProvider.injectFields(beanAccepted);
-				return true;
-			}
-		}.visit(document, bean, customer);
-	}
-
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object, boolean runtime)
+	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
 	throws Exception {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
@@ -266,7 +234,7 @@ public class UtilImpl {
 			populateFully((AbstractPersistentBean) object);
 		}
 
-		T result = cloneBySerialization(object, runtime);
+		T result = cloneBySerialization(object);
 		setTransient(result);
 
 		return result;
