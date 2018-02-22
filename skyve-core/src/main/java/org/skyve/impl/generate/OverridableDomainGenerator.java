@@ -495,7 +495,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									.replace("FactoryExtension", ""));*/
 
 			try {
-				Class<?> c = Class.forName(className);
+				Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 				if (c.isAnnotationPresent(SkyveFactory.class)) {
 					annotation = c.getAnnotation(SkyveFactory.class);
 					// System.out.println("Test action: " + annotation.testAction());
@@ -2127,7 +2127,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// check if this is a server side action, all other types are ignored
 			try {
-				Class<?> c = Class.forName(className);
+				Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 				if (!ArrayUtils.contains(c.getInterfaces(), ServerSideAction.class)) {
 					// System.out.println("Skipping " + actionName + " which is not a ServerSideAction");
 					continue;
