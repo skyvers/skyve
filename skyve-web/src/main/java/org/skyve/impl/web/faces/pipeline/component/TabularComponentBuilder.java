@@ -434,10 +434,21 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		// Insert <p:message> before the contents of the data grid column
+		// and surround the lot with <div style="display:flex"></div>
+		// The flex div ensures controls are laid out to availabel column width correctly (think combos)
 		List<UIComponent> currentChildren = current.getChildren();
 		if (! currentChildren.isEmpty()) {
-			String forId = currentChildren.get(0).getId();
-
+			UIComponent contents = currentChildren.get(0);
+			String forId = contents.getId();
+			
+			// If we hae an input control in the column, surround it with the div
+			HtmlPanelGroup div = null;
+			if (contents instanceof UIInput) {
+				div = panelGroup(true, true, true, null, null);
+				div.setStyle("display:flex");
+			}
+			
+			// The message to the left
 			Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
 			setId(message, null);
 			message.setFor(forId);
@@ -445,7 +456,25 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			message.setShowSummary(false);
 			message.setDisplay("icon");
 			message.setStyle("float:left");
-			currentChildren.add(0, message);
+
+			// If a div was not required (no input control), insert the message into the column
+			if (div == null) {
+				currentChildren.add(0, message);
+			}
+			else {
+				// Add the message to the div
+				List<UIComponent> divChildren = div.getChildren();
+				divChildren.add(message);
+
+				// Set the width of the input component to 100%
+				UIComponent firstComponent = currentChildren.get(0);
+				firstComponent.setValueExpression("style", ef.createValueExpression(elc, "width:100%", String.class));
+	
+				// add all the children column children to the div and add the div to the column
+				divChildren.addAll(currentChildren);
+				currentChildren.clear();
+				currentChildren.add(div);
+			}
 		}
 
 		return current.getParent(); // move from column to table
