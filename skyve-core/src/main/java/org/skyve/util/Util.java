@@ -38,7 +38,7 @@ public class Util {
 	 * @return
 	 */
 	public static final <T extends Serializable> T cloneBySerialization(T object) {
-		return UtilImpl.cloneBySerialization(object, true);
+		return UtilImpl.cloneBySerialization(object);
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class Util {
 	 */
 	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
 	throws Exception {
-		return UtilImpl.cloneToTransientBySerialization(object, true);
+		return UtilImpl.cloneToTransientBySerialization(object);
 	}
 
 	/**

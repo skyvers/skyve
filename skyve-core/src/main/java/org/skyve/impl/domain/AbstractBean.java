@@ -10,7 +10,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.collection.spi.PersistentCollection;
 import org.skyve.CORE;
-import org.skyve.cdi.CDIProvider;
 import org.skyve.domain.Bean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.impl.bind.BindUtil;
@@ -276,19 +275,6 @@ public abstract class AbstractBean implements Bean {
 	 */
 	protected Object readResolve() throws Exception {
 	    BeanProvider.injectFields(this);
-	    return this;
-	}
-
-	/**
-	 * Clears out any {@link Injected} fields before serialising.
-	 * {@link Injected} fields are re-injected in {@link #writeObject()} for this
-	 * object and in {@link #readResolve()} for any new instances that are de-serialised.
-	 * @return this
-	 * @throws Exception
-	 * @see CDIProvider#clearInjectedFields(Object)
-	 */
-	protected Object writeReplace() throws Exception {
-	    CDIProvider.clearInjectedFields(this);
 	    return this;
 	}
 }
