@@ -31,6 +31,7 @@
 				<h:inputHidden id="_b" value="#{_skyveBizImport.binding}" />
 				<h:inputHidden id="_a" value="#{_skyveBizImport.action}" />
 				<p:fileUpload fileUploadListener="#{_skyveBizImport.handleFileUpload}" 
+								allowTypes="/^[^.]+$|\.(?(XLS|XLSX)$)([^.]+$)/i"
 								update="messages problems" 
 								oncomplete="top.isc.WindowStack.getOpener().saveInstance(true,'_PUSH');" />
 			    <p:growl id="messages" showDetail="true" escape="false" life="20000" />
