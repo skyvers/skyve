@@ -58,6 +58,7 @@ public abstract class ActionVisitor {
 	public abstract void visitUploadAction(ActionImpl action);
 	public abstract void visitNewAction(ActionImpl action);
 	public abstract void visitEditAction(ActionImpl action);
+	public void visitPrintAction(ActionImpl action) { }
 	public abstract void visitParameter(Parameter parameter,
 											boolean parentVisible,
 											boolean parentEnabled);
@@ -140,6 +141,9 @@ public abstract class ActionVisitor {
 		}
 		else if (implicitName == ImplicitActionName.Edit) {
 			visitEditAction(action);
+		}
+		else if (implicitName == ImplicitActionName.Print) {
+			visitPrintAction(action);
 		}
 		else {
 			throw new IllegalArgumentException(implicitName + " is not supported by ActionVisitor.");

@@ -2266,6 +2266,11 @@ class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
+	public void visitPrintAction(ActionImpl action) {
+		visitActionInternal(action);
+	}
+
+	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {

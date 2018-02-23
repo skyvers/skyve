@@ -228,7 +228,8 @@ public class SmartClientEditServlet extends HttpServlet {
 					if ((actionName != null) && 
 							(! ImplicitActionName.OK.toString().equals(actionName)) &&
 							(! ImplicitActionName.Save.toString().equals(actionName)) &&
-							(! ImplicitActionName.ZoomOut.toString().equals(actionName))) {
+							(! ImplicitActionName.ZoomOut.toString().equals(actionName)) &&
+							(! ImplicitActionName.Print.toString().equals(actionName))) {
 						UtilImpl.LOGGER.info("ACTION " + formBinding + " : " + gridBinding);
 						if ((editIdCounter == null) || (createIdCounter == null)) {
 							throw new ServletException("Request is malformed");
@@ -891,6 +892,10 @@ public class SmartClientEditServlet extends HttpServlet {
 					throw new SecurityException("update this data", user.getName());
 				}
 				processedBean = persistence.save(processDocument, (PersistentBean) processedBean);
+			}
+
+			if (ImplicitActionName.Print.equals(implicitAction)) {
+
 			}
 		}
 		

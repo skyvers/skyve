@@ -109,6 +109,8 @@
 
   <xs:element name="password" type="tns:password"/>
 
+  <xs:element name="print" type="tns:printAction"/>
+
   <xs:element name="progressBar" type="tns:progressBar"/>
 
   <xs:element name="queryListViewReference" type="tns:queryListViewReference"/>
@@ -694,6 +696,7 @@
         <xs:element ref="tns:download"/>
         <xs:element ref="tns:upload"/>
         <xs:element ref="tns:zoomOut"/>
+        <xs:element ref="tns:print"/>
       </xs:choice>
     </xs:sequence>
     <xs:attribute name="widgetId" type="xs:string"/>
@@ -869,6 +872,14 @@
   </xs:complexType>
 
   <xs:complexType name="zoomOutAction">
+    <xs:complexContent>
+      <xs:extension base="tns:validatableAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="printAction">
     <xs:complexContent>
       <xs:extension base="tns:validatableAction">
         <xs:sequence/>
@@ -1759,6 +1770,7 @@
       <xs:enumeration value="BizExport"/>
       <xs:enumeration value="Download"/>
       <xs:enumeration value="Upload"/>
+      <xs:enumeration value="Print"/>
     </xs:restriction>
   </xs:simpleType>
 

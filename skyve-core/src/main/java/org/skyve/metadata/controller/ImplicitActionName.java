@@ -87,7 +87,12 @@ public enum ImplicitActionName {
 	/**
 	 * Upload and process a file
 	 */
-	Upload("Upload");
+	Upload("Upload"),
+
+	/**
+	 * Prints the current view
+	 */
+	Print("Print");
 	
 	private String displayName;
 
