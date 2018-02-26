@@ -1,8 +1,15 @@
 package org.skyve.impl.util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +41,7 @@ public class TestUtil {
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
 	private static final String ALPHA_NUMERIC = LETTERS + NUMBERS;
+	private static final Map<String, List<String>> DATA_CACHE = new HashMap<>();
 
 	private TestUtil() {
 		// no implementation
@@ -244,8 +252,15 @@ public class TestUtil {
 				case text:
 					Text text = (Text) attribute;
 
+					// check if there is a data file for this field
+					Util.LOGGER.fine(String.format("Looking for test data file in data/%s.txt", attribute.getName()));
+					String value = randomValueFromFile(attribute);
+					if (value != null) {
+						Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
+						BindUtil.set(result, name, value);
+					}
 					// check if this string has a format mask
-					if (text.getFormat() != null) {
+					else if (text.getFormat() != null) {
 						// check if it has a format mask and a regex, if so, prefer the regex
 						if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
 								&& text.getValidator().getType() == null) {
@@ -397,4 +412,66 @@ public class TestUtil {
 		return String.valueOf(guts);
 	}
 
+	/**
+	 * <p>
+	 * Returns a random value from the test data file for the specified attribute if
+	 * a data file exists, null otherwise. The file name is expected to be within a
+	 * <code>data</code> directory on the classpath with the same name (case sensitive)
+	 * as the attribute name.
+	 * </p>
+	 * 
+	 * <p>
+	 * E.g. <code>src/test/resources/data/postCode.txt</code>
+	 * </p>
+	 * 
+	 * <p>
+	 * The file will be cached the first time it is requested, and loaded from memory
+	 * for subsequent random value requests.
+	 * </p>
+	 * 
+	 * @param attribute The attribute to return the random value for
+	 * @return A random value from the data file if it exists, null otherwise
+	 * @throws IOException
+	 */
+	private static String randomValueFromFile(Attribute attribute) throws IOException {
+		List<String> values = null;
+		if (DATA_CACHE.containsKey(attribute.getName())) {
+			values = DATA_CACHE.get(attribute.getName());
+			Util.LOGGER.fine(String.format("Loaded %s list from cache", attribute.getName()));
+		} else {
+			ClassLoader classLoader = TestUtil.class.getClassLoader();
+			InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s.txt", attribute.getName()));
+			values = readFromInputStream(inputStream);
+			DATA_CACHE.put(attribute.getName(), values);
+			Util.LOGGER.fine(String.format("Loaded %s list from file", attribute.getName()));
+		}
+
+		if (values != null) {
+			return values.get(random.nextInt(values.size()));
+		}
+
+		return null;
+	}
+
+	/**
+	 * Attempts to read a test data file from an input stream and stores each line
+	 * as a string in a list.
+	 * 
+	 * @param inputStream The input stream to read from
+	 * @return A list of strings for each line in the file, null if the input stream cannot be read
+	 * @throws IOException
+	 */
+	private static List<String> readFromInputStream(InputStream inputStream) throws IOException {
+		if (inputStream == null) {
+			return null;
+		}
+		List<String> list = new ArrayList<>();
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				list.add(line);
+			}
+		}
+		return list;
+	}
 }

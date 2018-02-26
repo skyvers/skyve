@@ -349,7 +349,13 @@ public class CustomerResourceServlet extends HttpServlet {
 				out.flush();
 			}
 		} 
+		catch (SecurityException e) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			System.err.println("Problem getting the customer resource - " + e.toString());
+			e.printStackTrace();
+		}
 		catch (Exception e) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			System.err.println("Problem getting the customer resource - " + e.toString());
 			e.printStackTrace();
 		}

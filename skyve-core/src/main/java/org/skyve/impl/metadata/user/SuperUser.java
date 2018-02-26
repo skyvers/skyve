@@ -3,19 +3,13 @@ package org.skyve.impl.metadata.user;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.impl.metadata.user.UserImpl;
 
-@Alternative
 public class SuperUser extends UserImpl {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -6233814867322594601L;
 
 	public SuperUser() {

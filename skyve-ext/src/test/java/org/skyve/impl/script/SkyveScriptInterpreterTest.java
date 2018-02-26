@@ -80,7 +80,7 @@ public class SkyveScriptInterpreterTest {
 
 		assertThat(document.getName(), is("Address"));
 		assertThat(document.getSingularAlias(), is("Address"));
-		assertThat(document.getPluralAlias(), is("Addresses"));
+		assertThat("Plural alias should be singluar for non-persistent documents", document.getPluralAlias(), is("Address"));
 		assertThat(document.getPersistent(), is(nullValue()));
 		assertThat(document.getBizKey(), is(notNullValue()));
 		assertThat(document.getBizKey().getExpression(), is(("Address")));
@@ -130,7 +130,7 @@ public class SkyveScriptInterpreterTest {
 
 		assertThat(document.getName(), is("AddressTitle"));
 		assertThat(document.getSingularAlias(), is("Address Title"));
-		assertThat(document.getPluralAlias(), is("Address Titles"));
+		assertThat(document.getPluralAlias(), is("Address Title"));
 		assertThat(document.getPersistent(), is(nullValue()));
 	}
 

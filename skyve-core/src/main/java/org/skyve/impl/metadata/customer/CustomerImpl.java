@@ -10,8 +10,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
-import javax.enterprise.inject.Alternative;
-
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
@@ -52,7 +50,6 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.view.Action;
 import org.skyve.web.WebContext;
 
-@Alternative
 public class CustomerImpl implements Customer {
 	private static final long serialVersionUID = 2926460705821800439L;
 

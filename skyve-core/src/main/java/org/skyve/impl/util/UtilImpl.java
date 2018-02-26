@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.deltaspike.core.api.provider.BeanProvider;
 import org.hibernate.internal.util.SerializationHelper;
 import org.hibernate.proxy.HibernateProxy;
 import org.skyve.CORE;
@@ -153,8 +152,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20180220";
-	public static final String SKYVE_VERSION = "20180220";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20180222-SNAPSHOT";
+	public static final String SKYVE_VERSION = "20180222-SNAPSHOT";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	// for skyve script
@@ -210,8 +209,8 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <T extends Serializable> T cloneBySerialization(T object, boolean runtime) {
-		T clone = (T) SerializationHelper.clone(object);
+	public static final <T extends Serializable> T cloneBySerialization(T object) {
+		return (T) SerializationHelper.clone(object);
 		// try {
 		// ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		// new ObjectOutputStream(baos).writeObject(object);
@@ -221,17 +220,9 @@ public class UtilImpl {
 		// catch (Exception e) {
 		// throw new IllegalArgumentException(e);
 		// }		
-
-		// We need to re-inject any injected fields on the cloned object as they will have been cleared
-		// when the bean was serialised.
-		if (runtime) {
-			BeanProvider.injectFields(object);
-		}
-		
-		return clone;
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object, boolean runtime)
+	public static final <T extends Serializable> T cloneToTransientBySerialization(T object)
 	throws Exception {
 		if (object instanceof List<?>) {
 			for (Object element : (List<?>) object) {
@@ -243,7 +234,7 @@ public class UtilImpl {
 			populateFully((AbstractPersistentBean) object);
 		}
 
-		T result = cloneBySerialization(object, runtime);
+		T result = cloneBySerialization(object);
 		setTransient(result);
 
 		return result;
