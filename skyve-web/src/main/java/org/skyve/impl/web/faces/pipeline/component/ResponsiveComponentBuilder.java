@@ -60,10 +60,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 		return card;
 */
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		if (borderTitle != null) {
-			result.setHeader(borderTitle);
-		}
-
+		setValueOrValueExpression(borderTitle, result::setHeader, "header", result);
 		setInvisible(result, invisibleConditionName, null);
 		setId(result, null);
 		result.setStyleClass("ui-g-12");

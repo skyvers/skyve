@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
@@ -156,7 +157,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
-		result.setTitle(tab.getTitle());
+		setValueOrValueExpression(tab.getTitle(), result::setTitle, "title", result);
 		setDisabled(result, tab.getDisabledConditionName());
 		setInvisible(result, tab.getInvisibleConditionName(), null);
 		setId(result, null);
@@ -1623,13 +1624,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY));
 	}
-	
-	private Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
-		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		if (title != null) {
-			result.setHeader(title);
-		}
 
+	protected Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
+		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
+		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
 		setSize(result, null, pixelWidth, null, null, null, null, NINETY_EIGHT);
 		setId(result, widgetId);
@@ -2690,6 +2688,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
 			confirm.setMessage(confirmationText);
 			component.addClientBehavior("click", confirm);
+		}
+	}
+
+	protected void setValueOrValueExpression(String value, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
+		if (value != null && value.indexOf('{') > -1) {
+			final String sanitisedBinding = ((value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value);
+			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding, true, null, String.class);
+			component.setValueExpression(valueExpressionName, ve);
+		} else if (value != null) {
+			valueSetter.accept(value);
 		}
 	}
 	

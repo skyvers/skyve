@@ -652,6 +652,7 @@ class ViewValidator extends ViewVisitor {
 		}
 		validateConditionName(form.getDisabledConditionName(), formIdentifier);
 		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
+		validateMessageBindings(form.getBorderTitle(), formIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -770,6 +771,7 @@ class ViewValidator extends ViewVisitor {
 		String id = hbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
+		validateMessageBindings(hbox.getBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
@@ -1440,6 +1442,7 @@ class ViewValidator extends ViewVisitor {
 		String tabIdentifier = "Tab " + tab.getTitle();
 		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
 		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
+		validateMessageBindings(tab.getTitle(), tabIdentifier, "title");
 	}
 
 	@Override
@@ -1528,6 +1531,7 @@ class ViewValidator extends ViewVisitor {
 		String id = vbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
+		validateMessageBindings(vbox.getBorderTitle(), boxIdentifier, "borderTitle");
 	}
 
 	@Override
