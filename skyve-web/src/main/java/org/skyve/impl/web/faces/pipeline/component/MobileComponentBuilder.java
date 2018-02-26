@@ -441,9 +441,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid grid,
-									boolean canCreateDocument,
-									boolean showPaginator,
-									boolean stickyHeader) {
+									boolean canCreateDocument) {
 		if (component != null) {
 			return component;
 		}
@@ -463,11 +461,6 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, null);
 		result.setVar("row");
-		result.setPaginator(showPaginator);
-		if (showPaginator) {
-			result.setRows(20);
-	        result.setPaginatorAlwaysVisible(false);
-		}
         result.setLazy(true);
         result.setEmptyMessage("No Items to show");
 

@@ -11,7 +11,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
-import org.skyve.impl.web.SortParameter;
+import org.skyve.web.SortParameter;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Association;

@@ -27,23 +27,31 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private Bean bean;
 	private String binding;
 	private boolean includeEmptyItem;
-
+	private String moduleName;
+	private String documentName;
+	
 	public GetSelectItemsAction(Bean bean, String binding, boolean includeEmptyItem) {
 		this.bean = bean;
 		this.binding = binding;
 		this.includeEmptyItem = includeEmptyItem;
+		this.moduleName = bean.getBizModule();
+		this.documentName = bean.getBizDocument();
+	}
+
+	public GetSelectItemsAction(String moduleName, String documentName, String binding, boolean includeEmptyItem) {
+		this.binding = binding;
+		this.includeEmptyItem = includeEmptyItem;
+		this.moduleName = moduleName;
+		this.documentName = documentName;
 	}
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
 
-		String bizModule = bean.getBizModule();
-    	String bizDocument = bean.getBizDocument();
-
     	Customer customer = CORE.getUser().getCustomer();
-        Module module = customer.getModule(bizModule);
-        Document document = module.getDocument(customer, bizDocument);
+        Module module = customer.getModule(moduleName);
+        Document document = module.getDocument(customer, documentName);
         TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, binding);
         Attribute targetAttribute = target.getAttribute();
         Document targetDocument = target.getDocument();

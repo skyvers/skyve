@@ -6,7 +6,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.web.UserAgent.UserAgentType;
 import org.skyve.metadata.controller.ImplicitActionName;
 
-public class SkyveComponentBuilder extends ResponsiveComponentBuilder {
+public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {
 	/**
 	 * No spacers rendered for phones.
 	 */

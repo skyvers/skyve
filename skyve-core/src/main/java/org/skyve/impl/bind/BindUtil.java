@@ -201,11 +201,15 @@ public final class BindUtil {
 	
 	/**
 	 * Place the bindingPrefix + '.' + <existing expression> wherever a binding expression - {<expression>} occurs.
-	 * @param message	The message to process.
+	 * @param message	The message to process. Can be null.
 	 * @param bindingPrefix	The binding prefix to prefix with.
-	 * @return	The prefixed message.
+	 * @return	The prefixed message or null if message argument was null.
 	 */
 	public static String prefixMessageBindings(String message, String bindingPrefix) {
+		if (message == null) {
+			return null;
+		}
+
 		String bindingPrefixAndDot = bindingPrefix + '.';
 		
 		StringBuilder result = new StringBuilder(message);

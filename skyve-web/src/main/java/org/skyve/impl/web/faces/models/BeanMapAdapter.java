@@ -156,6 +156,21 @@ public final class BeanMapAdapter<T extends Bean> implements Map<String, Object>
 		return result;
 	}
 	
+	public List<SelectItem> getSelectItems(String moduleName,
+											String documentName,
+											String binding,
+											boolean includeEmptyItem) {
+		final String key = new StringBuilder(64).append(moduleName).append('.').append(documentName).append('.').append(binding).toString();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
+		List<SelectItem> result = lists.get(key);
+		if (result == null) {
+			result = new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
+			lists.put(key, result);
+		}
+		
+		return result;
+	}
+	
 	private Object get(final String binding) throws Exception {
 		Object result = Binder.get(bean, binding);
 		

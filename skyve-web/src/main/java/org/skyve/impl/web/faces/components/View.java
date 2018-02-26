@@ -19,7 +19,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.FacesViewVisitor;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
-import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.customer.Customer;
@@ -51,7 +51,7 @@ public class View extends HtmlPanelGroup {
 	    	try {
 	    		tempComponentBuilder = (classString != null) ? 
 	    								(ComponentBuilder) Class.forName(classString).newInstance() :
-    									new SkyveComponentBuilder();
+    									new SkyveComponentBuilderChain();
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);

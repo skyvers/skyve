@@ -154,9 +154,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelName,
 											ListModel<? extends Bean> model,
 											ListGrid listGrid,
-											boolean canCreateDocument,
-											boolean showPaginator,
-											boolean stickyHeader);
+											boolean canCreateDocument);
 
 	/*
 	 * List Repeater is just like a list grid but...
@@ -174,8 +172,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												List<FilterParameter> filterParameters,
 												String title,
 												boolean showColumnHeaders,
-												boolean showGrid,
-												boolean stickyHeader);
+												boolean showGrid);
 
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	

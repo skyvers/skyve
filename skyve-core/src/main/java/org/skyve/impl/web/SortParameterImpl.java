@@ -3,11 +3,9 @@ package org.skyve.impl.web;
 import java.io.Serializable;
 
 import org.skyve.metadata.SortDirection;
+import org.skyve.web.SortParameter;
 
-public class SortParameter implements Serializable, org.skyve.web.SortParameter {
-	/**
-	 * For Serialization
-	 */
+public class SortParameterImpl implements Serializable, SortParameter {
 	private static final long serialVersionUID = 4250974309552241616L;
 
 	private String by;
