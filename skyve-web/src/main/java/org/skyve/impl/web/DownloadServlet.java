@@ -29,9 +29,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
 public class DownloadServlet extends HttpServlet {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -73,7 +70,7 @@ public class DownloadServlet extends HttpServlet {
 																							document, 
 																							resourceName,
 																							true);
-			        	Bean bean = webContext.getCurrentBean();
+						Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
 			        	
 						boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);
 						Download result = null;

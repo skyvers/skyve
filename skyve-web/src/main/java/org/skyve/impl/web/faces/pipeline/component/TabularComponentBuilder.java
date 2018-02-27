@@ -2120,7 +2120,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Create a button with a href URL that looks like...
-	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_ctim=<currentTimeInMillis>
+	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
 	 */
 	private Button downloadButton(String title, 
 									String iconStyleClass,
@@ -2135,22 +2135,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									@SuppressWarnings("unused") String confirmationText,
 									String disabled,
 									String invisible) {
-		String href = String.format("download?%s=%s&%s=%s.%s&%s=#{%s.webContext.webId}&%s=%d", 
-										AbstractWebContext.RESOURCE_FILE_NAME,
-										downloadActionName,
-										AbstractWebContext.DOCUMENT_NAME,
-										moduleName,
-										documentName,
-										AbstractWebContext.CONTEXT_NAME,
+		String href = String.format("#{%s.getDownloadUrl('%s','%s','%s')}", 
 										managedBeanName,
-										AbstractWebContext.CURRENT_TIME_IN_MILLIS,
-										Long.valueOf(System.currentTimeMillis()));
+										downloadActionName,
+										moduleName,
+										documentName);
 		return linkButton((iconStyleClass == null) ? "fa fa-download" : iconStyleClass, 
 							null, 
 							null,
 							title,
 							tooltip,
-							href.toString(),
+							href,
 							pixelWidth,
 							pixelHeight,
 							disabled,

@@ -371,6 +371,21 @@ public class FacesView<T extends Bean> extends Harness {
 		return dualListModels;
  	}
 
+	// /skyve/download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
+	public String getDownloadUrl(String downloadActionName, String moduleName, String documentName) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/download?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
+		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append(moduleName).append('.').append(documentName);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
+		return result.toString();
+	}
+
 	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
 	public String getContentUploadUrl(String sanitisedBinding) {
 		StringBuilder result = new StringBuilder(128);
