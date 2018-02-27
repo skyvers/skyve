@@ -750,17 +750,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (grid.getTitle() != null) {
 			addListGridHeader(grid.getTitle(), result);
 		}
-        List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, result.getWidgetVar());
+
+		boolean showFilter = (! Boolean.FALSE.equals(grid.getShowFilter()));
+		if (showFilter) {
+			result.setFilterDelay(500);
+		}
+		
+		List<UIComponent> children = result.getChildren();
+        addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
         if ((canCreateDocument && createRendered) || zoomRendered) {
         	final UIComponent actionColumn = createListGridActionColumn(moduleName,
-        								drivingDocumentName, 
-        								canCreateDocument,
-        								createRendered, 
-        								createDisabled,
-        								zoomRendered,
-        								grid.getDisableZoomConditionName(),
-										grid.getProperties());
+									        								drivingDocumentName, 
+									        								canCreateDocument,
+									        								createRendered, 
+									        								createDisabled,
+									        								zoomRendered,
+									        								grid.getDisableZoomConditionName(),
+																			grid.getProperties());
 			children.add(actionColumn);
         }
     	
@@ -813,6 +819,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
 											List<UIComponent> componentChildrenToAddTo,
+											boolean showFilter,
 											String tableVar) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
@@ -830,7 +837,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			// Sort out a display name and filter facet
 			String displayName = queryColumn.getDisplayName();
-			UIComponent filterComponent = null;
+			UIComponent specialFilterComponent = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				Document bindingDocument = target.getDocument();
@@ -854,8 +861,11 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					if (displayName == null) {
 						displayName = bindingAttribute.getDisplayName();
 					}
-					if (queryColumn.isFilterable()) {
-						filterComponent = createColumnFilterFacetComponent(document, binding,  bindingAttribute, tableVar);
+					if (showFilter && queryColumn.isFilterable()) {
+						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
+																							binding,
+																							bindingAttribute,
+																							tableVar);
 					}
 				}
 			}
@@ -876,11 +886,13 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 
 			// Unbound columns or unfilterable columns should be set unfilterable
-			if ((binding == null) || (filterComponent == null)) {
-				column.setFilterable(false);
+			if ((binding != null) && showFilter && queryColumn.isFilterable()) {
+				if (specialFilterComponent != null) {
+					column.getFacets().put("filter", specialFilterComponent);
+				}
 			}
 			else {
-				column.getFacets().put("filter", filterComponent);
+				column.setFilterable(false);
 			}
 			
 			// Add the EL expression
@@ -892,10 +904,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
-	protected UIComponent createColumnFilterFacetComponent(Document modelDrivingDocument, 
-															String columnBinding,
-															Attribute columnAttribute,
-															String tableVar) {
+	protected UIComponent createSpecialColumnFilterFacetComponent(Document modelDrivingDocument, 
+																	String columnBinding,
+																	Attribute columnAttribute,
+																	String tableVar) {
 		// To keep the appropriate length of the filter input components inside the data table columns,
 		// A <div style="display:flex" /> should be used, but nesting the control in a div breaks
 		// the filtering processing of faces...so instead, the <div class=".ui-column-customfilter" />
@@ -920,12 +932,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				SelectBooleanCheckbox cb = checkbox(null, null, null, false, null);
 				cb.setOnchange(String.format("PF('%s').filter()", tableVar));
 				result = cb;
-			}
-			else {
-				InputText t = textField(null, null, null, false, false, null, null, null, null, false);
-				t.setStyle("width:100%");
-				t.setOnkeypress(String.format("SKYVE.filterOnEnter(event,'%s')", tableVar));
-				result = t;
 			}
 		}
 		
@@ -970,7 +976,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return column;
 	}
 
-	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
+													@SuppressWarnings("unused") Map<String, String> properties) {
 		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 		button.setValue(null);
 		button.setTitle("View Detail");
@@ -1059,7 +1066,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			addListGridHeader(title, result);
 		}
         List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children, result.getWidgetVar());
+        addListGridDataColumns(model, children, false, result.getWidgetVar());
 
         result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
         result.setEmptyMessage("");
@@ -2160,7 +2167,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String listVar, 
 										Integer pixelWidth, 
 										Integer pixelHeight,
-										Boolean clientValidation, 
+										@SuppressWarnings("unused") Boolean clientValidation, 
 										String confirmationText,
 										String disabled, 
 										String invisible,
@@ -2627,22 +2634,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		UISelectItems result = (UISelectItems) a.createComponent(UISelectItems.COMPONENT_TYPE);
 		setId(result, null);
 		String expression = null;
-		if ((moduleName != null) && (documentName != null)) {
+		ValueExpression valueExpression = null;
+		if ((moduleName != null) && (documentName != null)) { // module and document, use FacesView.getSelectItems()
 			expression = String.format("getSelectItems('%s','%s','%s',%s)", 
 										moduleName,
 										documentName,
 										binding,
 										String.valueOf(includeEmptyItems));
+			valueExpression = createValueExpressionFromFragment(managedBeanName, false, expression, false, null, List.class);
 		}
-		else {
+		else { // use the FacesView.currentBean.getSelectItems()
 			expression = String.format("getSelectItems('%s',%s)", binding, String.valueOf(includeEmptyItems));
-		}
-		ValueExpression valueExpression = null;
-		if (listVar != null) {
-			valueExpression = createValueExpressionFromFragment(listVar, true, expression, false, null, List.class);
-		}
-		else {
-			valueExpression = createValueExpressionFromFragment(expression, false, null, List.class);
+			if (listVar != null) {
+				valueExpression = createValueExpressionFromFragment(listVar, true, expression, false, null, List.class);
+			}
+			else {
+				valueExpression = createValueExpressionFromFragment(expression, false, null, List.class);
+			}
 		}
 		result.setValueExpression("value", valueExpression);
 

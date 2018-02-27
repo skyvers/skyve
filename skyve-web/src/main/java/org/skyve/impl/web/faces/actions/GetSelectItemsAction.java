@@ -30,6 +30,12 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private String moduleName;
 	private String documentName;
 	
+	/**
+	 * Constructor used for input components in forms and grids.
+	 * @param bean
+	 * @param binding
+	 * @param includeEmptyItem
+	 */
 	public GetSelectItemsAction(Bean bean, String binding, boolean includeEmptyItem) {
 		this.bean = bean;
 		this.binding = binding;
@@ -38,6 +44,13 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 		this.documentName = bean.getBizDocument();
 	}
 
+	/**
+	 * Constructor used for filter components.
+	 * @param moduleName
+	 * @param documentName
+	 * @param binding
+	 * @param includeEmptyItem
+	 */
 	public GetSelectItemsAction(String moduleName, String documentName, String binding, boolean includeEmptyItem) {
 		this.binding = binding;
 		this.includeEmptyItem = includeEmptyItem;
@@ -61,11 +74,13 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         if ((targetDocument != null) && (targetAttribute != null)) {
             DomainType domainType = targetAttribute.getDomainType();
             Bean owningBean = bean;
-            int lastDotIndex = binding.lastIndexOf('.');
-            if (lastDotIndex > 0) {
-            	owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+            if (bean != null) {
+	            int lastDotIndex = binding.lastIndexOf('.');
+	            if (lastDotIndex > 0) {
+	            	owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+	            }
             }
-
+            
             List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
 																	                            domainType,
 																	                            targetAttribute,
@@ -74,7 +89,8 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            result = new ArrayList<>(domainValues.size() + 1);
 	        	// add an empty select item so that a null value 
 	        	// in the bean can be represented, even if mandatory
-	        	if (targetAttribute.isRequired()) {
+	            // Notice filter components should always have a selectable empty value
+	        	if ((bean != null) && targetAttribute.isRequired()) {
 	        		result.add(new SelectItem(null, "", "", true, false, true)); // mandatory gets an unselectable item
 	        	}
 	        	else {

@@ -31,12 +31,6 @@ SKYVE = function() {
 			SKYVE.getById(id + '_' + binding + '_link').attr('href','javascript:void(0)').text('<Empty>');
 		},
 		
-		filterOnEnter: function(event, tableVar) {
-			if (event.keyCode == 13) {
-				PF(tableVar).filter();
-			}
-		},
-		
 		getTextElement: function(id) {
 			return SKYVE.getById(id);
 		},

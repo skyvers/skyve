@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 
-public class ListStickyHeaderBuilder extends NoOpComponentBuilder {
+public class StickyHeaderListBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String modelDocumentName,
@@ -18,7 +18,9 @@ public class ListStickyHeaderBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
-		((DataTable) component).setStickyHeader(true);
+		if (component != null) {
+			((DataTable) component).setStickyHeader(true);
+		}
 		return component;
 	}
 	
@@ -31,7 +33,9 @@ public class ListStickyHeaderBuilder extends NoOpComponentBuilder {
 										String title,
 										boolean showColumnHeaders,
 										boolean showGrid) {
-		((DataTable) component).setStickyHeader(true);
+		if (component != null) {
+			((DataTable) component).setStickyHeader(true);
+		}
 		return component;
 	}
 }

@@ -9,8 +9,12 @@ body,html {
 }
 /* Ensure that the list grid filter components fit the column widths nicely */
 .ui-column-customfilter {
-	display: flex;
+	display: flex !important;
 }
+.ui-column-filter {
+	width: 95% !important;
+}
+
 /* skyve alignment styles */
 .left {
 	text-align: left;

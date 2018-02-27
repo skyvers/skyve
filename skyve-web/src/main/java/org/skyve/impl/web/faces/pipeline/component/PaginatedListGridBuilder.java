@@ -7,7 +7,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.view.model.list.ListModel;
 
-public class ListGridPaginatorBuilder extends NoOpComponentBuilder {
+public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 	@Override
 	public UIComponent listGrid(UIComponent component,
 									String modelDocumentName,
@@ -15,12 +15,14 @@ public class ListGridPaginatorBuilder extends NoOpComponentBuilder {
 									ListModel<? extends Bean> model,
 									ListGrid listGrid,
 									boolean canCreateDocument) {
-		UIData dt = (UIData) component;
-		dt.setPaginator(true);
-    	dt.setRowsPerPageTemplate("25,50,75,100");
-    	dt.setRows(50);
-    	dt.setPaginatorAlwaysVisible(false);
-
+		if (component != null) {
+			UIData dt = (UIData) component;
+			dt.setPaginator(true);
+	    	dt.setRowsPerPageTemplate("25,50,75,100");
+	    	dt.setRows(50);
+	    	dt.setPaginatorAlwaysVisible(false);
+		}
+		
 		return component;
 	}
 }
