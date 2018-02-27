@@ -404,7 +404,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Column result = column(listVar,
-								(columnBinding == null) ? Bean.BIZ_KEY : columnBinding,
+								null,
 								columnTitle,
 	                            column.getAlignment(),
 	                            false,
