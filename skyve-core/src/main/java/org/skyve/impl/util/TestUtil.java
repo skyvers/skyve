@@ -440,10 +440,11 @@ public class TestUtil {
 			Util.LOGGER.fine(String.format("Loaded %s list from cache", attribute.getName()));
 		} else {
 			ClassLoader classLoader = TestUtil.class.getClassLoader();
-			InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s.txt", attribute.getName()));
-			values = readFromInputStream(inputStream);
-			DATA_CACHE.put(attribute.getName(), values);
-			Util.LOGGER.fine(String.format("Loaded %s list from file", attribute.getName()));
+			try (InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s.txt", attribute.getName()))) {
+				values = readFromInputStream(inputStream);
+				DATA_CACHE.put(attribute.getName(), values);
+				Util.LOGGER.fine(String.format("Loaded %s list from file", attribute.getName()));
+			}
 		}
 
 		if (values != null) {
