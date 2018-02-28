@@ -19,6 +19,10 @@
 
   <xs:element name="delete" type="tns:delete"/>
 
+  <xs:element name="listGridSelect" type="tns:listGridSelect"/>
+
+  <xs:element name="listGridZoom" type="tns:listGridZoom"/>
+
   <xs:element name="lookupDescriptionAutoComplete" type="tns:lookupDescriptionAutoComplete"/>
 
   <xs:element name="lookupDescriptionEdit" type="tns:lookupDescriptionEdit"/>
@@ -35,11 +39,15 @@
 
   <xs:element name="save" type="tns:save"/>
 
+  <xs:element name="selenese" type="tns:selenese"/>
+
   <xs:element name="setup" type="tns:setup"/>
 
   <xs:element name="tabSelect" type="tns:tabSelect"/>
 
   <xs:element name="tearDown" type="tns:tearDown"/>
+
+  <xs:element name="test" type="tns:test"/>
 
   <xs:element name="testCase" type="tns:testCase"/>
 
@@ -80,6 +88,10 @@
         <xs:element ref="tns:dataGridEdit"/>
         <xs:element ref="tns:dataGridRemove"/>
         <xs:element ref="tns:dataGridSelect"/>
+        <xs:element ref="tns:listGridZoom"/>
+        <xs:element ref="tns:listGridSelect"/>
+        <xs:element ref="tns:test"/>
+        <xs:element ref="tns:selenese"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -185,6 +197,34 @@
     <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="listGridZoom">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridSelect">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="test">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:simpleType name="selenese">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
   <xs:complexType name="testCase">
     <xs:sequence>
       <xs:element ref="tns:setup" minOccurs="0"/>
@@ -212,6 +252,10 @@
               <xs:element ref="tns:dataGridEdit"/>
               <xs:element ref="tns:dataGridRemove"/>
               <xs:element ref="tns:dataGridSelect"/>
+              <xs:element ref="tns:listGridZoom"/>
+              <xs:element ref="tns:listGridSelect"/>
+              <xs:element ref="tns:test"/>
+              <xs:element ref="tns:selenese"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -244,6 +288,10 @@
         <xs:element ref="tns:dataGridEdit"/>
         <xs:element ref="tns:dataGridRemove"/>
         <xs:element ref="tns:dataGridSelect"/>
+        <xs:element ref="tns:listGridZoom"/>
+        <xs:element ref="tns:listGridSelect"/>
+        <xs:element ref="tns:test"/>
+        <xs:element ref="tns:selenese"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>

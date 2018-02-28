@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.language.step.Selenese;
+import org.skyve.impl.tools.test.sail.language.step.Test;
 import org.skyve.impl.tools.test.sail.language.step.interaction.DataEnter;
 import org.skyve.impl.tools.test.sail.language.step.interaction.Menu;
 import org.skyve.impl.tools.test.sail.language.step.interaction.TabSelect;
@@ -24,6 +26,8 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.grids.DataGridNe
 import org.skyve.impl.tools.test.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.impl.tools.test.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.impl.tools.test.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.impl.tools.test.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.impl.tools.test.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.impl.tools.test.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.impl.tools.test.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.impl.tools.test.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -52,7 +56,11 @@ public class TearDown extends Procedure {
 						@XmlElementRef(type = DataGridZoom.class),
 						@XmlElementRef(type = DataGridEdit.class),
 						@XmlElementRef(type = DataGridRemove.class),
-						@XmlElementRef(type = DataGridSelect.class)})
+						@XmlElementRef(type = DataGridSelect.class),
+						@XmlElementRef(type = ListGridZoom.class),
+						@XmlElementRef(type = ListGridSelect.class),
+						@XmlElementRef(type = Test.class),
+						@XmlElementRef(type = Selenese.class)})
 	public List<Step> getSteps() {
 		return super.getSteps();
 	}
