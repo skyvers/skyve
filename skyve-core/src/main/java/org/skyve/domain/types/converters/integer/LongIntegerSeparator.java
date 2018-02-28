@@ -15,7 +15,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	@Override
 	public Long fromDisplayValue(String displayValue) throws Exception {
 		String result = displayValue.replace(",", "");
-		return Long.parseLong(result);
+		return Long.valueOf(result);
 	}
 
 	@Override

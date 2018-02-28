@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -67,11 +68,11 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.tools.test.sail.language.TestCase;
 import org.skyve.impl.tools.test.sail.language.TestSuite;
-import org.skyve.impl.tools.test.sail.language.step.Call;
+import org.skyve.impl.tools.test.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-class GenerateViewVisitor extends ViewVisitor {
+class GenerateViewVisitor extends NoOpViewVisitor {
 	private TestSuite testSuite;
 	
 	protected GenerateViewVisitor(CustomerImpl customer,
@@ -85,12 +86,11 @@ class GenerateViewVisitor extends ViewVisitor {
 
 	@Override
 	public void visitView() {
-		TestCase foo = new TestCase();
-		foo.setIdentifier(module.getName() + '.' + document.getName());
-		Call call = new Call();
-		call.setIdentifier(foo.getIdentifier());
-		foo.getSteps().add(call);
-		testSuite.getCases().add(foo);
+		TestCase crud = new TestCase();
+		crud.setIdentifier(String.format("CRUD Test %s.%s", module.getName(), document.getName()));
+		TestDataEnter testDataEnter = new TestDataEnter();
+		crud.getSteps().add(testDataEnter);
+		testSuite.getCases().add(crud);
 	}
 
 	@Override

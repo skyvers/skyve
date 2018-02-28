@@ -1,29 +1,27 @@
 package org.skyve.impl.tools.test.sail.language.step;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
 import org.skyve.impl.tools.test.sail.language.Step;
-import org.skyve.impl.util.UtilImpl;
 
 @XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
-public class Call implements Step {
-	private String identifier;
+public class Selenese implements Step {
+	private String selenese;
 
-	public String getIdentifier() {
-		return identifier;
+	public String getSelenese() {
+		return selenese;
 	}
 
-	@XmlAttribute(required = true)
-	public void setIdentifier(String identifier) {
-		this.identifier = UtilImpl.processStringValue(identifier);
+	@XmlValue
+	public void setSelenese(String selenese) {
+		this.selenese = selenese;
 	}
 
 	@Override
 	public void execute(StringBuilder script) {
-		script.append("call ").append(identifier).append('\n');
 	}
 }

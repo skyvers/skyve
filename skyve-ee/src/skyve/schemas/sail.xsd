@@ -3,23 +3,51 @@
 
   <xs:element name="action" type="tns:action"/>
 
-  <xs:element name="call" type="tns:call"/>
+  <xs:element name="cancel" type="tns:cancel"/>
+
+  <xs:element name="dataEnter" type="tns:dataEnter"/>
+
+  <xs:element name="dataGridEdit" type="tns:dataGridEdit"/>
+
+  <xs:element name="dataGridNew" type="tns:dataGridNew"/>
+
+  <xs:element name="dataGridRemove" type="tns:dataGridRemove"/>
+
+  <xs:element name="dataGridSelect" type="tns:dataGridSelect"/>
+
+  <xs:element name="dataGridZoom" type="tns:dataGridZoom"/>
+
+  <xs:element name="delete" type="tns:delete"/>
+
+  <xs:element name="lookupDescriptionAutoComplete" type="tns:lookupDescriptionAutoComplete"/>
+
+  <xs:element name="lookupDescriptionEdit" type="tns:lookupDescriptionEdit"/>
+
+  <xs:element name="lookupDescriptionNew" type="tns:lookupDescriptionNew"/>
+
+  <xs:element name="lookupDescriptionPick" type="tns:lookupDescriptionPick"/>
 
   <xs:element name="menu" type="tns:menu"/>
 
-  <xs:element name="module" type="tns:module"/>
+  <xs:element name="ok" type="tns:ok"/>
 
-  <xs:element name="navigate" type="tns:navigate"/>
+  <xs:element name="remove" type="tns:remove"/>
 
-  <xs:element name="reload" type="tns:reload"/>
+  <xs:element name="save" type="tns:save"/>
 
   <xs:element name="setup" type="tns:setup"/>
+
+  <xs:element name="tabSelect" type="tns:tabSelect"/>
 
   <xs:element name="tearDown" type="tns:tearDown"/>
 
   <xs:element name="testCase" type="tns:testCase"/>
 
+  <xs:element name="testDataEnter" type="tns:testDataEnter"/>
+
   <xs:element name="testSuite" type="tns:testSuite"/>
+
+  <xs:element name="zoomOut" type="tns:zoomOut"/>
 
   <xs:complexType name="testSuite">
     <xs:sequence>
@@ -32,39 +60,129 @@
   <xs:complexType name="setup">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:call"/>
-        <xs:element ref="tns:module"/>
-        <xs:element ref="tns:action"/>
         <xs:element ref="tns:menu"/>
-        <xs:element ref="tns:navigate"/>
-        <xs:element ref="tns:reload"/>
+        <xs:element ref="tns:tabSelect"/>
+        <xs:element ref="tns:testDataEnter"/>
+        <xs:element ref="tns:dataEnter"/>
+        <xs:element ref="tns:ok"/>
+        <xs:element ref="tns:save"/>
+        <xs:element ref="tns:cancel"/>
+        <xs:element ref="tns:delete"/>
+        <xs:element ref="tns:zoomOut"/>
+        <xs:element ref="tns:remove"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:lookupDescriptionAutoComplete"/>
+        <xs:element ref="tns:lookupDescriptionPick"/>
+        <xs:element ref="tns:lookupDescriptionNew"/>
+        <xs:element ref="tns:lookupDescriptionEdit"/>
+        <xs:element ref="tns:dataGridNew"/>
+        <xs:element ref="tns:dataGridZoom"/>
+        <xs:element ref="tns:dataGridEdit"/>
+        <xs:element ref="tns:dataGridRemove"/>
+        <xs:element ref="tns:dataGridSelect"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="call">
+  <xs:complexType name="menu">
     <xs:sequence/>
-    <xs:attribute name="identifier" type="xs:string" use="required"/>
+    <xs:attribute name="path" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="module">
+  <xs:complexType name="tabSelect">
+    <xs:sequence/>
+    <xs:attribute name="path" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testDataEnter">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="dataEnter">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ok">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="save">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="cancel">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="delete">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="zoomOut">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="remove">
     <xs:sequence/>
   </xs:complexType>
 
   <xs:complexType name="action">
     <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="menu">
+  <xs:complexType name="lookupDescriptionAutoComplete">
     <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="search" type="xs:string" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="navigate">
+  <xs:complexType name="lookupDescriptionPick">
     <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="reload">
+  <xs:complexType name="lookupDescriptionNew">
     <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="lookupDescriptionEdit">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridNew">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridZoom">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridEdit">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridRemove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridSelect">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="testCase">
@@ -74,12 +192,26 @@
         <xs:complexType>
           <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="tns:call"/>
-              <xs:element ref="tns:module"/>
-              <xs:element ref="tns:action"/>
               <xs:element ref="tns:menu"/>
-              <xs:element ref="tns:navigate"/>
-              <xs:element ref="tns:reload"/>
+              <xs:element ref="tns:tabSelect"/>
+              <xs:element ref="tns:testDataEnter"/>
+              <xs:element ref="tns:dataEnter"/>
+              <xs:element ref="tns:ok"/>
+              <xs:element ref="tns:save"/>
+              <xs:element ref="tns:cancel"/>
+              <xs:element ref="tns:delete"/>
+              <xs:element ref="tns:zoomOut"/>
+              <xs:element ref="tns:remove"/>
+              <xs:element ref="tns:action"/>
+              <xs:element ref="tns:lookupDescriptionAutoComplete"/>
+              <xs:element ref="tns:lookupDescriptionPick"/>
+              <xs:element ref="tns:lookupDescriptionNew"/>
+              <xs:element ref="tns:lookupDescriptionEdit"/>
+              <xs:element ref="tns:dataGridNew"/>
+              <xs:element ref="tns:dataGridZoom"/>
+              <xs:element ref="tns:dataGridEdit"/>
+              <xs:element ref="tns:dataGridRemove"/>
+              <xs:element ref="tns:dataGridSelect"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -92,12 +224,26 @@
   <xs:complexType name="tearDown">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:call"/>
-        <xs:element ref="tns:module"/>
-        <xs:element ref="tns:action"/>
         <xs:element ref="tns:menu"/>
-        <xs:element ref="tns:navigate"/>
-        <xs:element ref="tns:reload"/>
+        <xs:element ref="tns:tabSelect"/>
+        <xs:element ref="tns:testDataEnter"/>
+        <xs:element ref="tns:dataEnter"/>
+        <xs:element ref="tns:ok"/>
+        <xs:element ref="tns:save"/>
+        <xs:element ref="tns:cancel"/>
+        <xs:element ref="tns:delete"/>
+        <xs:element ref="tns:zoomOut"/>
+        <xs:element ref="tns:remove"/>
+        <xs:element ref="tns:action"/>
+        <xs:element ref="tns:lookupDescriptionAutoComplete"/>
+        <xs:element ref="tns:lookupDescriptionPick"/>
+        <xs:element ref="tns:lookupDescriptionNew"/>
+        <xs:element ref="tns:lookupDescriptionEdit"/>
+        <xs:element ref="tns:dataGridNew"/>
+        <xs:element ref="tns:dataGridZoom"/>
+        <xs:element ref="tns:dataGridEdit"/>
+        <xs:element ref="tns:dataGridRemove"/>
+        <xs:element ref="tns:dataGridSelect"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
