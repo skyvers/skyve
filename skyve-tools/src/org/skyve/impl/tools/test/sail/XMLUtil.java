@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.wail;
+package org.skyve.impl.tools.test.sail;
 
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 
@@ -13,7 +13,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.skyve.impl.tools.test.wail.language.TestSuite;
+import org.skyve.impl.tools.test.sail.language.TestSuite;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 
@@ -26,7 +26,7 @@ public class XMLUtil {
 		try {
 			WAIL_CONTEXT = JAXBContext.newInstance(TestSuite.class);
 			SchemaFactory sf = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
-			WAIL_SCHEMA = sf.newSchema(new File(UtilImpl.getAbsoluteBasePath() + "schemas/wail/wail.xsd"));
+			WAIL_SCHEMA = sf.newSchema(new File(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd"));
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Could not initialize one of the metadata JAXB contexts", e);

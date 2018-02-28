@@ -13,7 +13,7 @@ import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
-import org.skyve.impl.tools.test.wail.language.TestSuite;
+import org.skyve.impl.tools.test.sail.language.TestSuite;
 
 public class XMLSchemaGenerator {
 	public static void main(String[] args) throws Exception {

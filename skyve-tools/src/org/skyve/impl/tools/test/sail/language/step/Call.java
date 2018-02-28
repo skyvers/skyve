@@ -1,11 +1,11 @@
-package org.skyve.impl.tools.test.wail.language.step;
+package org.skyve.impl.tools.test.sail.language.step;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.tools.test.wail.XMLUtil;
-import org.skyve.impl.tools.test.wail.language.Step;
+import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.language.Step;
 import org.skyve.impl.util.UtilImpl;
 
 @XmlType(namespace = XMLUtil.WAIL_NAMESPACE)

@@ -1,10 +1,10 @@
-package org.skyve.impl.tools.test.wail.interpret;
+package org.skyve.impl.tools.test.sail.interpret;
 
 import java.io.StringReader;
 
-import org.skyve.impl.tools.test.wail.XMLUtil;
-import org.skyve.impl.tools.test.wail.generate.Generator;
-import org.skyve.impl.tools.test.wail.language.TestSuite;
+import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.generate.Generator;
+import org.skyve.impl.tools.test.sail.language.TestSuite;
 
 public class Interpreter {
 	public static void main(String[] args) throws Exception {

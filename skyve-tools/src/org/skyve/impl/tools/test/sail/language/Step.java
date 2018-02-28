@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.wail.language;
+package org.skyve.impl.tools.test.sail.language;
 
 import javax.xml.bind.annotation.XmlTransient;
 

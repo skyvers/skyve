@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.wail.generate;
+package org.skyve.impl.tools.test.sail.generate;
 
 import java.util.Map.Entry;
 
@@ -8,8 +8,8 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.tools.test.wail.XMLUtil;
-import org.skyve.impl.tools.test.wail.language.TestSuite;
+import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.language.TestSuite;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -25,11 +25,11 @@ public class Generator {
 			System.exit(1);
 		}
 
-		visitModules(args[0]);
+System.out.println(visitModules(args[0]));
 	}
 
 	public static String visitModules(String customerName) throws Exception {
-		UtilImpl.APPS_JAR_DIRECTORY = "C:/_/bizhub/Apps/javaee/bizhub.ear/apps.jar/";
+		UtilImpl.APPS_JAR_DIRECTORY = "/Users/mike/dtf/skyve/skyve-ee/javaee/skyve.ear/apps.jar/";
 		AbstractRepository.set(new LocalDesignRepository());
 		Customer customer = AbstractRepository.get().getCustomer(customerName);
 

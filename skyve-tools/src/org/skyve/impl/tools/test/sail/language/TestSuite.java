@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.wail.language;
+package org.skyve.impl.tools.test.sail.language;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.impl.tools.test.wail.XMLUtil;
+import org.skyve.impl.tools.test.sail.XMLUtil;
 
 @XmlType(namespace = XMLUtil.WAIL_NAMESPACE, propOrder = {"setup", "cases", "tearDown"})
 @XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
