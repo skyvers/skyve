@@ -14,6 +14,6 @@ import org.skyve.impl.tools.test.sail.language.Step;
 @XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class Cancel implements Step {
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(StringBuilder script, int indentationDepth) {
 	}
 }

@@ -26,6 +26,6 @@ public class DataGridNew implements Step {
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(StringBuilder script, int indentationDepth) {
 	}
 }

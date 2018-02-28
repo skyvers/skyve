@@ -14,9 +14,9 @@ public abstract class Procedure implements Executable {
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(StringBuilder script, int indentationDepth) {
 		for (Step step : steps) {
-			step.execute(script);
+			step.execute(script, indentationDepth);
 		}
 	}
 }

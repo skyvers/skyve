@@ -40,15 +40,19 @@ public class TestSuite implements Executable {
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(StringBuilder script, int indentationDepth) {
 		if (setup != null) {
-			setup.execute(script);
+			startTest("Test Suite Setup", script, indentationDepth);
+			setup.execute(script, indentationDepth + 1);
+			endTest(script, indentationDepth);
 		}
 		for (TestCase testCase : cases) {
-			testCase.execute(script);
+			testCase.execute(script, indentationDepth);
 		}
 		if (tearDown != null) {
-			tearDown.execute(script);
+			startTest("Test Suite Tear Down", script, indentationDepth);
+			tearDown.execute(script, indentationDepth + 1);
+			endTest(script, indentationDepth);
 		}
 	}
 }

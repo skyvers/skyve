@@ -102,13 +102,15 @@ public class TestCase extends Procedure {
 	}
 	
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(StringBuilder script, int indentationDepth) {
+		startTest(identifier, script, indentationDepth);
 		if (setup != null) {
-			setup.execute(script);
+			setup.execute(script, indentationDepth);
 		}
-		super.execute(script);
+		super.execute(script, indentationDepth);
 		if (tearDown != null) {
-			tearDown.execute(script);
+			tearDown.execute(script, indentationDepth);
 		}
+		endTest(script, indentationDepth);
 	}
 }
