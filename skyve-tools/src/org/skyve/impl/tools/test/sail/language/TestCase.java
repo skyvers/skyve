@@ -19,8 +19,8 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.browser.Navigate
 import org.skyve.impl.tools.test.sail.language.step.interaction.browser.Reload;
 import org.skyve.impl.util.UtilImpl;
 
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE, propOrder = {"setup", "steps", "tearDown"})
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE, propOrder = {"setup", "steps", "tearDown"})
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class TestCase extends Procedure {
 	private String identifier;
 	private Setup setup;
@@ -39,7 +39,7 @@ public class TestCase extends Procedure {
 		return setup;
 	}
 
-	@XmlElement(namespace = XMLUtil.WAIL_NAMESPACE, name = "setup")
+	@XmlElement(namespace = XMLUtil.SAIL_NAMESPACE, name = "setup")
 	public void setSetup(Setup setup) {
 		this.setup = setup;
 	}
@@ -48,12 +48,12 @@ public class TestCase extends Procedure {
 		return tearDown;
 	}
 
-	@XmlElement(namespace = XMLUtil.WAIL_NAMESPACE, name = "tearDown")
+	@XmlElement(namespace = XMLUtil.SAIL_NAMESPACE, name = "tearDown")
 	public void setTearDown(TearDown tearDown) {
 		this.tearDown = tearDown;
 	}
 
-	@XmlElementWrapper(namespace = XMLUtil.WAIL_NAMESPACE, name = "method")
+	@XmlElementWrapper(namespace = XMLUtil.SAIL_NAMESPACE, name = "method")
 	@XmlElementRefs({@XmlElementRef(type = Call.class),
 						@XmlElementRef(type = Module.class),
 						@XmlElementRef(type = Action.class),

@@ -9,8 +9,8 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
 
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE, propOrder = {"setup", "cases", "tearDown"})
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE, propOrder = {"setup", "cases", "tearDown"})
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class TestSuite implements Executable {
 	private Setup setup;
 	private List<TestCase> cases = new ArrayList<>();
@@ -20,7 +20,7 @@ public class TestSuite implements Executable {
 		return setup;
 	}
 
-	@XmlElement(namespace = XMLUtil.WAIL_NAMESPACE, name = "setup")
+	@XmlElement(namespace = XMLUtil.SAIL_NAMESPACE, name = "setup")
 	public void setSetup(Setup setup) {
 		this.setup = setup;
 	}
@@ -29,12 +29,12 @@ public class TestSuite implements Executable {
 		return tearDown;
 	}
 
-	@XmlElement(namespace = XMLUtil.WAIL_NAMESPACE, name = "tearDown")
+	@XmlElement(namespace = XMLUtil.SAIL_NAMESPACE, name = "tearDown")
 	public void setTearDown(TearDown tearDown) {
 		this.tearDown = tearDown;
 	}
 
-	@XmlElement(namespace = XMLUtil.WAIL_NAMESPACE, name = "testCase", required = true)
+	@XmlElement(namespace = XMLUtil.SAIL_NAMESPACE, name = "testCase", required = true)
 	public List<TestCase> getCases() {
 		return cases;
 	}

@@ -10,8 +10,8 @@ import org.skyve.impl.tools.test.sail.language.Step;
  * Click on a menu item within the current module.
  * @author mike
  */
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class Menu implements Step {
 	@Override
 	public void execute(StringBuilder script) {

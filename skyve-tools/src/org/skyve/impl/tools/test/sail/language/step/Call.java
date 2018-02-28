@@ -8,8 +8,8 @@ import org.skyve.impl.tools.test.sail.XMLUtil;
 import org.skyve.impl.tools.test.sail.language.Step;
 import org.skyve.impl.util.UtilImpl;
 
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class Call implements Step {
 	private String identifier;
 

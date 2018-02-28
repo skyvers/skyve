@@ -131,7 +131,7 @@
 	</target>
 
 	<target name="buildXmlSchemas">
-		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
+		<java fork="true" classname="org.skyve.impl.tools.XMLSchemaGenerator">
 			<classpath refid="classpath" />
 		</java>
 		<move todir="src/skyve/schemas" failonerror="true">

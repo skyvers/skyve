@@ -10,7 +10,7 @@ public class Interpreter {
 	public static void main(String[] args) throws Exception {
 		String xml = Generator.visitModules("bizhub");
 System.out.println(xml);
-		TestSuite testSuite = XMLUtil.unmarshalWAIL(new StringReader(xml));
+		TestSuite testSuite = XMLUtil.unmarshalSAIL(new StringReader(xml));
 		StringBuilder script = new StringBuilder(2048);
 		testSuite.execute(script);
 		System.out.println(script);

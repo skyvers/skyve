@@ -45,8 +45,8 @@ public class XMLSchemaGenerator {
 				else if (namespaceUri.endsWith("/router")) {
 					file = new File("router.xsd");
 				}
-				else if (namespaceUri.endsWith("/wail")) {
-					file = new File("wail.xsd");
+				else if (namespaceUri.endsWith("/sail")) {
+					file = new File("sail.xsd");
 				}
 				else {
 					throw new IllegalArgumentException(namespaceUri + " not catered for");

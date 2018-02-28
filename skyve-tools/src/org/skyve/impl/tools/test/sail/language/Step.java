@@ -3,7 +3,7 @@ package org.skyve.impl.tools.test.sail.language;
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
- * Abstract of all implicit "OPCODES" in WAIL language.
+ * Abstract of all implicit "OPCODES" in SAIL language.
  * @author mike
  *
  */

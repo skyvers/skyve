@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/wail" xmlns:tns="http://www.skyve.org/xml/wail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:element name="action" type="tns:action"/>
 

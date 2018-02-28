@@ -18,15 +18,15 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 
 public class XMLUtil {
-	public static final String WAIL_NAMESPACE = "http://www.skyve.org/xml/wail";
-	private static final JAXBContext WAIL_CONTEXT;
-	private static final Schema WAIL_SCHEMA;
+	public static final String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
+	private static final JAXBContext SAIL_CONTEXT;
+	private static final Schema SAIL_SCHEMA;
 
 	static {
 		try {
-			WAIL_CONTEXT = JAXBContext.newInstance(TestSuite.class);
+			SAIL_CONTEXT = JAXBContext.newInstance(TestSuite.class);
 			SchemaFactory sf = SchemaFactory.newInstance(W3C_XML_SCHEMA_NS_URI);
-			WAIL_SCHEMA = sf.newSchema(new File(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd"));
+			SAIL_SCHEMA = sf.newSchema(new File(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd"));
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Could not initialize one of the metadata JAXB contexts", e);
@@ -37,30 +37,30 @@ public class XMLUtil {
 		// prevent construction
 	}
 
-	public static String marshalWAIL(TestSuite testSuite) {
+	public static String marshalSAIL(TestSuite testSuite) {
 		try {
-			Marshaller marshaller = WAIL_CONTEXT.createMarshaller();
+			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
-									WAIL_NAMESPACE + " http://www.skyve.org/xml/wail.xsd");
-			marshaller.setSchema(WAIL_SCHEMA);
+									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
+			marshaller.setSchema(SAIL_SCHEMA);
 			StringWriter sos = new StringWriter(1024);
 			marshaller.marshal(testSuite, sos);
 			return sos.toString();
 		}
 		catch (JAXBException e) {
-			throw new MetaDataException("Could not marshal WAIL", e);
+			throw new MetaDataException("Could not marshal SAIL", e);
 		}
 	}
 
-	public static TestSuite unmarshalWAIL(Reader xmlReader) {
+	public static TestSuite unmarshalSAIL(Reader xmlReader) {
 		try {
-			Unmarshaller unmarshaller = WAIL_CONTEXT.createUnmarshaller();
-			unmarshaller.setSchema(WAIL_SCHEMA);
+			Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(SAIL_SCHEMA);
 			return (TestSuite) unmarshaller.unmarshal(xmlReader);
 		}
 		catch (Exception e) {
-			throw new MetaDataException("Could not unmarshal WAIL", e);
+			throw new MetaDataException("Could not unmarshal SAIL", e);
 		}
 	}
 }

@@ -15,8 +15,8 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.Module;
 import org.skyve.impl.tools.test.sail.language.step.interaction.browser.Navigate;
 import org.skyve.impl.tools.test.sail.language.step.interaction.browser.Reload;
 
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class TearDown extends Procedure {
 	@Override
 	@XmlElementRefs({@XmlElementRef(type = Call.class),

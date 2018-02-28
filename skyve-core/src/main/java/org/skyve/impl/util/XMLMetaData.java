@@ -466,44 +466,6 @@ public class XMLMetaData {
 			throw new JAXBException("Could not find XML Schema for " + schemaFileName, se);
 		}
 	}
-	
-	public static void main(String[] args) throws Exception {
-		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
-															ModuleMetaData.class,
-															DocumentMetaData.class,
-															ViewMetaData.class,
-															Router.class);
-		jaxbContext.generateSchema(new SchemaOutputResolver() {
-			@Override
-			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
-				File file = null;
-				if (namespaceUri.endsWith("/common")) {
-					file = new File("common.xsd");
-				}
-				else if (namespaceUri.endsWith("/customer")) {
-					file = new File("customer.xsd");
-				}
-				else if (namespaceUri.endsWith("/module")) {
-					file = new File("module.xsd");
-				}
-				else if (namespaceUri.endsWith("/document")) {
-					file = new File("document.xsd");
-				}
-				else if (namespaceUri.endsWith("/view")) {
-					file = new File("view.xsd");
-				}
-				else if (namespaceUri.endsWith("/router")) {
-					file = new File("router.xsd");
-				}
-				else {
-					throw new IllegalArgumentException(namespaceUri + " not catered for");
-				}
-		        StreamResult result = new StreamResult(file);
-		        result.setSystemId(file.toURI().toURL().toString());
-		        return result;
-			}
-		});
-	}
 
 	/**
 	 * Visitor to fix JAXB namespace issues, remove empty elements with no children,

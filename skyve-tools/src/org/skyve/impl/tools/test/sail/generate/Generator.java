@@ -59,6 +59,6 @@ System.out.println(visitModules(args[0]));
 			}
 		}
 		
-		return XMLUtil.marshalWAIL(result);
+		return XMLUtil.marshalSAIL(result);
 	}
 }

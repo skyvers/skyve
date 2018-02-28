@@ -16,14 +16,8 @@
           <xs:element name="defaultTimeConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="defaultDateTimeConverter" type="ns1:converterName" form="qualified"/>
           <xs:element name="defaultTimestampConverter" type="ns1:converterName" form="qualified"/>
-          <xs:element name="modules" form="qualified" minOccurs="0">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="module" type="tns:module" form="qualified" maxOccurs="unbounded"/>
-              </xs:sequence>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="homeModule" type="xs:string" form="qualified"/>
+          <xs:element name="modules" type="tns:modules" form="qualified"/>
+          <xs:element name="roles" type="tns:roles" form="qualified" minOccurs="0"/>
           <xs:element name="interceptors" form="qualified" minOccurs="0">
             <xs:complexType>
               <xs:sequence>
@@ -55,10 +49,51 @@
     <xs:attribute name="smartClientJavascript" type="xs:string"/>
   </xs:complexType>
 
+  <xs:complexType name="modules">
+    <xs:sequence>
+      <xs:element name="module" type="tns:module" form="qualified" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="homeModule" type="xs:string" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="module">
     <xs:complexContent>
       <xs:extension base="ns1:namedMetaData">
         <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="roles">
+    <xs:sequence>
+      <xs:element name="role" type="tns:role" form="qualified" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="allowModuleRoles" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="role">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence>
+          <xs:element name="documentation" type="xs:string" form="qualified" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" form="qualified"/>
+          <xs:element name="roles" form="qualified" minOccurs="0">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="role" type="tns:moduleRole" form="qualified" maxOccurs="unbounded"/>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="moduleRole">
+    <xs:complexContent>
+      <xs:extension base="ns1:namedMetaData">
+        <xs:sequence/>
+        <xs:attribute name="module" type="xs:string" use="required"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

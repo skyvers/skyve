@@ -10,8 +10,8 @@ import org.skyve.impl.tools.test.sail.language.Step;
  * Click on a module menu header/title to ensure the module menu has focus.
  * @author mike
  */
-@XmlType(namespace = XMLUtil.WAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.WAIL_NAMESPACE)
+@XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
+@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class Module implements Step {
 	@Override
 	public void execute(StringBuilder script) {
