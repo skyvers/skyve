@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.sail.language.step.interaction.grids;
+package org.skyve.impl.tools.test.sail.language.step.interaction.navigation;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,17 +10,15 @@ import org.skyve.impl.tools.test.sail.language.Step;
 import org.skyve.impl.util.UtilImpl;
 
 /**
- * Zoom into a row in a list grid at the given row number
+ * Navigate to an edit view.
  * @author mike
  */
 @XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
-public class ListGridZoom implements Step {
+public class NavigateEdit implements Step {
 	private String moduleName;
 	private String documentName;
-	private String queryName;
-	private String modelName;
-	private Integer row;
+	private String bizId;
 	
 	public String getModuleName() {
 		return moduleName;
@@ -35,36 +33,18 @@ public class ListGridZoom implements Step {
 		return documentName;
 	}
 
-	@XmlAttribute(name = "document")
+	@XmlAttribute(name = "document", required = true)
 	public void setDocumentName(String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getQueryName() {
-		return queryName;
+	public String getBizId() {
+		return bizId;
 	}
 
-	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
-		this.queryName = UtilImpl.processStringValue(queryName);
-	}
-
-	public String getModelName() {
-		return modelName;
-	}
-
-	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
-		this.modelName = UtilImpl.processStringValue(modelName);
-	}
-
-	public Integer getRow() {
-		return row;
-	}
-
-	@XmlAttribute(name = "row", required = true)
-	public void setRow(Integer row) {
-		this.row = row;
+	@XmlAttribute(name = "bizId")
+	public void setBizId(String bizId) {
+		this.bizId = UtilImpl.processStringValue(bizId);
 	}
 
 	@Override

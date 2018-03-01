@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * Remove a row in a data grid at the given row number
@@ -23,7 +25,7 @@ public class DataGridRemove implements Step {
 
 	@XmlAttribute(name = "binding", required = true)
 	public void setBinding(String binding) {
-		this.binding = binding;
+		this.binding = UtilImpl.processStringValue(binding);
 	}
 
 	public Integer getRow() {
@@ -36,6 +38,7 @@ public class DataGridRemove implements Step {
 	}
 
 	@Override
-	public void execute(StringBuilder script, int indentationDepth) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }

@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * Select the tab with the given tabPath.
@@ -25,10 +27,11 @@ public class TabSelect implements Step {
 
 	@XmlAttribute(name = "path", required = true)
 	public void setTabPath(String tabPath) {
-		this.tabPath = tabPath;
+		this.tabPath = UtilImpl.processStringValue(tabPath);
 	}
 
 	@Override
-	public void execute(StringBuilder script, int indentationDepth) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }
