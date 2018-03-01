@@ -7,7 +7,6 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.ViewVisitor;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -87,7 +86,7 @@ class GenerateViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitView() {
 		TestCase crud = new TestCase();
-		crud.setIdentifier(String.format("CRUD Test %s.%s", module.getName(), document.getName()));
+		crud.setName(String.format("CRUD Test %s.%s", module.getName(), document.getName()));
 		TestDataEnter testDataEnter = new TestDataEnter();
 		crud.getSteps().add(testDataEnter);
 		testSuite.getCases().add(crud);

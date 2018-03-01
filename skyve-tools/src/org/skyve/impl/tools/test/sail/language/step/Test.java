@@ -5,8 +5,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
+/**
+ * Test the value of a widget.
+ * @author mike
+ */
 @XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
 public class Test implements Step {
@@ -19,7 +25,7 @@ public class Test implements Step {
 
 	@XmlAttribute(name = "binding", required = true)
 	public void setBinding(String binding) {
-		this.binding = binding;
+		this.binding = UtilImpl.processStringValue(binding);
 	}
 
 	public String getValue() {
@@ -28,10 +34,11 @@ public class Test implements Step {
 
 	@XmlAttribute(name = "value", required = true)
 	public void setValue(String value) {
-		this.value = value;
+		this.value = UtilImpl.processStringValue(value);
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }

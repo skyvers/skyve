@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * Set the control representing the given binding to the given value.
@@ -23,7 +25,7 @@ public class DataEnter implements Step {
 
 	@XmlAttribute(name = "binding", required = true)
 	public void setBinding(String binding) {
-		this.binding = binding;
+		this.binding = UtilImpl.processStringValue(binding);
 	}
 
 	public String getValue() {
@@ -32,10 +34,11 @@ public class DataEnter implements Step {
 
 	@XmlAttribute(name = "value", required = true)
 	public void setValue(String value) {
-		this.value = value;
+		this.value = UtilImpl.processStringValue(value);
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }

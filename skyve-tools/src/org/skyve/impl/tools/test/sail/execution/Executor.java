@@ -1,14 +1,7 @@
-package org.skyve.impl.tools.test.sail.language;
+package org.skyve.impl.tools.test.sail.execution;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlElementRef;
-import javax.xml.bind.annotation.XmlElementRefs;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
-import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.language.TestCase;
+import org.skyve.impl.tools.test.sail.language.TestSuite;
 import org.skyve.impl.tools.test.sail.language.step.Execute;
 import org.skyve.impl.tools.test.sail.language.step.Test;
 import org.skyve.impl.tools.test.sail.language.step.interaction.DataEnter;
@@ -40,42 +33,44 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.Navig
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateTree;
 
-@XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
-@XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
-public class Procedure {
-	private List<Step> steps = new ArrayList<>();
+public interface Executor {
+	public void execute(TestSuite testSuite);
+	public void execute(TestCase testCase);
 
-	@XmlElementRefs({@XmlElementRef(type = NavigateMenu.class),
-						@XmlElementRef(type = NavigateList.class),
-						@XmlElementRef(type = NavigateEdit.class),
-						@XmlElementRef(type = NavigateTree.class),
-						@XmlElementRef(type = NavigateMap.class),
-						@XmlElementRef(type = NavigateCalendar.class),
-						@XmlElementRef(type = NavigateLink.class),
-						@XmlElementRef(type = TabSelect.class),
-						@XmlElementRef(type = TestDataEnter.class),
-						@XmlElementRef(type = DataEnter.class),
-						@XmlElementRef(type = Ok.class),
-						@XmlElementRef(type = Save.class),
-						@XmlElementRef(type = Cancel.class),
-						@XmlElementRef(type = Delete.class),
-						@XmlElementRef(type = ZoomOut.class),
-						@XmlElementRef(type = Remove.class),
-						@XmlElementRef(type = Action.class),
-						@XmlElementRef(type = LookupDescriptionAutoComplete.class),
-						@XmlElementRef(type = LookupDescriptionPick.class),
-						@XmlElementRef(type = LookupDescriptionNew.class),
-						@XmlElementRef(type = LookupDescriptionEdit.class),
-						@XmlElementRef(type = DataGridNew.class),
-						@XmlElementRef(type = DataGridZoom.class),
-						@XmlElementRef(type = DataGridEdit.class),
-						@XmlElementRef(type = DataGridRemove.class),
-						@XmlElementRef(type = DataGridSelect.class),
-						@XmlElementRef(type = ListGridZoom.class),
-						@XmlElementRef(type = ListGridSelect.class),
-						@XmlElementRef(type = Test.class),
-						@XmlElementRef(type = Execute.class)})
-	public List<Step> getSteps() {
-		return steps;
-	}
+	public void execute(NavigateMenu menu);
+	public void execute(NavigateList list);
+	public void execute(NavigateEdit edit);
+	public void execute(NavigateTree tree);
+	public void execute(NavigateMap map);
+	public void execute(NavigateCalendar calendar);
+	public void execute(NavigateLink link);
+	
+	public void execute(TabSelect tabSelect);
+	public void execute(TestDataEnter testDataEnter);
+	public void execute(DataEnter dataEnter);
+	
+	public void execute(Ok ok);
+	public void execute(Save save);
+	public void execute(Cancel cancel);
+	public void execute(Delete delete);
+	public void execute(ZoomOut zoomOut);
+	public void execute(Remove remove);
+	public void execute(Action action);
+
+	public void execute(LookupDescriptionAutoComplete complete);
+	public void execute(LookupDescriptionPick pick);
+	public void execute(LookupDescriptionNew nu);
+	public void execute(LookupDescriptionEdit edit);
+
+	public void execute(DataGridNew nu);
+	public void execute(DataGridZoom zoom);
+	public void execute(DataGridEdit edit);
+	public void execute(DataGridRemove remove);
+	public void execute(DataGridSelect select);
+	
+	public void execute(ListGridZoom zoom);
+	public void execute(ListGridSelect select);
+
+	public void execute(Test test);
+	public void execute(Execute execute);
 }

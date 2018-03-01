@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * Auto-complete by entering the search string and selecting the first match from the drop down.
@@ -23,7 +25,7 @@ public class LookupDescriptionAutoComplete implements Step {
 
 	@XmlAttribute(name = "binding", required = true)
 	public void setBinding(String binding) {
-		this.binding = binding;
+		this.binding = UtilImpl.processStringValue(binding);
 	}
 
 	public String getSearch() {
@@ -32,10 +34,11 @@ public class LookupDescriptionAutoComplete implements Step {
 
 	@XmlAttribute(name = "search", required = true)
 	public void setSearch(String search) {
-		this.search = search;
+		this.search = UtilImpl.processStringValue(search);
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }

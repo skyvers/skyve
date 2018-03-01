@@ -1,4 +1,4 @@
-package org.skyve.impl.tools.test.sail.language.step.interaction.grids;
+package org.skyve.impl.tools.test.sail.language.step.interaction.navigation;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -10,17 +10,16 @@ import org.skyve.impl.tools.test.sail.language.Step;
 import org.skyve.impl.util.UtilImpl;
 
 /**
- * Zoom into a row in a list grid at the given row number
+ * Navigate to a list view.
  * @author mike
  */
 @XmlType(namespace = XMLUtil.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLUtil.SAIL_NAMESPACE)
-public class ListGridZoom implements Step {
+public class NavigateList implements Step {
 	private String moduleName;
 	private String documentName;
 	private String queryName;
 	private String modelName;
-	private Integer row;
 	
 	public String getModuleName() {
 		return moduleName;
@@ -56,15 +55,6 @@ public class ListGridZoom implements Step {
 	@XmlAttribute(name = "model")
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
-	}
-
-	public Integer getRow() {
-		return row;
-	}
-
-	@XmlAttribute(name = "row", required = true)
-	public void setRow(Integer row) {
-		this.row = row;
 	}
 
 	@Override

@@ -5,7 +5,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.tools.test.sail.XMLUtil;
+import org.skyve.impl.tools.test.sail.execution.Executor;
 import org.skyve.impl.tools.test.sail.language.Step;
+import org.skyve.impl.util.UtilImpl;
 
 /**
  * All explicit actions - BizImport, BizExport, Upload, Download, Report, Server etc
@@ -22,10 +24,11 @@ public class Action implements Step {
 
 	@XmlAttribute(name = "name", required = true)
 	public void setActionName(String actionName) {
-		this.actionName = actionName;
+		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 
 	@Override
-	public void execute(StringBuilder script) {
+	public void execute(Executor executor) {
+		executor.execute(this);
 	}
 }
