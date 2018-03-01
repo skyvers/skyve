@@ -47,7 +47,8 @@ public class DownloadServlet extends HttpServlet {
 				try {
 					try {
 						persistence.begin();
-						User user = WebUtil.processUserPrincipalForRequest(request, request.getUserPrincipal().getName(), true);
+						User user = WebUtil.processUserPrincipalForRequest(request,
+								request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : null, true);
 						if (user == null) {
 							throw new SessionEndedException();
 						}
