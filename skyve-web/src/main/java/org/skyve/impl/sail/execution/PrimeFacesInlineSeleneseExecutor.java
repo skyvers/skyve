@@ -30,7 +30,6 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
@@ -40,13 +39,15 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 	}
 
 	@Override
-	public Document execute(NavigateMenu menu) {
+	public void execute(NavigateMenu menu) {
+		super.execute(menu); // determine driving document
 		// TODO Auto-generated method stub
-		return super.execute(menu);
 	}
 
 	@Override
-	public Document execute(NavigateList list) {
+	public void execute(NavigateList list) {
+		super.execute(list); // determine driving document
+
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
 		String modelName = list.getModelName();
@@ -65,12 +66,12 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 		else {
 			throw new MetaDataException("NavigateList must have module and one of (query, document, document & mode)l");
 		}
-		
-		return super.execute(list);
 	}
 
 	@Override
-	public Document execute(NavigateEdit edit) {
+	public void execute(NavigateEdit edit) {
+		super.execute(edit); // determine driving document
+
 		String bizId = edit.getBizId();
 		if (bizId == null) {
 			command("open", String.format(".?a=e&m=%s&d=%s", edit.getModuleName(), edit.getDocumentName()));
@@ -81,32 +82,30 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 											edit.getDocumentName(),
 											bizId));
 		}
-		
-		return super.execute(edit);
 	}
 
 	@Override
-	public Document execute(NavigateTree tree) {
+	public void execute(NavigateTree tree) {
+		super.execute(tree); // determine driving document
 		// TODO Auto-generated method stub
-		return super.execute(tree);
 	}
 
 	@Override
-	public Document execute(NavigateMap map) {
+	public void execute(NavigateMap map) {
+		super.execute(map); // determine driving document
 		// TODO Auto-generated method stub
-		return super.execute(map);
 	}
 
 	@Override
-	public Document execute(NavigateCalendar calendar) {
+	public void execute(NavigateCalendar calendar) {
+		super.execute(calendar); // determine driving document
 		// TODO Auto-generated method stub
-		return super.execute(calendar);
 	}
 
 	@Override
 	public void execute(NavigateLink link) {
+		super.execute(link); // null driving document
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -117,6 +116,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 
 	@Override
 	public void execute(TestDataEnter testDataEnter) {
+System.out.println(getDrivingDocument());
 		// TODO Auto-generated method stub
 		
 	}

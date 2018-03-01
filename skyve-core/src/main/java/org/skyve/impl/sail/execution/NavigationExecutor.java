@@ -5,6 +5,7 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
@@ -33,8 +34,8 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateMenu menu) {
-		return null;
+	public void execute(NavigateMenu menu) {
+		// TODO implement
 	}
 
 	/**
@@ -42,27 +43,25 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateList list) {
+	public void execute(NavigateList list) {
 		Customer c = user.getCustomer();
 		Module m = c.getModule(list.getModuleName());
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
 		String modelName = list.getModelName();
 
-		Document result = null;
 		if (queryName != null) {
-			result = m.getDocument(c, m.getDocumentQuery(queryName).getDocumentName());
+			drivingDocument = m.getDocument(c, m.getDocumentQuery(queryName).getDocumentName());
 		}
 		else if (documentName != null) {
 			Repository r = CORE.getRepository();
-			result = m.getDocument(c, documentName);
+			drivingDocument = m.getDocument(c, documentName);
 
 			if (modelName != null) {
-				ListModel<Bean> model = r.getListModel(c, result, modelName, false);
-				result = model.getDrivingDocument();
+				ListModel<Bean> model = r.getListModel(c, drivingDocument, modelName, false);
+				drivingDocument = model.getDrivingDocument();
 			}
 		}
-		return result;
 	}
 
 	/**
@@ -70,10 +69,10 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateEdit edit) {
+	public void execute(NavigateEdit edit) {
 		Customer c = user.getCustomer();
 		Module m = c.getModule(edit.getModuleName());
-		return m.getDocument(c, edit.getDocumentName());
+		drivingDocument = m.getDocument(c, edit.getDocumentName());
 	}
 
 	/**
@@ -81,8 +80,8 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateTree tree) {
-		return execute((NavigateList) tree);
+	public void execute(NavigateTree tree) {
+		execute((NavigateList) tree);
 	}
 
 	/**
@@ -90,8 +89,8 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateMap map) {
-		return execute((NavigateList) map);
+	public void execute(NavigateMap map) {
+		execute((NavigateList) map);
 	}
 
 	/**
@@ -99,7 +98,16 @@ public abstract class NavigationExecutor implements Executor {
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public Document execute(NavigateCalendar calendar) {
-		return execute((NavigateList) calendar);
+	public void execute(NavigateCalendar calendar) {
+		execute((NavigateList) calendar);
+	}
+	
+	/**
+	 * Do nothing but set the driving document to null.
+	 * This is intended to be called by sub-classes.
+	 */
+	@Override
+	public void execute(NavigateLink link) {
+		drivingDocument = null;
 	}
 }
