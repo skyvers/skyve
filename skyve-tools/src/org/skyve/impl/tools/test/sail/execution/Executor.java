@@ -32,17 +32,18 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.Navig
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.model.document.Document;
 
 public interface Executor {
 	public void execute(TestSuite testSuite);
 	public void execute(TestCase testCase);
 
-	public void execute(NavigateMenu menu);
-	public void execute(NavigateList list);
-	public void execute(NavigateEdit edit);
-	public void execute(NavigateTree tree);
-	public void execute(NavigateMap map);
-	public void execute(NavigateCalendar calendar);
+	public Document execute(NavigateMenu menu);
+	public Document execute(NavigateList list);
+	public Document execute(NavigateEdit edit);
+	public Document execute(NavigateTree tree);
+	public Document execute(NavigateMap map);
+	public Document execute(NavigateCalendar calendar);
 	public void execute(NavigateLink link);
 	
 	public void execute(TabSelect tabSelect);

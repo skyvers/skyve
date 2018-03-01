@@ -30,17 +30,23 @@ import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.Navig
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.impl.tools.test.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.User;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 
-	@Override
-	public void execute(NavigateMenu menu) {
-		// TODO Auto-generated method stub
-		
+	public PrimeFacesInlineSeleneseExecutor(User user) {
+		super(user);
 	}
 
 	@Override
-	public void execute(NavigateList list) {
+	public Document execute(NavigateMenu menu) {
+		// TODO Auto-generated method stub
+		return super.execute(menu);
+	}
+
+	@Override
+	public Document execute(NavigateList list) {
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
 		String modelName = list.getModelName();
@@ -59,10 +65,12 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 		else {
 			throw new MetaDataException("NavigateList must have module and one of (query, document, document & mode)l");
 		}
+		
+		return super.execute(list);
 	}
 
 	@Override
-	public void execute(NavigateEdit edit) {
+	public Document execute(NavigateEdit edit) {
 		String bizId = edit.getBizId();
 		if (bizId == null) {
 			command("open", String.format(".?a=e&m=%s&d=%s", edit.getModuleName(), edit.getDocumentName()));
@@ -73,24 +81,26 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 											edit.getDocumentName(),
 											bizId));
 		}
+		
+		return super.execute(edit);
 	}
 
 	@Override
-	public void execute(NavigateTree tree) {
+	public Document execute(NavigateTree tree) {
 		// TODO Auto-generated method stub
-		
+		return super.execute(tree);
 	}
 
 	@Override
-	public void execute(NavigateMap map) {
+	public Document execute(NavigateMap map) {
 		// TODO Auto-generated method stub
-		
+		return super.execute(map);
 	}
 
 	@Override
-	public void execute(NavigateCalendar calendar) {
+	public Document execute(NavigateCalendar calendar) {
 		// TODO Auto-generated method stub
-		
+		return super.execute(calendar);
 	}
 
 	@Override

@@ -1,6 +1,12 @@
 package org.skyve.impl.tools.test.sail.execution;
 
+import org.skyve.metadata.user.User;
+
 public abstract class SeleneseExecutor extends ScriptExecutor {
+	public SeleneseExecutor(User user) {
+		super(user);
+	}
+
 	protected void command(String command, String parameter1, String parameter2) {
 		indent().append("<tr><td>").append(command).append("</td><td>");
 		if (parameter1 != null) {

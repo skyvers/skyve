@@ -4,8 +4,13 @@ import org.skyve.impl.tools.test.sail.language.Procedure;
 import org.skyve.impl.tools.test.sail.language.Step;
 import org.skyve.impl.tools.test.sail.language.TestCase;
 import org.skyve.impl.tools.test.sail.language.TestSuite;
+import org.skyve.metadata.user.User;
 
 public abstract class InlineSeleneseExecutor extends SeleneseExecutor {
+	public InlineSeleneseExecutor(User user) {
+		super(user);
+	}
+
 	@Override
 	public void execute(TestSuite testSuite) {
 		Procedure setup = testSuite.getSetup();
