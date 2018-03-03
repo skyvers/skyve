@@ -16,6 +16,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -29,13 +30,22 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+
+import javax.faces.component.UIComponent;
+
+import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.faces.components.ListGrid;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.user.User;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
-
-	public PrimeFacesInlineSeleneseExecutor(User user) {
-		super(user);
+	private ComponentBuilder componentBuilder;
+	private UIComponent currentComponent;
+	private ClientIdCollector currentCollector;
+	
+	public PrimeFacesInlineSeleneseExecutor(ComponentBuilder componentBuilder) {
+		this.componentBuilder = componentBuilder;
 	}
 
 	@Override
@@ -52,6 +62,21 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 		String queryName = list.getQueryName();
 		String modelName = list.getModelName();
 
+		currentCollector = new ClientIdCollector(list);
+		ComponentBuilderChain chain = new ComponentBuilderChain(componentBuilder, currentCollector);
+		
+		currentComponent = ListGrid.generate(list.getModuleName(), 
+												documentName, 
+												queryName, 
+												modelName, 
+												Boolean.TRUE,
+												false,
+												Boolean.TRUE,
+												false,
+												"skyve",
+												UserAgentType.desktop,
+												chain);
+		
 		if (queryName != null) {
 			command("open", String.format("/?a=l&m=%s&q=%s", list.getModuleName(), queryName));
 		}
@@ -224,15 +249,20 @@ System.out.println(getDrivingDocument());
 	}
 
 	@Override
+	public void execute(ListGridNew nu) {
+		command("clickAndWait", ClientIdCollector.clientId(currentCollector.getFacesComponents(nu.getIdentifier()).get(0)));
+	}
+
+	@Override
 	public void execute(ListGridZoom zoom) {
-		// TODO Auto-generated method stub
-		
+		UIComponent component = currentCollector.getFacesComponents(zoom.getIdentifier()).get(0);
+		command("clickAndWait", ClientIdCollector.clientId(component, zoom.getRow()));
 	}
 
 	@Override
 	public void execute(ListGridSelect select) {
-		// TODO Auto-generated method stub
-		
+		UIComponent component = currentCollector.getFacesComponents(select.getIdentifier()).get(0);
+		command("clickAndWait", String.format("//tr[%d]/td", select.getRow())); //ClientIdCollector.clientId(component, select.getRow()));
 	}
 
 	@Override

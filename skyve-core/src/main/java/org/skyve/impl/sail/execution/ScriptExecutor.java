@@ -1,15 +1,10 @@
 package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.user.User;
 
 public abstract class ScriptExecutor extends NavigationExecutor {
 	private StringBuilder script = new StringBuilder(4096);
 	private int indent = 0;
-	
-	public ScriptExecutor(User user) {
-		super(user);
-	}
 	
 	protected final ScriptExecutor indent() {
 		for (int i = 0; i < indent; i++) {

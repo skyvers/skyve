@@ -8,7 +8,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.metadata.sail.language.TestSuite;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.Customer;
@@ -33,7 +33,7 @@ System.out.println(visitModules(args[0]));
 		AbstractRepository.set(new LocalDesignRepository());
 		Customer customer = AbstractRepository.get().getCustomer(customerName);
 
-		TestSuite result = new TestSuite();
+		Automation result = new Automation();
 		
 		// visit each customer module
 		for (Module module : customer.getModules()) {

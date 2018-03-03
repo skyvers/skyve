@@ -11,17 +11,16 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 /**
- * Select a row in a list grid at the given row number
+ * Create a new row in a list grid
  * @author mike
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
-public class ListGridSelect implements Step {
+public class ListGridNew implements Step {
 	private String moduleName;
 	private String documentName;
 	private String queryName;
 	private String modelName;
-	private Integer row;
 	
 	public String getModuleName() {
 		return moduleName;
@@ -59,23 +58,14 @@ public class ListGridSelect implements Step {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
-	public Integer getRow() {
-		return row;
-	}
-
-	@XmlAttribute(name = "row", required = true)
-	public void setRow(Integer row) {
-		this.row = row;
-	}
-
 	@Override
 	public void execute(Executor executor) {
 		executor.execute(this);
 	}
-
+	
 	@Override
 	public String getIdentifier() {
 		String identifier = NavigateList.listGridIdentifier(moduleName, queryName, documentName, modelName);
-		return identifier + ".select";
+		return identifier + ".new";
 	}
 }

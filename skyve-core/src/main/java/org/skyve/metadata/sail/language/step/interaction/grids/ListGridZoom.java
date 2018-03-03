@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -70,5 +71,11 @@ public class ListGridZoom implements Step {
 	@Override
 	public void execute(Executor executor) {
 		executor.execute(this);
+	}
+
+	@Override
+	public String getIdentifier() {
+		String identifier = NavigateList.listGridIdentifier(moduleName, queryName, documentName, modelName);
+		return identifier + ".zoom";
 	}
 }

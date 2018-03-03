@@ -44,7 +44,7 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.sail.language.TestSuite;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
 import org.xml.sax.SAXException;
 
@@ -110,7 +110,7 @@ public class XMLMetaData {
 			VIEW_CONTEXT = JAXBContext.newInstance(ViewMetaData.class);
 			VIEW_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/view.xsd");
 
-			SAIL_CONTEXT = JAXBContext.newInstance(TestSuite.class);
+			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
 			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		}
 		catch (Exception e) {
@@ -449,7 +449,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalSAIL(TestSuite testSuite) {
+	public static String marshalSAIL(Automation automation) {
 		try {
 			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -457,7 +457,7 @@ public class XMLMetaData {
 									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
 			marshaller.setSchema(SAIL_SCHEMA);
 			StringWriter sos = new StringWriter(1024);
-			marshaller.marshal(testSuite, sos);
+			marshaller.marshal(automation, sos);
 			return sos.toString();
 		}
 		catch (JAXBException e) {
@@ -465,7 +465,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static TestSuite unmarshalSAIL(String file) {
+	public static Automation unmarshalSAIL(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -474,13 +474,13 @@ public class XMLMetaData {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
 						unmarshaller.setSchema(SAIL_SCHEMA);
-						return (TestSuite) unmarshaller.unmarshal(br);
+						return (Automation) unmarshaller.unmarshal(br);
 					}
 				}
 			}
 		}
 		catch (Exception e) {
-			throw new MetaDataException("Could not unmarshal view at " + file, e);
+			throw new MetaDataException("Could not unmarshal SAIL at " + file, e);
 		}
 	}
 
@@ -631,7 +631,7 @@ public class XMLMetaData {
 															DocumentMetaData.class,
 															ViewMetaData.class,
 															Router.class,
-															TestSuite.class);
+															Automation.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
 			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {

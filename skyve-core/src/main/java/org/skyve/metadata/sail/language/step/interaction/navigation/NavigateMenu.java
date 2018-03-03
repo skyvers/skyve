@@ -44,4 +44,9 @@ public class NavigateMenu implements Step {
 	public void execute(Executor executor) {
 		executor.execute(this);
 	}
+
+	@Override
+	public String getIdentifier() {
+		return String.format("%s.%s", moduleName, menuPath);
+	}
 }

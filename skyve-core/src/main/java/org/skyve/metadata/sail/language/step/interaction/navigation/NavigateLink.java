@@ -31,4 +31,9 @@ public class NavigateLink implements Step {
 	public void execute(Executor executor) {
 		executor.execute(this);
 	}
+
+	@Override
+	public String getIdentifier() {
+		return href;
+	}
 }

@@ -26,6 +26,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -71,6 +72,7 @@ public class Procedure {
 						@XmlElementRef(type = DataGridEdit.class),
 						@XmlElementRef(type = DataGridRemove.class),
 						@XmlElementRef(type = DataGridSelect.class),
+						@XmlElementRef(type = ListGridNew.class),
 						@XmlElementRef(type = ListGridZoom.class),
 						@XmlElementRef(type = ListGridSelect.class),
 						@XmlElementRef(type = Test.class),

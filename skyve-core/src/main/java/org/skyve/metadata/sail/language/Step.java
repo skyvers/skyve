@@ -8,5 +8,5 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlTransient
 public interface Step extends Executable {
-	// Nothing to see here
+	public String getIdentifier();
 }

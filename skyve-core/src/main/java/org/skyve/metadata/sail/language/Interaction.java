@@ -29,6 +29,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -45,13 +46,13 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"setup", "steps", "tearDown"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"before", "steps", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
-public class TestCase implements Executable {
+public class Interaction implements Executable {
 	private String name;
-	private Procedure setup;
+	private Procedure before;
 	private List<Step> steps = new ArrayList<>();
-	private Procedure tearDown;
+	private Procedure after;
 
 	public String getName() {
 		return name;
@@ -62,22 +63,22 @@ public class TestCase implements Executable {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
-	public Procedure getSetup() {
-		return setup;
+	public Procedure getBefore() {
+		return before;
 	}
 
-	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "setup")
-	public void setSetup(Procedure setup) {
-		this.setup = setup;
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
+	public void setBefore(Procedure before) {
+		this.before = before;
 	}
 
-	public Procedure getTearDown() {
-		return tearDown;
+	public Procedure getAfter() {
+		return after;
 	}
 
-	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "tearDown")
-	public void setTearDown(Procedure tearDown) {
-		this.tearDown = tearDown;
+	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
+	public void setAfter(Procedure after) {
+		this.after = after;
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.SAIL_NAMESPACE, name = "method")
@@ -107,6 +108,7 @@ public class TestCase implements Executable {
 						@XmlElementRef(type = DataGridEdit.class),
 						@XmlElementRef(type = DataGridRemove.class),
 						@XmlElementRef(type = DataGridSelect.class),
+						@XmlElementRef(type = ListGridNew.class),
 						@XmlElementRef(type = ListGridZoom.class),
 						@XmlElementRef(type = ListGridSelect.class),
 						@XmlElementRef(type = Test.class),

@@ -4,10 +4,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.metadata.sail.execution.Executor;
-import org.skyve.metadata.sail.language.Step;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.Step;
 
 /**
  * Navigate to a list view.
@@ -60,5 +60,31 @@ public class NavigateList implements Step {
 	@Override
 	public void execute(Executor executor) {
 		executor.execute(this);
+	}
+	
+	@Override
+	public String getIdentifier() {
+		return listGridIdentifier(moduleName, queryName, documentName, modelName);
+	}
+	
+	public static String listGridIdentifier(String moduleName,
+												String queryName,
+												String documentName,
+												String modelName) {
+		String result = null;
+		
+		if (queryName != null) {
+			result = String.format("%s.%s", moduleName, queryName);
+		}
+		else if (documentName != null) {
+			if (modelName == null) {
+				result = String.format("%s.%s", moduleName, documentName);
+			}
+			else {
+				result = String.format("%s.%s.%s", moduleName, documentName, modelName);
+			}
+		}
+		
+		return result;
 	}
 }

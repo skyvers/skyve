@@ -2,32 +2,27 @@ package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.TestCase;
-import org.skyve.metadata.sail.language.TestSuite;
-import org.skyve.metadata.user.User;
+import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Automation;
 
 public abstract class InlineSeleneseExecutor extends SeleneseExecutor {
-	public InlineSeleneseExecutor(User user) {
-		super(user);
-	}
-
 	@Override
-	public void execute(TestSuite testSuite) {
-		Procedure setup = testSuite.getSetup();
-		if (setup != null) {
-			startTest("Test Suite Setup");
-			for (Step step : setup.getSteps()) {
+	public void execute(Automation automation) {
+		Procedure before = automation.getBefore();
+		if (before != null) {
+			startTest("Before Automation");
+			for (Step step : before.getSteps()) {
 				step.execute(this);
 			}
 			endTest();
 		}
-		for (TestCase testCase : testSuite.getCases()) {
-			execute(testCase);
+		for (Interaction interaction : automation.getInteractions()) {
+			execute(interaction);
 		}
-		Procedure tearDown = testSuite.getTearDown();
-		if (tearDown != null) {
-			startTest("Test Suite Tear Down");
-			for (Step step : tearDown.getSteps()) {
+		Procedure after = automation.getAfter();
+		if (after != null) {
+			startTest("After Automation");
+			for (Step step : after.getSteps()) {
 				step.execute(this);
 			}
 			endTest();
@@ -35,23 +30,22 @@ public abstract class InlineSeleneseExecutor extends SeleneseExecutor {
 	}
 	
 	@Override
-	public void execute(TestCase testCase) {
-		
-		startTest(testCase.getName());
-		Procedure setup = testCase.getSetup();
-		if (setup != null) {
-			indent().append("<!-- Setup for ").append(testCase.getName()).append(" -->").newline();
-			for (Step step : setup.getSteps()) {
+	public void execute(Interaction interaction) {
+		startTest(interaction.getName());
+		Procedure before = interaction.getBefore();
+		if (before != null) {
+			indent().append("<!-- Before ").append(interaction.getName()).append(" -->").newline();
+			for (Step step : before.getSteps()) {
 				step.execute(this);
 			}
 		}
-		for (Step step : testCase.getSteps()) {
+		for (Step step : interaction.getSteps()) {
 			step.execute(this);
 		}
-		Procedure tearDown = testCase.getTearDown();
-		if (tearDown != null) {
-			indent().append("<!-- Tear down for ").append(testCase.getName()).append(" -->").newline();
-			for (Step step : tearDown.getSteps()) {
+		Procedure after = interaction.getAfter();
+		if (after != null) {
+			indent().append("<!-- After ").append(interaction.getName()).append(" -->").newline();
+			for (Step step : interaction.getSteps()) {
 				step.execute(this);
 			}
 		}

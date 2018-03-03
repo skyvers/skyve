@@ -41,4 +41,9 @@ public class LookupDescriptionPick implements Step {
 	public void execute(Executor executor) {
 		executor.execute(this);
 	}
+	
+	@Override
+	public String getIdentifier() {
+		return binding + ".pick";
+	}
 }

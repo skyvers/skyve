@@ -41,4 +41,9 @@ public class DataGridEdit implements Step {
 	public void execute(Executor executor) {
 		executor.execute(this);
 	}
+	
+	@Override
+	public String getIdentifier() {
+		return String.format("%s[%d].edit", binding, row);
+	}
 }

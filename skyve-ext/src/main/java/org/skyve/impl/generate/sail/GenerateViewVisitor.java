@@ -65,31 +65,31 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
-import org.skyve.metadata.sail.language.TestCase;
-import org.skyve.metadata.sail.language.TestSuite;
+import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
 class GenerateViewVisitor extends NoOpViewVisitor {
-	private TestSuite testSuite;
+	private Automation automation;
 	
 	protected GenerateViewVisitor(CustomerImpl customer,
 									ModuleImpl module,
 									DocumentImpl document,
 									ViewImpl view,
-									TestSuite testSuite) {
+									Automation automation) {
 		super(customer, module, document, view);
-		this.testSuite = testSuite;
+		this.automation = automation;
 	}
 
 	@Override
 	public void visitView() {
-		TestCase crud = new TestCase();
+		Interaction crud = new Interaction();
 		crud.setName(String.format("CRUD Test %s.%s", module.getName(), document.getName()));
 		TestDataEnter testDataEnter = new TestDataEnter();
 		crud.getSteps().add(testDataEnter);
-		testSuite.getCases().add(crud);
+		automation.getInteractions().add(crud);
 	}
 
 	@Override
