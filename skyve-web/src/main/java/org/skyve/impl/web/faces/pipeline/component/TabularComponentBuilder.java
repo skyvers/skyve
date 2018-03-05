@@ -939,19 +939,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 	
 	protected UIComponent createListGridActionColumn(String moduleName,
-										   String documentName,
-										   boolean canCreateDocument,
-										   boolean createRendered,
-										   String[] createDisabledConditionNames,
-										   boolean zoomRendered,
-										   String zoomDisabledConditionName,
-										   Map<String, String> properties) {
+													   String documentName,
+													   boolean canCreateDocument,
+													   boolean createRendered,
+													   String[] createDisabledConditionNames,
+													   boolean zoomRendered,
+													   String zoomDisabledConditionName,
+													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
 		column.setWidth("40");
 		column.setStyle("text-align:center !important");
 		if (canCreateDocument && createRendered) {
 			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+			setId(button, null);
 			button.setValue(null);
 			button.setTitle("New record");
 			button.setIcon("fa fa-plus");
@@ -979,6 +980,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
 													@SuppressWarnings("unused") Map<String, String> properties) {
 		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		setId(button, null);
 		button.setValue(null);
 		button.setTitle("View Detail");
 		button.setIcon("fa fa-chevron-right");

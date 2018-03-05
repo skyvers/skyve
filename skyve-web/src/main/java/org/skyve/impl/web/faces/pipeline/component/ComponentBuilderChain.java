@@ -49,7 +49,7 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 public class ComponentBuilderChain extends ComponentBuilder {
 	private ComponentBuilder[] builders;
 	
-	protected ComponentBuilderChain(ComponentBuilder... builders) {
+	public ComponentBuilderChain(ComponentBuilder... builders) {
 		this.builders = builders;
 	}
 	

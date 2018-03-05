@@ -69,47 +69,20 @@ public class ListGrid extends HtmlPanelGroup {
 			new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					ListModel<? extends Bean> model = null;
-					String name = null;
-
-					User user = CORE.getUser();
-					Customer customer = user.getCustomer();
-					Module module = customer.getModule(moduleName);
-					if (queryName != null) {
-						DocumentQueryDefinition query = module.getDocumentQuery(queryName);
-						if (query == null) {
-							query = module.getDocumentDefaultQuery(customer, queryName);
-						}
-						DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
-						queryModel.setQuery(query);
-						model = queryModel;
-						name = queryName;
-					}
-					else {
-						Document document = module.getDocument(customer, documentName);
-						model = CORE.getRepository().getListModel(customer, document, modelName, true);
-						name = modelName;
-					}
-					
 					FacesContext fc = FacesContext.getCurrentInstance();
 					final UserAgentType userAgentType = (UserAgentType) fc.getExternalContext().getRequestMap().get(FacesUtil.USER_AGENT_TYPE_KEY);
-					componentBuilder.setManagedBeanName(managedBeanName);
-		        	componentBuilder.setUserAgentType(userAgentType);
 
-					org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
-					listGrid.setTitle(model.getDescription());
-					listGrid.setShowAdd(createRendered);
-					listGrid.setDisabledConditionName(String.valueOf(createDisabled));
-					listGrid.setShowZoom(zoomRendered);
-					listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
-
-					UIComponent grid = componentBuilder.listGrid(null,
-																	documentName,
-																	name,
-																	model,
-																	listGrid,
-																	user.canCreateDocument(model.getDrivingDocument()));
-				    ListGrid.this.getChildren().add(grid);
+					ListGrid.this.getChildren().add(ListGrid.generate(moduleName,
+																		documentName,
+																		queryName,
+																		modelName,
+																		createRendered,
+																		createDisabled,
+																		zoomRendered,
+																		zoomDisabled,
+																		managedBeanName,
+																		userAgentType,
+																		componentBuilder));
 				    
 					return null;
 				}
@@ -119,5 +92,56 @@ public class ListGrid extends HtmlPanelGroup {
 		if ((UtilImpl.FACES_TRACE) && (! context.isPostback())) Util.LOGGER.info(new ComponentRenderer(this).toString());
 
 		super.encodeBegin(context);
+	}
+	
+	public static UIComponent generate(String moduleName,
+										String documentName,
+										String queryName,
+										String modelName,
+										Boolean createRendered,
+										boolean createDisabled,
+										Boolean zoomRendered,
+										boolean zoomDisabled,
+										String managedBeanName,
+										UserAgentType userAgentType,
+										ComponentBuilder componentBuilder) {
+		ListModel<? extends Bean> model = null;
+		String name = null;
+
+		User user = CORE.getUser();
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(moduleName);
+		if (queryName != null) {
+			DocumentQueryDefinition query = module.getDocumentQuery(queryName);
+			if (query == null) {
+				query = module.getDocumentDefaultQuery(customer, queryName);
+			}
+			DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
+			queryModel.setQuery(query);
+			model = queryModel;
+			name = queryName;
+		}
+		else {
+			Document document = module.getDocument(customer, documentName);
+			model = CORE.getRepository().getListModel(customer, document, modelName, true);
+			name = modelName;
+		}
+		
+		componentBuilder.setManagedBeanName(managedBeanName);
+    	componentBuilder.setUserAgentType(userAgentType);
+
+		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
+		listGrid.setTitle(model.getDescription());
+		listGrid.setShowAdd(createRendered);
+		listGrid.setDisabledConditionName(String.valueOf(createDisabled));
+		listGrid.setShowZoom(zoomRendered);
+		listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
+
+		return componentBuilder.listGrid(null,
+											documentName,
+											name,
+											model,
+											listGrid,
+											user.canCreateDocument(model.getDrivingDocument()));
 	}
 }

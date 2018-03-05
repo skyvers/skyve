@@ -3,6 +3,8 @@
 
   <xs:element name="action" type="tns:action"/>
 
+  <xs:element name="automation" type="tns:automation"/>
+
   <xs:element name="cancel" type="tns:cancel"/>
 
   <xs:element name="dataEnter" type="tns:dataEnter"/>
@@ -20,6 +22,10 @@
   <xs:element name="delete" type="tns:delete"/>
 
   <xs:element name="execute" type="tns:execute"/>
+
+  <xs:element name="interaction" type="tns:interaction"/>
+
+  <xs:element name="listGridNew" type="tns:listGridNew"/>
 
   <xs:element name="listGridSelect" type="tns:listGridSelect"/>
 
@@ -59,19 +65,15 @@
 
   <xs:element name="test" type="tns:test"/>
 
-  <xs:element name="testCase" type="tns:testCase"/>
-
   <xs:element name="testDataEnter" type="tns:testDataEnter"/>
-
-  <xs:element name="testSuite" type="tns:testSuite"/>
 
   <xs:element name="zoomOut" type="tns:zoomOut"/>
 
-  <xs:complexType name="testSuite">
+  <xs:complexType name="automation">
     <xs:sequence>
-      <xs:element name="setup" type="tns:procedure" form="qualified" minOccurs="0"/>
-      <xs:element ref="tns:testCase" maxOccurs="unbounded"/>
-      <xs:element name="tearDown" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element ref="tns:interaction" maxOccurs="unbounded"/>
+      <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -104,6 +106,7 @@
         <xs:element ref="tns:dataGridEdit"/>
         <xs:element ref="tns:dataGridRemove"/>
         <xs:element ref="tns:dataGridSelect"/>
+        <xs:element ref="tns:listGridNew"/>
         <xs:element ref="tns:listGridZoom"/>
         <xs:element ref="tns:listGridSelect"/>
         <xs:element ref="tns:test"/>
@@ -262,6 +265,14 @@
     <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="listGridNew">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
   <xs:complexType name="listGridZoom">
     <xs:sequence/>
     <xs:attribute name="document" type="xs:string"/>
@@ -290,9 +301,9 @@
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
 
-  <xs:complexType name="testCase">
+  <xs:complexType name="interaction">
     <xs:sequence>
-      <xs:element name="setup" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
       <xs:element name="method" form="qualified" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
@@ -323,6 +334,7 @@
               <xs:element ref="tns:dataGridEdit"/>
               <xs:element ref="tns:dataGridRemove"/>
               <xs:element ref="tns:dataGridSelect"/>
+              <xs:element ref="tns:listGridNew"/>
               <xs:element ref="tns:listGridZoom"/>
               <xs:element ref="tns:listGridSelect"/>
               <xs:element ref="tns:test"/>
@@ -331,7 +343,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="tearDown" type="tns:procedure" form="qualified" minOccurs="0"/>
+      <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
