@@ -543,6 +543,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
 				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+				setId(button, null);
 		    	button.setValue(null);
 	        	button.setTitle("Add a new " + singularDocumentAlias);
 		    	button.setIcon("fa fa-plus");
@@ -568,7 +569,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
 				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-		    	button.setValue(null);
+				setId(button, null);
+				button.setValue(null);
 	        	button.setTitle("Edit this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-chevron-right");
 				action(button, ImplicitActionName.Navigate, null, listBinding, listVar, inline, null);
@@ -594,6 +596,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				}
 	
 				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+				setId(button, null);
 		    	button.setValue(null);
 	        	button.setTitle("Remove this " + singularDocumentAlias);
 		    	button.setIcon("fa fa-minus");

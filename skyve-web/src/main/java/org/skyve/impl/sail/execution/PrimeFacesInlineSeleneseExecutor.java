@@ -4,18 +4,24 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
-import org.primefaces.component.checkbox.Checkbox;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -56,6 +62,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
@@ -80,6 +87,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		
 		if (queryName != null) {
 			DocumentQueryDefinition q = m.getDocumentQuery(queryName);
+			if (q == null) {
+				q = m.getDocumentDefaultQuery(c, documentName);
+			}
 			m = q.getOwningModule();
 			newContext.setModuleName(m.getName());
 			newContext.setDocumentName(q.getDocumentName());
@@ -88,6 +98,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			Document d = m.getDocument(c, documentName);
 			if (modelName != null) {
 				d = CORE.getRepository().getListModel(c, d, modelName, false).getDrivingDocument();
+			}
+			else {
+				push.setQueryName(documentName);
 			}
 			newContext.setModuleName(d.getOwningModuleName());
 			newContext.setDocumentName(d.getName());
@@ -110,6 +123,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		newContext.setDocumentName(push.getDocumentName());
 		if (Boolean.TRUE.equals(push.getCreate())) {
 			newContext.setViewType(ViewType.create);
+		}
+		else {
+			newContext.setViewType(ViewType.edit);
 		}
 		newContext.setUxui(push.getUxui());
 		newContext.setUserAgentType(push.getUserAgentType());
@@ -236,14 +252,24 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			else {
 				// Should be the interface but its in the skyve-ee test package
 				Object factory = factoryClass.newInstance();
-				bean = (Bean) factoryClass.getMethod("newInstance").invoke(factory);
+				bean = (Bean) factoryClass.getMethod("getInstance").invoke(factory);
 			}
 		}
 		catch (Exception e) {
 			throw new MetaDataException(String.format("Could not create a random instance of %s.%s", moduleName, documentName) , e);
 		}
 		
+        ViewImpl view = (ViewImpl) r.getView(context.getUxui(), c, d, context.getViewType().toString());
+		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor((CustomerImpl) c,
+																			(ModuleImpl) m,
+																			(DocumentImpl) d,
+																			view,
+																			bean);
+		visitor.visit();
 		
+		for (Step steps : visitor.getScalarSteps()) {
+			steps.execute(this);
+		}
 	}
 
 	@Override
@@ -257,10 +283,11 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
+System.out.println(component);
 			boolean text = (component instanceof InputText) || (component instanceof InputTextarea);
 			boolean selectOne = (component instanceof SelectOneMenu);
 			boolean masked = (component instanceof InputMask);
-			boolean checkbox = (component instanceof Checkbox);
+			boolean checkbox = (component instanceof SelectBooleanCheckbox);
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
@@ -271,7 +298,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 				// check the value and only click if we need the other different value
 				command("storeEval", String.format("window.SKYVE.getCheckboxValue('%s')", clientId), "checked");
 				command("if", String.format("${checked} != %s", dataEnter.getValue()));
-				command("click", String.format("%s_input"));
+				command("click", String.format("%s_input", clientId));
 				command("endIf");
 			}
 			else if (selectOne) {
@@ -297,8 +324,10 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 				// Value here should be an index in the drop down starting from 0
 				command("click", String.format("%s_%s", clientId, dataEnter.getValue()));
 			}
-			command("endIf");
-			command("endIf");
+			if (! checkbox) { // endIf for disabled/editable test
+				command("endIf");
+			}
+			command("endIf"); // endIf for present test
 		}
 	}
 
@@ -344,6 +373,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void execute(Ok ok) {
 		button(ok, "ok", false, false);
+		pop();
 	}
 
 	@Override
@@ -354,21 +384,25 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void execute(Cancel cancel) {
 		button(cancel, "cancel", false, false);
+		pop();
 	}
 
 	@Override
 	public void execute(Delete delete) {
 		button(delete, "delete", false, true);
+		pop();
 	}
 
 	@Override
 	public void execute(ZoomOut zoomOut) {
 		button(zoomOut, "zoom out", false, false);
+		pop();
 	}
 
 	@Override
 	public void execute(Remove remove) {
 		button(remove, "remove", false, true);
+		pop();
 	}
 
 	@Override
@@ -402,14 +436,70 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void execute(DataGridNew nu) {
-		// TODO Auto-generated method stub
-		
+		gridNewZoom(nu, nu.getBinding(), null);
 	}
-
+	
 	@Override
 	public void execute(DataGridZoom zoom) {
-		// TODO Auto-generated method stub
+		gridNewZoom(zoom, zoom.getBinding(), zoom.getRow());
+	}
+	
+	private void gridNewZoom(Step step, String binding, Integer row) {
+		PrimeFacesAutomationContext context = peek();
+		String buttonIdentifier = step.getIdentifier(context);
 		
+		List<UIComponent> dataGridComponents = context.getFacesComponents(binding);
+		if (dataGridComponents == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
+														(row != null) ? "DataGridZoom" : "DataGridNew",
+														binding));
+		}
+		for (UIComponent dataGridComponent : dataGridComponents) {
+			String dataGridClientId = ComponentCollector.clientId(dataGridComponent);
+			if (row != null) {
+				comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+			}
+			else {
+				comment(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
+			}
+			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
+			for (UIComponent buttonComponent : buttonComponents) {
+				String buttonClientId = (row != null) ?
+											ComponentCollector.clientId(buttonComponent, row) :
+											ComponentCollector.clientId(buttonComponent);
+				if (buttonClientId.startsWith(dataGridClientId)) {
+					// data grid is present
+					command("storeElementPresent", dataGridClientId, "present");
+					command("if", "${present} == true");
+					// data grid button is present
+					command("storeElementPresent", buttonClientId, "present");
+					command("if", "${present} == true");
+					// Look for prime faces disabled style on data grid button
+					command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
+					command("if", "${disabled} == false");
+					// All good, continue with the button click
+					command("clickAndWait", buttonClientId);
+					command("endIf");
+					command("endIf");
+					command("endIf");
+				}
+			}
+		}
+
+		// Determine the Document of the edit view to push
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(context.getModuleName());
+		Document d = m.getDocument(c, context.getDocumentName());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		String newDocumentName = ((Collection) target.getAttribute()).getDocumentName();
+		d = m.getDocument(c, newDocumentName);
+		String newModuleName = d.getOwningModuleName();
+		
+		// Push it
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(newModuleName);
+		push.setDocumentName(newDocumentName);
+		push.execute(this);
 	}
 
 	@Override
@@ -420,8 +510,11 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void execute(DataGridRemove remove) {
-		// TODO Auto-generated method stub
-		
+		PrimeFacesAutomationContext context = peek();
+		UIComponent component = context.getFacesComponents(remove.getIdentifier(context)).get(0);
+// TODO loop over components and check for visible grid, visible new button and disabled new button
+		command("click", ComponentCollector.clientId(component, remove.getRow()));
+		command("waitForNotVisible", "ajaxStatus");
 	}
 
 	@Override
@@ -434,9 +527,14 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	public void execute(ListGridNew nu) {
 		PrimeFacesAutomationContext context = peek();
 		if (ViewType.list.equals(context.getViewType())) {
-			UIComponent component = context.getFacesComponents(nu.getIdentifier(context)).get(0);
-			command("clickAndWait", ComponentCollector.clientId(component));
+			String identifier = nu.getIdentifier(context);
+			UIComponent component = context.getFacesComponents(identifier).get(0);
+			String clientId = ComponentCollector.clientId(component);
+// TODO check for visible and disabled
+			comment(String.format("New row on list grid [%s] (%s)", identifier, clientId));
+			command("clickAndWait", clientId);
 		}
+// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
 		
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
@@ -448,9 +546,14 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	public void execute(ListGridZoom zoom) {
 		PrimeFacesAutomationContext context = peek();
 		if (ViewType.list.equals(context.getViewType())) {
-			UIComponent component = context.getFacesComponents(zoom.getIdentifier(context)).get(0);
-			command("clickAndWait", ComponentCollector.clientId(component, zoom.getRow()));
+			String identifier = zoom.getIdentifier(context);
+			UIComponent component = context.getFacesComponents(identifier).get(0);
+			String clientId = ComponentCollector.clientId(component, zoom.getRow());
+// TODO check for visible and disabled
+			comment(String.format("Zoom on row %d on data grid [%s] (%s)", zoom.getRow(), identifier, clientId));
+			command("clickAndWait", clientId);
 		}
+// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
 
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
@@ -463,8 +566,10 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		PrimeFacesAutomationContext context = peek();
 		if (ViewType.list.equals(context.getViewType())) {
 			UIComponent component = context.getFacesComponents(select.getIdentifier(context)).get(0);
+// TODO check for visible and disabled
 			command("clickAndWait", String.format("//tr[%d]/td", select.getRow())); // ClientIdCollector.clientId(component, select.getRow()));
 		}
+// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
 
 		// TODO only if there is no select event on the skyve edit view for embedded list grid
 		PushEditContext push = new PushEditContext();

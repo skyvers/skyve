@@ -33,6 +33,7 @@ import javax.faces.validator.Validator;
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
+import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.column.Column;
@@ -50,8 +51,10 @@ import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
+import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.row.Row;
+import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.steps.Steps;
@@ -74,7 +77,10 @@ public class MockApplication extends Application {
     
 	@Override
 	public UIComponent createComponent(String componentType) throws FacesException {
-		if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
+		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
+			return new AutoComplete();
+		}
+		else if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
 			return new AccordionPanel();
 		}
 		else if (BreadCrumb.COMPONENT_TYPE.equals(componentType)) {
@@ -152,6 +158,9 @@ public class MockApplication extends Application {
 		else if (PanelGrid.COMPONENT_TYPE.equals(componentType)) {
 			return new PanelGrid();
 		}
+		else if (Password.COMPONENT_TYPE.equals(componentType)) {
+			return new Password();
+		}
 		else if (PickList.COMPONENT_TYPE.equals(componentType)) {
 			return new PickList();
 		}
@@ -160,6 +169,9 @@ public class MockApplication extends Application {
 		}
 		else if (SelectOneMenu.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectOneMenu();
+		}
+		else if (SelectBooleanCheckbox.COMPONENT_TYPE.equals(componentType)) {
+			return new SelectBooleanCheckbox();
 		}
 		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
 			return new Spacer();
