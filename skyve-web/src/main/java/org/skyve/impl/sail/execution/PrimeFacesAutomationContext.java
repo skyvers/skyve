@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
+import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.View;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
@@ -42,6 +43,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 
 		componentCollector = new ComponentCollector(this, push);
 		ComponentBuilderChain chain = new ComponentBuilderChain(componentBuilder, componentCollector);
+		chain.setSAILManagedBean(new FacesView<>());
 	
 		component = ListGrid.generate(moduleName, 
 										documentName, 
@@ -61,6 +63,10 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 							LayoutBuilder layoutBuilder) {
 		componentCollector = new ComponentCollector(this, push);
 		ComponentBuilderChain chain = new ComponentBuilderChain(componentBuilder, componentCollector);
+		
+		FacesView<?> managedBean = new FacesView<>();
+		chain.setSAILManagedBean(managedBean);
+		layoutBuilder.setSAILManagedBean(managedBean);
 		
 		List<UIComponent> editAndCreateView = View.generate(push.getModuleName(), 
 																push.getDocumentName(), 

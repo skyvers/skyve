@@ -21,6 +21,10 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 		command(command, null, null);
 	}
 
+	protected void comment(String comment) {
+		indent().append("<!-- ").append(comment).append(" -->").newline();
+	}
+	
 	protected void startTest(String heading) {
 		indent().append("<table>").newline();
 		in().indent().append("<thead>").newline();

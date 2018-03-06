@@ -37,6 +37,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.UserAgentType;
+import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
@@ -57,6 +58,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public void setManagedBeanName(String managedBeanName) {
 		for (ComponentBuilder builder : builders) {
 			builder.setManagedBeanName(managedBeanName);
+		}
+	}
+	
+	@Override
+	public void setSAILManagedBean(FacesView<?> managedBean) {
+		for (ComponentBuilder builder : builders) {
+			builder.setSAILManagedBean(managedBean);
 		}
 	}
 

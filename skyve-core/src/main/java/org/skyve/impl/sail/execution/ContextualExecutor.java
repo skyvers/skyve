@@ -22,17 +22,25 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
-	private String defaultUxUi = null;
-	private UserAgentType defaultUserAgentType = null;
+	private String currentUxUi = null;
+	private UserAgentType currentUserAgentType = null;
 	
 	private Stack<T> contextStack = new Stack<>();
 
 	protected final void push(T context) {
-		if (context.getUxui() == null) {
-			context.setUxui(defaultUxUi);
+		String uxui = context.getUxui();
+		if (uxui == null) {
+			context.setUxui(currentUxUi);
 		}
-		if (context.getUserAgentType() == null) {
-			context.setUserAgentType(defaultUserAgentType);
+		else {
+			currentUxUi = uxui;
+		}
+		UserAgentType userAgentType = context.getUserAgentType();
+		if (userAgentType == null) {
+			context.setUserAgentType(currentUserAgentType);
+		}
+		else {
+			currentUserAgentType = userAgentType;
 		}
 		contextStack.push(context);
 	}
@@ -55,8 +63,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 */
 	@Override
 	public void execute(Automation automation) {
-		defaultUxUi = automation.getUxui();
-		defaultUserAgentType = automation.getUserAgentType();
+		currentUxUi = automation.getUxui();
+		currentUserAgentType = automation.getUserAgentType();
 	}
 	
 	/**

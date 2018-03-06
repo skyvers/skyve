@@ -4,6 +4,10 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
+import org.primefaces.component.inputmask.InputMask;
+import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.skyve.CORE;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -138,14 +142,14 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		execute(push);
 
 		if (queryName != null) {
-			command("open", String.format("/?a=l&m=%s&q=%s", moduleName, queryName));
+			command("open", String.format("?a=l&m=%s&q=%s", moduleName, queryName));
 		}
 		else if (documentName != null) {
 			if (modelName != null) {
-				command("open", String.format(".?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
+				command("open", String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
 			}
 			else {
-				command("open", String.format(".?a=l&m=%s&q=%s", moduleName, documentName));
+				command("open", String.format("?a=l&m=%s&q=%s", moduleName, documentName));
 			}
 		}
 	}
@@ -209,11 +213,43 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void execute(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
-		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
-		List<UIComponent> components = context.getFacesComponents(dataEnter.getIdentifier(context));
+//		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
+		String identifier = dataEnter.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
+		}
 		for (UIComponent component : components) {
-			// if exists and is not disabled
+			String clientId = ComponentCollector.clientId(component);
+			boolean text = (component instanceof InputText) || (component instanceof InputTextarea);
+			boolean selectOne = (component instanceof SelectOneMenu);
+			boolean masked = (component instanceof InputMask);
 			
+			// if exists and is not disabled
+			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
+			command("storeElementPresent", clientId, "present");
+			command("if", "${present} == true");
+			if (! selectOne) {
+				command("storeEditable", clientId, "editable");
+				command("if", "${editable} == true");
+			}
+			
+			if (text) {
+				command("type", clientId, dataEnter.getValue());
+			}
+			else if (masked) {
+				command("click", clientId);
+				command("sendKeys", clientId, dataEnter.getValue());
+			}
+			else if (selectOne) {
+				command("click", String.format("%s_label", clientId));
+				command("click", String.format("%s_1", clientId));
+			}
+			
+			if (! selectOne) {
+				command("endIf");
+			}
+			command("endIf");
 		}
 	}
 
@@ -225,8 +261,24 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void execute(Save save) {
-		// TODO Auto-generated method stub
-		
+		PrimeFacesAutomationContext context = peek();
+//		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
+		String identifier = save.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException("<save /> is not on the view.");
+		}
+		for (UIComponent component : components) {
+			String clientId = ComponentCollector.clientId(component);
+
+			// if exists and is not disabled
+			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
+			command("storeElementPresent", clientId, "present");
+			command("if", "${present} == true");
+			command("click", clientId);
+			command("waitForNotVisible", "ajaxStatus");
+			command("endIf");
+		}
 	}
 
 	@Override

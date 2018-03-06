@@ -10,13 +10,30 @@ import javax.faces.component.UIComponent;
 
 import org.primefaces.component.button.Button;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentImage;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentLink;
+import org.skyve.impl.metadata.view.widget.bound.input.HTML;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.Password;
+import org.skyve.impl.metadata.view.widget.bound.input.Radio;
+import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.bound.Bound;
 
 class ComponentCollector extends NoOpComponentBuilder {
 	private AutomationContext context;
@@ -66,9 +83,27 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 				put(name.toString(), component, name);
 			}
 			else {
-				put(action.getName(), component, name);
+				put(action.getName(), component, action);
 			}
 		}
+		return component;
+	}
+	
+	@Override
+	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+
+	@Override
+	public UIComponent report(UIComponent component, Action action) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
 		return component;
 	}
 	
@@ -95,6 +130,122 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 			put(listGridIdentifier + ".select", component.getChildren().get(0), listGrid);
 		}
 		
+		return component;
+	}
+	
+	@Override
+	public UIComponent checkBox(UIComponent component,
+									String listVar,
+									CheckBox checkBox,
+									String title,
+									boolean required) {
+		return putByBinding(checkBox, component);
+	}
+	
+	@Override
+	public UIComponent colourPicker(UIComponent component,
+										String listVar,
+										ColourPicker colour,
+										String title,
+										boolean required) {
+		return putByBinding(colour, component);
+	}
+	
+	@Override
+	public UIComponent combo(UIComponent component, String listVar, Combo combo, String title, boolean required) {
+		return putByBinding(combo, component);
+	}
+	
+	@Override
+	public UIComponent contentImage(UIComponent component,
+										String listVar,
+										ContentImage image,
+										String title,
+										boolean required) {
+		return putByBinding(image, component);
+	}
+	
+	@Override
+	public UIComponent contentLink(UIComponent component,
+									String listVar,
+									ContentLink link,
+									String title,
+									boolean required) {
+		return putByBinding(link, component);
+	}
+	
+	@Override
+	public UIComponent html(UIComponent component, String listVar, HTML html, String title, boolean required) {
+		return putByBinding(html, component);
+	}
+	
+	@Override
+	public UIComponent lookupDescription(UIComponent component,
+											String listVar,
+											LookupDescription lookup,
+											String title,
+											boolean required,
+											String displayBinding,
+											QueryDefinition query) {
+		return putByBinding(lookup, component);
+	}
+	
+	@Override
+	public UIComponent password(UIComponent component,
+									String listVar,
+									Password password,
+									String title,
+									boolean required) {
+		return putByBinding(password, component);
+	}
+	
+	@Override
+	public UIComponent radio(UIComponent component,
+								String listVar,
+								Radio radio,
+								String title,
+								boolean required) {
+		return putByBinding(radio, component);
+	}
+	
+	@Override
+	public UIComponent richText(UIComponent component, String listVar, RichText text, String title, boolean required) {
+		return putByBinding(text, component);
+	}
+	
+	@Override
+	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
+		return putByBinding(spinner, component);
+	}
+	
+	@Override
+	public UIComponent text(UIComponent component,
+								String listVar,
+								TextField text,
+								String title,
+								boolean required,
+								Integer length,
+								Converter<?> converter,
+								Format<?> format,
+								javax.faces.convert.Converter facesConverter) {
+		return putByBinding(text, component);
+	}
+
+	@Override
+	public UIComponent textArea(UIComponent component,
+									String listVar,
+									TextArea text,
+									String title,
+									boolean required,
+									Integer length) {
+		return putByBinding(text, component);
+	}
+	
+	private UIComponent putByBinding(Bound bound, UIComponent component) {
+		if (component != null) {
+			put(bound.getBinding(), component, bound);
+		}
+
 		return component;
 	}
 	
