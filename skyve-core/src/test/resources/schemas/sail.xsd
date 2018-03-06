@@ -216,6 +216,7 @@
   <xs:complexType name="action">
     <xs:sequence/>
     <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="confirm" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionAutoComplete">

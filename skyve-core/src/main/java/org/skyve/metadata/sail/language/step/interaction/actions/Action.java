@@ -18,6 +18,8 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Action implements Step {
 	private String actionName;
+	// Need to press OK/Yes/Continue on the confirmation dialog - true or false/null
+	private Boolean confirm;
 	
 	public String getActionName() {
 		return actionName;
@@ -26,6 +28,15 @@ public class Action implements Step {
 	@XmlAttribute(name = "name", required = true)
 	public void setActionName(String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
+	}
+
+	public Boolean getConfirm() {
+		return confirm;
+	}
+
+	@XmlAttribute(name = "confirm")
+	public void setConfirm(Boolean confirm) {
+		this.confirm = confirm;
 	}
 
 	@Override
