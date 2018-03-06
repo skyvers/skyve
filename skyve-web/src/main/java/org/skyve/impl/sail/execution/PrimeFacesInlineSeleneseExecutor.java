@@ -4,11 +4,14 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
+import org.primefaces.component.checkbox.Checkbox;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
@@ -16,6 +19,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Test;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
@@ -50,7 +54,9 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Util;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
@@ -199,21 +205,51 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void execute(TabSelect tabSelect) {
-		// TODO Auto-generated method stub
-		
+		// TODO Not quite right as we are looking for the first link with the tab name/label.
+		for (String tabName : tabSelect.getTabPath().split("/")) {
+			command("click", String.format("link=%s", tabName));
+		}
 	}
 
 	@Override
 	public void execute(TestDataEnter testDataEnter) {
-//System.out.println(peek().getModuleName() + '.' + peek().getDocumentName());
-		// TODO Auto-generated method stub
+		PrimeFacesAutomationContext context = peek();
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
+		AbstractRepository r = (AbstractRepository) CORE.getRepository();
+		Class<?> factoryClass = null;
+		try {
+			factoryClass = r.getJavaClass(null, String.format("modules.%s.util.%sFactoryExtension", moduleName, documentName));
+		}
+		catch (MetaDataException e) {
+			factoryClass = r.getJavaClass(null, String.format("modules.%s.util.%sFactory", moduleName, documentName));
+		}
+		Bean bean = null;
+		try {
+			if (factoryClass == null) {
+				bean = Util.constructRandomInstance(u, m, d, 1);
+			}
+			else {
+				// Should be the interface but its in the skyve-ee test package
+				Object factory = factoryClass.newInstance();
+				bean = (Bean) factoryClass.getMethod("newInstance").invoke(factory);
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException(String.format("Could not create a random instance of %s.%s", moduleName, documentName) , e);
+		}
+		
 		
 	}
 
 	@Override
 	public void execute(DataEnter dataEnter) {
+// TODO tab clicks to get on the right tab
 		PrimeFacesAutomationContext context = peek();
-//		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
 		String identifier = dataEnter.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
@@ -224,12 +260,27 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			boolean text = (component instanceof InputText) || (component instanceof InputTextarea);
 			boolean selectOne = (component instanceof SelectOneMenu);
 			boolean masked = (component instanceof InputMask);
+			boolean checkbox = (component instanceof Checkbox);
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
 			command("storeElementPresent", clientId, "present");
 			command("if", "${present} == true");
-			if (! selectOne) {
+			if (checkbox) {
+				// dont need to check if checkbox is disabled coz we can still try to click it
+				// check the value and only click if we need the other different value
+				command("storeEval", String.format("window.SKYVE.getCheckboxValue('%s')", clientId), "checked");
+				command("if", String.format("${checked} != %s", dataEnter.getValue()));
+				command("click", String.format("%s_input"));
+				command("endIf");
+			}
+			else if (selectOne) {
+				// Look for prime faces disabled style
+				command("storeCssCount", String.format("css=#%s.ui-state-disabled", clientId), "disabled");
+				command("if", "${disabled} == false");
+			}
+			else {
+				// determine editable as these are <input/>
 				command("storeEditable", clientId, "editable");
 				command("if", "${editable} == true");
 			}
@@ -237,78 +288,92 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			if (text) {
 				command("type", clientId, dataEnter.getValue());
 			}
-			else if (masked) {
-				command("click", clientId);
+			else if (masked) { // need to send key strokes to masked fields
+				command("click", clientId); // the click selects the existing expression for overtype
 				command("sendKeys", clientId, dataEnter.getValue());
 			}
 			else if (selectOne) {
 				command("click", String.format("%s_label", clientId));
-				command("click", String.format("%s_1", clientId));
+				// Value here should be an index in the drop down starting from 0
+				command("click", String.format("%s_%s", clientId, dataEnter.getValue()));
 			}
-			
-			if (! selectOne) {
-				command("endIf");
-			}
+			command("endIf");
 			command("endIf");
 		}
 	}
 
-	@Override
-	public void execute(Ok ok) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execute(Save save) {
+	private void button(Step button, String tagName, boolean ajax, boolean confirm) {
 		PrimeFacesAutomationContext context = peek();
-//		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
-		String identifier = save.getIdentifier(context);
+		String identifier = button.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
-			throw new MetaDataException("<save /> is not on the view.");
+			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
 
 			// if exists and is not disabled
-			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
+			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
 			command("storeElementPresent", clientId, "present");
 			command("if", "${present} == true");
-			command("click", clientId);
-			command("waitForNotVisible", "ajaxStatus");
+			// Look for prime faces disabled style
+			command("storeCssCount", String.format("css=#%s.ui-state-disabled", clientId), "disabled");
+			command("if", "${disabled} == false");
+			if (ajax) {
+				command("click", clientId);
+				if (confirm) {
+					command("click", "confirmOK");
+				}
+				command("waitForNotVisible", "ajaxStatus");
+			}
+			else {
+				if (confirm) {
+					command("click", clientId);
+					command("clickAndWait", "confirmOK");
+				}
+				else {
+					command("clickAndWait", clientId);
+				}
+			}
+			command("endIf");
 			command("endIf");
 		}
+		
+	}
+	
+	@Override
+	public void execute(Ok ok) {
+		button(ok, "ok", false, false);
+	}
+
+	@Override
+	public void execute(Save save) {
+		button(save, "save", true, false);
 	}
 
 	@Override
 	public void execute(Cancel cancel) {
-		// TODO Auto-generated method stub
-		
+		button(cancel, "cancel", false, false);
 	}
 
 	@Override
 	public void execute(Delete delete) {
-		// TODO Auto-generated method stub
-		
+		button(delete, "delete", false, true);
 	}
 
 	@Override
 	public void execute(ZoomOut zoomOut) {
-		// TODO Auto-generated method stub
-		
+		button(zoomOut, "zoom out", false, false);
 	}
 
 	@Override
 	public void execute(Remove remove) {
-		// TODO Auto-generated method stub
-		
+		button(remove, "remove", false, true);
 	}
 
 	@Override
 	public void execute(Action action) {
-		// TODO Auto-generated method stub
-		
+		button(action, action.getActionName(), true, Boolean.TRUE.equals(action.getConfirm()));
 	}
 
 	@Override
