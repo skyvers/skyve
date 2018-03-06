@@ -12,7 +12,8 @@ import org.primefaces.component.column.Column;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 
@@ -24,7 +25,9 @@ public abstract class AbstractFacesBuilder {
 	protected static final String PROCESS_KEY = "process";
 	protected static final String UPDATE_KEY = "update";
 
-	protected FacesContext fc = FacesContext.getCurrentInstance();
+	protected FacesContext fc = (FacesContext.getCurrentInstance() != null) ? 
+									FacesContext.getCurrentInstance() : 
+									new MockFacesContext();
 	protected Application a = fc.getApplication();
 	protected ExpressionFactory ef = a.getExpressionFactory();
 	protected ELContext elc = fc.getELContext();
@@ -38,8 +41,16 @@ public abstract class AbstractFacesBuilder {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
 		}
-		managedBean = FacesUtil.getManagedBean(managedBeanName);
+		// Do nothing is this is being executed through SAIL
+		if (FacesContext.getCurrentInstance() != null) {
+			managedBean = FacesUtil.getManagedBean(managedBeanName);
+		}
 	}
+	
+	public void setSAILManagedBean(FacesView<?> managedBean) {
+		this.managedBean = managedBean;
+	}
+	
 	public void setProcess(String process) {
 		if (process != null) {
 			this.process = process;

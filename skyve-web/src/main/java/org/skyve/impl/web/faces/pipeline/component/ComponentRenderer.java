@@ -160,6 +160,10 @@ public class ComponentRenderer {
 			if ((priority > 0) && (priority <= 6)) {
 				putValue(attributes, "priority", Integer.toString(priority));
 			}
+			putValue(attributes, "field", column.getField());
+			if (! column.isSortable()) {
+				putValue(attributes, "sortable", Boolean.FALSE);
+			}
 		}
 		else if (component instanceof CommandButton) {
 			tagName = "p:commandButton";
@@ -205,6 +209,22 @@ public class ComponentRenderer {
 			DataTable table = (DataTable) component;
 			putValueExpression(attributes, "value", component);
 			putValue(attributes, "var", table.getVar());
+			if (table.isPaginator()) {
+				putValue(attributes, "paginator", Boolean.TRUE);
+				putValue(attributes, "rowsPerPageTemplate", table.getRowsPerPageTemplate());
+				putValue(attributes, "rows", Integer.valueOf(table.getRows()));
+				putValue(attributes, "paginatorAlwaysVisible", Boolean.valueOf(table.isPaginatorAlwaysVisible()));
+			}
+			if (table.isLazy()) {
+				putValue(attributes, "lazy", Boolean.TRUE);
+			}
+			putValue(attributes, "emptyMessage", table.getEmptyMessage());
+			if (table.isStickyHeader()) {
+				putValue(attributes, "stickyHeader", Boolean.TRUE);
+			}
+			if ("multiple".equals(table.getSortMode())) {
+				putValue(attributes, "sortMode", "multiple");
+			}
 			putValue(attributes, "widgetVar", table.getWidgetVar());
 			putValue(attributes, "selectionMode", table.getSelectionMode());
 			putValueExpression(attributes, "rowKey", component);

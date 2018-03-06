@@ -13,6 +13,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
 
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.SelectEvent;
@@ -31,6 +32,7 @@ import org.skyve.impl.web.faces.actions.ExecuteActionAction;
 import org.skyve.impl.web.faces.actions.GetBeansAction;
 import org.skyve.impl.web.faces.actions.GetContentFileNameAction;
 import org.skyve.impl.web.faces.actions.GetContentURLAction;
+import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
 import org.skyve.impl.web.faces.actions.PreRenderAction;
 import org.skyve.impl.web.faces.actions.RemoveAction;
 import org.skyve.impl.web.faces.actions.RerenderAction;
@@ -369,6 +371,21 @@ public class FacesView<T extends Bean> extends Harness {
 		return dualListModels;
  	}
 
+	// /skyve/download?_n=<action>&_doc=<module.document>&_c=<webId>&_ctim=<millis> and optionally &_b=<view binding>
+	public String getDownloadUrl(String downloadActionName, String moduleName, String documentName) {
+		StringBuilder result = new StringBuilder(128);
+		result.append(Util.getSkyveContextUrl()).append("/download?");
+		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(downloadActionName);
+		result.append('&').append(AbstractWebContext.DOCUMENT_NAME).append('=');
+		result.append(moduleName).append('.').append(documentName);
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webContext.getWebId());
+		if (viewBinding != null) {
+			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
+		}
+		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
+		return result.toString();
+	}
+
 	// /skyve/contentUpload.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
 	public String getContentUploadUrl(String sanitisedBinding) {
 		StringBuilder result = new StringBuilder(128);
@@ -427,6 +444,16 @@ public class FacesView<T extends Bean> extends Harness {
 		return result.toString();
  	}
 
+	@SuppressWarnings("static-method")
+	public List<SelectItem> getSelectItems(String moduleName,
+											String documentName,
+											String binding,
+											boolean includeEmptyItem) {
+		final String key = new StringBuilder(64).append(moduleName).append('.').append(documentName).append('.').append(binding).toString();
+		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.finest("BeanMapAdapter.getSelectItems - key = " + key);
+		return new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
+	}
+	
  	public List<BeanMapAdapter<Bean>> complete(String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();

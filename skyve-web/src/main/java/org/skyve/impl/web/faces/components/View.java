@@ -1,9 +1,12 @@
 package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.faces.component.FacesComponent;
+import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 
@@ -13,13 +16,13 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.FacesViewVisitor;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentRenderer;
-import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.customer.Customer;
@@ -51,7 +54,7 @@ public class View extends HtmlPanelGroup {
 	    	try {
 	    		tempComponentBuilder = (classString != null) ? 
 	    								(ComponentBuilder) Class.forName(classString).newInstance() :
-    									new SkyveComponentBuilder();
+    									new SkyveComponentBuilderChain();
 	    	}
 	    	catch (Exception e) {
 	    		throw new IOException("Cannot instantiate the component builder " + classString, e);
@@ -93,49 +96,18 @@ public class View extends HtmlPanelGroup {
 	    	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					User user = CORE.getUser();
-			        Customer customer = user.getCustomer();
-			        Module module = customer.getModule(moduleName);
-			        Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
-			        Repository repository = CORE.getRepository();
-
-		        	componentBuilder.setManagedBeanName(managedBeanName);
-		        	componentBuilder.setProcess(process);
-		        	componentBuilder.setUpdate(update);
-		        	componentBuilder.setUserAgentType(userAgentType);
-		        	layoutBuilder.setManagedBeanName(managedBeanName);
-		        	layoutBuilder.setProcess(process);
-		        	layoutBuilder.setUpdate(update);
-		        	layoutBuilder.setUserAgentType(userAgentType);
-
-			        FacesViewVisitor fvv = null;
-			        org.skyve.metadata.view.View view = repository.getView(uxui.getName(), customer, document, ViewType.edit.toString());
-			        if (view != null) {
-			        	fvv = new FacesViewVisitor(user,
-													(CustomerImpl) customer,
-													(ModuleImpl) module, 
-													(DocumentImpl) document,
-													(ViewImpl) view,
-													widgetId,
-													componentBuilder,
-													layoutBuilder);
-	                    fvv.visit();
-	                    View.this.getChildren().add(fvv.getFacesView());
-	                }
-	                view = repository.getView(uxui.getName(), customer, document, ViewType.create.toString());
-	                if (view != null) {
-	                    fvv = new FacesViewVisitor(user,
-		                                              (CustomerImpl) customer,
-		                                              (ModuleImpl) module, 
-		                                              (DocumentImpl) document,
-		                                              (ViewImpl) view,
-		                                              widgetId,
-		                                              componentBuilder,
-		                                              layoutBuilder);
-	                    fvv.visit();
-	                    View.this.getChildren().add(fvv.getFacesView());
-	                }
-	                
+					List<UIComponent> views = View.generate(moduleName,
+																documentName,
+																widgetId,
+																managedBeanName,
+																uxui.getName(),
+																userAgentType,
+																process,
+																update,
+																componentBuilder,
+																layoutBuilder);
+					View.this.getChildren().addAll(views);
+					
 	                return null;
 				}
 			}.execute();
@@ -144,5 +116,63 @@ public class View extends HtmlPanelGroup {
 		}
 
 		super.encodeBegin(context);
+    }
+    
+    public static List<UIComponent> generate(String moduleName,
+				    							String documentName,
+				    							String widgetId,
+				    							String managedBeanName,
+				    							String uxui,
+				    							UserAgentType userAgentType,
+				    							String process,
+				    							String update,
+				    							ComponentBuilder componentBuilder,
+				    							LayoutBuilder layoutBuilder) {
+    	List<UIComponent> result = new ArrayList<>(2);
+    	
+    	User user = CORE.getUser();
+    	Customer customer = user.getCustomer();
+        Module module = customer.getModule(moduleName);
+        Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);
+        Repository repository = CORE.getRepository();
+
+    	componentBuilder.setManagedBeanName(managedBeanName);
+    	componentBuilder.setProcess(process);
+    	componentBuilder.setUpdate(update);
+    	componentBuilder.setUserAgentType(userAgentType);
+    	layoutBuilder.setManagedBeanName(managedBeanName);
+    	layoutBuilder.setProcess(process);
+    	layoutBuilder.setUpdate(update);
+    	layoutBuilder.setUserAgentType(userAgentType);
+
+        FacesViewVisitor fvv = null;
+        org.skyve.metadata.view.View view = repository.getView(uxui, customer, document, ViewType.edit.toString());
+        if (view != null) {
+        	fvv = new FacesViewVisitor(user,
+										(CustomerImpl) customer,
+										(ModuleImpl) module, 
+										(DocumentImpl) document,
+										(ViewImpl) view,
+										widgetId,
+										componentBuilder,
+										layoutBuilder);
+            fvv.visit();
+            result.add(fvv.getFacesView());
+        }
+        view = repository.getView(uxui, customer, document, ViewType.create.toString());
+        if (view != null) {
+            fvv = new FacesViewVisitor(user,
+                                          (CustomerImpl) customer,
+                                          (ModuleImpl) module, 
+                                          (DocumentImpl) document,
+                                          (ViewImpl) view,
+                                          widgetId,
+                                          componentBuilder,
+                                          layoutBuilder);
+            fvv.visit();
+            result.add(fvv.getFacesView());
+        }
+        
+        return result;
     }
 }

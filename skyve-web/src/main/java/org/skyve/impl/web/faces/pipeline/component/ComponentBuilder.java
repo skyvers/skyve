@@ -154,9 +154,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String modelName,
 											ListModel<? extends Bean> model,
 											ListGrid listGrid,
-											boolean canCreateDocument,
-											boolean showPaginator,
-											boolean stickyHeader);
+											boolean canCreateDocument);
 
 	/*
 	 * List Repeater is just like a list grid but...
@@ -174,8 +172,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												List<FilterParameter> filterParameters,
 												String title,
 												boolean showColumnHeaders,
-												boolean showGrid,
-												boolean stickyHeader);
+												boolean showGrid);
 
 	public abstract UIComponent listMembership(UIComponent component, ListMembership membership);
 	
@@ -247,13 +244,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String title,
 											boolean required);
 	
-	public abstract UIComponent textArea(UIComponent component, 
-											String listVar,
-											TextArea text,
-											String title,
-											boolean required,
-											Integer length);
-	
 	public abstract UIComponent text(UIComponent component, 
 										String listVar, 
 										TextField text, 
@@ -263,6 +253,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										Converter<?> converter,
 										Format<?> format,
 										javax.faces.convert.Converter facesConverter);
+
+	public abstract UIComponent textArea(UIComponent component, 
+											String listVar,
+											TextArea text,
+											String title,
+											boolean required,
+											Integer length);
 	
 	public HtmlOutputLink outputLink(String listVar, 
 										String value, 

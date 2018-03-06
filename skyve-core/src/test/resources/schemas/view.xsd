@@ -1416,7 +1416,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractDataWidget">
         <xs:sequence>
-          <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:choice maxOccurs="unbounded">
             <xs:element ref="tns:boundColumn"/>
             <xs:element ref="tns:containerColumn"/>
           </xs:choice>

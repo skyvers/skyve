@@ -25,7 +25,7 @@
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
-			<script type="text/javascript" src="external/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+			<script type="text/javascript" src="prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
 			<ui:insert name="head" />
 		</h:head>
 		<h:body>
@@ -69,8 +69,8 @@
 							<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
 							<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 							<p:confirmDialog global="true">
-								<p:commandButton value="Cancel" type="button" styleClass="ui-confirmdialog-no" style="float:right;" icon="ui-icon-close"/>
-								<p:commandButton value="OK" type="button" styleClass="ui-confirmdialog-yes" style="float:right;" icon="ui-icon-check"/>
+								<p:commandButton id="confirmCancel" value="Cancel" type="button" styleClass="ui-confirmdialog-no" style="float:right;" icon="ui-icon-close"/>
+								<p:commandButton id="confirmOK" value="OK" type="button" styleClass="ui-confirmdialog-yes" style="float:right;" icon="ui-icon-check"/>
 							</p:confirmDialog>
 							
 							<ui:insert name="body" />

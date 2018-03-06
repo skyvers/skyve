@@ -44,6 +44,7 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.util.Util;
 import org.xml.sax.SAXException;
 
@@ -72,6 +73,7 @@ public class XMLMetaData {
 	public static final String MODULE_NAMESPACE = "http://www.skyve.org/xml/module";
 	public static final String DOCUMENT_NAMESPACE = "http://www.skyve.org/xml/document";
 	public static final String VIEW_NAMESPACE = "http://www.skyve.org/xml/view";
+	public static final String SAIL_NAMESPACE = "http://www.skyve.org/xml/sail";
 
 	private static final JAXBContext ROUTER_CONTEXT;
 	private static final Schema ROUTER_SCHEMA;
@@ -87,6 +89,9 @@ public class XMLMetaData {
 
 	private static final JAXBContext VIEW_CONTEXT;
 	private static final Schema VIEW_SCHEMA;
+
+	private static final JAXBContext SAIL_CONTEXT;
+	private static final Schema SAIL_SCHEMA;
 
 	static {
 		try {
@@ -104,6 +109,9 @@ public class XMLMetaData {
 
 			VIEW_CONTEXT = JAXBContext.newInstance(ViewMetaData.class);
 			VIEW_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/view.xsd");
+
+			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
+			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Could not initialize one of the metadata JAXB contexts", e);
@@ -441,6 +449,41 @@ public class XMLMetaData {
 		}
 	}
 
+	public static String marshalSAIL(Automation automation) {
+		try {
+			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
+									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
+			marshaller.setSchema(SAIL_SCHEMA);
+			StringWriter sos = new StringWriter(1024);
+			marshaller.marshal(automation, sos);
+			return sos.toString();
+		}
+		catch (JAXBException e) {
+			throw new MetaDataException("Could not marshal SAIL", e);
+		}
+	}
+
+	public static Automation unmarshalSAIL(String file) {
+		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
+		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, Util.UTF8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
+						unmarshaller.setSchema(SAIL_SCHEMA);
+						return (Automation) unmarshaller.unmarshal(br);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL at " + file, e);
+		}
+	}
+
 	/**
 	 * Cleans the XML string by removing any empty lines left by removing
 	 * nodes during the {@link JAXBFixingVisitor}.
@@ -465,44 +508,6 @@ public class XMLMetaData {
 			// this can only happen if there's a deployment error and the resource is missing.
 			throw new JAXBException("Could not find XML Schema for " + schemaFileName, se);
 		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
-															ModuleMetaData.class,
-															DocumentMetaData.class,
-															ViewMetaData.class,
-															Router.class);
-		jaxbContext.generateSchema(new SchemaOutputResolver() {
-			@Override
-			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
-				File file = null;
-				if (namespaceUri.endsWith("/common")) {
-					file = new File("common.xsd");
-				}
-				else if (namespaceUri.endsWith("/customer")) {
-					file = new File("customer.xsd");
-				}
-				else if (namespaceUri.endsWith("/module")) {
-					file = new File("module.xsd");
-				}
-				else if (namespaceUri.endsWith("/document")) {
-					file = new File("document.xsd");
-				}
-				else if (namespaceUri.endsWith("/view")) {
-					file = new File("view.xsd");
-				}
-				else if (namespaceUri.endsWith("/router")) {
-					file = new File("router.xsd");
-				}
-				else {
-					throw new IllegalArgumentException(namespaceUri + " not catered for");
-				}
-		        StreamResult result = new StreamResult(file);
-		        result.setSystemId(file.toURI().toURL().toString());
-		        return result;
-			}
-		});
 	}
 
 	/**
@@ -618,5 +623,47 @@ public class XMLMetaData {
 				}
 			}
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
+															ModuleMetaData.class,
+															DocumentMetaData.class,
+															ViewMetaData.class,
+															Router.class,
+															Automation.class);
+		jaxbContext.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+				File file = null;
+				if (namespaceUri.endsWith("/common")) {
+					file = new File("common.xsd");
+				}
+				else if (namespaceUri.endsWith("/customer")) {
+					file = new File("customer.xsd");
+				}
+				else if (namespaceUri.endsWith("/module")) {
+					file = new File("module.xsd");
+				}
+				else if (namespaceUri.endsWith("/document")) {
+					file = new File("document.xsd");
+				}
+				else if (namespaceUri.endsWith("/view")) {
+					file = new File("view.xsd");
+				}
+				else if (namespaceUri.endsWith("/router")) {
+					file = new File("router.xsd");
+				}
+				else if (namespaceUri.endsWith("/sail")) {
+					file = new File("sail.xsd");
+				}
+				else {
+					throw new IllegalArgumentException(namespaceUri + " not catered for");
+				}
+		        StreamResult result = new StreamResult(file);
+		        result.setSystemId(file.toURI().toURL().toString());
+		        return result;
+			}
+		});
 	}
 }

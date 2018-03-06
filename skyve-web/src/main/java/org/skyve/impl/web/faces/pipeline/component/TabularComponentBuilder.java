@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
@@ -99,6 +100,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -155,7 +157,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
-		result.setTitle(tab.getTitle());
+		setValueOrValueExpression(tab.getTitle(), result::setTitle, "title", result);
 		setDisabled(result, tab.getDisabledConditionName());
 		setInvisible(result, tab.getInvisibleConditionName(), null);
 		setId(result, null);
@@ -402,7 +404,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		Column result = column(listVar,
-								(columnBinding == null) ? Bean.BIZ_KEY : columnBinding,
+								null,
 								columnTitle,
 	                            column.getAlignment(),
 	                            false,
@@ -658,9 +660,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid grid,
-									boolean canCreateDocument,
-									boolean showPaginator,
-									boolean stickyHeader) {
+									boolean canCreateDocument) {
 		if (component != null) {
 			return component;
 		}
@@ -673,25 +673,20 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		String disableAddConditionName = grid.getDisableAddConditionName();
 		String disabledConditionName = grid.getDisabledConditionName();
 		String[] createDisabled = (disableAddConditionName == null) ?
-				((disabledConditionName == null) ?
-						null :
-						new String[] {disabledConditionName}) :
-				((disabledConditionName == null) ?
-						new String[] {disableAddConditionName} :
-						new String[] {disableAddConditionName, disabledConditionName});
+									((disabledConditionName == null) ?
+											null :
+											new String[] {disabledConditionName}) :
+									((disabledConditionName == null) ?
+											new String[] {disableAddConditionName} :
+											new String[] {disableAddConditionName, disabledConditionName});
 		boolean zoomRendered = (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
         result.setVar("row");
-        result.setPaginator(showPaginator);
-        if (showPaginator) {
-	        result.setRowsPerPageTemplate("25,50,75,100");
-	        result.setRows(50);
-	        result.setPaginatorAlwaysVisible(false);
-        }
+
         result.setLazy(true);
         result.setEmptyMessage("No Items to show");
-        result.setStickyHeader(stickyHeader);
+        result.setSortMode("multiple");
         
         setId(result, null);
     	result.setWidgetVar(result.getId());
@@ -755,17 +750,23 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		if (grid.getTitle() != null) {
 			addListGridHeader(grid.getTitle(), result);
 		}
-        List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children);
+
+		boolean showFilter = (! Boolean.FALSE.equals(grid.getShowFilter()));
+		if (showFilter) {
+			result.setFilterDelay(500);
+		}
+		
+		List<UIComponent> children = result.getChildren();
+        addListGridDataColumns(model, children, showFilter, result.getWidgetVar());
         if ((canCreateDocument && createRendered) || zoomRendered) {
         	final UIComponent actionColumn = createListGridActionColumn(moduleName,
-        								drivingDocumentName, 
-        								canCreateDocument,
-        								createRendered, 
-        								createDisabled,
-        								zoomRendered,
-        								grid.getDisableZoomConditionName(),
-										grid.getProperties());
+									        								drivingDocumentName, 
+									        								canCreateDocument,
+									        								createRendered, 
+									        								createDisabled,
+									        								zoomRendered,
+									        								grid.getDisableZoomConditionName(),
+																			grid.getProperties());
 			children.add(actionColumn);
         }
     	
@@ -817,7 +818,9 @@ public class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	protected void addListGridDataColumns(ListModel<? extends Bean> model,
-											List<UIComponent> componentChildrenToAddTo) {
+											List<UIComponent> componentChildrenToAddTo,
+											boolean showFilter,
+											String tableVar) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -832,14 +835,15 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String name = queryColumn.getName();
 			String binding = queryColumn.getBinding();
 
-			// Sort out a display name
+			// Sort out a display name and filter facet
 			String displayName = queryColumn.getDisplayName();
-			if (displayName == null) {
-				if (binding != null) {
-					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-					Document bindingDocument = target.getDocument();
-					Attribute bindingAttribute = target.getAttribute();
-					if (binding.endsWith(Bean.BIZ_KEY)) {
+			UIComponent specialFilterComponent = null;
+			if (binding != null) {
+				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+				Document bindingDocument = target.getDocument();
+				Attribute bindingAttribute = target.getAttribute();
+				if (binding.endsWith(Bean.BIZ_KEY)) {
+					if (displayName == null) {
 						if (bindingDocument != null) {
 							displayName = bindingDocument.getSingularAlias();
 						}
@@ -847,27 +851,50 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							displayName = DocumentImpl.getBizKeyAttribute().getDisplayName();
 						}
 					}
-					else if (binding.endsWith(Bean.ORDINAL_NAME)) {
+				}
+				else if (binding.endsWith(Bean.ORDINAL_NAME)) {
+					if (displayName == null) {
 						displayName = DocumentImpl.getBizOrdinalAttribute().getDisplayName();
 					}
-					else if (bindingAttribute != null) {
+				}
+				else if (bindingAttribute != null) {
+					if (displayName == null) {
 						displayName = bindingAttribute.getDisplayName();
+					}
+					if (showFilter && queryColumn.isFilterable()) {
+						specialFilterComponent = createSpecialColumnFilterFacetComponent(document,
+																							binding,
+																							bindingAttribute,
+																							tableVar);
 					}
 				}
 			}
 			
 			// Create the column
 			Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
+			setId(column, null);
 			column.setHeaderText(displayName);
 			column.setPriority(columnPriority);
 			if (columnPriority < 6) {
 				columnPriority++;
 			}
-				
-/* TODO complete this
-			column.setSortBy(queryColumn.getBinding());
-			column.setFilterBy(queryColumn.getBinding());
-*/
+			column.setField((name != null) ? name : binding);
+			
+			// Unbound columns or unsortable columns should be set unsortable
+			if ((binding == null) || (! queryColumn.isSortable())) {
+				column.setSortable(false);
+			}
+
+			// Unbound columns or unfilterable columns should be set unfilterable
+			if ((binding != null) && showFilter && queryColumn.isFilterable()) {
+				if (specialFilterComponent != null) {
+					column.getFacets().put("filter", specialFilterComponent);
+				}
+			}
+			else {
+				column.setFilterable(false);
+			}
+			
 			// Add the EL expression
 			String value = String.format("#{row['{%s}']}", (name != null) ? name : binding);
 			UIOutput outputText = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
@@ -877,20 +904,55 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
+	protected UIComponent createSpecialColumnFilterFacetComponent(Document modelDrivingDocument, 
+																	String columnBinding,
+																	Attribute columnAttribute,
+																	String tableVar) {
+		// To keep the appropriate length of the filter input components inside the data table columns,
+		// A <div style="display:flex" /> should be used, but nesting the control in a div breaks
+		// the filtering processing of faces...so instead, the <div class=".ui-column-customfilter" />
+		// already rendered by PF data table is hijacked into a flexbox in prime.css.
+		UIComponent result = null;
+
+		if (DomainType.constant.equals(columnAttribute.getDomainType())) {
+			HtmlSelectOneMenu s = selectOneMenu(null, null, null, false, null, null);
+			s.setStyle("width:100%");
+			s.setOnchange(String.format("PF('%s').filter()", tableVar));
+			UISelectItems i = selectItems(modelDrivingDocument.getOwningModuleName(), 
+											modelDrivingDocument.getName(),
+											null,
+											columnBinding,
+											true);
+			s.getChildren().add(i);
+			result = s;
+		}
+		else {
+			AttributeType type = columnAttribute.getAttributeType();
+			if (AttributeType.bool.equals(type)) {
+				SelectBooleanCheckbox cb = checkbox(null, null, null, false, null);
+				cb.setOnchange(String.format("PF('%s').filter()", tableVar));
+				result = cb;
+			}
+		}
+		
+		return result;
+	}
+	
 	protected UIComponent createListGridActionColumn(String moduleName,
-										   String documentName,
-										   boolean canCreateDocument,
-										   boolean createRendered,
-										   String[] createDisabledConditionNames,
-										   boolean zoomRendered,
-										   String zoomDisabledConditionName,
-										   Map<String, String> properties) {
+													   String documentName,
+													   boolean canCreateDocument,
+													   boolean createRendered,
+													   String[] createDisabledConditionNames,
+													   boolean zoomRendered,
+													   String zoomDisabledConditionName,
+													   Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setPriority(1);
 		column.setWidth("40");
 		column.setStyle("text-align:center !important");
 		if (canCreateDocument && createRendered) {
 			Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+			setId(button, null);
 			button.setValue(null);
 			button.setTitle("New record");
 			button.setIcon("fa fa-plus");
@@ -915,8 +977,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return column;
 	}
 
-	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
+													@SuppressWarnings("unused") Map<String, String> properties) {
 		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
+		setId(button, null);
 		button.setValue(null);
 		button.setTitle("View Detail");
 		button.setIcon("fa fa-chevron-right");
@@ -949,8 +1013,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										List<FilterParameter> filterParameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid,
-										boolean stickyHeader) {
+										boolean showGrid) {
 		if (component != null) {
 			return component;
 		}
@@ -964,7 +1027,6 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.setPaginator(false);
         result.setLazy(true);
         result.setEmptyMessage("");
-        result.setStickyHeader(stickyHeader);
         
         setId(result, null);
     	result.setWidgetVar(result.getId());
@@ -1006,7 +1068,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			addListGridHeader(title, result);
 		}
         List<UIComponent> children = result.getChildren();
-        addListGridDataColumns(model, children);
+        addListGridDataColumns(model, children, false, result.getWidgetVar());
 
         result.setStyleClass(repeaterStyleClass(showColumnHeaders, showGrid));
         result.setEmptyMessage("");
@@ -1134,7 +1196,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								                required,
 								                combo.getDisabledConditionName(),
 								                null);
-		UISelectItems i = selectItems(listVar, binding, true);
+		UISelectItems i = selectItems(null, null, listVar, binding, true);
 		s.getChildren().add(i);
 		
 		return s;
@@ -1345,7 +1407,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				                                required,
 				                                radio.getDisabledConditionName());
         result.getAttributes().put("binding", radio.getBinding());
-        UISelectItems i = selectItems(listVar, binding, false);
+        UISelectItems i = selectItems(null, null, listVar, binding, false);
 		result.getChildren().add(i);
 		return result;
 	}
@@ -1571,13 +1633,10 @@ public class TabularComponentBuilder extends ComponentBuilder {
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY));
 	}
-	
-	private Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
-		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		if (title != null) {
-			result.setHeader(title);
-		}
 
+	protected Panel panel(String title, String invisible, Integer pixelWidth, String widgetId) {
+		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
+		setValueOrValueExpression(title, result::setHeader, "header", result);
 		setInvisible(result, invisible, null);
 		setSize(result, null, pixelWidth, null, null, null, null, NINETY_EIGHT);
 		setId(result, widgetId);
@@ -2063,7 +2122,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Create a button with a href URL that looks like...
-	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_ctim=<currentTimeInMillis>
+	 * http://localhost:8080/skyve/download?_n=<downloadAction>&_doc=<module>.<document>&_c=<webId>&_b=<form binding>&_ctim=<currentTimeInMillis>
 	 */
 	private Button downloadButton(String title, 
 									String iconStyleClass,
@@ -2078,22 +2137,17 @@ public class TabularComponentBuilder extends ComponentBuilder {
 									@SuppressWarnings("unused") String confirmationText,
 									String disabled,
 									String invisible) {
-		String href = String.format("download?%s=%s&%s=%s.%s&%s=#{%s.webContext.webId}&%s=%d", 
-										AbstractWebContext.RESOURCE_FILE_NAME,
-										downloadActionName,
-										AbstractWebContext.DOCUMENT_NAME,
-										moduleName,
-										documentName,
-										AbstractWebContext.CONTEXT_NAME,
+		String href = String.format("#{%s.getDownloadUrl('%s','%s','%s')}", 
 										managedBeanName,
-										AbstractWebContext.CURRENT_TIME_IN_MILLIS,
-										Long.valueOf(System.currentTimeMillis()));
+										downloadActionName,
+										moduleName,
+										documentName);
 		return linkButton((iconStyleClass == null) ? "fa fa-download" : iconStyleClass, 
 							null, 
 							null,
 							title,
 							tooltip,
-							href.toString(),
+							href,
 							pixelWidth,
 							pixelHeight,
 							disabled,
@@ -2110,7 +2164,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 										String listVar, 
 										Integer pixelWidth, 
 										Integer pixelHeight,
-										Boolean clientValidation, 
+										@SuppressWarnings("unused") Boolean clientValidation, 
 										String confirmationText,
 										String disabled, 
 										String invisible,
@@ -2569,17 +2623,31 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UISelectItems selectItems(String listVar, String binding, boolean includeEmptyItems) {
+	private UISelectItems selectItems(String moduleName,
+										String documentName,
+										String listVar,
+										String binding,
+										boolean includeEmptyItems) {
 		UISelectItems result = (UISelectItems) a.createComponent(UISelectItems.COMPONENT_TYPE);
 		setId(result, null);
-		StringBuilder expression = new StringBuilder(32);
-		expression.append("getSelectItems('").append(binding).append("',").append(includeEmptyItems).append(')');
+		String expression = null;
 		ValueExpression valueExpression = null;
-		if (listVar != null) {
-			valueExpression = createValueExpressionFromFragment(listVar, true, expression.toString(), false, null, List.class);
+		if ((moduleName != null) && (documentName != null)) { // module and document, use FacesView.getSelectItems()
+			expression = String.format("getSelectItems('%s','%s','%s',%s)", 
+										moduleName,
+										documentName,
+										binding,
+										String.valueOf(includeEmptyItems));
+			valueExpression = createValueExpressionFromFragment(managedBeanName, false, expression, false, null, List.class);
 		}
-		else {
-			valueExpression = createValueExpressionFromFragment(expression.toString(), false, null, List.class);
+		else { // use the FacesView.currentBean.getSelectItems()
+			expression = String.format("getSelectItems('%s',%s)", binding, String.valueOf(includeEmptyItems));
+			if (listVar != null) {
+				valueExpression = createValueExpressionFromFragment(listVar, true, expression, false, null, List.class);
+			}
+			else {
+				valueExpression = createValueExpressionFromFragment(expression, false, null, List.class);
+			}
 		}
 		result.setValueExpression("value", valueExpression);
 
@@ -2594,12 +2662,14 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							String disabled) {
 		UIInput result = (UIInput) a.createComponent(componentType);
 		setId(result, null);
-		if (listVar != null) {
-			result.setValueExpression("value",
-										createValueExpressionFromFragment(listVar, true, binding, true, null, Object.class));
-		}
-		else {
-			result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));
+		if (binding != null) { // data table filter components don't set a binding
+			if (listVar != null) {
+				result.setValueExpression("value",
+											createValueExpressionFromFragment(listVar, true, binding, true, null, Object.class));
+			}
+			else {
+				result.setValueExpression("value", createValueExpressionFromFragment(binding, true, null, Object.class));
+			}
 		}
 		if (title != null) {
 			result.setValueExpression("title",
@@ -2623,6 +2693,16 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			ConfirmBehavior confirm = (ConfirmBehavior) a.createBehavior(ConfirmBehavior.BEHAVIOR_ID);
 			confirm.setMessage(confirmationText);
 			component.addClientBehavior("click", confirm);
+		}
+	}
+
+	protected void setValueOrValueExpression(String value, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
+		if (value != null && value.indexOf('{') > -1) {
+			final String sanitisedBinding = ((value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value);
+			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding, true, null, String.class);
+			component.setValueExpression(valueExpressionName, ve);
+		} else if (value != null) {
+			valueSetter.accept(value);
 		}
 	}
 	

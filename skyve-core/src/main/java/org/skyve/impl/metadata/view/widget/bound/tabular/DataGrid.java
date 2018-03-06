@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -129,8 +130,9 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	}
 
 	@Override
-	@XmlElementRefs({@XmlElementRef(type = DataGridBoundColumn.class),
-						@XmlElementRef(type = DataGridContainerColumn.class)})
+	// Ensure that there is at least 1 bound or container column
+	@XmlElements({@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn", type = DataGridBoundColumn.class, required = true),
+						@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "containerColumn", type = DataGridContainerColumn.class, required = true)})
 	public List<DataGridColumn> getColumns() {
 		return columns;
 	}

@@ -27,23 +27,44 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	private Bean bean;
 	private String binding;
 	private boolean includeEmptyItem;
-
+	private String moduleName;
+	private String documentName;
+	
+	/**
+	 * Constructor used for input components in forms and grids.
+	 * @param bean
+	 * @param binding
+	 * @param includeEmptyItem
+	 */
 	public GetSelectItemsAction(Bean bean, String binding, boolean includeEmptyItem) {
 		this.bean = bean;
 		this.binding = binding;
 		this.includeEmptyItem = includeEmptyItem;
+		this.moduleName = bean.getBizModule();
+		this.documentName = bean.getBizDocument();
+	}
+
+	/**
+	 * Constructor used for filter components.
+	 * @param moduleName
+	 * @param documentName
+	 * @param binding
+	 * @param includeEmptyItem
+	 */
+	public GetSelectItemsAction(String moduleName, String documentName, String binding, boolean includeEmptyItem) {
+		this.binding = binding;
+		this.includeEmptyItem = includeEmptyItem;
+		this.moduleName = moduleName;
+		this.documentName = documentName;
 	}
 
 	@Override
 	public List<SelectItem> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) Util.LOGGER.info("GetSelectItemsAction - binding=" + binding + " : includeEmptyItem=" + includeEmptyItem);
 
-		String bizModule = bean.getBizModule();
-    	String bizDocument = bean.getBizDocument();
-
     	Customer customer = CORE.getUser().getCustomer();
-        Module module = customer.getModule(bizModule);
-        Document document = module.getDocument(customer, bizDocument);
+        Module module = customer.getModule(moduleName);
+        Document document = module.getDocument(customer, documentName);
         TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, binding);
         Attribute targetAttribute = target.getAttribute();
         Document targetDocument = target.getDocument();
@@ -53,11 +74,13 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
         if ((targetDocument != null) && (targetAttribute != null)) {
             DomainType domainType = targetAttribute.getDomainType();
             Bean owningBean = bean;
-            int lastDotIndex = binding.lastIndexOf('.');
-            if (lastDotIndex > 0) {
-            	owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+            if (bean != null) {
+	            int lastDotIndex = binding.lastIndexOf('.');
+	            if (lastDotIndex > 0) {
+	            	owningBean = (Bean) Binder.get(bean, binding.substring(0, lastDotIndex));
+	            }
             }
-
+            
             List<DomainValue> domainValues = ((DocumentImpl) targetDocument).getDomainValues((CustomerImpl) customer,
 																	                            domainType,
 																	                            targetAttribute,
@@ -66,7 +89,8 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	            result = new ArrayList<>(domainValues.size() + 1);
 	        	// add an empty select item so that a null value 
 	        	// in the bean can be represented, even if mandatory
-	        	if (targetAttribute.isRequired()) {
+	            // Notice filter components should always have a selectable empty value
+	        	if ((bean != null) && targetAttribute.isRequired()) {
 	        		result.add(new SelectItem(null, "", "", true, false, true)); // mandatory gets an unselectable item
 	        	}
 	        	else {

@@ -178,9 +178,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid listGrid,
-									boolean canCreateDocument,
-									boolean showPaginator,
-									boolean stickyHeader) {
+									boolean canCreateDocument) {
 		return component;
 	}
 
@@ -192,8 +190,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										List<FilterParameter> filterParameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid,
-										boolean stickyHeader) {
+										boolean showGrid) {
 		return component;
 	}
 

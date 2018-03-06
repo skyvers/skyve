@@ -900,9 +900,7 @@ public class FacesViewVisitor extends ViewVisitor {
 										listWidgetModelName,
 										listWidgetModel,
 										grid,
-										user.canCreateDocument(listWidgetDrivingDocument),
-										true,
-										false);
+										user.canCreateDocument(listWidgetDrivingDocument));
 		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
 	}
 	
@@ -918,8 +916,7 @@ public class FacesViewVisitor extends ViewVisitor {
 											repeater.getParameters(), 
 											repeater.getTitle(),
 											Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
-											Boolean.TRUE.equals(repeater.getShowGrid()),
-											false);
+											Boolean.TRUE.equals(repeater.getShowGrid()));
 		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
 	}
 
@@ -1168,7 +1165,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitCheckMembership(CheckMembership membership,
 	                                    boolean parentVisible,
 	                                    boolean parentEnabled) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
+//		SmartClientDataGridFieldDefinition def = getFieldDef(membership);
         UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
         addToContainer(c, null, null, null, membership.getInvisibleConditionName());
@@ -1329,7 +1326,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	public void visitComparison(Comparison comparison,
 	                                boolean parentVisible,
 	                                boolean parentEnabled) {
-		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
+//		SmartClientDataGridFieldDefinition def = getFieldDef(comparison);
         UIComponent c = cb.label(null, "comparison"); // TODO comparison
         addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
         addedToContainer();

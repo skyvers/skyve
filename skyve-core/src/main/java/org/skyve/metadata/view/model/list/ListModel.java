@@ -10,7 +10,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.web.SortParameter;
+import org.skyve.web.SortParameter;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;

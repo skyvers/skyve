@@ -1,26 +1,34 @@
 package org.skyve.impl.util;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Converted and enhanced Java implementation of https://github.com/rhroyston/pluralizer-js/blob/master/pluralizer.js.
  * License: MIT
  */
 public class PluralUtil {
 
-	private static final String[][] irregular = new String[][] {
-			{ "child", "children" },
-			{ "die", "dice" },
-			{ "foot", "feet" },
-			{ "goose", "geese" },
-			{ "louse", "lice" },
-			{ "man", "men" },
-			{ "mouse", "mice" },
-			{ "ox", "oxen" },
-			{ "person", "people" },
-			{ "that", "those" },
-			{ "this", "these" },
-			{ "tooth", "teeth" },
-			{ "woman", "women" } };
-	private static final String[][] xExceptions = new String[][] { { "fez", "fezzes" }, { "gas", "gasses" }, { "ox", "oxen" } };
+	final static String LOWERCASE_PATTERN = "\\b[a-z'\\-]+\\b";
+	final static String TITLECASE_PATTERN = "\\b[A-Z][a-z'\\-]+\\b";
+	final static String UPPERCASE_PATTERN = "\\b[A-Z'\\-]+\\b";
+
+	private static final String[][] aExceptions = new String[][] { { "agenda", "agendas" },
+			{ "alfalfa", "alfalfas" },
+			{ "aurora", "auroras" },
+			{ "banana", "bananas" },
+			{ "barracuda", "barracudas" },
+			{ "cornea", "corneas" },
+			{ "nova", "novas" },
+			{ "phobia", "phobias" } };
+	private static final String[][] exExceptions = new String[][] {
+			{ "annex", "annexes" },
+			{ "complex", "complexes" },
+			{ "duplex", "duplexes" },
+			{ "hex", "hexes" },
+			{ "index", "indices" } };
 	private static final String[][] fExceptions = new String[][] { { "belief", "beliefs" },
 			{ "chef", "chefs" },
 			{ "chief", "chiefs" },
@@ -36,11 +44,8 @@ public class PluralUtil {
 			{ "roof", "roofs" },
 			{ "safe", "safes" },
 			{ "turf", "turfs" } };
-	private static final String[][] feExceptions = new String[][] {
-			{ "safe", "safes" } };
-	private static String[][] ffExceptions = new String[][] {
-			{ "staff", "staff" }
-	};
+	private static final String[][] feExceptions = new String[][] { { "safe", "safes" } };
+	private static String[][] ffExceptions = new String[][] { { "staff", "staff" } };
 	private static final String[][] oExceptions = new String[][] { { "albino", "albinos" },
 			{ "armadillo", "armadillos" },
 			{ "auto", "autos" },
@@ -71,6 +76,11 @@ public class PluralUtil {
 			{ "video", "videos" },
 			{ "yo", "yos" },
 			{ "zoo", "zoos" } };
+	private static final String[][] onExceptions = new String[][] {
+			{ "balloon", "balloons" },
+			{ "carton", "cartons" },
+			{ "formation", "formations" } };
+	private static final String[][] umExceptions = new String[][] { { "album", "albums" }, { "stadium", "stadiums" } };
 	private static final String[][] usExceptions = new String[][] {
 			{ "abacus", "abacuses" },
 			{ "bus", "buses" },
@@ -79,59 +89,22 @@ public class PluralUtil {
 			{ "octopus", "octopuses" },
 			{ "rhombus", "rhombuses" },
 			{ "walrus", "walruses" } };
-	private static final String[][] umExceptions = new String[][] { { "album", "albums" }, { "stadium", "stadiums" } };
-	private static final String[][] aExceptions = new String[][] { { "agenda", "agendas" },
-			{ "alfalfa", "alfalfas" },
-			{ "aurora", "auroras" },
-			{ "banana", "bananas" },
-			{ "barracuda", "barracudas" },
-			{ "cornea", "corneas" },
-			{ "nova", "novas" },
-			{ "phobia", "phobias" } };
-	private static final String[][] onExceptions = new String[][] {
-			{ "balloon", "balloons" },
-			{ "carton", "cartons" },
-			{ "formation", "formations" } };
-	private static final String[][] exExceptions = new String[][] {
-			{ "annex", "annexes" },
-			{ "complex", "complexes" },
-			{ "duplex", "duplexes" },
-			{ "hex", "hexes" },
-			{ "index", "indices" } };
-	private static final String[] unchanging = new String[] { "advice",
-			"aircraft",
-			"bison",
-			"corn",
-			"deer",
-			"equipment",
-			"evidence",
-			"fish",
-			"gold",
-			"information",
-			"jewelry",
-			"kin",
-			"legislation",
-			"luck",
-			"luggage",
-			"moose",
-			"music",
-			"offspring",
-			"sheep",
-			"silver",
-			"swine",
-			"trousers",
-			"trout",
-			"wheat" };
-	private static final String[] onlySingular = new String[] {
-			"equipment",
-			"glass",
-			"information",
-			"luggage",
-			"oil",
-			"paper",
-			"steel",
-			"sugar",
-			"wood" };
+	private static final String[][] xExceptions = new String[][] { { "fez", "fezzes" }, { "gas", "gasses" }, { "ox", "oxen" } };
+
+	private static final String[][] irregular = new String[][] {
+			{ "child", "children" },
+			{ "die", "dice" },
+			{ "foot", "feet" },
+			{ "goose", "geese" },
+			{ "louse", "lice" },
+			{ "man", "men" },
+			{ "mouse", "mice" },
+			{ "ox", "oxen" },
+			{ "person", "people" },
+			{ "that", "those" },
+			{ "this", "these" },
+			{ "tooth", "teeth" },
+			{ "woman", "women" } };
 	private static final String[] onlyPlurals = new String[] { "barracks",
 			"bellows",
 			"cattle",
@@ -158,6 +131,32 @@ public class PluralUtil {
 			"tongs",
 			"tweezers",
 			"vespers" };
+	private static final String[] unchanging = new String[] { "advice",
+			"aircraft",
+			"bison",
+			"corn",
+			"deer",
+			"equipment",
+			"evidence",
+			"fish",
+			"gold",
+			"information",
+			"jewelry",
+			"kin",
+			"legislation",
+			"luck",
+			"luggage",
+			"moose",
+			"music",
+			"oil",
+			"offspring",
+			"sheep",
+			"silver",
+			"steel",
+			"swine",
+			"trousers",
+			"trout",
+			"wheat" };
 
 	private PluralUtil() {
 		// no-op
@@ -170,33 +169,28 @@ public class PluralUtil {
 	 * @param singular The word to pluralise
 	 * @return The plural of the singualr word
 	 */
-	public static String pluralise(final String str) {
-		if (str != null && str.length() > 0) {
+	public static String pluralise(final String singular) {
+		if (singular != null && singular.length() > 0) {
+			String str = singular.toLowerCase();
 			StringBuilder out = new StringBuilder(str);
 
 			// check unchanging
 			for (int i = 0; i < unchanging.length; i++) {
-				if (str == unchanging[i]) {
-					return str;
+				if (str.equals(unchanging[i])) {
+					return singular;
 				}
 			}
 			// check only plural
 			for (int i = 0; i < onlyPlurals.length; i++) {
-				if (str == onlyPlurals[i]) {
-					return str;
+				if (str.equals(onlyPlurals[i])) {
+					return singular;
 				}
 			}
 
-			// check only singular
-			for (int i = 0; i < onlySingular.length; i++) {
-				if (str == onlySingular[i]) {
-					return str;
-				}
-			}
 			// check irregular
 			for (int i = 0; i < irregular.length; i++) {
-				if (str == irregular[i][0]) {
-					return irregular[i][1];
+				if (str.equals(irregular[i][0])) {
+					return replaceWithMatchingCase(singular, irregular[i][1]);
 				}
 			}
 
@@ -204,8 +198,8 @@ public class PluralUtil {
 			if (str.endsWith("ex")) {
 				// look for exceptions first exExceptions
 				for (int i = 0; i < exExceptions.length; i++) {
-					if (str == exExceptions[i][0]) {
-						return exExceptions[i][1];
+					if (str.equals(exExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, exExceptions[i][1]);
 					}
 				}
 				// change final 'ex' to 'ices'
@@ -222,8 +216,8 @@ public class PluralUtil {
 			else if (str.endsWith("us")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < usExceptions.length; i++) {
-					if (str == usExceptions[i][0]) {
-						return usExceptions[i][1];
+					if (str.equals(usExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, usExceptions[i][1]);
 					}
 				}
 				// change final 'us' to 'i'
@@ -235,8 +229,8 @@ public class PluralUtil {
 					|| str.endsWith("z")) {
 				// look for exceptions first xExceptions
 				for (int i = 0; i < xExceptions.length; i++) {
-					if (str == xExceptions[i][0]) {
-						return xExceptions[i][1];
+					if (str.equals(xExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, xExceptions[i][1]);
 					}
 				}
 				out.append("es");
@@ -257,8 +251,8 @@ public class PluralUtil {
 			else if (str.endsWith("ff") || str.endsWith("ffe")) {
 				// look for exceptions first ffExceptions
 				for (int i = 0; i < ffExceptions.length; i++) {
-					if (str == ffExceptions[i][0]) {
-						return ffExceptions[i][1];
+					if (str.equals(ffExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, ffExceptions[i][1]);
 					}
 				}
 				out.append("s");
@@ -267,8 +261,8 @@ public class PluralUtil {
 			else if (str.endsWith("f")) {
 				// look for exceptions first fExceptions
 				for (int i = 0; i < fExceptions.length; i++) {
-					if (str == fExceptions[i][0]) {
-						return fExceptions[i][1];
+					if (str.equals(fExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, fExceptions[i][1]);
 					}
 				}
 				// change the 'f' to 'ves'
@@ -279,8 +273,8 @@ public class PluralUtil {
 			else if (str.endsWith("fe")) {
 				// look for exceptions first feExceptions
 				for (int i = 0; i < feExceptions.length; i++) {
-					if (str == feExceptions[i][0]) {
-						return feExceptions[i][1];
+					if (str.equals(feExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, feExceptions[i][1]);
 					}
 				}
 				// change the 'fe' to 'ves'
@@ -291,8 +285,8 @@ public class PluralUtil {
 			else if (str.endsWith("o")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < oExceptions.length; i++) {
-					if (str == oExceptions[i][0]) {
-						return oExceptions[i][1];
+					if (str.equals(oExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, oExceptions[i][1]);
 					}
 				}
 				// add 'es'
@@ -302,8 +296,8 @@ public class PluralUtil {
 			else if (str.endsWith("um")) {
 				// look for exceptions first oExceptions
 				for (int i = 0; i < umExceptions.length; i++) {
-					if (str == umExceptions[i][0]) {
-						return umExceptions[i][1];
+					if (str.equals(umExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, umExceptions[i][1]);
 					}
 				}
 				// change final 'um' to 'a'
@@ -315,12 +309,12 @@ public class PluralUtil {
 				// not ending is 'ia'
 				if (str.endsWith("ia")) {
 					out.append("s");
-					return out.toString();
+					return replaceWithMatchingCase(singular, out.toString());
 				}
 				// look for exceptions first aExceptions
 				for (int i = 0; i < aExceptions.length; i++) {
-					if (str == aExceptions[i][0]) {
-						return aExceptions[i][1];
+					if (str.equals(aExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, aExceptions[i][1]);
 					}
 				}
 				// Change final 'a' to 'ae'
@@ -331,8 +325,8 @@ public class PluralUtil {
 			else if (str.endsWith("on")) {
 				// look for exceptions first onExceptions
 				for (int i = 0; i < onExceptions.length; i++) {
-					if (str == onExceptions[i][0]) {
-						return onExceptions[i][1];
+					if (str.equals(onExceptions[i][0])) {
+						return replaceWithMatchingCase(singular, onExceptions[i][1]);
 					}
 				}
 				// change final 'on' to 'a'
@@ -342,9 +336,142 @@ public class PluralUtil {
 				out.append("s");
 			}
 
-			return out.toString();
+			return replaceWithMatchingCase(singular, out.toString());
 		}
 
 		return null;
+	}
+
+	/**
+	 * Tests that all the words in the specified phrase are lowercase,
+	 * ignoring whitespace and basic punctuation.
+	 * 
+	 * <pre>
+	 * PluralUtil.isLowerCase(null)   = false
+	 * PluralUtil.isLowerCase("")     = false
+	 * PluralUtil.isLowerCase("  ")   = false
+	 * PluralUtil.isLowerCase("abc")  = true
+	 * PluralUtil.isLowerCase("abC")  = false
+	 * PluralUtil.isLowerCase("two words")  = true
+	 * </pre>
+	 * 
+	 * @param phrase The phrase to check
+	 * @return true if all the words are lowercase, false otherwise
+	 */
+	public static boolean isLowerCase(final String phrase) {
+		if (phrase != null && phrase.length() > 0) {
+			Pattern p = Pattern.compile(LOWERCASE_PATTERN);
+			String[] tokens = phrase.split("\\s");
+			for (String s : tokens) {
+				Matcher m = p.matcher(s);
+				if (!m.matches()) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Tests that all the words in the specified phrase are title case,
+	 * ignoring whitespace and basic punctuation.
+	 * 
+	 * <pre>
+	 * PluralUtil.isTitleCase(null)   = false
+	 * PluralUtil.isTitleCase("")     = false
+	 * PluralUtil.isTitleCase("  ")   = false
+	 * PluralUtil.isTitleCase("Abc")  = true
+	 * PluralUtil.isTitleCase("aBC")  = false
+	 * PluralUtil.isTitleCase("Two Words")  = true
+	 * </pre>
+	 * 
+	 * @param phrase The phrase to check
+	 * @return true if all the words are title case, false otherwise
+	 */
+	public static boolean isTitleCase(final String phrase) {
+		if (phrase != null && phrase.length() > 0) {
+			Pattern p = Pattern.compile(TITLECASE_PATTERN);
+			String[] tokens = phrase.split("\\s");
+			for (String s : tokens) {
+				Matcher m = p.matcher(s);
+				if (!m.matches()) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Tests that all the words in the specified phrase are uppercase,
+	 * ignoring whitespace and basic punctuation.
+	 * 
+	 * <pre>
+	 * PluralUtil.isUpperCase(null)   = false
+	 * PluralUtil.isUpperCase("")     = false
+	 * PluralUtil.isUpperCase("  ")   = false
+	 * PluralUtil.isUpperCase("ABC")  = true
+	 * PluralUtil.isUpperCase("aBC")  = false
+	 * PluralUtil.isUpperCase("TWO WORDS")  = true
+	 * </pre>
+	 * 
+	 * @param phrase The phrase to check
+	 * @return true if all the words are uppercase, false otherwise
+	 */
+	public static boolean isUpperCase(final String phrase) {
+		if (phrase != null && phrase.length() > 0) {
+			Pattern p = Pattern.compile(UPPERCASE_PATTERN);
+			String[] tokens = phrase.split("\\s");
+			for (String s : tokens) {
+				Matcher m = p.matcher(s);
+				if (!m.matches()) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Fashion a title case identifier from the given string.
+	 * 
+	 * @param phrase The string to convert
+	 * @return A title case identifier. First letter upper case words with spaces between.
+	 */
+	public static String toTitleCase(String phrase) {
+		if (phrase != null && phrase.length() > 0) {
+			StringBuilder out = new StringBuilder();
+			String[] tokens = phrase.split("\\s");
+			for (String s : tokens) {
+				out.append(out.length() > 0 ? " " : "");
+				out.append(StringUtils.capitalize(s.toLowerCase()));
+			}
+			return out.toString();
+		}
+		return null;
+	}
+
+	/**
+	 * Attempts to return the replacement string in the same case as the original string,
+	 * e.g. if the input string is in all upper case or all lower case, the replacement
+	 * string will be in a matching case.
+	 * 
+	 * @param original The input string with the original case
+	 * @param replacement The replacement string with the case to be matched to the original
+	 * @return The replacement string, with the matching case of the original if possible
+	 */
+	static String replaceWithMatchingCase(final String original, final String replacement) {
+		if (isUpperCase(original)) {
+			return replacement.toUpperCase();
+		} else if (isLowerCase(original)) {
+			return replacement;
+		} else if (isTitleCase(original)) {
+			return toTitleCase(replacement);
+		}
+
+		return replacement;
 	}
 }

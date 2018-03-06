@@ -492,7 +492,7 @@ public class SkyveScriptInterpreter {
 	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
 		// identify the type from the parts
 		String type = null;
-		if (parts.length >= 1) {// || parts.length == 2) {
+		if (parts.length >= 1) {
 			type = parts[0];
 		}
 

@@ -36,6 +36,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.web.UserAgentType;
+import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;
@@ -48,8 +50,43 @@ import org.skyve.metadata.view.widget.bound.FilterParameter;
 public class ComponentBuilderChain extends ComponentBuilder {
 	private ComponentBuilder[] builders;
 	
-	protected ComponentBuilderChain(ComponentBuilder... builders) {
+	public ComponentBuilderChain(ComponentBuilder... builders) {
 		this.builders = builders;
+	}
+	
+	@Override
+	public void setManagedBeanName(String managedBeanName) {
+		for (ComponentBuilder builder : builders) {
+			builder.setManagedBeanName(managedBeanName);
+		}
+	}
+	
+	@Override
+	public void setSAILManagedBean(FacesView<?> managedBean) {
+		for (ComponentBuilder builder : builders) {
+			builder.setSAILManagedBean(managedBean);
+		}
+	}
+
+	@Override
+	public void setProcess(String process) {
+		for (ComponentBuilder builder : builders) {
+			builder.setProcess(process);
+		}
+	}
+
+	@Override
+	public void setUpdate(String update) {
+		for (ComponentBuilder builder : builders) {
+			builder.setUpdate(update);
+		}
+	}
+
+	@Override
+	public void setUserAgentType(UserAgentType userAgentType) {
+		for (ComponentBuilder builder : builders) {
+			builder.setUserAgentType(userAgentType);
+		}
 	}
 	
 	@Override
@@ -284,9 +321,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 									String modelName,
 									ListModel<? extends Bean> model,
 									ListGrid listGrid,
-									boolean canCreateDocument,
-									boolean showPaginator,
-									boolean stickyHeader) {
+									boolean canCreateDocument) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -294,9 +329,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										modelName,
 										model,
 										listGrid,
-										canCreateDocument,
-										showPaginator,
-										stickyHeader);
+										canCreateDocument);
 		}
 		return result;
 	}
@@ -309,8 +342,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										List<FilterParameter> filterParameters,
 										String title,
 										boolean showColumnHeaders,
-										boolean showGrid,
-										boolean stickyHeader) {
+										boolean showGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listRepeater(result,
@@ -320,8 +352,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											filterParameters,
 											title,
 											showColumnHeaders,
-											showGrid,
-											stickyHeader);
+											showGrid);
 		}
 		return result;
 	}
