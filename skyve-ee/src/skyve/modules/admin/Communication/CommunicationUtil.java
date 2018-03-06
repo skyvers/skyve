@@ -76,7 +76,7 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
 
 		String result = null;
 
@@ -231,18 +231,23 @@ public class CommunicationUtil {
 				switch (format) {
 				case email:
 					EXT.sendMail(new String[] { sendTo }, cc, bcc, sendFrom, emailSubject, emailBody.toString(), MimeType.html, attachments);
+					
+					if(webContext!=null) {
+						webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
+					}
 					break;
 				default:
 					break;
 				}
 			}
 			break;
-		
-			
-
 		}
 		
 		return result;
+	}
+	
+	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
 	/**
@@ -379,12 +384,16 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		
 		String sendTo = "{contact.email1}"; // user contact email address
 		String ccTo = null;
 		
-		sendFailSafeSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
+		sendFailSafeSystemCommunication(webContext, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
+	}
+	
+	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
 	
@@ -400,9 +409,13 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
-		actionCommunicationRequest(ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
+		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
+	}
+	
+	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
 	/**
