@@ -1,6 +1,22 @@
 package org.skyve.impl.sail.execution;
 
+import java.util.List;
+
+import javax.faces.component.UIComponent;
+
+import org.skyve.CORE;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.context.ClearContext;
+import org.skyve.metadata.sail.language.step.context.PopContext;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -30,24 +46,77 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.view.View.ViewType;
 
-import javax.faces.component.UIComponent;
-
-import org.skyve.impl.web.UserAgent.UserAgentType;
-import org.skyve.impl.web.faces.components.ListGrid;
-import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
-import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
-import org.skyve.metadata.MetaDataException;
-
-public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
+public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
-	private UIComponent currentComponent;
-	private ClientIdCollector currentCollector;
+	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInlineSeleneseExecutor(ComponentBuilder componentBuilder) {
+	public PrimeFacesInlineSeleneseExecutor(ComponentBuilder componentBuilder,
+												LayoutBuilder layoutBuilder) {
 		this.componentBuilder = componentBuilder;
+		this.layoutBuilder = layoutBuilder;
 	}
 
+	@Override
+	public void execute(PushListContext push) {
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		String moduleName = push.getModuleName();
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		String documentName = push.getDocumentName();
+		String queryName = push.getQueryName();
+		String modelName = push.getModelName();
+		
+		if (queryName != null) {
+			DocumentQueryDefinition q = m.getDocumentQuery(queryName);
+			m = q.getOwningModule();
+			newContext.setModuleName(m.getName());
+			newContext.setDocumentName(q.getDocumentName());
+		}
+		else if (documentName != null) {
+			Document d = m.getDocument(c, documentName);
+			if (modelName != null) {
+				d = CORE.getRepository().getListModel(c, d, modelName, false).getDrivingDocument();
+			}
+			newContext.setModuleName(d.getOwningModuleName());
+			newContext.setDocumentName(d.getName());
+		}
+		else {
+			throw new MetaDataException("NavigateList must have module and one of (query, document, document & mode)l");
+		}
+
+		newContext.setViewType(ViewType.list);
+		newContext.setUxui(push.getUxui());
+		newContext.setUserAgentType(push.getUserAgentType());
+		push(newContext);
+		newContext.generate(push, componentBuilder);
+	}
+
+	@Override
+	public void execute(PushEditContext push) {
+		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
+		newContext.setModuleName(push.getModuleName());
+		newContext.setDocumentName(push.getDocumentName());
+		if (Boolean.TRUE.equals(push.getCreate())) {
+			newContext.setViewType(ViewType.create);
+		}
+		newContext.setUxui(push.getUxui());
+		newContext.setUserAgentType(push.getUserAgentType());
+		push(newContext);
+		newContext.generate(push, componentBuilder, layoutBuilder);
+	}
+	
+	@Override
+	public void execute(ClearContext clear) {
+		clear();
+	}
+	
+	@Override
+	public void execute(PopContext pop) {
+		pop();
+	}
+	
 	@Override
 	public void execute(NavigateMenu menu) {
 		super.execute(menu); // determine driving document
@@ -56,46 +125,37 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 
 	@Override
 	public void execute(NavigateList list) {
-		super.execute(list); // determine driving document
-
+		String moduleName = list.getModuleName();
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
 		String modelName = list.getModelName();
 
-		currentCollector = new ClientIdCollector(list);
-		ComponentBuilderChain chain = new ComponentBuilderChain(componentBuilder, currentCollector);
-		
-		currentComponent = ListGrid.generate(list.getModuleName(), 
-												documentName, 
-												queryName, 
-												modelName, 
-												Boolean.TRUE,
-												false,
-												Boolean.TRUE,
-												false,
-												"skyve",
-												UserAgentType.desktop,
-												chain);
-		
+		PushListContext push = new PushListContext();
+		push.setModuleName(moduleName);
+		push.setDocumentName(documentName);
+		push.setQueryName(queryName);
+		push.setModelName(modelName);
+		execute(push);
+
 		if (queryName != null) {
-			command("open", String.format("/?a=l&m=%s&q=%s", list.getModuleName(), queryName));
+			command("open", String.format("/?a=l&m=%s&q=%s", moduleName, queryName));
 		}
 		else if (documentName != null) {
 			if (modelName != null) {
-				command("open", String.format(".?a=l&m=%s&d=%s&q=%s", list.getModuleName(), documentName, modelName));
+				command("open", String.format(".?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
 			}
 			else {
-				command("open", String.format(".?a=l&m=%s&q=%s", list.getModuleName(), documentName));
+				command("open", String.format(".?a=l&m=%s&q=%s", moduleName, documentName));
 			}
-		}
-		else {
-			throw new MetaDataException("NavigateList must have module and one of (query, document, document & mode)l");
 		}
 	}
 
 	@Override
 	public void execute(NavigateEdit edit) {
-		super.execute(edit); // determine driving document
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(edit.getModuleName());
+		push.setDocumentName(edit.getDocumentName());
+		execute(push);
 
 		String bizId = edit.getBizId();
 		if (bizId == null) {
@@ -141,15 +201,20 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor {
 
 	@Override
 	public void execute(TestDataEnter testDataEnter) {
-System.out.println(getDrivingDocument());
+//System.out.println(peek().getModuleName() + '.' + peek().getDocumentName());
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void execute(DataEnter dataEnter) {
-		// TODO Auto-generated method stub
-		
+		PrimeFacesAutomationContext context = peek();
+		List<Object> widgets = context.getSkyveWidgets(dataEnter.getIdentifier(context));
+		List<UIComponent> components = context.getFacesComponents(dataEnter.getIdentifier(context));
+		for (UIComponent component : components) {
+			// if exists and is not disabled
+			
+		}
 	}
 
 	@Override
@@ -250,19 +315,45 @@ System.out.println(getDrivingDocument());
 
 	@Override
 	public void execute(ListGridNew nu) {
-		command("clickAndWait", ClientIdCollector.clientId(currentCollector.getFacesComponents(nu.getIdentifier()).get(0)));
+		PrimeFacesAutomationContext context = peek();
+		if (ViewType.list.equals(context.getViewType())) {
+			UIComponent component = context.getFacesComponents(nu.getIdentifier(context)).get(0);
+			command("clickAndWait", ComponentCollector.clientId(component));
+		}
+		
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(context.getModuleName());
+		push.setDocumentName(context.getDocumentName());
+		push.execute(this);
 	}
 
 	@Override
 	public void execute(ListGridZoom zoom) {
-		UIComponent component = currentCollector.getFacesComponents(zoom.getIdentifier()).get(0);
-		command("clickAndWait", ClientIdCollector.clientId(component, zoom.getRow()));
+		PrimeFacesAutomationContext context = peek();
+		if (ViewType.list.equals(context.getViewType())) {
+			UIComponent component = context.getFacesComponents(zoom.getIdentifier(context)).get(0);
+			command("clickAndWait", ComponentCollector.clientId(component, zoom.getRow()));
+		}
+
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(context.getModuleName());
+		push.setDocumentName(context.getDocumentName());
+		push.execute(this);
 	}
 
 	@Override
 	public void execute(ListGridSelect select) {
-		UIComponent component = currentCollector.getFacesComponents(select.getIdentifier()).get(0);
-		command("clickAndWait", String.format("//tr[%d]/td", select.getRow())); //ClientIdCollector.clientId(component, select.getRow()));
+		PrimeFacesAutomationContext context = peek();
+		if (ViewType.list.equals(context.getViewType())) {
+			UIComponent component = context.getFacesComponents(select.getIdentifier(context)).get(0);
+			command("clickAndWait", String.format("//tr[%d]/td", select.getRow())); // ClientIdCollector.clientId(component, select.getRow()));
+		}
+
+		// TODO only if there is no select event on the skyve edit view for embedded list grid
+		PushEditContext push = new PushEditContext();
+		push.setModuleName(context.getModuleName());
+		push.setDocumentName(context.getDocumentName());
+		push.execute(this);
 	}
 
 	@Override

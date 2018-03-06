@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;

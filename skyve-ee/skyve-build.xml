@@ -131,10 +131,13 @@
 	</target>
 
 	<target name="buildXmlSchemas">
-		<java fork="true" classname="org.skyve.impl.tools.XMLSchemaGenerator">
+		<java fork="true" classname="org.skyve.impl.util.XMLMetaData">
 			<classpath refid="classpath" />
 		</java>
-		<move todir="src/skyve/schemas" failonerror="true">
+		<copy todir="src/skyve/schemas" failonerror="true">
+			<fileset dir="." includes="*.xsd" />
+		</copy>
+		<move todir="../skyve-core/src/test/resources/schemas" failonerror="true">
 			<fileset dir="." includes="*.xsd" />
 		</move>
 	</target>

@@ -11,9 +11,15 @@ import javax.faces.application.NavigationHandler;
 import javax.faces.application.StateManager;
 import javax.faces.application.ViewHandler;
 import javax.faces.component.UIComponent;
+import javax.faces.component.UIForm;
 import javax.faces.component.UIOutput;
 import javax.faces.component.UISelectItems;
 import javax.faces.component.behavior.Behavior;
+import javax.faces.component.html.HtmlInputHidden;
+import javax.faces.component.html.HtmlOutputLink;
+import javax.faces.component.html.HtmlOutputText;
+import javax.faces.component.html.HtmlPanelGrid;
+import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.el.MethodBinding;
@@ -25,10 +31,37 @@ import javax.faces.event.ActionListener;
 import javax.faces.validator.Validator;
 
 import org.primefaces.behavior.ajax.AjaxBehavior;
+import org.primefaces.behavior.confirm.ConfirmBehavior;
+import org.primefaces.component.accordionpanel.AccordionPanel;
+import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.column.Column;
+import org.primefaces.component.commandbutton.CommandButton;
+import org.primefaces.component.commandlink.CommandLink;
+import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.component.defaultcommand.DefaultCommand;
+import org.primefaces.component.graphicimage.GraphicImage;
+import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.menuitem.UIMenuItem;
+import org.primefaces.component.message.Message;
+import org.primefaces.component.outputlabel.OutputLabel;
+import org.primefaces.component.outputpanel.OutputPanel;
+import org.primefaces.component.overlaypanel.OverlayPanel;
+import org.primefaces.component.panel.Panel;
+import org.primefaces.component.panelgrid.PanelGrid;
+import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.row.Row;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.spacer.Spacer;
+import org.primefaces.component.steps.Steps;
+import org.primefaces.component.tabview.Tab;
+import org.primefaces.component.tabview.TabView;
+import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.mobile.component.content.Content;
+import org.primefaces.mobile.component.field.Field;
+import org.primefaces.mobile.component.header.Header;
+import org.primefaces.mobile.component.page.Page;
 
 @SuppressWarnings("deprecation") // This super class has a whole bunch of deprecated shit in it
 public class MockApplication extends Application {
@@ -41,17 +74,113 @@ public class MockApplication extends Application {
     
 	@Override
 	public UIComponent createComponent(String componentType) throws FacesException {
-		if (Button.COMPONENT_TYPE.equals(componentType)) {
+		if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
+			return new AccordionPanel();
+		}
+		else if (BreadCrumb.COMPONENT_TYPE.equals(componentType)) {
+			return new BreadCrumb();
+		}
+		else if (Button.COMPONENT_TYPE.equals(componentType)) {
 			return new Button();
 		}
 		else if (Column.COMPONENT_TYPE.equals(componentType)) {
 			return new Column();
 		}
+		else if (CommandButton.COMPONENT_TYPE.equals(componentType)) {
+			return new CommandButton();
+		}
+		else if (CommandLink.COMPONENT_TYPE.equals(componentType)) {
+			return new CommandLink();
+		}
+		else if (Content.COMPONENT_TYPE.equals(componentType)) {
+			return new Content();
+		}
+		else if (DataList.COMPONENT_TYPE.equals(componentType)) {
+			return new DataList();
+		}
 		else if (DataTable.COMPONENT_TYPE.equals(componentType)) {
 			return new DataTable();
 		}
+		else if (DefaultCommand.COMPONENT_TYPE.equals(componentType)) {
+			return new DefaultCommand();
+		}
+		else if (Field.COMPONENT_TYPE.equals(componentType)) {
+			return new Field();
+		}
+		else if (GraphicImage.COMPONENT_TYPE.equals(componentType)) {
+			return new GraphicImage();
+		}
+		else if (Header.COMPONENT_TYPE.equals(componentType)) {
+			return new Header();
+		}
+		else if (HtmlInputHidden.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlInputHidden();
+		}
+		else if (HtmlOutputLink.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlOutputLink();
+		}
+		else if (HtmlOutputText.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlOutputText();
+		}
+		else if (HtmlPanelGrid.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlPanelGrid();
+		}
+		else if (HtmlPanelGroup.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlPanelGroup();
+		}
+		else if (InputText.COMPONENT_TYPE.equals(componentType)) {
+			return new InputText();
+		}
+		else if (Message.COMPONENT_TYPE.equals(componentType)) {
+			return new Message();
+		}
+		else if (OutputLabel.COMPONENT_TYPE.equals(componentType)) {
+			return new OutputLabel();
+		}
+		else if (OutputPanel.COMPONENT_TYPE.equals(componentType)) {
+			return new OutputPanel();
+		}
+		else if (OverlayPanel.COMPONENT_TYPE.equals(componentType)) {
+			return new OverlayPanel();
+		}
+		else if (Page.COMPONENT_TYPE.equals(componentType)) {
+			return new Page();
+		}
+		else if (Panel.COMPONENT_TYPE.equals(componentType)) {
+			return new Panel();
+		}
+		else if (PanelGrid.COMPONENT_TYPE.equals(componentType)) {
+			return new PanelGrid();
+		}
+		else if (PickList.COMPONENT_TYPE.equals(componentType)) {
+			return new PickList();
+		}
+		else if (Row.COMPONENT_TYPE.equals(componentType)) {
+			return new Row();
+		}
 		else if (SelectOneMenu.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectOneMenu();
+		}
+		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
+			return new Spacer();
+		}
+		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
+			return new Steps();
+		}
+		else if (Tab.COMPONENT_TYPE.equals(componentType)) {
+			return new Tab();
+		}
+		else if (TabView.COMPONENT_TYPE.equals(componentType)) {
+			return new TabView();
+		}
+		else if (Toolbar.COMPONENT_TYPE.equals(componentType)) {
+			return new Toolbar();
+		}
+		else if (UIForm.COMPONENT_TYPE.equals(componentType)) {
+			return new UIForm();
+		}
+		else if (UIMenuItem.COMPONENT_TYPE.equals(componentType)) {
+			return new UIMenuItem();
 		}
 		else if (UIOutput.COMPONENT_TYPE.equals(componentType)) {
 			return new UIOutput();
@@ -66,6 +195,9 @@ public class MockApplication extends Application {
 	public Behavior createBehavior(String behaviorId) throws FacesException {
 		if (AjaxBehavior.BEHAVIOR_ID.equals(behaviorId)) {
 			return new AjaxBehavior();
+		}
+		else if (ConfirmBehavior.BEHAVIOR_ID.equals(behaviorId)) {
+			return new ConfirmBehavior();
 		}
 		throw new FacesException("MockApplication.createBehavior() does not cater for behaviorId " + behaviorId);
 	}

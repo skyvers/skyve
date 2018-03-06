@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -43,7 +44,7 @@ public class DataGridZoom implements Step {
 	}
 	
 	@Override
-	public String getIdentifier() {
+	public String getIdentifier(AutomationContext context) {
 		return String.format("%s[%d].zoom", binding, row);
 	}
 }

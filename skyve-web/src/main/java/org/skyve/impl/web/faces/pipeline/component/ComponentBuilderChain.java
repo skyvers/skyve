@@ -36,7 +36,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.view.Action;

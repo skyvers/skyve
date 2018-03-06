@@ -5,9 +5,11 @@ import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Automation;
 
-public abstract class InlineSeleneseExecutor extends SeleneseExecutor {
+public abstract class InlineSeleneseExecutor<T extends AutomationContext> extends SeleneseExecutor<T> {
 	@Override
 	public void execute(Automation automation) {
+		super.execute(automation); // set context defaults
+
 		Procedure before = automation.getBefore();
 		if (before != null) {
 			startTest("Before Automation");

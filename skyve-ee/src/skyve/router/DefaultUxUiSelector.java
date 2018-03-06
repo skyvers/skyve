@@ -2,7 +2,7 @@ package router;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.router.UxUiSelector;
 

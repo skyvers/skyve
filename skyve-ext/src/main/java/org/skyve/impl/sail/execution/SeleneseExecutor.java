@@ -1,6 +1,6 @@
 package org.skyve.impl.sail.execution;
 
-public abstract class SeleneseExecutor extends ScriptExecutor {
+public abstract class SeleneseExecutor<T extends AutomationContext> extends ScriptExecutor<T> {
 	protected void command(String command, String parameter1, String parameter2) {
 		indent().append("<tr><td>").append(command).append("</td><td>");
 		if (parameter1 != null) {

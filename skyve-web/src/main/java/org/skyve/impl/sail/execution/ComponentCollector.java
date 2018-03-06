@@ -14,16 +14,19 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 
-public class ClientIdCollector extends NoOpComponentBuilder {
-	private Step context;
+class ComponentCollector extends NoOpComponentBuilder {
+	private AutomationContext context;
+	private Step step;
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
 	
-	public ClientIdCollector(Step context) {
+	ComponentCollector(AutomationContext context, Step step) {
 		this.context = context;
+		this.step = step;
 	}
 	
 	private void put(String identifier, UIComponent component, Object widget) {
@@ -43,11 +46,11 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		widgetList.add(widget);
 	}
 	
-	public List<UIComponent> getFacesComponents(String identifier) {
+	List<UIComponent> getFacesComponents(String identifier) {
 		return components.get(identifier);
 	}
 
-	public List<Object> getSkyveWidgets(String identifier) {
+	List<Object> getSkyveWidgets(String identifier) {
 		return widgets.get(identifier);
 	}
 	
@@ -62,6 +65,9 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 			if (name != null) {
 				put(name.toString(), component, name);
 			}
+			else {
+				put(action.getName(), component, name);
+			}
 		}
 		return component;
 	}
@@ -74,7 +80,8 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		if (component != null) {
-			String listGridIdentifier = context.getIdentifier();
+			String listGridIdentifier = (step instanceof PushEditContext) ? modelName : step.getIdentifier(context);
+
 			put(listGridIdentifier, component, listGrid);
 			UIComponent potentialActionColumn = component.getChildren().get(component.getChildCount() - 1);
 			UIComponent addButton = potentialActionColumn.getFacet("header");
@@ -87,6 +94,7 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 			}
 			put(listGridIdentifier + ".select", component.getChildren().get(0), listGrid);
 		}
+		
 		return component;
 	}
 	

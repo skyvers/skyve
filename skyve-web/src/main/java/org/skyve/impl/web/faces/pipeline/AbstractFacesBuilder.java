@@ -13,7 +13,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 

@@ -1,5 +1,7 @@
 package org.skyve.impl.sail.interpret;
 
+import org.jboss.weld.environment.se.Weld;
+import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -11,6 +13,7 @@ import org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
+import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.persistence.DataStore;
 
@@ -47,16 +50,26 @@ public class Interpreter {
 		user.setId(USER);
 
 		final AbstractPersistence persistence = AbstractPersistence.get();
+		Weld weld = null;
 		try {
 			persistence.setUser(user);
 			persistence.begin();
 
+			weld = new Weld();
+			weld.addPackage(true, SkyveCDIProducer.class);
+			weld.initialize();
+
 			Automation automation = XMLMetaData.unmarshalSAIL("/Users/mike/dtf/skyve/skyve-tools/test.xml");
-			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain());
+			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
+																								new ResponsiveLayoutBuilder());
 			automation.execute(executor);
 			System.out.println(executor);
 		}
 		finally {
+			if (weld != null) {
+				weld.shutdown();
+			}
+
 			// The call to commit and disposeAllPersistenceInstances will close and dispose the current connection.
 			// For H2 by default, closing the last connection to a database closes the database.
 			// For an in-memory database, this means the content is lost.

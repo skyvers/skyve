@@ -4,6 +4,10 @@ import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.context.ClearContext;
+import org.skyve.metadata.sail.language.step.context.PopContext;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -38,6 +42,11 @@ public interface Executor {
 	public void execute(Automation automation);
 	public void execute(Interaction interaction);
 
+	public void execute(PushListContext push);
+	public void execute(PushEditContext push);
+	public void execute(PopContext pop);
+	public void execute(ClearContext clear);
+	
 	public void execute(NavigateMenu menu);
 	public void execute(NavigateList list);
 	public void execute(NavigateEdit edit);

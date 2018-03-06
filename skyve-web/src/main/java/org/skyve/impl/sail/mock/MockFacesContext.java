@@ -16,7 +16,8 @@ import javax.faces.render.RenderKit;
 public class MockFacesContext extends FacesContext {
 	private Application a = new MockApplication();
 	private ELContext elc = new MockELContext();
-
+	private UIViewRoot root = new UIViewRoot();
+	
 	@Override
 	public Application getApplication() {
 		return a;
@@ -27,6 +28,17 @@ public class MockFacesContext extends FacesContext {
 		return elc;
 	}
     
+
+	@Override
+	public UIViewRoot getViewRoot() {
+		return root;
+	}
+
+	@Override
+	public void setViewRoot(UIViewRoot root) {
+		this.root = root;
+	}
+
 	@Override
 	public Iterator<String> getClientIdsWithMessages() {
 		return null;
@@ -84,16 +96,6 @@ public class MockFacesContext extends FacesContext {
 
 	@Override
 	public void setResponseWriter(ResponseWriter responseWriter) {
-		// nothing to see here
-	}
-
-	@Override
-	public UIViewRoot getViewRoot() {
-		return null;
-	}
-
-	@Override
-	public void setViewRoot(UIViewRoot root) {
 		// nothing to see here
 	}
 

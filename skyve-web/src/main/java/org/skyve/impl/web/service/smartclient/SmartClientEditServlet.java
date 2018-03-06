@@ -41,7 +41,7 @@ import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;

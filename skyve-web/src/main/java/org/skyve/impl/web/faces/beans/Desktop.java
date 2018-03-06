@@ -26,7 +26,7 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.metadata.customer.Customer;

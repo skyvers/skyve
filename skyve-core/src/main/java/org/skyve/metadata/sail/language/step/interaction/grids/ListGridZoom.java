@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
@@ -27,7 +28,7 @@ public class ListGridZoom implements Step {
 		return moduleName;
 	}
 
-	@XmlAttribute(name = "module", required = true)
+	@XmlAttribute(name = "module")
 	public void setModuleName(String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
@@ -74,8 +75,8 @@ public class ListGridZoom implements Step {
 	}
 
 	@Override
-	public String getIdentifier() {
-		String identifier = NavigateList.listGridIdentifier(moduleName, queryName, documentName, modelName);
+	public String getIdentifier(AutomationContext context) {
+		String identifier = NavigateList.listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 		return identifier + ".zoom";
 	}
 }
