@@ -53,6 +53,7 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 										false,
 										Boolean.TRUE,
 										false,
+										Boolean.TRUE,
 										"skyve",
 										getUserAgentType(),
 										chain);
