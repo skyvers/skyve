@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
@@ -63,26 +64,27 @@ public class NavigateList implements Step {
 	}
 	
 	@Override
-	public String getIdentifier() {
-		return listGridIdentifier(moduleName, queryName, documentName, modelName);
+	public String getIdentifier(AutomationContext context) {
+		return listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 	}
 	
-	public static String listGridIdentifier(String moduleName,
+	public static String listGridIdentifier(AutomationContext context,
+												String moduleName,
 												String queryName,
 												String documentName,
 												String modelName) {
 		String result = null;
 		
+		String keyModuleName = (moduleName == null) ? context.getModuleName() : moduleName;
+		String keyDocumentName = (documentName == null) ? context.getDocumentName() : documentName;
 		if (queryName != null) {
-			result = String.format("%s.%s", moduleName, queryName);
+			result = String.format("%s.%s", keyModuleName, queryName);
 		}
-		else if (documentName != null) {
-			if (modelName == null) {
-				result = String.format("%s.%s", moduleName, documentName);
-			}
-			else {
-				result = String.format("%s.%s.%s", moduleName, documentName, modelName);
-			}
+		else if (modelName != null) {
+			result = String.format("%s.%s.%s", keyModuleName, keyDocumentName, modelName);
+		}
+		else {
+			result = String.format("%s.%s", keyModuleName, keyDocumentName);
 		}
 		
 		return result;

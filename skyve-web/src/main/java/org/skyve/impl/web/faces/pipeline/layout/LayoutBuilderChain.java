@@ -10,7 +10,8 @@ import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
+import org.skyve.impl.web.faces.beans.FacesView;
 
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
@@ -23,6 +24,13 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	public void setManagedBeanName(String managedBeanName) {
 		for (LayoutBuilder builder : builders) {
 			builder.setManagedBeanName(managedBeanName);
+		}
+	}
+	
+	@Override
+	public void setSAILManagedBean(FacesView<?> managedBean) {
+		for (LayoutBuilder builder : builders) {
+			builder.setSAILManagedBean(managedBean);
 		}
 	}
 

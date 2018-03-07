@@ -16,7 +16,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.FacesViewVisitor;
@@ -96,9 +96,7 @@ public class View extends HtmlPanelGroup {
 	    	new FacesAction<Void>() {
 				@Override
 				public Void callback() throws Exception {
-					User user = CORE.getUser();
-					List<UIComponent> views = View.generate(user, 
-																moduleName,
+					List<UIComponent> views = View.generate(moduleName,
 																documentName,
 																widgetId,
 																managedBeanName,
@@ -120,8 +118,7 @@ public class View extends HtmlPanelGroup {
 		super.encodeBegin(context);
     }
     
-    public static List<UIComponent> generate(User user, 
-				    							String moduleName,
+    public static List<UIComponent> generate(String moduleName,
 				    							String documentName,
 				    							String widgetId,
 				    							String managedBeanName,
@@ -133,6 +130,7 @@ public class View extends HtmlPanelGroup {
 				    							LayoutBuilder layoutBuilder) {
     	List<UIComponent> result = new ArrayList<>(2);
     	
+    	User user = CORE.getUser();
     	Customer customer = user.getCustomer();
         Module module = customer.getModule(moduleName);
         Document document = module.getDocument(customer, documentName); // FacesActions.getTargetDocumentForViewBinding(customer, module, facesView);

@@ -19,7 +19,7 @@ import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.web.UserAgent;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.Menu;
 import org.skyve.metadata.customer.Customer;

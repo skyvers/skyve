@@ -16,19 +16,6 @@ public class UserAgent {
 		// nothing to see here
 	}
 	
-	public static enum UserAgentType {
-		phone(true), tablet(true), desktop(false), other(false);
-		
-		private boolean mobile;
-		private UserAgentType(boolean mobile) {
-			this.mobile = mobile;
-		}
-		
-		public boolean isMobile() {
-			return mobile;
-		}
-	}
-
 	private static Map<String, UserAgentType> typeCache = new TreeMap<>();
 
 	public static UserAgentType getType(HttpServletRequest request) {

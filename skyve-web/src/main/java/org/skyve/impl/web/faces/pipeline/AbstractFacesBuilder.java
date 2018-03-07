@@ -13,7 +13,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.LayoutUtil;
 import org.skyve.impl.sail.mock.MockFacesContext;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.beans.FacesView;
 
@@ -41,13 +41,16 @@ public abstract class AbstractFacesBuilder {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
 		}
-		if (FacesContext.getCurrentInstance() == null) {
-			managedBean = new FacesView<>();
-		}
-		else {
+		// Do nothing is this is being executed through SAIL
+		if (FacesContext.getCurrentInstance() != null) {
 			managedBean = FacesUtil.getManagedBean(managedBeanName);
 		}
 	}
+	
+	public void setSAILManagedBean(FacesView<?> managedBean) {
+		this.managedBean = managedBean;
+	}
+	
 	public void setProcess(String process) {
 		if (process != null) {
 			this.process = process;

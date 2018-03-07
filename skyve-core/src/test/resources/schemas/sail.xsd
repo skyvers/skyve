@@ -67,6 +67,8 @@
 
   <xs:element name="testDataEnter" type="tns:testDataEnter"/>
 
+  <xs:element name="userAgentType" type="tns:userAgentType"/>
+
   <xs:element name="zoomOut" type="tns:zoomOut"/>
 
   <xs:complexType name="automation">
@@ -75,6 +77,8 @@
       <xs:element ref="tns:interaction" maxOccurs="unbounded"/>
       <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="uxui" type="xs:string" use="required"/>
+    <xs:attribute name="userAgentType" type="tns:userAgentType" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="procedure">
@@ -212,6 +216,7 @@
   <xs:complexType name="action">
     <xs:sequence/>
     <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="confirm" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionAutoComplete">
@@ -269,7 +274,7 @@
     <xs:sequence/>
     <xs:attribute name="document" type="xs:string"/>
     <xs:attribute name="model" type="xs:string"/>
-    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
   </xs:complexType>
 
@@ -277,7 +282,7 @@
     <xs:sequence/>
     <xs:attribute name="document" type="xs:string"/>
     <xs:attribute name="model" type="xs:string"/>
-    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
     <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
@@ -286,7 +291,7 @@
     <xs:sequence/>
     <xs:attribute name="document" type="xs:string"/>
     <xs:attribute name="model" type="xs:string"/>
-    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
     <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
@@ -347,5 +352,14 @@
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
+
+  <xs:simpleType name="userAgentType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="phone"/>
+      <xs:enumeration value="tablet"/>
+      <xs:enumeration value="desktop"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
 

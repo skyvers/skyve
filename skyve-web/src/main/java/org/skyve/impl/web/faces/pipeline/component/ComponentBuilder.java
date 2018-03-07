@@ -244,13 +244,6 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String title,
 											boolean required);
 	
-	public abstract UIComponent textArea(UIComponent component, 
-											String listVar,
-											TextArea text,
-											String title,
-											boolean required,
-											Integer length);
-	
 	public abstract UIComponent text(UIComponent component, 
 										String listVar, 
 										TextField text, 
@@ -260,6 +253,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 										Converter<?> converter,
 										Format<?> format,
 										javax.faces.convert.Converter facesConverter);
+
+	public abstract UIComponent textArea(UIComponent component, 
+											String listVar,
+											TextArea text,
+											String title,
+											boolean required,
+											Integer length);
 	
 	public HtmlOutputLink outputLink(String listVar, 
 										String value, 

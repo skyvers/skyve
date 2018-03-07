@@ -3,7 +3,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.commandbutton.CommandButton;
-import org.skyve.impl.web.UserAgent.UserAgentType;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {

@@ -1,6 +1,6 @@
 package org.skyve.impl.sail.execution;
 
-public abstract class SeleneseExecutor extends ScriptExecutor {
+public abstract class SeleneseExecutor<T extends AutomationContext> extends ScriptExecutor<T> {
 	protected void command(String command, String parameter1, String parameter2) {
 		indent().append("<tr><td>").append(command).append("</td><td>");
 		if (parameter1 != null) {
@@ -21,6 +21,10 @@ public abstract class SeleneseExecutor extends ScriptExecutor {
 		command(command, null, null);
 	}
 
+	protected void comment(String comment) {
+		indent().append("<!-- ").append(comment).append(" -->").newline();
+	}
+	
 	protected void startTest(String heading) {
 		indent().append("<table>").newline();
 		in().indent().append("<thead>").newline();

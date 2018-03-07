@@ -9,7 +9,6 @@ import javax.faces.component.html.HtmlOutputLabel;
 import javax.faces.component.html.HtmlOutputText;
 import javax.faces.component.html.HtmlPanelGrid;
 import javax.faces.component.html.HtmlPanelGroup;
-import javax.faces.context.FacesContext;
 
 import org.primefaces.component.message.Message;
 import org.skyve.impl.metadata.Container;
@@ -185,7 +184,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * @param grid	The responsive form layout grid definition
 	 */
 	public void addResponsiveStyles(ResponsiveFormGrid grid) {
-		Map<String, Object> attributes = FacesContext.getCurrentInstance().getViewRoot().getAttributes();
+		Map<String, Object> attributes = fc.getViewRoot().getAttributes();
 		@SuppressWarnings("unchecked")
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) attributes.get(FacesUtil.FORM_STYLES_KEY);
 		if (formStyles == null) {
