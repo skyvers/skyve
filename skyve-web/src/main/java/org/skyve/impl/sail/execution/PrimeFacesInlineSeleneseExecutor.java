@@ -4,11 +4,13 @@ import java.util.List;
 
 import javax.faces.component.UIComponent;
 
+import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.spinner.Spinner;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -178,20 +180,22 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void execute(NavigateEdit edit) {
+		String moduleName = edit.getModuleName();
+		String documentName = edit.getDocumentName();
+		
 		PushEditContext push = new PushEditContext();
-		push.setModuleName(edit.getModuleName());
-		push.setDocumentName(edit.getDocumentName());
+		push.setModuleName(moduleName);
+		push.setDocumentName(documentName);
 		execute(push);
 
 		String bizId = edit.getBizId();
 		if (bizId == null) {
-			command("open", String.format(".?a=e&m=%s&d=%s", edit.getModuleName(), edit.getDocumentName()));
+			comment(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
+			command("open", String.format(".?a=e&m=%s&d=%s", moduleName, documentName));
 		}
 		else {
-			command("open", String.format(".?a=e&m=%s&d=%s&i=%s",
-											edit.getModuleName(),
-											edit.getDocumentName(),
-											bizId));
+			comment(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
+			command("open", String.format(".?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
 	}
 
@@ -222,7 +226,8 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void execute(TabSelect tabSelect) {
 		// TODO Not quite right as we are looking for the first link with the tab name/label.
-		for (String tabName : tabSelect.getTabPath().split("/")) {
+		for (String tabName : tabSelect.getTabPath().split("\\|->")) {
+			comment(String.format("click tab [%s]", tabName));
 			command("click", String.format("link=%s", tabName));
 		}
 	}
@@ -283,11 +288,11 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
-System.out.println(component);
 			boolean text = (component instanceof InputText) || (component instanceof InputTextarea);
 			boolean selectOne = (component instanceof SelectOneMenu);
 			boolean masked = (component instanceof InputMask);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox);
+			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
@@ -300,6 +305,11 @@ System.out.println(component);
 				command("if", String.format("${checked} != %s", dataEnter.getValue()));
 				command("click", String.format("%s_input", clientId));
 				command("endIf");
+			}
+			else if (_input) {
+				// determine editable as these are <input/>
+				command("storeEditable", String.format("%s_input", clientId), "editable");
+				command("if", "${editable} == true");
 			}
 			else if (selectOne) {
 				// Look for prime faces disabled style
@@ -318,6 +328,9 @@ System.out.println(component);
 			else if (masked) { // need to send key strokes to masked fields
 				command("click", clientId); // the click selects the existing expression for overtype
 				command("sendKeys", clientId, dataEnter.getValue());
+			}
+			else if (_input) {
+				command("type", String.format("%s_input", clientId), dataEnter.getValue());
 			}
 			else if (selectOne) {
 				command("click", String.format("%s_label", clientId));
@@ -436,52 +449,72 @@ System.out.println(component);
 
 	@Override
 	public void execute(DataGridNew nu) {
-		gridNewZoom(nu, nu.getBinding(), null);
+		dataGridButton(nu, nu.getBinding(), null);
 	}
 	
 	@Override
 	public void execute(DataGridZoom zoom) {
-		gridNewZoom(zoom, zoom.getBinding(), zoom.getRow());
+		dataGridButton(zoom, zoom.getBinding(), zoom.getRow());
 	}
 	
-	private void gridNewZoom(Step step, String binding, Integer row) {
+	@Override
+	public void execute(DataGridRemove remove) {
+		dataGridButton(remove, remove.getBinding(), remove.getRow());
+	}
+
+	private void dataGridButton(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		
 		List<UIComponent> dataGridComponents = context.getFacesComponents(binding);
 		if (dataGridComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
-														(row != null) ? "DataGridZoom" : "DataGridNew",
+														(row != null) ? 
+															((step instanceof DataGridZoom) ? "DataGridZoom" : "DataGridRemove") : 
+															"DataGridNew",
 														binding));
 		}
 		for (UIComponent dataGridComponent : dataGridComponents) {
 			String dataGridClientId = ComponentCollector.clientId(dataGridComponent);
 			if (row != null) {
-				comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+				if (step instanceof DataGridZoom) {
+					comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+				}
+				else {
+					comment(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
+				}
 			}
 			else {
 				comment(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
 			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			for (UIComponent buttonComponent : buttonComponents) {
-				String buttonClientId = (row != null) ?
-											ComponentCollector.clientId(buttonComponent, row) :
-											ComponentCollector.clientId(buttonComponent);
-				if (buttonClientId.startsWith(dataGridClientId)) {
-					// data grid is present
-					command("storeElementPresent", dataGridClientId, "present");
-					command("if", "${present} == true");
-					// data grid button is present
-					command("storeElementPresent", buttonClientId, "present");
-					command("if", "${present} == true");
-					// Look for prime faces disabled style on data grid button
-					command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
-					command("if", "${disabled} == false");
-					// All good, continue with the button click
-					command("clickAndWait", buttonClientId);
-					command("endIf");
-					command("endIf");
-					command("endIf");
+			if (buttonComponents != null) { // button may not be shown
+				for (UIComponent buttonComponent : buttonComponents) {
+					String buttonClientId = (row != null) ?
+												ComponentCollector.clientId(buttonComponent, row) :
+												ComponentCollector.clientId(buttonComponent);
+					if (buttonClientId.startsWith(dataGridClientId)) {
+						// data grid is present
+						command("storeElementPresent", dataGridClientId, "present");
+						command("if", "${present} == true");
+						// data grid button is present
+						command("storeElementPresent", buttonClientId, "present");
+						command("if", "${present} == true");
+						// Look for prime faces disabled style on data grid button
+						command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
+						command("if", "${disabled} == false");
+						// All good, continue with the button click
+						if (step instanceof DataGridRemove) {
+							command("click", ComponentCollector.clientId(buttonComponent, row));
+							command("waitForNotVisible", "ajaxStatus");
+						}
+						else {
+							command("clickAndWait", buttonClientId);
+						}
+						command("endIf");
+						command("endIf");
+						command("endIf");
+					}
 				}
 			}
 		}
@@ -509,15 +542,6 @@ System.out.println(component);
 	}
 
 	@Override
-	public void execute(DataGridRemove remove) {
-		PrimeFacesAutomationContext context = peek();
-		UIComponent component = context.getFacesComponents(remove.getIdentifier(context)).get(0);
-// TODO loop over components and check for visible grid, visible new button and disabled new button
-		command("click", ComponentCollector.clientId(component, remove.getRow()));
-		command("waitForNotVisible", "ajaxStatus");
-	}
-
-	@Override
 	public void execute(DataGridSelect select) {
 		// TODO Auto-generated method stub
 		
@@ -525,17 +549,9 @@ System.out.println(component);
 
 	@Override
 	public void execute(ListGridNew nu) {
-		PrimeFacesAutomationContext context = peek();
-		if (ViewType.list.equals(context.getViewType())) {
-			String identifier = nu.getIdentifier(context);
-			UIComponent component = context.getFacesComponents(identifier).get(0);
-			String clientId = ComponentCollector.clientId(component);
-// TODO check for visible and disabled
-			comment(String.format("New row on list grid [%s] (%s)", identifier, clientId));
-			command("clickAndWait", clientId);
-		}
-// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
+		listGridButton(nu, null);
 		
+		PrimeFacesAutomationContext context = peek();
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
 		push.setDocumentName(context.getDocumentName());
@@ -544,17 +560,9 @@ System.out.println(component);
 
 	@Override
 	public void execute(ListGridZoom zoom) {
+		listGridButton(zoom, zoom.getRow());
+		
 		PrimeFacesAutomationContext context = peek();
-		if (ViewType.list.equals(context.getViewType())) {
-			String identifier = zoom.getIdentifier(context);
-			UIComponent component = context.getFacesComponents(identifier).get(0);
-			String clientId = ComponentCollector.clientId(component, zoom.getRow());
-// TODO check for visible and disabled
-			comment(String.format("Zoom on row %d on data grid [%s] (%s)", zoom.getRow(), identifier, clientId));
-			command("clickAndWait", clientId);
-		}
-// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
-
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
 		push.setDocumentName(context.getDocumentName());
@@ -563,19 +571,76 @@ System.out.println(component);
 
 	@Override
 	public void execute(ListGridSelect select) {
-		PrimeFacesAutomationContext context = peek();
-		if (ViewType.list.equals(context.getViewType())) {
-			UIComponent component = context.getFacesComponents(select.getIdentifier(context)).get(0);
-// TODO check for visible and disabled
-			command("clickAndWait", String.format("//tr[%d]/td", select.getRow())); // ClientIdCollector.clientId(component, select.getRow()));
-		}
-// TODO embedded list grid from an edit view, grid visible, grid new button visible and enabled
-
+		listGridButton(select, select.getRow());
+		
 		// TODO only if there is no select event on the skyve edit view for embedded list grid
+		PrimeFacesAutomationContext context = peek();
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
 		push.setDocumentName(context.getDocumentName());
 		push.execute(this);
+	}
+
+	// TODO handle embedded list grid from an edit view
+	private void listGridButton(Step step, Integer row) {
+		PrimeFacesAutomationContext context = peek();
+		String buttonIdentifier = step.getIdentifier(context);
+		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
+		
+		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
+		if (listGridComponents == null) {
+			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
+														(row != null) ? 
+															((step instanceof ListGridZoom) ? "ListGridZoom" : "ListGridDelete") : 
+															"ListGridNew",
+															listGridIdentifier));
+		}
+		for (UIComponent listGridComponent : listGridComponents) {
+			String listGridClientId = ComponentCollector.clientId(listGridComponent);
+			if (row != null) {
+				if (step instanceof ListGridZoom) {
+					comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+				}
+				else if (step instanceof ListGridSelect) {
+					comment(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+				}
+				else {
+					comment(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+				}
+			}
+			else {
+				comment(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
+			}
+			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
+			if (buttonComponents != null) { // button may not be shown
+				for (UIComponent buttonComponent : buttonComponents) {
+					String buttonClientId = (row != null) ?
+												ComponentCollector.clientId(buttonComponent, row) :
+												ComponentCollector.clientId(buttonComponent);
+					if (buttonClientId.startsWith(listGridClientId)) {
+						// list grid is present
+						command("storeElementPresent", listGridClientId, "present");
+						command("if", "${present} == true");
+						// list grid button is present
+						command("storeElementPresent", buttonClientId, "present");
+						command("if", "${present} == true");
+						// Look for prime faces disabled style on list grid button
+						command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
+						command("if", "${disabled} == false");
+						// All good, continue with the button click
+						if (step instanceof ListGridSelect) {
+							command("clickAndWait", String.format("//tr[%d]/td", row)); // ClientIdCollector.clientId(component, select.getRow()));
+						}
+						else {
+							command("clickAndWait", buttonClientId);
+						}
+						command("endIf");
+						command("endIf");
+						command("endIf");
+					}
+				}
+			}
+		}
 	}
 
 	@Override

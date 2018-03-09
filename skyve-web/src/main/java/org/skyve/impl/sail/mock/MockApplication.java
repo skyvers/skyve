@@ -36,6 +36,7 @@ import org.primefaces.component.accordionpanel.AccordionPanel;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
+import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
@@ -57,6 +58,7 @@ import org.primefaces.component.row.Row;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spacer.Spacer;
+import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
@@ -88,6 +90,9 @@ public class MockApplication extends Application {
 		}
 		else if (Button.COMPONENT_TYPE.equals(componentType)) {
 			return new Button();
+		}
+		else if (Calendar.COMPONENT_TYPE.equals(componentType)) {
+			return new Calendar();
 		}
 		else if (Column.COMPONENT_TYPE.equals(componentType)) {
 			return new Column();
@@ -175,6 +180,9 @@ public class MockApplication extends Application {
 		}
 		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
 			return new Spacer();
+		}
+		else if (Spinner.COMPONENT_TYPE.equals(componentType)) {
+			return new Spinner();
 		}
 		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
 			return new Steps();
