@@ -91,7 +91,8 @@ public abstract class ActionVisitor {
 							(value != ImplicitActionName.BizImport) && 
 							(value != ImplicitActionName.Download) && 
 							(value != ImplicitActionName.Upload) && 
-							(value != ImplicitActionName.Navigate)) {
+							(value != ImplicitActionName.Navigate) &&
+							(value != ImplicitActionName.Print)) {
 						visit(viewName, value, action);
 					}
 				}

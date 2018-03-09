@@ -64,6 +64,7 @@ import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
 
+    public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
     protected final JasperDesign jasperDesign;
     protected final DesignSpecification designSpecification;
 
@@ -97,6 +98,19 @@ public class JasperReportRenderer {
             renderDesign();
         }
         return JasperCompileManager.compileReport(jasperDesign);
+    }
+
+    public static JasperReport getSubReport(DesignSpecification designSpecification, String subReport) throws Exception {
+        final DesignSpecification subReportSpec = designSpecification.getSubReports().stream()
+                .filter(r -> r.getName().equals(subReport))
+                .findFirst()
+                .orElse(null);
+        if (subReportSpec == null) {
+            throw new IllegalArgumentException(String.format("Specified subreport %s does not exist.", subReport));
+        }
+
+        final JasperReportRenderer subReportRenderer = new JasperReportRenderer(subReportSpec);
+        return subReportRenderer.getReport();
     }
 
     public String renderDesign() throws Exception {
@@ -141,6 +155,13 @@ public class JasperReportRenderer {
 
             jasperDesign.addParameter(parameter);
         }
+
+        final JRDesignParameter designSpecParameter = new JRDesignParameter();
+        designSpecParameter.setName(DESIGN_SPEC_PARAMETER_NAME);
+        designSpecParameter.setValueClassName(DesignSpecification.class.getName());
+        designSpecParameter.setForPrompting(false);
+
+        jasperDesign.addParameter(designSpecParameter);
     }
 
     protected void configureReportProperties(DesignSpecification design) {
@@ -258,7 +279,9 @@ public class JasperReportRenderer {
                 jrField.setName(reportField.getName());
                 jrField.setValueClassName(reportField.getTypeClass());
 
-                if (!Mode.sql.equals(reportField.getParent().getMode())) {
+                if (!Mode.sql.equals(reportField.getParent().getMode()) &&
+                        String.class.getTypeName().equals(reportField.getTypeClass())) {
+                    // Setting the field description will cause the SkyveDataSource to return the display value (String) for the field.
                     jrField.setDescription(reportField.getName());
                 }
 
@@ -382,7 +405,7 @@ public class JasperReportRenderer {
                 expressionText = String.format("$F{THIS}.%s()", flipCondition(invisibleConditionName));
             } else {
                 final String subExpression =
-                        String.format("modules.design.reportgeneration.BeanForReport.evaluateCondition(\"%s\", \"%s\", $P{ID}, \"%s\")",
+                        String.format("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(\"%s\", \"%s\", $P{ID}, \"%s\")",
                                 designSpecification.getModuleName(),
                                 designSpecification.getDocumentName(),
                                 rawConditionName(invisibleConditionName));
@@ -497,7 +520,7 @@ public class JasperReportRenderer {
                 }
 
                 final JRDesignExpression subReportExpression = new JRDesignExpression();
-                subReportExpression.setText(String.format("$P{SUBREPORT_DIR} + \"%s.jasper\"", reportElement.getReportFileName()));
+                subReportExpression.setText(String.format("org.skyve.impl.generate.jasperreports.JasperReportRenderer.getSubReport($P{%s}, \"%s\")", DESIGN_SPEC_PARAMETER_NAME, reportElement.getReportFileName()));
                 jrSubreport.setExpression(subReportExpression);
 
                 return jrSubreport;
@@ -634,13 +657,14 @@ public class JasperReportRenderer {
         switch (reportElement.getElementType()) {
             case contentImage:
                 final StringBuilder contentExpressionBuilder = new StringBuilder();
-                contentExpressionBuilder.append("modules.design.reportgeneration.ContentImageForReport.image(");
+                contentExpressionBuilder.append("org.skyve.impl.generate.jasperreports.ContentImageForReport.image(");
                 contentExpressionBuilder.append("$F{").append(reportElement.getElementValue()).append("}, ");
 
                 if (reportElement.getElementWidth() != null) {
                     contentExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
                     contentExpressionBuilder.append(reportElement.getElementWidth().toString());
                 }
+                contentExpressionBuilder.append(")");
                 expression = contentExpressionBuilder.toString();
                 break;
             case dynamicImage:
@@ -654,7 +678,7 @@ public class JasperReportRenderer {
                     dynamicExpressionBuilder.append("$F{THIS}, ");
                 } else {
                     // sql
-                    dynamicExpressionBuilder.append("modules.design.reportgeneration.BeanForReport.getBean(");
+                    dynamicExpressionBuilder.append("org.skyve.impl.generate.jasperreports.BeanForReport.getBean(");
                     dynamicExpressionBuilder.append(reportElement.getParent().getParent().getModuleName()).append(", ");
                     dynamicExpressionBuilder.append(reportElement.getParent().getParent().getDocumentName()).append(", ");
                     dynamicExpressionBuilder.append("$P{ID})");
@@ -664,7 +688,7 @@ public class JasperReportRenderer {
                     dynamicExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
                 }
                 // TODO vertical sizing - for now assume square based on pixelWidth
-                dynamicExpressionBuilder.append(" (org.skyve.metadata.user.User) modules.design.reportgeneration.BeanForReport.getUser())");
+                dynamicExpressionBuilder.append(" (org.skyve.impl.generate.jasperreports.BeanForReport.getUser())");
                 expression = dynamicExpressionBuilder.toString();
                 break;
             case staticImage:

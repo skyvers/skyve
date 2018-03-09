@@ -19,6 +19,9 @@ import javax.servlet.http.HttpSession;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.generate.jasperreports.DesignSpecification;
+import org.skyve.impl.generate.jasperreports.Generator;
+import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
 import org.skyve.impl.jasperreports.ReportDesignParameters;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ReportColumn;
@@ -133,16 +136,18 @@ public class ReportServlet extends HttpServlet {
 			if (documentName == null) {
 				throw new ServletException("No document name in the URL");
 			}
+			// If report name is not specified, generate the report.
 			String reportName = request.getParameter(AbstractWebContext.REPORT_NAME);
+			boolean generatedReport = false;
 			if (reportName == null) {
-				throw new ServletException("No report name in the URL");
+				generatedReport = true;
 			}
 			String formatString = request.getParameter(AbstractWebContext.REPORT_FORMAT);
 			if (formatString == null) {
 				throw new ServletException("No report format in the URL");
 			}
 			ReportFormat format = ReportFormat.valueOf(formatString);
-			
+
 			User user = AbstractPersistence.get().getUser();
 			Customer customer = user.getCustomer();
 			Module module = customer.getModule(moduleName);
@@ -153,13 +158,42 @@ public class ReportServlet extends HttpServlet {
 			Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
 
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			JasperPrint jasperPrint = ReportUtil.runReport(user, 
-															document, 
-															reportName, 
-															getParameters(request), 
-															bean, 
-															format,
-															baos);
+			final JasperPrint jasperPrint;
+	        if (generatedReport) {
+	            reportName = String.format("%s - %s", moduleName, documentName);
+
+	        	final DesignSpecification designSpecification = new DesignSpecification();
+				designSpecification.setName("EditView");
+	        	designSpecification.setModuleName(moduleName);
+	        	designSpecification.setDocumentName(documentName);
+
+				final Generator generator = new Generator(designSpecification);
+				generator.generateDefaultDesign();
+				designSpecification.setMode(DesignSpecification.Mode.bean);
+				designSpecification.setDefinitionSource(DesignSpecification.DefinitionSource.view);
+				designSpecification.setReportType(DesignSpecification.ReportType.report);
+
+				final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
+
+				final Map<String, Object> parameters = getParameters(request);
+				parameters.put(JasperReportRenderer.DESIGN_SPEC_PARAMETER_NAME, designSpecification);
+				jasperPrint = ReportUtil.runReport(reportRenderer.getReport(),
+						user,
+						document,
+						parameters,
+						bean,
+						format,
+						baos);
+			} else {
+				jasperPrint = ReportUtil.runReport(user,
+						document,
+						reportName,
+						getParameters(request),
+						bean,
+						format,
+						baos);
+			}
+
 			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
 		}
 		catch (Exception e) {

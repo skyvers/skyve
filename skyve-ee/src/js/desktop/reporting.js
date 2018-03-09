@@ -593,7 +593,7 @@ isc.ReportDialog.addClassProperties({
 	
 	popupReport: function(view, // view
 							params) { // param map (name -> binding expression with {} if required
-		if (params._f) {
+		if (params && params._f) {
 			var format = params._f;
 			var paramsCopy = isc.addProperties({}, params);
 			delete paramsCopy._f;
@@ -640,11 +640,20 @@ isc.ReportDialog.addClassProperties({
 			var b = view._b;
 			var bizId = instance.bizId;
 
-			var src = 'report/' + params['_n'] + '.' + format +
-						'?_f=' + format +
-						(c ? '&_c=' + c : '') +
-						(b ? '&_b=' + b : '') +
-						(bizId ? '&_id=' + bizId : '');
+			var src;
+            if (params && params['_n']) {
+                src = 'report/' + params['_n'] + '.' + format +
+                    '?_f=' + format +
+                    (c ? '&_c=' + c : '') +
+                    (b ? '&_b=' + b : '') +
+                    (bizId ? '&_id=' + bizId : '');
+			} else {
+                src = 'report/' +
+                    '?_f=' + format +
+                    (c ? '&_c=' + c : '') +
+                    (b ? '&_b=' + b : '') +
+                    (bizId ? '&_id=' + bizId : '');
+			}
 			if (params) {
 				for (var name in params) {
 					var binding = params[name];

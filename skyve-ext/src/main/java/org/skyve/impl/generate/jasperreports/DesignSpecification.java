@@ -726,7 +726,7 @@ public class DesignSpecification {
 		setTopMargin(new Integer(42));
 		setBottomMargin(new Integer(30));
 		setMode(Mode.bean);
-		setDefaultFontName("Arial");
+		setDefaultFontName("SansSerif");
 		setDefaultFontSize(new Integer(12));
 		setTitleFontSize(new Integer(16));
 		setDefinitionSource(DefinitionSource.view);
