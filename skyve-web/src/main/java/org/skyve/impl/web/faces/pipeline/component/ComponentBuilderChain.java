@@ -56,6 +56,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	
 	@Override
 	public void setManagedBeanName(String managedBeanName) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setManagedBeanName(managedBeanName);
+		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setManagedBeanName(managedBeanName);
 		}
@@ -63,6 +66,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	
 	@Override
 	public void setSAILManagedBean(FacesView<?> managedBean) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setSAILManagedBean(managedBean);
+		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setSAILManagedBean(managedBean);
 		}
@@ -70,6 +76,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public void setProcess(String process) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setProcess(process);
+		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setProcess(process);
 		}
@@ -77,6 +86,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public void setUpdate(String update) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setUpdate(update);
+		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setUpdate(update);
 		}
@@ -84,6 +96,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 
 	@Override
 	public void setUserAgentType(UserAgentType userAgentType) {
+		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
+		super.setUserAgentType(userAgentType);
+		// Now set the state on all builders in the chain
 		for (ComponentBuilder builder : builders) {
 			builder.setUserAgentType(userAgentType);
 		}
