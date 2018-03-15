@@ -1104,7 +1104,8 @@ isc.EditView.addMethods({
 				// Determine what is the selected tab
 				var selectedTabIndexBinding = contained.selectedTabIndexBinding;
 				if (selectedTabIndexBinding) {
-					if (values[selectedTabIndexBinding]) {
+					if ((values[selectedTabIndexBinding] !== undefined) && 
+							(values[selectedTabIndexBinding] != null)) { // (careful - tab 0 is valid but is falsey)
 						selectedTabNumber = values[selectedTabIndexBinding];
 					}
 				}
