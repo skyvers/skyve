@@ -5,9 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 public class DesignSpecification {
 	private int alias = (int)('a');
@@ -65,6 +69,10 @@ public class DesignSpecification {
 	 * Report Bean Document.
 	 **/
 	private String documentName;
+    /**
+     * Report Query Name.
+     **/
+    private String queryName;
 	/**
 	 * If a view report, this is the uxui to create the report for
 	 */
@@ -332,7 +340,13 @@ public class DesignSpecification {
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
 	}
-	public String getUxui() {
+    public String getQueryName() {
+        return queryName;
+    }
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
+    }
+    public String getUxui() {
 		return uxui;
 	}
 	public void setUxui(String uxui) {
@@ -767,5 +781,19 @@ public class DesignSpecification {
 			setColumnWidth(842 - getLeftMargin() - getRightMargin());
 			setHeight(595);
 		}
+	}
+
+	public Customer getCustomer() {
+		return CORE.getPersistence().getUser().getCustomer();
+	}
+
+	public Module getModule() {
+		final Customer customer = getCustomer();
+		return customer.getModule(getModuleName());
+	}
+
+	public Document getDocument() {
+		final Customer customer = getCustomer();
+		return getModule().getDocument(customer, getDocumentName());
 	}
 }

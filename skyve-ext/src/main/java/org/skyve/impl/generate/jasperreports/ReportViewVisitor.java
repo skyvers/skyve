@@ -87,6 +87,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	public static final double TWIP_TO_PIXEL = 0.0666666667;
 	public static final double PIXEL_TO_TWIP = 15;
 
+	protected ReportDesignGenerator reportDesignGenerator;
 	protected DesignSpecification design = null;
 	protected List<ReportBand> detailBands = null;
 	
@@ -632,8 +633,9 @@ public class ReportViewVisitor extends ViewVisitor {
 	 * @param document
 	 * @param view
 	 */
-	public ReportViewVisitor(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
+	public ReportViewVisitor(ReportDesignGenerator reportDesignGenerator, CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
 		super(customer, module, document, view);
+		this.reportDesignGenerator = reportDesignGenerator;
 		detailBands = new ArrayList<>();
 		viewTitle = view.getTitle();
 	}
@@ -713,7 +715,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			case staticText:
 			case textField:
 				if (binding != null) {
-					fld = Generator.fieldFromBinding(design, customer, document, binding);
+					fld = reportDesignGenerator.fieldFromBinding(design, customer, document, binding);
 				}
 
 				String valueExpression = null;
@@ -813,7 +815,7 @@ public class ReportViewVisitor extends ViewVisitor {
 				break;
 			case line:
 			case subreport:
-				fld = Generator.fieldFromBinding(design, customer, document, binding);
+				fld = reportDesignGenerator.fieldFromBinding(design, customer, document, binding);
 				design.getFields().add(fld);
 				ReportElement s = new ReportElement(elementType, binding , binding, null, null, null, invisibleConditionName);
 				s.setPixelWidth(pixelWidth);
@@ -949,9 +951,9 @@ public class ReportViewVisitor extends ViewVisitor {
 			}
 		}
 
-		Generator subReportGenerator = new Generator(sub);
+		ReportDesignGenerator subReportGenerator = reportDesignGenerator.getSubreportGenerator();
 		try {
-			subReportGenerator.generateDefaultDesign();
+			subReportGenerator.populateDesign(sub);
 		} catch (Exception e){
 			Util.LOGGER.info("COULD NOT CREATE DEFAULT DESIGN FOR SUB REPORT " + sub.getName());
 		}
