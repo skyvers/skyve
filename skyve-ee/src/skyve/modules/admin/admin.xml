@@ -308,6 +308,7 @@
 				</document>
 				<document name="ReportDesign" permission="_____">
 					<action name="GenerateDefault" />
+					<action name="Preview" />
 				</document>
 			</privileges>
 		</role>
