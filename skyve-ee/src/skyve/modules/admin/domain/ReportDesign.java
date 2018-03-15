@@ -57,6 +57,8 @@ public class ReportDesign extends AbstractTransientBean {
 	/** @hidden */
 	public static final String queryNamePropertyName = "queryName";
 	/** @hidden */
+	public static final String menuItemPropertyName = "menuItem";
+	/** @hidden */
 	public static final String repositoryPathPropertyName = "repositoryPath";
 	/** @hidden */
 	public static final String saveToDocumentPackagePropertyName = "saveToDocumentPackage";
@@ -239,7 +241,8 @@ public class ReportDesign extends AbstractTransientBean {
 	public static enum DefinitionSource implements Enumeration {
 		document("document", "document"),
 		view("view", "view"),
-		query("query", "query");
+		query("query", "query"),
+		list("list", "list");
 
 		private String code;
 		private String description;
@@ -576,6 +579,12 @@ public class ReportDesign extends AbstractTransientBean {
 	 * Report Query.
 	 **/
 	private String queryName;
+	/**
+	 * Menu Item
+	 * <br/>
+	 * Menu Item.
+	 **/
+	private String menuItem;
 	/**
 	 * Output Path
 	 * <br/>
@@ -951,6 +960,24 @@ public class ReportDesign extends AbstractTransientBean {
 	public void setQueryName(String queryName) {
 		preset(queryNamePropertyName, queryName);
 		this.queryName = queryName;
+	}
+
+	/**
+	 * {@link #menuItem} accessor.
+	 * @return	The value.
+	 **/
+	public String getMenuItem() {
+		return menuItem;
+	}
+
+	/**
+	 * {@link #menuItem} mutator.
+	 * @param menuItem	The new value.
+	 **/
+	@XmlElement
+	public void setMenuItem(String menuItem) {
+		preset(menuItemPropertyName, menuItem);
+		this.menuItem = menuItem;
 	}
 
 	/**

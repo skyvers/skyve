@@ -9,29 +9,27 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.type.*;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.jasperreports.ReportDesignParameters;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.module.query.QueryColumn;
+import org.skyve.metadata.view.model.list.DocumentQueryListModel;
+import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRBand;
-import net.sf.jasperreports.engine.JRElement;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExpression;
-import net.sf.jasperreports.engine.JRField;
-import net.sf.jasperreports.engine.JRLineBox;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.base.JRBoxPen;
 import net.sf.jasperreports.engine.design.JRDesignBand;
 import net.sf.jasperreports.engine.design.JRDesignElement;
@@ -51,15 +49,6 @@ import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
-import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
-import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
-import net.sf.jasperreports.engine.type.IncrementTypeEnum;
-import net.sf.jasperreports.engine.type.LineStyleEnum;
-import net.sf.jasperreports.engine.type.ModeEnum;
-import net.sf.jasperreports.engine.type.RotationEnum;
-import net.sf.jasperreports.engine.type.SplitTypeEnum;
-import net.sf.jasperreports.engine.type.StretchTypeEnum;
-import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
@@ -67,9 +56,16 @@ public class JasperReportRenderer {
     public static final String DESIGN_SPEC_PARAMETER_NAME = "DESIGN_SPEC";
     protected final JasperDesign jasperDesign;
     protected final DesignSpecification designSpecification;
+    protected final ReportDesignParameters reportDesignParameters;
+
+    private static final Float FONT_TEN = 10f;
+    private static final Float FONT_TWELVE = 12f;
+    private static final Float FONT_TWENTY_SIX = 26f;
 
     private static final Map<String, String> properties;
     private boolean rendered = false;
+
+    private String jrxml;
 
     static {
         properties = new HashMap<>();
@@ -89,7 +85,21 @@ public class JasperReportRenderer {
     }
 
     public JasperReportRenderer(DesignSpecification designSpecification) {
-        this.designSpecification = designSpecification;
+        // Currently lists can only be rendered using the alternative report design abstraction
+        // so instead of re-implementing we convert to that design.
+        if (DesignSpecification.DefinitionSource.list.equals(designSpecification.getDefinitionSource())) {
+            this.designSpecification = null;
+            this.reportDesignParameters = convertDesign(designSpecification);
+        } else {
+            this.designSpecification = designSpecification;
+            this.reportDesignParameters = null;
+        }
+        jasperDesign = new JasperDesign();
+    }
+
+    public JasperReportRenderer(ReportDesignParameters reportDesignParameters) {
+        this.reportDesignParameters = reportDesignParameters;
+        this.designSpecification = null;
         jasperDesign = new JasperDesign();
     }
 
@@ -98,6 +108,14 @@ public class JasperReportRenderer {
             renderDesign();
         }
         return JasperCompileManager.compileReport(jasperDesign);
+    }
+
+    public String getJrxml() throws Exception {
+        if (!rendered) {
+            renderDesign();
+        }
+
+        return jrxml;
     }
 
     public static JasperReport getSubReport(DesignSpecification designSpecification, String subReport) throws Exception {
@@ -118,12 +136,31 @@ public class JasperReportRenderer {
             throw new IllegalStateException("Report has already been rendered.");
         }
 
+        /*
+        * Note there are currently two different report abstractions which are converted to the JasperDesign.
+        * In the future these could be merged into the one.
+        */
+        if (designSpecification != null) {
+            jrxml = renderFromDesignSpecification();
+            return jrxml;
+        }
+        if (reportDesignParameters != null) {
+            jrxml = renderFromReportDesignParameters();
+            return jrxml;
+        }
+
+        throw new IllegalStateException("No design to render.");
+    }
+
+    private String renderFromDesignSpecification() throws JRException {
         if (designSpecification.getModuleName() != null && designSpecification.getDocumentName() != null) {
             configureReportProperties(designSpecification);
 
             // support document queries
             JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
             jasperReportsContext.setProperty(JRQueryExecuterFactory.QUERY_EXECUTER_FACTORY_PREFIX + "document", SkyveDocumentExecuterFactory.class.getCanonicalName());
+
+            Optional.ofNullable(designSpecification.getLanguage()).ifPresent(jasperDesign::setLanguage);
 
             addProperties();
             addImports();
@@ -136,9 +173,283 @@ public class JasperReportRenderer {
             final String jrxml = JRXmlWriter.writeReport(jasperDesign, "UTF-8");
             rendered = true;
             return jrxml;
+        } else {
+            throw new IllegalArgumentException("Invalid module or document name.");
+        }
+    }
+
+    private String renderFromReportDesignParameters() throws JRException {
+        int reportColumnWidth = reportDesignParameters.getPageWidth() - reportDesignParameters.getLeftMargin() - reportDesignParameters.getRightMargin();
+        ReportFormat format = reportDesignParameters.getReportFormat();
+        boolean wideStaticTexts = ReportFormat.csv.equals(format) ||
+                ReportFormat.txt.equals(format) ||
+                ReportFormat.xml.equals(format);
+
+        // JasperDesign
+        jasperDesign.setName("Export");
+        jasperDesign.setLanguage(JRReport.LANGUAGE_GROOVY);
+        jasperDesign.setPageWidth(reportDesignParameters.getPageWidth());
+        jasperDesign.setPageHeight(reportDesignParameters.getPageHeight());
+        jasperDesign.setColumnWidth(reportColumnWidth);
+        jasperDesign.setColumnSpacing(0);
+        jasperDesign.setLeftMargin(reportDesignParameters.getLeftMargin());
+        jasperDesign.setRightMargin(reportDesignParameters.getRightMargin());
+        jasperDesign.setTopMargin(reportDesignParameters.getTopMargin());
+        jasperDesign.setBottomMargin(reportDesignParameters.getBottomMargin());
+        jasperDesign.setIgnorePagination(! reportDesignParameters.isPaginated());
+
+        // Parameters
+        JRDesignParameter parameter = new JRDesignParameter();
+        parameter.setName("TITLE");
+        parameter.setValueClass(String.class);
+        jasperDesign.addParameter(parameter);
+
+        parameter = new JRDesignParameter();
+        parameter.setName("RESOURCE_DIR");
+        parameter.setValueClass(java.lang.String.class);
+        jasperDesign.addParameter(parameter);
+
+        // TODO allow grouping here
+
+        JRDesignBand band;
+        JRDesignStaticText staticText;
+        JRDesignTextField textField;
+        JRDesignLine line;
+        JRDesignExpression expression;
+
+        JRDesignBand columnHeaderBand = new JRDesignBand();
+        if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+            columnHeaderBand.setHeight(18);
         }
 
-        throw new IllegalArgumentException("Invalid module or document name.");
+        JRDesignBand detailBand = new JRDesignBand();
+        if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+            detailBand.setHeight(20);
+        }
+        else {
+            detailBand.setHeight(reportDesignParameters.getColumns().size() * 20 + 10);
+        }
+
+        int xPos = 0;
+        int yPos = 0;
+        int columnarLabelWidth = 0;
+
+        // Determine the size of the labels (for columnar reports)
+        if (ReportDesignParameters.ReportStyle.columnar.equals(reportDesignParameters.getReportStyle())) {
+            for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
+                columnarLabelWidth = Math.max(columnarLabelWidth, column.getTitle().length() * 8);
+            }
+        }
+
+        for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
+            // Field
+            JRDesignField designField = new JRDesignField();
+            designField.setName(column.getName());
+            designField.setDescription(column.getName());
+            designField.setValueClass(String.class);
+            jasperDesign.addField(designField);
+
+            HorizontalTextAlignEnum alignment = null;
+            switch (column.getAlignment()) {
+                case left:
+                    alignment = HorizontalTextAlignEnum.LEFT;
+                    break;
+                case center:
+                    alignment = HorizontalTextAlignEnum.CENTER;
+                    break;
+                case right:
+                    alignment = HorizontalTextAlignEnum.RIGHT;
+                    break;
+                default:
+            }
+
+            // Detail
+            if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+                // Column Header
+                staticText = new JRDesignStaticText();
+                staticText.setMode(ModeEnum.OPAQUE);
+                staticText.setX(xPos);
+                staticText.setY(0);
+                staticText.setWidth(wideStaticTexts ? 1000 : column.getWidth());
+                staticText.setHeight(18);
+                staticText.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+                staticText.setForecolor(Color.white);
+                staticText.setBackcolor(new Color(0x99, 0x99, 0x99));
+                staticText.setFontSize(FONT_TWELVE);
+                staticText.setText(column.getTitle());
+                columnHeaderBand.addElement(staticText);
+
+                // Value
+                textField = new JRDesignTextField();
+                textField.setBlankWhenNull(true);
+                textField.setX(xPos);
+                textField.setY(0);
+                textField.setWidth(column.getWidth());
+                textField.setHeight(20);
+                textField.setHorizontalTextAlign(alignment);
+                textField.setFontSize(FONT_TWELVE);
+                textField.setStretchWithOverflow(true);
+                textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+                expression = new JRDesignExpression();
+                expression.setText("$F{" + column.getName() + "}");
+                textField.setExpression(expression);
+                detailBand.addElement(textField);
+            }
+            else {
+                // Label
+                staticText = new JRDesignStaticText();
+                staticText.setX(0);
+                staticText.setY(yPos);
+                staticText.setWidth(wideStaticTexts ? 1000 : columnarLabelWidth);
+                staticText.setHeight(20);
+                staticText.setFontSize(FONT_TWELVE);
+                staticText.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+                staticText.setItalic(true);
+                staticText.setText(column.getTitle());
+                detailBand.addElement(staticText);
+
+                // Value
+                textField = new JRDesignTextField();
+                textField.setBlankWhenNull(true);
+                textField.setX(150);
+                textField.setY(yPos);
+                textField.setWidth(reportColumnWidth - columnarLabelWidth);
+                textField.setHeight(20);
+                textField.setHorizontalTextAlign(HorizontalTextAlignEnum.LEFT);
+                textField.setFontSize(FONT_TWELVE);
+                textField.setStretchWithOverflow(true);
+                textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+                expression = new JRDesignExpression();
+                expression.setText("$F{" + column.getName() + "}");
+                textField.setExpression(expression);
+                detailBand.addElement(textField);
+            }
+
+            if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+                xPos += column.getWidth() + (reportDesignParameters.isPretty() ? 5 : 0);
+            }
+            else {
+                yPos += 20;
+            }
+        }
+
+        // Background
+
+        band = new JRDesignBand();
+        jasperDesign.setBackground(band);
+
+        // Title
+        band = new JRDesignBand();
+        if (reportDesignParameters.isPretty()) {
+            band.setHeight(58);
+            line = new JRDesignLine();
+            line.setX(0);
+            line.setY(8);
+            line.setWidth(reportColumnWidth);
+            line.setHeight(1);
+            band.addElement(line);
+            textField = new JRDesignTextField();
+            textField.setBlankWhenNull(true);
+            textField.setX(0);
+            textField.setY(13);
+            textField.setWidth(reportColumnWidth);
+            textField.setHeight(35);
+            textField.setHorizontalTextAlign(HorizontalTextAlignEnum.CENTER);
+            textField.setFontSize(FONT_TWENTY_SIX);
+            textField.setBold(true);
+            expression = new JRDesignExpression();
+            expression.setText("$P{TITLE}");
+            textField.setExpression(expression);
+            band.addElement(textField);
+            line = new JRDesignLine();
+            line.setPositionType(PositionTypeEnum.FIX_RELATIVE_TO_BOTTOM);
+            line.setX(0);
+            line.setY(51);
+            line.setWidth(reportColumnWidth);
+            line.setHeight(1);
+            band.addElement(line);
+        }
+        jasperDesign.setTitle(band);
+
+        // Page header
+        band = new JRDesignBand();
+        jasperDesign.setPageHeader(band);
+
+        // Column header
+        jasperDesign.setColumnHeader(columnHeaderBand);
+
+        // Detail
+        ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
+
+        // Column footer
+        band = new JRDesignBand();
+        jasperDesign.setColumnFooter(band);
+
+        // Page footer
+        band = new JRDesignBand();
+
+        if (reportDesignParameters.isPaginated()) {
+            band.setHeight(26);
+
+            // Current time
+            textField = new JRDesignTextField();
+            textField.setEvaluationTime(EvaluationTimeEnum.REPORT);
+            textField.setPattern("");
+            textField.setBlankWhenNull(false);
+            textField.setX(30);
+            textField.setY(6);
+            textField.setWidth(209);
+            textField.setHeight(19);
+            textField.setForecolor(Color.black);
+            textField.setBackcolor(Color.white);
+            textField.setFontSize(FONT_TEN);
+            expression = new JRDesignExpression();
+            expression.setText("new Date()");
+            textField.setExpression(expression);
+            band.addElement(textField);
+
+            // Page number of
+            textField = new JRDesignTextField();
+            textField.setPattern("");
+            textField.setBlankWhenNull(false);
+            textField.setX(reportColumnWidth - 200);
+            textField.setY(6);
+            textField.setWidth(155);
+            textField.setHeight(19);
+            textField.setForecolor(Color.black);
+            textField.setBackcolor(Color.white);
+            textField.setHorizontalTextAlign(HorizontalTextAlignEnum.RIGHT);
+            textField.setFontSize(FONT_TEN);
+            expression = new JRDesignExpression();
+            expression.setText("\"Page \" + $V{PAGE_NUMBER} + \" of\"");
+            textField.setExpression(expression);
+            band.addElement(textField);
+
+            // Total pages
+            textField = new JRDesignTextField();
+            textField.setEvaluationTime(EvaluationTimeEnum.REPORT);
+            textField.setPattern("");
+            textField.setBlankWhenNull(false);
+            textField.setX(reportColumnWidth - 40);
+            textField.setY(6);
+            textField.setWidth(40);
+            textField.setHeight(19);
+            textField.setForecolor(Color.black);
+            textField.setBackcolor(Color.white);
+            textField.setFontSize(FONT_TEN);
+            expression = new JRDesignExpression();
+            expression.setText("$V{PAGE_NUMBER}");
+            textField.setExpression(expression);
+            band.addElement(textField);
+        }
+        jasperDesign.setPageFooter(band);
+
+        // Summary
+        band = new JRDesignBand();
+        jasperDesign.setSummary(band);
+
+        rendered = true;
+        return JRXmlWriter.writeReport(jasperDesign, "UTF-8");
     }
 
     protected void addParameters(DesignSpecification design) throws JRException {
@@ -736,5 +1047,60 @@ public class JasperReportRenderer {
         } else {
             return conditionName.substring(0, 1).toLowerCase() + conditionName.substring(1);
         }
+    }
+
+    private ReportDesignParameters convertDesign(DesignSpecification designSpecification) {
+        final ReportDesignParameters reportDesignParameters = new ReportDesignParameters();
+
+        reportDesignParameters.setReportFormat(ReportFormat.pdf);
+        reportDesignParameters.setReportStyle(ReportDesignParameters.ReportStyle.tabular);
+        reportDesignParameters.setPageWidth(designSpecification.getWidth());
+        reportDesignParameters.setPageHeight(designSpecification.getHeight());
+        reportDesignParameters.setPaginated(true);
+        reportDesignParameters.setPretty(true);
+        reportDesignParameters.setTopMargin(20);
+        reportDesignParameters.setBottomMargin(20);
+        reportDesignParameters.setLeftMargin(20);
+        reportDesignParameters.setRightMargin(20);
+
+        for (QueryColumn queryColumn : getListModel(designSpecification).getColumns()) {
+            ReportDesignParameters.ReportColumn reportColumn = new ReportDesignParameters.ReportColumn();
+            reportColumn.setLine(1);
+            reportColumn.setName(queryColumn.getBinding());
+            reportColumn.setTitle(queryColumn.getBinding());
+            reportColumn.setType("text");
+            reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth() : 100);
+            String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toAlignmentString() : null;
+            if (align != null) {
+                reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.valueOf(align));
+            }
+            else {
+                reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.left);
+            }
+            reportDesignParameters.getColumns().add(reportColumn);
+        }
+
+        return reportDesignParameters;
+    }
+
+    protected DocumentQueryListModel<Bean> getListModel(DesignSpecification designSpecification) {
+        final Customer customer = CORE.getCustomer();
+        final Module module = designSpecification.getModule();
+
+        DocumentQueryDefinition query = null;
+        if (designSpecification.getQueryName() != null) {
+            query = module.getDocumentQuery(designSpecification.getQueryName());
+        }
+        if (query == null) {
+            query = module.getDocumentDefaultQuery(customer, designSpecification.getDocumentName());
+        }
+        if (query == null) {
+            throw new IllegalArgumentException("Design does not reference a valid query " + designSpecification.getQueryName());
+        }
+
+        final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
+        queryModel.setQuery(query);
+
+        return queryModel;
     }
 }

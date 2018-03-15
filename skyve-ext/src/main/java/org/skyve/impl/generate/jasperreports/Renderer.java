@@ -949,11 +949,11 @@ public class Renderer {
 	 * 
 	 * @param design
 	 */
-	public static void saveJrxml(DesignSpecification design) throws Exception {
+	public static void saveJrxml(DesignSpecification design, JasperReportRenderer reportRenderer) throws Exception {
 
 		if (!design.getSubReports().isEmpty()) {
 			for (DesignSpecification ds : design.getSubReports()) {
-				saveJrxml(ds);
+				saveJrxml(ds, reportRenderer);
 			}
 		}
 
@@ -987,7 +987,7 @@ public class Renderer {
 			file = new File(filePath.toString());
 			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
-				out.println(design.getJrxml());
+				out.println(reportRenderer.getJrxml());
 				out.flush();
 			}
 		}

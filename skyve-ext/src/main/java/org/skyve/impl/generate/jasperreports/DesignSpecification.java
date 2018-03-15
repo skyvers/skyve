@@ -26,7 +26,8 @@ public class DesignSpecification {
 	public static enum DefinitionSource {
 		document,
 		view,
-		query
+		query,
+		list
 	}
 
 // TODO do I need to Capitalise the toString().
@@ -41,6 +42,7 @@ public class DesignSpecification {
 		landscape
 	}
 
+	private String language;
 	/**
 	 * Report Name
 	 **/
@@ -678,16 +680,6 @@ public class DesignSpecification {
 		return documentName;
 	}
 
-	public String getJrxml() {
-		try {
-			return new JasperReportRenderer(this).renderDesign();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
 	public int getAlias() {
 		return alias;
 	}
@@ -795,5 +787,13 @@ public class DesignSpecification {
 	public Document getDocument() {
 		final Customer customer = getCustomer();
 		return getModule().getDocument(customer, getDocumentName());
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 }

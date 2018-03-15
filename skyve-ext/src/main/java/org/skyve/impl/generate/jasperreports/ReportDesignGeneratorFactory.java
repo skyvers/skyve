@@ -13,6 +13,8 @@ public class ReportDesignGeneratorFactory {
                 return new ViewReportDesignGenerator();
             case query:
                 return new QueryReportDesignGenerator();
+            case list:
+                return new ListReportDesignGenerator();
         }
 
         throw new IllegalArgumentException("Unknown design definition source.");
