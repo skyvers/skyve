@@ -20,8 +20,9 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.generate.jasperreports.DesignSpecification;
-import org.skyve.impl.generate.jasperreports.Generator;
 import org.skyve.impl.generate.jasperreports.JasperReportRenderer;
+import org.skyve.impl.generate.jasperreports.ReportDesignGenerator;
+import org.skyve.impl.generate.jasperreports.ReportDesignGeneratorFactory;
 import org.skyve.impl.jasperreports.ReportDesignParameters;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ColumnAlignment;
 import org.skyve.impl.jasperreports.ReportDesignParameters.ReportColumn;
@@ -167,8 +168,9 @@ public class ReportServlet extends HttpServlet {
 	        	designSpecification.setModuleName(moduleName);
 	        	designSpecification.setDocumentName(documentName);
 
-				final Generator generator = new Generator(designSpecification);
-				generator.generateDefaultDesign();
+				final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
+						.getGeneratorForDesign(designSpecification);
+				generator.populateDesign(designSpecification);
 				designSpecification.setMode(DesignSpecification.Mode.bean);
 				designSpecification.setDefinitionSource(DesignSpecification.DefinitionSource.view);
 				designSpecification.setReportType(DesignSpecification.ReportType.report);
