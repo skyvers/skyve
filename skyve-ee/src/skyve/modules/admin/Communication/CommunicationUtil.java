@@ -8,12 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
-import modules.ModulesUtil;
-import modules.admin.Communication.actions.GetResults;
-import modules.admin.domain.Communication;
-import modules.admin.domain.Communication.FormatType;
-import modules.admin.domain.Subscription;
-
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
@@ -34,6 +28,12 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import modules.ModulesUtil;
+import modules.admin.Communication.actions.GetResults;
+import modules.admin.domain.Communication;
+import modules.admin.domain.Communication.FormatType;
+import modules.admin.domain.Subscription;
 
 public class CommunicationUtil {
 
@@ -594,14 +594,26 @@ public class CommunicationUtil {
 
 	/**
 	 * Returns a String with wrapped with <html><body> tags
-	 * and replaces \n with <br/>
+	 * and replaces \n within a line with <br>
 	 * 
 	 * @param html
 	 * @return
 	 */
 	private static String htmlEnclose(String html) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<html><body>").append(html.replace("\n","<br/>")).append("</body></html>");
+
+		// replace all \n with <br> when it is not at the end of a line
+		String[] lines = html.split("\n");
+		for (String line : lines) {
+			sb.append(line);
+			if (line.length() > 0 && !line.endsWith(">")) {
+				sb.append("<br>\n");
+			} else {
+				sb.append("\n");
+			}
+		}
+
+		sb.insert(0, "<html><body>").append("</body></html>");
 		return sb.toString();
 	}
 }
