@@ -33,8 +33,10 @@ import javax.faces.validator.Validator;
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.accordionpanel.AccordionPanel;
+import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
+import org.primefaces.component.calendar.Calendar;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
@@ -50,10 +52,13 @@ import org.primefaces.component.outputpanel.OutputPanel;
 import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
 import org.primefaces.component.panelgrid.PanelGrid;
+import org.primefaces.component.password.Password;
 import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.row.Row;
+import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spacer.Spacer;
+import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
@@ -74,7 +79,10 @@ public class MockApplication extends Application {
     
 	@Override
 	public UIComponent createComponent(String componentType) throws FacesException {
-		if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
+		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
+			return new AutoComplete();
+		}
+		else if (AccordionPanel.COMPONENT_TYPE.equals(componentType)) {
 			return new AccordionPanel();
 		}
 		else if (BreadCrumb.COMPONENT_TYPE.equals(componentType)) {
@@ -82,6 +90,9 @@ public class MockApplication extends Application {
 		}
 		else if (Button.COMPONENT_TYPE.equals(componentType)) {
 			return new Button();
+		}
+		else if (Calendar.COMPONENT_TYPE.equals(componentType)) {
+			return new Calendar();
 		}
 		else if (Column.COMPONENT_TYPE.equals(componentType)) {
 			return new Column();
@@ -152,6 +163,9 @@ public class MockApplication extends Application {
 		else if (PanelGrid.COMPONENT_TYPE.equals(componentType)) {
 			return new PanelGrid();
 		}
+		else if (Password.COMPONENT_TYPE.equals(componentType)) {
+			return new Password();
+		}
 		else if (PickList.COMPONENT_TYPE.equals(componentType)) {
 			return new PickList();
 		}
@@ -161,8 +175,14 @@ public class MockApplication extends Application {
 		else if (SelectOneMenu.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectOneMenu();
 		}
+		else if (SelectBooleanCheckbox.COMPONENT_TYPE.equals(componentType)) {
+			return new SelectBooleanCheckbox();
+		}
 		else if (Spacer.COMPONENT_TYPE.equals(componentType)) {
 			return new Spacer();
+		}
+		else if (Spinner.COMPONENT_TYPE.equals(componentType)) {
+			return new Spinner();
 		}
 		else if (Steps.COMPONENT_TYPE.equals(componentType)) {
 			return new Steps();

@@ -194,6 +194,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		cfg.put("hibernate.cache.provider_class", "org.hibernate.cache.EhCacheProvider");
 		cfg.put("hibernate.cache.region.factory_class", "org.hibernate.cache.ehcache.EhCacheRegionFactory");
 		
+		// Allow more than 1 representation of the same detached entity to be merged,
+		// possibly from multiple sessions, multiple caches, or various serializations.
+		cfg.put("hibernate.event.merge.entity_copy_observer", "allow");
+		
 		// JDBC parameters
 		cfg.put("hibernate.jdbc.use_streams_for_binary", "true");
 		cfg.put("hibernate.jdbc.batch_size", "16");

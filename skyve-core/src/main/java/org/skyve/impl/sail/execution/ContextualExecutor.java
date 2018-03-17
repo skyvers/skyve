@@ -70,6 +70,9 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	/**
 	 * Do nothing but populate the automation context.
 	 * This is intended to be called by sub-classes.
+	 * 
+	 * Note :- For edit views we cannot tell if we need to use the create view or not.
+	 * 			If a tester knows we need the create view, they should use NavigateEdit with create="true".
 	 */
 	@Override
 	public void execute(NavigateMenu menu) {

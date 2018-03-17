@@ -54,6 +54,10 @@ public class ListGrid extends HtmlPanelGroup {
 			Object zoomDisabledAttribute = attributes.get("zoomDisabled");
 			final boolean zoomDisabled = String.valueOf(true).equals(zoomDisabledAttribute) || // literal "true"
 											Boolean.TRUE.equals(zoomDisabledAttribute); // evaluated EL expression
+			Object filterRenderedAttribute = attributes.get("filterRendered");
+			final Boolean filterRendered = Boolean.valueOf((filterRenderedAttribute == null) ||
+															String.valueOf(true).equals(filterRenderedAttribute) || // literal "true"
+															Boolean.TRUE.equals(filterRenderedAttribute)); // evaluated EL expression
 	    	String classString = (String) attributes.get("componentBuilderClass");
 	    	ComponentBuilder tempComponentBuilder = null;
 	    	try {
@@ -80,6 +84,7 @@ public class ListGrid extends HtmlPanelGroup {
 																		createDisabled,
 																		zoomRendered,
 																		zoomDisabled,
+																		filterRendered,
 																		managedBeanName,
 																		userAgentType,
 																		componentBuilder));
@@ -102,6 +107,7 @@ public class ListGrid extends HtmlPanelGroup {
 										boolean createDisabled,
 										Boolean zoomRendered,
 										boolean zoomDisabled,
+										Boolean filterRendered,
 										String managedBeanName,
 										UserAgentType userAgentType,
 										ComponentBuilder componentBuilder) {
@@ -136,6 +142,7 @@ public class ListGrid extends HtmlPanelGroup {
 		listGrid.setDisabledConditionName(String.valueOf(createDisabled));
 		listGrid.setShowZoom(zoomRendered);
 		listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
+		listGrid.setShowFilter(filterRendered);
 
 		return componentBuilder.listGrid(null,
 											documentName,

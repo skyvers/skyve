@@ -1,9 +1,12 @@
 package org.skyve.impl.sail.interpret;
 
+import java.util.List;
+
 import org.jboss.weld.environment.se.Weld;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.generate.sail.Generator;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -12,6 +15,7 @@ import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
 import org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.impl.web.UserAgentType;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.sail.language.Automation;
@@ -38,16 +42,12 @@ public class Interpreter {
 		UtilImpl.QUERY_TRACE = false;
 		UtilImpl.CONTENT_DIRECTORY = CONTENT_DIRECTORY;
 
-//generator should create Automation object
-//		String xml = Generator.visitModules("bizhub");
-//System.out.println(xml);
-//		Automation automation = XMLUtil.unmarshalSAIL(new StringReader(xml));
-		AbstractRepository.set(new LocalDesignRepository());
-
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);
 		user.setName(USER);
 		user.setId(USER);
+
+		AbstractRepository.set(new LocalDesignRepository());
 
 		final AbstractPersistence persistence = AbstractPersistence.get();
 		Weld weld = null;
@@ -58,12 +58,26 @@ public class Interpreter {
 			weld = new Weld();
 			weld.addPackage(true, SkyveCDIProducer.class);
 			weld.initialize();
-
+/*
+			List<Automation> suite = Generator.visitMenus(user, "tablet", UserAgentType.desktop);
+			List<Automation> suite = Generator.visitModules(user, "tablet", UserAgentType.desktop);
+			for (Automation automation : suite) {
+				System.out.println(XMLMetaData.marshalSAIL(automation));
+			}
+*/
 			Automation automation = XMLMetaData.unmarshalSAIL("/Users/mike/dtf/skyve/skyve-tools/test.xml");
 			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
 																								new ResponsiveLayoutBuilder());
 			automation.execute(executor);
 			System.out.println(executor);
+/*
+			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
+																								new ResponsiveLayoutBuilder());
+			for (Automation automation : suite) {
+				automation.execute(executor);
+			}
+			System.out.println(executor);
+*/
 		}
 		finally {
 			if (weld != null) {

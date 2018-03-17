@@ -25,6 +25,9 @@ public abstract class AbstractFacesBuilder {
 	protected static final String PROCESS_KEY = "process";
 	protected static final String UPDATE_KEY = "update";
 
+	// NOTE:- Any of this protected state needs to be set in the ComponentBuilderChain and LayoutBuilderChain.
+	//			Otherwise the protected utility methods in this class that rely on this state wont work.
+	
 	protected FacesContext fc = (FacesContext.getCurrentInstance() != null) ? 
 									FacesContext.getCurrentInstance() : 
 									new MockFacesContext();

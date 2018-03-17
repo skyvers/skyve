@@ -197,14 +197,8 @@
 			<type>java.lang.Boolean</type>
 		</attribute>
 		<attribute>
-			<description>Indicates whether this grid should use a sticky header when the header scrolls from the browser viewport.</description>
-			<name>stickyHeader</name>
-			<required>false</required>
-			<type>java.lang.Boolean</type>
-		</attribute>
-		<attribute>
-			<description>Indicates whether this grid should use a paginator.</description>
-			<name>paginator</name>
+			<description>Indicates whether this grid should render the filter header.</description>
+			<name>filterRendered</name>
 			<required>false</required>
 			<type>java.lang.Boolean</type>
 		</attribute>

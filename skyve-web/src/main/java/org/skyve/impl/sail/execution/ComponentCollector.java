@@ -9,6 +9,7 @@ import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.button.Button;
+import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
@@ -25,6 +26,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -133,6 +135,43 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		return component;
 	}
 	
+	@Override
+	public UIComponent addDataGridActionColumn(UIComponent component,
+												UIComponent current,
+												DataGrid grid,
+												String listVar,
+												String gridColumnExpression,
+												String singluarDocumentAlias,
+												boolean inline) {
+		// component = current as it was set in the previous builder in the chain
+		if (component != null) {
+			String dataGridIdentifier = grid.getBinding();
+			put(dataGridIdentifier, component, grid);
+			UIComponent potentialActionColumn = component.getChildren().get(component.getChildCount() - 1);
+			UIComponent addButton = potentialActionColumn.getFacet("header");
+			if (addButton instanceof CommandButton) {
+				put(dataGridIdentifier + ".new", addButton, grid);
+			}
+			List<UIComponent> potentialActionColumnChildren = potentialActionColumn.getChildren();
+			if (potentialActionColumnChildren.size() > 0) {
+				UIComponent zoomButton = potentialActionColumnChildren.get(0);
+				if (zoomButton instanceof CommandButton) {
+					put(dataGridIdentifier + ".zoom", zoomButton, grid);
+				}
+			}
+			// child 1 is a spacer.
+			if (potentialActionColumnChildren.size() > 2) {
+				UIComponent removeButton = potentialActionColumnChildren.get(2);
+				if (removeButton instanceof CommandButton) {
+					put(dataGridIdentifier + ".remove", removeButton, grid);
+				}
+			}
+			put(dataGridIdentifier + ".select", component.getChildren().get(0), grid);
+		}
+		
+		return component;
+	}
+
 	@Override
 	public UIComponent checkBox(UIComponent component,
 									String listVar,

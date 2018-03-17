@@ -331,7 +331,8 @@ public class CustomerResourceServlet extends HttpServlet {
 			
 			byte[] bytes = resource.getBytes();
 			if (bytes == null) {
-				response.sendError(404);
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				System.err.println(String.format("Problem getting the customer resource - %s was not found.", resource.getFileName()));
 				return;
 			}
 	
