@@ -96,7 +96,7 @@ public class Restore {
 						}
 					}
 				}
-				UtilImpl.LOGGER.info("restore table " + table.name);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restore table " + table.name);
 				File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 				if (! backupFile.exists()) {
 					System.err.println("***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist");
@@ -286,7 +286,7 @@ public class Restore {
 						}
 					}
 				}
-				UtilImpl.LOGGER.info("restored table " + table.name + " with " + rowCount + " rows.");
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restored table " + table.name + " with " + rowCount + " rows.");
 			} // for (each table)
 		}
 	}
@@ -299,7 +299,7 @@ public class Restore {
 			if (table instanceof JoinTable) {
 				continue;
 			}
-			UtilImpl.LOGGER.info("restore foreign keys for table " + table.name);
+			if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("restore foreign keys for table " + table.name);
 			File backupFile = new File(backupDirectory.getAbsolutePath() + File.separator + table.name + ".csv");
 			if (! backupFile.exists()) {
 				System.err.println("***** File " + backupFile.getAbsolutePath() + File.separator + " does not exist");

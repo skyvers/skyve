@@ -99,7 +99,7 @@ public class Backup {
 						BackupUtil.secureSQL(sql, table, customerName);
 						statement.execute(sql.toString());
 						try (ResultSet resultSet = statement.getResultSet()) {
-							UtilImpl.LOGGER.info("Backup " + table.name);
+							if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("Backup " + table.name);
 							try (FileWriter fw = new FileWriter(backupDir + File.separator + table.name + ".csv",
 																	false)) {
 								try (CsvMapWriter writer = new CsvMapWriter(fw, CsvPreference.STANDARD_PREFERENCE)) {
