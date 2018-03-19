@@ -3,6 +3,9 @@ package util;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -20,6 +23,8 @@ import org.skyve.util.Util;
 public abstract class AbstractDomainTest<T extends PersistentBean> extends AbstractH2Test {
 
 	protected abstract T getBean() throws Exception;
+
+	private static final SecureRandom random = new SecureRandom();
 
 	@Test
 	@SuppressWarnings("boxing")
@@ -125,7 +130,8 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 			T uResult = CORE.getPersistence().save(result);
 
 			// verify the results
-			assertThat(Binder.get(uResult, attributeToUpdate.getName()), is(not(originalValue)));
+			assertThat("Error updating " + attributeToUpdate.getName(), Binder.get(uResult, attributeToUpdate.getName()),
+					is(not(originalValue)));
 		} else {
 			Util.LOGGER.fine(String.format("Skipping update test for %s, no scalar attribute found", bean.getBizDocument()));
 		}
@@ -135,18 +141,32 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
+		Attribute transientAttribute = null;
 
-		for (Attribute attribute : document.getAllAttributes()) {
+		ArrayList<? extends Attribute> allAttributes = new ArrayList<>(document.getAllAttributes());
+
+		// randomise the attributes in the collection
+		Collections.shuffle(allAttributes, random);
+
+		for (Attribute attribute : allAttributes) {
 			AttributeType type = attribute.getAttributeType();
 
-			if (AttributeType.collection.equals(type) || AttributeType.association.equals(type)
+			// skip updating content, an association or collection, try find a scalar attribute to update
+			if (AttributeType.content.equals(type) || AttributeType.collection.equals(type)
+					|| AttributeType.association.equals(type)
 					|| AttributeType.inverseOne.equals(type) || AttributeType.inverseMany.equals(type)) {
+				continue;
+			}
+
+			// try use a persistent attribute if we can
+			if (!attribute.isPersistent()) {
+				transientAttribute = attribute;
 				continue;
 			}
 
 			return attribute;
 		}
 
-		return null;
+		return transientAttribute != null ? transientAttribute : null;
 	}
 }

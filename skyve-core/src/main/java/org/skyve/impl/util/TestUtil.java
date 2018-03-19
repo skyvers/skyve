@@ -73,9 +73,10 @@ public class TestUtil {
 	 * @param bean The bean containing the to update
 	 * @param attribute The current value of the attribute of the bean to modify
 	 * @return The bean with a modified attribute with a different random value if possible
+	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "boxing" })
-	public static <T extends PersistentBean> T updateAttribute(T bean, Attribute attribute) {
+	public static <T extends PersistentBean> T updateAttribute(T bean, Attribute attribute) throws IOException {
 		if (attribute == null) {
 			return bean;
 		}
@@ -95,14 +96,14 @@ public class TestUtil {
 				break;
 			case date:
 				Date futureDate = new Date();
-				TimeUtil.addDays(futureDate, random.nextInt(10 + 1));
+				TimeUtil.addDays(futureDate, random.nextInt(10) + 1);
 				BindUtil.convertAndSet(bean, name, futureDate);
 				break;
 			case dateTime:
 			case time:
 			case timestamp:
 				Date futureTime = new Date();
-				TimeUtil.addHours(futureTime, random.nextInt(10 + 1));
+				TimeUtil.addHours(futureTime, random.nextInt(10) + 1);
 				BindUtil.convertAndSet(bean, name, futureTime);
 				break;
 			case decimal10:
@@ -138,7 +139,8 @@ public class TestUtil {
 				BindUtil.set(bean, name, randomString(((int) (Math.random() * 255)) + 1));
 				break;
 			case text:
-				BindUtil.set(bean, name, randomString(((LengthField) attribute).getLength()));
+				Text text = (Text) attribute;
+				BindUtil.set(bean, name, randomText(text));
 				break;
 			case association:
 			case collection:
@@ -251,53 +253,7 @@ public class TestUtil {
 					break;
 				case text:
 					Text text = (Text) attribute;
-
-					// check if there is a data file for this field
-					Util.LOGGER.fine(String.format("Looking for test data file in data/%s.txt", attribute.getName()));
-					String value = randomValueFromFile(attribute);
-					if (value != null) {
-						Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
-						BindUtil.set(result, name, value);
-					}
-					// check if this string has a format mask
-					else if (text.getFormat() != null) {
-						// check if it has a format mask and a regex, if so, prefer the regex
-						if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-								&& text.getValidator().getType() == null) {
-							// return text matching the regex
-							String xeger = randomRegex(text.getValidator().getRegularExpression());
-							if (xeger != null) {
-								BindUtil.set(result, name, xeger);
-								continue;
-							}
-						}
-
-						// return text matching the format mask
-						BindUtil.set(result, name, randomFormat(text.getFormat()));
-					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-							&& text.getValidator().getType() == null) {
-						// check if this string has a regex and no validator type
-						String xeger = randomRegex(text.getValidator().getRegularExpression());
-						if (xeger != null) {
-							BindUtil.set(result, name, xeger);
-							continue;
-						}
-					} else {
-						// check if this is an email address
-						if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
-							BindUtil.set(result, name, randomEmail(((LengthField) attribute).getLength()));
-						} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
-							// check if this string has a regex via a validator type
-							String xeger = randomRegex(text.getValidator().getRegularExpression());
-							if (xeger != null) {
-								BindUtil.set(result, name, xeger);
-								continue;
-							}
-						} else {
-							// return random text
-							BindUtil.set(result, name, randomString(((LengthField) attribute).getLength()));
-						}
-					}
+					BindUtil.set(result, name, randomText(text));
 			}
 		}
 		return result;
@@ -410,6 +366,69 @@ public class TestUtil {
 		}
 
 		return String.valueOf(guts);
+	}
+
+	/**
+	 * Constructs a random string for the specified {@link Text} attribute. It will attempt
+	 * to fill the text based on:
+	 * <ul>
+	 * <li>the presence of a file with the attribute name, e.g. firstName.txt
+	 * <li>the presence of a format mask
+	 * <li>a regular expression or other validator
+	 * <li>random text
+	 * 
+	 * @param text The attribute to create the random data for
+	 * @return A string containing random data for the text attribute
+	 * @throws IOException
+	 */
+	private static String randomText(Text text) throws IOException {
+		if (text != null) {
+			// check if there is a data file for this field
+			Util.LOGGER.fine(String.format("Looking for test data file in data/%s.txt", text.getName()));
+			String value = randomValueFromFile(text);
+			if (value != null) {
+				Util.LOGGER.fine(String.format("Random %s: %s", text.getName(), value));
+				return value;
+			}
+			// check if this string has a format mask
+			else if (text.getFormat() != null) {
+				// check if it has a format mask and a regex, if so, prefer the regex
+				if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+						&& text.getValidator().getType() == null) {
+					// return text matching the regex
+					String xeger = randomRegex(text.getValidator().getRegularExpression());
+					if (xeger != null) {
+						return xeger;
+					}
+				}
+
+				// return text matching the format mask
+				return randomFormat(text.getFormat());
+			} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+					&& text.getValidator().getType() == null) {
+				// check if this string has a regex and no validator type
+				String xeger = randomRegex(text.getValidator().getRegularExpression());
+				if (xeger != null) {
+					return xeger;
+				}
+			} else {
+				// check if this is an email address
+				if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
+					return randomEmail(((LengthField) text).getLength());
+				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
+					// check if this string has a regex via a validator type
+					String xeger = randomRegex(text.getValidator().getRegularExpression());
+					if (xeger != null) {
+						return xeger;
+					}
+				} else {
+					// return random text
+					return randomString(((LengthField) text).getLength());
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
