@@ -13,6 +13,7 @@ public class UserFactoryExtension extends UserFactory {
 	public User getInstance() throws Exception {
 		User user = super.getInstance();
 		user.setConfirmPassword(null);
+		user.setGeneratedPassword(null);
 		user.setNewPassword(null);
 
 		user.getGroups().add(new GroupFactory().getInstance());
