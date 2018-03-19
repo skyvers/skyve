@@ -114,8 +114,12 @@ public class PerformDocumentActionForTagJob extends Job {
 						} else {
 							pers.save(pb);
 							pers.commit(false);
-							pers.evictCached(pb);
-							pers.begin();
+							/*
+							 * Action interactions may effect related records
+							 * evicting any cached records will cause later actions to fail if they refer to the same beans
+							 */
+//							pers.evictCached(pb);
+//							pers.begin();
 						}
 						sb.append(" - Successful");
 

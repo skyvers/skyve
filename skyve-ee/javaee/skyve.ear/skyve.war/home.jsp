@@ -18,6 +18,7 @@
 <%@ page import="org.skyve.impl.web.UserAgentType"%>
 <%@ page import="org.skyve.impl.web.WebUtil"%>
 <%@ page import="org.skyve.impl.web.faces.FacesUtil"%>
+<%@ page import="org.skyve.impl.util.UtilImpl"%>
 
 <%
 	// Stop cookie/request header injection by checking the customer name
@@ -116,6 +117,17 @@
 			criteria.setViewType((i == null) ? ViewType.create : ViewType.edit);
 		}
 		String outcomeUrl = router.selectOutcomeUrl(uxui.getName(), criteria);
+		if (UtilImpl.COMMAND_TRACE) {
+			UtilImpl.LOGGER.info(String.format("home.jsp - Route uxui=%s,c=%s,dg=%s,d=%s,m=%s,q=%s,a=%s to %s",
+													uxui.getName(),
+													criteria.getCustomerName(),
+													criteria.getDataGroupId(),
+													criteria.getDocumentName(),
+													criteria.getModuleName(),
+													criteria.getQueryName(),
+													a,
+													outcomeUrl));
+		}
 		if (outcomeUrl == null) {
 			throw new ServletException("The route criteria " + criteria + " for uxui " + uxui + " did not produce an outcome URL");
 		}
