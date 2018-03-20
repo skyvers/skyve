@@ -15,6 +15,7 @@
 		<java fork="true" classname="org.skyve.impl.generate.DomainGenerator">
 			<classpath refid="classpath" />
 			<arg value="src/skyve/" /> <!-- source path -->
+			<arg value="src/generated/" /> <!-- generated path -->
 			<arg value="src/test/" /> <!-- test path -->
 			<arg value="src/generatedTest/" /> <!-- generated test path -->
 			<arg value="true" /> <!-- debug -->
