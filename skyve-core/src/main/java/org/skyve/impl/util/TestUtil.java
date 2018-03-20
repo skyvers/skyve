@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.Bean;
@@ -29,6 +30,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Binder;
 import org.skyve.util.Util;
+import org.skyve.util.test.DataMap;
+import org.skyve.util.test.SkyveFactory;
 
 import com.mifmif.common.regex.Generex;
 import com.vividsolutions.jts.geom.Coordinate;
@@ -41,7 +44,21 @@ public class TestUtil {
 	private static final String NUMBERS = "0123456789";
 	private static final String LETTERS = "abcdefghijklmnopqrstuvwxyz";
 	private static final String ALPHA_NUMERIC = LETTERS + NUMBERS;
+
+	/**
+	 * Name of generic text file to fill long text fields and memos.
+	 */
+	private static final String LOREM = "lorem.txt";
+
+	/**
+	 * Cache of module.document.attributeName to loaded file random values.
+	 */
 	private static final Map<String, List<String>> DATA_CACHE = new HashMap<>();
+
+	/**
+	 * Cache of module.document.attributeName to @DataMap fileNames.
+	 */
+	private static final Map<String, String> DATA_MAP_CACHE = new HashMap<>();
 
 	private TestUtil() {
 		// no implementation
@@ -68,15 +85,32 @@ public class TestUtil {
 	}
 
 	/**
-	 * Update an attribute on the given bean with a random value
+	 * Update an attribute on the given bean with a random value. Note: this method will
+	 * not make use of any {@link DataMap} annotations present on the bean FactoryExtension. Please use
+	 * {@link #updateAttribute(Module, Document, PersistentBean, Attribute)} instead.
 	 * 
 	 * @param bean The bean containing the to update
 	 * @param attribute The current value of the attribute of the bean to modify
 	 * @return The bean with a modified attribute with a different random value if possible
 	 * @throws IOException
 	 */
+	public static <T extends PersistentBean> T updateAttribute(final T bean, final Attribute attribute) throws IOException {
+		return updateAttribute(null, null, bean, attribute);
+	}
+
+	/**
+	 * Update an attribute on the given bean with a random value
+	 * 
+	 * @param module The module (corresponds to type T)
+	 * @param document The document (corresponds to type T)
+	 * @param bean The bean containing the to update
+	 * @param attribute The current value of the attribute of the bean to modify
+	 * @return The bean with a modified attribute with a different random value if possible
+	 * @throws IOException
+	 */
 	@SuppressWarnings({ "unchecked", "boxing" })
-	public static <T extends PersistentBean> T updateAttribute(T bean, Attribute attribute) throws IOException {
+	public static <T extends PersistentBean> T updateAttribute(final Module module, final Document document, final T bean,
+			final Attribute attribute) throws IOException {
 		if (attribute == null) {
 			return bean;
 		}
@@ -136,11 +170,8 @@ public class TestUtil {
 				break;
 			case markup:
 			case memo:
-				BindUtil.set(bean, name, randomString(((int) (Math.random() * 255)) + 1));
-				break;
 			case text:
-				Text text = (Text) attribute;
-				BindUtil.set(bean, name, randomText(text));
+				BindUtil.set(bean, name, randomText(module, document, attribute));
 				break;
 			case association:
 			case collection:
@@ -153,6 +184,19 @@ public class TestUtil {
 		}
 
 		return bean;
+	}
+
+	/**
+	 * Creates a cache key for an attribute so it is unique per document.
+	 */
+	private static String attributeKey(final Module module, final Document document, final String attributeName) {
+		if (attributeName != null) {
+			if (module != null && document != null) {
+				return String.format("%s.%s.%s", module.getName(), document.getName(), attributeName);
+			}
+			return attributeName;
+		}
+		return null;
 	}
 
 	@SuppressWarnings("incomplete-switch") // content type missing from switch statement
@@ -249,14 +293,26 @@ public class TestUtil {
 					break;
 				case markup:
 				case memo:
-					BindUtil.set(result, name, randomString(((int) (Math.random() * 255)) + 1));
-					break;
 				case text:
-					Text text = (Text) attribute;
-					BindUtil.set(result, name, randomText(text));
+					BindUtil.set(result, name, randomText(module, document, attribute));
+					break;
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Checks if the requested filename has a file extension.
+	 * @param filename The name of the file to check
+	 * @return True if the string contains a period followed by at least one character, false otherwise
+	 */
+	private static boolean hasExtension(final String filename) {
+		if(filename != null && filename.length() > 0 && filename.indexOf(".") > 0) {
+			if ((filename.substring(filename.indexOf(".") + 1)).length() > 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static String randomEmail(int length) {
@@ -377,55 +433,147 @@ public class TestUtil {
 	 * <li>a regular expression or other validator
 	 * <li>random text
 	 * 
+	 * @param module The module this attribute belongs to
+	 * @param document The document this attribute belongs to
 	 * @param text The attribute to create the random data for
 	 * @return A string containing random data for the text attribute
 	 * @throws IOException
 	 */
-	private static String randomText(Text text) throws IOException {
-		if (text != null) {
-			// check if there is a data file for this field
-			Util.LOGGER.fine(String.format("Looking for test data file in data/%s.txt", text.getName()));
-			String value = randomValueFromFile(text);
-			if (value != null) {
-				Util.LOGGER.fine(String.format("Random %s: %s", text.getName(), value));
-				return value;
-			}
-			// check if this string has a format mask
-			else if (text.getFormat() != null) {
-				// check if it has a format mask and a regex, if so, prefer the regex
-				if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-						&& text.getValidator().getType() == null) {
-					// return text matching the regex
-					String xeger = randomRegex(text.getValidator().getRegularExpression());
-					if (xeger != null) {
-						return xeger;
-					}
+	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
+		if (attribute != null) {
+			String fileName = null;
+			Integer length = null;
+
+			// check if there is a data map for this field
+			if (module != null && document != null) {
+				final String key = attributeKey(module, document, attribute.getName());
+				if (DATA_MAP_CACHE.containsKey(key)) {
+					fileName = DATA_MAP_CACHE.get(key);
+					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
+				} else {
+					String className = String.format("modules.%s.util.%sFactoryExtension", module.getName(), document.getName());
+					Util.LOGGER
+							.fine(String.format("Looking for factory extension annotations in %s", className));
+					try {
+						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
+						if (c != null) {
+							Util.LOGGER.fine("Found class " + c.getName());
+							if (c.isAnnotationPresent(DataMap.class)) {
+								DataMap annotation = c.getAnnotation(DataMap.class);
+								Util.LOGGER.info(
+										String.format("attributeName: %s fileName: %s", annotation.attributeName(),
+												annotation.fileName()));
+								if (attribute.getName().equals(annotation.attributeName())) {
+									fileName = annotation.fileName();
+									DATA_MAP_CACHE.put(key, fileName);
+								}
+							} else if (c.isAnnotationPresent(SkyveFactory.class)) {
+								SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
+								DataMap[] values = annotation.value();
+								for (DataMap map : values) {
+									Util.LOGGER.info(
+											String.format("attributeName: %s fileName: %s", map.attributeName(), map.fileName()));
+									if (attribute.getName().equals(map.attributeName())) {
+										fileName = map.fileName();
+										DATA_MAP_CACHE.put(key, fileName);
+										break;
+									}
+								}
+							}
+						}
+					} catch (Exception e) {
+						// couldn't find the extension file on the classpath
+					}	
 				}
 
-				// return text matching the format mask
-				return randomFormat(text.getFormat());
-			} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-					&& text.getValidator().getType() == null) {
-				// check if this string has a regex and no validator type
-				String xeger = randomRegex(text.getValidator().getRegularExpression());
-				if (xeger != null) {
-					return xeger;
+				// check if there is a data file for this field
+				Util.LOGGER.fine(String.format(
+						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
+				String value = randomValueFromFile(module, document, attribute.getName(), fileName);
+				if (value != null) {
+					Util.LOGGER.info(String.format("Random %s: %s", attribute.getName(), value));
+					return value;
 				}
-			} else {
-				// check if this is an email address
-				if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
-					return randomEmail(((LengthField) text).getLength());
-				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
-					// check if this string has a regex via a validator type
+			}
+
+			// check if this string has a format mask
+			if(attribute instanceof Text) {
+				Text text = (Text) attribute;
+				length = Integer.valueOf(text.getLength());
+			
+				if (text.getFormat() != null) {
+					// check if it has a format mask and a regex, if so, prefer the regex
+					if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+							&& text.getValidator().getType() == null) {
+						// return text matching the regex
+						String xeger = randomRegex(text.getValidator().getRegularExpression());
+						if (xeger != null) {
+							return xeger;
+						}
+					}
+
+					// return text matching the format mask
+					return randomFormat(text.getFormat());
+				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
+						&& text.getValidator().getType() == null) {
+					// check if this string has a regex and no validator type
 					String xeger = randomRegex(text.getValidator().getRegularExpression());
 					if (xeger != null) {
 						return xeger;
 					}
 				} else {
-					// return random text
-					return randomString(((LengthField) text).getLength());
+					// check if this is an email address
+					if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
+						return randomEmail(((LengthField) text).getLength());
+					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
+						// check if this string has a regex via a validator type
+						String xeger = randomRegex(text.getValidator().getRegularExpression());
+						if (xeger != null) {
+							return xeger;
+						}
+					}
 				}
 			}
+			
+			// return random lorem ipsum text
+			if (length == null) {
+				// set an arbitrary max length for memo fields
+				length = Integer.valueOf(2048);
+			}
+			String value = randomValueFromFile(null, null, LOREM);
+			if (value != null) {
+				String[] sentences = value.split("\\.");
+				shuffleArray(sentences);
+				int i = 0,
+						min = length.intValue() / 3,
+						r = random.nextInt(length.intValue() + 1 - min) + min;
+
+				// keep adding sentences until we hit the length
+				StringBuilder b = new StringBuilder();
+				while (b.length() < r) {
+					b.append(sentences[i]).append(".");
+					i++;
+					if (b.length() > r) {
+						String out = b.toString();
+						out = out.substring(0, r).trim();
+						if (out.indexOf(".") > 0) {
+							// trim to last sentence boundary
+							out = out.substring(0, out.lastIndexOf(".") + 1).trim();
+						}
+						Util.LOGGER.fine(String.format("Random %s for %s with length %d(%d): %s",
+								attribute.getAttributeType(),
+								attribute.getName(),
+								Integer.valueOf(r),
+								length,
+								out));
+						return out;
+					}
+				}
+
+			}
+
+			// return random text
+			return randomString(length.intValue());
 		}
 
 		return null;
@@ -448,26 +596,53 @@ public class TestUtil {
 	 * for subsequent random value requests.
 	 * </p>
 	 * 
-	 * @param attribute The attribute to return the random value for
+	 * @param module The module this attribute belongs to
+	 * @param document The document this attribute belongs to
+	 * @param attributeName The attribute name to return the random value for
+	 * @param fileName <em>Optional</em> The filename to load random values for, if it doesn't match the attribute name
 	 * @return A random value from the data file if it exists, null otherwise
 	 * @throws IOException
 	 */
-	private static String randomValueFromFile(Attribute attribute) throws IOException {
-		List<String> values = null;
-		if (DATA_CACHE.containsKey(attribute.getName())) {
-			values = DATA_CACHE.get(attribute.getName());
-			Util.LOGGER.fine(String.format("Loaded %s list from cache", attribute.getName()));
-		} else {
-			ClassLoader classLoader = TestUtil.class.getClassLoader();
-			try (InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s.txt", attribute.getName()))) {
-				values = readFromInputStream(inputStream);
-				DATA_CACHE.put(attribute.getName(), values);
-				Util.LOGGER.fine(String.format("Loaded %s list from file", attribute.getName()));
-			}
-		}
+	private static String randomValueFromFile(final Module module, final Document document, final String attributeName,
+			final String... fileName) throws IOException {
+		if (attributeName != null) {
+			final String key = attributeKey(module, document, attributeName);
 
-		if (values != null) {
-			return values.get(random.nextInt(values.size()));
+			List<String> values = null;
+			if (DATA_CACHE.containsKey(key)) {
+				values = DATA_CACHE.get(key);
+				Util.LOGGER.fine(String.format("Loaded %s list from cache", key));
+			} else {
+				ClassLoader classLoader = TestUtil.class.getClassLoader();
+				String fileToLoad = attributeName;
+				if (fileName != null && fileName.length == 1 && fileName[0] != null) {
+					fileToLoad = fileName[0];
+				}
+
+				// default the extension if none specified
+				if (fileToLoad != null && !hasExtension(fileToLoad)) {
+					fileToLoad = fileToLoad + ".txt";
+				}
+
+				Util.LOGGER.fine("Attempting to find on the classpath: " + String.format("data/%s", fileToLoad));
+				try (InputStream inputStream = classLoader.getResourceAsStream(String.format("data/%s", fileToLoad))) {
+					values = readFromInputStream(inputStream);
+					DATA_CACHE.put(key, values);
+					Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
+					if (values != null && values.size() > 0) {
+						Util.LOGGER.info(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
+								Integer.valueOf(values.size())));
+					}
+				}
+			}
+
+			if (values != null) {
+				// return random value or all of lorem
+				if (attributeName.equals(LOREM)) {
+					return values.stream().collect(Collectors.joining("\n"));
+				}
+				return values.get(random.nextInt(values.size()));
+			}
 		}
 
 		return null;
@@ -493,5 +668,20 @@ public class TestUtil {
 			}
 		}
 		return list;
+	}
+
+	/**
+	 * Shuffles an array using the <a href="http://en.wikipedia.org/wiki/Fisher-Yates_shuffle">Fisher–Yates shuffle</a>.
+	 * 
+	 * @param arr The array to shuffle
+	 */
+	private static void shuffleArray(String[] arr) {
+		for (int i = arr.length - 1; i > 0; i--) {
+			int index = random.nextInt(i + 1);
+			// Simple swap
+			String a = arr[index];
+			arr[index] = arr[i];
+			arr[i] = a;
+		}
 	}
 }
