@@ -142,7 +142,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate for customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
-			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE +
+			String modulesPath = GENERATED_PATH + repository.CUSTOMERS_NAMESPACE +
 					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
@@ -189,7 +189,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// Restrict the base class definitions based on customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			final Customer customer = repository.getCustomer(customerName);
-			String modulesPath = SRC_PATH + repository.CUSTOMERS_NAMESPACE +
+			String modulesPath = GENERATED_PATH + repository.CUSTOMERS_NAMESPACE +
 					customerName + '/' + repository.MODULES_NAME + '/';
 			File customerModulesDirectory = new File(modulesPath);
 			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
@@ -331,18 +331,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// clear out the domain folder
 		final String packagePath = repository.MODULES_NAMESPACE + moduleName + '/' + repository.DOMAIN_NAME;
-		File domainFolder = new File(SRC_PATH + packagePath + '/');
+		File domainFolder = new File(GENERATED_PATH + packagePath + '/');
 		if (domainFolder.exists()) {
 			for (File domainFile : domainFolder.listFiles()) {
 				domainFile.delete();
 			}
 		} else {
-			domainFolder.mkdir();
+			domainFolder.mkdirs();
 		}
 
 		// clear out the generated test folder
 		final String modulePath = repository.MODULES_NAMESPACE + moduleName;
-		final File factoryPath = new File(GENERATED_TEST_PATH + modulePath + "/util/");
+		final File factoryPath = new File(GENERATED_PATH + modulePath + "/util/");
 		final File domainTestPath = new File(GENERATED_TEST_PATH + packagePath);
 		if (factoryPath.exists()) {
 			for (File testFile : factoryPath.listFiles()) {
@@ -358,10 +358,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		// Make a orm.hbm.xml file
-		File mappingFile = new File(SRC_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
+		File mappingFile = new File(GENERATED_PATH + packagePath + '/' + moduleName + "_orm.hbm.xml");
 		if (UtilImpl.XML_TRACE) {
 			UtilImpl.LOGGER.fine("Mapping file is " + mappingFile);
 		}
+		// mappingFile.mkdirs();
 		mappingFile.createNewFile();
 		final StringBuilder filterDefinitions = new StringBuilder(1024);
 		try (FileWriter mappingFileWriter = new FileWriter(mappingFile)) {
@@ -375,7 +376,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
 
 					// Generate base
-					File classFile = new File(SRC_PATH + packagePath + '/' + documentName + ".java");
+					File classFile = new File(GENERATED_PATH + packagePath + '/' + documentName + ".java");
 					classFile.createNewFile();
 
 					try (FileWriter fw = new FileWriter(classFile)) {
@@ -393,7 +394,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					if ((domainClass != null) && domainClass.isAbstract) {
 						// Generate extension
-						classFile = new File(SRC_PATH + packagePath + '/' + documentName + "Ext.java");
+						classFile = new File(GENERATED_PATH + packagePath + '/' + documentName + "Ext.java");
 						classFile.createNewFile();
 
 						try (FileWriter fw = new FileWriter(classFile)) {
@@ -532,7 +533,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						customer.getName() + '/' +
 						repository.MODULES_NAMESPACE +
 						moduleName + '/' + repository.DOMAIN_NAME;
-				final File domainFolder = new File(SRC_PATH + packagePath + '/');
+				final File domainFolder = new File(GENERATED_PATH + packagePath + '/');
 				if (domainFolder.exists()) {
 					for (File domainFile : domainFolder.listFiles()) {
 						domainFile.delete();
@@ -570,7 +571,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							}
 
 							// Generate extension
-							String classFileName = SRC_PATH + packagePath + '/' + documentName;
+							String classFileName = GENERATED_PATH + packagePath + '/' + documentName;
 							if (vanillaDocumentName != null) {
 								classFileName += "Ext";
 							}
@@ -750,7 +751,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append(indent).append("\t<class name=\"");
 			}
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
-				String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
+				String extensionPath = GENERATED_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
 						+ documentName + "Extension.java";
 				if (new File(extensionPath).exists()) {
 					System.out.println("    Generate ORM using " + extensionPath);
@@ -2764,7 +2765,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
 			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java",
-					SRC_PATH,
+					GENERATED_PATH,
 					repository.MODULES_NAMESPACE,
 					baseDocument.getOwningModuleName(),
 					baseDocumentName,
@@ -3158,7 +3159,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @return true if the extension class exists in the expected location, false otherwise
 	 */
 	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
-		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/'
+		String extensionPath = GENERATED_PATH + modulePath + '/' + documentName + '/'
 				+ documentName + "Extension.java";
 		if (new File(extensionPath).exists()) {
 			return true;

@@ -4,12 +4,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
+import modules.test.domain.MappedExtensionJoinedStrategy;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 
 /**
- * Mapped Subclassed Single Strategy
+ * Mapped Subclassed Joined Strategy
  * <br/>
  * Another Extension document to test that the generated class extends 
 			MappedExtensionExtension.java
@@ -18,7 +18,7 @@ import org.skyve.domain.messages.DomainException;
  */
 @XmlType
 @XmlRootElement
-public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrategyExtension {
+public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrategy {
 	/**
 	 * For Serialization
 	 * @hidden
@@ -28,7 +28,7 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 	/** @hidden */
 	public static final String MODULE_NAME = "test";
 	/** @hidden */
-	public static final String DOCUMENT_NAME = "MappedSubclassedSingleStrategy";
+	public static final String DOCUMENT_NAME = "MappedSubclassedJoinedStrategy";
 
 	/** @hidden */
 	public static final String subclassIntegerPropertyName = "subclassInteger";
@@ -41,16 +41,16 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 	@Override
 	@XmlTransient
 	public String getBizModule() {
-		return MappedSubclassedSingleStrategy.MODULE_NAME;
+		return MappedSubclassedJoinedStrategy.MODULE_NAME;
 	}
 
 	@Override
 	@XmlTransient
 	public String getBizDocument() {
-		return MappedSubclassedSingleStrategy.DOCUMENT_NAME;
+		return MappedSubclassedJoinedStrategy.DOCUMENT_NAME;
 	}
 
-	public static MappedSubclassedSingleStrategy newInstance() {
+	public static MappedSubclassedJoinedStrategy newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
@@ -77,8 +77,8 @@ public class MappedSubclassedSingleStrategy extends MappedExtensionSingleStrateg
 
 	@Override
 	public boolean equals(Object o) {
-		return ((o instanceof MappedSubclassedSingleStrategy) && 
-					this.getBizId().equals(((MappedSubclassedSingleStrategy) o).getBizId()));
+		return ((o instanceof MappedSubclassedJoinedStrategy) && 
+					this.getBizId().equals(((MappedSubclassedJoinedStrategy) o).getBizId()));
 	}
 
 	/**
