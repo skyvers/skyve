@@ -1,4 +1,4 @@
-package modules.admin.util;
+package modules.admin.Communication;
 
 import org.skyve.util.test.SkyveFactory;
 
@@ -6,7 +6,9 @@ import modules.admin.Communication.actions.CreateFiles;
 import modules.admin.Communication.actions.GetResults;
 import modules.admin.Communication.actions.SendNow;
 import modules.admin.Communication.actions.TestSend;
+import modules.admin.Tag.TagFactoryExtension;
 import modules.admin.domain.Communication;
+import modules.admin.util.CommunicationFactory;
 
 @SkyveFactory(excludedActions = { CreateFiles.class, GetResults.class, SendNow.class, TestSend.class })
 public class CommunicationFactoryExtension extends CommunicationFactory {

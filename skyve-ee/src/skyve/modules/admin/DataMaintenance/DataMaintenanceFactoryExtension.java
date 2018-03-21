@@ -1,8 +1,9 @@
-package modules.admin.util;
+package modules.admin.DataMaintenance;
 
 import org.skyve.util.test.SkyveFactory;
 
 import modules.admin.domain.DataMaintenance;
+import modules.admin.util.DataMaintenanceFactory;
 
 @SkyveFactory(testAction = false)
 public class DataMaintenanceFactoryExtension extends DataMaintenanceFactory {

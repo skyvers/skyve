@@ -1,8 +1,8 @@
 package modules.admin.User.actions;
 
+import modules.admin.User.UserFactoryExtension;
 import modules.admin.domain.User;
 import modules.admin.util.UserFactory;
-import modules.admin.util.UserFactoryExtension;
 import util.AbstractActionTest;
 
 /**

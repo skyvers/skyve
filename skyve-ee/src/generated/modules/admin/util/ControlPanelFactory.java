@@ -1,5 +1,6 @@
 package modules.admin.util;
 
+import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -11,19 +12,19 @@ import util.AbstractDomainFactory;
 
 /**
  * Generated - local changes will be overwritten.
- * Create class src/test/modules/admin/util/ControlPanelFactoryExtension.java
+ * Create class src/skyve/modules/admin/ControlPanel/ControlPanelFactoryExtension.java
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory
-public class ControlPanelFactory extends AbstractDomainFactory<ControlPanel > {
+public class ControlPanelFactory extends AbstractDomainFactory<ControlPanelExtension > {
 
 	@Override
-	public ControlPanel getInstance() throws Exception {
+	public ControlPanelExtension getInstance() throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
 		Module module = customer.getModule(ControlPanel.MODULE_NAME);
 		Document document = module.getDocument(customer, ControlPanel.DOCUMENT_NAME);
 
-		ControlPanel controlPanel = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);
+		ControlPanelExtension controlPanel = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);
 
 		return controlPanel;
 	}

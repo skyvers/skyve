@@ -1,4 +1,4 @@
-package modules.admin.util;
+package modules.admin.Audit;
 
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -8,6 +8,7 @@ import org.skyve.util.Util;
 
 import modules.admin.domain.Audit;
 import modules.admin.domain.Audit.Operation;
+import modules.admin.util.AuditFactory;
 
 public class AuditFactoryExtension extends AuditFactory {
 

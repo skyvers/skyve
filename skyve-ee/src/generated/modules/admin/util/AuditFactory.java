@@ -1,7 +1,7 @@
 package modules.admin.util;
 
+import modules.admin.Audit.AuditFactoryExtension;
 import modules.admin.domain.Audit;
-import modules.admin.util.AuditFactoryExtension;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -12,7 +12,7 @@ import util.AbstractDomainFactory;
 
 /**
  * Generated - local changes will be overwritten.
- * Create class src/test/modules/admin/util/AuditFactoryExtension.java
+ * Create class src/skyve/modules/admin/Audit/AuditFactoryExtension.java
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory

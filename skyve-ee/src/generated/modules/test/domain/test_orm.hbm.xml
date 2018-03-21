@@ -239,7 +239,7 @@
 		<filter name="testHierarchicalUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="modules.test.domain.InjectedDocument" table="TEST_InjectedDocument" entity-name="testInjectedDocument">
+	<class name="modules.test.InjectedDocument.InjectedDocumentExtension" table="TEST_InjectedDocument" entity-name="testInjectedDocument">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -255,7 +255,7 @@
 		<filter name="testInjectedDocumentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-		<class name="modules.test.domain.MappedExtensionSingleStrategy" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
+		<class name="modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension" table="TEST_MappedExtensionSingleStrategy" discriminator-value="ME" entity-name="testMappedExtensionSingleStrategy">
 			<id name="bizId" length="36" />
 			<discriminator column="bizDiscriminator" type="string" />
 			<version name="bizVersion" unsaved-value="null" />
@@ -309,7 +309,7 @@
 			<filter name="testMappedExtensionSingleStrategyUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
 
-		<class name="modules.test.domain.MappedExtensionJoinedStrategy" table="TEST_MappedExtensionJoinedStrategy" entity-name="testMappedExtensionJoinedStrategy">
+		<class name="modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension" table="TEST_MappedExtensionJoinedStrategy" entity-name="testMappedExtensionJoinedStrategy">
 			<id name="bizId" length="36" />
 			<version name="bizVersion" unsaved-value="null" />
 			<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

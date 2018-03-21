@@ -1,7 +1,7 @@
 package modules.admin.util;
 
+import modules.admin.User.UserFactoryExtension;
 import modules.admin.domain.JobSchedule;
-import modules.admin.util.UserFactoryExtension;
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -12,7 +12,7 @@ import util.AbstractDomainFactory;
 
 /**
  * Generated - local changes will be overwritten.
- * Create class src/test/modules/admin/util/JobScheduleFactoryExtension.java
+ * Create class src/skyve/modules/admin/JobSchedule/JobScheduleFactoryExtension.java
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory

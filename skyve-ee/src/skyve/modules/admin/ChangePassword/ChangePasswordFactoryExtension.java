@@ -1,8 +1,9 @@
-package modules.admin.util;
+package modules.admin.ChangePassword;
 
 import org.skyve.util.test.SkyveFactory;
 
 import modules.admin.domain.ChangePassword;
+import modules.admin.util.ChangePasswordFactory;
 
 @SkyveFactory(testAction = false)
 public class ChangePasswordFactoryExtension extends ChangePasswordFactory {

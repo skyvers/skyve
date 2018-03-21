@@ -11,7 +11,7 @@ import util.AbstractDomainFactory;
 
 /**
  * Generated - local changes will be overwritten.
- * Create class src/test/modules/admin/util/UserLoginRecordFactoryExtension.java
+ * Create class src/skyve/modules/admin/UserLoginRecord/UserLoginRecordFactoryExtension.java
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory

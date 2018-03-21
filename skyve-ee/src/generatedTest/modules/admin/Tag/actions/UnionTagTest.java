@@ -1,8 +1,8 @@
 package modules.admin.Tag.actions;
 
+import modules.admin.Tag.TagFactoryExtension;
 import modules.admin.domain.Tag;
 import modules.admin.util.TagFactory;
-import modules.admin.util.TagFactoryExtension;
 import util.AbstractActionTest;
 
 /**

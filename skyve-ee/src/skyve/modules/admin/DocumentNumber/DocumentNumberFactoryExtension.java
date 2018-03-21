@@ -1,6 +1,7 @@
-package modules.admin.util;
+package modules.admin.DocumentNumber;
 
 import modules.admin.domain.DocumentNumber;
+import modules.admin.util.DocumentNumberFactory;
 
 public class DocumentNumberFactoryExtension extends DocumentNumberFactory {
 

@@ -1,10 +1,12 @@
-package modules.admin.util;
+package modules.admin.User;
 
 import org.skyve.util.test.SkyveFactory;
 
 import modules.admin.User.actions.Check;
 import modules.admin.User.actions.Next;
 import modules.admin.domain.User;
+import modules.admin.util.GroupFactory;
+import modules.admin.util.UserFactory;
 
 @SkyveFactory(excludedActions = { Check.class, Next.class })
 public class UserFactoryExtension extends UserFactory {

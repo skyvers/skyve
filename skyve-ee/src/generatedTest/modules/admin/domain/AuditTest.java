@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.Audit.AuditFactoryExtension;
 import modules.admin.util.AuditFactory;
-import modules.admin.util.AuditFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

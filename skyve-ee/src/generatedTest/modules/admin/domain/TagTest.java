@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.Tag.TagFactoryExtension;
 import modules.admin.util.TagFactory;
-import modules.admin.util.TagFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

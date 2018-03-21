@@ -12,7 +12,7 @@ import util.AbstractDomainFactory;
 
 /**
  * Generated - local changes will be overwritten.
- * Create class src/test/modules/admin/util/UserFactoryExtension.java
+ * Create class src/skyve/modules/admin/User/UserFactoryExtension.java
  * to extend this class and customise specific values for this document.
  */
 @SkyveFactory

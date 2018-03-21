@@ -430,10 +430,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 
 						// check if this document is annotated to skip domain tests
-						File factoryExtensionPath = new File(TEST_PATH + modulePath + "/util/");
-						File factoryExtensionFile = new File(
-								factoryExtensionPath.getPath() + File.separator + documentName + "FactoryExtension.java");
-
+						File factoryExtensionFile = new File(getFactoryExtensionPath(modulePath, documentName));
 						SkyveFactory annotation = retrieveFactoryExtensionAnnotation(factoryExtensionFile);
 
 						// generate domain test for persistent documents that are not mapped, or not children
@@ -484,29 +481,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		if (factoryExtensionFile.exists()) {
 			String className = factoryExtensionFile.getPath().replaceAll("\\\\|\\/", ".")
-					.replace(TEST_PATH.replaceAll("\\\\|\\/", "."), "");
+					.replace(SRC_PATH.replaceAll("\\\\|\\/", "."), "");
 
 			System.out.println("Found factory extension " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
-			/*System.out.println(
-					"Scanning for annotations in: "
-							+ className.replace(documentName, ".*")
-									.replace("FactoryExtension", ""));*/
-
 			try {
 				Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 				if (c.isAnnotationPresent(SkyveFactory.class)) {
 					annotation = c.getAnnotation(SkyveFactory.class);
-					// System.out.println("Test action: " + annotation.testAction());
-					// System.out.println("Test domain: " + annotation.testDomain());
 				}
 			} catch (Exception e) {
 				System.err.println("Could not find factory class for: " + e.getMessage());
 			}
-			// List<Class<?>> classes = CPScanner.scanClasses(new
-			// ClassFilter().packageName(packagePath.replaceAll("\\\\|\\/", ".")));
 		}
 
 		return annotation;
@@ -751,7 +739,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				fw.append(indent).append("\t<class name=\"");
 			}
 			if ((baseDocumentName == null) || (! ExtensionStrategy.mapped.equals(strategy))) {
-				String extensionPath = GENERATED_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
+				String extensionPath = SRC_PATH + packagePathPrefix.replace('.', '/') + moduleName + '/' + documentName + '/'
 						+ documentName + "Extension.java";
 				if (new File(extensionPath).exists()) {
 					System.out.println("    Generate ORM using " + extensionPath);
@@ -2217,7 +2205,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			imports.add(String.format("%s.%s", domainPath, documentName));
 		}
 		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
+			imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		}
 
 		// generate imports
@@ -2277,7 +2265,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// customise imports if this is not a base class
 		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%s.util.%s%s", modulePath.replaceAll("\\\\|\\/", "."), documentName, "FactoryExtension"));
+			imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		}
 
 		// generate imports
@@ -2368,11 +2356,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
 
 						// add an import for the reference factory
-						imports.add(String.format("%s%s.util.%sFactory%s",
-								AbstractRepository.get().MODULES_NAMESPACE,
-								relatedModuleName,
-								referenceClassName,
-								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
+						if (extensionFactoryExists) {
+							imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."),
+									documentName));
+						} else {
+							imports.add(String.format("%s%s.util.%sFactory",
+									AbstractRepository.get().MODULES_NAMESPACE,
+									relatedModuleName,
+									referenceClassName).replaceAll("\\\\|\\/", "."));
+						}
 
 						// check the collection type, if child, add a parent reference
 						if (CollectionType.child.equals(reference.getType())) {
@@ -2408,15 +2400,18 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (attribute.isRequired()) {
 
 						// check if there is an extension class for this Document
-						// boolean extensionFactoryExists = factoryExtensionClassExists(modulePath, referenceClassName);
 						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
 
 						// add an import for the reference factory
-						imports.add(String.format("%s%s.util.%sFactory%s",
+						if (extensionFactoryExists) {
+							imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."),
+									referenceClassName));
+						} else {
+							imports.add(String.format("%s%s.util.%sFactory",
 								AbstractRepository.get().MODULES_NAMESPACE,
 								relatedModuleName,
-								referenceClassName,
-								extensionFactoryExists ? "Extension" : "").replaceAll("\\\\|\\/", "."));
+									referenceClassName).replaceAll("\\\\|\\/", "."));
+						}
 
 						// this is a required association, call association Document's factory
 						String propertyClassName = ((Reference) attribute).getDocumentName();
@@ -2435,8 +2430,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			fw.append("import ").append(importClassName).append(";\n");
 		}
 
-		String factoryExtensionPath = new String(
-				TEST_PATH + packagePath.replace('.', '/') + "/util/" + documentName + "FactoryExtension.java");
+		String factoryExtensionPath = getFactoryExtensionPath(modulePath, documentName);
 
 		// generate javadoc
 		fw.append("\n").append("/**");
@@ -3159,7 +3153,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @return true if the extension class exists in the expected location, false otherwise
 	 */
 	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
-		String extensionPath = GENERATED_PATH + modulePath + '/' + documentName + '/'
+		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/'
 				+ documentName + "Extension.java";
 		if (new File(extensionPath).exists()) {
 			return true;
@@ -3179,9 +3173,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private static boolean factoryExtensionClassExists(String modulePath, String documentName) {
 		boolean baseDocumentExtensionFactoryExists = false;
 
-		File factoryPath = new File(TEST_PATH + modulePath + "/util/");
-		File factoryExtensionFile = new File(
-				factoryPath.getPath() + File.separator + documentName + "FactoryExtension.java");
+		File factoryExtensionFile = new File(getFactoryExtensionPath(modulePath, documentName));
 
 		if (factoryExtensionFile.exists()) {
 			baseDocumentExtensionFactoryExists = true;
@@ -3206,6 +3198,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Returns the expected path to the FactoryExtension file for the specified module and document.
+	 * 
+	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param documentName The name of the document; e.g. Audit
+	 * @return The path as a String, e.g. src/main/java/modules/admin/Audit/AuditFactoryExtension.java
+	 */
+	private static String getFactoryExtensionPath(final String modulePath, final String documentName) {
+		final String path = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "FactoryExtension.java";
+		System.err.println("Looking for factory extension in " + path);
+		return path;
 	}
 
 	/**

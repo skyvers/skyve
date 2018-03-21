@@ -1,6 +1,7 @@
-package modules.admin.util;
+package modules.admin.Subscription;
 
 import modules.admin.domain.Communication.FormatType;
+import modules.admin.util.SubscriptionFactory;
 import modules.admin.domain.Subscription;
 
 public class SubscriptionFactoryExtension extends SubscriptionFactory {
