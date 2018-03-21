@@ -18,7 +18,7 @@ import org.skyve.metadata.sail.language.Step;
 public class Delete implements Step {
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDelete(this);
 	}
 	
 	@Override

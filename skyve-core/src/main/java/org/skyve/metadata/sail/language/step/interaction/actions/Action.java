@@ -41,7 +41,7 @@ public class Action implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeAction(this);
 	}
 	
 	@Override

@@ -41,7 +41,6 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -82,8 +81,7 @@ public class Interaction implements Executable {
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.SAIL_NAMESPACE, name = "method")
-	@XmlElementRefs({@XmlElementRef(type = NavigateMenu.class),
-						@XmlElementRef(type = NavigateList.class),
+	@XmlElementRefs({@XmlElementRef(type = NavigateList.class),
 						@XmlElementRef(type = NavigateEdit.class),
 						@XmlElementRef(type = NavigateTree.class),
 						@XmlElementRef(type = NavigateMap.class),
@@ -119,6 +117,6 @@ public class Interaction implements Executable {
 	
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeInteraction(this);
 	}
 }

@@ -17,7 +17,7 @@ import org.skyve.metadata.sail.language.Step;
 public class TestDataEnter implements Step {
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeTestDataEnter(this);
 	}
 	
 	@Override

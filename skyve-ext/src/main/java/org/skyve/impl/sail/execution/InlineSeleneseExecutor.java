@@ -7,8 +7,8 @@ import org.skyve.metadata.sail.language.Automation;
 
 public abstract class InlineSeleneseExecutor<T extends AutomationContext> extends SeleneseExecutor<T> {
 	@Override
-	public void execute(Automation automation) {
-		super.execute(automation); // set context defaults
+	public void executeAutomation(Automation automation) {
+		super.executeAutomation(automation); // set context defaults
 
 		Procedure before = automation.getBefore();
 		if (before != null) {
@@ -19,7 +19,7 @@ public abstract class InlineSeleneseExecutor<T extends AutomationContext> extend
 			endTest();
 		}
 		for (Interaction interaction : automation.getInteractions()) {
-			execute(interaction);
+			executeInteraction(interaction);
 		}
 		Procedure after = automation.getAfter();
 		if (after != null) {
@@ -32,7 +32,7 @@ public abstract class InlineSeleneseExecutor<T extends AutomationContext> extend
 	}
 	
 	@Override
-	public void execute(Interaction interaction) {
+	public void executeInteraction(Interaction interaction) {
 		startTest(interaction.getName());
 		Procedure before = interaction.getBefore();
 		if (before != null) {

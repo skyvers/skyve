@@ -1,5 +1,6 @@
 package org.skyve.metadata.sail.language.step.interaction.actions;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -16,9 +17,20 @@ import org.skyve.metadata.sail.language.Step;
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Save implements Step {
+	private Boolean createView;
+
+	public Boolean getCreateView() {
+		return createView;
+	}
+	
+	@XmlAttribute(name = "createView")
+	public void setCreateView(Boolean createView) {
+		this.createView = createView;
+	}
+
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeSave(this);
 	}
 	
 	@Override

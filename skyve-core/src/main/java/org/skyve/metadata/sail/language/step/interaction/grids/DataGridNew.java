@@ -30,7 +30,7 @@ public class DataGridNew implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDataGridNew(this);
 	}
 	
 	@Override

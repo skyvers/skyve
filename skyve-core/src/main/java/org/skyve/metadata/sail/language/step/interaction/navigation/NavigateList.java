@@ -60,7 +60,7 @@ public class NavigateList implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateList(this);
 	}
 	
 	@Override

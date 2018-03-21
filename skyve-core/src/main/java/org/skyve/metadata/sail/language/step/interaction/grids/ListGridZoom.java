@@ -71,7 +71,7 @@ public class ListGridZoom implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeListGridZoom(this);
 	}
 
 	@Override

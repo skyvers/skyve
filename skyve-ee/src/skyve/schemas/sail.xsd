@@ -49,8 +49,6 @@
 
   <xs:element name="navigateMap" type="tns:navigateMap"/>
 
-  <xs:element name="navigateMenu" type="tns:navigateMenu"/>
-
   <xs:element name="navigateTree" type="tns:navigateTree"/>
 
   <xs:element name="ok" type="tns:ok"/>
@@ -84,7 +82,6 @@
   <xs:complexType name="procedure">
     <xs:sequence>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="tns:navigateMenu"/>
         <xs:element ref="tns:navigateList"/>
         <xs:element ref="tns:navigateTree"/>
         <xs:element ref="tns:navigateMap"/>
@@ -117,12 +114,6 @@
         <xs:element ref="tns:execute"/>
       </xs:choice>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="navigateMenu">
-    <xs:sequence/>
-    <xs:attribute name="path" type="xs:string" use="required"/>
-    <xs:attribute name="module" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="navigateList">
@@ -186,6 +177,7 @@
   <xs:complexType name="dataEnter">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="navigateToWidget" type="xs:boolean"/>
     <xs:attribute name="value" type="xs:string" use="required"/>
   </xs:complexType>
 
@@ -195,6 +187,7 @@
 
   <xs:complexType name="save">
     <xs:sequence/>
+    <xs:attribute name="createView" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="cancel">
@@ -272,6 +265,7 @@
 
   <xs:complexType name="listGridNew">
     <xs:sequence/>
+    <xs:attribute name="createView" type="xs:boolean"/>
     <xs:attribute name="document" type="xs:string"/>
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="module" type="xs:string"/>
@@ -313,7 +307,6 @@
         <xs:complexType>
           <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-              <xs:element ref="tns:navigateMenu"/>
               <xs:element ref="tns:navigateList"/>
               <xs:element ref="tns:navigateTree"/>
               <xs:element ref="tns:navigateMap"/>

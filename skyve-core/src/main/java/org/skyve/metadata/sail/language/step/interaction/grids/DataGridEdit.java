@@ -40,7 +40,7 @@ public class DataGridEdit implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDataGridEdit(this);
 	}
 	
 	@Override

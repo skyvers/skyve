@@ -30,7 +30,7 @@ public class NavigateLink implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateLink(this);
 	}
 
 	@Override

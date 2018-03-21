@@ -19,6 +19,7 @@ import org.skyve.impl.util.XMLMetaData;
 public class DataEnter implements Step {
 	private String binding;
 	private String value;
+	private Boolean navigateToWidget;
 	
 	public String getBinding() {
 		return binding;
@@ -38,9 +39,18 @@ public class DataEnter implements Step {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
+	public Boolean getNavigateToWidget() {
+		return navigateToWidget;
+	}
+
+	@XmlAttribute(name = "navigateToWidget")
+	public void setNavigateToWidget(Boolean navigateToWidget) {
+		this.navigateToWidget = navigateToWidget;
+	}
+
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDataEnter(this);
 	}
 	
 	@Override

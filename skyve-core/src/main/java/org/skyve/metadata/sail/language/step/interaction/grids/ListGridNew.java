@@ -22,6 +22,7 @@ public class ListGridNew implements Step {
 	private String documentName;
 	private String queryName;
 	private String modelName;
+	private Boolean createView;
 	
 	public String getModuleName() {
 		return moduleName;
@@ -59,9 +60,18 @@ public class ListGridNew implements Step {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
+	public Boolean getCreateView() {
+		return createView;
+	}
+	
+	@XmlAttribute(name = "createView")
+	public void setCreateView(Boolean createView) {
+		this.createView = createView;
+	}
+
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeListGridNew(this);
 	}
 	
 	@Override

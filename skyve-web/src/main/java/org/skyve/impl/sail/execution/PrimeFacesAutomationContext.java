@@ -68,18 +68,17 @@ public class PrimeFacesAutomationContext extends AutomationContext {
 		FacesView<?> managedBean = new FacesView<>();
 		chain.setSAILManagedBean(managedBean);
 		layoutBuilder.setSAILManagedBean(managedBean);
-		
 		List<UIComponent> editAndCreateView = View.generate(push.getModuleName(), 
 																push.getDocumentName(), 
 																null,
 																"skyve", 
-																push.getUxui(), 
-																push.getUserAgentType(),
+																getUxui(), 
+																getUserAgentType(),
 																null,
 																null,
 																chain,
 																layoutBuilder);
-		if ((editAndCreateView.size() > 1) && Boolean.TRUE.equals(push.getCreate())) {
+		if ((editAndCreateView.size() > 1) && Boolean.TRUE.equals(push.getCreateView())) {
 			component = editAndCreateView.get(1);
 		}
 		else {

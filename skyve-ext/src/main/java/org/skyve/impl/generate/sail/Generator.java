@@ -5,13 +5,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.skyve.CORE;
-import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
-import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -25,12 +21,12 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
+import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
+import org.skyve.metadata.sail.language.step.interaction.actions.Save;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.user.User;
-import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 
 public class Generator {
@@ -77,30 +73,25 @@ System.out.println(visitModules(args[0]));
 	
 	private static void menu(Customer c,
 								Module m,
-								String prefix,
+								String descriptionPrefix,
 								List<MenuItem> items,
 								String uxui,
 								List<Interaction> interactions) {
 		String moduleName = m.getName();
 		for (MenuItem item : items) {
 			if (item.isApplicable(uxui)) {
-				String path = item.getName();
-				if (prefix != null) {
-					path = String.format("%s/%s", prefix, path);
+				String description = item.getName();
+				if (descriptionPrefix != null) {
+					description = String.format("%s::%s", descriptionPrefix, description);
 				}
 
 				if (item instanceof MenuGroup) {
-					menu(c, m, path, ((MenuGroup) item).getItems(), uxui, interactions);
+					menu(c, m, description, ((MenuGroup) item).getItems(), uxui, interactions);
 				}
 				else {
 					Interaction interaction = new Interaction();
-					interaction.setName("Menu " + path);
+					interaction.setName("Menu " + description);
 					List<Step> steps = interaction.getSteps();
-					
-					NavigateMenu navigate = new NavigateMenu();
-					navigate.setModuleName(moduleName);
-					navigate.setMenuPath(path);
-					steps.add(navigate);
 					
 					if (item instanceof ListItem) {
 						ListItem list = (ListItem) item;
@@ -108,27 +99,43 @@ System.out.println(visitModules(args[0]));
 						String documentName = list.getDocumentName();
 						String modelName = list.getModelName();
 
+						NavigateList navigate = new NavigateList();
+						navigate.setModuleName(moduleName);
+						steps.add(navigate);
+
 						Document d = null;
 						
 						if (queryName != null) {
 							DocumentQueryDefinition query = m.getDocumentQuery(queryName);
 							if (query == null) {
+								navigate.setDocumentName(queryName);
 								query = m.getDocumentDefaultQuery(c, queryName);
+							}
+							else {
+								navigate.setQueryName(queryName);
 							}
 							d = query.getDocumentModule(c).getDocument(c, query.getDocumentName());
 						}
 						else {
+							navigate.setDocumentName(documentName);
 							d = m.getDocument(c, documentName);
 							if (modelName != null) {
+								navigate.setModelName(modelName);
 								ListModel<?> model = CORE.getRepository().getListModel(c, d, modelName, true);
 								d = model.getDrivingDocument();
 							}
 						}
 						
-						crud(d, steps);
+						crud(c, m, d, uxui, navigate, steps);
 					}
 					else if (item instanceof EditItem) {
-						Document d = m.getDocument(c, ((EditItem) item).getDocumentName());
+						NavigateEdit navigate = new NavigateEdit();
+						navigate.setModuleName(moduleName);
+						String documentName = ((EditItem) item).getDocumentName();
+						navigate.setDocumentName(documentName);
+						steps.add(navigate);
+
+						Document d = m.getDocument(c, documentName);
 						edit(c, m, d, uxui, steps);
 					}
 
@@ -147,6 +154,10 @@ System.out.println(visitModules(args[0]));
 		Customer c = u.getCustomer();
 		for (Module m : c.getModules()) {
 			String moduleName = m.getName();
+			// Don't process the test module as its cyclic and not required anyway
+			if ("test".equals(moduleName)) {
+				continue;
+			}
 			Automation automation = new Automation();
 			automation.setUxui(uxui);
 			automation.setUserAgentType(userAgentType);
@@ -157,7 +168,9 @@ System.out.println(visitModules(args[0]));
 				if (documentRef.getOwningModuleName().equals(moduleName)) {
 					String documentName = entry.getKey();
 					Document d = m.getDocument(c, documentName);
-					if ((! d.isAbstract()) && u.canAccessDocument(d)) {
+					if ((! d.isAbstract()) && 
+							(d.getParentDocumentName() == null) && 
+							u.canAccessDocument(d)) {
 						if (d.getPersistent() == null) {
 							Interaction interaction = new Interaction();
 							interaction.setName("Edit document " + documentName);
@@ -182,7 +195,7 @@ System.out.println(visitModules(args[0]));
 							navigate.setDocumentName(documentName);
 							steps.add(navigate);
 							
-							crud(d, steps);
+							crud(c, m, d, uxui, navigate, steps);
 
 							interactions.add(interaction);
 						}
@@ -194,29 +207,41 @@ System.out.println(visitModules(args[0]));
 		
 		return result;
 	}
-	
+
 	private static void edit(Customer c, Module m, Document d, String uxui, List<Step> steps) {
-		TestDataEnter enter = new TestDataEnter();
-		steps.add(enter);
-		
-		View createView = d.getView(uxui, c, ViewType.create.toString());
-		View editView = d.getView(uxui, c, ViewType.edit.toString());
-		new GenerateViewVisitor((CustomerImpl) c,
-									(ModuleImpl) m,
-									(DocumentImpl) d,
-									(ViewImpl) ((createView != editView) ? createView : editView),
-									steps).visit();
-		
-/*
-		visit the view and determine the grids to data enter.
-		Need to resolve whether to click tabs or not???
-		What if tabs are replaced with accordions - how do I click them?
-		But the tabSelect command wont work anyway!
-		Could be busy clicking tabs.
-*/
+		GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
+		visitor.visit();
+		steps.addAll(visitor.getPopulateSteps());
+		if (visitor.getHasSave()) {
+			steps.add(new Save());
+			steps.add(new TestDataEnter());
+			steps.add(new Save());
+		}
+		steps.addAll(visitor.getActionSteps());
+		if (visitor.getHasSave()) {
+			steps.add(new Save());
+		}
 	}
 	
-	private static void crud(Document d, List<Step> steps) {
-		// TODO implement
+	private static void crud(Customer c, Module m, Document d, String uxui, NavigateList list, List<Step> steps) {
+		ListGridNew nu = new ListGridNew();
+		nu.setModuleName(list.getModuleName());
+		nu.setDocumentName(list.getDocumentName());
+		nu.setQueryName(list.getQueryName());
+		nu.setModelName(list.getModelName());
+		steps.add(nu);
+		
+		GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
+		visitor.visit();
+		steps.addAll(visitor.getPopulateSteps());
+		if (visitor.getHasSave()) {
+			steps.add(new Save());
+			steps.add(new TestDataEnter());
+			steps.add(new Save());
+		}
+		steps.addAll(visitor.getActionSteps());
+		if (visitor.getHasDelete()) {
+			steps.add(new Delete());
+		}
 	}
 }

@@ -40,7 +40,7 @@ public class LookupDescriptionAutoComplete implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeLookupDescriptionAutoComplete(this);
 	}
 	
 	@Override

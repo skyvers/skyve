@@ -40,7 +40,7 @@ public class LookupDescriptionPick implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeLookupDescriptionPick(this);
 	}
 	
 	@Override

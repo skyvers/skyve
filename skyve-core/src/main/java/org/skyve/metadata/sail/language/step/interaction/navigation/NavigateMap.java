@@ -48,6 +48,6 @@ public class NavigateMap extends NavigateList {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateMap(this);
 	}
 }

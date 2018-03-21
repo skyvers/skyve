@@ -20,6 +20,7 @@ import org.skyve.impl.util.XMLMetaData;
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class TabSelect implements Step {
+	// Tab names separated by "::" to make a path
 	private String tabPath;
 
 	public String getTabPath() {
@@ -33,11 +34,11 @@ public class TabSelect implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeTabSelect(this);
 	}
 	
 	@Override
 	public String getIdentifier(AutomationContext context) {
-		return tabPath;
+		return tabPath + " Tab";
 	}
 }
