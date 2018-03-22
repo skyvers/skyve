@@ -1,23 +1,21 @@
 package org.skyve.impl.generate.jasperreports;
 
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.base.JRBoxPen;
+import net.sf.jasperreports.engine.design.*;
+import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
 import net.sf.jasperreports.engine.type.*;
+import net.sf.jasperreports.engine.xml.JRXmlWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
+import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 import org.skyve.impl.jasperreports.ReportDesignParameters;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -27,29 +25,11 @@ import org.skyve.metadata.module.query.QueryColumn;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
-import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
-import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 
-import net.sf.jasperreports.engine.base.JRBoxPen;
-import net.sf.jasperreports.engine.design.JRDesignBand;
-import net.sf.jasperreports.engine.design.JRDesignElement;
-import net.sf.jasperreports.engine.design.JRDesignExpression;
-import net.sf.jasperreports.engine.design.JRDesignField;
-import net.sf.jasperreports.engine.design.JRDesignImage;
-import net.sf.jasperreports.engine.design.JRDesignLine;
-import net.sf.jasperreports.engine.design.JRDesignParameter;
-import net.sf.jasperreports.engine.design.JRDesignQuery;
-import net.sf.jasperreports.engine.design.JRDesignRectangle;
-import net.sf.jasperreports.engine.design.JRDesignSection;
-import net.sf.jasperreports.engine.design.JRDesignStaticText;
-import net.sf.jasperreports.engine.design.JRDesignSubreport;
-import net.sf.jasperreports.engine.design.JRDesignSubreportParameter;
-import net.sf.jasperreports.engine.design.JRDesignTextElement;
-import net.sf.jasperreports.engine.design.JRDesignTextField;
-import net.sf.jasperreports.engine.design.JRDesignVariable;
-import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
-import net.sf.jasperreports.engine.xml.JRXmlWriter;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class JasperReportRenderer {
 
@@ -230,6 +210,13 @@ public class JasperReportRenderer {
             detailBand.setHeight(reportDesignParameters.getColumns().size() * 20 + 10);
         }
 
+        final JRDesignBand columnFooterBand = new JRDesignBand();
+        if (ReportDesignParameters.ReportStyle.tabular.equals(reportDesignParameters.getReportStyle())) {
+            columnFooterBand.setHeight(20);
+        }
+
+        final JRDesignBand summaryBand = new JRDesignBand();
+
         int xPos = 0;
         int yPos = 0;
         int columnarLabelWidth = 0;
@@ -244,10 +231,54 @@ public class JasperReportRenderer {
         for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
             // Field
             JRDesignField designField = new JRDesignField();
-            designField.setName(column.getName());
+            designField.setName(String.format("%s_display", column.getName()));
             designField.setDescription(column.getName());
             designField.setValueClass(String.class);
             jasperDesign.addField(designField);
+            if (isAggregatableAttribute(column.getAttributeType())) {
+                JRDesignField aggregateField = new JRDesignField();
+                aggregateField.setName(column.getName());
+                aggregateField.setValueClass(column.getAttributeType().getImplementingType());
+                jasperDesign.addField(aggregateField);
+            }
+
+            // Aggregation variable.
+            if (isAggregatableAttribute(column.getAttributeType())) {
+                if (AttributeType.date.equals(column.getAttributeType())) {
+                    final JRDesignVariable minDateVariable = new JRDesignVariable();
+                    minDateVariable.setName(String.format("%s_minDate", column.getName()));
+                    minDateVariable.setValueClass(String.class);
+                    minDateVariable.setCalculation(CalculationEnum.LOWEST);
+                    final JRDesignExpression minDateExpression = new JRDesignExpression();
+                    minDateExpression.setText("$F{" + column.getName() + "}");
+                    minDateVariable.setExpression(minDateExpression);
+                    jasperDesign.addVariable(minDateVariable);
+
+                    final JRDesignVariable maxDateVariable = new JRDesignVariable();
+                    maxDateVariable.setName(String.format("%s_maxDate", column.getName()));
+                    maxDateVariable.setValueClass(String.class);
+                    maxDateVariable.setCalculation(CalculationEnum.HIGHEST);
+                    final JRDesignExpression maxDateExpression = new JRDesignExpression();
+                    maxDateExpression.setText("$F{" + column.getName() + "}");
+                    maxDateVariable.setExpression(maxDateExpression);
+                    jasperDesign.addVariable(maxDateVariable);
+                } else {
+                    final JRDesignVariable columnSummaryVariable = new JRDesignVariable();
+                    columnSummaryVariable.setName(String.format("%s_summary", column.getName()));
+
+                    if (isCustomNumberType(column.getAttributeType())) {
+                        columnSummaryVariable.setValueClass(Number.class);
+                    } else {
+                        columnSummaryVariable.setValueClass(column.getAttributeType().getImplementingType());
+                    }
+                    columnSummaryVariable.setCalculation(CalculationEnum.SUM);
+                    columnSummaryVariable.setResetType(ResetTypeEnum.REPORT);
+                    final JRDesignExpression variableExpression = new JRDesignExpression();
+                    variableExpression.setText(String.format("$F{%s}", column.getName()));
+                    columnSummaryVariable.setExpression(variableExpression);
+                    jasperDesign.addVariable(columnSummaryVariable);
+                }
+            }
 
             HorizontalTextAlignEnum alignment = null;
             switch (column.getAlignment()) {
@@ -291,9 +322,31 @@ public class JasperReportRenderer {
                 textField.setStretchWithOverflow(true);
                 textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                 expression = new JRDesignExpression();
-                expression.setText("$F{" + column.getName() + "}");
+                expression.setText("$F{" + column.getName() + "_display}");
                 textField.setExpression(expression);
                 detailBand.addElement(textField);
+
+                // Column totals
+                if (isAggregatableAttribute(column.getAttributeType())) {
+                    textField = new JRDesignTextField();
+                    textField.setBlankWhenNull(true);
+                    textField.setX(xPos);
+                    textField.setY(0);
+                    textField.setWidth(column.getWidth());
+                    textField.setHeight(20);
+                    textField.setHorizontalTextAlign(alignment);
+                    textField.setFontSize(FONT_TWELVE);
+                    textField.setStretchWithOverflow(true);
+                    textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+                    expression = new JRDesignExpression();
+                    if (AttributeType.date.equals(column.getAttributeType())) {
+                        expression.setText(String.format("$V{%s_minDate} + \" - \" + $V{%s_maxDate}", column.getName(), column.getName()));
+                    } else {
+                        expression.setText(String.format("$V{%s_summary}", column.getName()));
+                    }
+                    textField.setExpression(expression);
+                    summaryBand.addElement(textField);
+                }
             }
             else {
                 // Label
@@ -382,8 +435,7 @@ public class JasperReportRenderer {
         ((JRDesignSection) jasperDesign.getDetailSection()).addBand(detailBand);
 
         // Column footer
-        band = new JRDesignBand();
-        jasperDesign.setColumnFooter(band);
+        jasperDesign.setColumnFooter(columnFooterBand);
 
         // Page footer
         band = new JRDesignBand();
@@ -445,8 +497,46 @@ public class JasperReportRenderer {
         jasperDesign.setPageFooter(band);
 
         // Summary
-        band = new JRDesignBand();
-        jasperDesign.setSummary(band);
+        summaryBand.setHeight(40);
+
+        line = new JRDesignLine();
+        line.setX(0);
+        line.setY(0);
+        line.setWidth(reportColumnWidth);
+        line.setHeight(1);
+        summaryBand.addElement(line);
+        line = new JRDesignLine();
+        line.setX(0);
+        line.setY(20);
+        line.setWidth(reportColumnWidth);
+        line.setHeight(1);
+        line.setPositionType(PositionTypeEnum.FLOAT);
+        summaryBand.addElement(line);
+        line = new JRDesignLine();
+        line.setX(0);
+        line.setY(39);
+        line.setWidth(reportColumnWidth);
+        line.setHeight(1);
+        line.setPositionType(PositionTypeEnum.FLOAT);
+        summaryBand.addElement(line);
+
+        textField = new JRDesignTextField();
+        textField.setBlankWhenNull(true);
+        textField.setX(0);
+        textField.setY(20);
+        textField.setWidth(reportColumnWidth);
+        textField.setHeight(20);
+        textField.setHorizontalTextAlign(HorizontalTextAlignEnum.LEFT);
+        textField.setFontSize(FONT_TWELVE);
+        textField.setStretchWithOverflow(true);
+        textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
+        textField.setEvaluationTime(EvaluationTimeEnum.REPORT);
+        expression = new JRDesignExpression();
+        expression.setText("\"Number of records: \" + $V{REPORT_COUNT}");
+        textField.setExpression(expression);
+        textField.setPositionType(PositionTypeEnum.FLOAT);
+        summaryBand.addElement(textField);
+        jasperDesign.setSummary(summaryBand);
 
         rendered = true;
         return JRXmlWriter.writeReport(jasperDesign, "UTF-8");
@@ -1102,5 +1192,20 @@ public class JasperReportRenderer {
         queryModel.setQuery(query);
 
         return queryModel;
+    }
+
+    protected boolean isAggregatableAttribute(AttributeType attributeType) {
+        return attributeType == AttributeType.integer ||
+                attributeType == AttributeType.longInteger ||
+                attributeType == AttributeType.decimal2 ||
+                attributeType == AttributeType.decimal5 ||
+                attributeType == AttributeType.decimal10 ||
+                attributeType == AttributeType.date;
+    }
+
+    protected boolean isCustomNumberType(AttributeType attributeType) {
+        return attributeType == AttributeType.decimal2 ||
+                attributeType == AttributeType.decimal5 ||
+                attributeType == AttributeType.decimal10;
     }
 }

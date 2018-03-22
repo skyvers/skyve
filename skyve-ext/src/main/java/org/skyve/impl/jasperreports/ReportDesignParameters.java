@@ -3,6 +3,7 @@ package org.skyve.impl.jasperreports;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.metadata.model.Attribute;
 import org.skyve.report.ReportFormat;
 
 public final class ReportDesignParameters {
@@ -23,6 +24,7 @@ public final class ReportDesignParameters {
 		private int line;
 		private int width;
 		private ColumnAlignment alignment;
+		private Attribute.AttributeType attributeType;
 
 		public String getName() {
 			return name;
@@ -59,6 +61,12 @@ public final class ReportDesignParameters {
 		}
 		public void setAlignment(ColumnAlignment alignment) {
 			this.alignment = alignment;
+		}
+		public Attribute.AttributeType getAttributeType() {
+			return attributeType;
+		}
+		public void setAttributeType(Attribute.AttributeType attributeType) {
+			this.attributeType = attributeType;
 		}
 	}
 

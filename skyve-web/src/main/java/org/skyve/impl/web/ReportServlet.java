@@ -35,6 +35,7 @@ import org.skyve.impl.web.service.smartclient.CompoundFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientFilterOperator;
 import org.skyve.impl.web.service.smartclient.SmartClientListServlet;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
@@ -415,6 +416,13 @@ public class ReportServlet extends HttpServlet {
 						else {
 							reportColumn.setAlignment(ColumnAlignment.left);
 						}
+						if (drivingDocument != null && reportColumn.getName() != null) {
+							final Attribute attribute = drivingDocument.getAttribute(reportColumn.getName());
+							if (attribute != null) {
+								reportColumn.setAttributeType(attribute.getAttributeType());
+							}
+						}
+
 						designParams.getColumns().add(reportColumn);
 					}
 
