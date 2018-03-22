@@ -65,6 +65,7 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="Job" permission="_R__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU">
 					<action name="CopySnapshotToUser" />
@@ -108,6 +109,7 @@
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="Job" permission="_R__U" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="Tag" permission="CRUDU">
@@ -199,6 +201,7 @@
 				<document name="Content" permission="_R__C" />
 				<document name="DataGroup" permission="CRUDC" />
 				<document name="SystemDashboard" permission="_____" />
+				<document name="Job" permission="_R__C" />
 				<document name="DocumentNumber" permission="CRUDC" />
 				<document name="Group" permission="CRUDC" />
 				<document name="GroupRole" permission="CRUDC" />
@@ -437,6 +440,16 @@
 				<column binding="endTime" />
 				<column binding="status" />
 				<column binding="percentComplete" />
+			</columns>
+		</documentQuery>
+		<documentQuery name="qDashboardJobs" documentName="Job">
+			<description>All completed jobs for display on a dashboard.</description>
+			<columns>
+				<column binding="displayName" />
+				<column binding="status" />
+				<column binding="percentComplete" />
+				<column binding="startTime" sortOrder="descending" />
+				<column binding="endTime" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qAllSchedules" documentName="JobSchedule">
