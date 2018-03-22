@@ -112,9 +112,33 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		
 		return component;
 	}
+	
+	@Override
+	public UIComponent downloadButton(UIComponent component,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action,
+										String moduleName,
+										String documentName) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
 
 	@Override
 	public UIComponent report(UIComponent component, Action action) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+	
+	@Override
+	public UIComponent reportButton(UIComponent component,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action) {
 		if (component != null) {
 			put(action.getName(), component, action);
 		}
