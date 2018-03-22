@@ -55,6 +55,8 @@ public class ReportDesign extends AbstractTransientBean {
 	/** @hidden */
 	public static final String documentNamePropertyName = "documentName";
 	/** @hidden */
+	public static final String queryNamePropertyName = "queryName";
+	/** @hidden */
 	public static final String repositoryPathPropertyName = "repositoryPath";
 	/** @hidden */
 	public static final String saveToDocumentPackagePropertyName = "saveToDocumentPackage";
@@ -569,6 +571,12 @@ public class ReportDesign extends AbstractTransientBean {
 	 **/
 	private String documentName;
 	/**
+	 * Query
+	 * <br/>
+	 * Report Query.
+	 **/
+	private String queryName;
+	/**
 	 * Output Path
 	 * <br/>
 	 * <p>The path to the place where you want jrxml files created.</p>
@@ -925,6 +933,24 @@ public class ReportDesign extends AbstractTransientBean {
 	public void setDocumentName(String documentName) {
 		preset(documentNamePropertyName, documentName);
 		this.documentName = documentName;
+	}
+
+	/**
+	 * {@link #queryName} accessor.
+	 * @return	The value.
+	 **/
+	public String getQueryName() {
+		return queryName;
+	}
+
+	/**
+	 * {@link #queryName} mutator.
+	 * @param queryName	The new value.
+	 **/
+	@XmlElement
+	public void setQueryName(String queryName) {
+		preset(queryNamePropertyName, queryName);
+		this.queryName = queryName;
 	}
 
 	/**

@@ -13,6 +13,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -138,6 +139,7 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 		}
 		result.setModuleName(spec.getModuleName());
 		result.setDocumentName(spec.getDocumentName());
+		result.setQueryName(spec.getQueryName());
 		result.setRepositoryPath(spec.getRepositoryPath());
 		result.setSaveToDocumentPackage(spec.getSaveToDocumentPackage());
 		if (spec.getOrientation() != null) {
@@ -236,6 +238,13 @@ public class ReportDesignBizlet extends Bizlet<ReportDesign> {
 			for (String documentName : module.getDocumentRefs().keySet()) {
 				Document document = module.getDocument(customer, documentName);
 				result.add(new DomainValue(document.getName(), document.getDescription()));
+			}
+		}
+
+		if (ReportDesign.queryNamePropertyName.equals(attributeName) && bean.getModuleName() != null) {
+			Module module = customer.getModule(bean.getModuleName());
+			for (QueryDefinition queryDefinition : module.getMetadataQueries()) {
+				result.add(new DomainValue(queryDefinition.getName(), queryDefinition.getDescription()));
 			}
 		}
 

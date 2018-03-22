@@ -44,6 +44,12 @@
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>
+		<text name="queryName">
+			<displayName>Query</displayName>
+			<description>Report Query.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
 		<text name="repositoryPath" >
 			<displayName>Output Path</displayName>
 			<description><![CDATA[

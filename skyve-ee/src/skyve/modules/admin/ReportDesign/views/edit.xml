@@ -36,6 +36,15 @@
 						</row>
 						<row>
 							<item>
+								<combo binding="queryName">
+									<onChangedHandlers>
+										<rerender clientValidation="false" />
+									</onChangedHandlers>
+								</combo>
+							</item>
+						</row>
+						<row>
+							<item>
 								<default binding="repositoryPath" />
 							</item>
 						</row>
