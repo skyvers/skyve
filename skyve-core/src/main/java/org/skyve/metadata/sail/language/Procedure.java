@@ -10,7 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -73,7 +75,9 @@ public class Procedure {
 						@XmlElementRef(type = ListGridNew.class),
 						@XmlElementRef(type = ListGridZoom.class),
 						@XmlElementRef(type = ListGridSelect.class),
-						@XmlElementRef(type = Test.class),
+						@XmlElementRef(type = TestValue.class),
+						@XmlElementRef(type = TestSuccess.class),
+						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Execute.class)})
 	public List<Step> getSteps() {
 		return steps;

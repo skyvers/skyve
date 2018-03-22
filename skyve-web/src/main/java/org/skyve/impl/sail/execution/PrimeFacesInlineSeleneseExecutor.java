@@ -29,8 +29,11 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -352,7 +355,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 	}
 
-	private void button(Step button, String tagName, boolean ajax, boolean confirm) {
+	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -385,6 +388,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 					command("clickAndWait", clientId);
 				}
 			}
+			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+				executeTestSuccess(new TestSuccess());
+			}
 			command("endIf");
 			command("endIf");
 		}
@@ -393,13 +399,13 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	
 	@Override
 	public void executeOk(Ok ok) {
-		button(ok, "ok", false, false);
+		button(ok, "ok", false, false, ok.getTestSuccess());
 		pop();
 	}
 
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", true, false);
+		button(save, "save", true, false, save.getTestSuccess());
 		Boolean createView = save.getCreateView(); // NB could be null
 		if (Boolean.TRUE.equals(createView)) {
 			PrimeFacesAutomationContext context = peek();
@@ -413,31 +419,35 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		button(cancel, "cancel", false, false);
+		button(cancel, "cancel", false, false, cancel.getTestSuccess());
 		pop();
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		button(delete, "delete", false, true);
+		button(delete, "delete", false, true, delete.getTestSuccess());
 		pop();
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, false);
+		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
 		pop();
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		button(remove, "remove", false, true);
+		button(remove, "remove", false, true, remove.getTestSuccess());
 		pop();
 	}
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, action.getActionName(), true, Boolean.TRUE.equals(action.getConfirm()));
+		button(action, 
+				action.getActionName(),
+				true,
+				Boolean.TRUE.equals(action.getConfirm()),
+				action.getTestSuccess());
 	}
 
 	@Override
@@ -662,8 +672,54 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void executeTest(Test test) {
+	public void executeTestValue(TestValue test) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public void executeTestSuccess(TestSuccess test) {
+		TestStrategy strategy = getTestStrategy();
+		if (TestStrategy.Verify.equals(strategy)) {
+			comment("Test Success");
+			command("verifyElementNotPresent", "css=.ui-messages-error");
+			command("verifyElementNotPresent", "css=.ui-message-error");
+		}
+		else if (TestStrategy.None.equals(strategy)) {
+			// nothing to do
+		}
+		else { // null or Assert
+			comment("Test Success");
+			command("assertElementNotPresent", "css=.ui-messages-error");
+			command("assertElementNotPresent", "css=.ui-message-error");
+		}
+	}
+	
+	@Override
+	public void executeTestFailure(TestFailure test) {
+		TestStrategy strategy = getTestStrategy();
+		if (! TestStrategy.None.equals(strategy)) {
+			String message = test.getMessage();
+			if (message == null) {
+				comment("Test Failure");
+				if (TestStrategy.Verify.equals(strategy)) {
+					command("verifyElementPresent", "css=.ui-messages-error");
+				}
+				else {
+					command("assertElementPresent", "css=.ui-messages-error");
+				}
+			}
+			else {
+				comment(String.format("Test Failure with message '%s'", message));
+				if (TestStrategy.Verify.equals(strategy)) {
+					command("verifyElementPresent", "css=.ui-messages-error");
+					command("verifyTextPresent", message);
+				}
+				else {
+					command("assertElementPresent", "css=.ui-messages-error");
+					command("assertTextPresent", message);
+				}
+			}
+		}
 	}
 }

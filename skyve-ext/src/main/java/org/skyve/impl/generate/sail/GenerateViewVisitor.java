@@ -106,19 +106,23 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitCustomAction(ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			Action step = new Action();
-			step.setActionName(action.getName());
-			if (action.getConfirmationText() != null) {
-				step.setConfirm(Boolean.TRUE);
-			}
-			actionSteps.add(step);
+			addCustomAction(action);
 		}
 	}
 	
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
 		ActionImpl action = (ActionImpl) view.getAction(button.getActionName());
-		visitCustomAction(action);
+		addCustomAction(action);
+	}
+	
+	private void addCustomAction(ActionImpl action) {
+		Action step = new Action();
+		step.setActionName(action.getName());
+		if (action.getConfirmationText() != null) {
+			step.setConfirm(Boolean.TRUE);
+		}
+		actionSteps.add(step);
 	}
 	
 	List<Step> getPopulateSteps() {

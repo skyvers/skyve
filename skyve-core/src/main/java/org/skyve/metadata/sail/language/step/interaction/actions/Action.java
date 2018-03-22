@@ -4,11 +4,10 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.skyve.metadata.sail.execution.Executor;
-import org.skyve.metadata.sail.language.Step;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.execution.Executor;
 
 /**
  * All explicit actions - BizImport, BizExport, Upload, Download, Report, Server etc
@@ -16,11 +15,11 @@ import org.skyve.impl.util.XMLMetaData;
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
-public class Action implements Step {
+public class Action extends AbstractAction {
 	private String actionName;
 	// Need to press OK/Yes/Continue on the confirmation dialog - true or false/null
 	private Boolean confirm;
-	
+
 	public String getActionName() {
 		return actionName;
 	}

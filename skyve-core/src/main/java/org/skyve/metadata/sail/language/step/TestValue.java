@@ -16,7 +16,7 @@ import org.skyve.impl.util.XMLMetaData;
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
-public class Test implements Step {
+public class TestValue implements Step {
 	private String binding;
 	private String value;
 
@@ -40,7 +40,7 @@ public class Test implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.executeTest(this);
+		executor.executeTestValue(this);
 	}
 	
 	@Override

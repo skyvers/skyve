@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+  <xs:element name="abstractAction" type="tns:abstractAction"/>
+
   <xs:element name="action" type="tns:action"/>
 
   <xs:element name="automation" type="tns:automation"/>
@@ -61,9 +63,13 @@
 
   <xs:element name="tabSelect" type="tns:tabSelect"/>
 
-  <xs:element name="test" type="tns:test"/>
-
   <xs:element name="testDataEnter" type="tns:testDataEnter"/>
+
+  <xs:element name="testFailure" type="tns:testFailure"/>
+
+  <xs:element name="testSuccess" type="tns:testSuccess"/>
+
+  <xs:element name="testValue" type="tns:testValue"/>
 
   <xs:element name="userAgentType" type="tns:userAgentType"/>
 
@@ -77,6 +83,7 @@
     </xs:sequence>
     <xs:attribute name="uxui" type="xs:string" use="required"/>
     <xs:attribute name="userAgentType" type="tns:userAgentType" use="required"/>
+    <xs:attribute name="testStrategy" type="tns:testStrategy"/>
   </xs:complexType>
 
   <xs:complexType name="procedure">
@@ -110,7 +117,9 @@
         <xs:element ref="tns:listGridNew"/>
         <xs:element ref="tns:listGridZoom"/>
         <xs:element ref="tns:listGridSelect"/>
-        <xs:element ref="tns:test"/>
+        <xs:element ref="tns:testValue"/>
+        <xs:element ref="tns:testSuccess"/>
+        <xs:element ref="tns:testFailure"/>
         <xs:element ref="tns:execute"/>
       </xs:choice>
     </xs:sequence>
@@ -182,34 +191,67 @@
   </xs:complexType>
 
   <xs:complexType name="ok">
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractAction" abstract="true">
     <xs:sequence/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="save">
-    <xs:sequence/>
-    <xs:attribute name="createView" type="xs:boolean"/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="createView" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="cancel">
-    <xs:sequence/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="delete">
-    <xs:sequence/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="zoomOut">
-    <xs:sequence/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="remove">
-    <xs:sequence/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="action">
-    <xs:sequence/>
-    <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="confirm" type="xs:boolean"/>
+    <xs:complexContent>
+      <xs:extension base="tns:abstractAction">
+        <xs:sequence/>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionAutoComplete">
@@ -290,10 +332,19 @@
     <xs:attribute name="row" type="xs:int" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="test">
+  <xs:complexType name="testValue">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
     <xs:attribute name="value" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testSuccess">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="testFailure">
+    <xs:sequence/>
+    <xs:attribute name="message" type="xs:string"/>
   </xs:complexType>
 
   <xs:simpleType name="execute">
@@ -335,7 +386,9 @@
               <xs:element ref="tns:listGridNew"/>
               <xs:element ref="tns:listGridZoom"/>
               <xs:element ref="tns:listGridSelect"/>
-              <xs:element ref="tns:test"/>
+              <xs:element ref="tns:testValue"/>
+              <xs:element ref="tns:testSuccess"/>
+              <xs:element ref="tns:testFailure"/>
               <xs:element ref="tns:execute"/>
             </xs:choice>
           </xs:sequence>
@@ -352,6 +405,14 @@
       <xs:enumeration value="tablet"/>
       <xs:enumeration value="desktop"/>
       <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="testStrategy">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Assert"/>
+      <xs:enumeration value="Verify"/>
+      <xs:enumeration value="None"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

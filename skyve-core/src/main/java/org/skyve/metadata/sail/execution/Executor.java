@@ -3,7 +3,9 @@ package org.skyve.metadata.sail.execution;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -80,6 +82,8 @@ public interface Executor {
 	public void executeListGridZoom(ListGridZoom zoom);
 	public void executeListGridSelect(ListGridSelect select);
 
-	public void executeTest(Test test);
+	public void executeTestValue(TestValue test);
+	public void executeTestSuccess(TestSuccess test);
+	public void executeTestFailure(TestFailure test);
 	public void executeExecute(Execute execute);
 }

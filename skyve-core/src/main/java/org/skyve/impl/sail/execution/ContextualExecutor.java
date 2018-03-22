@@ -11,6 +11,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -23,6 +24,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
 	private String currentUxUi = null;
 	private UserAgentType currentUserAgentType = null;
+	private TestStrategy testStrategy = null;
 	
 	private Stack<T> contextStack = new Stack<>();
 
@@ -78,6 +80,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	public void executeAutomation(Automation automation) {
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
+		testStrategy = automation.getTestStrategy();
 	}
 	
 	/**
@@ -162,5 +165,9 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		T context = peek();
 		context.setDocumentName(null);
 		context.setViewType(null);
+	}
+	
+	public TestStrategy getTestStrategy() {
+		return testStrategy;
 	}
 }
