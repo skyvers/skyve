@@ -13,12 +13,6 @@
 		<dynamicImage name="Activity" />
 	</vbox>
 	<vbox border="true" borderTitle="Jobs">
-		<dataGrid binding="jobs" editable="false">
-			<boundColumn binding="displayName" />
-			<boundColumn binding="status" />
-			<boundColumn binding="percentComplete" />
-			<boundColumn binding="startTime" />
-			<boundColumn binding="endTime" />
-		</dataGrid>
+		<listGrid continueConversation="false" query="qDashboardJobs" disabled="true" />
 	</vbox>
 </view>

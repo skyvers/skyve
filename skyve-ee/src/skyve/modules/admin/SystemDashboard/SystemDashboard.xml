@@ -7,13 +7,5 @@
 	<icon16x16RelativeFilePath>icons/document/chart16.png</icon16x16RelativeFilePath>
 	<icon32x32RelativeFilePath>icons/document/chart32.png</icon32x32RelativeFilePath>
 	<attributes>
-		<collection name="jobs" type="aggregation">
-			<displayName>Jobs</displayName>
-			<documentName>Job</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order by="startTime" sort="descending" />
-			</ordering>
-		</collection>
 	</attributes>
 </document>

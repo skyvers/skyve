@@ -37,13 +37,5 @@
 				<order by="rolename" sort="ascending" />
 			</ordering>
 		</collection>		
-		<collection name="jobs" type="aggregation" >
-			<displayName>Jobs</displayName>
-			<documentName>Job</documentName>
-			<minCardinality>0</minCardinality>
-			<ordering>
-				<order by="startTime" sort="descending" />
-			</ordering>
-		</collection>		
 	</attributes>
 </document>
