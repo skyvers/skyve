@@ -21,7 +21,7 @@
 			<base href="#{bean.baseHref}" />
 			<link rel="icon" type="image/png" href="images/window/skyve_fav.png" />
 			<link type="text/css" rel="stylesheet" href="css/prime-min.css?v=#{bean.webResourceFileVersion}" />
-			<title>#{bean.title}</title>
+			<title>Skyve</title>
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->
@@ -44,7 +44,7 @@
 						<td style="width:70%">
 							<div id="formHeader">
 								<div>
-									<h3 class="ui-widget" style="color: steelblue;">#{bean.title}</h3>
+									<h3 class="ui-widget" style="color:white"><p:outputPanel id="title" layout="inline" autoUpdate="true">#{bean.title}</p:outputPanel></h3>
 								</div>
 							</div>
 						</td>

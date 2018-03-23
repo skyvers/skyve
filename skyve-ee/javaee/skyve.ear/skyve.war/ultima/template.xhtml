@@ -24,7 +24,7 @@
 			<link rel="icon" type="image/png" href="#{bean.baseHref}/images/window/skyve_fav.png" />
 			<link type="text/css" rel="stylesheet" href="#{bean.baseHref}/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ultima.css" library="skyve" />
-			<title>#{title}</title>
+			<title>Skyve</title>
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->	
@@ -45,6 +45,7 @@
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="leftMenu" value="#{leftMenu}" />
 					<ui:param name="topMenu" value="#{topMenu}" />
+					<ui:param name="title" value="#{bean.title}" />
 				</ui:include>
 	
 				<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
