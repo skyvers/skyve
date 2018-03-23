@@ -83,6 +83,10 @@ public final class ReportDesignParameters {
 	private int rightMargin;
 	private List<ReportColumn> columns = new ArrayList<>();	
 	private List<String> groupColumns = new ArrayList<>();
+	/**
+	 * Whether or not the customer's logo should be included in the report's title band.
+	 */
+	private boolean includeCustomerLogo = true;
 
 	public ReportFormat getReportFormat() {
 		return reportFormat;
@@ -149,5 +153,11 @@ public final class ReportDesignParameters {
 	}
 	public List<String> getGroupColumns() {
 		return groupColumns;
+	}
+	public boolean isIncludeCustomerLogo() {
+		return includeCustomerLogo;
+	}
+	public void setIncludeCustomerLogo(boolean includeCustomerLogo) {
+		this.includeCustomerLogo = includeCustomerLogo;
 	}
 }

@@ -152,6 +152,8 @@ public abstract class ReportDesignGenerator {
         background.setParent(design);
         design.getBands().add(background);
 
+        design.getBands().add(createTitleBand(design));
+
         ReportBand pageHeader = new ReportBand();
         pageHeader.setBandType(ReportBand.BandType.pageHeader);
         pageHeader.setParent(design);
@@ -212,6 +214,15 @@ public abstract class ReportDesignGenerator {
         }
 
         design.getBands().add(noData);
+    }
+
+    protected ReportBand createTitleBand(DesignSpecification design) {
+        final ReportBand title = new ReportBand();
+        title.setName("Title");
+        title.setBandType(ReportBand.BandType.title);
+        title.setParent(design);
+
+        return title;
     }
 
     protected ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {

@@ -30,31 +30,6 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
     protected void addBands(DesignSpecification design) {
         super.addBands(design);
 
-        if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
-
-            ReportBand title = new ReportBand();
-            title.setBandType(ReportBand.BandType.title);
-            title.setName("Title");
-            title.setParent(design);
-
-            // TODO handle borders as stretchable lines
-            title = Renderer.addElement(title, ReportElement.ElementType.textField, "bizKey", Renderer.renderBoundMessage(design, "{bizKey}"), null, null, 0,
-                    0, design.getColumnWidth(),
-                    design.getDefaultElementHeight() * 2, null, null, Boolean.TRUE, null, null, null, null);
-
-            if (Boolean.TRUE.equals(design.getSectionBorderTop())
-                    || Boolean.TRUE.equals(design.getSectionBorderLeft())
-                    || Boolean.TRUE.equals(design.getSectionBorderBottom())
-                    || Boolean.TRUE.equals(design.getSectionBorderRight())) {
-
-                // TODO implement borders as lines
-                title = Renderer.addElement(title, ReportElement.ElementType.border, null, null, null, null, 0, 0, design.getColumnWidth(),
-                        design.getDefaultElementHeight() * 2, null, null, null, null, null, null, null);
-            }
-
-            design.getBands().add(title);
-        }
-
         ReportBand columnHeader = new ReportBand();
         columnHeader.setBandType(ReportBand.BandType.columnHeader);
         columnHeader.setName(ReportBand.BandType.columnHeader.toString());
@@ -203,5 +178,28 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
             columnFooter.spreadElements();
         }
         design.getBands().add(columnFooter);
+    }
+
+    @Override
+    protected ReportBand createTitleBand(DesignSpecification design) {
+        ReportBand title = super.createTitleBand(design);
+
+        if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
+            title = Renderer.addElement(title, ReportElement.ElementType.textField, "bizKey", Renderer.renderBoundMessage(design, "{bizKey}"), null, null, 0,
+                    0, design.getColumnWidth(),
+                    design.getDefaultElementHeight() * 2, null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
+
+            if (Boolean.TRUE.equals(design.getSectionBorderTop())
+                    || Boolean.TRUE.equals(design.getSectionBorderLeft())
+                    || Boolean.TRUE.equals(design.getSectionBorderBottom())
+                    || Boolean.TRUE.equals(design.getSectionBorderRight())) {
+
+                // TODO implement borders as lines
+                title = Renderer.addElement(title, ReportElement.ElementType.border, null, null, null, null, 0, 0, design.getColumnWidth(),
+                        design.getDefaultElementHeight() * 2, null, null, null, null, null, null, null);
+            }
+        }
+
+        return title;
     }
 }

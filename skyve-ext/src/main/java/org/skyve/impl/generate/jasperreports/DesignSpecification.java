@@ -309,6 +309,10 @@ public class DesignSpecification {
 	 **/
 	private Boolean verticalise;
 	/**
+	 * Whether or not the customer's logo should be included in the report's title band.
+	 */
+	private boolean includeCustomerLogo = true;
+	/**
 	 * Label Alignment
 	 **/
 	private ReportElement.ElementAlignment labelAlignmentOverride;
@@ -711,6 +715,14 @@ public class DesignSpecification {
 		}
 		joins.put(documentName, join);
 		joinAlias.put(join, alias);
+	}
+
+	public boolean isIncludeCustomerLogo() {
+		return includeCustomerLogo;
+	}
+
+	public void setIncludeCustomerLogo(boolean includeCustomerLogo) {
+		this.includeCustomerLogo = includeCustomerLogo;
 	}
 
 	/**

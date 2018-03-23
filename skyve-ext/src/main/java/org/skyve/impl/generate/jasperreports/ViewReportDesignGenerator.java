@@ -50,16 +50,18 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
             visitor.visit();
         }
 
+        design.getBands().addAll(visitor.getDetailBands());
+    }
+
+    @Override
+    protected ReportBand createTitleBand(DesignSpecification design) {
+        ReportBand title = super.createTitleBand(design);
+
         // construct title band
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
-            ReportBand title = new ReportBand();
-            title.setBandType(ReportBand.BandType.title);
-            title.setName("Title");
-            title.setParent(design);
-
             title = Renderer.addElement(title, ReportElement.ElementType.textField, "title", Renderer.renderBoundMessage(design, visitor.getViewTitle()), null, null,
                     0, 0, design.getColumnWidth(),
-                    design.getDefaultElementHeight() * 2, null, null, Boolean.TRUE, null, null, null, null);
+                    design.getDefaultElementHeight() * 2, null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
 
             if (Boolean.TRUE.equals(design.getSectionBorderTop())
                     || Boolean.TRUE.equals(design.getSectionBorderLeft())
@@ -70,11 +72,9 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
                 title = Renderer.addElement(title, ReportElement.ElementType.border, null, null, null, null, 0, 0, design.getColumnWidth(),
                         design.getDefaultElementHeight() * 2, null, null, null, null, design.getSectionTitleForeground(), design.getSectionTitleBackground(), null);
             }
-
-            design.getBands().add(title);
         }
 
-        design.getBands().addAll(visitor.getDetailBands());
+        return title;
     }
 
     private void initialiseVisitorIfNull(DesignSpecification design) {

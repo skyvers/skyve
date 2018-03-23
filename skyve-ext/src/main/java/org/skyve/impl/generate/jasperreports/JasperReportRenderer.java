@@ -421,6 +421,10 @@ public class JasperReportRenderer {
             line.setWidth(reportColumnWidth);
             line.setHeight(1);
             band.addElement(line);
+
+            if (reportDesignParameters.isIncludeCustomerLogo()) {
+                addCustomerLogo(band);
+            }
         }
         jasperDesign.setTitle(band);
 
@@ -733,7 +737,12 @@ public class JasperReportRenderer {
 
     private void addBands(DesignSpecification designSpecification) {
         getBandByType(designSpecification, BandType.background).ifPresent(jasperDesign::setBackground);
-        getBandByType(designSpecification, BandType.title).ifPresent(jasperDesign::setTitle);
+        getBandByType(designSpecification, BandType.title).ifPresent(titleBand -> {
+            if (designSpecification.isIncludeCustomerLogo()) {
+                addCustomerLogo(titleBand);
+            }
+            jasperDesign.setTitle(titleBand);
+        });
         getBandByType(designSpecification, BandType.pageHeader).ifPresent(jasperDesign::setPageHeader);
         getBandByType(designSpecification, BandType.columnHeader).ifPresent(jasperDesign::setColumnHeader);
         getDetailBands(designSpecification).forEach(this::addDetailBand);
@@ -742,6 +751,17 @@ public class JasperReportRenderer {
         getBandByType(designSpecification, BandType.lastPageFooter).ifPresent(jasperDesign::setLastPageFooter);
         getBandByType(designSpecification, BandType.summary).ifPresent(jasperDesign::setSummary);
         getBandByType(designSpecification, BandType.noData).ifPresent(jasperDesign::setNoData);
+    }
+
+    protected void addCustomerLogo(JRBand titleBand) {
+        final int logoWidth = 200;
+        final JRDesignImage logoImage = new JRDesignImage(null);
+        logoImage.setWidth(logoWidth);
+        logoImage.setHeight(titleBand.getHeight());
+        final JRDesignExpression expression = new JRDesignExpression();
+        expression.setText(String.format("org.skyve.impl.generate.jasperreports.ContentImageForReport.customerLogo(%d, %d)", logoWidth, titleBand.getHeight()));
+        logoImage.setExpression(expression);
+        ((JRDesignBand) titleBand).addElement(logoImage);
     }
 
     private Optional<JRBand> getBandByType(DesignSpecification designSpecification, BandType bandType) {
