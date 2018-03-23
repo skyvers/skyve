@@ -168,7 +168,7 @@ public class ReportServlet extends HttpServlet {
 						baos);
 			} else {
 				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
-				if (isList != null && Boolean.valueOf(isList)) {
+				if (isList != null && Boolean.parseBoolean(isList)) {
 					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
 					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
 					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
