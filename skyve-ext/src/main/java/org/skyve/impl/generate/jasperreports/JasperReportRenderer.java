@@ -9,12 +9,14 @@ import net.sf.jasperreports.engine.xml.JRXmlWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
 import org.skyve.impl.jasperreports.ReportDesignParameters;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
@@ -167,7 +169,7 @@ public class JasperReportRenderer {
 
         // JasperDesign
         jasperDesign.setName("Export");
-        jasperDesign.setLanguage(JRReport.LANGUAGE_GROOVY);
+        jasperDesign.setLanguage(JRReport.LANGUAGE_JAVA);
         jasperDesign.setPageWidth(reportDesignParameters.getPageWidth());
         jasperDesign.setPageHeight(reportDesignParameters.getPageHeight());
         jasperDesign.setColumnWidth(reportColumnWidth);
@@ -247,7 +249,7 @@ public class JasperReportRenderer {
                 if (AttributeType.date.equals(column.getAttributeType())) {
                     final JRDesignVariable minDateVariable = new JRDesignVariable();
                     minDateVariable.setName(String.format("%s_minDate", column.getName()));
-                    minDateVariable.setValueClass(String.class);
+                    minDateVariable.setValueClass(DateOnly.class);
                     minDateVariable.setCalculation(CalculationEnum.LOWEST);
                     final JRDesignExpression minDateExpression = new JRDesignExpression();
                     minDateExpression.setText("$F{" + column.getName() + "}");
@@ -256,7 +258,7 @@ public class JasperReportRenderer {
 
                     final JRDesignVariable maxDateVariable = new JRDesignVariable();
                     maxDateVariable.setName(String.format("%s_maxDate", column.getName()));
-                    maxDateVariable.setValueClass(String.class);
+                    maxDateVariable.setValueClass(DateOnly.class);
                     maxDateVariable.setCalculation(CalculationEnum.HIGHEST);
                     final JRDesignExpression maxDateExpression = new JRDesignExpression();
                     maxDateExpression.setText("$F{" + column.getName() + "}");
@@ -1173,7 +1175,9 @@ public class JasperReportRenderer {
         reportDesignParameters.setLeftMargin(20);
         reportDesignParameters.setRightMargin(20);
 
-        for (QueryColumn queryColumn : getListModel(designSpecification).getColumns()) {
+        final DocumentQueryListModel<Bean> listModel = getListModel(designSpecification);
+        final Document drivingDocument = listModel.getDrivingDocument();
+        for (QueryColumn queryColumn : listModel.getColumns()) {
             ReportDesignParameters.ReportColumn reportColumn = new ReportDesignParameters.ReportColumn();
             reportColumn.setLine(1);
             reportColumn.setName(queryColumn.getBinding());
@@ -1187,6 +1191,13 @@ public class JasperReportRenderer {
             else {
                 reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.left);
             }
+            if (drivingDocument != null && reportColumn.getName() != null) {
+                final Attribute attribute = drivingDocument.getAttribute(reportColumn.getName());
+                if (attribute != null) {
+                    reportColumn.setAttributeType(attribute.getAttributeType());
+                }
+            }
+
             reportDesignParameters.getColumns().add(reportColumn);
         }
 

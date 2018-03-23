@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
@@ -166,13 +167,28 @@ public class ReportServlet extends HttpServlet {
 						format,
 						baos);
 			} else {
-				jasperPrint = ReportUtil.runReport(user,
-						document,
-						reportName,
-						getParameters(request),
-						bean,
-						format,
-						baos);
+				final String isList = request.getParameter(AbstractWebContext.IS_LIST);
+				if (isList != null && Boolean.valueOf(isList)) {
+					final String queryName = request.getParameter(AbstractWebContext.QUERY_NAME);
+					final String modelName = request.getParameter(AbstractWebContext.MODEL_NAME);
+					final String documentOrQueryOrModelName = modelName != null ? modelName : queryName != null ? queryName : documentName;
+					final ListModel<Bean> listModel = getDocumentQueryListModel(module, documentOrQueryOrModelName);
+					jasperPrint = ReportUtil.runReport(user,
+							document,
+							reportName,
+							getParameters(request),
+							listModel,
+							format,
+							baos);
+				} else {
+					jasperPrint = ReportUtil.runReport(user,
+							document,
+							reportName,
+							getParameters(request),
+							bean,
+							format,
+							baos);
+				}
 			}
 
 			pumpOutReportFormat(baos.toByteArray(), jasperPrint, format, reportName, request.getSession(), response);
@@ -468,5 +484,20 @@ public class ReportServlet extends HttpServlet {
 				persistence.commit(true);
 			}
 		}
+	}
+
+	public static DocumentQueryListModel<Bean> getDocumentQueryListModel(Module module, String documentOrQueryOrModelName) {
+		final Customer customer = CORE.getCustomer();
+		DocumentQueryDefinition query = module.getDocumentQuery(documentOrQueryOrModelName);
+		if (query == null) {
+			query = module.getDocumentDefaultQuery(customer, documentOrQueryOrModelName);
+		}
+		if (query == null) {
+			throw new IllegalArgumentException("DataSource does not reference a valid query " + documentOrQueryOrModelName);
+		}
+		final DocumentQueryListModel<Bean> queryModel = new DocumentQueryListModel<>();
+		queryModel.setQuery(query);
+
+		return queryModel;
 	}
 }

@@ -830,7 +830,10 @@
       <xs:extension base="tns:parameterizableAction">
         <xs:sequence/>
         <xs:attribute name="documentName" type="xs:string" use="required"/>
+        <xs:attribute name="listReport" type="xs:boolean"/>
+        <xs:attribute name="modelName" type="xs:string"/>
         <xs:attribute name="moduleName" type="xs:string" use="required"/>
+        <xs:attribute name="queryName" type="xs:string"/>
         <xs:attribute name="reportFormat" type="ns1:reportFormat"/>
         <xs:attribute name="reportName" type="xs:string" use="required"/>
       </xs:extension>
