@@ -377,7 +377,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 				if (confirm) {
 					command("click", "confirmOK");
 				}
-				command("waitForNotVisible", "ajaxStatus");
+				command("waitForNotVisible", "busy");
 			}
 			else {
 				if (confirm) {
@@ -533,7 +533,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 						// All good, continue with the button click
 						if (step instanceof DataGridRemove) {
 							command("click", ComponentCollector.clientId(buttonComponent, row));
-							command("waitForNotVisible", "ajaxStatus");
+							command("waitForNotVisible", "busy");
 						}
 						else {
 							command("clickAndWait", buttonClientId);
@@ -618,9 +618,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
 		if (listGridComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
-														(row != null) ? 
-															((step instanceof ListGridZoom) ? "ListGridZoom" : "ListGridDelete") : 
-															"ListGridNew",
+															step.getClass().getSimpleName(),
 															listGridIdentifier));
 		}
 		for (UIComponent listGridComponent : listGridComponents) {

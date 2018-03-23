@@ -3,6 +3,7 @@ package org.skyve.impl.generate.sail;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -23,6 +24,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder.TargetMetaData;
 
 public class GenerateViewVisitor extends NoOpViewVisitor {
 	private String uxui;
@@ -73,7 +75,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		nu.setBinding(binding);
 		populateSteps.add(nu);
 		
-		Relation relation = (Relation) document.getAttribute(binding);
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		Relation relation = (Relation) target.getAttribute();
 		Document gridDocument = module.getDocument(customer, relation.getDocumentName());
 		Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
 		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, uxui);

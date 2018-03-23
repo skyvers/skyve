@@ -61,12 +61,14 @@
 					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 					<p:confirmDialog id="confirm" global="true">
-						<p:commandButton value="Cancel" 
+						<p:commandButton id="confirmCancel" 
+											value="Cancel" 
 											type="button"
 											styleClass="ui-confirmdialog-no" 
 											style="float:right;"
 											icon="ui-icon-close" />
-						<p:commandButton value="OK" 
+						<p:commandButton id="confirmOK" 
+											value="OK" 
 											type="button"
 											styleClass="ui-confirmdialog-yes" 
 											style="float:right;"
@@ -95,7 +97,7 @@
 	
 			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
 				<f:facet name="start">
-					<i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />

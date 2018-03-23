@@ -46,6 +46,7 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.defaultcommand.DefaultCommand;
 import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
+import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.menuitem.UIMenuItem;
@@ -148,6 +149,9 @@ public class MockApplication extends Application {
 		}
 		else if (HtmlPanelGroup.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlPanelGroup();
+		}
+		else if (InputMask.COMPONENT_TYPE.equals(componentType)) {
+			return new InputMask();
 		}
 		else if (InputText.COMPONENT_TYPE.equals(componentType)) {
 			return new InputText();

@@ -48,6 +48,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 										ViewImpl view,
 										Bean bean) {
 		super(customer, module, document, view);
+//System.out.println(String.format("TestDataEnter for %s.%s %s view", module.getName(), document.getName(), view.getName()));
 		this.bean = bean;
 	}
 

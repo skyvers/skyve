@@ -67,10 +67,26 @@ System.out.println(visitModules(args[0]));
 			}
 		}
 
-//		return XMLMetaData.marshalSAIL(result);
 		return result;
 	}
-	
+
+	public static Automation visitMenu(User user, String moduleName, String uxui, UserAgentType userAgentType)
+	throws Exception {
+		CORE.getRepository().resetMenus(user);
+		UserImpl u = (UserImpl) user;
+		Customer c = user.getCustomer();
+		
+		Module m = c.getModule(moduleName);
+		Automation result = new Automation();
+		result.setUserAgentType(userAgentType);
+		result.setUxui(uxui);
+		List<Interaction> interactions = result.getInteractions();
+		Menu menu = u.getModuleMenu(moduleName);
+		menu(c, m, null, menu.getItems(), uxui, interactions);
+
+		return result;
+	}
+
 	private static void menu(Customer c,
 								Module m,
 								String descriptionPrefix,
@@ -158,51 +174,66 @@ System.out.println(visitModules(args[0]));
 			if ("test".equals(moduleName)) {
 				continue;
 			}
-			Automation automation = new Automation();
-			automation.setUxui(uxui);
-			automation.setUserAgentType(userAgentType);
-			List<Interaction> interactions = automation.getInteractions();
-			
-			for (Entry<String, DocumentRef> entry : m.getDocumentRefs().entrySet()) {
-				DocumentRef documentRef = entry.getValue();
-				if (documentRef.getOwningModuleName().equals(moduleName)) {
-					String documentName = entry.getKey();
-					Document d = m.getDocument(c, documentName);
-					if ((! d.isAbstract()) && 
-							(d.getParentDocumentName() == null) && 
-							u.canAccessDocument(d)) {
-						if (d.getPersistent() == null) {
-							Interaction interaction = new Interaction();
-							interaction.setName("Edit document " + documentName);
-							List<Step> steps = interaction.getSteps();
-							
-							NavigateEdit navigate = new NavigateEdit();
-							navigate.setModuleName(moduleName);
-							navigate.setDocumentName(documentName);
-							steps.add(navigate);
+			Automation automation = visitModule(u, moduleName, uxui, userAgentType);
+			if (! automation.getInteractions().isEmpty()) {
+				result.add(automation);
+			}
+		}
+		
+		return result;
+	}
 
-							edit(c, m, d, uxui, steps);
-							
-							interactions.add(interaction);
-						}
-						else {
-							Interaction interaction = new Interaction();
-							interaction.setName("CRUD document " + documentName);
-							List<Step> steps = interaction.getSteps();
+	public static Automation visitModule(User u,
+											String moduleName,
+											String uxui,
+											UserAgentType userAgentType)
+	throws Exception {
+		Customer c = u.getCustomer();
+		Module m = c.getModule(moduleName);
+		
+		Automation result = new Automation();
+		result.setUxui(uxui);
+		result.setUserAgentType(userAgentType);
+		List<Interaction> interactions = result.getInteractions();
+		
+		for (Entry<String, DocumentRef> entry : m.getDocumentRefs().entrySet()) {
+			DocumentRef documentRef = entry.getValue();
+			if (documentRef.getOwningModuleName().equals(moduleName)) {
+				String documentName = entry.getKey();
+				Document d = m.getDocument(c, documentName);
+				if ((! d.isAbstract()) && 
+						(d.getParentDocumentName() == null) && 
+						u.canAccessDocument(d)) {
+					if (d.getPersistent() == null) {
+						Interaction interaction = new Interaction();
+						interaction.setName("Edit document " + documentName);
+						List<Step> steps = interaction.getSteps();
+						
+						NavigateEdit navigate = new NavigateEdit();
+						navigate.setModuleName(moduleName);
+						navigate.setDocumentName(documentName);
+						steps.add(navigate);
 
-							NavigateList navigate = new NavigateList();
-							navigate.setModuleName(moduleName);
-							navigate.setDocumentName(documentName);
-							steps.add(navigate);
-							
-							crud(c, m, d, uxui, navigate, steps);
+						edit(c, m, d, uxui, steps);
+						
+						interactions.add(interaction);
+					}
+					else {
+						Interaction interaction = new Interaction();
+						interaction.setName("CRUD document " + documentName);
+						List<Step> steps = interaction.getSteps();
 
-							interactions.add(interaction);
-						}
+						NavigateList navigate = new NavigateList();
+						navigate.setModuleName(moduleName);
+						navigate.setDocumentName(documentName);
+						steps.add(navigate);
+						
+						crud(c, m, d, uxui, navigate, steps);
+
+						interactions.add(interaction);
 					}
 				}
 			}
-			result.add(automation);
 		}
 		
 		return result;
@@ -224,6 +255,7 @@ System.out.println(visitModules(args[0]));
 	}
 	
 	private static void crud(Customer c, Module m, Document d, String uxui, NavigateList list, List<Step> steps) {
+//System.out.println(String.format("CRUD %s.%s", m.getName(), d.getName()));
 		ListGridNew nu = new ListGridNew();
 		nu.setModuleName(list.getModuleName());
 		nu.setDocumentName(list.getDocumentName());
