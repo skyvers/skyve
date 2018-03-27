@@ -110,11 +110,10 @@ public class SmartClientListServlet extends HttpServlet {
 	        
 	        try {
 				try {
-			        Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
-
 					// use the view's conversation if it was sent down from the client
 					String webId = request.getParameter(AbstractWebContext.CONTEXT_NAME);
 					AbstractWebContext webContext = WebUtil.getCachedConversation(webId, request, response);
+					Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 					if (webContext != null) {
 						if (request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null) {
 				        	UtilImpl.LOGGER.info("USE VIEW CONVERSATION!!!!");
