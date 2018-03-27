@@ -136,7 +136,9 @@ public class ReportServlet extends HttpServlet {
 			
 			// Find the context bean
 			// Note - if there is no form in the view then there is no web context
-			Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+			String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+			Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 
 	        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			final JasperPrint jasperPrint;
@@ -349,7 +351,9 @@ public class ReportServlet extends HttpServlet {
 					
 					// Set the context bean in the list model
 					// Note - if there is no form in the view then there is no web context
-					model.setBean(WebUtil.getConversationBeanFromRequest(request, response));
+					String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+		        	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 					
 					drivingDocument = model.getDrivingDocument();
 				}

@@ -71,7 +71,7 @@ public class DownloadServlet extends HttpServlet {
 																							document, 
 																							resourceName,
 																							true);
-						Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 			        	
 						boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);
 						Download result = null;
