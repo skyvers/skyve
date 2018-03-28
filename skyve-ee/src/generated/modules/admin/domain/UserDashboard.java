@@ -19,7 +19,6 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
  * 
  * @navhas n currentUser 0..1 User
  * @navhas n roles 0..n UserRole
- * @navhas n jobs 0..n Job
  * @navhas n groups 0..n Group
  * @stereotype "transient"
  */
@@ -47,8 +46,6 @@ public class UserDashboard extends AbstractTransientBean {
 	public static final String groupsPropertyName = "groups";
 	/** @hidden */
 	public static final String rolesPropertyName = "roles";
-	/** @hidden */
-	public static final String jobsPropertyName = "jobs";
 
 	/**
 	 * Current User
@@ -70,10 +67,6 @@ public class UserDashboard extends AbstractTransientBean {
 	 * Roles
 	 **/
 	private List<UserRole> roles = new ArrayList<>();
-	/**
-	 * Jobs
-	 **/
-	private List<Job> jobs = new ArrayList<>();
 
 	@Override
 	@XmlTransient
@@ -213,32 +206,5 @@ public class UserDashboard extends AbstractTransientBean {
 	 **/
 	public void setRolesElementById(String bizId, UserRole element) {
 		 setElementById(roles, element);
-	}
-
-	/**
-	 * {@link #jobs} accessor.
-	 * @return	The value.
-	 **/
-	@XmlElement
-	public List<Job> getJobs() {
-		return jobs;
-	}
-
-	/**
-	 * {@link #jobs} accessor.
-	 * @param bizId	The bizId of the element in the list.
-	 * @return	The value of the element in the list.
-	 **/
-	public Job getJobsElementById(String bizId) {
-		return getElementById(jobs, bizId);
-	}
-
-	/**
-	 * {@link #jobs} mutator.
-	 * @param bizId	The bizId of the element in the list.
-	 * @param element	The new value of the element in the list.
-	 **/
-	public void setJobsElementById(String bizId, Job element) {
-		 setElementById(jobs, element);
 	}
 }
