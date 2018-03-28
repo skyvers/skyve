@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.User.UserFactoryExtension;
 import modules.admin.util.UserFactory;
-import modules.admin.util.UserFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

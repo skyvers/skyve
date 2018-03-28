@@ -6,8 +6,6 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.PolymorphicPersistentBean;
 
-import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
-import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
 import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.Hierarchical;
 import modules.test.domain.MappedBase;
@@ -33,9 +31,9 @@ public class GenerationTests extends AbstractSkyveTest {
 		Assert.assertTrue(mejs.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // joined strategy
 		Assert.assertTrue(mess instanceof MappedBase);
 		Assert.assertTrue(mess.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // single strategy
-		Assert.assertTrue(msjs instanceof MappedExtensionJoinedStrategyExtension);
+		Assert.assertTrue(msjs instanceof MappedExtensionJoinedStrategy);
 		Assert.assertFalse(msjs.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
-		Assert.assertTrue(msss instanceof MappedExtensionSingleStrategyExtension);
+		Assert.assertTrue(msss instanceof MappedExtensionSingleStrategy);
 		Assert.assertFalse(msss.getClass().isAnnotationPresent(PolymorphicPersistentBean.class)); // no subclasses
 	}
 }

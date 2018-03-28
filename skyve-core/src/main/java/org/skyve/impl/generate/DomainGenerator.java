@@ -25,6 +25,7 @@ public abstract class DomainGenerator {
 	protected static final String GEOMETRY = "Geometry";
 
 	protected static String SRC_PATH;
+	protected static String GENERATED_PATH;
 	protected static String TEST_PATH;
 	protected static String GENERATED_TEST_PATH;
 	protected static String[] EXCLUDED_MODULES;
@@ -95,9 +96,9 @@ public abstract class DomainGenerator {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length == 0 || args.length < 3) {
-			System.err.println("You must have at least the src path, test path and generated test path as arguments"
-					+ " - usually \"src/skyve/ src/test/ src/generatedTest/\"");
+		if (args.length == 0 || args.length < 4) {
+			System.err.println("You must have at least the src path, generated path, test path and generated test path as arguments"
+					+ " - usually \"src/main/java/ src/generated/java/ src/test/java/ src/generatedTest/java/\"");
 			System.exit(1);
 		}
 
@@ -111,12 +112,13 @@ public abstract class DomainGenerator {
 		UtilImpl.XML_TRACE = false;
 
 		SRC_PATH = args[0];
-		TEST_PATH = args[1];// "src/test/";
-		GENERATED_TEST_PATH = args[2];// "src/generatedTest/";
+		GENERATED_PATH = args[1];// "src/generated/";
+		TEST_PATH = args[2];// "src/test/";
+		GENERATED_TEST_PATH = args[3];// "src/generatedTest/";
 
-		if (args.length >= 4) { // allow for debug mode if there are 4 arguments
-			if ("true".equalsIgnoreCase(args[3]) || "false".equalsIgnoreCase(args[3])) {
-				if (Boolean.parseBoolean(args[3])) {
+		if (args.length >= 5) { // allow for debug mode if there are 4 arguments
+			if ("true".equalsIgnoreCase(args[4]) || "false".equalsIgnoreCase(args[4])) {
+				if (Boolean.parseBoolean(args[4])) {
 					UtilImpl.COMMAND_TRACE = true;
 					UtilImpl.CONTENT_TRACE = true;
 					UtilImpl.HTTP_TRACE = true;
@@ -127,32 +129,34 @@ public abstract class DomainGenerator {
 					UtilImpl.XML_TRACE = true;
 				}
 			} else {
-				System.err.println("The fourth argument DEBUG should be true or false");
+				System.err.println("The fifth argument DEBUG should be true or false");
 				System.exit(1);
 			}
 		}
 
-		if (args.length >= 5) {
+		if (args.length >= 6) {
 			try {
-				DIALECT_OPTIONS = DialectOptions.valueOf(args[4]);
+				DIALECT_OPTIONS = DialectOptions.valueOf(args[5]);
 			} catch (IllegalArgumentException e) {
-				System.err.println("The fifth argument DIALECT_OPTIONS should be one of the following " + StringUtils.join(DialectOptions.values(), ", "));
+				System.err.println("The sixth argument DIALECT_OPTIONS should be one of the following "
+						+ StringUtils.join(DialectOptions.values(), ", "));
 				System.exit(1);
 			}
 		}
 
-		if (args.length == 6) {
-			if ((args[5] != null) && (! args[5].isEmpty())) {
-				EXCLUDED_MODULES = args[5].toLowerCase().split(",");
+		if (args.length == 7) {
+			if ((args[6] != null) && (!args[6].isEmpty())) {
+				EXCLUDED_MODULES = args[6].toLowerCase().split(",");
 			}
 		}
 
 		System.out.println("SRC_PATH=" + SRC_PATH);
+		System.out.println("GENERATED_PATH=" + GENERATED_PATH);
 		System.out.println("TEST_PATH=" + TEST_PATH);
 		System.out.println("GENERATED_TEST_PATH=" + GENERATED_TEST_PATH);
-		System.out.println("DEBUG=" + (args.length >= 4 ? args[3] : "false"));
+		System.out.println("DEBUG=" + (args.length >= 5 ? args[4] : "false"));
 		System.out.println("DIALECT_OPTIONS=" + DIALECT_OPTIONS.toString());
-		System.out.println("EXCLUDED_MODULES=" + (args.length == 6 ? args[5] : ""));
+		System.out.println("EXCLUDED_MODULES=" + (args.length == 7 ? args[6] : ""));
 
 		DomainGenerator foo = UtilImpl.USING_JPA ? new JPADomainGenerator() : new OverridableDomainGenerator();
 		AbstractRepository repository = new LocalDesignRepository();

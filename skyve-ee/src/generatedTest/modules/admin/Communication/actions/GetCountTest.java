@@ -1,8 +1,8 @@
 package modules.admin.Communication.actions;
 
+import modules.admin.Communication.CommunicationFactoryExtension;
 import modules.admin.domain.Communication;
 import modules.admin.util.CommunicationFactory;
-import modules.admin.util.CommunicationFactoryExtension;
 import util.AbstractActionTest;
 
 /**

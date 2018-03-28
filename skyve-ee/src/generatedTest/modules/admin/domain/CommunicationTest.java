@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.Communication.CommunicationFactoryExtension;
 import modules.admin.util.CommunicationFactory;
-import modules.admin.util.CommunicationFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

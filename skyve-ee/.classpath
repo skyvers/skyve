@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="src/generatedTest"/>
 	<classpathentry kind="src" output="javaee/skyve.ear/skyve.war/WEB-INF/classes" path="src/web"/>
 	<classpathentry excluding="resources/" kind="src" path="src/test"/>
+	<classpathentry kind="src" output="javaee/skyve.ear/apps.jar" path="src/generated"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-ext"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/skyve-web"/>
