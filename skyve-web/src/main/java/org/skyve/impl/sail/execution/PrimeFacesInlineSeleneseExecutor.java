@@ -452,26 +452,71 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
-		// TODO Auto-generated method stub
-		
+		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
-		// TODO Auto-generated method stub
+		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
+	}
+
+	private void lookupDescription(Step step, String binding, Integer row, String search) {
+		PrimeFacesAutomationContext context = peek();
 		
+		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
+		if (lookupComponents == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
+														step.getClass().getSimpleName(),
+														binding));
+		}
+		for (UIComponent lookupComponent : lookupComponents) {
+			String clientId = ComponentCollector.clientId(lookupComponent);
+			if (row != null) {
+				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
+			}
+			else {
+				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
+			}
+			
+			// lookup description is present
+			command("storeElementPresent", clientId, "present");
+			command("if", "${present} == true");
+			// determine editable as these are <input/>
+			command("storeEditable", String.format("%s_input", clientId), "editable");
+			command("if", "${editable} == true");
+
+			if (row != null) {
+				// Click the drop down button
+				command("clickAt", String.format("//span[@id='%s']/button", clientId), "10,10");
+				// Wait for pick list drop down
+				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
+				// Select the row
+				command("click", String.format("//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
+			}
+			else {
+				// Type in the input field (everything but the last char)
+				command("type", String.format("%s_input", clientId), search.substring(0, search.length() - 1));
+				command("sendKeys", String.format("%s_input", clientId), search.substring(search.length() - 1));
+
+				// Wait for pick list drop down
+				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
+				// Select the first row
+				command("click", String.format("//div[@id='%s_panel']/ul/li", clientId));
+			}
+			
+			command("endIf");
+			command("endIf");
+		}
 	}
 
 	@Override
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do here as PF doesn't allow new off of lookup descriptions
 	}
 
 	@Override
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
-		// TODO Auto-generated method stub
-		
+		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
 	@Override
@@ -564,8 +609,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		// TODO Auto-generated method stub
-		
+		// cannot edit a grid row in PF
 	}
 
 	@Override
