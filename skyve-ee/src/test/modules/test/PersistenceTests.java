@@ -254,7 +254,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 		testDerivedPropertiesAvailableAfterSave(test);
 	}
 
-	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionSingleStrategy test)
+	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionSingleStrategyExtension test)
 			throws Exception {
 		Integer[] values = new Integer[] { test.getBaseDerivedInteger(),
 				test.getDerivedInteger(),
@@ -268,7 +268,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 			Assert.assertNotNull(value);
 		}
 
-		MappedExtensionSingleStrategy persistedTest = p.save(test);
+		MappedExtensionSingleStrategyExtension persistedTest = p.save(test);
 
 		Assert.assertEquals(values[0], persistedTest.getBaseDerivedInteger());
 		Assert.assertEquals(values[1], persistedTest.getDerivedInteger());
@@ -292,7 +292,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 		testDerivedPropertiesAvailableAfterSave(test);
 	}
 
-	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionJoinedStrategy test)
+	private void testDerivedPropertiesAvailableAfterSave(MappedExtensionJoinedStrategyExtension test)
 			throws Exception {
 		Integer[] values = new Integer[] { test.getBaseDerivedInteger(),
 				test.getDerivedInteger(),
@@ -306,7 +306,7 @@ public class PersistenceTests extends AbstractSkyveTest {
 			Assert.assertNotNull(value);
 		}
 
-		MappedExtensionJoinedStrategy persistedTest = p.save(test);
+		MappedExtensionJoinedStrategyExtension persistedTest = p.save(test);
 
 		Assert.assertEquals(values[0], persistedTest.getBaseDerivedInteger());
 		Assert.assertEquals(values[1], persistedTest.getDerivedInteger());

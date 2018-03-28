@@ -4,7 +4,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import modules.test.domain.MappedExtensionJoinedStrategy;
+import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 
@@ -18,7 +18,7 @@ import org.skyve.domain.messages.DomainException;
  */
 @XmlType
 @XmlRootElement
-public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrategy {
+public class MappedSubclassedJoinedStrategy extends MappedExtensionJoinedStrategyExtension {
 	/**
 	 * For Serialization
 	 * @hidden

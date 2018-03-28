@@ -2759,7 +2759,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (baseDocumentName != null) {
 			Document baseDocument = module.getDocument(customer, baseDocumentName);
 			String baseDocumentExtensionPath = String.format("%s%s%s/%s/%sExtension.java",
-					GENERATED_PATH,
+					SRC_PATH,
 					repository.MODULES_NAMESPACE,
 					baseDocument.getOwningModuleName(),
 					baseDocumentName,
