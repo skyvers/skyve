@@ -1908,7 +1908,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(propertyClassName) == null)) {
 			propertyPackagePath = "customers." + customer.getName() + '.' + propertyPackagePath;
 		}
-		if (!propertyPackagePath.equals(packagePath)) {
+		
+		// Check for Extension class defined and alter the class name accordingly
+		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + propertyPackageName;
+		if (domainExtensionClassExists(modulePath, propertyClassName)) {
+			propertyPackagePath = String.format("modules.%s.%s", propertyPackageName, propertyClassName);
+			propertyClassName += "Extension";
+		}
+
+		if (! propertyPackagePath.equals(packagePath)) {
 			imports.add(propertyPackagePath + '.' + propertyClassName);
 		}
 
@@ -2023,7 +2031,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if ((documentVanillaClasses == null) || (documentVanillaClasses.get(propertyClassName) == null)) {
 			propertyPackagePath = "customers." + customer.getName() + '.' + propertyPackagePath;
 		}
-		if (!propertyPackagePath.equals(packagePath)) {
+		
+		// Check for Extension class defined and alter the class name accordingly
+		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + propertyPackageName;
+		if (domainExtensionClassExists(modulePath, propertyClassName)) {
+			propertyPackagePath = String.format("modules.%s.%s", propertyPackageName, propertyClassName);
+			propertyClassName += "Extension";
+		}
+
+		if (! propertyPackagePath.equals(packagePath)) {
 			imports.add(propertyPackagePath + '.' + propertyClassName);
 		}
 
@@ -2486,7 +2502,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Document and module names
 
-		if ((!overridden) || (baseDocumentName == null)) { // not an extension
+		if ((! overridden) || (baseDocumentName == null)) { // not an extension
 			imports.add("javax.xml.bind.annotation.XmlTransient");
 			imports.add("org.skyve.CORE");
 			imports.add("org.skyve.domain.messages.DomainException");
@@ -2729,7 +2745,19 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		String parentDocumentName = document.getParentDocumentName();
+		String parentPackagePath = null;
+		String parentClassName = null;
+
 		if (parentDocumentName != null) {
+			String parentPackageName = module.getDocument(customer, parentDocumentName).getOwningModuleName();
+			parentPackagePath = String.format("modules.%s.domain.", parentPackageName);
+			parentClassName = parentDocumentName;
+			String modulePath = AbstractRepository.get().MODULES_NAMESPACE + parentPackageName;
+			if (domainExtensionClassExists(modulePath, parentDocumentName)) {
+				parentPackagePath = String.format("modules.%s.%s.", parentPackageName, parentDocumentName);
+				parentClassName += "Extension";
+			}
+
 			if (parentDocumentName.equals(documentName)) { // hierarchical
 				imports.add("java.util.List");
 				imports.add("org.skyve.domain.HierarchicalBean");
@@ -2739,7 +2767,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				imports.add("org.skyve.persistence.DocumentQuery");
 				imports.add("org.skyve.persistence.Persistence");
 			} else {
-				imports.add("modules." + module.getName() + ".domain." + parentDocumentName);
+				imports.add(parentPackagePath + parentClassName);
 				imports.add("org.skyve.domain.ChildBean");
 			}
 
@@ -2899,11 +2927,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\treturn q.beanResults();\n");
 				methods.append("\t}\n");
 			} else {
-				attributes.append("\tprivate ").append(parentDocumentName).append(" parent;\n\n");
+				attributes.append("\tprivate ").append(parentClassName).append(" parent;\n\n");
 
 				// Accessor method
 				methods.append("\n\t@Override\n");
-				methods.append("\tpublic ").append(parentDocumentName).append(" getParent() {\n");
+				methods.append("\tpublic ").append(parentClassName).append(" getParent() {\n");
 				methods.append("\t\treturn parent;\n");
 				methods.append("\t}\n");
 
@@ -2911,7 +2939,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\n\t@Override\n");
 				methods.append("\t@XmlElement\n");
 				methods.append("\tpublic void setParent(");
-				methods.append(parentDocumentName).append(" parent) {\n");
+				methods.append(parentClassName).append(" parent) {\n");
 				methods.append("\t\tpreset(ChildBean.PARENT_NAME, parent);\n");
 				methods.append("\t\tthis.parent = ").append(" parent;\n");
 				methods.append("\t}\n");
@@ -3041,9 +3069,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				.collect(Collectors.joining(", "));
 		if (parentDocumentName != null) {
 			if (parentDocumentName.equals(documentName)) { // hierarchical
-				fw.append(" implements HierarchicalBean<").append(parentDocumentName).append('>');
+				fw.append(" implements HierarchicalBean<").append(parentClassName).append('>');
 			} else {
-				fw.append(" implements ChildBean<").append(parentDocumentName).append('>');
+				fw.append(" implements ChildBean<").append(parentClassName).append('>');
 			}
 
 			if (!document.getInterfaces().isEmpty()) {
@@ -3148,13 +3176,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Checks if a domain extension class exists for the given document name in the specified package
 	 * and module path.
 	 * 
-	 * @param modulePath the path to the document's module; e.g. modules.admin
+	 * @param modulePath the path to the document's module; e.g. modules/admin
 	 * @param documentName The name of the document, e.g. Audit
 	 * @return true if the extension class exists in the expected location, false otherwise
 	 */
 	private static boolean domainExtensionClassExists(String modulePath, String documentName) {
-		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/'
-				+ documentName + "Extension.java";
+		String extensionPath = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "Extension.java";
 		if (new File(extensionPath).exists()) {
 			return true;
 		}

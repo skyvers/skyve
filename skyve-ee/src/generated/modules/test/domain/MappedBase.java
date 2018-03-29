@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import modules.test.MappedExtensionSingleStrategy.MappedExtensionSingleStrategyExtension;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
@@ -246,7 +247,7 @@ public class MappedBase extends AbstractPersistentBean {
 	/**
 	 * Composed Association
 	 **/
-	private MappedExtensionSingleStrategy composedAssociation = null;
+	private MappedExtensionSingleStrategyExtension composedAssociation = null;
 
 	@Override
 	@XmlTransient
@@ -630,7 +631,7 @@ public class MappedBase extends AbstractPersistentBean {
 	 * {@link #composedAssociation} accessor.
 	 * @return	The value.
 	 **/
-	public MappedExtensionSingleStrategy getComposedAssociation() {
+	public MappedExtensionSingleStrategyExtension getComposedAssociation() {
 		return composedAssociation;
 	}
 
@@ -639,7 +640,7 @@ public class MappedBase extends AbstractPersistentBean {
 	 * @param composedAssociation	The new value.
 	 **/
 	@XmlElement
-	public void setComposedAssociation(MappedExtensionSingleStrategy composedAssociation) {
+	public void setComposedAssociation(MappedExtensionSingleStrategyExtension composedAssociation) {
 		preset(composedAssociationPropertyName, composedAssociation);
 		this.composedAssociation = composedAssociation;
 	}

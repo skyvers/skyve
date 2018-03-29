@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import modules.test.MappedExtensionJoinedStrategy.MappedExtensionJoinedStrategyExtension;
 import modules.test.domain.MappedBase;
 import org.skyve.CORE;
 import org.skyve.domain.PolymorphicPersistentBean;
@@ -50,19 +51,19 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	/**
 	 * Aggregated Association
 	 **/
-	private MappedExtensionJoinedStrategy aggregatedAssociation = null;
+	private MappedExtensionJoinedStrategyExtension aggregatedAssociation = null;
 	/**
 	 * Aggregated Collection
 	 **/
-	private List<MappedExtensionJoinedStrategy> aggregatedCollection = new ArrayList<>();
+	private List<MappedExtensionJoinedStrategyExtension> aggregatedCollection = new ArrayList<>();
 	/**
 	 * Composed Collection
 	 **/
-	private List<MappedExtensionJoinedStrategy> composedCollection = new ArrayList<>();
+	private List<MappedExtensionJoinedStrategyExtension> composedCollection = new ArrayList<>();
 	/**
 	 * Inverse
 	 **/
-	private List<MappedExtensionJoinedStrategy> inverseAggregatedAssociation = new ArrayList<>();
+	private List<MappedExtensionJoinedStrategyExtension> inverseAggregatedAssociation = new ArrayList<>();
 	/**
 	 * Derived Integer
 	 **/
@@ -115,7 +116,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * {@link #aggregatedAssociation} accessor.
 	 * @return	The value.
 	 **/
-	public MappedExtensionJoinedStrategy getAggregatedAssociation() {
+	public MappedExtensionJoinedStrategyExtension getAggregatedAssociation() {
 		return aggregatedAssociation;
 	}
 
@@ -124,7 +125,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param aggregatedAssociation	The new value.
 	 **/
 	@XmlElement
-	public void setAggregatedAssociation(MappedExtensionJoinedStrategy aggregatedAssociation) {
+	public void setAggregatedAssociation(MappedExtensionJoinedStrategyExtension aggregatedAssociation) {
 		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
 		this.aggregatedAssociation = aggregatedAssociation;
 	}
@@ -134,7 +135,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<MappedExtensionJoinedStrategy> getAggregatedCollection() {
+	public List<MappedExtensionJoinedStrategyExtension> getAggregatedCollection() {
 		return aggregatedCollection;
 	}
 
@@ -143,7 +144,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public MappedExtensionJoinedStrategy getAggregatedCollectionElementById(String bizId) {
+	public MappedExtensionJoinedStrategyExtension getAggregatedCollectionElementById(String bizId) {
 		return getElementById(aggregatedCollection, bizId);
 	}
 
@@ -152,7 +153,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setAggregatedCollectionElementById(String bizId, MappedExtensionJoinedStrategy element) {
+	public void setAggregatedCollectionElementById(String bizId, MappedExtensionJoinedStrategyExtension element) {
 		 setElementById(aggregatedCollection, element);
 	}
 
@@ -161,7 +162,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<MappedExtensionJoinedStrategy> getComposedCollection() {
+	public List<MappedExtensionJoinedStrategyExtension> getComposedCollection() {
 		return composedCollection;
 	}
 
@@ -170,7 +171,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public MappedExtensionJoinedStrategy getComposedCollectionElementById(String bizId) {
+	public MappedExtensionJoinedStrategyExtension getComposedCollectionElementById(String bizId) {
 		return getElementById(composedCollection, bizId);
 	}
 
@@ -179,7 +180,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @param element	The new value of the element in the list.
 	 **/
-	public void setComposedCollectionElementById(String bizId, MappedExtensionJoinedStrategy element) {
+	public void setComposedCollectionElementById(String bizId, MappedExtensionJoinedStrategyExtension element) {
 		 setElementById(composedCollection, element);
 	}
 
@@ -188,7 +189,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @return	The value.
 	 **/
 	@XmlElement
-	public List<MappedExtensionJoinedStrategy> getInverseAggregatedAssociation() {
+	public List<MappedExtensionJoinedStrategyExtension> getInverseAggregatedAssociation() {
 		return inverseAggregatedAssociation;
 	}
 
@@ -197,7 +198,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 	 * @param bizId	The bizId of the element in the list.
 	 * @return	The value of the element in the list.
 	 **/
-	public MappedExtensionJoinedStrategy getInverseAggregatedAssociationElementById(String bizId) {
+	public MappedExtensionJoinedStrategyExtension getInverseAggregatedAssociationElementById(String bizId) {
 		return getElementById(inverseAggregatedAssociation, bizId);
 	}
 
