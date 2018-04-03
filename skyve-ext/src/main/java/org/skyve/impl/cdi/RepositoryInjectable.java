@@ -22,6 +22,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.test.DataFactory;
 
 /**
  * A proxy that can be Serialized with no state and continue to work after deserialization.
@@ -134,6 +135,13 @@ public class RepositoryInjectable implements Repository, Serializable {
 		return CORE.getRepository().getUploadAction(customer, document, className, runtime);
 	}
 
+	@Override
+	public DataFactory getDataFactory(Customer customer,
+										String moduleName,
+										String documentName) {
+		return CORE.getRepository().getDataFactory(customer, moduleName, documentName);
+	}
+	
 	@Override
 	public User retrieveUser(String userName) {
 		return CORE.getRepository().retrieveUser(userName);

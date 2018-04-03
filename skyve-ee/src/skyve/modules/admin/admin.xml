@@ -286,6 +286,9 @@
 					<action name="GenerateQuery" />
 					<action name="SendMail" />
 					<action name="SwapCustomer" />
+					<action name="GenerateMenuSAIL" />
+					<action name="GenerateModuleSAIL" />
+					<action name="ExecuteSAIL" />
 				</document>
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />

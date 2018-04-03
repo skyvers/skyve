@@ -193,7 +193,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 						value = String.valueOf(index);
 					}
 					else {
-						throw new MetaDataException(String.format("Value %s does not exist in combo [%s] in document %s.%s. Check the test data factory!",
+						throw new MetaDataException(String.format("Value %s does not exist in combo [%s] in document %s.%s. Check the data factory!",
 																	value,
 																	binding,
 																	bean.getBizModule(),

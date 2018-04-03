@@ -465,7 +465,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Automation unmarshalSAIL(String file) {
+	public static Automation unmarshalSAILFile(String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -481,6 +481,17 @@ public class XMLMetaData {
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not unmarshal SAIL at " + file, e);
+		}
+	}
+
+	public static Automation unmarshalSAIL(String sail) {
+		try (StringReader sr = new StringReader(sail)) {
+			Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
+			unmarshaller.setSchema(SAIL_SCHEMA);
+			return (Automation) unmarshaller.unmarshal(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL " + sail, e);
 		}
 	}
 

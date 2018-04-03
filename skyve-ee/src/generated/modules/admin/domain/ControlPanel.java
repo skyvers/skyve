@@ -1,17 +1,25 @@
 package modules.admin.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.domain.AbstractTransientBean;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
 /**
  * Control Panel
  * 
+ * @depend - - - SailUserAgentType
+ * @depend - - - SailExecutor
  * @navhas n emailToContact 0..1 Contact
+ * @navhas n sailUser 0..1 User
  * @stereotype "transient"
  */
 @XmlType
@@ -63,9 +71,180 @@ public class ControlPanel extends AbstractTransientBean {
 	/** @hidden */
 	public static final String emailContentPropertyName = "emailContent";
 	/** @hidden */
+	public static final String sailUserPropertyName = "sailUser";
+	/** @hidden */
+	public static final String sailModuleNamePropertyName = "sailModuleName";
+	/** @hidden */
+	public static final String sailUxUiPropertyName = "sailUxUi";
+	/** @hidden */
+	public static final String sailUserAgentTypePropertyName = "sailUserAgentType";
+	/** @hidden */
+	public static final String sailExecutorPropertyName = "sailExecutor";
+	/** @hidden */
+	public static final String sailComponentBuilderPropertyName = "sailComponentBuilder";
+	/** @hidden */
+	public static final String sailLayoutBuilderPropertyName = "sailLayoutBuilder";
+	/** @hidden */
+	public static final String sailPropertyName = "sail";
+	/** @hidden */
 	public static final String resultsPropertyName = "results";
 	/** @hidden */
 	public static final String tabIndexPropertyName = "tabIndex";
+
+	/**
+	 * User Agent Type
+	 **/
+	@XmlEnum
+	public static enum SailUserAgentType implements Enumeration {
+		desktop("desktop", "Desktop"),
+		tablet("tablet", "Tablet"),
+		phone("phone", "Phone"),
+		other("other", "Other");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private SailUserAgentType(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static SailUserAgentType fromCode(String code) {
+			SailUserAgentType result = null;
+
+			for (SailUserAgentType value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static SailUserAgentType fromDescription(String description) {
+			SailUserAgentType result = null;
+
+			for (SailUserAgentType value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				SailUserAgentType[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (SailUserAgentType value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Executor
+	 **/
+	@XmlEnum
+	public static enum SailExecutor implements Enumeration {
+		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private SailExecutor(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static SailExecutor fromCode(String code) {
+			SailExecutor result = null;
+
+			for (SailExecutor value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static SailExecutor fromDescription(String description) {
+			SailExecutor result = null;
+
+			for (SailExecutor value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				SailExecutor[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (SailExecutor value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
 
 	/**
 	 * XML
@@ -153,6 +332,38 @@ public class ControlPanel extends AbstractTransientBean {
 	 * Email
 	 **/
 	private String emailContent;
+	/**
+	 * User
+	 **/
+	private User sailUser = null;
+	/**
+	 * Module Name
+	 **/
+	private String sailModuleName;
+	/**
+	 * UX/UI
+	 **/
+	private String sailUxUi;
+	/**
+	 * User Agent Type
+	 **/
+	private SailUserAgentType sailUserAgentType;
+	/**
+	 * Executor
+	 **/
+	private SailExecutor sailExecutor;
+	/**
+	 * Component Builder
+	 **/
+	private String sailComponentBuilder = "org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain";
+	/**
+	 * Layout Builder
+	 **/
+	private String sailLayoutBuilder = "org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder";
+	/**
+	 * SAIL
+	 **/
+	private String sail;
 	/**
 	 * Results
 	 **/
@@ -499,6 +710,150 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setEmailContent(String emailContent) {
 		preset(emailContentPropertyName, emailContent);
 		this.emailContent = emailContent;
+	}
+
+	/**
+	 * {@link #sailUser} accessor.
+	 * @return	The value.
+	 **/
+	public User getSailUser() {
+		return sailUser;
+	}
+
+	/**
+	 * {@link #sailUser} mutator.
+	 * @param sailUser	The new value.
+	 **/
+	@XmlElement
+	public void setSailUser(User sailUser) {
+		preset(sailUserPropertyName, sailUser);
+		this.sailUser = sailUser;
+	}
+
+	/**
+	 * {@link #sailModuleName} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailModuleName() {
+		return sailModuleName;
+	}
+
+	/**
+	 * {@link #sailModuleName} mutator.
+	 * @param sailModuleName	The new value.
+	 **/
+	@XmlElement
+	public void setSailModuleName(String sailModuleName) {
+		preset(sailModuleNamePropertyName, sailModuleName);
+		this.sailModuleName = sailModuleName;
+	}
+
+	/**
+	 * {@link #sailUxUi} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailUxUi() {
+		return sailUxUi;
+	}
+
+	/**
+	 * {@link #sailUxUi} mutator.
+	 * @param sailUxUi	The new value.
+	 **/
+	@XmlElement
+	public void setSailUxUi(String sailUxUi) {
+		preset(sailUxUiPropertyName, sailUxUi);
+		this.sailUxUi = sailUxUi;
+	}
+
+	/**
+	 * {@link #sailUserAgentType} accessor.
+	 * @return	The value.
+	 **/
+	public SailUserAgentType getSailUserAgentType() {
+		return sailUserAgentType;
+	}
+
+	/**
+	 * {@link #sailUserAgentType} mutator.
+	 * @param sailUserAgentType	The new value.
+	 **/
+	@XmlElement
+	public void setSailUserAgentType(SailUserAgentType sailUserAgentType) {
+		preset(sailUserAgentTypePropertyName, sailUserAgentType);
+		this.sailUserAgentType = sailUserAgentType;
+	}
+
+	/**
+	 * {@link #sailExecutor} accessor.
+	 * @return	The value.
+	 **/
+	public SailExecutor getSailExecutor() {
+		return sailExecutor;
+	}
+
+	/**
+	 * {@link #sailExecutor} mutator.
+	 * @param sailExecutor	The new value.
+	 **/
+	@XmlElement
+	public void setSailExecutor(SailExecutor sailExecutor) {
+		preset(sailExecutorPropertyName, sailExecutor);
+		this.sailExecutor = sailExecutor;
+	}
+
+	/**
+	 * {@link #sailComponentBuilder} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailComponentBuilder() {
+		return sailComponentBuilder;
+	}
+
+	/**
+	 * {@link #sailComponentBuilder} mutator.
+	 * @param sailComponentBuilder	The new value.
+	 **/
+	@XmlElement
+	public void setSailComponentBuilder(String sailComponentBuilder) {
+		preset(sailComponentBuilderPropertyName, sailComponentBuilder);
+		this.sailComponentBuilder = sailComponentBuilder;
+	}
+
+	/**
+	 * {@link #sailLayoutBuilder} accessor.
+	 * @return	The value.
+	 **/
+	public String getSailLayoutBuilder() {
+		return sailLayoutBuilder;
+	}
+
+	/**
+	 * {@link #sailLayoutBuilder} mutator.
+	 * @param sailLayoutBuilder	The new value.
+	 **/
+	@XmlElement
+	public void setSailLayoutBuilder(String sailLayoutBuilder) {
+		preset(sailLayoutBuilderPropertyName, sailLayoutBuilder);
+		this.sailLayoutBuilder = sailLayoutBuilder;
+	}
+
+	/**
+	 * {@link #sail} accessor.
+	 * @return	The value.
+	 **/
+	public String getSail() {
+		return sail;
+	}
+
+	/**
+	 * {@link #sail} mutator.
+	 * @param sail	The new value.
+	 **/
+	@XmlElement
+	public void setSail(String sail) {
+		preset(sailPropertyName, sail);
+		this.sail = sail;
 	}
 
 	/**

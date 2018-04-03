@@ -19,7 +19,6 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
-import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -29,6 +28,7 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -69,7 +69,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.Util;
+import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.skyve.util.DataBuilder;
 
 public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
@@ -85,7 +86,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	public void executePushListContext(PushListContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		String moduleName = push.getModuleName();
-		Customer c = CORE.getUser().getCustomer();
+		Customer c = getUser().getCustomer();
 		Module m = c.getModule(moduleName);
 		String documentName = push.getDocumentName();
 		String queryName = push.getQueryName();
@@ -241,31 +242,19 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		PrimeFacesAutomationContext context = peek();
 		String moduleName = context.getModuleName();
 		String documentName = context.getDocumentName();
-		User u = CORE.getUser();
+		User u = getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
-		AbstractRepository r = (AbstractRepository) CORE.getRepository();
-		Class<?> factoryClass = null;
-		try {
-			factoryClass = r.getJavaClass(null, String.format("modules.%s.util.%sFactoryExtension", moduleName, documentName));
-		}
-		catch (MetaDataException e) {
-			factoryClass = r.getJavaClass(null, String.format("modules.%s.util.%sFactory", moduleName, documentName));
-		}
+		Repository r = CORE.getRepository();
+		
 		Bean bean = null;
-		try {
-			if (factoryClass == null) {
-				bean = Util.constructRandomInstance(u, m, d, 1);
-			}
-			else {
-				// Should be the interface but its in the skyve-ee test package
-				Object factory = factoryClass.newInstance();
-				bean = (Bean) factoryClass.getMethod("getInstance").invoke(factory);
-			}
+		String fixture = testDataEnter.getFixture();
+		if (fixture == null) {
+			bean = new DataBuilder(u).fixture(FixtureType.sail).build(d);
 		}
-		catch (Exception e) {
-			throw new MetaDataException(String.format("Could not create a random instance of %s.%s", moduleName, documentName) , e);
+		else {
+			bean = new DataBuilder(u).fixture(fixture).build(d);
 		}
 		
         ViewImpl view = (ViewImpl) r.getView(context.getUxui(), c, d, context.getViewType().toString());
@@ -592,7 +581,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 
 		// Determine the Document of the edit view to push
-		Customer c = CORE.getUser().getCustomer();
+		Customer c = getUser().getCustomer();
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);

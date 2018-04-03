@@ -71,6 +71,7 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.test.DataFactory;
 
 /**
  * Do not instantiate directly, use the RepositoryFactory.
@@ -785,6 +786,42 @@ public class LocalDesignRepository extends AbstractRepository {
 	@Override
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
 		return getAction(customer, document, uploadActionName, true, runtime);
+	}
+
+	@Override
+	public DataFactory getDataFactory(Customer customer, String moduleName, String documentName) {
+		DataFactory result = null;
+		
+		try {
+			Class<?> factoryClass = null;
+			try {
+				factoryClass = getJavaClass(null, String.format("customers.%s.modules.%s.%s.%sFactory",
+																	customer.getName(),
+																	moduleName,
+																	documentName,
+																	documentName));
+			}
+			catch (MetaDataException e) {
+				// overridden customer data factory class doesn't exist, so continue
+			}
+			if (factoryClass == null) {
+				factoryClass = getJavaClass(null, String.format("modules.%s.%s.%sFactory", moduleName, documentName, documentName));
+			}
+			if (factoryClass != null) {
+				result = (DataFactory) factoryClass.newInstance();
+			}
+		}
+		catch (MetaDataException e) {
+			// module data factory class doesn't exist
+		}
+		catch (Exception e) {
+			throw new MetaDataException(String.format("Cannot create a new instance of %s.%s data factory",
+														moduleName,
+														documentName),
+											e);
+		}
+		
+		return result;
 	}
 
 	@Override

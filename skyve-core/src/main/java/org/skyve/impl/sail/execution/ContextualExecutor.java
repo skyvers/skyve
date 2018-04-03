@@ -18,10 +18,12 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
+	private User user = null;
 	private String currentUxUi = null;
 	private UserAgentType currentUserAgentType = null;
 	private TestStrategy testStrategy = null;
@@ -92,7 +94,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		T context = peek();
 		context.setViewType(ViewType.list);
 		
-		Customer c = CORE.getUser().getCustomer();
+		Customer c = user.getCustomer();
 		Module m = c.getModule(list.getModuleName());
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
@@ -169,5 +171,15 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	
 	public TestStrategy getTestStrategy() {
 		return testStrategy;
+	}
+	
+	@Override
+	public User getUser() {
+		return user;
+	}
+	
+	@Override
+	public void setUser(User user) {
+		this.user = user;
 	}
 }

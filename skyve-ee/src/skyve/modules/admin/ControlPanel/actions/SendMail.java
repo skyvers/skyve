@@ -15,6 +15,7 @@ public class SendMail implements ServerSideAction<ControlPanelExtension> {
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
 	throws Exception {
+		bean.setTabIndex(null);
 		try {
 			String emailTo = bean.getEmailTo();
 			Contact emailToContact = bean.getEmailToContact();

@@ -13,9 +13,11 @@ public class EvictFromCache implements ServerSideAction<ControlPanelExtension> {
 	@Override
 	public ServerSideActionResult<ControlPanelExtension> execute(ControlPanelExtension bean, WebContext webContext) 
 	throws Exception {
+		bean.setResults(null);
+		bean.setTabIndex(null);
+
 		try {
 			CORE.getRepository().evictCachedMetaData(null);
-			bean.setResults(null);
 		}
 		catch (Exception e) {
 			bean.trapException(e);

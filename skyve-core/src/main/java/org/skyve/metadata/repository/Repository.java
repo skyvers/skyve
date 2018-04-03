@@ -17,6 +17,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
+import org.skyve.util.test.DataFactory;
 
 /**
  * 
@@ -136,6 +137,8 @@ public interface Repository {
 	 */
 	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime);
 
+	public DataFactory getDataFactory(Customer customer, String moduleName, String documentName);
+	
 	/**
 	 * 
 	 * @param userName

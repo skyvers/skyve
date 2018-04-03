@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.impl.metadata.repository.AbstractRepository;
+import org.skyve.impl.metadata.repository.router.Router;
+import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.Module;
@@ -61,6 +63,18 @@ public class ControlPanelBizlet extends Bizlet<ControlPanel> {
 				result.add(new DomainValue(cus));
 			}
 			Collections.sort(result, new ModulesUtil.DomainValueSortByDescription());
+		}
+		else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
+			AbstractRepository r = AbstractRepository.get();
+			for (String moduleName : r.getAllVanillaModuleNames()) {
+				result.add(new DomainValue(moduleName));
+			}
+		}
+		else if (ControlPanel.sailUxUiPropertyName.equals(attributeName)) {
+			Router r = CORE.getRepository().getRouter();
+			for (UxUiMetadata uxui : r.getUxUis()) {
+				result.add(new DomainValue(uxui.getName()));
+			}
 		}
 
 		return result;

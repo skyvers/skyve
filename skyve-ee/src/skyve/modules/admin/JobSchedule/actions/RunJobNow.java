@@ -17,9 +17,6 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 public class RunJobNow implements ServerSideAction<JobSchedule> {
-	/**
-	 * For Serialization
-	 */
 	private static final long serialVersionUID = -1037253249182913062L;
 
 	@Override
@@ -49,7 +46,7 @@ public class RunJobNow implements ServerSideAction<JobSchedule> {
 		EXT.runOneShotJob(job, bean, user);
 
 		// Used to update the UI.
-		bean.setJobScheduledImmediately(true);
+		bean.setJobScheduledImmediately(Boolean.TRUE);
 
 		return new ServerSideActionResult<>(bean);
 	}

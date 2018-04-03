@@ -181,6 +181,7 @@
 
   <xs:complexType name="testDataEnter">
     <xs:sequence/>
+    <xs:attribute name="fixture" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataEnter">

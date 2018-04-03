@@ -1,26 +1,12 @@
 package modules.admin.Contact;
 
-import java.util.List;
+import org.skyve.domain.Bean;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.web.WebContext;
 
-import modules.ModulesUtil;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
-import modules.admin.domain.DataGroup;
-import modules.admin.domain.User;
-
-import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.domain.messages.Message;
-import org.skyve.domain.messages.ValidationException;
-import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.model.document.Document;
-import org.skyve.metadata.module.Module;
-import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
-import org.skyve.web.WebContext;
 
 public class ContactBizlet extends Bizlet<Contact> {
 	private static final long serialVersionUID = 6794069388827546373L;

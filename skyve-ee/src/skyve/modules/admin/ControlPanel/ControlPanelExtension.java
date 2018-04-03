@@ -23,7 +23,12 @@ public class ControlPanelExtension extends ControlPanel {
 	 */
 	@Override
 	public void setResults(String results) {
-		super.setResults('\n' + results.replace("{", "\\{").replace("<", "&lt;").replace(">", "&gt;"));
+		if (results == null) {
+			super.setResults(null);
+		}
+		else {
+			super.setResults('\n' + results.replace("{", "\\{").replace("<", "&lt;").replace(">", "&gt;"));
+		}
 	}
 	
 	@Override

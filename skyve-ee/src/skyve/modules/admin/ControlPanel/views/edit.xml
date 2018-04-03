@@ -78,6 +78,72 @@
 				</row>
 			</form>
 		</tab>
+		<tab title="SAIL">
+			<form border="true" borderTitle="User">
+				<column pixelWidth="120" />
+				<column />
+				<row>
+					<item>
+						<lookupDescription binding="sailUser" descriptionBinding="bizKey" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Generate">
+				<column pixelWidth="120" />
+				<column />
+				<column pixelWidth="100" />
+				<column pixelWidth="100" />
+				<row>
+					<item>
+						<combo binding="sailModuleName" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailUxUi" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="sailUserAgentType" />
+					</item>
+					<item align="right">
+						<button actionName="GenerateMenuSAIL" pixelWidth="90" />
+					</item>
+					<item align="right">
+						<button actionName="GenerateModuleSAIL" pixelWidth="90" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="Execute">
+				<column pixelWidth="120" />
+				<column />
+				<column pixelWidth="100" />
+				<row>
+					<item>
+						<combo binding="sailExecutor" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sailComponentBuilder" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="sailLayoutBuilder" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="sail" />
+					</item>
+					<item align="right">
+						<button actionName="ExecuteSAIL" pixelWidth="90" />
+					</item>
+				</row>
+			</form>
+		</tab>
 		<tab title="Results">
 			<form>
 				<column />
@@ -220,5 +286,8 @@
 		<action className="GenerateQuery" displayName="Query XML" inActionPanel="false" />
 		<action className="SendMail" displayName="Send Mail" inActionPanel="false" />
 		<action className="ExecuteQuery" displayName="Execute" inActionPanel="false" />
+		<action className="GenerateMenuSAIL" displayName="Menu SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) menu" />
+		<action className="GenerateModuleSAIL" displayName="Module SAIL" inActionPanel="false" toolTip="Generate SAIL using the module(s) documents" />
+		<action className="ExecuteSAIL" displayName="Execute" inActionPanel="false" toolTip="Execute SAIL and output results" />
 	</actions>
 </view>

@@ -7,6 +7,7 @@
 	<pluralAlias>Control Panels</pluralAlias>
 	<iconStyleClass>fa fa-sliders</iconStyleClass>
 	<attributes>
+		<!-- Instrumentation attributes -->
 		<boolean name="xmlTrace">
 			<displayName>XML</displayName>
 			<description>Log XML metadata parse operations</description>
@@ -55,6 +56,7 @@
 			<description>Output any SQL logged in a more readable multiline format.</description>
 		</boolean>
 -->
+		<!-- Design attributes -->
 		<text name="designModuleDocumentName">
 			<displayName>Module.Document Name</displayName>
 			<domain>variant</domain>
@@ -88,6 +90,50 @@
 		<markup name="emailContent">
 			<displayName>Email</displayName>
 		</markup>
+		<!-- SAIL Attributes -->
+		<association name="sailUser" type="aggregation">
+			<displayName>User</displayName>
+			<documentName>User</documentName>
+		</association>
+		<text name="sailModuleName">
+			<displayName>Module Name</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<text name="sailUxUi">
+			<displayName>UX/UI</displayName>
+			<domain>variant</domain>
+			<length>50</length>
+		</text>
+		<enum name="sailUserAgentType">
+			<displayName>User Agent Type</displayName>
+			<values>
+				<value code="desktop" description="Desktop" />
+				<value code="tablet" description="Tablet" />
+				<value code="phone" description="Phone" />
+				<value code="other" description="Other" />
+			</values>
+		</enum>
+		<enum name="sailExecutor">
+			<displayName>Executor</displayName>
+			<values>
+				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor" description="PrimeFaces Inline Selenese" />
+			</values>
+		</enum>
+		<text name="sailComponentBuilder">
+			<displayName>Component Builder</displayName>
+			<defaultValue>org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain</defaultValue>
+			<length>256</length>
+		</text>
+		<text name="sailLayoutBuilder">
+			<displayName>Layout Builder</displayName>
+			<defaultValue>org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder</defaultValue>
+			<length>256</length>
+		</text>
+		<memo name="sail">
+			<displayName>SAIL</displayName>
+		</memo>
+		<!-- Results -->
 		<memo name="results">
 			<displayName>Results</displayName>
 		</memo>
