@@ -40,7 +40,7 @@ public class DataGridZoom implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDataGridZoom(this);
 	}
 	
 	@Override

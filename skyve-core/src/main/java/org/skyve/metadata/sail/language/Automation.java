@@ -13,11 +13,19 @@ import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.util.Util;
 
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "before", "interactions", "after"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"uxui", "userAgentType", "testStrategy", "before", "interactions", "after"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Automation implements Executable {
+	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
+	public static enum TestStrategy {
+		Assert,
+		Verify,
+		None
+	}
+	
 	private String uxui;
 	private UserAgentType userAgentType;
+	private TestStrategy testStrategy;
 	private Procedure before;
 	private List<Interaction> interactions = new ArrayList<>();
 	private Procedure after;
@@ -38,6 +46,16 @@ public class Automation implements Executable {
 	@XmlAttribute(name = "userAgentType", required = true)
 	public void setUserAgentType(UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
+	}
+
+	
+	public TestStrategy getTestStrategy() {
+		return testStrategy;
+	}
+
+	@XmlAttribute(name = "testStrategy")
+	public void setTestStrategy(TestStrategy testStrategy) {
+		this.testStrategy = testStrategy;
 	}
 
 	public Procedure getBefore() {
@@ -65,6 +83,6 @@ public class Automation implements Executable {
 	
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeAutomation(this);
 	}
 }

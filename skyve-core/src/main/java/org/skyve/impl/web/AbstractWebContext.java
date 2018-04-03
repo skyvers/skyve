@@ -35,6 +35,7 @@ public abstract class AbstractWebContext implements Serializable, WebContext {
 	public static final String REPORT_FORMAT = "_f";
 	public static final String RESOURCE_FILE_NAME = "_n";
 	public static final String CURRENT_TIME_IN_MILLIS = "_ctim";
+	public static final String IS_LIST = "_list";
 
 	private Map<String, Bean> contextBeans = new TreeMap<>();
 

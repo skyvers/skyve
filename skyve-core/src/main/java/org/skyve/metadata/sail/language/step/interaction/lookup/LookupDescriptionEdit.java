@@ -30,7 +30,7 @@ public class LookupDescriptionEdit implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeLookupDescriptionEdit(this);
 	}
 	
 	@Override

@@ -13,6 +13,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
@@ -92,7 +93,32 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 	}
 	
 	@Override
+	public UIComponent actionButton(UIComponent component,
+										String listBinding,
+										String listVar,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action) {
+		if (component != null) {
+			put(button.getActionName(), component, button);
+		}
+		return component;
+	}
+	
+	@Override
 	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+	
+	@Override
+	public UIComponent downloadButton(UIComponent component,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action,
+										String moduleName,
+										String documentName) {
 		if (component != null) {
 			put(action.getName(), component, action);
 		}
@@ -102,6 +128,17 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 
 	@Override
 	public UIComponent report(UIComponent component, Action action) {
+		if (component != null) {
+			put(action.getName(), component, action);
+		}
+		
+		return component;
+	}
+	
+	@Override
+	public UIComponent reportButton(UIComponent component,
+										org.skyve.impl.metadata.view.widget.Button button,
+										Action action) {
 		if (component != null) {
 			put(action.getName(), component, action);
 		}
@@ -255,6 +292,15 @@ System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 	@Override
 	public UIComponent spinner(UIComponent component, String listVar, Spinner spinner, String title, boolean required) {
 		return putByBinding(spinner, component);
+	}
+	
+	@Override
+	public UIComponent tab(UIComponent component, Tab tab) {
+		if (component != null) {
+			// TODO this needs to take into account that it could be nested in other tabs and have a name clash
+			put(tab.getTitle() + " Tab", component, tab);
+		}
+		return component;
 	}
 	
 	@Override

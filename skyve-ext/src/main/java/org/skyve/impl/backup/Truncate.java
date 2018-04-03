@@ -51,7 +51,7 @@ public class Truncate {
 					sql.setLength(sql.length() - 1); // remove the comma
 
 					BackupUtil.secureSQL(sql, table, customerName);
-					UtilImpl.LOGGER.info("unlink table " + table.name);
+					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("unlink table " + table.name);
 					persistence.newSQL(sql.toString()).execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -64,7 +64,7 @@ public class Truncate {
 					sql.setLength(0);
 					sql.append("delete from ").append(table.name);
 					BackupUtil.secureSQL(sql, table, customerName);
-					UtilImpl.LOGGER.info("delete joining table " + table.name);
+					if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete joining table " + table.name);
 					persistence.newSQL(sql.toString()).execute();
 					persistence.commit(false);
 					persistence.begin();
@@ -82,7 +82,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.name);
 				BackupUtil.secureSQL(sql, table, customerName);
-				UtilImpl.LOGGER.info("delete extension table " + table.name);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete extension table " + table.name);
 				persistence.newSQL(sql.toString()).execute();
 				persistence.commit(false);
 				persistence.begin();
@@ -99,7 +99,7 @@ public class Truncate {
 				sql.setLength(0);
 				sql.append("delete from ").append(table.name);
 				BackupUtil.secureSQL(sql, table, customerName);
-				UtilImpl.LOGGER.info("delete table " + table.name);
+				if (UtilImpl.COMMAND_TRACE) UtilImpl.LOGGER.info("delete table " + table.name);
 				persistence.newSQL(sql.toString()).execute();
 				persistence.commit(false);
 				persistence.begin();

@@ -11,12 +11,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -24,6 +24,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 public abstract class ContextualExecutor<T extends AutomationContext> implements Executor {
 	private String currentUxUi = null;
 	private UserAgentType currentUserAgentType = null;
+	private TestStrategy testStrategy = null;
 	
 	private Stack<T> contextStack = new Stack<>();
 
@@ -46,7 +47,21 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 
 	protected final T pop() {
-		return contextStack.pop();
+		T result = contextStack.pop();
+
+		T current = contextStack.peek();
+		if (current != null) {
+			String uxui = current.getUxui();
+			if (uxui != null) {
+				currentUxUi = uxui;
+			}
+			UserAgentType userAgentType = current.getUserAgentType();
+			if (userAgentType != null) {
+				currentUserAgentType = userAgentType;
+			}
+		}
+
+		return result;
 	}
 	
 	protected final T peek() {
@@ -62,29 +77,18 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(Automation automation) {
+	public void executeAutomation(Automation automation) {
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
+		testStrategy = automation.getTestStrategy();
 	}
 	
 	/**
 	 * Do nothing but populate the automation context.
 	 * This is intended to be called by sub-classes.
-	 * 
-	 * Note :- For edit views we cannot tell if we need to use the create view or not.
-	 * 			If a tester knows we need the create view, they should use NavigateEdit with create="true".
 	 */
 	@Override
-	public void execute(NavigateMenu menu) {
-		// TODO implement
-	}
-
-	/**
-	 * Do nothing but populate the automation context.
-	 * This is intended to be called by sub-classes.
-	 */
-	@Override
-	public void execute(NavigateList list) {
+	public void executeNavigateList(NavigateList list) {
 		T context = peek();
 		context.setViewType(ViewType.list);
 		
@@ -118,7 +122,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(NavigateEdit edit) {
+	public void executeNavigateEdit(NavigateEdit edit) {
 		T context = peek();
 		context.setViewType(ViewType.edit);
 		context.setModuleName(edit.getModuleName());
@@ -130,8 +134,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(NavigateTree tree) {
-		execute((NavigateList) tree);
+	public void executeNavigateTree(NavigateTree tree) {
+		executeNavigateList(tree);
 	}
 
 	/**
@@ -139,8 +143,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(NavigateMap map) {
-		execute((NavigateList) map);
+	public void executeNavigateMap(NavigateMap map) {
+		executeNavigateList(map);
 	}
 
 	/**
@@ -148,8 +152,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(NavigateCalendar calendar) {
-		execute((NavigateList) calendar);
+	public void executeNavigateCalendar(NavigateCalendar calendar) {
+		executeNavigateList(calendar);
 	}
 	
 	/**
@@ -157,9 +161,13 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void execute(NavigateLink link) {
+	public void executeNavigateLink(NavigateLink link) {
 		T context = peek();
 		context.setDocumentName(null);
 		context.setViewType(null);
+	}
+	
+	public TestStrategy getTestStrategy() {
+		return testStrategy;
 	}
 }

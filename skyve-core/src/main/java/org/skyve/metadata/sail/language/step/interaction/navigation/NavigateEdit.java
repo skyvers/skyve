@@ -50,7 +50,7 @@ public class NavigateEdit implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateEdit(this);
 	}
 	
 	@Override

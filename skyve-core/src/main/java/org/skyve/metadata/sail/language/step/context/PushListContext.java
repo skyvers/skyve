@@ -41,7 +41,7 @@ public class PushListContext extends NavigateList {
 	
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executePushListContext(this);
 	}
 
 	@Override

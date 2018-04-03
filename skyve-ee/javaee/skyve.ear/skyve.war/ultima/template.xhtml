@@ -24,7 +24,7 @@
 			<link rel="icon" type="image/png" href="#{bean.baseHref}/images/window/skyve_fav.png" />
 			<link type="text/css" rel="stylesheet" href="#{bean.baseHref}/css/prime-min.css?v=#{bean.webResourceFileVersion}" />
 			<h:outputStylesheet name="css/ultima.css" library="skyve" />
-			<title>#{title}</title>
+			<title>Skyve</title>
 <!-- normally commented out for security reasons
 			<h:outputText value="#{bean.skyveVersionComment}" escape="false" />
 -->	
@@ -45,6 +45,7 @@
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="leftMenu" value="#{leftMenu}" />
 					<ui:param name="topMenu" value="#{topMenu}" />
+					<ui:param name="title" value="#{bean.title}" />
 				</ui:include>
 	
 				<h:form id="menuform" prependId="false" rendered="#{leftMenu}">
@@ -60,13 +61,15 @@
 					<p:messages id="messages" widgetVar="messages" globalOnly="true" autoUpdate="true" />
 					<p:growl id="growl" widgetVar="growl" globalOnly="true" autoUpdate="true" />
 					<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
-					<p:confirmDialog global="true">
-						<p:commandButton value="Cancel" 
+					<p:confirmDialog id="confirm" global="true">
+						<p:commandButton id="confirmCancel" 
+											value="Cancel" 
 											type="button"
 											styleClass="ui-confirmdialog-no" 
 											style="float:right;"
 											icon="ui-icon-close" />
-						<p:commandButton value="OK" 
+						<p:commandButton id="confirmOK" 
+											value="OK" 
 											type="button"
 											styleClass="ui-confirmdialog-yes" 
 											style="float:right;"
@@ -83,6 +86,7 @@
 										<h:graphicImage name="images/skyve_inv.png" library="skyve" />
 									</span>
 									<span class="footer-text-right">
+										<span>Version ${project.version}</span>
 										<span class="ui-icon ui-icon-copyright"></span>
 										<span>All Rights Reserved</span>
 									</span>
@@ -95,7 +99,7 @@
 	
 			<p:ajaxStatus style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
 				<f:facet name="start">
-					<i class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
+					<i id="busy" class="fa fa-circle-o-notch fa-spin ajax-loader" aria-hidden="true"></i>
 				</f:facet>
 				<f:facet name="complete">
 					<h:outputText value="" />

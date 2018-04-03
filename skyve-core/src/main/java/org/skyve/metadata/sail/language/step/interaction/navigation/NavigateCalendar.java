@@ -15,6 +15,6 @@ import org.skyve.metadata.sail.execution.Executor;
 public class NavigateCalendar extends NavigateList {
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateCalendar(this);
 	}
 }

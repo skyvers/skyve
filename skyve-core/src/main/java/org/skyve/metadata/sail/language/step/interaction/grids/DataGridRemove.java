@@ -40,7 +40,7 @@ public class DataGridRemove implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeDataGridRemove(this);
 	}
 	
 	@Override

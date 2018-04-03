@@ -27,6 +27,9 @@ public class ReportAction extends ParameterizableAction {
 	private String documentName;
 	private String reportName;
 	private ReportFormat reportFormat;
+	private Boolean listReport;
+	private String queryName;
+	private String modelName;
 	
 	public String getModuleName() {
 		return moduleName;
@@ -63,7 +66,34 @@ public class ReportAction extends ParameterizableAction {
 	public void setReportFormat(ReportFormat reportFormat) {
 		this.reportFormat = reportFormat;
 	}
-	
+
+	public Boolean isListReport() {
+		return listReport;
+	}
+
+	@XmlAttribute
+	public void setListReport(Boolean listReport) {
+		this.listReport = listReport;
+	}
+
+	public String getQueryName() {
+		return queryName;
+	}
+
+	@XmlAttribute
+	public void setQueryName(String queryName) {
+		this.queryName = queryName;
+	}
+
+	public String getModelName() {
+		return modelName;
+	}
+
+	@XmlAttribute
+	public void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
+
 	@Override
 	public ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
@@ -89,6 +119,24 @@ public class ReportAction extends ParameterizableAction {
 			p = new ParameterImpl();
 			p.setName(AbstractWebContext.REPORT_FORMAT);
 			p.setValue(reportFormat.name());
+			parameters.add(p);
+		}
+		if (listReport != null) {
+			p = new ParameterImpl();
+			p.setName(AbstractWebContext.IS_LIST);
+			p.setValue(Boolean.toString(listReport));
+			parameters.add(p);
+		}
+		if (queryName != null) {
+			p = new ParameterImpl();
+			p.setName(AbstractWebContext.QUERY_NAME);
+			p.setValue(queryName);
+			parameters.add(p);
+		}
+		if (modelName != null) {
+			p = new ParameterImpl();
+			p.setName(AbstractWebContext.MODEL_NAME);
+			p.setValue(modelName);
 			parameters.add(p);
 		}
 		

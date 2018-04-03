@@ -36,7 +36,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 	}
 
 	@Override
-	public final void execute(Execute execute) {
+	public final void executeExecute(Execute execute) {
 		indent().append(execute.getScript()).newline();
 	}
 	

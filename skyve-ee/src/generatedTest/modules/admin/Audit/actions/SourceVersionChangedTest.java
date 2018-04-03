@@ -1,8 +1,8 @@
 package modules.admin.Audit.actions;
 
+import modules.admin.Audit.AuditFactoryExtension;
 import modules.admin.domain.Audit;
 import modules.admin.util.AuditFactory;
-import modules.admin.util.AuditFactoryExtension;
 import util.AbstractActionTest;
 
 /**

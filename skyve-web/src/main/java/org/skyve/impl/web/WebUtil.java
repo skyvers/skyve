@@ -158,32 +158,28 @@ public class WebUtil {
 		return user;
 	}
 	
-	public static Bean getConversationBeanFromRequest(HttpServletRequest request,
-														HttpServletResponse response)
+	public static Bean getConversationBeanFromRequest(AbstractWebContext webContext,
+														HttpServletRequest request)
 	throws Exception {
 		// Find the context bean
 		// Note - if there is no form in the view then there is no web context
 		Bean result = null;
-		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
-        if (contextKey != null) {
-    		AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
-    		if (webContext != null) {
-	    		result = webContext.getCurrentBean();
-	
-				String bizId = request.getParameter(Bean.DOCUMENT_ID); 
-		    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
-	    		if (formBinding != null) { // sub-form
-	        		// find the process bean
-	        		Object referenceValue = BindUtil.get(result, formBinding);
-	        		if (referenceValue instanceof List<?>) {
-	        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
-	        		}
-	        		else {
-	        			result = (Bean) referenceValue;
-	        		}
-	        	}
-    		}
-        }
+		if (webContext != null) {
+    		result = webContext.getCurrentBean();
+
+			String bizId = request.getParameter(Bean.DOCUMENT_ID); 
+	    	String formBinding = request.getParameter(AbstractWebContext.BINDING_NAME);
+    		if (formBinding != null) { // sub-form
+        		// find the process bean
+        		Object referenceValue = BindUtil.get(result, formBinding);
+        		if (referenceValue instanceof List<?>) {
+        			result = BindUtil.getElementInCollection(result, formBinding, bizId); 
+        		}
+        		else {
+        			result = (Bean) referenceValue;
+        		}
+        	}
+		}
         
         return result;
 	}

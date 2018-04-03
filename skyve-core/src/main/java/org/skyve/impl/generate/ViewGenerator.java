@@ -91,9 +91,7 @@ public class ViewGenerator {
 			title.append(finalDescription);
 		}
 		result.setTitle(title.toString());
-		result.setIconStyleClass(document.getIconStyleClass());
-		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-		
+
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
@@ -119,9 +117,7 @@ public class ViewGenerator {
 		result.setName(ViewType.edit.toString());
 
 		result.setTitle(document.getSingularAlias());
-		result.setIconStyleClass(document.getIconStyleClass());
-		result.setIcon32x32RelativeFileName(document.getIcon32x32RelativeFileName());
-		
+
 		ActionImpl action = new ActionImpl();
 		action.setImplicitName(ImplicitActionName.DEFAULTS);
 		result.putAction(action);
@@ -377,8 +373,6 @@ public class ViewGenerator {
 		ViewMetaData repositoryView = new ViewMetaData();
 		repositoryView.setName(ViewType.edit.toString());
 		repositoryView.setTitle(view.getTitle());
-		repositoryView.setIconStyleClass(view.getIconStyleClass());
-		repositoryView.setIcon32x32RelativeFileName(view.getIcon32x32RelativeFileName());
 
 		repositoryView.getContained().addAll(view.getContained());
 		Actions actions = new Actions();

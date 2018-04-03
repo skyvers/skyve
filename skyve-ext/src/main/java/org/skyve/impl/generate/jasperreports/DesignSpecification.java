@@ -5,9 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.skyve.CORE;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 
 public class DesignSpecification {
 	private int alias = (int)('a');
@@ -22,7 +26,8 @@ public class DesignSpecification {
 	public static enum DefinitionSource {
 		document,
 		view,
-		query
+		query,
+		list
 	}
 
 // TODO do I need to Capitalise the toString().
@@ -37,6 +42,7 @@ public class DesignSpecification {
 		landscape
 	}
 
+	private String language;
 	/**
 	 * Report Name
 	 **/
@@ -65,6 +71,10 @@ public class DesignSpecification {
 	 * Report Bean Document.
 	 **/
 	private String documentName;
+    /**
+     * Report Query Name.
+     **/
+    private String queryName;
 	/**
 	 * If a view report, this is the uxui to create the report for
 	 */
@@ -299,6 +309,10 @@ public class DesignSpecification {
 	 **/
 	private Boolean verticalise;
 	/**
+	 * Whether or not the customer's logo should be included in the report's title band.
+	 */
+	private boolean includeCustomerLogo = true;
+	/**
 	 * Label Alignment
 	 **/
 	private ReportElement.ElementAlignment labelAlignmentOverride;
@@ -332,7 +346,13 @@ public class DesignSpecification {
 	public void setDocumentName(String documentName) {
 		this.documentName = documentName;
 	}
-	public String getUxui() {
+    public String getQueryName() {
+        return queryName;
+    }
+    public void setQueryName(String queryName) {
+        this.queryName = queryName;
+    }
+    public String getUxui() {
 		return uxui;
 	}
 	public void setUxui(String uxui) {
@@ -664,16 +684,6 @@ public class DesignSpecification {
 		return documentName;
 	}
 
-	public String getJrxml() {
-		try {
-			return new JasperReportRenderer(this).renderDesign();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return null;
-	}
-
 	public int getAlias() {
 		return alias;
 	}
@@ -707,6 +717,14 @@ public class DesignSpecification {
 		joinAlias.put(join, alias);
 	}
 
+	public boolean isIncludeCustomerLogo() {
+		return includeCustomerLogo;
+	}
+
+	public void setIncludeCustomerLogo(boolean includeCustomerLogo) {
+		this.includeCustomerLogo = includeCustomerLogo;
+	}
+
 	/**
 	 * Default constructor with defaults for A4 page
 	 * 
@@ -726,7 +744,7 @@ public class DesignSpecification {
 		setTopMargin(new Integer(42));
 		setBottomMargin(new Integer(30));
 		setMode(Mode.bean);
-		setDefaultFontName("Arial");
+		setDefaultFontName("SansSerif");
 		setDefaultFontSize(new Integer(12));
 		setTitleFontSize(new Integer(16));
 		setDefinitionSource(DefinitionSource.view);
@@ -767,5 +785,27 @@ public class DesignSpecification {
 			setColumnWidth(842 - getLeftMargin() - getRightMargin());
 			setHeight(595);
 		}
+	}
+
+	public Customer getCustomer() {
+		return CORE.getPersistence().getUser().getCustomer();
+	}
+
+	public Module getModule() {
+		final Customer customer = getCustomer();
+		return customer.getModule(getModuleName());
+	}
+
+	public Document getDocument() {
+		final Customer customer = getCustomer();
+		return getModule().getDocument(customer, getDocumentName());
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 }

@@ -1557,6 +1557,11 @@ isc.BizButton.addMethods({
 			}
 			else if (this.type == "M") { // Navigate to a binding within a conversation
 			}
+            else if (this.type == "V") { // Print this edit view
+                var params = {_mod: this._view._mod,
+                    _doc: this._view._doc}
+                isc.ReportDialog.popupReport(this._view, params);
+            }
 			else {
 				this._view.doAction(this.actionName, validate);
 			}

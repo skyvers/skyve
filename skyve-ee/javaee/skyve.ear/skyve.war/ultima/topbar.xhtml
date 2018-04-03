@@ -17,7 +17,7 @@
 					<i></i>
 				</a>
 			</c:if>
-			<span class="topbar-title">#{title}</span>
+			<span class="topbar-title"><p:outputPanel id="title" layout="inline" autoUpdate="true">#{title}</p:outputPanel></span>
 			<c:if test="#{topMenu}">
 				<a id="topbar-menu-button" href="#">
 					<i class="material-icons">menu</i>

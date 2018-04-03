@@ -72,13 +72,9 @@
 	</hbox>
 	<tabPane>
 		<tab title="Jobs">
-			<dataGrid binding="jobs" editable="false">
-				<boundColumn binding="displayName" />
-				<boundColumn binding="status" />
-				<boundColumn binding="percentComplete" />
-				<boundColumn binding="startTime" />
-				<boundColumn binding="endTime" />
-			</dataGrid>
+			<listGrid continueConversation="false" query="qDashboardJobs" disabled="true">
+				<filterParameter operator="equal" name="bizUserId" binding="currentUser.bizId"/>
+			</listGrid>
 		</tab>
 		<tab title="Subscriptions" >
 			<listGrid continueConversation="true" query="qUserSubscriptions">

@@ -246,7 +246,7 @@ public class Renderer {
 					iE.append("$F{THIS}, ");
 				} else {
 					// sql
-					iE.append("modules.design.reportgeneration.BeanForReport.getBean(");
+					iE.append("org.skyve.impl.generate.jasperreports.BeanForReport.getBean(");
 					iE.append(elem.getParent().getParent().getModuleName()).append(", ");
 					iE.append(elem.getParent().getParent().getDocumentName()).append(", ");
 					iE.append("$P{ID})");
@@ -256,11 +256,11 @@ public class Renderer {
 					iE.append(elem.getElementWidth().toString()).append(", ");
 				}
 				// TODO vertical sizing - for now assume square based on pixelWidth
-				iE.append(" (org.skyve.metadata.user.User) modules.design.reportgeneration.BeanForReport.getUser())");
+				iE.append(" (org.skyve.metadata.user.User) org.skyve.impl.generate.jasperreports.BeanForReport.getUser())");
 			} else if (ElementType.staticImage.equals(elem.getElementType())) {
 				iE.append(elem.getElementValue());
 			} else if (ElementType.contentImage.equals(elem.getElementType())) {
-				iE.append("modules.design.reportgeneration.ContentImageForReport.image(");
+				iE.append("org.skyve.impl.generate.jasperreports.ContentImageForReport.image(");
 				iE.append("$F{").append(elem.getElementValue()).append("}, ");
 
 				if (elem.getElementWidth() != null) {
@@ -735,7 +735,7 @@ public class Renderer {
 			if (!invisibleConditionName.startsWith("not")) {
 				sb.append("!");
 			}
-			sb.append("modules.design.reportgeneration.BeanForReport.evaluateCondition(");
+			sb.append("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(");
 			sb.append("\"").append(design.getModuleName()).append("\",");
 			sb.append("\"").append(design.getDocumentName()).append("\",");
 			sb.append("$P{ID},");
@@ -949,11 +949,11 @@ public class Renderer {
 	 * 
 	 * @param design
 	 */
-	public static void saveJrxml(DesignSpecification design) throws Exception {
+	public static void saveJrxml(DesignSpecification design, JasperReportRenderer reportRenderer) throws Exception {
 
 		if (!design.getSubReports().isEmpty()) {
 			for (DesignSpecification ds : design.getSubReports()) {
-				saveJrxml(ds);
+				saveJrxml(ds, reportRenderer);
 			}
 		}
 
@@ -987,7 +987,7 @@ public class Renderer {
 			file = new File(filePath.toString());
 			UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
 			try (PrintWriter out = new PrintWriter(file)) {
-				out.println(design.getJrxml());
+				out.println(reportRenderer.getJrxml());
 				out.flush();
 			}
 		}
@@ -1003,7 +1003,7 @@ public class Renderer {
 	 */
 	public static String renderBoundMessage(DesignSpecification design, String msg) {
 		StringBuilder exp = new StringBuilder(64);
-		exp.append("modules.design.reportgeneration.BeanForReport.getMessage(");
+		exp.append("org.skyve.impl.generate.jasperreports.BeanForReport.getMessage(");
 		if (Mode.bean.equals(design.getMode())) {
 			exp.append("$F{THIS}").append(", ");
 		} else {

@@ -35,15 +35,11 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
-import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
-import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
-import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.view.widget.bound.Bound;
 
 public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	private Bean bean;
 	private List<Step> scalarSteps = new ArrayList<>();
-	private List<Step> dataGridSteps = new ArrayList<>();
 	private boolean inDataWidget = false;
 	
 	protected TestDataEnterViewVisitor(CustomerImpl customer, 
@@ -52,6 +48,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 										ViewImpl view,
 										Bean bean) {
 		super(customer, module, document, view);
+//System.out.println(String.format("TestDataEnter for %s.%s %s view", module.getName(), document.getName(), view.getName()));
 		this.bean = bean;
 	}
 
@@ -60,7 +57,6 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		TabSelect select = new TabSelect();
 		select.setTabPath(tab.getTitle());
 		scalarSteps.add(select);
-		dataGridSteps.add(select);
 	}
 	
 	@Override
@@ -97,13 +93,6 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 
 	@Override
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
-		DataGridNew nu = new DataGridNew();
-		nu.setBinding(grid.getBinding());
-		dataGridSteps.add(nu);
-		
-		dataGridSteps.add(new TestDataEnter());
-		dataGridSteps.add(new ZoomOut());
-
 		inDataWidget = true;
 	}
 
@@ -224,9 +213,5 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	
 	List<Step> getScalarSteps() {
 		return scalarSteps;
-	}
-	
-	List<Step> getDataGridSteps() {
-		return dataGridSteps;
 	}
 }

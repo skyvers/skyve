@@ -136,7 +136,9 @@ public class MapServlet extends HttpServlet {
 	private static String processCollection(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
-		Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+    	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		
 		String collectionBinding = request.getParameter(AbstractWebContext.GRID_BINDING_NAME);
 		String geometryBinding = request.getParameter(GEOMETRY_BINDING_NAME);
@@ -150,7 +152,9 @@ public class MapServlet extends HttpServlet {
 	private static String processModel(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
 		Customer customer = CORE.getUser().getCustomer();
-		Bean bean = WebUtil.getConversationBeanFromRequest(request, response);
+		String contextKey = request.getParameter(AbstractWebContext.CONTEXT_NAME);
+    	AbstractWebContext webContext = WebUtil.getCachedConversation(contextKey, request, response);
+		Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 

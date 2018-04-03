@@ -10,7 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -38,7 +40,6 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
@@ -46,8 +47,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 public class Procedure {
 	private List<Step> steps = new ArrayList<>();
 
-	@XmlElementRefs({@XmlElementRef(type = NavigateMenu.class),
-						@XmlElementRef(type = NavigateList.class),
+	@XmlElementRefs({@XmlElementRef(type = NavigateList.class),
 						@XmlElementRef(type = NavigateEdit.class),
 						@XmlElementRef(type = NavigateTree.class),
 						@XmlElementRef(type = NavigateMap.class),
@@ -75,7 +75,9 @@ public class Procedure {
 						@XmlElementRef(type = ListGridNew.class),
 						@XmlElementRef(type = ListGridZoom.class),
 						@XmlElementRef(type = ListGridSelect.class),
-						@XmlElementRef(type = Test.class),
+						@XmlElementRef(type = TestValue.class),
+						@XmlElementRef(type = TestSuccess.class),
+						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Execute.class)})
 	public List<Step> getSteps() {
 		return steps;

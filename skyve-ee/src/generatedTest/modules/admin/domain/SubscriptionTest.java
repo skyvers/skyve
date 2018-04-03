@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.Subscription.SubscriptionFactoryExtension;
 import modules.admin.util.SubscriptionFactory;
-import modules.admin.util.SubscriptionFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

@@ -3,6 +3,7 @@ package org.skyve.impl.jasperreports;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.metadata.model.Attribute;
 import org.skyve.report.ReportFormat;
 
 public final class ReportDesignParameters {
@@ -23,6 +24,7 @@ public final class ReportDesignParameters {
 		private int line;
 		private int width;
 		private ColumnAlignment alignment;
+		private Attribute.AttributeType attributeType;
 
 		public String getName() {
 			return name;
@@ -60,6 +62,12 @@ public final class ReportDesignParameters {
 		public void setAlignment(ColumnAlignment alignment) {
 			this.alignment = alignment;
 		}
+		public Attribute.AttributeType getAttributeType() {
+			return attributeType;
+		}
+		public void setAttributeType(Attribute.AttributeType attributeType) {
+			this.attributeType = attributeType;
+		}
 	}
 
 	private ReportFormat reportFormat;
@@ -75,6 +83,10 @@ public final class ReportDesignParameters {
 	private int rightMargin;
 	private List<ReportColumn> columns = new ArrayList<>();	
 	private List<String> groupColumns = new ArrayList<>();
+	/**
+	 * Whether or not the customer's logo should be included in the report's title band.
+	 */
+	private boolean includeCustomerLogo = true;
 
 	public ReportFormat getReportFormat() {
 		return reportFormat;
@@ -141,5 +153,11 @@ public final class ReportDesignParameters {
 	}
 	public List<String> getGroupColumns() {
 		return groupColumns;
+	}
+	public boolean isIncludeCustomerLogo() {
+		return includeCustomerLogo;
+	}
+	public void setIncludeCustomerLogo(boolean includeCustomerLogo) {
+		this.includeCustomerLogo = includeCustomerLogo;
 	}
 }

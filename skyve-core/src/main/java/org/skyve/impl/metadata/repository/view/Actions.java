@@ -20,6 +20,7 @@ import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
 import org.skyve.impl.metadata.repository.view.actions.DownloadAction;
 import org.skyve.impl.metadata.repository.view.actions.NewAction;
 import org.skyve.impl.metadata.repository.view.actions.OKAction;
+import org.skyve.impl.metadata.repository.view.actions.PrintAction;
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
@@ -63,7 +64,8 @@ public class Actions implements Identifiable {
 						@XmlElementRef(type = SaveAction.class),
 						@XmlElementRef(type = DownloadAction.class),
 						@XmlElementRef(type = UploadAction.class),
-						@XmlElementRef(type = ZoomOutAction.class)})
+						@XmlElementRef(type = ZoomOutAction.class),
+						@XmlElementRef(type = PrintAction.class)})
 	public List<ActionMetaData> getActions() {
 		return actions;
 	}

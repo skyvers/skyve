@@ -44,16 +44,6 @@ public class UserDashboardBizlet extends Bizlet<UserDashboard> {
 				bean.getRoles().add(r);
 			}
 			
-			//find jobs
-			//TODO - work out why I only get one job
-			DocumentQuery qJobs = pers.newDocumentQuery(Job.MODULE_NAME, Job.DOCUMENT_NAME);
-			qJobs.getFilter().addEquals(Bean.USER_ID, bean.getCurrentUser().getBizId());
-			
-			List<Job> jobs = qJobs.beanResults();
-			for(Job job:jobs){
-				bean.getJobs().add(job);
-			}
-
 			//get last login time
 			DocumentQuery qLogins = pers.newDocumentQuery(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 			qLogins.getFilter().addEquals(UserLoginRecord.userNamePropertyName, user.getUserName());

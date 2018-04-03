@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jasperreports.engine.*;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.impl.jasperreports.SkyveDataSource;
@@ -16,14 +17,10 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.report.ReportFormat;
 
-import net.sf.jasperreports.engine.JRAbstractExporter;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.export.JExcelApiExporter;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.export.JRHtmlExporter;
@@ -65,7 +62,8 @@ public final class ReportUtil {
 											ReportFormat format,
 											OutputStream out)
 	throws Exception {
-		return runReport(user, document, reportName, parameters, null, format, out);
+		// Cast to null to remove method call ambiguity, this does not throw an NPE.
+		return runReport(user, document, reportName, parameters, (Bean) null, format, out);
 	}
 
 	public static JasperPrint runReport(User user,
@@ -84,6 +82,22 @@ public final class ReportUtil {
 		return runReport(jasperReport, user, document, parameters, bean, format, out);
 	}
 
+	public static JasperPrint runReport(User user,
+										Document document,
+										String reportName,
+										Map<String, Object> parameters,
+										ListModel<Bean> listModel,
+										ReportFormat format,
+										OutputStream out)
+			throws Exception {
+		final Customer customer = user.getCustomer();
+		final String reportFileName = preProcess(customer, document, reportName, parameters);
+
+		final JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(reportFileName));
+
+		return runReport(jasperReport, user, document, parameters, listModel, format, out);
+	}
+
 	public static JasperPrint runReport(JasperReport jasperReport,
 	                                    User user,
 	                                    Document document,
@@ -97,20 +111,7 @@ public final class ReportUtil {
 
 		UtilImpl.LOGGER.info("QUERY LNG = " + queryLanguage);
 		if ("sql".equalsIgnoreCase(queryLanguage)) {
-			@SuppressWarnings("resource")
-			Connection connection = EXT.getDataStoreConnection();
-			try {
-				UtilImpl.LOGGER.info("FILL REPORT");
-				result = JasperFillManager.fillReport(jasperReport,
-						parameters,
-						connection);
-				UtilImpl.LOGGER.info("PUMP REPORT");
-				runReport(result, format, out);
-				UtilImpl.LOGGER.info("PUMPED REPORT");
-			}
-			finally {
-				SQLUtil.disconnect(connection);
-			}
+			result = fillSqlReport(jasperReport, parameters, format, out);
 		}
 		else if ("document".equalsIgnoreCase(queryLanguage)) {
 			Bean reportBean = bean;
@@ -131,6 +132,49 @@ public final class ReportUtil {
 			UtilImpl.LOGGER.info("PUMPED REPORT");
 		}
 
+		return result;
+	}
+
+	public static JasperPrint runReport(JasperReport jasperReport,
+										User user,
+										Document document,
+										Map<String, Object> parameters,
+										ListModel<Bean> listModel,
+										ReportFormat format,
+										OutputStream out) throws Exception {
+		JasperPrint result;
+
+		UtilImpl.LOGGER.info("FILL REPORT");
+
+		try (AutoClosingIterable<Bean> iterable = listModel.iterate()) {
+			final JRDataSource dataSource = new SkyveDataSource(user, iterable.iterator());
+
+			result = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+		}
+
+		UtilImpl.LOGGER.info("PUMP REPORT");
+		runReport(result, format, out);
+		UtilImpl.LOGGER.info("PUMPED REPORT");
+
+		return result;
+	}
+
+	private static JasperPrint fillSqlReport(JasperReport jasperReport, Map<String, Object> parameters, ReportFormat format, OutputStream out) throws JRException {
+		JasperPrint result;
+		@SuppressWarnings("resource")
+		Connection connection = EXT.getDataStoreConnection();
+		try {
+            UtilImpl.LOGGER.info("FILL REPORT");
+            result = JasperFillManager.fillReport(jasperReport,
+                    parameters,
+                    connection);
+            UtilImpl.LOGGER.info("PUMP REPORT");
+            runReport(result, format, out);
+            UtilImpl.LOGGER.info("PUMPED REPORT");
+        }
+        finally {
+            SQLUtil.disconnect(connection);
+        }
 		return result;
 	}
 

@@ -126,7 +126,12 @@ public abstract class AbstractDomainTest<T extends PersistentBean> extends Abstr
 
 		if (attributeToUpdate != null) {
 			Object originalValue = Binder.get(result, attributeToUpdate.getName());
-			TestUtil.updateAttribute(result, attributeToUpdate);
+
+			Customer customer = CORE.getUser().getCustomer();
+			Module module = customer.getModule(getBean().getBizModule());
+			Document document = module.getDocument(customer, getBean().getBizDocument());
+
+			TestUtil.updateAttribute(module, document, result, attributeToUpdate);
 			T uResult = CORE.getPersistence().save(result);
 
 			// verify the results

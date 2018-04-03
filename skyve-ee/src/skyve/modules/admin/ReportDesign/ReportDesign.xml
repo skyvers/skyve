@@ -23,6 +23,7 @@
 				<value code="document"/>
 				<value code="view"/>
 				<value code="query"/>
+				<value code="list"/>
 			</values>
 		</enum>
 		<enum name="reportType">
@@ -41,6 +42,18 @@
 		<text name="documentName">
 			<displayName>Document</displayName>
 			<description>Report Bean Document.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="queryName">
+			<displayName>Query</displayName>
+			<description>Report Query.</description>
+			<domain>dynamic</domain>
+			<length>500</length>
+		</text>
+		<text name="menuItem">
+			<displayName>Menu Item</displayName>
+			<description>Menu Item.</description>
 			<domain>dynamic</domain>
 			<length>500</length>
 		</text>

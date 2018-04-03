@@ -5,9 +5,11 @@ import java.util.List;
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.calendar.Calendar;
+import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.password.Password;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spinner.Spinner;
@@ -27,8 +29,11 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Test;
+import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -60,7 +65,6 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
-import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
@@ -78,7 +82,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(PushListContext push) {
+	public void executePushListContext(PushListContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		String moduleName = push.getModuleName();
 		Customer c = CORE.getUser().getCustomer();
@@ -119,11 +123,11 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(PushEditContext push) {
+	public void executePushEditContext(PushEditContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext.setModuleName(push.getModuleName());
 		newContext.setDocumentName(push.getDocumentName());
-		if (Boolean.TRUE.equals(push.getCreate())) {
+		if (Boolean.TRUE.equals(push.getCreateView())) {
 			newContext.setViewType(ViewType.create);
 		}
 		else {
@@ -136,23 +140,17 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 	
 	@Override
-	public void execute(ClearContext clear) {
+	public void executeClearContext(ClearContext clear) {
 		clear();
 	}
 	
 	@Override
-	public void execute(PopContext pop) {
+	public void executePopContext(PopContext pop) {
 		pop();
 	}
 	
 	@Override
-	public void execute(NavigateMenu menu) {
-		super.execute(menu); // determine driving document
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void execute(NavigateList list) {
+	public void executeNavigateList(NavigateList list) {
 		String moduleName = list.getModuleName();
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
@@ -163,7 +161,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		push.setDocumentName(documentName);
 		push.setQueryName(queryName);
 		push.setModelName(modelName);
-		execute(push);
+		executePushListContext(push);
 
 		if (queryName != null) {
 			command("open", String.format("?a=l&m=%s&q=%s", moduleName, queryName));
@@ -179,14 +177,14 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(NavigateEdit edit) {
+	public void executeNavigateEdit(NavigateEdit edit) {
 		String moduleName = edit.getModuleName();
 		String documentName = edit.getDocumentName();
 		
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(moduleName);
 		push.setDocumentName(documentName);
-		execute(push);
+		executePushEditContext(push);
 
 		String bizId = edit.getBizId();
 		if (bizId == null) {
@@ -200,40 +198,46 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(NavigateTree tree) {
-		super.execute(tree); // determine driving document
+	public void executeNavigateTree(NavigateTree tree) {
+		super.executeNavigateTree(tree); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void execute(NavigateMap map) {
-		super.execute(map); // determine driving document
+	public void executeNavigateMap(NavigateMap map) {
+		super.executeNavigateMap(map); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void execute(NavigateCalendar calendar) {
-		super.execute(calendar); // determine driving document
+	public void executeNavigateCalendar(NavigateCalendar calendar) {
+		super.executeNavigateCalendar(calendar); // determine driving document
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void execute(NavigateLink link) {
-		super.execute(link); // null driving document
+	public void executeNavigateLink(NavigateLink link) {
+		super.executeNavigateLink(link); // null driving document
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void execute(TabSelect tabSelect) {
-		// TODO Not quite right as we are looking for the first link with the tab name/label.
-		for (String tabName : tabSelect.getTabPath().split("\\|->")) {
-			comment(String.format("click tab [%s]", tabName));
-			command("click", String.format("link=%s", tabName));
+	public void executeTabSelect(TabSelect tabSelect) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = tabSelect.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
+		}
+		for (UIComponent component : components) {
+			String clientId = ComponentCollector.clientId(component);
+			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
+			command("click", String.format("//a[contains(@href, '#%s')]", clientId));
 		}
 	}
 
 	@Override
-	public void execute(TestDataEnter testDataEnter) {
+	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String moduleName = context.getModuleName();
 		String documentName = context.getDocumentName();
@@ -278,8 +282,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(DataEnter dataEnter) {
-// TODO tab clicks to get on the right tab
+	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -288,11 +291,19 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
-			boolean text = (component instanceof InputText) || (component instanceof InputTextarea);
+			boolean text = (component instanceof InputText) || 
+								(component instanceof InputTextarea) || 
+								(component instanceof Password);
 			boolean selectOne = (component instanceof SelectOneMenu);
 			boolean masked = (component instanceof InputMask);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox);
 			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
+			
+			// TODO implement colour picker testing
+			if (component instanceof ColorPicker) {
+				comment(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
+				return;
+			}
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
@@ -344,7 +355,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 	}
 
-	private void button(Step button, String tagName, boolean ajax, boolean confirm) {
+	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -366,7 +377,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 				if (confirm) {
 					command("click", "confirmOK");
 				}
-				command("waitForNotVisible", "ajaxStatus");
+				command("waitForNotVisible", "busy");
 			}
 			else {
 				if (confirm) {
@@ -377,6 +388,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 					command("clickAndWait", clientId);
 				}
 			}
+			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+				executeTestSuccess(new TestSuccess());
+			}
 			command("endIf");
 			command("endIf");
 		}
@@ -384,81 +398,139 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 	
 	@Override
-	public void execute(Ok ok) {
-		button(ok, "ok", false, false);
+	public void executeOk(Ok ok) {
+		button(ok, "ok", false, false, ok.getTestSuccess());
 		pop();
 	}
 
 	@Override
-	public void execute(Save save) {
-		button(save, "save", true, false);
+	public void executeSave(Save save) {
+		button(save, "save", true, false, save.getTestSuccess());
+		Boolean createView = save.getCreateView(); // NB could be null
+		if (Boolean.TRUE.equals(createView)) {
+			PrimeFacesAutomationContext context = peek();
+			context.setViewType(ViewType.create);
+		}
+		else if (Boolean.FALSE.equals(createView)) {
+			PrimeFacesAutomationContext context = peek();
+			context.setViewType(ViewType.edit);
+		}
 	}
 
 	@Override
-	public void execute(Cancel cancel) {
-		button(cancel, "cancel", false, false);
+	public void executeCancel(Cancel cancel) {
+		button(cancel, "cancel", false, false, cancel.getTestSuccess());
 		pop();
 	}
 
 	@Override
-	public void execute(Delete delete) {
-		button(delete, "delete", false, true);
+	public void executeDelete(Delete delete) {
+		button(delete, "delete", false, true, delete.getTestSuccess());
 		pop();
 	}
 
 	@Override
-	public void execute(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, false);
+	public void executeZoomOut(ZoomOut zoomOut) {
+		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
 		pop();
 	}
 
 	@Override
-	public void execute(Remove remove) {
-		button(remove, "remove", false, true);
+	public void executeRemove(Remove remove) {
+		button(remove, "remove", false, true, remove.getTestSuccess());
 		pop();
 	}
 
 	@Override
-	public void execute(Action action) {
-		button(action, action.getActionName(), true, Boolean.TRUE.equals(action.getConfirm()));
+	public void executeAction(Action action) {
+		button(action, 
+				action.getActionName(),
+				true,
+				Boolean.TRUE.equals(action.getConfirm()),
+				action.getTestSuccess());
 	}
 
 	@Override
-	public void execute(LookupDescriptionAutoComplete complete) {
-		// TODO Auto-generated method stub
+	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
+		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
+	}
+
+	@Override
+	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
+		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
+	}
+
+	private void lookupDescription(Step step, String binding, Integer row, String search) {
+		PrimeFacesAutomationContext context = peek();
 		
+		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
+		if (lookupComponents == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
+														step.getClass().getSimpleName(),
+														binding));
+		}
+		for (UIComponent lookupComponent : lookupComponents) {
+			String clientId = ComponentCollector.clientId(lookupComponent);
+			if (row != null) {
+				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
+			}
+			else {
+				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
+			}
+			
+			// lookup description is present
+			command("storeElementPresent", clientId, "present");
+			command("if", "${present} == true");
+			// determine editable as these are <input/>
+			command("storeEditable", String.format("%s_input", clientId), "editable");
+			command("if", "${editable} == true");
+
+			if (row != null) {
+				// Click the drop down button
+				command("clickAt", String.format("//span[@id='%s']/button", clientId), "10,10");
+				// Wait for pick list drop down
+				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
+				// Select the row
+				command("click", String.format("//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
+			}
+			else {
+				// Type in the input field (everything but the last char)
+				command("type", String.format("%s_input", clientId), search.substring(0, search.length() - 1));
+				command("sendKeys", String.format("%s_input", clientId), search.substring(search.length() - 1));
+
+				// Wait for pick list drop down
+				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
+				// Select the first row
+				command("click", String.format("//div[@id='%s_panel']/ul/li", clientId));
+			}
+			
+			command("endIf");
+			command("endIf");
+		}
 	}
 
 	@Override
-	public void execute(LookupDescriptionPick pick) {
-		// TODO Auto-generated method stub
-		
+	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
+		// Nothing to do here as PF doesn't allow new off of lookup descriptions
 	}
 
 	@Override
-	public void execute(LookupDescriptionNew nu) {
-		// TODO Auto-generated method stub
-		
+	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
+		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
 	@Override
-	public void execute(LookupDescriptionEdit edit) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execute(DataGridNew nu) {
+	public void executeDataGridNew(DataGridNew nu) {
 		dataGridButton(nu, nu.getBinding(), null);
 	}
 	
 	@Override
-	public void execute(DataGridZoom zoom) {
+	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridButton(zoom, zoom.getBinding(), zoom.getRow());
 	}
 	
 	@Override
-	public void execute(DataGridRemove remove) {
+	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridButton(remove, remove.getBinding(), remove.getRow());
 	}
 
@@ -506,7 +578,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 						// All good, continue with the button click
 						if (step instanceof DataGridRemove) {
 							command("click", ComponentCollector.clientId(buttonComponent, row));
-							command("waitForNotVisible", "ajaxStatus");
+							command("waitForNotVisible", "busy");
 						}
 						else {
 							command("clickAndWait", buttonClientId);
@@ -536,30 +608,30 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(DataGridEdit edit) {
+	public void executeDataGridEdit(DataGridEdit edit) {
+		// cannot edit a grid row in PF
+	}
+
+	@Override
+	public void executeDataGridSelect(DataGridSelect select) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void execute(DataGridSelect select) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void execute(ListGridNew nu) {
+	public void executeListGridNew(ListGridNew nu) {
 		listGridButton(nu, null);
 		
 		PrimeFacesAutomationContext context = peek();
 		PushEditContext push = new PushEditContext();
 		push.setModuleName(context.getModuleName());
 		push.setDocumentName(context.getDocumentName());
+		push.setCreateView(nu.getCreateView());
 		push.execute(this);
 	}
 
 	@Override
-	public void execute(ListGridZoom zoom) {
+	public void executeListGridZoom(ListGridZoom zoom) {
 		listGridButton(zoom, zoom.getRow());
 		
 		PrimeFacesAutomationContext context = peek();
@@ -570,7 +642,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(ListGridSelect select) {
+	public void executeListGridSelect(ListGridSelect select) {
 		listGridButton(select, select.getRow());
 		
 		// TODO only if there is no select event on the skyve edit view for embedded list grid
@@ -590,9 +662,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
 		if (listGridComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined.",
-														(row != null) ? 
-															((step instanceof ListGridZoom) ? "ListGridZoom" : "ListGridDelete") : 
-															"ListGridNew",
+															step.getClass().getSimpleName(),
 															listGridIdentifier));
 		}
 		for (UIComponent listGridComponent : listGridComponents) {
@@ -644,8 +714,54 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	}
 
 	@Override
-	public void execute(Test test) {
+	public void executeTestValue(TestValue test) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public void executeTestSuccess(TestSuccess test) {
+		TestStrategy strategy = getTestStrategy();
+		if (TestStrategy.Verify.equals(strategy)) {
+			comment("Test Success");
+			command("verifyElementNotPresent", "css=.ui-messages-error");
+			command("verifyElementNotPresent", "css=.ui-message-error");
+		}
+		else if (TestStrategy.None.equals(strategy)) {
+			// nothing to do
+		}
+		else { // null or Assert
+			comment("Test Success");
+			command("assertElementNotPresent", "css=.ui-messages-error");
+			command("assertElementNotPresent", "css=.ui-message-error");
+		}
+	}
+	
+	@Override
+	public void executeTestFailure(TestFailure test) {
+		TestStrategy strategy = getTestStrategy();
+		if (! TestStrategy.None.equals(strategy)) {
+			String message = test.getMessage();
+			if (message == null) {
+				comment("Test Failure");
+				if (TestStrategy.Verify.equals(strategy)) {
+					command("verifyElementPresent", "css=.ui-messages-error");
+				}
+				else {
+					command("assertElementPresent", "css=.ui-messages-error");
+				}
+			}
+			else {
+				comment(String.format("Test Failure with message '%s'", message));
+				if (TestStrategy.Verify.equals(strategy)) {
+					command("verifyElementPresent", "css=.ui-messages-error");
+					command("verifyTextPresent", message);
+				}
+				else {
+					command("assertElementPresent", "css=.ui-messages-error");
+					command("assertTextPresent", message);
+				}
+			}
+		}
 	}
 }

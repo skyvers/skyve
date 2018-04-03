@@ -2191,6 +2191,22 @@ pickListFields:[{name:'value'}],
 	}
 
 	@Override
+	public void visitPrintAction(ActionImpl action) {
+		addAction(null,
+				ImplicitActionName.Print,
+				action.getDisplayName(),
+				action.getInActionPanel(),
+				action.getClientValidation(),
+				action.getRelativeIconFileName(),
+				action.getIconStyleClass(),
+				action.getToolTip(),
+				action.getConfirmationText(),
+				action.getParameters(),
+				action.getDisabledConditionName(),
+				action.getInvisibleConditionName());
+	}
+
+	@Override
 	public void visitOnChangedEventHandler(Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
@@ -2853,6 +2869,13 @@ pickListFields:[{name:'value'}],
 					revisedRelativeIconFileName = "actions/ZoomOut.gif";
 				}
 				actionType = 'Z';
+				result.append(implicitName);
+				break;
+			case Print:
+				if (revisedRelativeIconFileName == null) {
+					revisedRelativeIconFileName = "actions/Report.gif";
+				}
+				actionType = 'V';
 				result.append(implicitName);
 				break;
 			default:

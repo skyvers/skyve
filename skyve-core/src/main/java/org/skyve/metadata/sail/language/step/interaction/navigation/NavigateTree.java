@@ -38,6 +38,6 @@ public class NavigateTree extends NavigateList {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executeNavigateTree(this);
 	}
 }

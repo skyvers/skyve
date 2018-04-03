@@ -37,14 +37,18 @@ import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.breadcrumb.BreadCrumb;
 import org.primefaces.component.button.Button;
 import org.primefaces.component.calendar.Calendar;
+import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.defaultcommand.DefaultCommand;
+import org.primefaces.component.editor.Editor;
 import org.primefaces.component.graphicimage.GraphicImage;
+import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
@@ -57,6 +61,7 @@ import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.row.Row;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
+import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.steps.Steps;
@@ -94,6 +99,9 @@ public class MockApplication extends Application {
 		else if (Calendar.COMPONENT_TYPE.equals(componentType)) {
 			return new Calendar();
 		}
+		else if (ColorPicker.COMPONENT_TYPE.equals(componentType)) {
+			return new ColorPicker();
+		}
 		else if (Column.COMPONENT_TYPE.equals(componentType)) {
 			return new Column();
 		}
@@ -114,6 +122,9 @@ public class MockApplication extends Application {
 		}
 		else if (DefaultCommand.COMPONENT_TYPE.equals(componentType)) {
 			return new DefaultCommand();
+		}
+		else if (Editor.COMPONENT_TYPE.equals(componentType)) {
+			return new Editor();
 		}
 		else if (Field.COMPONENT_TYPE.equals(componentType)) {
 			return new Field();
@@ -139,8 +150,14 @@ public class MockApplication extends Application {
 		else if (HtmlPanelGroup.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlPanelGroup();
 		}
+		else if (InputMask.COMPONENT_TYPE.equals(componentType)) {
+			return new InputMask();
+		}
 		else if (InputText.COMPONENT_TYPE.equals(componentType)) {
 			return new InputText();
+		}
+		else if (InputTextarea.COMPONENT_TYPE.equals(componentType)) {
+			return new InputTextarea();
 		}
 		else if (Message.COMPONENT_TYPE.equals(componentType)) {
 			return new Message();
@@ -174,6 +191,9 @@ public class MockApplication extends Application {
 		}
 		else if (SelectOneMenu.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectOneMenu();
+		}
+		else if (SelectOneRadio.COMPONENT_TYPE.equals(componentType)) {
+			return new SelectOneRadio();
 		}
 		else if (SelectBooleanCheckbox.COMPONENT_TYPE.equals(componentType)) {
 			return new SelectBooleanCheckbox();

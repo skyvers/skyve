@@ -29,4 +29,10 @@ public @interface SkyveFactory {
 	 * this will be ignored as all action tests will be excluded.
 	 */
 	Class<? extends ServerSideAction<?>>[] excludedActions() default {};
+
+	/**
+	 * <em>Optional</em> array of {@link DataMap} annotations which define filename
+	 * overrides for attributes.
+	 */
+	DataMap[] value() default {};
 }

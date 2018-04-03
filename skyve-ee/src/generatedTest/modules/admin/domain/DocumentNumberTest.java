@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.DocumentNumber.DocumentNumberFactoryExtension;
 import modules.admin.util.DocumentNumberFactory;
-import modules.admin.util.DocumentNumberFactoryExtension;
 import util.AbstractDomainTest;
 
 /**

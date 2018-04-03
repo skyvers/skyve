@@ -1,7 +1,6 @@
 package modules.admin.ReportDesign.actions;
 
-import org.skyve.impl.generate.jasperreports.Generator;
-import org.skyve.impl.generate.jasperreports.Renderer;
+import org.skyve.impl.generate.jasperreports.*;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
@@ -16,10 +15,16 @@ public class GenerateDefault implements ServerSideAction<ReportDesign> {
 	@Override
 	public ServerSideActionResult<ReportDesign> execute(ReportDesign bean, WebContext webContext) throws Exception {
 
-		Generator generator = new Generator(ReportDesignBizlet.specificationFromDesignBean(bean));
-		generator.generateDefaultDesign();
-		bean.setJrxml(generator.getDesign().getJrxml());
-		Renderer.saveJrxml(generator.getDesign());
+		final DesignSpecification designSpecification = ReportDesignBizlet.specificationFromDesignBean(bean);
+		final ReportDesignGenerator generator = new ReportDesignGeneratorFactory()
+				.getGeneratorForDesign(designSpecification);
+
+		generator.populateDesign(designSpecification);
+
+		final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
+
+		bean.setJrxml(reportRenderer.getJrxml());
+		Renderer.saveJrxml(designSpecification, reportRenderer);
 
 		return new ServerSideActionResult<>(bean);
 	}

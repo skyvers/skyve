@@ -20,7 +20,7 @@ import org.skyve.metadata.sail.language.Step;
 public class PushEditContext implements Step {
 	private String moduleName;
 	private String documentName;
-	private Boolean create;
+	private Boolean createView;
 	private String uxui;
 	private UserAgentType userAgentType;
 	
@@ -42,13 +42,13 @@ public class PushEditContext implements Step {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public Boolean getCreate() {
-		return create;
+	public Boolean getCreateView() {
+		return createView;
 	}
 	
-	@XmlAttribute(name = "create")
-	public void setCreate(Boolean create) {
-		this.create = create;
+	@XmlAttribute(name = "createView")
+	public void setCreateView(Boolean createView) {
+		this.createView = createView;
 	}
 
 	public String getUxui() {
@@ -71,7 +71,7 @@ public class PushEditContext implements Step {
 
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executePushEditContext(this);
 	}
 
 	@Override

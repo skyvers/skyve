@@ -17,7 +17,7 @@ import org.skyve.metadata.sail.language.Step;
 public class PopContext implements Step {
 	@Override
 	public void execute(Executor executor) {
-		executor.execute(this);
+		executor.executePopContext(this);
 	}
 
 	@Override

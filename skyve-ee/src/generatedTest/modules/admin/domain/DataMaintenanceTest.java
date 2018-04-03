@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
+import modules.admin.DataMaintenance.DataMaintenanceFactoryExtension;
 import modules.admin.util.DataMaintenanceFactory;
-import modules.admin.util.DataMaintenanceFactoryExtension;
 import util.AbstractDomainTest;
 
 /**
