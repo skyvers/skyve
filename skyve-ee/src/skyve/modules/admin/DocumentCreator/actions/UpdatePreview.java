@@ -26,15 +26,14 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 		if (script == null) {
 			bean.setMarkdownPreview(null);
 			bean.setDocumentPreview(null);
-		}
-		else {
+		} else {
 			SkyveScriptInterpreter i = new SkyveScriptInterpreter(bean.getScript(), bean.getDefaultModule());
 			i.preProcess();
 			Node document = i.parse();
 
 			// create a markdown to HTML renderer for the markdown preview tab
 			HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
-	
+
 			// update the markdown preview
 			bean.setMarkdownPreview(htmlRenderer.render(document));
 
@@ -65,9 +64,11 @@ public class UpdatePreview implements ServerSideAction<DocumentCreator> {
 					out.append(String.format("%9s: %s (line %d)", e.getType(), e.getMessage(), e.getLineNumber())).append("<br>");
 				}
 				bean.setErrors(out.toString());
+			} else {
+				bean.setErrors(null);
 			}
 		}
-		
+
 		return new ServerSideActionResult<>(bean);
 	}
 

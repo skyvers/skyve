@@ -827,6 +827,8 @@ public class SkyveScriptInterpreter {
 
 			currentModule.setName(moduleName);
 			currentModule.setTitle(moduleTitle);
+
+			getModules().add(currentModule);
 		} else {
 			addCritical("Default module required but not supplied");
 		}
