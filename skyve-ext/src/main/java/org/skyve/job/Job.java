@@ -16,7 +16,9 @@ public abstract class Job extends AbstractSkyveJob {
 	 * If the job can't be cancelled then return a reason why the job cannot be cancelled, otherwise return null.
 	 */
 	@Override
-	public abstract String cancel();
+	public String cancel() {
+		return "Job cannot be cancelled.";
+	}
 	
 	private static final String EVENT_BUS_FACTORY = "org.primefaces.push.EventBusFactory";
 	private static final String EVENT_BUS = "org.primefaces.push.EventBus";
