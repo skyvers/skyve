@@ -526,7 +526,8 @@ class SmartClientViewVisitor extends ViewVisitor {
 	public void visitedFormRow(FormRow row,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		// nothing to do here
+		code.setLength(code.length() - 2); // remove "},"
+		code.append(",endRow:true},");
 	}
 
 	@Override
