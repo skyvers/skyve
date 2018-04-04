@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.LengthField;
@@ -31,8 +32,10 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.UsageType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.test.DataFactory;
@@ -197,7 +200,7 @@ public class DataBuilder {
 		try {
 			result = dataFactory(customer, (DocumentImpl) document);
 			if (result == null) {
-				result = randomBean(module, document);
+				result = randomBean(customer, module, document);
 			}
 	
 			for (Attribute attribute : document.getAllAttributes()) {
@@ -272,10 +275,10 @@ public class DataBuilder {
 	}
 
 	@SuppressWarnings("incomplete-switch")
-	private <T extends Bean> T randomBean(Module module, Document document)
+	private <T extends Bean> T randomBean(Customer customer, Module module, Document document)
 	throws Exception {
 		T result = document.newInstance(user);
-
+		
 		for (Attribute attribute : document.getAllAttributes()) {
 			if (filter(attribute)) {
 				continue;
@@ -283,7 +286,8 @@ public class DataBuilder {
 
 			String name = attribute.getName();
 			AttributeType type = attribute.getAttributeType();
-
+			String domainValue = null;
+			
 			switch (type) {
 				case bool:
 					// Random bools always are set to false as most processing changes around the true value.
@@ -291,7 +295,13 @@ public class DataBuilder {
 					BindUtil.set(result, name, Boolean.FALSE);
 					break;
 				case colour:
-					BindUtil.set(result, name, "#FFFFFF");
+					domainValue = randomDomainValue(customer, document, attribute, result);
+					if (domainValue == null) {
+						BindUtil.set(result, name, "#FFFFFF");
+					}
+					else if (! domainValue.isEmpty()) {
+						BindUtil.set(result, name, domainValue);
+					}
 					break;
 				case date:
 				case dateTime:
@@ -321,7 +331,13 @@ public class DataBuilder {
 				case markup:
 				case memo:
 				case text:
-					BindUtil.set(result, name, randomText(user.getCustomerName(), module, document, attribute));
+					domainValue = randomDomainValue(customer, document, attribute, result);
+					if (domainValue == null) {
+						BindUtil.set(result, name, randomText(user.getCustomerName(), module, document, attribute));
+					}
+					else if (! domainValue.isEmpty()) {
+						BindUtil.set(result, name, domainValue);
+					}
 					break;
 			}
 		}
@@ -391,6 +407,27 @@ public class DataBuilder {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * Get domain values for a document attribute if they exist
+	 * @return null if there are no domain values or "" if there is a domain value set defined but no yielded values
+	 */
+	private static String randomDomainValue(Customer customer, Document document, Attribute attribute, Bean bean) {
+		String result = null;
+
+		DomainType domainType = attribute.getDomainType();
+		if (domainType != null) {
+			List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, domainType, attribute, bean);
+			if ((values != null) && (! values.isEmpty())) {
+				result = values.get(RANDOM.nextInt(values.size())).getCode();
+			}
+			else {
+				result = "";
+			}
+		}
+		
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
