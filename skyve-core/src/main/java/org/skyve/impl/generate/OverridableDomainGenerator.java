@@ -2524,7 +2524,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\treturn ").append(documentName).append(".DOCUMENT_NAME;\n");
 			methods.append("\t}\n");
 
-			methods.append("\n\tpublic static ").append(documentName).append(" newInstance() {\n");
+			// Check for Extension class defined and alter the class returned accordingly
+			String modulePath = AbstractRepository.get().MODULES_NAMESPACE + module.getName();
+			if (domainExtensionClassExists(modulePath, documentName)) {
+				imports.add(String.format("modules.%s.%s.%sExtension", module.getName(), documentName, documentName));
+				methods.append("\n\tpublic static ").append(documentName).append("Extension newInstance() {\n");
+			}
+			else {
+				methods.append("\n\tpublic static ").append(documentName).append(" newInstance() {\n");
+			}
 			methods.append("\t\ttry {\n");
 			methods.append("\t\t\treturn CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());\n");
 			methods.append("\t\t}\n");
