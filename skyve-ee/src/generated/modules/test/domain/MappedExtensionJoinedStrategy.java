@@ -81,7 +81,7 @@ public class MappedExtensionJoinedStrategy extends MappedBase {
 		return MappedExtensionJoinedStrategy.DOCUMENT_NAME;
 	}
 
-	public static MappedExtensionJoinedStrategy newInstance() {
+	public static MappedExtensionJoinedStrategyExtension newInstance() {
 		try {
 			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
 		}
