@@ -18,7 +18,7 @@ public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column) {
-					((Column) child).setSortable(false);
+					((Column) child).setFilterable(false);
 				}
 			}
 		}
