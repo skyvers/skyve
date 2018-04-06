@@ -380,7 +380,7 @@ public class UserImpl implements User {
 		DocumentPermissionScope result = roleNames.contains(SUPER_ROLE) ? 
 											DocumentPermissionScope.customer :
 											DocumentPermissionScope.none;
-		DocumentPermission permission = documentPermissions.get(moduleName + '.' + documentName);
+		DocumentPermission permission = documentPermissions.get(String.format("%s.%s", moduleName, documentName));
 		if (permission != null) {
 			result = permission.getScope();
 		}
