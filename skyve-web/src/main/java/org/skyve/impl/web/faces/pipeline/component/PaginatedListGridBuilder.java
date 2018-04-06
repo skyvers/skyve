@@ -19,7 +19,6 @@ public class PaginatedListGridBuilder extends NoOpComponentBuilder {
 			UIData dt = (UIData) component;
 			dt.setPaginator(true);
 	    	dt.setRowsPerPageTemplate("25,50,75,100");
-	    	dt.setRows(50);
 	    	dt.setPaginatorAlwaysVisible(false);
 		}
 		

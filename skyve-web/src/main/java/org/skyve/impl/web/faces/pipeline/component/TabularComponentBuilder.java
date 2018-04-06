@@ -688,6 +688,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
         result.setVar("row");
 
         result.setLazy(true);
+    	result.setRows(50);
         result.setEmptyMessage("No Items to show");
         result.setSortMode("multiple");
         
