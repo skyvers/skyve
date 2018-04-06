@@ -31,11 +31,12 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.view.widget.bound.Bound;
+import org.skyve.util.Util;
 
 public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	private Bean bean;
@@ -182,22 +183,40 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 					GetSelectItemsAction get = new GetSelectItemsAction(bean, binding, true);
 					boolean found = false;
 					int index = 0;
-					for (SelectItem item : get.execute()) {
-						if (value.equals(item.getLabel())) {
-							found = true;
-							break;
+					try {
+						for (SelectItem item : get.execute()) {
+							if (value.equals(item.getLabel())) {
+								found = true;
+								break;
+							}
+							index++;
 						}
-						index++;
+					}
+					catch (Exception e) {
+						String message = String.format("WARNING: Can't set value for combo [%s] in document %s.%s as there were no domain values.",
+														binding,
+														bean.getBizModule(),
+														bean.getBizDocument());
+						Util.LOGGER.warning(message);
+						Comment comment = new Comment();
+						comment.setComment(message);
+						scalarSteps.add(comment);
+						return;
 					}
 					if (found) {
 						value = String.valueOf(index);
 					}
 					else {
-						throw new MetaDataException(String.format("Value %s does not exist in combo [%s] in document %s.%s. Check the data factory!",
-																	value,
-																	binding,
-																	bean.getBizModule(),
-																	bean.getBizDocument()));
+						String message = String.format("WARNING: Can't set value '%s' for combo [%s] in document %s.%s as it is not a valid value. Check the data factory!",
+														value,
+														binding,
+														bean.getBizModule(),
+														bean.getBizDocument());
+						Util.LOGGER.warning(message);
+						Comment comment = new Comment();
+						comment.setComment(message);
+						scalarSteps.add(comment);
+						value = null;
 					}
 				}
 			}

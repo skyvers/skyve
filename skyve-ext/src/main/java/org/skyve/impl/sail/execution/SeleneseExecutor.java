@@ -1,5 +1,7 @@
 package org.skyve.impl.sail.execution;
 
+import org.skyve.metadata.sail.language.step.Comment;
+
 public abstract class SeleneseExecutor<T extends AutomationContext> extends ScriptExecutor<T> {
 	protected void command(String command, String parameter1, String parameter2) {
 		indent().append("<tr><td>").append(command).append("</td><td>");
@@ -36,5 +38,10 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	protected void endTest() {
 		out().indent().append("</tbody>").newline();
 		out().indent().append("</table>").newline();
+	}
+	
+	@Override
+	public void executeComment(Comment comment) {
+		comment(comment.getComment());
 	}
 }

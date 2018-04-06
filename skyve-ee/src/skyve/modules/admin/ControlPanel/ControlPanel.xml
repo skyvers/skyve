@@ -114,6 +114,18 @@
 				<value code="other" description="Other" />
 			</values>
 		</enum>
+		<enum name="sailTestStrategy">
+			<displayName>Test Strategy</displayName>
+			<description>
+				Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
+			</description>
+			<defaultValue>Assert</defaultValue>
+			<values>
+				<value code="Assert" name="Assert" />
+				<value code="Verify" name="Verify" />
+				<value code="None" name="None" />
+			</values>
+		</enum>
 		<enum name="sailExecutor">
 			<displayName>Executor</displayName>
 			<values>

@@ -107,6 +107,11 @@
 					<item>
 						<combo binding="sailUserAgentType" />
 					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="sailTestStrategy" vertical="false" />
+					</item>
 					<item align="right">
 						<button actionName="GenerateMenuSAIL" pixelWidth="90" />
 					</item>

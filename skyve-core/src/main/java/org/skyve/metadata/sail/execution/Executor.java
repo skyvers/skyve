@@ -2,6 +2,7 @@ package org.skyve.metadata.sail.execution;
 
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
@@ -89,5 +90,7 @@ public interface Executor {
 	public void executeTestValue(TestValue test);
 	public void executeTestSuccess(TestSuccess test);
 	public void executeTestFailure(TestFailure test);
+
 	public void executeExecute(Execute execute);
+	public void executeComment(Comment comment);
 }

@@ -655,23 +655,24 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 															listGridIdentifier));
 		}
 		for (UIComponent listGridComponent : listGridComponents) {
-			String listGridClientId = ComponentCollector.clientId(listGridComponent);
-			if (row != null) {
-				if (step instanceof ListGridZoom) {
-					comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-				}
-				else if (step instanceof ListGridSelect) {
-					comment(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-				}
-				else {
-					comment(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
-				}
-			}
-			else {
-				comment(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
-			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
+				String listGridClientId = ComponentCollector.clientId(listGridComponent);
+				if (row != null) {
+					if (step instanceof ListGridZoom) {
+						comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					}
+					else if (step instanceof ListGridSelect) {
+						comment(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					}
+					else {
+						comment(String.format("Delete on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					}
+				}
+				else {
+					comment(String.format("New row on list grid [%s] (%s)", listGridIdentifier, listGridClientId));
+				}
+
 				for (UIComponent buttonComponent : buttonComponents) {
 					String buttonClientId = (row != null) ?
 												ComponentCollector.clientId(buttonComponent, row) :

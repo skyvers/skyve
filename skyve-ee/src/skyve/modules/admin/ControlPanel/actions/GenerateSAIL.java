@@ -11,11 +11,13 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
+import modules.admin.domain.ControlPanel.SailTestStrategy;
 import modules.admin.domain.ControlPanel.SailUserAgentType;
 
 public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExtension> {
@@ -30,7 +32,8 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 		modules.admin.domain.User user = bean.getSailUser();
 		String moduleName = bean.getSailModuleName();
 		String uxui = bean.getSailUxUi();
-		SailUserAgentType userAgentType = bean.getSailUserAgentType();
+		SailUserAgentType sailUserAgentType = bean.getSailUserAgentType();
+		SailTestStrategy sailTestStrategy = bean.getSailTestStrategy();
 
 		boolean error = false;
 		Message message = new Message("Select a value");
@@ -42,9 +45,13 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			error = true;
 			message.addBinding(ControlPanel.sailUxUiPropertyName);
 		}
-		if (userAgentType == null) {
+		if (sailUserAgentType == null) {
 			error = true;
 			message.addBinding(ControlPanel.sailUserAgentTypePropertyName);
+		}
+		if (sailTestStrategy == null) {
+			error = true;
+			message.addBinding(ControlPanel.sailTestStrategyPropertyName);
 		}
 		if (error) {
 			throw new ValidationException(message);
@@ -54,20 +61,32 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			Repository r = CORE.getRepository();
 			@SuppressWarnings("null")
 			User u = r.retrieveUser(String.format("%s/%s", user.getBizCustomer(), user.getUserName()));
+			@SuppressWarnings("null")
+			UserAgentType userAgentType = UserAgentType.valueOf(sailUserAgentType.toCode());
+			@SuppressWarnings("null")
+			TestStrategy testStrategy = TestStrategy.valueOf(sailTestStrategy.toCode());
 			if (moduleName != null) {
-				@SuppressWarnings("null")
-				Automation result = singular(u, moduleName, uxui, UserAgentType.valueOf(userAgentType.toCode()));
-				bean.setResults(XMLMetaData.marshalSAIL(result));
+				Automation result = single(u, moduleName, uxui, userAgentType, testStrategy);
+				if (result.getInteractions().isEmpty()) {
+					bean.setResults("NOTHING WAS GENERATED");
+				}
+				else {
+					bean.setResults(XMLMetaData.marshalSAIL(result));
+				}
 			}
 			else {
-				@SuppressWarnings("null")
-				List<Automation> result = plural(u, uxui, UserAgentType.valueOf(userAgentType.toCode()));
-				StringBuilder sb = new StringBuilder(4096);
-				for (Automation automation : result) {
-					sb.append(XMLMetaData.marshalSAIL(automation));
-					sb.append('\n');
+				List<Automation> result = multiple(u, uxui, userAgentType, testStrategy);
+				if (result.isEmpty()) {
+					bean.setResults("NOTHING WAS GENERATED");
 				}
-				bean.setResults(sb.toString());
+				else {
+					StringBuilder sb = new StringBuilder(4096);
+					for (Automation automation : result) {
+						sb.append(XMLMetaData.marshalSAIL(automation));
+						sb.append('\n');
+					}
+					bean.setResults(sb.toString());
+				}
 			}
 		}
 		catch (Exception e) {
@@ -78,8 +97,15 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 		return new ServerSideActionResult<>(bean);
 	}
 	
-	protected abstract Automation singular(User user, String moduleName, String uxui, UserAgentType userAgentType)
+	protected abstract Automation single(User user,
+											String moduleName,
+											String uxui,
+											UserAgentType userAgentType,
+											TestStrategy testStrategy)
 	throws Exception;
-	protected abstract List<Automation> plural(User user, String uxui, UserAgentType userAgentType)
+	protected abstract List<Automation> multiple(User user,
+													String uxui,
+													UserAgentType userAgentType,
+													TestStrategy testStrategy)
 	throws Exception;
 }

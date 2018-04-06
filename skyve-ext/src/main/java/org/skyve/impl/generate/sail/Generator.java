@@ -18,6 +18,7 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
@@ -44,7 +45,10 @@ public class Generator {
 System.out.println(visitModules(args[0]));
 	}
 */
-	public static List<Automation> visitMenus(User user, String uxui, UserAgentType userAgentType)
+	public static List<Automation> visitMenus(User user,
+												String uxui,
+												UserAgentType userAgentType,
+												TestStrategy testStrategy)
 	throws Exception {
 		CORE.getRepository().resetMenus(user);
 		UserImpl u = (UserImpl) user;
@@ -57,12 +61,13 @@ System.out.println(visitModules(args[0]));
 			Automation automation = new Automation();
 			automation.setUserAgentType(userAgentType);
 			automation.setUxui(uxui);
+			automation.setTestStrategy(testStrategy);
 			List<Interaction> interactions = automation.getInteractions();
 			Menu menu = u.getModuleMenu(moduleName);
 			menu(c, m, null, menu.getItems(), uxui, interactions);
 
 			// some modules may have no access at all for this user
-			if (interactions.size() > 0) {
+			if (! interactions.isEmpty()) {
 				result.add(automation);
 			}
 		}
@@ -70,7 +75,11 @@ System.out.println(visitModules(args[0]));
 		return result;
 	}
 
-	public static Automation visitMenu(User user, String moduleName, String uxui, UserAgentType userAgentType)
+	public static Automation visitMenu(User user,
+										String moduleName,
+										String uxui,
+										UserAgentType userAgentType,
+										TestStrategy testStrategy)
 	throws Exception {
 		CORE.getRepository().resetMenus(user);
 		UserImpl u = (UserImpl) user;
@@ -80,6 +89,7 @@ System.out.println(visitModules(args[0]));
 		Automation result = new Automation();
 		result.setUserAgentType(userAgentType);
 		result.setUxui(uxui);
+		result.setTestStrategy(testStrategy);
 		List<Interaction> interactions = result.getInteractions();
 		Menu menu = u.getModuleMenu(moduleName);
 		menu(c, m, null, menu.getItems(), uxui, interactions);
@@ -163,7 +173,8 @@ System.out.println(visitModules(args[0]));
 	
 	public static List<Automation> visitModules(User u,
 													String uxui,
-													UserAgentType userAgentType)
+													UserAgentType userAgentType,
+													TestStrategy testStrategy)
 	throws Exception {
 		List<Automation> result = new ArrayList<>();
 		
@@ -174,7 +185,7 @@ System.out.println(visitModules(args[0]));
 			if ("test".equals(moduleName)) {
 				continue;
 			}
-			Automation automation = visitModule(u, moduleName, uxui, userAgentType);
+			Automation automation = visitModule(u, moduleName, uxui, userAgentType, testStrategy);
 			if (! automation.getInteractions().isEmpty()) {
 				result.add(automation);
 			}
@@ -186,7 +197,8 @@ System.out.println(visitModules(args[0]));
 	public static Automation visitModule(User u,
 											String moduleName,
 											String uxui,
-											UserAgentType userAgentType)
+											UserAgentType userAgentType,
+											TestStrategy testStrategy)
 	throws Exception {
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
@@ -194,6 +206,7 @@ System.out.println(visitModules(args[0]));
 		Automation result = new Automation();
 		result.setUxui(uxui);
 		result.setUserAgentType(userAgentType);
+		result.setTestStrategy(testStrategy);
 		List<Interaction> interactions = result.getInteractions();
 		
 		for (Entry<String, DocumentRef> entry : m.getDocumentRefs().entrySet()) {

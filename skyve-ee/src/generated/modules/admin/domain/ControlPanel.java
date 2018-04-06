@@ -18,6 +18,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * Control Panel
  * 
  * @depend - - - SailUserAgentType
+ * @depend - - - SailTestStrategy
  * @depend - - - SailExecutor
  * @navhas n emailToContact 0..1 Contact
  * @navhas n sailUser 0..1 User
@@ -79,6 +80,8 @@ public class ControlPanel extends AbstractTransientBean {
 	public static final String sailUxUiPropertyName = "sailUxUi";
 	/** @hidden */
 	public static final String sailUserAgentTypePropertyName = "sailUserAgentType";
+	/** @hidden */
+	public static final String sailTestStrategyPropertyName = "sailTestStrategy";
 	/** @hidden */
 	public static final String sailExecutorPropertyName = "sailExecutor";
 	/** @hidden */
@@ -163,6 +166,86 @@ public class ControlPanel extends AbstractTransientBean {
 				SailUserAgentType[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (SailUserAgentType value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Test Strategy
+	 * <br/>
+	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
+	 **/
+	@XmlEnum
+	public static enum SailTestStrategy implements Enumeration {
+		Assert("Assert", "Assert"),
+		Verify("Verify", "Verify"),
+		None("None", "None");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private SailTestStrategy(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static SailTestStrategy fromCode(String code) {
+			SailTestStrategy result = null;
+
+			for (SailTestStrategy value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static SailTestStrategy fromDescription(String description) {
+			SailTestStrategy result = null;
+
+			for (SailTestStrategy value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				SailTestStrategy[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (SailTestStrategy value : values) {
 					domainValues.add(value.domainValue);
 				}
 			}
@@ -349,6 +432,12 @@ public class ControlPanel extends AbstractTransientBean {
 	 * User Agent Type
 	 **/
 	private SailUserAgentType sailUserAgentType;
+	/**
+	 * Test Strategy
+	 * <br/>
+	 * Assert (stop if they fail), Verify (test but don't stop), or None (don't conduct the tests at all)
+	 **/
+	private SailTestStrategy sailTestStrategy = SailTestStrategy.Assert;
 	/**
 	 * Executor
 	 **/
@@ -783,6 +872,24 @@ public class ControlPanel extends AbstractTransientBean {
 	public void setSailUserAgentType(SailUserAgentType sailUserAgentType) {
 		preset(sailUserAgentTypePropertyName, sailUserAgentType);
 		this.sailUserAgentType = sailUserAgentType;
+	}
+
+	/**
+	 * {@link #sailTestStrategy} accessor.
+	 * @return	The value.
+	 **/
+	public SailTestStrategy getSailTestStrategy() {
+		return sailTestStrategy;
+	}
+
+	/**
+	 * {@link #sailTestStrategy} mutator.
+	 * @param sailTestStrategy	The new value.
+	 **/
+	@XmlElement
+	public void setSailTestStrategy(SailTestStrategy sailTestStrategy) {
+		preset(sailTestStrategyPropertyName, sailTestStrategy);
+		this.sailTestStrategy = sailTestStrategy;
 	}
 
 	/**
