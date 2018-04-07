@@ -189,6 +189,10 @@
 		<converter-class>org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter</converter-class>
 	</converter>
 	<converter>
+		<converter-id>TriStateBoolean</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter</converter-class>
+	</converter>
+	<converter>
 		<converter-id>Geometry</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.geometry.GeometryConverter</converter-class>
 	</converter>

@@ -277,11 +277,12 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 			return component;
 		}
 
-		SelectBooleanCheckbox result = checkbox(listVar,
-												checkBox.getBinding(), 
-												title,
-												required,
-												checkBox.getDisabledConditionName());
+		SelectBooleanCheckbox result = (SelectBooleanCheckbox) checkbox(listVar,
+																			checkBox.getBinding(), 
+																			title,
+																			required,
+																			checkBox.getDisabledConditionName(),
+																			false);
 		result.setItemLabel(title);
 		return result;
 	}

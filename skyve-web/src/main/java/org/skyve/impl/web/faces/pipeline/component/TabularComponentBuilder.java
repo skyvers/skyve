@@ -53,6 +53,7 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.model.DualListModel;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -92,6 +93,7 @@ import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.AssociationPickListConverter;
 import org.skyve.impl.web.faces.converters.select.SelectItemsBeanConverter;
+import org.skyve.impl.web.faces.converters.select.TriStateCheckboxBooleanConverter;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -933,7 +935,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			AttributeType type = columnAttribute.getAttributeType();
 			if (AttributeType.bool.equals(type)) {
-				SelectBooleanCheckbox cb = checkbox(null, null, null, false, null);
+				TriStateCheckbox cb = (TriStateCheckbox) checkbox(null, null, null, false, null, true);
 				cb.setOnchange(String.format("PF('%s').filter()", tableVar));
 				result = cb;
 			}
@@ -1162,7 +1164,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							checkBox.getBinding(), 
 							title,
 							required,
-							checkBox.getDisabledConditionName());
+							checkBox.getDisabledConditionName(),
+							! Boolean.FALSE.equals(checkBox.getTriState()));
 	}
 	
 	@Override
@@ -2381,17 +2384,24 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 	// TODO do the grids
 
-	protected SelectBooleanCheckbox checkbox(String listVar, 
-												String binding, 
-												String title, 
-												boolean required,
-												String disabled) {
-		return (SelectBooleanCheckbox) input(SelectBooleanCheckbox.COMPONENT_TYPE,
-												listVar, 
-												binding, 
-												title, 
-												required, 
-												disabled);
+	protected UIInput checkbox(String listVar, 
+								String binding, 
+								String title, 
+								boolean required,
+								String disabled,
+								boolean triState) {
+		if (triState) {
+			TriStateCheckbox result = (TriStateCheckbox) input(TriStateCheckbox.COMPONENT_TYPE,
+																listVar, 
+																binding, 
+																title, 
+																required, 
+																disabled);
+			result.setConverter(new TriStateCheckboxBooleanConverter());
+			return result;
+		}
+		
+		return input(SelectBooleanCheckbox.COMPONENT_TYPE, listVar, binding, title, required, disabled);
 	}
 
 	protected ColorPicker colourPicker(String listVar, 
