@@ -60,6 +60,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.generate.SmartClientGenerateUtils;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.TabPane;
@@ -844,6 +845,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			// Sort out a display name and filter facet
 			String displayName = queryColumn.getDisplayName();
 			UIComponent specialFilterComponent = null;
+			AttributeType attributeType = null;
 			if (binding != null) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 				Document bindingDocument = target.getDocument();
@@ -864,6 +866,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 					}
 				}
 				else if (bindingAttribute != null) {
+					attributeType = bindingAttribute.getAttributeType();
 					if (displayName == null) {
 						displayName = bindingAttribute.getDisplayName();
 					}
@@ -899,6 +902,26 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			}
 			else {
 				column.setFilterable(false);
+			}
+			
+			// Add column styling
+			StringBuilder style = new StringBuilder(64);
+			Integer pixelWidth = queryColumn.getPixelWidth();
+			if (pixelWidth == null) {
+				pixelWidth = SmartClientGenerateUtils.determineDefaultColumnWidth(attributeType);
+			}
+			if (pixelWidth != null) {
+				style.append("width:").append(pixelWidth).append("px;");
+			}
+			HorizontalAlignment alignment = queryColumn.getAlignment();
+			if (alignment == null) {
+				alignment = SmartClientGenerateUtils.determineDefaultColumnAlignment(attributeType);
+			}
+			if ((alignment != null) && (! HorizontalAlignment.left.equals(alignment))) {
+				style.append("text-align:").append(HorizontalAlignment.centre.equals(alignment) ? "center" : "right").append(" !important;");
+			}
+			if (style.length() > 0) {
+				column.setStyle(style.toString());
 			}
 			
 			// Add the EL expression

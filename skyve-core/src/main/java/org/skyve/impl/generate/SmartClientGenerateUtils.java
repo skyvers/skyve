@@ -1177,7 +1177,7 @@ public class SmartClientGenerateUtils {
 		}
 	}
 
-	static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
+	public static HorizontalAlignment determineDefaultColumnAlignment(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 
 				AttributeType.dateTime.equals(attributeType) ||
 				AttributeType.time.equals(attributeType) || 
@@ -1195,7 +1195,7 @@ public class SmartClientGenerateUtils {
 		return HorizontalAlignment.left;
 	}
 	
-	static Integer determineDefaultColumnWidth(AttributeType attributeType) {
+	public static Integer determineDefaultColumnWidth(AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {
 			return Integer.valueOf(100);
 		}

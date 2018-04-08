@@ -10,6 +10,7 @@ body,html {
 /* Ensure that the list grid filter components fit the column widths nicely */
 .ui-column-customfilter {
 	display: flex !important;
+	justify-content: center !important;
 }
 .ui-column-filter {
 	width: 95% !important;
