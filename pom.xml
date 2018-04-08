@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.skyve</groupId>
 	<artifactId>skyve-parent</artifactId>
-	<version>20180405</version>
+	<version>20180409</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<skyve.version>20180405</skyve.version>
+		<skyve.version>20180409</skyve.version>
 		<asm.version>5.0.4</asm.version>
 		<atmosphere-runtime.version>2.4.3</atmosphere-runtime.version>
 		<bcmail-jdk15.version>1.45</bcmail-jdk15.version>
