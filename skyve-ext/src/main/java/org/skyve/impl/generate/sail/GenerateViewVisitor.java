@@ -2,6 +2,8 @@ package org.skyve.impl.generate.sail;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -34,6 +36,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	private boolean hasOk = false;
 	private boolean hasCancel = false;
 	private boolean hasDelete = false;
+	// list of module.document.view.binding visit in data grids to stop infinite recursion
+	private Set<String> breadcrumbs;
 	
 	protected GenerateViewVisitor(Customer customer, 
 										Module module,
@@ -44,6 +48,21 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 				(DocumentImpl) document,
 				determineView(customer, document, uxui));
 		this.uxui = uxui;
+		breadcrumbs = new TreeSet<>();
+		populateSteps.add(new TestDataEnter());
+	}
+	
+	private GenerateViewVisitor(Customer customer, 
+									Module module,
+									Document document,
+									String uxui,
+									Set<String> breadcrumbs) {
+		super((CustomerImpl) customer, 
+				(ModuleImpl) module,
+				(DocumentImpl) document,
+				determineView(customer, document, uxui));
+		this.uxui = uxui;
+		this.breadcrumbs = breadcrumbs;
 		populateSteps.add(new TestDataEnter());
 	}
 
@@ -71,6 +90,12 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 
 		String binding = grid.getBinding();
 
+		// Do nothing if we've visited this grid on this view before
+		String breadcrumb = String.format("%s.%s.%s.%s", module.getName(), document.getName(), view.getName(), binding);
+		if (! breadcrumbs.add(breadcrumb)) {
+			return;
+		}
+		
 		DataGridNew nu = new DataGridNew();
 		nu.setBinding(binding);
 		populateSteps.add(nu);
@@ -79,7 +104,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		Relation relation = (Relation) target.getAttribute();
 		Document gridDocument = module.getDocument(customer, relation.getDocumentName());
 		Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
-		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, uxui);
+		GenerateViewVisitor gridVisitor = new GenerateViewVisitor(customer, gridModule, gridDocument, uxui, breadcrumbs);
 		gridVisitor.visit();
 		populateSteps.addAll(gridVisitor.populateSteps);
 
