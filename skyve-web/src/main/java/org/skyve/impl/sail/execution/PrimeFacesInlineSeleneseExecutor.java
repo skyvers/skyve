@@ -24,8 +24,8 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.repository.Repository;
@@ -585,7 +585,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		String newDocumentName = ((Collection) target.getAttribute()).getDocumentName();
+		String newDocumentName = ((Relation) target.getAttribute()).getDocumentName();
 		d = m.getDocument(c, newDocumentName);
 		String newModuleName = d.getOwningModuleName();
 		
