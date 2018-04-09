@@ -356,57 +356,52 @@ public class DataBuilder {
 
 		if (attribute.isRequired()) {
 			if (! required) {
-				return false;
+				return true;
 			}
 		}
 		else {
 			if (! optional) {
-				return false;
+				return true;
 			}
 		}
 		if (attribute.isPersistent()) {
 			if (! persistent) {
-				return false;
+				return true;
 			}
 		}
 		else {
 			if (! transients) {
-				return false;
+				return true;
 			}
 		}
 		UsageType usage = attribute.getUsage();
 		if (UsageType.view.equals(usage)) {
 			if (! view) {
-				return false;
+				return true;
 			}
 		}
 		if (UsageType.domain.equals(usage)) {
 			if (! domain) {
-				return false;
+				return true;
 			}
 		}
 		if (attribute.isDeprecated()) {
 			if (! deprecated) {
-				return false;
-			}
-		}
-		else {
-			if (deprecated) {
-				return false;
+				return true;
 			}
 		}
 		if (types != null) {
 			if (Boolean.FALSE.equals(types.get(type))) {
-				return false;
+				return true;
 			}
 		}
 		if (names != null) {
 			if (Boolean.FALSE.equals(names.get(name))) {
-				return false;
+				return true;
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	/**
