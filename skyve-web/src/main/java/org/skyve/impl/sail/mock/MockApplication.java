@@ -68,6 +68,7 @@ import org.primefaces.component.steps.Steps;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.toolbar.Toolbar;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.primefaces.mobile.component.content.Content;
 import org.primefaces.mobile.component.field.Field;
 import org.primefaces.mobile.component.header.Header;
@@ -215,6 +216,9 @@ public class MockApplication extends Application {
 		}
 		else if (Toolbar.COMPONENT_TYPE.equals(componentType)) {
 			return new Toolbar();
+		}
+		else if (TriStateCheckbox.COMPONENT_TYPE.equals(componentType)) {
+			return new TriStateCheckbox();
 		}
 		else if (UIForm.COMPONENT_TYPE.equals(componentType)) {
 			return new UIForm();
