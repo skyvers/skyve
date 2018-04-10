@@ -2237,7 +2237,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 
 		setSize(result, null, pixelWidth, null, null, pixelHeight, null, null);
 		setDisabled(result, disabled);
-		setInvisible(result, invisible, null);
+		setInvisible(result, listVar, invisible, null);
 		setConfirmation(result, confirmationText);
 		setId(result, null);
 

@@ -85,6 +85,14 @@ public abstract class AbstractFacesBuilder {
 		}
 	}
 
+	protected void setInvisible(UIComponent component, String listVar, String invisibleConditionName, String extraELToAnd) {
+		if (invisibleConditionName != null) {
+			final String visible = BindUtil.negateCondition(invisibleConditionName);
+			component.setValueExpression("rendered",  createValueExpressionFromFragment(listVar, true,
+					visible, false, extraELToAnd, Boolean.class));
+		}
+	}
+
 	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
 		String styleClass = null;
 		if (HorizontalAlignment.left.equals(textAlignment)) {
