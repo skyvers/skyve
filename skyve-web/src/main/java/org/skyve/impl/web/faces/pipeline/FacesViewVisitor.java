@@ -141,6 +141,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.Action;
+import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -158,6 +160,7 @@ public class FacesViewVisitor extends ViewVisitor {
 	private boolean createView;
 	private String widgetId;
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
+	private ViewImpl view;
 
 	private UIComponent current; // current component being constructed
 	private Stack<Container> currentContainers = new Stack<>(); // used to determine how to add widgets to containers
@@ -179,6 +182,7 @@ public class FacesViewVisitor extends ViewVisitor {
 		this.widgetId = widgetId;
 		this.cb = cb;
 		this.lb = lb;
+		this.view = view;
 	}
 	
 	public UIComponent getFacesView() {
@@ -816,7 +820,36 @@ public class FacesViewVisitor extends ViewVisitor {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(ActionReference reference) {
-				c.set(cb.actionLink(null, listBinding, listVar, link, reference.getActionName()));
+				final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, listBinding);
+
+				final Document listDocument;
+				// Figure out the document type of the relation.
+				if (listTarget.getAttribute() instanceof Relation) {
+					final String documentName = ((Relation) listTarget.getAttribute()).getDocumentName();
+					listDocument = module.getDocument(customer, documentName);
+				} else {
+					listDocument = listTarget.getDocument();
+				}
+
+				final ViewType[] viewTypesToSearch = new ViewType[] { ViewType.edit, ViewType.create };
+				Action action = null;
+				for (ViewType viewType : viewTypesToSearch) {
+					final View listDocumentView = listDocument.getView(cb.userAgentType.name(), customer, viewType.name());
+					if (listDocumentView == null) {
+						continue;
+					}
+					action = listDocumentView.getAction(reference.getActionName());
+					if (action != null) {
+						// Found the action, we can stop looking.
+						break;
+					}
+				}
+
+				if (action != null) {
+					c.set(cb.actionLink(null, listBinding, listVar, link, action));
+				} else {
+					c.set(cb.actionLink(null, listBinding, listVar, link, reference.getActionName()));
+				}
 			}
 		}.process(outerReference);
 

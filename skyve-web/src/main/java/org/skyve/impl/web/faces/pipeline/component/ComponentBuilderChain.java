@@ -551,6 +551,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	@Override
+	public UIComponent actionLink(UIComponent component,
+								  String listBinding,
+								  String listVar,
+								  Link link,
+								  Action action) {
+		UIComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.actionLink(result, listBinding, listVar, link, action);
+		}
+		return result;
+	}
+
+	@Override
 	public UIComponent report(UIComponent component, Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {

@@ -1592,6 +1592,34 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							properties.get(PROCESS_KEY),
 							properties.get(UPDATE_KEY));
 	}
+
+	@Override
+	public UIComponent actionLink(UIComponent component,
+								  String listBinding,
+								  String listVar,
+								  Link link,
+								  Action action) {
+		if (component != null) {
+			return component;
+		}
+
+		Map<String, String> properties = link.getProperties();
+		return actionLink(link.getValue(),
+				action.getToolTip(),
+				null,
+				action.getName(),
+				false,
+				listBinding,
+				listVar,
+				link.getPixelWidth(),
+				null,
+				action.getClientValidation(),
+				action.getConfirmationText(),
+				action.getDisabledConditionName(),
+				action.getInvisibleConditionName(),
+				properties.get(PROCESS_KEY),
+				properties.get(UPDATE_KEY));
+	}
 	
 	@Override
 	public UIComponent report(UIComponent component, Action action) {

@@ -358,7 +358,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		component.addClientBehavior(eventName, ajax);
 	}
 
-	public abstract UIComponent actionLink(UIComponent component, 
+	public UIComponent actionLink(UIComponent component,
+										   String listBinding,
+										   String listVar,
+										   Link link,
+										   Action action) {
+		return actionLink(component, listBinding, listVar, link, action.getName());
+	}
+
+	public abstract UIComponent actionLink(UIComponent component,
 											String listBinding,
 											String listVar,
 											Link link,
