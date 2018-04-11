@@ -5,6 +5,7 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.UserAgentType;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -57,10 +58,14 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			throw new ValidationException(message);
 		}
 		
+		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
+		User currentUser = CORE.getUser();
 		try {
 			Repository r = CORE.getRepository();
 			@SuppressWarnings("null")
 			User u = r.retrieveUser(String.format("%s/%s", user.getBizCustomer(), user.getUserName()));
+			p.setUser(u);
+
 			@SuppressWarnings("null")
 			UserAgentType userAgentType = UserAgentType.valueOf(sailUserAgentType.toCode());
 			@SuppressWarnings("null")
@@ -91,6 +96,9 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 		}
 		catch (Exception e) {
 			bean.trapException(e);
+		}
+		finally {
+			p.setUser(currentUser);
 		}
 		bean.setTabIndex(Integer.valueOf(2));
 
