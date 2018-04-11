@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.faces.FacesException;
@@ -135,9 +136,12 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		
-		for (String binding : keySet()) {
+		Iterator<Map.Entry<String, DualListModel<DomainValue>>> i = entrySet().iterator();
+		while (i.hasNext()) {
+			Map.Entry<String, DualListModel<DomainValue>> entry = i.next();
+			String binding = entry.getKey();
+			DualListModel<DomainValue> model = entry.getValue();
 			try {
-				DualListModel<DomainValue> model = get(binding);
 				@SuppressWarnings("unchecked")
 				List<Bean> collection = (List<Bean>) Binder.get(bean, binding);
 				// collection could be null if we have a list membership that is bound to a compound binding...
@@ -177,7 +181,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 					// Sort the collection if required
 					BindUtil.sortCollectionByMetaData(bean, c, m, d, binding);
 					// Ensure that a new model is recreated with the correct sorting & domain values etc
-					remove(binding);
+					i.remove();
 				}
 			}
 			catch (Exception e) {
