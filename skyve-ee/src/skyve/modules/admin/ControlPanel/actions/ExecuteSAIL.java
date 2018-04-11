@@ -3,6 +3,7 @@ package modules.admin.ControlPanel.actions;
 import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
@@ -77,13 +78,16 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 														"Cannot create layout builder: " + e.getMessage()));
 		}
 		
+		AbstractPersistence p = (AbstractPersistence) CORE.getPersistence();
+		User currentUser = p.getUser();
 		try {
 			Automation automation = XMLMetaData.unmarshalSAIL(bean.getSail());
 
 			Repository r = CORE.getRepository();
 			@SuppressWarnings("null")
 			User u = r.retrieveUser(String.format("%s/%s", user.getBizCustomer(), user.getUserName()));
-
+			p.setUser(u);
+			
 			Class<?> type = loader.loadClass("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor");
 			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
 			executor.setUser(u);
@@ -92,6 +96,9 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		}
 		catch (Exception e) {
 			bean.trapException(e);
+		}
+		finally {
+			p.setUser(currentUser);
 		}
 		bean.setTabIndex(Integer.valueOf(2));
 		return new ServerSideActionResult<>(bean);
