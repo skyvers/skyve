@@ -436,6 +436,26 @@
 				</column>
 			</columns>
 		</documentQuery>
+		<documentQuery name="qUsersInGroup" documentName="User">
+			<description>Group Users</description>
+			<from>
+				<![CDATA[
+					{admin.User} as bean
+					inner join bean.groups as groop
+				]]>
+			</from>
+			<filter>
+				<![CDATA[
+					groop.bizId = :bizId
+				]]>
+			</filter>
+			<columns>
+				<column binding="contact.name" sortOrder="ascending" />
+				<column binding="contact.email1" sortOrder="ascending" />
+				<column binding="contact.mobile" sortOrder="ascending" />
+				<column binding="userName" sortOrder="ascending" />
+			</columns>
+		</documentQuery>
 		<documentQuery name="qCompletedJobs" documentName="Job">
 			<description>All completed jobs whether successful or not</description>
 			<columns>
