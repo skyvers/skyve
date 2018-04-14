@@ -53,7 +53,6 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
 public class ESClient extends AbstractContentManager {
-	private static final String FILE_STORE_NAME = "SKYVE_STORE";
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
 	static final String ATTACHMENT_INDEX_TYPE = "attachment";
 	static final String BEAN_INDEX_NAME = "beans";

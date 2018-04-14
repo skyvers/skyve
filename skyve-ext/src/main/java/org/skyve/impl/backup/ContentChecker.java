@@ -21,7 +21,8 @@ import java.sql.Statement;
 public class ContentChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContentChecker.class);
 
-    public void checkContent() throws Exception {
+    @SuppressWarnings("static-method")
+	public void checkContent() throws Exception {
         String customerName = CORE.getUser().getCustomerName();
 
         try (Connection connection = EXT.getDataStoreConnection()) {
@@ -43,8 +44,7 @@ public class ContentChecker {
 
                                     if (Attribute.AttributeType.content.equals(attributeType)) {
                                         String stringValue = resultSet.getString(name);
-                                        if (resultSet.wasNull()) {
-                                        } else {
+                                        if (! resultSet.wasNull()) {
                                             AttachmentContent content;
                                             try {
                                                 content = cm.get(stringValue);
@@ -52,7 +52,7 @@ public class ContentChecker {
                                                     LOGGER.error("Detected missing content {} for field name {} for table {}", stringValue, name, table.name);
 
                                                     // Construct what would be the file path.
-                                                    final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, "SKYVE_STORE").toFile();
+                                                    final File contentDirectory = Paths.get(UtilImpl.CONTENT_DIRECTORY, AbstractContentManager.FILE_STORE_NAME).toFile();
                                                     final StringBuilder contentAbsolutePath = new StringBuilder(contentDirectory.getAbsolutePath() + File.separator);
                                                     AbstractContentManager.appendBalancedFolderPathFromContentId(stringValue, contentAbsolutePath);
                                                     final File contentFile = Paths.get(contentAbsolutePath.toString(), stringValue).toFile();

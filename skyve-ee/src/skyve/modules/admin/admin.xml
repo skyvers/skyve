@@ -271,7 +271,6 @@
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="CheckAuditMatches"/>
 					<action name="TruncateAuditLog"/>
-					<action name="CheckContent" />
 				</document>
 			</privileges>
 		</role>
@@ -294,6 +293,7 @@
 				<document name="DataMaintenance" permission="CRUDC">
 					<action name="Backup" />
 					<action name="BackupSelected" />
+					<action name="CheckContent" />
 					<action name="ContentSelected" />
 					<action name="DataMaintenanceExportAction" />
 					<action name="DataMaintenanceImportAction" />
@@ -307,7 +307,6 @@
 					<action name="Drop" />
 					<action name="Sync" />
 					<action name="UploadBackup" />
-					<action name="CheckContent" />
 				</document>
 				<document name="DataMaintenanceModuleDocument" permission="_RU_C"/>
 				<document name="DocumentCreator" permission="_____">
