@@ -407,7 +407,7 @@ public class ESClient extends AbstractContentManager {
 											binding,
 											fileName,
 											mimeType,
-											new FileInputStream(file));
+											file);
 		}
 		else {
 			result = new AttachmentContent(bizCustomer,
