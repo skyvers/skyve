@@ -620,7 +620,7 @@ public class ESClient extends AbstractContentManager {
 		return results;
 	}
 
-	private static Object fieldValue(SearchHit hit, String fieldName) {
+	static Object fieldValue(SearchHit hit, String fieldName) {
 		SearchHitField field = hit.field(fieldName);
 		if (field != null) {
 			return field.value();

@@ -8,7 +8,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
@@ -83,16 +82,12 @@ class ESIterable implements ContentIterable {
 		public SearchResult next() {
 			SearchHit searchHit = i.next();
 
-			String bizCustomer = (String) searchHit.field(ESClient.BEAN_CUSTOMER_NAME).value();
-			String bizModule = (String) searchHit.field(ESClient.BEAN_MODULE_KEY).value();
-			String bizDocument = (String) searchHit.field(ESClient.BEAN_DOCUMENT_KEY).value();
-			String bizDataGroupId = null;
-			SearchHitField field = searchHit.field(ESClient.BEAN_DATA_GROUP_ID);
-			if (field != null) {
-				bizDataGroupId = field.value();
-			}
-			String bizUserId = (String) searchHit.field(ESClient.BEAN_USER_ID).value();
-			String bizId = (String) searchHit.field(ESClient.BEAN_DOCUMENT_ID).value();
+			String bizCustomer = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_CUSTOMER_NAME);
+			String bizModule = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_MODULE_KEY);
+			String bizDocument = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DOCUMENT_KEY);
+			String bizDataGroupId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DATA_GROUP_ID);
+			String bizUserId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_USER_ID);
+			String bizId = (String) ESClient.fieldValue(searchHit, ESClient.BEAN_DOCUMENT_ID);
 
 			SearchResult hit = new SearchResult();
 			
@@ -103,31 +98,25 @@ class ESIterable implements ContentIterable {
 			hit.setBizUserId(bizUserId);
 			hit.setBizId(bizId);
 
-			field = searchHit.field(ESClient.CONTENT);
-			if (field != null) {
-				hit.setExcerpt((String) field.value());
-			}
-
-			field = searchHit.field(ESClient.BEAN_ATTRIBUTE_NAME);
-			if (field != null) {
-				hit.setAttributeName((String) field.getValue());
-			}
-			field = searchHit.field(ESClient.LAST_MODIFIED);
-			if (field != null) {
+			hit.setExcerpt((String) ESClient.fieldValue(searchHit, ESClient.CONTENT));
+			hit.setAttributeName((String) ESClient.fieldValue(searchHit, ESClient.BEAN_ATTRIBUTE_NAME));
+			
+			String lastModified = (String) ESClient.fieldValue(searchHit, ESClient.LAST_MODIFIED);
+			if (lastModified != null) {
 				try {
-					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+					hit.setLastModified(TimeUtil.parseISODate(lastModified));
 				}
 				catch (ParseException e) {
-					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + field.getValue() + " for content ID = " + searchHit.getId());
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + lastModified + " for content ID = " + searchHit.getId());
 				}
 			}
-			field = searchHit.field(ESClient.FILE_LAST_MODIFIED);
-			if (field != null) {
+			String fileLastModified = (String) ESClient.fieldValue(searchHit, ESClient.FILE_LAST_MODIFIED);
+			if (fileLastModified != null) {
 				try {
-					hit.setLastModified(TimeUtil.parseISODate((String) field.getValue()));
+					hit.setLastModified(TimeUtil.parseISODate(fileLastModified));
 				}
 				catch (ParseException e) {
-					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO last modified date of " + field.getValue() + " for content ID = " + searchHit.getId());
+					if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESIterable.ESIterator.next(): Could not parse ISO file last modified date of " + fileLastModified + " for content ID = " + searchHit.getId());
 				}
 			}
 			hit.setContentId(searchHit.getId());
