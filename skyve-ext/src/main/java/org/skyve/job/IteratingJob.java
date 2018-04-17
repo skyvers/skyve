@@ -13,11 +13,21 @@ public abstract class IteratingJob<T> extends CancellableJob {
         getLog().add(String.format("Commencing job %s.", getDisplayName()));
 
         final Collection<T> elementsToProcess = getElements();
-        getLog().add(String.format("Found %d elements to process.", elementsToProcess.size()));
+        getLog().add(String.format("Found %d element(s) to process.", elementsToProcess.size()));
         int numProcessedElements = 0;
         for (T element : elementsToProcess) {
             if (!isCancelled()) {
-                operation(element);
+                try {
+                    operation(element);
+                } catch (final Exception e) {
+                    if (!continueOnFailure()) {
+                        throw e;
+                    } else {
+                        getLog().add(String.format("Exception processing element %d: %s", numProcessedElements, e.getMessage()));
+                    }
+                } finally {
+                    numProcessedElements++;
+                }
             } else {
                 getLog().add(String.format("Job was cancelled after processing %d elements.", numProcessedElements));
                 return;
@@ -37,5 +47,12 @@ public abstract class IteratingJob<T> extends CancellableJob {
     /**
      * @param element The element to perform the operation on.
      */
-    protected abstract void operation(T element);
+    protected abstract void operation(T element) throws Exception;
+
+    /**
+     * @return Boolean that determines whether processing should continue if the operation fails.
+     */
+    protected boolean continueOnFailure() {
+        return false;
+    }
 }
