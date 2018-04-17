@@ -9,14 +9,14 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.job.Job;
 import org.skyve.persistence.DocumentQuery;
-import org.skyve.persistence.Persistence;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.persistence.Persistence;
 
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance;
-import modules.admin.domain.DataMaintenanceModuleDocument;
 import modules.admin.domain.DataMaintenance.RefreshOption;
+import modules.admin.domain.DataMaintenanceModuleDocument;
 
 public class RefreshDocumentTuplesJob extends Job {
 	private static final long serialVersionUID = 6282346785863992703L;
@@ -52,9 +52,10 @@ public class RefreshDocumentTuplesJob extends Job {
 		for (DataMaintenanceModuleDocument doc : dm.getRefreshDocuments()) {
 			if (Boolean.TRUE.equals(doc.getInclude())) {
 				StringBuilder sb = new StringBuilder();
-				sb.append("Document Data Refresh requested ");
-				sb.append(" for [").append(doc.getModuleName());
-				sb.append("].[").append(doc.getDocumentName()).append("]");
+				sb.append("Document Data Refresh requested for [")
+						.append(doc.getModuleName())
+						.append("].[")
+						.append(doc.getDocumentName()).append("]");
 
 				// get relevant document to action
 				Persistence pers = CORE.getPersistence();
@@ -76,14 +77,15 @@ public class RefreshDocumentTuplesJob extends Job {
 						pers.begin();
 
 					} catch (Exception e) {
-						StringBuilder sbFail = new StringBuilder(sb);
-						sbFail.append(" - Upsert failed for id ").append(pb.getBizId());
-						log.add(sbFail.toString());
+						log.add(String.format("%s - %s failed for id: %s",
+								sb.toString(),
+								dm.getRefreshOption().toDescription(),
+								pb.getBizId()));
 					}
 					processed++;
 					setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
 				}
-				sb.append("Completed");
+				sb.append(" Completed");
 				log.add(sb.toString());
 			}
 
