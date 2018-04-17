@@ -237,20 +237,18 @@ public class Restore {
 										}
 										else {
 											String dataGroupId = UtilImpl.processStringValue(values.get(Bean.DATA_GROUP_ID));
-											try (BufferedInputStream stream = new BufferedInputStream(new FileInputStream(contentFile))) {
-												AttachmentContent content = new AttachmentContent(values.get(Bean.CUSTOMER_NAME), 
-																									moduleName,
-																									documentName, 
-																									dataGroupId, 
-																									values.get(Bean.USER_ID), 
-																									values.get(Bean.DOCUMENT_ID),
-																									header,
-																									contentFile.getName(),
-																									stream);
-												content.setContentId(fileName);
-												cm.put(content);
-												statement.setString(index++, content.getContentId());
-											}
+											AttachmentContent content = new AttachmentContent(values.get(Bean.CUSTOMER_NAME), 
+																								moduleName,
+																								documentName, 
+																								dataGroupId, 
+																								values.get(Bean.USER_ID), 
+																								values.get(Bean.DOCUMENT_ID),
+																								header,
+																								contentFile.getName(),
+																								contentFile);
+											content.setContentId(fileName);
+											cm.put(content);
+											statement.setString(index++, content.getContentId());
 										}
 									}
 									else {

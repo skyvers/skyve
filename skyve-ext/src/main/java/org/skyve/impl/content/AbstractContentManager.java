@@ -11,6 +11,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.impl.content.AbstractContentManager;
 
 public abstract class AbstractContentManager implements ContentManager {
+	public static final String FILE_STORE_NAME = "SKYVE_STORE";
+
 	public static Class<? extends AbstractContentManager> IMPLEMENTATION_CLASS;
 	
 	public static AbstractContentManager get() {

@@ -1,6 +1,9 @@
 package org.skyve.content;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidObjectException;
@@ -18,7 +21,7 @@ public class AttachmentContent extends Content {
 	private String fileName;
 	private MimeType mimeType = MimeType.plain;
 	protected Date lastModified;
-	private transient InputStream stream;
+	private transient File file;
 	private byte[] bytes;
 
 	private AttachmentContent(String bizCustomer, 
@@ -99,9 +102,9 @@ public class AttachmentContent extends Content {
 								String attributeName,
 								String fileName,
 								MimeType mimeType,
-								InputStream stream) {
+								File file) {
 		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, mimeType);
-		this.stream = stream;
+		this.file = file;
 	}
 	
 	public AttachmentContent(String bizCustomer, 
@@ -112,9 +115,9 @@ public class AttachmentContent extends Content {
 								String bizId,
 								String attributeName,
 								MimeType mimeType,
-								InputStream stream) {
+								File file) {
 		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, null, mimeType);
-		this.stream = stream;
+		this.file = file;
 	}
 	
 	public AttachmentContent(String bizCustomer, 
@@ -125,9 +128,9 @@ public class AttachmentContent extends Content {
 								String bizId,
 								String attributeName,
 								String fileName,
-								InputStream stream) {
+								File file) {
 		this(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId, attributeName, fileName, (MimeType) null);
-		this.stream = stream;
+		this.file = file;
 	}
 
 	public final String getAttributeName() {
@@ -162,17 +165,21 @@ public class AttachmentContent extends Content {
 	 * NB This must be closed by the caller.
 	 */
 	public final InputStream getContentStream() {
-		if (stream == null) {
-			stream = new ByteArrayInputStream(bytes);
+		if (file == null) {
+			return new ByteArrayInputStream(bytes);
 		}
 		
-		return stream;
+		try {
+			return new FileInputStream(file);
+		}
+		catch (FileNotFoundException e) {
+			return new ByteArrayInputStream(new byte[0]);
+		}
 	}
 	
 	public final byte[] getContentBytes() throws IOException {
-		
 		if (bytes == null) {			
-			bytes = FileUtil.getFileBytes(stream);
+			bytes = FileUtil.getFileBytes(getContentStream());
 		}
 		
 		return bytes;
@@ -185,10 +192,10 @@ public class AttachmentContent extends Content {
 	 * @throws ObjectStreamException
 	 */
 	private Object writeReplace() throws ObjectStreamException {
-		if (stream != null) {
+		if (file != null) {
 			try {
 				getContentBytes();
-				stream = null;
+				file = null;
 			} 
 			catch (IOException e) {
 				e.printStackTrace();

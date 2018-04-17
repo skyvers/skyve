@@ -52,7 +52,7 @@ public class FacesContentUtil {
 															contentOwner.getBizId(), 
 															contentAttributeName, 
 															fileName, 
-															file.getInputstream());
+															file.getContents());
 		try (ContentManager cm = EXT.newContentManager()) {
 			// Determine if we should index the content or not
 			boolean index = true; // default

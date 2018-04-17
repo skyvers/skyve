@@ -152,6 +152,7 @@
 				</row>
 			</form>
 			<hbox horizontalAlignment="right" shrinkWrap="height">
+				<button actionName="CheckContent" />
 				<button actionName="Reindex" />
 			</hbox>
 		</tab>
@@ -308,5 +309,6 @@
 			toolTip="Generate a script to synchronise the SQL DB with metadata definitions" 
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh"/>
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
+		<action className="CheckContent" displayName="Check Content" inActionPanel="false"/>
 	</actions>
 </view>

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
@@ -57,7 +58,12 @@ public class UniqueConstraintNullableTest extends AbstractSkyveTest {
 		CORE.getPersistence().save(uniqueConstraintNullable2);
 	}
 
+	/**
+	 * This test is ignored because although there is a plan to test for null values inclusive in constraint definitions
+	 * it hasn't been implemented yet, so by default null values or partially nulled composite keys are ignored. 
+	 */
 	@Test(expected = UniqueConstraintViolationException.class)
+	@Ignore 
 	public void testSaveTwoIdenticalInstancesWithNull() throws Exception {
 		// setup the test data
 		uniqueConstraintNullable.setEnum3(null);

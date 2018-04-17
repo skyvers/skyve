@@ -1,6 +1,7 @@
 package org.skyve.impl.persistence.hibernate;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -57,7 +58,13 @@ class HibernateQueryDelegate {
 
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
-			if (value instanceof Geometry) {
+			if (value instanceof Collection) {
+				result.setParameterList(parameterName, (Collection<?>) value);
+			}
+			else if ((value != null) && value.getClass().isArray()) {
+				result.setParameterList(parameterName, (Object[]) value);
+			}
+			else if (value instanceof Geometry) {
 				result.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
 			}
 			else {
@@ -154,6 +161,12 @@ class HibernateQueryDelegate {
 		Query<?> hibernateQuery = session.createQuery(query.toQueryString());
 		for (String parameterName : query.getParameterNames()) {
 			Object value = query.getParameter(parameterName);
+			if (value instanceof Collection) {
+				hibernateQuery.setParameterList(parameterName, (Collection<?>) value);
+			}
+			else if ((value != null) && value.getClass().isArray()) {
+				hibernateQuery.setParameterList(parameterName, (Object[]) value);
+			}
 			if (value instanceof Geometry) {
 				hibernateQuery.setParameter(parameterName, value, AbstractHibernatePersistence.getDialect().getGeometryType());
 			}
