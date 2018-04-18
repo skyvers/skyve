@@ -33,44 +33,44 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 
 	private String[] splitLine() throws Exception {
 		String line = fileReader.readLine();
-		if(null == line) {
+		if (null == line) {
 			return null;
 		}
 		String[] parts = line.split(seperator);
-		
+
 		List<String> values = new ArrayList<>();
 		String part;
-		for(int cntr = 0; cntr < parts.length; ++cntr) {
+		for (int cntr = 0; cntr < parts.length; ++cntr) {
 			part = parts[cntr];
-			if(part.startsWith("\"")) {
-				while(!part.endsWith("\"")) {
+			if (part.startsWith("\"")) {
+				while (!part.endsWith("\"")) {
 					part += seperator + parts[++cntr];
 				}
 			}
 			values.add(part);
 		}
-		
-		if(line.endsWith(seperator)) {
+
+		if (line.endsWith(seperator)) {
 			values.add("");
 		}
-		
+
 		return values.toArray(new String[values.size()]);
 	}
 
-	public DelimitedLoader(LoaderActivityType activityType, InputStream fileInputStream, UploadException exception, 
+	public DelimitedLoader(LoaderActivityType activityType, InputStream fileInputStream, UploadException exception,
 			String moduleName, String documentName, String delimiter, String... bindings) throws Exception {
-		
+
 		super(activityType, exception, moduleName, documentName);
 		addFields(bindings);
-		
+
 		this.seperator = "" + delimiter;
 		fileReader = new BufferedReader(new InputStreamReader(fileInputStream));
 
 		header = splitLine();
-		
+
 		setDataIndex(0);
 	}
-	
+
 	@Override
 	public void finalize() {
 		try {
@@ -85,12 +85,12 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public String getStringFieldValue(int index, boolean blankAsNull) throws Exception {
 		String hdr = header[index];
-		if(getValueMap()!=null && getValueMap().containsKey(hdr)) {
+		if (getValueMap() != null && getValueMap().containsKey(hdr)) {
 			String value = (String) getValueMap().get(hdr);
-			if(blankAsNull && null != value && "".equals(value.trim())) {
+			if (blankAsNull && null != value && "".equals(value.trim())) {
 				return null;
-			} 
-			
+			}
+
 			return value;
 		}
 
@@ -100,9 +100,9 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public Date getDateFieldValue(int index) throws Exception {
 		String value = getStringFieldValue(index, true);
-		if(null == value)
+		if (null == value)
 			return null;
-		
+
 		Converter<DateTime> converter = CORE.getPersistence().getUser().getCustomer().getDefaultDateTimeConverter();
 		Date result = converter.fromDisplayValue(value);
 		return result;
@@ -111,23 +111,29 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	@Override
 	public Double getNumericFieldValue(int index, boolean emptyAsZero) throws Exception {
 		String value = getStringFieldValue(index, true);
-		if(null == value)
+		if (null == value)
 			return new Double(0);
-		
+
 		return Double.valueOf(value);
 	}
 
 	@Override
 	public void nextData() throws Exception {
 		String[] fieldValues = splitLine();
-		if(null == fieldValues) {
+		if (null == fieldValues) {
 			setValueMap(null);
 			return;
 		}
-		
+
 		Map<String, Object> values = new HashMap<>();
-		for(int cntr = 0; cntr < header.length; ++cntr) {
-			values.put(header[cntr], fieldValues[cntr]);
+		for (int cntr = 0; cntr < header.length; ++cntr) {
+			String currentValue = fieldValues[cntr];
+			// remove any surrounding double quotes from this CSV string, if any
+			if (currentValue != null && currentValue.indexOf("\"") >= 0) {
+				currentValue = removeQuotesSurroundingString(currentValue);
+			}
+
+			values.put(header[cntr], currentValue);
 		}
 		setValueMap(values);
 		dataIndex++;
@@ -138,10 +144,9 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		return true;
 	}
 
-
 	@Override
 	public boolean isNoData() throws Exception {
-		return (valueMap==null);
+		return (valueMap == null);
 	}
 
 	@Override
@@ -157,9 +162,9 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	public String debugData() throws Exception {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Line ").append(getDataIndex());
-		
+
 		if (valueMap != null) {
-			for(String key : getValueMap().keySet()) {
+			for (String key : getValueMap().keySet()) {
 				sb.append(", (").append(getDataIndex()).append(",").append(key).append(") = ");
 				sb.append(valueMap.get(key).toString());
 			}
@@ -167,5 +172,18 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 			sb.append(" Null");
 		}
 		return sb.toString();
+	}
+
+	/**
+	 * Removes surrounding quotes from the specified string.
+	 * 
+	 * @param string The string to cleanse
+	 * @return The string without double quotes at the beginning and end, if it had any
+	 */
+	static String removeQuotesSurroundingString(String string) {
+		if (string.startsWith("\"") && string.endsWith("\"")) {
+			return string.substring(1, string.length() - 1);
+		}
+		return string;
 	}
 }

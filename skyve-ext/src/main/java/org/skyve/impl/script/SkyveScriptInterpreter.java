@@ -1087,7 +1087,7 @@ public class SkyveScriptInterpreter {
 	 * Fashion a title case identifier from the given string.
 	 * 
 	 * @param string The string to convert
-	 * @return A valid java static identifier. First letter upper case words with spaces between.
+	 * @return A title case string. First letter of each word upper cased with spaces between words.
 	 */
 	private static String toTitleCase(String string) {
 		String javaIdentifierName = BindUtil.toJavaTypeIdentifier(string);
