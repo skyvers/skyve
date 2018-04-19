@@ -24,7 +24,9 @@ public class GenerateDefault implements ServerSideAction<ReportDesign> {
 		final JasperReportRenderer reportRenderer = new JasperReportRenderer(designSpecification);
 
 		bean.setJrxml(reportRenderer.getJrxml());
-		Renderer.saveJrxml(designSpecification, reportRenderer);
+		if (StringUtils.isNotBlank(bean.getRepositoryPath())) {
+			Renderer.saveJrxml(designSpecification, reportRenderer);
+		}
 
 		return new ServerSideActionResult<>(bean);
 	}
