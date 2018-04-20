@@ -322,6 +322,8 @@ public class JobSchedule extends AbstractPersistentBean {
 	public static final String runAsPropertyName = "runAs";
 	/** @hidden */
 	public static final String jobScheduledImmediatelyPropertyName = "jobScheduledImmediately";
+	/** @hidden */
+	public static final String disabledPropertyName = "disabled";
 
 	/**
 	 * Job To Run
@@ -911,6 +913,12 @@ public class JobSchedule extends AbstractPersistentBean {
 	 * Whether or not the job was scheduled immediately
 	 **/
 	private Boolean jobScheduledImmediately = new Boolean(false);
+	/**
+	 * Disabled
+	 * <br/>
+	 * Whether or not this schedule is disabled.
+	 **/
+	private Boolean disabled = new Boolean(false);
 
 	@Override
 	@XmlTransient
@@ -3560,6 +3568,24 @@ return modules.admin.JobSchedule.JobScheduleBizlet.getBizKey(this);
 	public void setJobScheduledImmediately(Boolean jobScheduledImmediately) {
 		preset(jobScheduledImmediatelyPropertyName, jobScheduledImmediately);
 		this.jobScheduledImmediately = jobScheduledImmediately;
+	}
+
+	/**
+	 * {@link #disabled} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getDisabled() {
+		return disabled;
+	}
+
+	/**
+	 * {@link #disabled} mutator.
+	 * @param disabled	The new value.
+	 **/
+	@XmlElement
+	public void setDisabled(Boolean disabled) {
+		preset(disabledPropertyName, disabled);
+		this.disabled = disabled;
 	}
 
 	/**

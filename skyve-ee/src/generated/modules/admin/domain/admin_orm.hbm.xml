@@ -276,6 +276,7 @@
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
 		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
+		<property name="disabled" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminJobScheduleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
@@ -380,6 +381,28 @@
 		<filter name="adminTaggedCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminTaggedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="adminTaggedUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.admin.domain.TestDocument" table="ADM_TestDocument" entity-name="adminTestDocument">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="textField" length="500" />
+		<property name="integerField" />
+		<property name="longField" />
+		<property name="decimal2Field" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5Field" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal10Field" type="Decimal10" precision="28" scale="10" />
+		<property name="dateField" type="DateOnly" />
+		<filter name="adminTestDocumentNoneFilter" condition="1=0"/>
+		<filter name="adminTestDocumentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminTestDocumentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminTestDocumentUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.admin.domain.User" table="ADM_SecurityUser" entity-name="adminUser">
@@ -617,6 +640,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminTaggedUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTestDocumentNoneFilter" />
+	<filter-def name="adminTestDocumentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTestDocumentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminTestDocumentUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserNoneFilter" />

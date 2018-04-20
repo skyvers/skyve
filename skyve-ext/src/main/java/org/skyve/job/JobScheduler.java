@@ -1,20 +1,6 @@
 package org.skyve.job;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.SimpleTrigger;
-import org.quartz.Trigger;
-import org.quartz.TriggerUtils;
+import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
@@ -35,6 +21,12 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JobScheduler {
 	private static Scheduler JOB_SCHEDULER = null;
@@ -61,7 +53,9 @@ public class JobScheduler {
 				}
 	
 				// Add triggers
-				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers();
+				List<Bean> jobSchedules = SQLMetaDataUtil.retrieveAllJobSchedulesForAllCustomers().stream()
+						.filter(js -> !Boolean.TRUE.equals(BindUtil.get(js, "disabled")))
+						.collect(Collectors.toList());
 				for (Bean jobSchedule : jobSchedules) {
 					scheduleJob(jobSchedule, (User) BindUtil.get(jobSchedule, "user"));
 				}
@@ -83,7 +77,7 @@ public class JobScheduler {
 		}
 	}
 
-	private static void addJobs(Module module) 
+	private static void addJobs(Module module)
 	throws Exception {
 		for (JobMetaData job : module.getJobs()) {
 			Class<?> jobClass = Thread.currentThread().getContextClassLoader().loadClass(job.getClassName());
@@ -237,9 +231,9 @@ public class JobScheduler {
 		scheduleJob(job, null, user, trigger, null);
 	}
 	
-	private static void scheduleJob(JobMetaData job, 
-										Bean parameter, 
-										User user, 
+	private static void scheduleJob(JobMetaData job,
+										Bean parameter,
+										User user,
 										Trigger trigger, 
 										Integer sleepAtEndInSeconds)
 	throws Exception {
