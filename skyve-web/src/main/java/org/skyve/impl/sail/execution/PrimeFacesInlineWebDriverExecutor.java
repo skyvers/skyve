@@ -13,6 +13,7 @@ import org.primefaces.component.password.Password;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spinner.Spinner;
+import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -208,7 +209,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 								(component instanceof Password) ||
 								(component instanceof InputMask);
 			boolean selectOne = (component instanceof SelectOneMenu);
-			boolean checkbox = (component instanceof SelectBooleanCheckbox);
+			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
 			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
 			
 			// TODO implement colour picker testing
