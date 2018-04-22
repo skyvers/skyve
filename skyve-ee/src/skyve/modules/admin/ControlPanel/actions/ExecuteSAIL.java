@@ -88,7 +88,8 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			User u = r.retrieveUser(String.format("%s/%s", user.getBizCustomer(), user.getUserName()));
 			p.setUser(u);
 			
-			Class<?> type = loader.loadClass("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor");
+			@SuppressWarnings("null")
+			Class<?> type = loader.loadClass(executorClass.toCode());
 			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
 			executor.setUser(u);
 			automation.execute(executor);

@@ -35,5 +35,9 @@
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commonmark-0.10.0.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/jasperreports-6.3.1.jar"/>
 	<classpathentry kind="lib" path="javaee/skyve.ear/lib/commons-lang3-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-api-3.11.0.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-support-3.11.0.jar"/>
+	<classpathentry kind="lib" path="lib/guava-23.6-jre.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-remote-driver-3.11.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

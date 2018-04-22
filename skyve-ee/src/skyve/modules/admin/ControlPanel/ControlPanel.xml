@@ -130,6 +130,7 @@
 			<displayName>Executor</displayName>
 			<values>
 				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor" description="PrimeFaces Inline Selenese" />
+				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor" description="PrimeFaces Inline Web Driver" />
 			</values>
 		</enum>
 		<text name="sailComponentBuilder">
