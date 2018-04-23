@@ -6,31 +6,31 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 	private StringBuilder script = new StringBuilder(4096);
 	private int indent = 0;
 	
-	protected final ScriptExecutor<T> indent() {
+	public final ScriptExecutor<T> indent() {
 		for (int i = 0; i < indent; i++) {
 			script.append('\t');
 		}
 		return this;
 	}
 	
-	protected final ScriptExecutor<T> in() {
+	public final ScriptExecutor<T> in() {
 		indent++;
 		return this;
 	}
 
-	protected final ScriptExecutor<T> out() {
+	public final ScriptExecutor<T> out() {
 		indent--;
 		return this;
 	}
 	
-	protected final ScriptExecutor<T> append(String stuff) {
+	public final ScriptExecutor<T> append(String stuff) {
 		if (stuff != null) {
 			script.append(stuff);
 		}
 		return this;
 	}
 	
-	protected final ScriptExecutor<T> newline() {
+	public final ScriptExecutor<T> newline() {
 		script.append('\n');
 		return this;
 	}
@@ -41,7 +41,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 	}
 	
 	@Override
-	public final String toString() {
+	public String toString() {
 		return script.toString();
 	}
 }

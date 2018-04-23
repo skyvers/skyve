@@ -471,6 +471,11 @@
 			<description>Whether or not the job was scheduled immediately</description>
 			<defaultValue>false</defaultValue>
 		</boolean>
+		<boolean name="disabled">
+			<documentation>Whether or not this schedule is disabled.</documentation>
+			<displayName>Disabled</displayName>
+			<defaultValue>false</defaultValue>
+		</boolean>
 	</attributes>
 	<conditions>
 		<condition name="scheduledImmediately">

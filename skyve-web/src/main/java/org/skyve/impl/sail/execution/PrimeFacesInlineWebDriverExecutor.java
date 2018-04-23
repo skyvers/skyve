@@ -62,11 +62,11 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 
-public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<PrimeFacesAutomationContext> {
+public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
 	
-	public PrimeFacesInlineSeleneseExecutor(ComponentBuilder componentBuilder,
+	public PrimeFacesInlineWebDriverExecutor(ComponentBuilder componentBuilder,
 												LayoutBuilder layoutBuilder) {
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;
@@ -114,16 +114,16 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 		if (queryName != null) {
 			comment(String.format("List for query [%s.%s]", moduleName, queryName));
-			command("open", String.format("?a=l&m=%s&q=%s", moduleName, queryName));
+			get(String.format("?a=l&m=%s&q=%s", moduleName, queryName));
 		}
 		else if (documentName != null) {
 			if (modelName != null) {
 				comment(String.format("List for model [%s.%s.%s]", moduleName, documentName, modelName));
-				command("open", String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
+				get(String.format("?a=l&m=%s&d=%s&q=%s", moduleName, documentName, modelName));
 			}
 			else {
 				comment(String.format("List for default query of [%s.%s]", moduleName, documentName));
-				command("open", String.format("?a=l&m=%s&q=%s", moduleName, documentName));
+				get(String.format("?a=l&m=%s&q=%s", moduleName, documentName));
 			}
 		}
 	}
@@ -141,11 +141,11 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		String bizId = edit.getBizId();
 		if (bizId == null) {
 			comment(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
-			command("open", String.format(".?a=e&m=%s&d=%s", moduleName, documentName));
+			get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
 		}
 		else {
 			comment(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
-			command("open", String.format(".?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
+			get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
 	}
 
@@ -184,7 +184,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
 			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-			command("click", String.format("//a[contains(@href, '#%s')]", clientId));
+			indent().append("tab(\"").append(clientId).append("\");").newline();
 		}
 	}
 
@@ -206,9 +206,9 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			String clientId = ComponentCollector.clientId(component);
 			boolean text = (component instanceof InputText) || 
 								(component instanceof InputTextarea) || 
-								(component instanceof Password);
+								(component instanceof Password) ||
+								(component instanceof InputMask);
 			boolean selectOne = (component instanceof SelectOneMenu);
-			boolean masked = (component instanceof InputMask);
 			boolean checkbox = (component instanceof SelectBooleanCheckbox) || (component instanceof TriStateCheckbox);
 			boolean _input = (component instanceof Spinner) || (component instanceof Calendar);
 			
@@ -220,51 +220,27 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
-			command("storeElementPresent", clientId, "present");
-			command("if", "${present} == true");
-			if (checkbox) {
-				// dont need to check if checkbox is disabled coz we can still try to click it
-				// check the value and only click if we need the other different value
-				command("storeEval", String.format("window.SKYVE.getCheckboxValue('%s')", clientId), "checked");
-				command("if", String.format("${checked} != %s", dataEnter.getValue()));
-				command("click", String.format("%s_input", clientId));
-				command("endIf");
-			}
-			else if (_input) {
-				// determine editable as these are <input/>
-				command("storeEditable", String.format("%s_input", clientId), "editable");
-				command("if", "${editable} == true");
-			}
-			else if (selectOne) {
-				// Look for prime faces disabled style
-				command("storeCssCount", String.format("css=#%s.ui-state-disabled", clientId), "disabled");
-				command("if", "${disabled} == false");
-			}
-			else {
-				// determine editable as these are <input/>
-				command("storeEditable", clientId, "editable");
-				command("if", "${editable} == true");
+			
+			//replace newlines
+			String value = dataEnter.getValue();
+			if (value != null) {
+				// never replace with a new line as chrome under test will trip the default button on the form 
+				// from the enter key as represented by \n
+				value = value.replace("\n", " ");
 			}
 			
-			if (text) {
-				command("type", clientId, dataEnter.getValue());
+			if (checkbox) {
+				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
-			else if (masked) { // need to send key strokes to masked fields
-				command("click", clientId); // the click selects the existing expression for overtype
-				command("sendKeys", clientId, dataEnter.getValue());
+			else if (text) {
+				indent().append("text(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
 			}
 			else if (_input) {
-				command("type", String.format("%s_input", clientId), dataEnter.getValue());
+				indent().append("_input(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
 			}
 			else if (selectOne) {
-				command("click", String.format("%s_label", clientId));
-				// Value here should be an index in the drop down starting from 0
-				command("click", String.format("%s_%s", clientId, dataEnter.getValue()));
+				indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
-			if (! checkbox) { // endIf for disabled/editable test
-				command("endIf");
-			}
-			command("endIf"); // endIf for present test
 		}
 	}
 
@@ -278,41 +254,39 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		for (UIComponent component : components) {
 			String clientId = ComponentCollector.clientId(component);
 
-			// if exists and is not disabled
 			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			command("storeElementPresent", clientId, "present");
-			command("if", "${present} == true");
-			// Look for prime faces disabled style
-			command("storeCssCount", String.format("css=#%s.ui-state-disabled", clientId), "disabled");
-			command("if", "${disabled} == false");
-			if (ajax) {
-				command("click", clientId);
-				if (confirm) {
-					command("click", "confirmOK");
-				}
-				command("waitForNotVisible", "busy");
-			}
-			else {
-				if (confirm) {
-					command("click", clientId);
-					command("clickAndWait", "confirmOK");
-				}
-				else {
-					command("clickAndWait", clientId);
-				}
-			}
+			indent().append("button(\"").append(clientId).append("\", ").append(String.valueOf(ajax));
+			append(", ").append(String.valueOf(confirm)).append(");").newline();
+
 			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 				executeTestSuccess(new TestSuccess());
 			}
-			command("endIf");
-			command("endIf");
 		}
-		
 	}
-	
+
+	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = button.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
+		}
+		for (UIComponent component : components) {
+			String clientId = ComponentCollector.clientId(component);
+
+			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
+			indent().append("redirectButton(\"").append(clientId).append("\", ");
+			append(String.valueOf(confirm)).append(");").newline();
+
+			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+				executeTestSuccess(new TestSuccess());
+			}
+		}
+	}
+
 	@Override
 	public void executeOk(Ok ok) {
-		button(ok, "ok", false, false, ok.getTestSuccess());
+		redirectButton(ok, "ok", false, ok.getTestSuccess());
 		pop();
 	}
 
@@ -338,7 +312,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void executeDelete(Delete delete) {
-		button(delete, "delete", false, true, delete.getTestSuccess());
+		redirectButton(delete, "delete", true, delete.getTestSuccess());
 		pop();
 	}
 
@@ -386,39 +360,12 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			String clientId = ComponentCollector.clientId(lookupComponent);
 			if (row != null) {
 				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
+				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(String.valueOf(row)).append(");").newline();
 			}
 			else {
 				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
+				indent().append("lookupDescription(\"").append(clientId).append("\", \"").append(search).append("\");").newline();
 			}
-			
-			// lookup description is present
-			command("storeElementPresent", clientId, "present");
-			command("if", "${present} == true");
-			// determine editable as these are <input/>
-			command("storeEditable", String.format("%s_input", clientId), "editable");
-			command("if", "${editable} == true");
-
-			if (row != null) {
-				// Click the drop down button
-				command("clickAt", String.format("//span[@id='%s']/button", clientId), "10,10");
-				// Wait for pick list drop down
-				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
-				// Select the row
-				command("click", String.format("//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
-			}
-			else {
-				// Type in the input field (everything but the last char)
-				command("type", String.format("%s_input", clientId), search.substring(0, search.length() - 1));
-				command("sendKeys", String.format("%s_input", clientId), search.substring(search.length() - 1));
-
-				// Wait for pick list drop down
-				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
-				// Select the first row
-				command("click", String.format("//div[@id='%s_panel']/ul/li", clientId));
-			}
-			
-			command("endIf");
-			command("endIf");
 		}
 	}
 
@@ -461,11 +408,13 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 		for (UIComponent dataGridComponent : dataGridComponents) {
 			String dataGridClientId = ComponentCollector.clientId(dataGridComponent);
+			boolean ajax = false;
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
 					comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
 				else {
+					ajax = true;
 					comment(String.format("Remove on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
 				}
 			}
@@ -479,26 +428,8 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 												ComponentCollector.clientId(buttonComponent, row) :
 												ComponentCollector.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
-						// data grid is present
-						command("storeElementPresent", dataGridClientId, "present");
-						command("if", "${present} == true");
-						// data grid button is present
-						command("storeElementPresent", buttonClientId, "present");
-						command("if", "${present} == true");
-						// Look for prime faces disabled style on data grid button
-						command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
-						command("if", "${disabled} == false");
-						// All good, continue with the button click
-						if (step instanceof DataGridRemove) {
-							command("click", ComponentCollector.clientId(buttonComponent, row));
-							command("waitForNotVisible", "busy");
-						}
-						else {
-							command("clickAndWait", buttonClientId);
-						}
-						command("endIf");
-						command("endIf");
-						command("endIf");
+						indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
+						append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
 					}
 				}
 			}
@@ -601,25 +532,13 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 												ComponentCollector.clientId(buttonComponent, row) :
 												ComponentCollector.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
-						// list grid is present
-						command("storeElementPresent", listGridClientId, "present");
-						command("if", "${present} == true");
-						// list grid button is present
-						command("storeElementPresent", buttonClientId, "present");
-						command("if", "${present} == true");
-						// Look for prime faces disabled style on list grid button
-						command("storeCssCount", String.format("css=#%s.ui-state-disabled", buttonClientId), "disabled");
-						command("if", "${disabled} == false");
-						// All good, continue with the button click
 						if (step instanceof ListGridSelect) {
-							command("clickAndWait", String.format("//tr[%d]/td", row)); // ClientIdCollector.clientId(component, select.getRow()));
+							indent().append("listGridSelect(\"").append(listGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
 						}
 						else {
-							command("clickAndWait", buttonClientId);
+							indent().append("listGridButton(\"").append(listGridClientId).append("\", \"");
+							append(buttonClientId).append("\", false);").newline();
 						}
-						command("endIf");
-						command("endIf");
-						command("endIf");
 					}
 				}
 			}
@@ -629,7 +548,6 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void executeTestValue(TestValue test) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override
@@ -637,16 +555,14 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		TestStrategy strategy = getTestStrategy();
 		if (TestStrategy.Verify.equals(strategy)) {
 			comment("Test Success");
-			command("verifyElementNotPresent", "css=.ui-messages-error");
-			command("verifyElementNotPresent", "css=.ui-message-error");
+			indent().append("verifySuccess();").newline();
 		}
 		else if (TestStrategy.None.equals(strategy)) {
 			// nothing to do
 		}
 		else { // null or Assert
 			comment("Test Success");
-			command("assertElementNotPresent", "css=.ui-messages-error");
-			command("assertElementNotPresent", "css=.ui-message-error");
+			indent().append("assertSuccess();").newline();
 		}
 	}
 	
@@ -658,23 +574,25 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			if (message == null) {
 				comment("Test Failure");
 				if (TestStrategy.Verify.equals(strategy)) {
-					command("verifyElementPresent", "css=.ui-messages-error");
+					indent().append("verifyFailure();").newline();
 				}
 				else {
-					command("assertElementPresent", "css=.ui-messages-error");
+					indent().append("assertFailure();").newline();
 				}
 			}
 			else {
 				comment(String.format("Test Failure with message '%s'", message));
 				if (TestStrategy.Verify.equals(strategy)) {
-					command("verifyElementPresent", "css=.ui-messages-error");
-					command("verifyTextPresent", message);
+					indent().append("verifyFailure(\"").append(message).append("\"").newline();
 				}
 				else {
-					command("assertElementPresent", "css=.ui-messages-error");
-					command("assertTextPresent", message);
+					indent().append("assertFailure(\"").append(message).append("\"").newline();
 				}
 			}
 		}
+	}
+	
+	private void get(String url) {
+		indent().append("get(\"").append(url).append("\");").newline();
 	}
 }

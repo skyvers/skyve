@@ -259,7 +259,8 @@ public class ControlPanel extends AbstractTransientBean {
 	 **/
 	@XmlEnum
 	public static enum SailExecutor implements Enumeration {
-		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese");
+		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese"),
+		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");
 
 		private String code;
 		private String description;

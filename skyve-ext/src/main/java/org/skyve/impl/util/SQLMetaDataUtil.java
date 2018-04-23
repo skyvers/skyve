@@ -1,10 +1,5 @@
 package org.skyve.impl.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.domain.Bean;
 import org.skyve.domain.MapBean;
@@ -18,6 +13,11 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class SQLMetaDataUtil {
 	/**
@@ -191,6 +191,7 @@ public class SQLMetaDataUtil {
 				properties.put("startTime", jobScheduleRow.get("starttime"));
 				properties.put("endTime", jobScheduleRow.get("endtime"));
 				properties.put("cronExpression", jobScheduleRow.get("cronexpression"));
+				properties.put("disabled", jobScheduleRow.get("disabled"));
 				properties.put("user", user);
 				
 				MapBean jobSchedule = new MapBean("admin", "JobSchedule", properties);

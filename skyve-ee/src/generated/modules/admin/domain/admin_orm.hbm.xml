@@ -276,6 +276,7 @@
 		<property name="startTime" type="DateTime" />
 		<property name="endTime" type="DateTime" />
 		<many-to-one name="runAs" entity-name="adminUser" column="runAs_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_ADM_JobSchedule_runAs" />
+		<property name="disabled" />
 		<filter name="adminJobScheduleNoneFilter" condition="1=0"/>
 		<filter name="adminJobScheduleCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="adminJobScheduleDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
