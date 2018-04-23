@@ -50,7 +50,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 	}
 	
 	private void put(String identifier, UIComponent component, Object widget) {
-System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
+//System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
 		List<UIComponent> componentList = components.get(identifier);
 		if (componentList == null) {
 			componentList = new ArrayList<>();

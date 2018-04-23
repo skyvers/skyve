@@ -1,7 +1,6 @@
 package org.skyve.impl.content.elasticsearch;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -313,7 +312,6 @@ public class ESClient extends AbstractContentManager {
 	}
 	
 	@Override
-	@SuppressWarnings("resource")
 	public AttachmentContent get(String contentId) throws Exception {
 		GetRequestBuilder builder = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId);
 		// Add attachment field if we have inlined content
