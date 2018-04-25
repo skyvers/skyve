@@ -451,9 +451,9 @@ public class TestUtil {
 					fileName = DATA_MAP_CACHE.get(key);
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
-					String className = String.format("modules.%s.util.%sFactoryExtension", module.getName(), document.getName());
-					Util.LOGGER
-							.fine(String.format("Looking for factory extension annotations in %s", className));
+					String className = String.format("modules.%1$s.%2$s.%2$sFactoryExtension", module.getName(),
+							document.getName());
+					Util.LOGGER.info(String.format("Looking for factory extension annotations in %s", className));
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
