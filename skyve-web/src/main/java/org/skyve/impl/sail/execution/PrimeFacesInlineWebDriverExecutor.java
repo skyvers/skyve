@@ -230,6 +230,12 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			}
 			
 			if (checkbox) {
+				if (Boolean.TRUE.toString().equals(value)) {
+					value = "Boolean.TRUE";
+				}
+				else if (Boolean.FALSE.toString().equals(value)) {
+					value = "Boolean.FALSE";
+				}
 				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
 			else if (text) {
