@@ -129,8 +129,20 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 		for (int cntr = 0; cntr < header.length; ++cntr) {
 			String currentValue = fieldValues[cntr];
 			// remove any surrounding double quotes from this CSV string, if any
-			if (currentValue != null && currentValue.indexOf("\"") >= 0) {
-				currentValue = removeQuotesSurroundingString(currentValue);
+			if (currentValue != null) {
+				// trim the string
+				currentValue = currentValue.trim();
+
+				if (currentValue.indexOf("\"") >= 0) {
+					// remove any surrounding double quotes from this CSV string, if any
+					currentValue = removeQuotesSurroundingString(currentValue);
+
+					// replace an escaped double quote with a single double quote ("")
+					currentValue = replaceEscapedDoubleQuote(currentValue);
+
+					// trim the string after the quotes were stripped
+					currentValue = currentValue.trim();
+				}
 			}
 
 			values.put(header[cntr], currentValue);
@@ -181,8 +193,22 @@ public class DelimitedLoader extends AbstractDataFileLoader {
 	 * @return The string without double quotes at the beginning and end, if it had any
 	 */
 	static String removeQuotesSurroundingString(String string) {
-		if (string.startsWith("\"") && string.endsWith("\"")) {
-			return string.substring(1, string.length() - 1);
+		if (string != null && string.startsWith("\"") && string.endsWith("\"")) {
+			return string.length() > 1 ? string.substring(1, string.length() - 1) : "";
+		}
+		return string;
+	}
+
+	/**
+	 * Replaces a CSV escaped double quote ("") with a single double
+	 * quote when present in the input value.
+	 * 
+	 * @param string The string to cleanse
+	 * @return The string without two consecutive double quotes, if it had any
+	 */
+	static String replaceEscapedDoubleQuote(String string) {
+		if (string != null && string.contains("\"\"")) {
+			return string.replaceAll("\"\"", "\"");
 		}
 		return string;
 	}
