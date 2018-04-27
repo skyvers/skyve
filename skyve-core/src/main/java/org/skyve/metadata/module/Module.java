@@ -117,7 +117,16 @@ public interface Module extends NamedMetaData {
 	 * @return
 	 */
 	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName);
-	
+
+	/**
+	 *
+	 * @param customer
+	 * @param documentName
+	 * @param includeAssociationBizKeys
+	 * @return
+	 */
+	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys);
+
 	/**
 	 * 
 	 * @param customer Can be null which means that this method returns the un-overridden document.
