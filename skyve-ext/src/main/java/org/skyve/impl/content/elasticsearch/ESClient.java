@@ -17,6 +17,7 @@ import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
+import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -47,6 +48,7 @@ import org.skyve.content.MimeType;
 import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -149,6 +151,11 @@ public class ESClient extends AbstractContentManager {
 			client.prepareIndex(BEAN_INDEX_NAME, 
 									BEAN_INDEX_TYPE,
 									content.getBizId()).setSource(source).execute().actionGet();
+
+			FlushResponse flushResponse = client.admin().indices().prepareFlush(BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+			if (flushResponse.getFailedShards() > 0) {
+				throw new DomainException("Could not flush the Elastic beans index to disk");
+			}
 		}
 	}
 	
@@ -264,12 +271,17 @@ public class ESClient extends AbstractContentManager {
 				source.endObject();
 			}
 			if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ESClient.put(): " + source.string());
-			IndexResponse response = client.prepareIndex(ATTACHMENT_INDEX_NAME, 
-															ATTACHMENT_INDEX_TYPE,
-															attachment.getContentId())
-										.setSource(source).execute().actionGet();
-			if (response.isCreated()) {
-				attachment.setContentId(response.getId());
+			IndexResponse indexResponse = client.prepareIndex(ATTACHMENT_INDEX_NAME, 
+																ATTACHMENT_INDEX_TYPE,
+																attachment.getContentId())
+													.setSource(source).execute().actionGet();
+			if (indexResponse.isCreated()) {
+				attachment.setContentId(indexResponse.getId());
+			}
+
+			FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+			if (flushResponse.getFailedShards() > 0) {
+				throw new DomainException("Could not flush the Elastic attachments index to disk");
 			}
 
 			if (UtilImpl.CONTENT_FILE_STORAGE) {
@@ -443,6 +455,11 @@ public class ESClient extends AbstractContentManager {
 		client.prepareDelete(BEAN_INDEX_NAME,
 								BEAN_INDEX_TYPE,
 								content.getBizId()).execute().actionGet();
+
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic beans index to disk");
+		}
 	}
 
 	@Override
@@ -451,6 +468,11 @@ public class ESClient extends AbstractContentManager {
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
 								ATTACHMENT_INDEX_TYPE,
 								contentId).execute().actionGet();
+
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic attachments index to disk");
+		}
 
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			String path = getFilePath(contentId);
@@ -487,6 +509,11 @@ public class ESClient extends AbstractContentManager {
 			.setIndices(ATTACHMENT_INDEX_NAME, BEAN_INDEX_NAME)
 			.setTypes(ATTACHMENT_INDEX_TYPE, BEAN_INDEX_TYPE)
 			.setQuery(QueryBuilders.termQuery(BEAN_CUSTOMER_NAME, customerName)).execute().actionGet();
+		
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME, BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic beans and attachments index to disk");
+		}
 	}
 
 	@Override
@@ -496,6 +523,11 @@ public class ESClient extends AbstractContentManager {
 			.setIndices(ATTACHMENT_INDEX_NAME)
 			.setTypes(ATTACHMENT_INDEX_TYPE)
 			.setQuery(QueryBuilders.termQuery(BEAN_CUSTOMER_NAME, customerName)).execute().actionGet();
+
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(ATTACHMENT_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic attachments index to disk");
+		}
 	}
 
 	@Override
@@ -505,6 +537,11 @@ public class ESClient extends AbstractContentManager {
 			.setIndices(BEAN_INDEX_NAME)
 			.setTypes(BEAN_INDEX_TYPE)
 			.setQuery(QueryBuilders.termQuery(BEAN_CUSTOMER_NAME, customerName)).execute().actionGet();
+
+		FlushResponse flushResponse = client.admin().indices().prepareFlush(BEAN_INDEX_NAME).setWaitIfOngoing(true).execute().actionGet();
+		if (flushResponse.getFailedShards() > 0) {
+			throw new DomainException("Could not flush the Elastic beans index to disk");
+		}
 	}
 
 	@Override
