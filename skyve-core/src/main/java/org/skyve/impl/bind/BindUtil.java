@@ -505,7 +505,7 @@ public final class BindUtil {
 				}
 				else {
 					boolean found = false;
-					Object codeValue = value;
+					String codeValue = value.toString();
 					for (DomainValue domainValue : domainValues) {
 						if (domainValue.getCode().equals(codeValue)) {
 							result = domainValue.getDescription();
@@ -514,7 +514,7 @@ public final class BindUtil {
 						}
 					}
 					if (! found) {
-						result = value.toString();
+						result = codeValue;
 					}
 				}
 			}
