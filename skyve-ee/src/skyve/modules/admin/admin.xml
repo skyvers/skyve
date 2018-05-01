@@ -299,6 +299,7 @@
 					<action name="DataMaintenanceImportAction" />
 					<action name="DeleteBackup" />
 					<action name="Reindex" />
+					<action name="RelinkContent" />
 					<action name="Restore" />
 					<action name="Truncate" />
 					<action name="DownloadBackup" />

@@ -1,8 +1,6 @@
 package org.skyve.impl.backup;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.math.BigDecimal;
 import java.sql.Connection;
