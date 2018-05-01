@@ -455,6 +455,7 @@ public class Desktop extends Harness {
 					String iconStyleClass = null;
 					Module itemModule = null;
 					String itemDocumentName = null;
+					String config = null;
 	                if (item instanceof TreeItem) {
 	                    TreeItem treeItem = (TreeItem) item;
 	                    itemDocumentName = treeItem.getDocumentName();
@@ -478,6 +479,13 @@ public class Desktop extends Harness {
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
 	                    ref = "tree";
+	                    boolean autoPopulate = treeItem.isAutoPopulate();
+	                    if (autoPopulate) {
+	                    	config = "{}";
+	                    }
+	                    else {
+	                    	config = "{autoPopulate:false}";
+	                    }
 	                }
 	                else if (item instanceof ListItem) {
 						ListItem gridItem = (ListItem) item;
@@ -502,6 +510,13 @@ public class Desktop extends Harness {
 						icon16 = itemDocument.getIcon16x16RelativeFileName();
 						iconStyleClass = itemDocument.getIconStyleClass();
 						ref = "grid";
+	                    boolean autoPopulate = gridItem.isAutoPopulate();
+	                    if (autoPopulate) {
+	                    	config = "{}";
+	                    }
+	                    else {
+	                    	config = "{autoPopulate:false}";
+	                    }
 					}
 					else if (item instanceof CalendarItem) {
 	                    CalendarItem calendarItem = (CalendarItem) item;
@@ -578,9 +593,11 @@ public class Desktop extends Harness {
 					if ((icon16 == null) && (iconStyleClass != null)) {
 						result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
 					}
-					result.append(SmartClientGenerateUtils.processString(Util.i18n(item.getName(), locale)));
-					result.append("',ref:'");
-					result.append(ref);
+					result.append(SmartClientGenerateUtils.processString(Util.i18n(item.getName(), locale))).append('\'');
+					if (config != null) {
+						result.append(",config:").append(config);
+					}
+					result.append(",ref:'").append(ref);
 					if (icon16 != null) {
 						result.append("',icon:'../resources?");
 						if ((itemModule != null) && (itemDocumentName != null)) { // NB link items have no document

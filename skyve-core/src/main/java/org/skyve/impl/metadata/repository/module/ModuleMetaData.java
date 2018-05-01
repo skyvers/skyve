@@ -598,6 +598,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				result.setDocumentName(documentName);
 				result.setQueryName(queryName);
 				result.setModelName(modelName);
+				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
 				
 				items.add(result);
 			}
@@ -681,6 +682,7 @@ public class ModuleMetaData extends NamedMetaData implements PersistentMetaData<
 				result.setDocumentName(documentName);
 				result.setModelName(modelName);
 				result.setQueryName(queryName);
+				result.setAutoPopulate(! Boolean.FALSE.equals(item.getAutoPopulate()));
 				
 				items.add(result);
 			}

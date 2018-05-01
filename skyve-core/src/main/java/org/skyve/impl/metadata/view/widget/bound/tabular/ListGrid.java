@@ -52,6 +52,7 @@ import org.skyve.metadata.view.Disableable;
 							"showExport",
 							"showSnap",
 							"showTag",
+							"autoPopulate",
 							"selectedIdBinding",
 							"continueConversation",
 							"editedActions",
@@ -84,6 +85,8 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	private Boolean showSnap;
 	private Boolean showTag;
 
+	private Boolean autoPopulate;
+	
 	private String queryName;
 	private String modelName;
 	private String selectedIdBinding;
@@ -309,6 +312,15 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	@XmlAttribute(name = "showTag", required = false)
 	public void setShowTag(Boolean showTag) {
 		this.showTag = showTag;
+	}
+
+	public Boolean getAutoPopulate() {
+		return autoPopulate;
+	}
+
+	@XmlAttribute(name = "autoPopulate", required = false)
+	public void setAutoPopulate(Boolean autoPopulate) {
+		this.autoPopulate = autoPopulate;
 	}
 
 	@Override
