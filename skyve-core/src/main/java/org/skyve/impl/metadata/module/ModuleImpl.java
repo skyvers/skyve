@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.AbstractMetaDataMap;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.module.query.DocumentQueryDefinitionImpl;
@@ -18,6 +20,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
@@ -87,6 +90,11 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	@Override
 	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
+		return getDocumentDefaultQuery(customer, documentName, false);
+	}
+
+	@Override
+	public DocumentQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys) {
 		DocumentQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
@@ -115,25 +123,14 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 				
 				result = query;
 
-/*
-				QueryColumn column = new QueryColumn();
-				column.setBinding(Bean.BIZ_KEY);
-				column.setEditable(false);
-				column.setHidden(true);
-				column.setDisplayName(document.getSingularAlias());
-				column.setSortOrder(SortDirection.ascending);
-				
-				result.getColumns().add(column);
-*/
-				
-				processColumns(customer, document, result.getColumns());
+				processColumns(customer, document, result.getColumns(), includeAssociationBizKeys);
 			}
 		}
 
 		return result;
 	}
 
-	private void processColumns(Customer customer, Document document, List<QueryColumn> columns) {
+	private void processColumns(Customer customer, Document document, List<QueryColumn> columns, boolean includeAssociationBizKeys) {
 		// NB We have to manually traverse the document inheritence hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
@@ -141,7 +138,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = getDocument(customer, inherits.getDocumentName());
-			processColumns(customer, baseDocument, columns);
+			processColumns(customer, baseDocument, columns, includeAssociationBizKeys);
 			if (! columns.isEmpty()) {
 				firstColumn = false;
 			}
@@ -155,6 +152,20 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 					column.setEditable(false);
 					column.setDisplayName(attribute.getDisplayName());
 					column.setBinding(attribute.getName());
+					if (firstColumn) {
+						column.setSortOrder(SortDirection.ascending);
+						firstColumn = false;
+					}
+					columns.add(column);
+				}
+				if (includeAssociationBizKeys && attribute instanceof Association) {
+					final Association association = (Association) attribute;
+
+					final QueryColumnImpl column = new QueryColumnImpl();
+					column.setEditable(false);
+					column.setDisplayName(String.format("%s BizKey", association.getDisplayName()));
+					column.setBinding(BindUtil.createCompoundBinding(association.getName(), Bean.BIZ_KEY));
+					column.setHidden(true);
 					if (firstColumn) {
 						column.setSortOrder(SortDirection.ascending);
 						firstColumn = false;

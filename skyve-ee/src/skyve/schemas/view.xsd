@@ -1628,6 +1628,7 @@
         <xs:attribute name="showExport" type="xs:boolean"/>
         <xs:attribute name="showSnap" type="xs:boolean"/>
         <xs:attribute name="showTag" type="xs:boolean"/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
         <xs:attribute name="selectedIdBinding" type="xs:string"/>
         <xs:attribute name="continueConversation" type="xs:boolean" use="required"/>
       </xs:extension>

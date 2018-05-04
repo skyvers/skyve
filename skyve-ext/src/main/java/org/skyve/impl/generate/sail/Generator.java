@@ -64,7 +64,7 @@ System.out.println(visitModules(args[0]));
 			automation.setTestStrategy(testStrategy);
 			List<Interaction> interactions = automation.getInteractions();
 			Menu menu = u.getModuleMenu(moduleName);
-			menu(c, m, null, menu.getItems(), uxui, interactions);
+			menu(u, c, m, null, menu.getItems(), uxui, interactions);
 
 			// some modules may have no access at all for this user
 			if (! interactions.isEmpty()) {
@@ -92,12 +92,13 @@ System.out.println(visitModules(args[0]));
 		result.setTestStrategy(testStrategy);
 		List<Interaction> interactions = result.getInteractions();
 		Menu menu = u.getModuleMenu(moduleName);
-		menu(c, m, null, menu.getItems(), uxui, interactions);
+		menu(u, c, m, null, menu.getItems(), uxui, interactions);
 
 		return result;
 	}
 
-	private static void menu(Customer c,
+	private static void menu(User u,
+								Customer c,
 								Module m,
 								String descriptionPrefix,
 								List<MenuItem> items,
@@ -112,7 +113,7 @@ System.out.println(visitModules(args[0]));
 				}
 
 				if (item instanceof MenuGroup) {
-					menu(c, m, description, ((MenuGroup) item).getItems(), uxui, interactions);
+					menu(u, c, m, description, ((MenuGroup) item).getItems(), uxui, interactions);
 				}
 				else {
 					Interaction interaction = new Interaction();
@@ -152,7 +153,7 @@ System.out.println(visitModules(args[0]));
 							}
 						}
 						
-						crud(c, m, d, uxui, navigate, steps);
+						crud(u, c, m, d, uxui, navigate, steps);
 					}
 					else if (item instanceof EditItem) {
 						NavigateEdit navigate = new NavigateEdit();
@@ -241,7 +242,7 @@ System.out.println(visitModules(args[0]));
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 						
-						crud(c, m, d, uxui, navigate, steps);
+						crud(u, c, m, d, uxui, navigate, steps);
 
 						interactions.add(interaction);
 					}
@@ -267,26 +268,28 @@ System.out.println(visitModules(args[0]));
 		}
 	}
 	
-	private static void crud(Customer c, Module m, Document d, String uxui, NavigateList list, List<Step> steps) {
+	private static void crud(User u, Customer c, Module m, Document d, String uxui, NavigateList list, List<Step> steps) {
 //System.out.println(String.format("CRUD %s.%s", m.getName(), d.getName()));
-		ListGridNew nu = new ListGridNew();
-		nu.setModuleName(list.getModuleName());
-		nu.setDocumentName(list.getDocumentName());
-		nu.setQueryName(list.getQueryName());
-		nu.setModelName(list.getModelName());
-		steps.add(nu);
-		
-		GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
-		visitor.visit();
-		steps.addAll(visitor.getPopulateSteps());
-		if (visitor.getHasSave()) {
-			steps.add(new Save());
-			steps.add(new TestDataEnter());
-			steps.add(new Save());
-		}
-		steps.addAll(visitor.getActionSteps());
-		if (visitor.getHasDelete()) {
-			steps.add(new Delete());
+		if (u.canCreateDocument(d)) {
+			ListGridNew nu = new ListGridNew();
+			nu.setModuleName(list.getModuleName());
+			nu.setDocumentName(list.getDocumentName());
+			nu.setQueryName(list.getQueryName());
+			nu.setModelName(list.getModelName());
+			steps.add(nu);
+			
+			GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
+			visitor.visit();
+			steps.addAll(visitor.getPopulateSteps());
+			if (visitor.getHasSave()) {
+				steps.add(new Save());
+				steps.add(new TestDataEnter());
+				steps.add(new Save());
+			}
+			steps.addAll(visitor.getActionSteps());
+			if (visitor.getHasDelete()) {
+				steps.add(new Delete());
+			}
 		}
 	}
 }

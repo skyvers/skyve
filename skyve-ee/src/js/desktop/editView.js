@@ -951,7 +951,9 @@ isc.EditView.addMethods({
 										grid.setDataSource(grid.dataSource);
 									}
 									else {
-										grid.refresh();
+										if (grid.autoPopulate) {
+											grid.refresh();
+										}
 									}
 								}
 							}
@@ -969,7 +971,9 @@ isc.EditView.addMethods({
 									(grid.postRefreshConditionName === undefined) ||
 									this._evaluateConditionName(grid.postRefreshConditionName, values)) {
 								if (grid.hasDataSource()) {
-									grid.refresh();
+									if (grid.autoPopulate) {
+										grid.refresh();
+									}
 								}
 								else {
 									grid.setDataSource(grid.dataSource);

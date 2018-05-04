@@ -153,6 +153,7 @@
 			</form>
 			<hbox horizontalAlignment="right" shrinkWrap="height">
 				<button actionName="CheckContent" />
+				<button actionName="RelinkContent" />
 				<button actionName="Reindex" />
 			</hbox>
 		</tab>
@@ -310,5 +311,6 @@
 			relativeIconFileName="shared/icons/Script.gif" iconStyleClass="fa fa-refresh"/>
 		<upload className="UploadBackup" displayName="Upload Backup" inActionPanel="false" />
 		<action className="CheckContent" displayName="Check Content" inActionPanel="false"/>
+		<action className="RelinkContent" displayName="Relink Content" inActionPanel="false" confirm="Sure?" />
 	</actions>
 </view>

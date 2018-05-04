@@ -2373,8 +2373,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 						// add an import for the reference factory
 						if (extensionFactoryExists) {
-							imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."),
-									documentName));
+							imports.add(String.format("%1$s%2$s.%3$s.%3$sFactoryExtension",
+									AbstractRepository.get().MODULES_NAMESPACE,
+									relatedModuleName,
+									referenceClassName).replaceAll("\\\\|\\/", "."));
 						} else {
 							imports.add(String.format("%s%s.util.%sFactory",
 									AbstractRepository.get().MODULES_NAMESPACE,
@@ -2414,14 +2416,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 				} else {
 					if (attribute.isRequired()) {
-
 						// check if there is an extension class for this Document
 						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
 
 						// add an import for the reference factory
 						if (extensionFactoryExists) {
-							imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."),
-									referenceClassName));
+							imports.add(String.format("%1$s%2$s.%3$s.%3$sFactoryExtension",
+									AbstractRepository.get().MODULES_NAMESPACE,
+									relatedModuleName,
+									referenceClassName).replaceAll("\\\\|\\/", "."));
 						} else {
 							imports.add(String.format("%s%s.util.%sFactory",
 								AbstractRepository.get().MODULES_NAMESPACE,

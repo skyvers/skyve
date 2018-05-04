@@ -36,6 +36,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.test.DataFactory;
@@ -280,65 +281,59 @@ public class DataBuilder {
 		T result = document.newInstance(user);
 		
 		for (Attribute attribute : document.getAllAttributes()) {
-			if (filter(attribute)) {
+			if ((attribute instanceof Relation) || (filter(attribute))) {
 				continue;
 			}
 
 			String name = attribute.getName();
 			AttributeType type = attribute.getAttributeType();
-			String domainValue = null;
-			
-			switch (type) {
-				case bool:
-					// Random bools always are set to false as most processing changes around the true value.
-					// This is considered the standard case, and can be set true after the random instance is constructed if needed.
-					BindUtil.set(result, name, Boolean.FALSE);
-					break;
-				case colour:
-					domainValue = randomDomainValue(customer, document, attribute, result);
-					if (domainValue == null) {
+			String domainValue = randomDomainValue(customer, document, attribute, result);
+			if (domainValue != null) {
+				if (! domainValue.isEmpty()) {
+					BindUtil.convertAndSet(result, name, domainValue);
+				}
+			}
+			else {
+				switch (type) {
+					case bool:
+						// Random bools always are set to false as most processing changes around the true value.
+						// This is considered the standard case, and can be set true after the random instance is constructed if needed.
+						BindUtil.set(result, name, Boolean.FALSE);
+						break;
+					case colour:
 						BindUtil.set(result, name, "#FFFFFF");
-					}
-					else if (! domainValue.isEmpty()) {
-						BindUtil.set(result, name, domainValue);
-					}
-					break;
-				case date:
-				case dateTime:
-				case time:
-				case timestamp:
-					BindUtil.convertAndSet(result, name, new Date());
-					break;
-				case decimal10:
-				case decimal2:
-				case decimal5:
-				case integer:
-				case longInteger:
-					BindUtil.convertAndSet(result, name, new Integer(RANDOM.nextInt(10000)));
-					break;
-				case enumeration:
-					// pick a random value from the enum
-					@SuppressWarnings("unchecked")
-					Class<Enum<?>> clazz = (Class<Enum<?>>) Binder.getPropertyType(result, name);
-					BindUtil.set(result, name, randomEnum(clazz, null));
-					break;
-				case geometry:
-					BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
-					break;
-				case id:
-					BindUtil.set(result, name, UUID.randomUUID().toString());
-					break;
-				case markup:
-				case memo:
-				case text:
-					domainValue = randomDomainValue(customer, document, attribute, result);
-					if (domainValue == null) {
+						break;
+					case date:
+					case dateTime:
+					case time:
+					case timestamp:
+						BindUtil.convertAndSet(result, name, new Date());
+						break;
+					case decimal10:
+					case decimal2:
+					case decimal5:
+					case integer:
+					case longInteger:
+						BindUtil.convertAndSet(result, name, new Integer(RANDOM.nextInt(10000)));
+						break;
+					case enumeration:
+						// pick a random value from the enum
+						@SuppressWarnings("unchecked")
+						Class<Enum<?>> clazz = (Class<Enum<?>>) Binder.getPropertyType(result, name);
+						BindUtil.set(result, name, randomEnum(clazz, null));
+						break;
+					case geometry:
+						BindUtil.set(result, name, new GeometryFactory().createPoint(new Coordinate(0, 0)));
+						break;
+					case id:
+						BindUtil.set(result, name, UUID.randomUUID().toString());
+						break;
+					case markup:
+					case memo:
+					case text:
 						BindUtil.set(result, name, randomText(user.getCustomerName(), module, document, attribute));
-					}
-					else if (! domainValue.isEmpty()) {
-						BindUtil.set(result, name, domainValue);
-					}
-					break;
+						break;
+				}
 			}
 		}
 

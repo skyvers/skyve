@@ -15,6 +15,7 @@ public class TreeItem extends Item {
 	private String documentName;
 	private String queryName;
 	private String modelName;
+	private Boolean autoPopulate;
 	
 	public String getDocumentName() {
 		return documentName;
@@ -38,5 +39,13 @@ public class TreeItem extends Item {
 	@XmlAttribute(name = "model")
 	public void setModelName(String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
+	}
+
+	public Boolean getAutoPopulate() {
+		return autoPopulate;
+	}
+	@XmlAttribute(name = "autoPopulate")
+	public void setAutoPopulate(Boolean autoPopulate) {
+		this.autoPopulate = autoPopulate;
 	}
 }

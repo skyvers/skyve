@@ -30,7 +30,7 @@ public class QueryGenerator {
 		// do nothing
 	}
 
-	public static List<QueryDefinition> generate(Customer customer, Module module) {
+	public static List<QueryDefinition> generate(Customer customer, Module module, boolean includeAssociationBizKeys) {
 		Set<String> documentNames = module.getDocumentRefs().keySet();
 		List<QueryDefinition> result = new ArrayList<>(documentNames.size());
 
@@ -38,17 +38,17 @@ public class QueryGenerator {
 			Document document = module.getDocument(customer, documentName);
 			Persistent persistent = document.getPersistent();
 			if ((persistent != null) && (persistent.getName() != null)) { // transient document
-				result.add(module.getDocumentDefaultQuery(customer, documentName));
+				result.add(module.getDocumentDefaultQuery(customer, documentName, includeAssociationBizKeys));
 			}
 		}
 
 		return result;
 	}
 
-	public static String generateQueryXML(Customer customer, Module module) {
+	public static String generateQueryXML(Customer customer, Module module, boolean includeAssociationBizKeys) {
 		ModuleMetaData newModule = new ModuleMetaData();
 
-		List<QueryDefinition> queries = generate(customer, module);
+		List<QueryDefinition> queries = generate(customer, module, includeAssociationBizKeys);
 		for (QueryDefinition query : queries) {
 			if (query instanceof DocumentQueryDefinition) {
 				DocumentQueryDefinition documentQuery = (DocumentQueryDefinition) query;
@@ -93,10 +93,16 @@ public class QueryGenerator {
 	public static void main(String[] args) throws Exception {
 		String customerName = null;
 		String moduleName = null;
+		Boolean includeAssociationBizKeys = false;
 		
 		if (args.length == 2) {
 			customerName = args[0];
 			moduleName = args[1];
+		}
+		else if (args.length == 3) {
+			customerName = args[0];
+			moduleName = args[1];
+			includeAssociationBizKeys = Boolean.valueOf(args[2]);
 		}
 		else {
 			System.err.println("Usage: org.skyve.impl.generate.QueryGenerator customerName moduleName");
@@ -110,7 +116,7 @@ public class QueryGenerator {
 		File file = new File("./generatedQueries.xml");
 		UtilImpl.LOGGER.info("Output is written to " + file.getCanonicalPath());
 		try (PrintWriter out = new PrintWriter(file)) {
-			out.println(generateQueryXML(customer, module));
+			out.println(generateQueryXML(customer, module, includeAssociationBizKeys));
 			out.flush();
 		}
 	}

@@ -1289,6 +1289,9 @@ class SmartClientViewVisitor extends ViewVisitor {
 		if (Boolean.FALSE.equals(grid.getShowTag())) {
 			code.append("showTag:false,");
 		}
+		if (Boolean.FALSE.equals(grid.getAutoPopulate())) {
+			code.append("autoPopulate:false,");
+		}
 	}
 
 	@Override

@@ -1,10 +1,13 @@
 package org.skyve.impl.generate;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.AbstractRepository;
@@ -417,17 +420,42 @@ public class ViewGenerator {
 		AbstractRepository.set(new LocalDesignRepository());
 		AbstractRepository repository = AbstractRepository.get();
 		Customer customer = repository.getCustomer(customerName);
-		Module module = repository.getModule(customer, moduleName);
-		Document document = repository.getDocument(customer, module, documentName);
+
+		// If the module and/or document was not specified, we will just generate all edit views.
+		if (StringUtils.isBlank(moduleName) || StringUtils.isBlank(documentName)) {
+			for (Module module : customer.getModules()) {
+				for (Map.Entry<String, Module.DocumentRef> entry : module.getDocumentRefs().entrySet()) {
+					Module.DocumentRef documentRef = entry.getValue();
+					if (documentRef.getOwningModuleName().equals(module.getName())) {
+						Document document = module.getDocument(customer, entry.getKey());
+						try {
+							writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
+						} catch (Exception e) {
+							UtilImpl.LOGGER.warning(String.format("Failed to generate edit view for %s.%s, %s.",
+									module.getName(), document.getName(), e.getMessage()));
+						}
+					}
+				}
+			}
+		} else {
+			Module module = repository.getModule(customer, moduleName);
+			Document document = repository.getDocument(customer, module, documentName);
+			writeEditView(srcPath, module, document, customer, customerOverridden, uxui);
+		}
+	}
+
+	private static void writeEditView(String srcPath, Module module, Document document, Customer customer,
+							   boolean customerOverridden,
+							   String uxui) throws IOException {
 		StringBuilder filePath = new StringBuilder(64);
 		filePath.append(srcPath);
 		if (customerOverridden) {
-			filePath.append("customers/").append(customerName).append("/modules/");
+			filePath.append("customers/").append(customer.getName()).append("/modules/");
 		}
 		else {
 			filePath.append("modules/");
 		}
-		filePath.append(moduleName).append('/').append(documentName).append("/views/");
+		filePath.append(module.getName()).append('/').append(document.getName()).append("/views/");
 		if (uxui != null) {
 			filePath.append(uxui).append('/');
 		}
