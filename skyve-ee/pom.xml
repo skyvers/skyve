@@ -772,6 +772,12 @@
 			<version>1.2</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.reactivestreams</groupId>
+			<artifactId>reactive-streams</artifactId>
+			<version>${reactive-streams.version}</version>
+			<scope>runtime</scope>
+		</dependency>
 
 		<!-- These need to remain and are not a copy of the skyve dependencies -->
         <dependency>
