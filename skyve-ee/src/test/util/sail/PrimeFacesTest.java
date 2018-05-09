@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -23,7 +24,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
 		WebElement element = byXpath(xpath);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			element.click();
+			click(element);
 			waitForAjaxResponse();
 		}
 	}
@@ -40,7 +41,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				if (value == null) {
 					for (int i = 0, l = 2; i < l; i++) { // try at most twice
 						if (checkboxValue != null) {
-							element.click();
+							click(element);
 							waitForAjaxResponse();
 							checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 						}
@@ -52,7 +53,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				else {
 					for (int i = 0, l = 2; i < l; i++) { // try at most twice
 						if ((checkboxValue == null) || (value.booleanValue() != checkboxValue.booleanValue())) {
-							element.click();
+							click(element);
 							waitForAjaxResponse();
 							checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 						}
@@ -77,7 +78,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				(element.getAttribute("disabled") == null) &&
 				(element.getAttribute("readonly") == null)) {
 			element.clear();
-			element.sendKeys(value);
+			element.sendKeys((value == null) ? "" : value);
 			waitForAjaxResponse();
 		}
 	}
@@ -89,7 +90,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			if (! element.getAttribute("class").contains("ui-state-disabled")) {
 				element = byId(String.format("%s_label", id));
 				if ((element != null) && element.isEnabled() && element.isDisplayed()) {
-					element.click();
+					click(element);
 
 					// Wait for pick list drop down
 					By xpath = By.id(String.format("%s_panel", id));
@@ -102,7 +103,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					if ((element != null) && element.isEnabled()) { // NB it may not be displayed
 						// Scroll the drop down panel so the item is visible
 						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
-						element.click();
+						click(element);
 						waitForAjaxResponse();
 					}
 				}
@@ -121,7 +122,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
 				}
 				else {
-					element.click();
+					click(element);
 				}
 				if (confirm) {
 					confirm();
@@ -147,7 +148,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 					clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
 				}
 				else {
-					element.click();
+					click(element);
 				}
 				if (confirm) {
 					confirm();
@@ -169,8 +170,9 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			element = byXpath(String.format("//span[@id='%s']/button", id));
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 				// Click the drop down button
-				Actions clicker = new Actions(driver);
-				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
+//				Actions clicker = new Actions(driver);
+//				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
+				click(element);
 				
 				// Wait for pick list drop down
 				By xpath = By.xpath(String.format("//div[@id='%s_panel']", id));
@@ -181,7 +183,9 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				// Select the row
 				element = byXpath(String.format("//div[@id='%s_panel']/ul/li[%d]", id, Integer.valueOf(row + 1)));
 				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-					element.click();
+					// Scroll the drop down panel so the item is visible
+					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
+					click(element);
 					waitForAjaxResponse();
 				}
 			}
@@ -202,7 +206,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			// Select the first row
 			element = byXpath(String.format("//div[@id='%s_panel']/ul/li", id));
 			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				element.click();
+				click(element);
 				waitForAjaxResponse();
 			}
 		}
@@ -219,7 +223,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				if (! element.getAttribute("class").contains("ui-state-disabled")) {
 					// All good, continue with the button click
 					String viewState = getViewState();
-					element.click();
+					click(element);
 					if (ajax) {
 						waitForAjaxResponse();
 					}
@@ -242,7 +246,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 				if (! element.getAttribute("class").contains("ui-state-disabled")) {
 					// All good, continue with the button click
 					String viewState = getViewState();
-					element.click();
+					click(element);
 					if (ajax) {
 						waitForAjaxResponse();
 					}
@@ -260,7 +264,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Find the row
 			element = element.findElement(By.xpath(String.format("//tr[%s]/td", String.valueOf(row))));
-			element.click();
+			click(element);
 			waitForAjaxResponse();
 		}
 	}
@@ -335,7 +339,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 			System.out.println("Confirm dialog was never showed");
 			throw e;
 		}
-		byId("confirmOK").click();
+		click(byId("confirmOK"));
 	}
 	
 	protected void waitForAjaxResponse() {
@@ -377,6 +381,27 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		return result;
 	}
 	
+	protected void click(WebElement element) {
+		try {
+			element.click();
+		}
+		// This could occur when the control is behind a floating element
+		// So scroll to the top of the page and see if the element can be made visible 
+		catch (WebDriverException e) {
+			JavascriptExecutor js = (JavascriptExecutor) driver;
+			try {
+				trace("    Could not click on the element - scroll to the top of the page and try again");
+				js.executeScript("javascript:window.scrollTo(0, 0)");
+				element.click();
+			}
+			// Scroll to the bottom of the page and try again in case the floating element is at the bottom
+			catch (WebDriverException e1) {
+				trace("    Could not click on the element - scroll to the bottom of the page and try again");
+				js.executeScript("javascript:window.scrollTo(0, 999999)");
+				element.click();
+			}
+		}
+	}
 	protected List<WebElement> byClass(String className) {
 		try {
 			return driver.findElements(By.className(className));
@@ -397,28 +422,64 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	
 	protected WebElement byId(String id) {
 		try {
-			return driver.findElement(By.id(id));
+			WebElement result = driver.findElement(By.id(id));
+			result.isDisplayed(); // check for stale element
+			result.isEnabled(); // check for stale element
+			return result;
 		}
 		catch (NoSuchElementException e) {
 			return null;
+		}
+		catch (StaleElementReferenceException e) {
+			try {
+				Thread.sleep(50);
+			}
+			catch (InterruptedException ie) {
+				// do nothing here
+			}
+			return byId(id);
 		}
 	}
 	
 	protected WebElement byXpath(String xpath) {
 		try {
-			return driver.findElement(By.xpath(xpath));
+			WebElement result = driver.findElement(By.xpath(xpath));
+			result.isDisplayed(); // check for stale element
+			result.isEnabled(); // check for stale element
+			return result;
 		}
 		catch (NoSuchElementException e) {
 			return null;
+		}
+		catch (StaleElementReferenceException e) {
+			try {
+				Thread.sleep(10);
+			}
+			catch (InterruptedException ie) {
+				// do nothing here
+			}
+			return byXpath(xpath);
 		}
 	}
 	
 	protected WebElement byName(String name) {
 		try {
-			return driver.findElement(By.name(name));
+			WebElement result = driver.findElement(By.name(name));
+			result.isDisplayed(); // check for stale element
+			result.isEnabled(); // check for stale element
+			return result;
 		}
 		catch (NoSuchElementException e) {
 			return null;
+		}
+		catch (StaleElementReferenceException e) {
+			try {
+				Thread.sleep(10);
+			}
+			catch (InterruptedException ie) {
+				// do nothing here
+			}
+			return byName(name);
 		}
 	}
 

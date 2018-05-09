@@ -13,6 +13,8 @@ public class CommunicationFactory extends DataFactory {
 	public Communication sail() {
 		Communication result = new DataBuilder(getUser()).build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		result.setSystem(Boolean.FALSE);
+		result.setCalendarStartTime(null);
+		result.setCalendarEndTime(null);
 		return result;
 	}
 }
