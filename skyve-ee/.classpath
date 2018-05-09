@@ -39,5 +39,15 @@
 	<classpathentry kind="lib" path="lib/selenium-support-3.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/guava-23.6-jre.jar"/>
 	<classpathentry kind="lib" path="lib/selenium-remote-driver-3.11.0.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-config-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-core-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-security-web-5.0.3.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-context-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-aop-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-beans-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-core-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-expression-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-jcl-5.0.4.RELEASE.jar"/>
+	<classpathentry kind="lib" path="javaee/skyve.ear/lib/spring-web-5.0.4.RELEASE.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

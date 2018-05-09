@@ -36,6 +36,9 @@
 		}
 	}
 	
+	// Check if this was a login error
+	boolean loginError = (request.getParameter("error") != null);
+	
 	String customerFieldName = "customer";
 	String userFieldName = "user";
 
@@ -78,18 +81,18 @@
 					form.user.focus();
 					return false;
 				}
-				else if (form.j_password.value.length < 1) {
+				else if (form.password.value.length < 1) {
 					alert('<%=Util.i18n("page.login.password.error.required", locale)%>');
-					form.j_password.focus();
+					form.password.focus();
 					return false;
 				}
 				else {
 					var hidden = document.createElement('input');
 					hidden.setAttribute('type', 'hidden');
-					hidden.setAttribute('name', 'j_username');
+					hidden.setAttribute('name', 'username');
 					hidden.setAttribute('value', form.customer.value + "/" + form.user.value);
 					form.appendChild(hidden);
-					form.action = 'j_security_check';
+					form.action = 'login';
 					return true;
 				}
 			}
@@ -133,13 +136,30 @@
 				<div class="col-6 col-8-md col-12-sm">
 					<form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)">
 						<div class="loginTable" style="width:100%;">
+							<% if (loginError) { %>
+								<div class="row">
+									<div class="col-12 center">
+										<span class="subhead">
+											<%=Util.i18n("page.loginError.banner", locale)%>
+											<br/>
+										</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-12 center">
+										<%=Util.i18n("page.loginError.invalid", locale)%>
+									</div>
+								</div>
+							<% } %>
 							<div class="row">
 								<div class="col-12 center">
-									<% if (request.getUserPrincipal() != null) { %>
-										<span class="subhead"><%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%></span>
-									<% } else { %>
-										<span class="subhead"><%=Util.i18n("page.login.banner", locale)%></span>
-									<% } %>
+									<span class="subhead">
+										<% if (request.getUserPrincipal() != null) { %>
+											<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
+										<% } else { %>
+											<%=Util.i18n("page.login.banner", locale)%>
+										<% } %>
+									</span>
 								</div>
 							</div>
 							<% if (customer == null) { %>
@@ -165,10 +185,10 @@
 							</div>
 							<div class="row">
 								<div class="col-4-sm right">
-									<label for="j_password"><%=Util.i18n("page.login.password.label", locale)%></label>
+									<label for="password"><%=Util.i18n("page.login.password.label", locale)%></label>
 								</div>
 								<div class="col-7-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="j_password">
+									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="password">
 								</div>
 							</div>
 							<div class="row">

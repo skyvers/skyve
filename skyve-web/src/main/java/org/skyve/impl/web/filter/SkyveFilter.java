@@ -1,6 +1,7 @@
 package org.skyve.impl.web.filter;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Enumeration;
 
 import javax.servlet.Filter;
@@ -51,7 +52,8 @@ public class SkyveFilter implements Filter {
 			UtilImpl.LOGGER.info("ServerName=" + request.getServerName());
 			UtilImpl.LOGGER.info("ServerPort=" + request.getServerPort());
 			UtilImpl.LOGGER.info("ServletPath=" + httpRequest.getServletPath());
-			UtilImpl.LOGGER.info("UserPrincipal=" + httpRequest.getUserPrincipal());
+			Principal principal = httpRequest.getUserPrincipal();
+			UtilImpl.LOGGER.info("UserPrincipal=" + ((principal == null) ? "<null>" : principal.getName()));
 			UtilImpl.LOGGER.info("************************* PARAMETERS *************************");
 			Enumeration<String> parameterNames = request.getParameterNames();
 			while (parameterNames.hasMoreElements()) {

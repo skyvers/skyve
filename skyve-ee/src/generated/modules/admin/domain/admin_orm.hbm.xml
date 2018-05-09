@@ -393,7 +393,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="userName" length="254" />
-		<property name="password" length="30" />
+		<property name="password" length="80" />
 		<property name="createdDateTime" type="DateTime" />
 		<property name="homeModule" length="30" />
 		<property name="legacyId" length="100" />
