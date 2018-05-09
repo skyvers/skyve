@@ -44,11 +44,15 @@
 
 		<!-- Secure dynamic image URLs -->
 		<intercept-url pattern="/images/dynamic.*" access="authenticated" />
+		<!-- Allow static image URLs -->
 		<intercept-url pattern="/images/**" access="permitAll" />
+		<intercept-url pattern="/**/*.jpg" access="permitAll" />
+		<intercept-url pattern="/**/*.jpeg" access="permitAll" />
+		<intercept-url pattern="/**/*.png" access="permitAll" />
+		<intercept-url pattern="/**/*.gif" access="permitAll" />
+
 		<!-- Do not secure faces pages as they are secured by a FacesSecurityFilter -->
 		<intercept-url pattern="/**/*.xhtml" access="permitAll" />
-
-		<intercept-url pattern="/smartgen*" access="permitAll" />
 
 		<intercept-url pattern="/**" access="authenticated" method="GET" />
 		<intercept-url pattern="/**" access="authenticated" method="POST" />
