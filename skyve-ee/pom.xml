@@ -560,7 +560,6 @@
 			<scope>test</scope>
 		</dependency>
 
-<!--
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-chrome-driver</artifactId>
@@ -573,7 +572,7 @@
 			<version>3.11.0</version>
 			<scope>test</scope>
 		</dependency>  
--->
+
 		<!-- Runtime dependencies -->
 		<dependency>
 			<groupId>org.slf4j</groupId>

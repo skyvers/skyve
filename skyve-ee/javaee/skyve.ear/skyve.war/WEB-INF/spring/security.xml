@@ -42,7 +42,7 @@
 		<intercept-url pattern="/smartClientJavascriptLogin*" access="permitAll" />
 		
 		<!-- Do not secure the home servlet as this ensures the right login page is displayed -->
-		<intercept-url pattern="/home.jsp" access="authenticated" />
+		<intercept-url pattern="/home.jsp*" access="authenticated" />
 		<intercept-url pattern="/home*" access="permitAll" />
 		
 		<intercept-url pattern="/pages/error.jsp" access="permitAll" />
@@ -82,7 +82,7 @@
 	</http>
 	
 	<b:bean id="skyve" class="org.skyve.impl.security.SkyveLegacyAuthenticationProvider">
-		<b:property name="hashedPasswordSql" value="select password from ADM_SecurityUser where bizCustomer || '/' || userName = ? and not inactive and not passwordExpired" />
+		<b:property name="hashedPasswordSql" value="select password from ADM_SecurityUser where bizCustomer || '/' || userName = ? and not inactive" />
 	</b:bean>
 	
 <!--
