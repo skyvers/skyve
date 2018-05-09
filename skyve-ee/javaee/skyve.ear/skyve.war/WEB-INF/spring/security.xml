@@ -37,6 +37,7 @@
 		<intercept-url pattern="/**/*.js" access="permitAll" />
 
 		<intercept-url pattern="/login*" access="permitAll" />
+		<intercept-url pattern="/loggedOut*" access="permitAll" />
 		<intercept-url pattern="/pages/error.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/expired.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/requestPasswordReset.jsp" access="permitAll" />
