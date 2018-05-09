@@ -283,7 +283,7 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>/j_security_check</url-pattern>
+		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
@@ -313,7 +313,7 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>/j_security_check</url-pattern>
+		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
     <filter>
