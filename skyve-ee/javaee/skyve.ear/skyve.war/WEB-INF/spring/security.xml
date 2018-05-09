@@ -36,12 +36,22 @@
 		<intercept-url pattern="/**/*.css" access="permitAll" />
 		<intercept-url pattern="/**/*.js" access="permitAll" />
 
+		<!-- Do not secure the login servlet -->
 		<intercept-url pattern="/login*" access="permitAll" />
 		<intercept-url pattern="/loggedOut*" access="permitAll" />
+		<intercept-url pattern="/smartClientJavascriptLogin*" access="permitAll" />
+		
+		<!-- Do not secure the home servlet as this ensures the right login page is displayed -->
+		<intercept-url pattern="/home.jsp" access="authenticated" />
+		<intercept-url pattern="/home*" access="permitAll" />
+		
 		<intercept-url pattern="/pages/error.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/expired.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/requestPasswordReset.jsp" access="permitAll" />
 		<intercept-url pattern="/pages/resetPassword.jsp" access="permitAll" />
+
+		<!-- Do not secure faces pages as they are secured by a FacesSecurityFilter -->
+		<intercept-url pattern="/**/*.xhtml" access="permitAll" />
 
 		<!-- Secure dynamic image URLs -->
 		<intercept-url pattern="/images/dynamic.*" access="authenticated" />
@@ -51,9 +61,6 @@
 		<intercept-url pattern="/**/*.jpeg" access="permitAll" />
 		<intercept-url pattern="/**/*.png" access="permitAll" />
 		<intercept-url pattern="/**/*.gif" access="permitAll" />
-
-		<!-- Do not secure faces pages as they are secured by a FacesSecurityFilter -->
-		<intercept-url pattern="/**/*.xhtml" access="permitAll" />
 
 		<intercept-url pattern="/**" access="authenticated" method="GET" />
 		<intercept-url pattern="/**" access="authenticated" method="POST" />
