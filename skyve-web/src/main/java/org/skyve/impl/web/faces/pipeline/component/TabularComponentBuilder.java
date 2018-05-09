@@ -545,50 +545,12 @@ public class TabularComponentBuilder extends ComponentBuilder {
 			String disabledConditionName = grid.getDisabledConditionName();
 
 			if (! Boolean.FALSE.equals(grid.getShowAdd())) {
-				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-				setId(button, null);
-		    	button.setValue(null);
-	        	button.setTitle("Add a new " + singularDocumentAlias);
-		    	button.setIcon("fa fa-plus");
-				action(button, ImplicitActionName.Add, null, listBinding, listVar, inline, null);
-				// if we are in an inline data grid, update the grid on a new record
-				if (inline) {
-		    		button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
-				}
-				String disableAddConditionName = grid.getDisableAddConditionName();
-				String[] createDisabled = (disableAddConditionName == null) ? 
-											((disabledConditionName == null) ? 
-												null : 
-												new String[] {disabledConditionName}) :
-											((disabledConditionName == null) ? 
-												new String[] {disableAddConditionName} : 
-												new String[] {disableAddConditionName, disabledConditionName});
-				ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
-				if (disabled != null) {
-					button.setValueExpression("disabled", disabled);
-				}
+				CommandButton button = createDataGridAddButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
 				col.getFacets().put("header", button);
 			}
 			
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
-				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-				setId(button, null);
-				button.setValue(null);
-	        	button.setTitle("Edit this " + singularDocumentAlias);
-		    	button.setIcon("fa fa-chevron-right");
-				action(button, ImplicitActionName.Navigate, null, listBinding, listVar, inline, null);
-				String disableZoomConditionName = grid.getDisableZoomConditionName();
-				String[] zoomDisabled = (disableZoomConditionName == null) ? 
-											((disabledConditionName == null) ? 
-												null : 
-												new String[] {disabledConditionName}) :
-											((disabledConditionName == null) ? 
-												new String[] {disableZoomConditionName} : 
-												new String[] {disableZoomConditionName, disabledConditionName});
-				if (zoomDisabled != null) {
-					button.setValueExpression("disabled", 
-												createOredValueExpressionFromConditions(zoomDisabled));
-				}
+				CommandButton button = createDataGridZoomButton(grid, listVar, singularDocumentAlias, inline, listBinding, disabledConditionName);
 				children.add(button);
 			}
 
@@ -597,30 +559,8 @@ public class TabularComponentBuilder extends ComponentBuilder {
 				if (! col.getChildren().isEmpty()) {
 					children.add(label(null, " "));
 				}
-	
-				CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
-				setId(button, null);
-		    	button.setValue(null);
-	        	button.setTitle("Remove this " + singularDocumentAlias);
-		    	button.setIcon("fa fa-minus");
-		    	// We cannot just update the data table ever when removing a row as 
-		    	// the grid may go invisible if the last row is removed.
-		    	// There is no performance shortcut we can do as we dont know what is going on
-		    	button.setUpdate(update); // update all forms (by default)
-		    	
-		    	action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, grid.getRemovedActions());
-				String disableRemoveConditionName = grid.getDisableRemoveConditionName();
-				String[] removeDisabled = (disableRemoveConditionName == null) ? 
-											((disabledConditionName == null) ? 
-												null : 
-												new String[] {disabledConditionName}) :
-											((disabledConditionName == null) ? 
-												new String[] {disableRemoveConditionName} : 
-												new String[] {disableRemoveConditionName, disabledConditionName});
-				if (removeDisabled != null) {
-					button.setValueExpression("disabled", 
-												createOredValueExpressionFromConditions(removeDisabled));
-				}
+
+				CommandButton button = createDataGridRemoveButton(grid, listVar, singularDocumentAlias, listBinding, disabledConditionName);
 				children.add(button);
 			}
 
@@ -633,6 +573,82 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		}
 		
 		return current;
+	}
+
+	protected CommandButton createDataGridAddButton(DataGrid grid, String listVar, String singularDocumentAlias,
+													boolean inline, String listBinding, String disabledConditionName) {
+		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Add a new " + singularDocumentAlias);
+		button.setIcon("fa fa-plus");
+		action(button, ImplicitActionName.Add, null, listBinding, listVar, inline, null);
+		// if we are in an inline data grid, update the grid on a new record
+		if (inline) {
+			button.setUpdate("@namingcontainer"); // update the data table - the closest naming container
+		}
+		String disableAddConditionName = grid.getDisableAddConditionName();
+		String[] createDisabled = (disableAddConditionName == null) ?
+									((disabledConditionName == null) ?
+										null :
+										new String[] {disabledConditionName}) :
+									((disabledConditionName == null) ?
+										new String[] {disableAddConditionName} :
+										new String[] {disableAddConditionName, disabledConditionName});
+		ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
+		if (disabled != null) {
+			button.setValueExpression("disabled", disabled);
+		}
+		return button;
+	}
+
+	protected CommandButton createDataGridRemoveButton(DataGrid grid, String listVar, String singularDocumentAlias, String listBinding, String disabledConditionName) {
+		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Remove this " + singularDocumentAlias);
+		button.setIcon("fa fa-minus");
+		// We cannot just update the data table ever when removing a row as
+		// the grid may go invisible if the last row is removed.
+		// There is no performance shortcut we can do as we dont know what is going on
+		button.setUpdate(update); // update all forms (by default)
+
+		action(button, ImplicitActionName.Remove, null, listBinding, listVar, true, grid.getRemovedActions());
+		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
+		String[] removeDisabled = (disableRemoveConditionName == null) ?
+									((disabledConditionName == null) ?
+										null :
+										new String[] {disabledConditionName}) :
+									((disabledConditionName == null) ?
+										new String[] {disableRemoveConditionName} :
+										new String[] {disableRemoveConditionName, disabledConditionName});
+		if (removeDisabled != null) {
+			button.setValueExpression("disabled",
+										createOredValueExpressionFromConditions(removeDisabled));
+		}
+		return button;
+	}
+
+	protected CommandButton createDataGridZoomButton(DataGrid grid, String listVar, String singularDocumentAlias, boolean inline, String listBinding, String disabledConditionName) {
+		CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
+		setId(button, null);
+		button.setValue(null);
+		button.setTitle("Edit this " + singularDocumentAlias);
+		button.setIcon("fa fa-chevron-right");
+		action(button, ImplicitActionName.Navigate, null, listBinding, listVar, inline, null);
+		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		String[] zoomDisabled = (disableZoomConditionName == null) ?
+									((disabledConditionName == null) ?
+										null :
+										new String[] {disabledConditionName}) :
+									((disabledConditionName == null) ?
+										new String[] {disableZoomConditionName} :
+										new String[] {disableZoomConditionName, disabledConditionName});
+		if (zoomDisabled != null) {
+			button.setValueExpression("disabled",
+										createOredValueExpressionFromConditions(zoomDisabled));
+		}
+		return button;
 	}
 
 	/*
