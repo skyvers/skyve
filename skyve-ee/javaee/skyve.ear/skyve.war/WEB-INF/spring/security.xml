@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <b:beans xmlns="http://www.springframework.org/schema/security"
 			xmlns:b="http://www.springframework.org/schema/beans"
+			xmlns:jee="http://www.springframework.org/schema/jee"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 			xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		 							http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+		 							http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		 							http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
 	<authentication-manager>
+<!--
 		<authentication-provider ref="skyve" />
+-->
 <!--
 		<authentication-provider>
 			<user-service>
@@ -13,15 +17,14 @@
 			</user-service>
 		</authentication-provider>
 -->
-<!--
+
 		<authentication-provider>
 			<jdbc-user-service data-source-ref="dataSource" 
-								users-by-username-query="select username, password, not inactive and not passwordExpired from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-								authorities-by-username-query="select null from ADM_SecurityUser where ? = null"
-								group-authorities-by-username-query="select null from ADM_SecurityUser where ? = null"
+								users-by-username-query="select bizCustomer || '/' || userName, password, not inactive from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+								authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+								group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
 								role-prefix="none" />
 		</authentication-provider>
--->
 	</authentication-manager>
 
 	<!-- Do not secure the H2 database servlet -->
@@ -29,46 +32,76 @@
 
 	<!-- Secure everything else -->
 	<http auto-config="true" use-expressions="true">
-		<form-login default-target-url="/" login-page="/login"  />
+		<form-login default-target-url="/" login-page="/login" />
 		<logout logout-success-url="/loggedOut" />
-		
-		<!-- Allow static web resources -->
-		<intercept-url pattern="/**/*.css" access="permitAll" />
-		<intercept-url pattern="/**/*.js" access="permitAll" />
+<!--
+		<remember-me key="skyve" />
+-->
 
-		<!-- Do not secure the login servlet -->
-		<intercept-url pattern="/login*" access="permitAll" />
-		<intercept-url pattern="/loggedOut*" access="permitAll" />
-		<intercept-url pattern="/smartClientJavascriptLogin*" access="permitAll" />
-		
+		<!-- Secure the system JSPs and HTMLs -->
+		<intercept-url pattern="/home.jsp" access="authenticated" />
+		<intercept-url pattern="/pages/changePassword.jsp" access="authenticated" />
+		<intercept-url pattern="/pages/htmlEdit/browseImages.jsp" access="authenticated" />
+		<intercept-url pattern="/pages/map/geolocate.jsp" access="authenticated" />
+
 		<!-- Do not secure the home servlet as this ensures the right login page is displayed -->
-		<intercept-url pattern="/home.jsp*" access="authenticated" />
-		<intercept-url pattern="/home*" access="permitAll" />
-		
-		<intercept-url pattern="/pages/error.jsp" access="permitAll" />
-		<intercept-url pattern="/pages/expired.jsp" access="permitAll" />
-		<intercept-url pattern="/pages/requestPasswordReset.jsp" access="permitAll" />
-		<intercept-url pattern="/pages/resetPassword.jsp" access="permitAll" />
+		<intercept-url pattern="/home" access="permitAll" />
 
 		<!-- Do not secure faces pages as they are secured by a FacesSecurityFilter -->
 		<intercept-url pattern="/**/*.xhtml" access="permitAll" />
 
 		<!-- Secure dynamic image URLs -->
 		<intercept-url pattern="/images/dynamic.*" access="authenticated" />
-		<!-- Allow static image URLs -->
-		<intercept-url pattern="/images/**" access="permitAll" />
-		<intercept-url pattern="/**/*.jpg" access="permitAll" />
-		<intercept-url pattern="/**/*.jpeg" access="permitAll" />
-		<intercept-url pattern="/**/*.png" access="permitAll" />
-		<intercept-url pattern="/**/*.gif" access="permitAll" />
 
-		<intercept-url pattern="/**" access="authenticated" method="GET" />
-		<intercept-url pattern="/**" access="authenticated" method="POST" />
+		<!-- Secure all report URLs -->
+		<intercept-url pattern="/report" access="authenticated" />
+		<intercept-url pattern="/export" access="authenticated" />
+		
+		<!-- Secure Image Servlet for HTML reporting through Jasper -->
+		<intercept-url pattern="/image" access="authenticated" />
 
-		<!-- Allow PUT and DELETE for rest -->
+		<!-- Secure customer resource servlet -->
+		<intercept-url pattern="/resource" access="authenticated" />
+		<intercept-url pattern="/content" access="authenticated" />
+
+		<!-- Secure SC edit view servlet -->
+		<intercept-url pattern="/smartedit" access="authenticated" />
+		<!-- Secure SC list view servlet -->
+		<intercept-url pattern="/smartlist" access="authenticated" />
+		<!-- Secure SC view generation servlet -->
+		<intercept-url pattern="/smartgen" access="authenticated" />
+		<!-- Secure SC snap servlet -->
+		<intercept-url pattern="/smartsnap" access="authenticated" />
+		<!-- Secure SC tag servlet -->
+		<intercept-url pattern="/smarttag" access="authenticated" />
+		<!-- Secure SC previous values servlet -->
+		<intercept-url pattern="/smartprev" access="authenticated" />
+		<!-- Secure SC text search servlet -->
+		<intercept-url pattern="/smartsearch" access="authenticated" />
+		
+		<!-- Secure map servlet -->
+		<intercept-url pattern="/map" access="authenticated" />
+		
+		<!-- Secure the Bizport Export Servlet -->
+		<intercept-url pattern="/bizexport.*" access="authenticated" />
+		
+		<!-- Secure the Download Servlet -->
+		<intercept-url pattern="/download" access="authenticated" />
+		
+		<!-- Do not Secure trackmate servlet - it handles authentication itself -->
+		<intercept-url pattern="/tracks" access="permitAll" />
+
+		<!-- Allow GET, PUT, POST and DELETE for rest -->
+		<intercept-url pattern="/rest**" access="authenticated" method="GET" />
 		<intercept-url pattern="/rest**" access="authenticated" method="PUT" />
+		<intercept-url pattern="/rest**" access="authenticated" method="POST" />
 		<intercept-url pattern="/rest**" access="authenticated" method="DELETE" />
 		
+		<!-- Permit all GET requests by default -->
+		<intercept-url pattern="/**" access="permitAll" method="GET" />
+		<!--  Secure all POST requests by default -->
+		<intercept-url pattern="/**" access="authenticated" method="POST" />
+
 		<!-- Only allow get and post methods by default -->
 		<intercept-url pattern="/**" access="denyAll" method="DELETE" />
 		<intercept-url pattern="/**" access="denyAll" method="HEAD" />
@@ -97,4 +130,5 @@
 		<b:constructor-arg name="dataSourceName" value="java:/H2Demo" />
 	</b:bean>
 -->
+	<jee:jndi-lookup id="dataSource" jndi-name="java:/H2Demo" expected-type="javax.sql.DataSource" />
 </b:beans>
