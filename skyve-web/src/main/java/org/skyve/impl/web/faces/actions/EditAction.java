@@ -50,6 +50,10 @@ public class EditAction<T extends Bean> extends FacesAction<Void> {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bizModule);
 		Document document = module.getDocument(customer, bizDocument);
+		if (! user.canAccessDocument(document)) {
+			throw new SecurityException(bizDocument + " in module " + bizModule, user.getName());
+		}
+		
 		String bizId = facesView.getBizIdParameter();
 		T bean = null;
 		AbstractWebContext webContext = null;
