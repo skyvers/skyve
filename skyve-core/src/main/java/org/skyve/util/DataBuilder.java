@@ -646,8 +646,6 @@ public class DataBuilder {
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
 					String className = String.format("modules.%s.util.%sFactoryExtension", module.getName(), document.getName());
-					Util.LOGGER
-							.fine(String.format("Looking for factory extension annotations in %s", className));
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {

@@ -453,7 +453,6 @@ public class TestUtil {
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactoryExtension", module.getName(),
 							document.getName());
-					Util.LOGGER.info(String.format("Looking for factory extension annotations in %s", className));
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
