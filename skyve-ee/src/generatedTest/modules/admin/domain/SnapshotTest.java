@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.SnapshotFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class SnapshotTest extends AbstractDomainTest<Snapshot> {
 
-	private SnapshotFactory factory;
-
 	@Override
 	protected Snapshot getBean() throws Exception {
-		if (factory == null) {
-			factory = new SnapshotFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
 	}
 }

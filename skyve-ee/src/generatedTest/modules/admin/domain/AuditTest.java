@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.Audit.AuditFactoryExtension;
-import modules.admin.util.AuditFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class AuditTest extends AbstractDomainTest<Audit> {
 
-	private AuditFactory factory;
-
 	@Override
 	protected Audit getBean() throws Exception {
-		if (factory == null) {
-			factory = new AuditFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 	}
 }

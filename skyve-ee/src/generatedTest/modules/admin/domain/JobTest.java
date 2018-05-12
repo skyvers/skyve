@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.JobFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class JobTest extends AbstractDomainTest<Job> {
 
-	private JobFactory factory;
-
 	@Override
 	protected Job getBean() throws Exception {
-		if (factory == null) {
-			factory = new JobFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Job.MODULE_NAME, Job.DOCUMENT_NAME);
 	}
 }

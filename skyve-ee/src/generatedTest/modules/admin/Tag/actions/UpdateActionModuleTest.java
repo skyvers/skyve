@@ -1,8 +1,8 @@
 package modules.admin.Tag.actions;
 
-import modules.admin.Tag.TagFactoryExtension;
 import modules.admin.domain.Tag;
-import modules.admin.util.TagFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -11,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class UpdateActionModuleTest extends AbstractActionTest<Tag, UpdateActionModule> {
 
-	private TagFactory factory;
-
 	@Override
 	protected UpdateActionModule getAction() {
 		return new UpdateActionModule();
@@ -20,10 +18,8 @@ public class UpdateActionModuleTest extends AbstractActionTest<Tag, UpdateAction
 
 	@Override
 	protected Tag getBean() throws Exception {
-		if (factory == null) {
-			factory = new TagFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 	}
 }

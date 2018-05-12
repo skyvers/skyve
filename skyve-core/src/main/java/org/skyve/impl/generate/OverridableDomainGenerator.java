@@ -420,18 +420,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 					// if this is not an excluded module, generate tests
 					if (EXCLUDED_MODULES == null || !Arrays.asList(EXCLUDED_MODULES).contains(moduleName.toLowerCase())) {
-						// generate test factory
-						File factoryFile = new File(
-								factoryPath.getPath() + File.separator + documentName + "Factory.java");
-						factoryPath.mkdirs();
-						factoryFile.createNewFile();
-						try (FileWriter fw = new FileWriter(factoryFile)) {
-							generateFactory(module, document, fw, modulePath.replaceAll("\\\\|\\/", "."), documentName);
-						}
-
 						// check if this document is annotated to skip domain tests
-						File factoryExtensionFile = new File(getFactoryExtensionPath(modulePath, documentName));
-						SkyveFactory annotation = retrieveFactoryExtensionAnnotation(factoryExtensionFile);
+						File factoryFile = new File(getFactoryPath(modulePath, documentName));
+						SkyveFactory annotation = retrieveFactoryAnnotation(factoryFile);
 
 						// generate domain test for persistent documents that are not mapped, or not children
 						Persistent persistent = document.getPersistent();
@@ -476,14 +467,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	private static SkyveFactory retrieveFactoryExtensionAnnotation(final File factoryExtensionFile) {
+	private static SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
 		SkyveFactory annotation = null;
 
-		if (factoryExtensionFile.exists()) {
-			String className = factoryExtensionFile.getPath().replaceAll("\\\\|\\/", ".")
+		if (factoryFile.exists()) {
+			String className = factoryFile.getPath().replaceAll("\\\\|\\/", ".")
 					.replace(SRC_PATH.replaceAll("\\\\|\\/", "."), "");
 
-			System.out.println("Found factory extension " + className);
+			System.out.println("Found factory " + className);
 			className = className.replaceFirst("[.][^.]+$", "");
 
 			// scan the classpath for the class
@@ -2207,21 +2198,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		Set<String> imports = new TreeSet<>();
 
 		imports.add("util.AbstractActionTest");
+		imports.add("org.skyve.util.DataBuilder");
+		imports.add("org.skyve.util.test.SkyveFixture.FixtureType");
 
-		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
-
-		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder
-		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
+		// import the domain class
+		imports.add(String.format("%s.%s", domainPath, documentName));
 
 		// customise imports if this is not a base class
 		if (useExtensionDocument) {
 			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
-		} else {
-			// import the domain class
-			imports.add(String.format("%s.%s", domainPath, documentName));
-		}
-		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		}
 
 		// generate imports
@@ -2242,10 +2227,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n");
 
 		// generate test body
-		fw.append("\n\t");
-		fw.append("private ").append(documentName).append("Factory factory;");
-		fw.append("\n");
-
 		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(actionName).append(" getAction() {");
 		fw.append("\n\t\t").append("return new ").append(actionName).append("();");
@@ -2255,34 +2236,26 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(documentName).append(useExtensionDocument ? "Extension" : "")
 				.append(" getBean() throws Exception {");
-		fw.append("\n\t\tif (factory == null) {");
-		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
-				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
-		fw.append("\n\t\t}");
-		fw.append("\n");
-		fw.append("\n\t\t").append("return factory.getInstance();");
+		fw.append("\n\t\t").append("return new DataBuilder()")
+				.append("\n\t\t\t.fixture(FixtureType.crud)")
+				.append("\n\t\t\t.build(")
+				.append(documentName).append(".MODULE_NAME, ")
+				.append(documentName).append(".DOCUMENT_NAME);");
 		fw.append("\n\t").append("}");
 
 		fw.append("\n}");
 	}
 
-	private static void generateDomainTest(FileWriter fw, String modulePath, String packagePath, String documentName)
-			throws IOException {
+	private static void generateDomainTest(FileWriter fw, @SuppressWarnings("unused") String modulePath, String packagePath,
+			String documentName) throws IOException {
 		System.out.println("Generate domain test class for " + packagePath + '.' + documentName);
 		fw.append("package ").append(packagePath).append(";\n\n");
 
 		Set<String> imports = new TreeSet<>();
 
-		imports.add(String.format("%s.util.%sFactory", modulePath.replaceAll("\\\\|\\/", "."), documentName));
 		imports.add("util.AbstractDomainTest");
-
-		// indicates if the base document has <BaseDocumentFactory>Extension.java defined in the test folder.
-		boolean baseDocumentExtensionFactoryExists = factoryExtensionClassExists(modulePath, documentName);
-
-		// customise imports if this is not a base class
-		if (baseDocumentExtensionFactoryExists) {
-			imports.add(String.format("%1$s.%2$s.%2$sFactoryExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
-		}
+		imports.add("org.skyve.util.DataBuilder");
+		imports.add("org.skyve.util.test.SkyveFixture.FixtureType");
 
 		// generate imports
 		for (String importClassName : imports) {
@@ -2301,188 +2274,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		fw.append("\n");
 
 		// generate test body
-		fw.append("\n\t");
-		fw.append("private ").append(documentName).append("Factory factory;");
-		fw.append("\n");
 
 		fw.append("\n\t").append("@Override");
 		fw.append("\n\t").append("protected ").append(documentName).append(" getBean() throws Exception {");
-		fw.append("\n\t\tif (factory == null) {");
-		fw.append("\n\t\t\tfactory = new ").append(documentName).append("Factory")
-				.append(baseDocumentExtensionFactoryExists ? "Extension" : "").append("();");
-		fw.append("\n\t\t}");
-		fw.append("\n");
-		fw.append("\n\t\t").append("return factory.getInstance();");
+		fw.append("\n\t\t").append("return new DataBuilder()")
+				.append("\n\t\t\t.fixture(FixtureType.crud)")
+				.append("\n\t\t\t.build(")
+				.append(documentName).append(".MODULE_NAME, ")
+				.append(documentName).append(".DOCUMENT_NAME);");
 		fw.append("\n\t").append("}");
-
-		fw.append("\n}");
-	}
-
-	@SuppressWarnings("boxing")
-	private static void generateFactory(Module module, Document document, FileWriter fw, String packagePath,
-			String documentName) throws IOException {
-		System.out.println("Generate factory class for " + packagePath + '.' + documentName);
-		final String variableName = getVariableNameForDocument(documentName);
-		Set<String> imports = new TreeSet<>();
-		StringBuilder associations = new StringBuilder();
-		StringBuilder collections = new StringBuilder();
-
-		// Generate package
-		fw.append("package ").append(packagePath).append(".util").append(";\n\n");
-
-		imports.add("org.skyve.CORE");
-		imports.add("org.skyve.metadata.customer.Customer");
-		imports.add("org.skyve.metadata.model.document.Document");
-		imports.add("org.skyve.metadata.module.Module");
-		imports.add("org.skyve.util.test.SkyveFactory");
-		imports.add("org.skyve.util.Util");
-		imports.add("util.AbstractDomainFactory");
-
-		imports.add(String.format("%s.domain.%s", packagePath, documentName));
-
-		// indicates if the base document has <BaseDocument>Extension.java defined in the src folder
-		String modulePath = AbstractRepository.get().MODULES_NAMESPACE + module.getName();
-		boolean baseDocumentExtensionExists = domainExtensionClassExists(modulePath, documentName);
-
-		// customise imports if this is not a base class
-		if (baseDocumentExtensionExists) {
-			imports.add(String.format("%1$s.%2$s.%2$sExtension", modulePath.replaceAll("\\\\|\\/", "."), documentName));
-		}
-
-		// determine if this document has an associations or collections to add to the factory
-		for (Attribute attribute : getAllAttributes(document)) {
-
-			String name = attribute.getName();
-			String methodName = name.substring(0, 1).toUpperCase() + name.substring(1);
-			AttributeType type = attribute.getAttributeType();
-
-			if (attribute instanceof Reference) {
-				Reference reference = (Reference) attribute;
-				String referenceClassName = reference.getDocumentName();
-				Document relatedDocument = module.getDocument(null, referenceClassName);
-				Module relatedModule = AbstractRepository.get().getModule(null, relatedDocument.getOwningModuleName());
-				String relatedModuleName = relatedModule.getName();
-				String relatedModulePath = new String(AbstractRepository.get().MODULES_NAMESPACE + relatedModuleName);
-
-				if (AttributeType.collection.equals(type)) {
-					// check the minCardinality
-					Collection collection = (Collection) attribute;
-					if (collection.getMinCardinality() > 0) {
-						// check if there is an extension class for this Document
-						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
-
-						// add an import for the reference factory
-						if (extensionFactoryExists) {
-							imports.add(String.format("%1$s%2$s.%3$s.%3$sFactoryExtension",
-									AbstractRepository.get().MODULES_NAMESPACE,
-									relatedModuleName,
-									referenceClassName).replaceAll("\\\\|\\/", "."));
-						} else {
-							imports.add(String.format("%s%s.util.%sFactory",
-									AbstractRepository.get().MODULES_NAMESPACE,
-									relatedModuleName,
-									referenceClassName).replaceAll("\\\\|\\/", "."));
-						}
-
-						// check the collection type, if child, add a parent reference
-						if (CollectionType.child.equals(reference.getType())) {
-							imports.add(String.format("%s.domain.%s", packagePath, referenceClassName));
-
-							String childVariableName = getVariableNameForDocument(referenceClassName);
-
-							collections.append("\n\t\t").append(referenceClassName).append(" ").append(childVariableName)
-									.append(" = new ")
-									.append(referenceClassName)
-									.append("Factory")
-									.append(extensionFactoryExists ? "Extension" : "")
-									.append("().getInstance();");
-							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
-									.append("().add(")
-									.append(childVariableName)
-									.append(");");
-
-							collections.append("\n\t\t").append(childVariableName).append(".setParent(")
-									.append(variableName)
-									.append(");");
-						} else {
-							// call the collection Document's factory
-							collections.append("\n\t\t").append(variableName).append(".get").append(methodName)
-									.append("().add(new ")
-									.append(referenceClassName)
-									.append("Factory")
-									.append(extensionFactoryExists ? "Extension" : "")
-									.append("().getInstance());");
-						}
-					}
-				} else {
-					if (attribute.isRequired()) {
-						// check if there is an extension class for this Document
-						boolean extensionFactoryExists = factoryExtensionClassExists(relatedModulePath, referenceClassName);
-
-						// add an import for the reference factory
-						if (extensionFactoryExists) {
-							imports.add(String.format("%1$s%2$s.%3$s.%3$sFactoryExtension",
-									AbstractRepository.get().MODULES_NAMESPACE,
-									relatedModuleName,
-									referenceClassName).replaceAll("\\\\|\\/", "."));
-						} else {
-							imports.add(String.format("%s%s.util.%sFactory",
-								AbstractRepository.get().MODULES_NAMESPACE,
-								relatedModuleName,
-									referenceClassName).replaceAll("\\\\|\\/", "."));
-						}
-
-						// this is a required association, call association Document's factory
-						String propertyClassName = ((Reference) attribute).getDocumentName();
-						associations.append("\n\t\t").append(variableName).append(".set").append(methodName).append("(new ")
-								.append(propertyClassName)
-								.append("Factory")
-								.append(extensionFactoryExists ? "Extension" : "")
-								.append("().getInstance());");
-					}
-				}
-			}
-		}
-
-		// generate imports
-		for (String importClassName : imports) {
-			fw.append("import ").append(importClassName).append(";\n");
-		}
-
-		String factoryExtensionPath = getFactoryExtensionPath(modulePath, documentName);
-
-		// generate javadoc
-		fw.append("\n").append("/**");
-		fw.append("\n").append(" * Generated - local changes will be overwritten.");
-		fw.append("\n").append(" * Create class ").append(factoryExtensionPath);
-		fw.append("\n").append(" * to extend this class and customise specific values for this document.");
-		fw.append("\n").append(" */");
-
-		// generate class
-		fw.append("\n").append("@SkyveFactory");
-		fw.append("\n").append("public class ").append(documentName).append("Factory");
-		fw.append(" extends AbstractDomainFactory<").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
-				.append(" ").append("> {");
-		fw.append("\n");
-
-		// generate getInstance method
-		fw.append("\n\t").append("@Override");
-		fw.append("\n\t").append("public ").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "")
-				.append(" getInstance() throws Exception {");
-		fw.append("\n\t\t").append("Customer customer = CORE.getUser().getCustomer();");
-		fw.append("\n\t\t").append("Module module = customer.getModule(").append(documentName).append(".MODULE_NAME);");
-		fw.append("\n\t\t").append("Document document = module.getDocument(customer, ").append(documentName)
-				.append(".DOCUMENT_NAME);");
-		fw.append("\n");
-		fw.append("\n\t\t").append(documentName).append(baseDocumentExtensionExists ? "Extension" : "").append(" ")
-				.append(variableName)
-				.append(" = Util.constructRandomInstance(CORE.getPersistence().getUser(), module, document, 1);");
-		// add any associations and collections
-		fw.append(associations);
-		fw.append(collections);
-		fw.append("\n");
-		fw.append("\n\t\t").append("return ").append(variableName).append(";");
-		fw.append("\n\t}");
 
 		fw.append("\n}");
 	}
@@ -3201,28 +3001,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Checks if a factory extension class exists for the given document name
-	 * in the specified module path.
-	 * 
-	 * @param modulePath the path to the document's module; e.g. modules.admin
-	 * @param documentName The name of the document; e.g. Audit
-	 * @return true if the factory extension class exists in the location, false otherwise
-	 */
-	private static boolean factoryExtensionClassExists(String modulePath, String documentName) {
-		boolean baseDocumentExtensionFactoryExists = false;
-
-		File factoryExtensionFile = new File(getFactoryExtensionPath(modulePath, documentName));
-
-		if (factoryExtensionFile.exists()) {
-			baseDocumentExtensionFactoryExists = true;
-		}
-
-		return baseDocumentExtensionFactoryExists;
-	}
-
-	/**
 	 * Return all vanilla attributes for the specified document.
 	 */
+	@SuppressWarnings("unused")
 	private static List<? extends Attribute> getAllAttributes(Document document) {
 		List<Attribute> result = new ArrayList<>(document.getAttributes());
 		Extends currentInherits = document.getExtends();
@@ -3239,15 +3020,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Returns the expected path to the FactoryExtension file for the specified module and document.
+	 * Returns the expected path to the Factory file for the specified module and document.
 	 * 
 	 * @param modulePath the path to the document's module; e.g. modules.admin
 	 * @param documentName The name of the document; e.g. Audit
-	 * @return The path as a String, e.g. src/main/java/modules/admin/Audit/AuditFactoryExtension.java
+	 * @return The path as a String, e.g. src/main/java/modules/admin/Audit/AuditFactory.java
 	 */
-	private static String getFactoryExtensionPath(final String modulePath, final String documentName) {
-		final String path = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "FactoryExtension.java";
-		System.err.println("Looking for factory extension in " + path);
+	private static String getFactoryPath(final String modulePath, final String documentName) {
+		final String path = SRC_PATH + modulePath + '/' + documentName + '/' + documentName + "Factory.java";
+		System.err.println("Looking for factory in " + path);
 		return path;
 	}
 
@@ -3259,6 +3040,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param documentName The name of the document to generate a variable name for
 	 * @return The variable name from the document.
 	 */
+	@SuppressWarnings("unused")
 	private static String getVariableNameForDocument(final String documentName) {
 		String variableName = Character.toLowerCase(documentName.charAt(0)) + documentName.substring(1);
 

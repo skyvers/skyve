@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.DocumentNumber.DocumentNumberFactoryExtension;
-import modules.admin.util.DocumentNumberFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class DocumentNumberTest extends AbstractDomainTest<DocumentNumber> {
 
-	private DocumentNumberFactory factory;
-
 	@Override
 	protected DocumentNumber getBean() throws Exception {
-		if (factory == null) {
-			factory = new DocumentNumberFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(DocumentNumber.MODULE_NAME, DocumentNumber.DOCUMENT_NAME);
 	}
 }

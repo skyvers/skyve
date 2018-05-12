@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.DataMaintenance.DataMaintenanceFactoryExtension;
-import modules.admin.util.DataMaintenanceFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class DataMaintenanceTest extends AbstractDomainTest<DataMaintenance> {
 
-	private DataMaintenanceFactory factory;
-
 	@Override
 	protected DataMaintenance getBean() throws Exception {
-		if (factory == null) {
-			factory = new DataMaintenanceFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(DataMaintenance.MODULE_NAME, DataMaintenance.DOCUMENT_NAME);
 	}
 }

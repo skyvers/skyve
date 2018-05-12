@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.User.UserFactoryExtension;
-import modules.admin.util.UserFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class UserTest extends AbstractDomainTest<User> {
 
-	private UserFactory factory;
-
 	@Override
 	protected User getBean() throws Exception {
-		if (factory == null) {
-			factory = new UserFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 	}
 }

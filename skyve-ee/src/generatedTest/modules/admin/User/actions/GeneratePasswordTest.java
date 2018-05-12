@@ -1,8 +1,8 @@
 package modules.admin.User.actions;
 
-import modules.admin.User.UserFactoryExtension;
 import modules.admin.domain.User;
-import modules.admin.util.UserFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -11,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class GeneratePasswordTest extends AbstractActionTest<User, GeneratePassword> {
 
-	private UserFactory factory;
-
 	@Override
 	protected GeneratePassword getAction() {
 		return new GeneratePassword();
@@ -20,10 +18,8 @@ public class GeneratePasswordTest extends AbstractActionTest<User, GeneratePassw
 
 	@Override
 	protected User getBean() throws Exception {
-		if (factory == null) {
-			factory = new UserFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(User.MODULE_NAME, User.DOCUMENT_NAME);
 	}
 }

@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.DataGroupFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class DataGroupTest extends AbstractDomainTest<DataGroup> {
 
-	private DataGroupFactory factory;
-
 	@Override
 	protected DataGroup getBean() throws Exception {
-		if (factory == null) {
-			factory = new DataGroupFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(DataGroup.MODULE_NAME, DataGroup.DOCUMENT_NAME);
 	}
 }

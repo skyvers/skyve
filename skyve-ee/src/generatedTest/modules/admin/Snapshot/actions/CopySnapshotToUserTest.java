@@ -1,7 +1,8 @@
 package modules.admin.Snapshot.actions;
 
 import modules.admin.domain.Snapshot;
-import modules.admin.util.SnapshotFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -10,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class CopySnapshotToUserTest extends AbstractActionTest<Snapshot, CopySnapshotToUser> {
 
-	private SnapshotFactory factory;
-
 	@Override
 	protected CopySnapshotToUser getAction() {
 		return new CopySnapshotToUser();
@@ -19,10 +18,8 @@ public class CopySnapshotToUserTest extends AbstractActionTest<Snapshot, CopySna
 
 	@Override
 	protected Snapshot getBean() throws Exception {
-		if (factory == null) {
-			factory = new SnapshotFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
 	}
 }

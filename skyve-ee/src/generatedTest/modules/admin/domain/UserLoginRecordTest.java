@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.UserLoginRecordFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class UserLoginRecordTest extends AbstractDomainTest<UserLoginRecord> {
 
-	private UserLoginRecordFactory factory;
-
 	@Override
 	protected UserLoginRecord getBean() throws Exception {
-		if (factory == null) {
-			factory = new UserLoginRecordFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(UserLoginRecord.MODULE_NAME, UserLoginRecord.DOCUMENT_NAME);
 	}
 }
