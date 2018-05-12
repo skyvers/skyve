@@ -168,7 +168,7 @@
 									<label for="customer"><%=Util.i18n("page.login.customer.label", locale)%></label>
 								</div>
 								<div class="col-7-sm">
-									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="customer">
+									<input type="text" id="customer" name="customer" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
 								</div>
 							</div>
 							<% } %>
@@ -180,7 +180,7 @@
 									<% if (customer != null) { %>
 										<input type="hidden" name="customer" value="<%=customer%>" />
 									<% } %>
-									<input type="text" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="user">
+									<input type="text" id="user" name="user" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
 								</div>
 							</div>
 							<div class="row">
@@ -188,7 +188,22 @@
 									<label for="password"><%=Util.i18n("page.login.password.label", locale)%></label>
 								</div>
 								<div class="col-7-sm">
-									<input type="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none" name="password">
+									<input type="password" id="password" name="password" spellcheck="false" autocapitalize="none" autocomplete="off" autocorrect="none">
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-4-sm right"></div>
+								<div class="col-7-sm center">
+									<table>
+										<tr>
+											<td style="padding:0 15px 0 0">
+												<input type="checkbox" id="remember" name="remember" />
+											</td>
+											<td>
+												<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
+											</td>
+										</tr>
+									</table>
 								</div>
 							</div>
 							<div class="row">

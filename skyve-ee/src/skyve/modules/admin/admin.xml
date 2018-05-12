@@ -38,6 +38,7 @@
 		<document ref="UserLoginRecord" />
 		<document ref="UserMonthlyHits" />
 		<document ref="UserRole" />
+		<document ref="UserToken" defaultQueryName="qUserTokens" />
 		<document ref="Snapshot" defaultQueryName="qSnapshots" />
 		<document ref="Tag" defaultQueryName="qTags" />
 		<document ref="Tagged" />
@@ -318,6 +319,7 @@
 					<action name="GenerateDefault" />
 					<action name="Preview" />
 				</document>
+				<document name="UserToken" permission="CRUDC" />
 			</privileges>
 		</role>
 	</roles>
@@ -423,6 +425,15 @@
 				<column binding="contact.mobile" sortOrder="ascending" />
 				<column binding="userName" sortOrder="ascending" />
 				<column binding="passwordExpired" hidden="true"/>
+			</columns>
+		</documentQuery>
+		<documentQuery name="qUserTokens" documentName="UserToken">
+			<description>All User Tokens</description>
+			<columns>
+				<column binding="userName" />
+				<column binding="series" />
+				<column binding="token" />
+				<column binding="lastUsed" />
 			</columns>
 		</documentQuery>
 		<documentQuery name="qActiveUsers" documentName="User">

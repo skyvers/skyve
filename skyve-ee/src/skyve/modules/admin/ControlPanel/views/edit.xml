@@ -283,6 +283,9 @@
 				</row>
 			</form>
 		</tab>
+		<tab title="User Remember-Me Tokens">
+			<listGrid query="qUserTokens" continueConversation="false" />
+		</tab>
 	</tabPane>
 	<actions>
 		<action className="EvictFromCache" displayName="Evict All Cached Metadata" />

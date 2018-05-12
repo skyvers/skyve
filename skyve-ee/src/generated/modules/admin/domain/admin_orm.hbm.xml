@@ -470,6 +470,25 @@
 		<filter name="adminUserRoleUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.admin.domain.UserToken" table="ADM_UserToken" entity-name="adminUserToken">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="userName" length="305" />
+		<property name="series" length="64" />
+		<property name="token" length="64" />
+		<property name="lastUsed" type="Timestamp" />
+		<filter name="adminUserTokenNoneFilter" condition="1=0"/>
+		<filter name="adminUserTokenCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="adminUserTokenDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="adminUserTokenUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<filter-def name="adminAuditNoneFilter" />
 	<filter-def name="adminAuditCustomerFilter">
 		<filter-param name="customerParam" type="string"/>
@@ -658,6 +677,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="adminUserRoleUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenNoneFilter" />
+	<filter-def name="adminUserTokenCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="adminUserTokenUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 </hibernate-mapping>
