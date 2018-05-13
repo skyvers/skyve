@@ -23,10 +23,10 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 public class ExecutionDelegate {
-	public static PrimeFacesAutomationContext newContext(PushListContext push, User user) {
+	public static PrimeFacesAutomationContext newContext(PushListContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		String moduleName = push.getModuleName();
-		Customer c = user.getCustomer();
+		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(moduleName);
 		String documentName = push.getDocumentName();
 		String queryName = push.getQueryName();
@@ -80,12 +80,12 @@ public class ExecutionDelegate {
 	}
 	
 	public static void executeTestDataEnter(TestDataEnter testDataEnter,
-												User user, 
 												PrimeFacesAutomationContext context,
 												Executor executor) {
 		String moduleName = context.getModuleName();
 		String documentName = context.getDocumentName();
-		Customer c = user.getCustomer();
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
 		Repository r = CORE.getRepository();
@@ -93,10 +93,10 @@ public class ExecutionDelegate {
 		Bean bean = null;
 		String fixture = testDataEnter.getFixture();
 		if (fixture == null) {
-			bean = new DataBuilder(user).fixture(FixtureType.sail).build(d);
+			bean = new DataBuilder().fixture(FixtureType.sail).build(d);
 		}
 		else {
-			bean = new DataBuilder(user).fixture(fixture).build(d);
+			bean = new DataBuilder().fixture(fixture).build(d);
 		}
 		
         ViewImpl view = (ViewImpl) r.getView(context.getUxui(), c, d, context.getViewType().toString());

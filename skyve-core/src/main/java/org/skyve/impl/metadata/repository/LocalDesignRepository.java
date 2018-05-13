@@ -71,7 +71,6 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.util.Binder.TargetMetaData;
-import org.skyve.util.test.DataFactory;
 
 /**
  * Do not instantiate directly, use the RepositoryFactory.
@@ -789,8 +788,8 @@ public class LocalDesignRepository extends AbstractRepository {
 	}
 
 	@Override
-	public DataFactory getDataFactory(Customer customer, String moduleName, String documentName) {
-		DataFactory result = null;
+	public Object getDataFactory(Customer customer, String moduleName, String documentName) {
+		Object result = null;
 		
 		try {
 			Class<?> factoryClass = null;
@@ -808,7 +807,7 @@ public class LocalDesignRepository extends AbstractRepository {
 				factoryClass = getJavaClass(null, String.format("modules.%s.%s.%sFactory", moduleName, documentName, documentName));
 			}
 			if (factoryClass != null) {
-				result = (DataFactory) factoryClass.newInstance();
+				result = factoryClass.newInstance();
 			}
 		}
 		catch (MetaDataException e) {

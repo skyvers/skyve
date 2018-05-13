@@ -39,7 +39,6 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.DataMap;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
@@ -72,6 +71,7 @@ public class DataBuilder {
 	private static final Map<String, String> DATA_MAP_CACHE = new HashMap<>();
 
 	private User user;
+	private Customer customer;
 	private String fixture;
 	private boolean required = true;
 	private boolean optional = true;
@@ -88,10 +88,7 @@ public class DataBuilder {
 
 	public DataBuilder() {
 		user = CORE.getUser();
-	}
-	
-	public DataBuilder(User user) {
-		this.user = user;
+		customer = user.getCustomer();
 	}
 	
 	public DataBuilder fixture(@SuppressWarnings("hiding") String fixture) {
@@ -177,31 +174,28 @@ public class DataBuilder {
 	}
 
 	public <T extends Bean> T build(String moduleName, String documentName) {
-		Customer c = user.getCustomer();
-		Module m = c.getModule(moduleName);
-		Document d = m.getDocument(c, documentName);
-		return build(c, m, d, 0);
+		Module m = customer.getModule(moduleName);
+		Document d = m.getDocument(customer, documentName);
+		return build(m, d, 0);
 	}
 	
 	public <T extends Bean> T build(Module module, Document document) {
-		return build(user.getCustomer(), module, document, 0);
+		return build(module, document, 0);
 	}
 	
 	public <T extends Bean> T build(Document document) {
-		Customer c = user.getCustomer();
-		Module m = c.getModule(document.getOwningModuleName());
-		return build(c, m, document, 0);
+		Module m = customer.getModule(document.getOwningModuleName());
+		return build(m, document, 0);
 	}
 	
-	private synchronized <T extends Bean> T build(Customer customer, 
-													Module module,
+	private synchronized <T extends Bean> T build(Module module,
 													Document document,
 													int currentDepth) {
 		T result = null;
 		try {
-			result = dataFactory(customer, (DocumentImpl) document);
+			result = dataFactory((DocumentImpl) document);
 			if (result == null) {
-				result = randomBean(customer, module, document);
+				result = randomBean(module, document);
 			}
 	
 			for (Attribute attribute : document.getAllAttributes()) {
@@ -230,7 +224,7 @@ public class DataBuilder {
 						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
 						BindUtil.set(result,
 										name,
-										build(customer, associationModule, associationDocument, currentDepth + 1));
+										build(associationModule, associationDocument, currentDepth + 1));
 					}
 				}
 				else if (AttributeType.collection.equals(type)) {
@@ -262,7 +256,7 @@ public class DataBuilder {
 						}
 	
 						for (int i = 0; i < cardinality; i++) {
-							list.add(build(customer, collectionModule, collectionDocument, currentDepth + 1));
+							list.add(build(collectionModule, collectionDocument, currentDepth + 1));
 						}
 					}
 				}
@@ -276,7 +270,7 @@ public class DataBuilder {
 	}
 
 	@SuppressWarnings("incomplete-switch")
-	private <T extends Bean> T randomBean(Customer customer, Module module, Document document)
+	private <T extends Bean> T randomBean(Module module, Document document)
 	throws Exception {
 		T result = document.newInstance(user);
 		
@@ -421,12 +415,12 @@ public class DataBuilder {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends Bean> T dataFactory(Customer customer, DocumentImpl document)
+	private <T extends Bean> T dataFactory(DocumentImpl document)
 	throws Exception {
 		T result = null;
 		
 		// If we have a data factory defined for this document,
-		DataFactory factory = CORE.getRepository().getDataFactory(customer, document.getOwningModuleName(), document.getName());
+		Object factory = CORE.getRepository().getDataFactory(customer, document.getOwningModuleName(), document.getName());
 		if (factory != null) {
 			Class<?> beanType = document.getBeanClass(customer);
 			List<Method> methods = new ArrayList<>();
@@ -474,7 +468,6 @@ public class DataBuilder {
 			
 			// If there are any valid methods at all
 			if (! methods.isEmpty()) {
-				factory.setUser(user);
 				result = (T) methods.get(RANDOM.nextInt(methods.size())).invoke(factory);
 			}
 		}
