@@ -18,7 +18,6 @@ public class TagFactory extends DataFactory {
 	@SkyveFixture(types = FixtureType.crud)
 	public static Tag crudInstance() {
 		Tag tag = new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
-		tag.setActionTag(new DataBuilder().fixture(FixtureType.crud).build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME));
 
 		tag.setUploadModuleName(Contact.MODULE_NAME);
 		tag.setUploadDocumentName(Contact.DOCUMENT_NAME);
