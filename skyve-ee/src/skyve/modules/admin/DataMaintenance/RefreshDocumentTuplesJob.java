@@ -1,7 +1,6 @@
 package modules.admin.DataMaintenance;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import org.skyve.CORE;
@@ -15,6 +14,7 @@ import org.skyve.persistence.Persistence;
 import modules.admin.Communication.CommunicationUtil;
 import modules.admin.Communication.CommunicationUtil.ResponseMode;
 import modules.admin.domain.DataMaintenance;
+import modules.admin.domain.DataMaintenance.EvictOption;
 import modules.admin.domain.DataMaintenance.RefreshOption;
 import modules.admin.domain.DataMaintenanceModuleDocument;
 
@@ -48,6 +48,9 @@ public class RefreshDocumentTuplesJob extends Job {
 			}
 		}
 
+		RefreshOption refresh = dm.getRefreshOption();
+		EvictOption evict = dm.getEvictOption();
+
 		// iterate
 		for (DataMaintenanceModuleDocument doc : dm.getRefreshDocuments()) {
 			if (Boolean.TRUE.equals(doc.getInclude())) {
@@ -60,31 +63,33 @@ public class RefreshDocumentTuplesJob extends Job {
 				// get relevant document to action
 				Persistence pers = CORE.getPersistence();
 				DocumentQuery q = pers.newDocumentQuery(doc.getModuleName(), doc.getDocumentName());
-				List<Bean> beans = q.beanResults();
-
-				Iterator<Bean> it = beans.iterator();
-				while (it.hasNext()) {
-					PersistentBean pb = (PersistentBean) it.next();
-
+				for (PersistentBean bean : q.<PersistentBean>beanResults()) {
 					try {
-						if(RefreshOption.upsert.equals(dm.getRefreshOption())){
-							pers.upsertBeanTuple(pb);
-						} else if(RefreshOption.save.equals(dm.getRefreshOption())){
-							pb = pers.save(pb);
+						if (RefreshOption.upsert.equals(refresh)) {
+							pers.upsertBeanTuple(bean);
+						}
+						else if (RefreshOption.save.equals(refresh)) {
+							bean = pers.save(bean);
 						}
 						pers.commit(false);
-						pers.evictCached(pb);
+						if (EvictOption.bean.equals(evict)) {
+							pers.evictCached(bean);
+						}
+						else if (EvictOption.all.equals(evict)) {
+							pers.evictAllCached();
+						}
 						pers.begin();
-
-					} catch (Exception e) {
+					}
+					catch (Exception e) {
 						log.add(String.format("%s - %s failed for id: %s",
-								sb.toString(),
-								dm.getRefreshOption().toDescription(),
-								pb.getBizId()));
+												sb.toString(),
+												dm.getRefreshOption().toDescription(),
+												bean.getBizId()));
 					}
 					processed++;
 					setPercentComplete((int) (((float) processed) / ((float) size) * 100F));
 				}
+
 				sb.append(" Completed");
 				log.add(sb.toString());
 			}

@@ -91,7 +91,6 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			@SuppressWarnings("null")
 			Class<?> type = loader.loadClass(executorClass.toCode());
 			Executor executor = (Executor) type.getConstructors()[0].newInstance(new Object[] {componentBuilder, layoutBuilder});
-			executor.setUser(u);
 			automation.execute(executor);
 			bean.setResults(executor.toString());
 		}

@@ -34,9 +34,11 @@
 	<http auto-config="true" use-expressions="true">
 		<form-login default-target-url="/" login-page="/login" />
 		<logout logout-success-url="/loggedOut" />
-<!--
-		<remember-me key="skyve" />
--->
+		<remember-me key="remember"
+						token-validity-seconds="1209600"
+						remember-me-parameter="remember"
+						remember-me-cookie="remember"
+						token-repository-ref="tokenRepository" />
 
 		<!-- Secure the system JSPs and HTMLs -->
 		<intercept-url pattern="/home.jsp" access="authenticated" />
@@ -114,9 +116,15 @@
 		<csrf disabled="true" />
 	</http>
 	
+	<b:bean id="tokenRepository" class="org.skyve.impl.security.SkyveRememberMeTokenRepository">
+		<b:property name="dataSource" ref="dataSource" />
+	</b:bean>
+
 	<b:bean id="skyve" class="org.skyve.impl.security.SkyveLegacyAuthenticationProvider">
 		<b:property name="hashedPasswordSql" value="select password from ADM_SecurityUser where bizCustomer || '/' || userName = ? and not inactive" />
 	</b:bean>
+
+	<jee:jndi-lookup id="dataSource" jndi-name="java:/H2Demo" expected-type="javax.sql.DataSource" />
 	
 <!--
 	<b:bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
@@ -129,6 +137,7 @@
 	<b:bean id="dataSource" class="org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup">
 		<b:constructor-arg name="dataSourceName" value="java:/H2Demo" />
 	</b:bean>
+
+	<b:bean id="tokenRepository" class="org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl" />
 -->
-	<jee:jndi-lookup id="dataSource" jndi-name="java:/H2Demo" expected-type="javax.sql.DataSource" />
 </b:beans>

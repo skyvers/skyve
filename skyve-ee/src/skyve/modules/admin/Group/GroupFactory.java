@@ -1,14 +1,13 @@
 package modules.admin.Group;
 
 import org.skyve.util.DataBuilder;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
 
-public class GroupFactory extends DataFactory {
+public class GroupFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static Group crudInstance() throws Exception {

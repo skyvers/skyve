@@ -1,7 +1,6 @@
 package modules.admin.Communication;
 
 import org.skyve.util.DataBuilder;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -14,7 +13,7 @@ import modules.admin.domain.Communication;
 import modules.admin.domain.Tag;
 
 @SkyveFactory(excludedActions = { CreateFiles.class, GetResults.class, SendNow.class, TestSend.class })
-public class CommunicationFactory extends DataFactory {
+public class CommunicationFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static Communication crudInstance() {
@@ -26,9 +25,10 @@ public class CommunicationFactory extends DataFactory {
 	}
 
 	// Ensure that system is switched off so that the communication can be deleted by the SAIL test.
+	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public Communication sail() {
-		Communication result = new DataBuilder(getUser()).build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
+		Communication result = new DataBuilder().build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 		result.setSystem(Boolean.FALSE);
 		result.setCalendarStartTime(null);
 		result.setCalendarEndTime(null);

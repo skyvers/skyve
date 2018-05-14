@@ -1,7 +1,6 @@
 package modules.admin.User;
 
 import org.skyve.util.DataBuilder;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -13,7 +12,7 @@ import modules.admin.domain.Group;
 import modules.admin.domain.User;
 
 @SkyveFactory(excludedActions = { Check.class, Next.class })
-public class UserFactory extends DataFactory {
+public class UserFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static User crudInstance() throws Exception {

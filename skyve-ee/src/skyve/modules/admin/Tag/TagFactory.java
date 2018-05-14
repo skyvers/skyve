@@ -1,7 +1,6 @@
 package modules.admin.Tag;
 
 import org.skyve.util.DataBuilder;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -13,7 +12,7 @@ import modules.admin.domain.Contact;
 import modules.admin.domain.Tag;
 
 @SkyveFactory(excludedActions = { BulkDocumentAction.class, PerformCombination.class, PrepareExplanation.class })
-public class TagFactory extends DataFactory {
+public class TagFactory {
 
 	@SkyveFixture(types = FixtureType.crud)
 	public static Tag crudInstance() {
@@ -25,9 +24,10 @@ public class TagFactory extends DataFactory {
 		return tag;
 	}
 
+	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
 	public Tag sail() {
-		Tag result = new DataBuilder(getUser()).build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag result = new DataBuilder().build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		result.setActionModuleName(null);
 		result.setActionDocumentName(null);
@@ -36,11 +36,11 @@ public class TagFactory extends DataFactory {
 
 		result.setUploadModuleName(null);
 		result.setUploadDocumentName(null);
-		
+
 		result.setDocumentAction(null);
 		result.setDocumentCondition(null);
 		result.setAttributeName(null);
-		
+
 		return result;
 	}
 }
