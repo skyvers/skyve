@@ -220,74 +220,74 @@ public class DataBuilder {
 			result = dataFactory((DocumentImpl) document);
 			if (result == null) {
 				result = randomBean(module, document);
-			}
-	
-			for (Attribute attribute : document.getAllAttributes()) {
-				if (filter(attribute)) {
-					continue;
-				}
-				
-				String name = attribute.getName();
-				AttributeType type = attribute.getAttributeType();
-				if (AttributeType.association.equals(type)) {
-					if (currentDepth < depth) { // check global depth
-						// check assigned depth
-						if (depths != null) {
-							Integer associationDepth = depths.get(name);
-							if ((associationDepth != null) && (currentDepth >= associationDepth.intValue())) {
-								continue;
-							}
-						}
-	
-						AssociationImpl association = (AssociationImpl) attribute;
-						Module associationModule = module;
-						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
-						if (associationModuleRef != null) {
-							associationModule = customer.getModule(associationModuleRef);
-						}
-						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
-						BindUtil.set(result,
-										name,
-										build(associationModule, associationDocument, currentDepth + 1));
+
+				for (Attribute attribute : document.getAllAttributes()) {
+					if (filter(attribute)) {
+						continue;
 					}
-				}
-				else if (AttributeType.collection.equals(type)) {
-					if (currentDepth < depth) { // check global depth
-						// check assigned depth
-						if (depths != null) {
-							Integer collectionDepth = depths.get(name);
-							if ((collectionDepth != null) && (currentDepth >= collectionDepth.intValue())) {
-								continue;
+					
+					String name = attribute.getName();
+					AttributeType type = attribute.getAttributeType();
+					if (AttributeType.association.equals(type)) {
+						if (currentDepth < depth) { // check global depth
+							// check assigned depth
+							if (depths != null) {
+								Integer associationDepth = depths.get(name);
+								if ((associationDepth != null) && (currentDepth >= associationDepth.intValue())) {
+									continue;
+								}
 							}
-						}
-	
-						Collection collection = (Collection) attribute;
-						Integer minCardinality = collection.getMinCardinality();
-						Module collectionModule = module;
-						String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
-						if (collectionModuleRef != null) {
-							collectionModule = customer.getModule(collectionModuleRef);
-						}
-						Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
-						@SuppressWarnings("unchecked")
-						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
-						
-						int cardinality = 1; // default to a single element
-						// Set min cardinality if it is set on the met-data and is greater than 2
-						if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
-							cardinality = minCardinality.intValue();
-						}
-						
-						// check if there is a cardinality set by the build for this collection
-						if (cardinalities != null) {
-							Integer collectionCardinality = cardinalities.get(name);
-							if (collectionCardinality != null) {
-								cardinality = collectionCardinality.intValue();
+		
+							AssociationImpl association = (AssociationImpl) attribute;
+							Module associationModule = module;
+							String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
+							if (associationModuleRef != null) {
+								associationModule = customer.getModule(associationModuleRef);
 							}
+							Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
+							BindUtil.set(result,
+											name,
+											build(associationModule, associationDocument, currentDepth + 1));
 						}
-	
-						for (int i = 0; i < cardinality; i++) {
-							list.add(build(collectionModule, collectionDocument, currentDepth + 1));
+					}
+					else if (AttributeType.collection.equals(type)) {
+						if (currentDepth < depth) { // check global depth
+							// check assigned depth
+							if (depths != null) {
+								Integer collectionDepth = depths.get(name);
+								if ((collectionDepth != null) && (currentDepth >= collectionDepth.intValue())) {
+									continue;
+								}
+							}
+		
+							Collection collection = (Collection) attribute;
+							Integer minCardinality = collection.getMinCardinality();
+							Module collectionModule = module;
+							String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
+							if (collectionModuleRef != null) {
+								collectionModule = customer.getModule(collectionModuleRef);
+							}
+							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
+							@SuppressWarnings("unchecked")
+							List<Bean> list = (List<Bean>) BindUtil.get(result, name);
+							
+							int cardinality = 1; // default to a single element
+							// Set min cardinality if it is set on the met-data and is greater than 2
+							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
+								cardinality = minCardinality.intValue();
+							}
+							
+							// check if there is a cardinality set by the build for this collection
+							if (cardinalities != null) {
+								Integer collectionCardinality = cardinalities.get(name);
+								if (collectionCardinality != null) {
+									cardinality = collectionCardinality.intValue();
+								}
+							}
+		
+							for (int i = 0; i < cardinality; i++) {
+								list.add(build(collectionModule, collectionDocument, currentDepth + 1));
+							}
 						}
 					}
 				}
