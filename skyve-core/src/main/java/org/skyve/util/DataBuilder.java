@@ -36,6 +36,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
@@ -73,8 +74,10 @@ public class DataBuilder {
 	private User user;
 	private Customer customer;
 	private String fixture;
-	private boolean required = true;
-	private boolean optional = true;
+	private boolean requiredScalars = true;
+	private boolean optionalScalars = true;
+	private boolean requiredReferences = true;
+	private boolean optionalReferences = true;
 	private boolean persistent = true;
 	private boolean transients = true;
 	private boolean view = true;
@@ -97,17 +100,38 @@ public class DataBuilder {
 	}
 
 	public DataBuilder fixture(FixtureType type) {
+		if (FixtureType.crud.equals(type)) {
+			depth = Integer.MAX_VALUE;
+			optionalReferences = false;
+		}
+		else if (FixtureType.sail.equals(type)) {
+			depth = 0;
+		}
 		this.fixture = type.toString();
 		return this;
 	}
 
 	public DataBuilder required(boolean include) {
-		required = include;
+		requiredScalars = include;
+		requiredReferences = include;
 		return this;
 	}
 	
+	public DataBuilder required(boolean includeScalars, boolean includeReferences) {
+		requiredScalars = includeScalars;
+		requiredReferences = includeReferences;
+		return this;
+	}
+
 	public DataBuilder optional(boolean include) {
-		optional = include;
+		optionalScalars = include;
+		optionalReferences = include;
+		return this;
+	}
+
+	public DataBuilder optional(boolean includeScalars, boolean includeReferences) {
+		optionalScalars = includeScalars;
+		optionalReferences = includeReferences;
 		return this;
 	}
 
@@ -238,6 +262,7 @@ public class DataBuilder {
 						}
 	
 						Collection collection = (Collection) attribute;
+						Integer minCardinality = collection.getMinCardinality();
 						Module collectionModule = module;
 						String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
 						if (collectionModuleRef != null) {
@@ -247,7 +272,13 @@ public class DataBuilder {
 						@SuppressWarnings("unchecked")
 						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
 						
-						int cardinality = 2;
+						int cardinality = 2; // default to 2 elements
+						// Set min cardinality if it is set on the met-data and is greater than 2
+						if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
+							cardinality = minCardinality.intValue();
+						}
+						
+						// check if there is a cardinality set by the build for this collection
 						if (cardinalities != null) {
 							Integer collectionCardinality = cardinalities.get(name);
 							if (collectionCardinality != null) {
@@ -344,13 +375,27 @@ public class DataBuilder {
 		AttributeType type = attribute.getAttributeType();
 
 		if (attribute.isRequired()) {
-			if (! required) {
-				return true;
+			if (attribute instanceof Reference) {
+				if (! requiredReferences) {
+					return true;
+				}
+			}
+			else {
+				if (! requiredScalars) {
+					return true;
+				}
 			}
 		}
 		else {
-			if (! optional) {
-				return true;
+			if (attribute instanceof Reference) {
+				if (! optionalReferences) {
+					return true;
+				}
+			}
+			else {
+				if (! optionalScalars) {
+					return true;
+				}
 			}
 		}
 		if (attribute.isPersistent()) {
