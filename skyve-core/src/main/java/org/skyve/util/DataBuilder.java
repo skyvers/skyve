@@ -272,7 +272,7 @@ public class DataBuilder {
 						@SuppressWarnings("unchecked")
 						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
 						
-						int cardinality = 2; // default to 2 elements
+						int cardinality = 1; // default to a single element
 						// Set min cardinality if it is set on the met-data and is greater than 2
 						if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
 							cardinality = minCardinality.intValue();
