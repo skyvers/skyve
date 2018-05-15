@@ -49,6 +49,52 @@ import com.mifmif.common.regex.Generex;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+/**
+ * <pre>
+ * DataBuilder is used to create random instances of domain objects generated from Skyve document definitions.
+ * It follows the builder pattern and has options for including and excluding both scalar (single valued) attributes
+ * and references (associations and collections).
+ * The attributes are populated with data that conforms to the data types, lengths and constraints 
+ * declared in the Document metadata.
+ * DataBuilder can be recursive enabling the instantiation and populate of an entire object tree graph from 1 starting point.
+ * 
+ * Data Factories and Fixtures are also catered for.
+ * By convention, a document can have a corresponding factory by defining a class called <Document-Name>Factory, similar to Bizlets.
+ * DataBuilder will find these classes when it needs to construct an instance of the document.
+ * It looks for public static or instance methods that take no arguments and return the domain object type required.
+ * If there are more than one candidate method that can be called, DataBuilder will randomly call one of the methods.
+ * 
+ * Fixtures are named groupings of methods that when executed together can collaboratively produce a data set for a specific purpose.
+ * Fixtures can be named with a String name, or there are implicit fixture types that are defined in the FixtureType enum.
+ * Annotating the methods in a Data Factory with either a fixture name or fixture type acts like a filter ensuring 
+ * that only suitable methods for each fixture (or use case) are called.
+ * Methods can be given a combination of multiple fixture names and types.
+ * DataBuilders and the SAIL language can name the fixture to use when generating data in this manner.
+ * A Data Factory can enlist the help of a DataBuilder in its fixture methods but beware of infinite recursion problems.
+ * Recursion is usually ended by ensuring that a different fixture or no fixture is called from the 
+ * calling fixture method.
+ * 
+ * The fixture types set the starting state of the DataBuilder to something that should be useful for the given use case.
+ * For instance SAIL sets no recursion and population of all attributes but CRUD sets infinite recursion and no optional references.
+ * 
+ * <code>
+ * Usage:
+ * 
+ * Create an object for a CRUD test
+ * Contact c = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+ * </code>
+ * 
+ * DataBuilder uses the current user and customer (CORE.getUser()) during creation of random data.
+ * 
+ * There are a number of methods that can be called in the DataBuilder before calling one of the build methods
+ * that filter and configure behavior for the different attributes.
+ * Check the method javadoc.
+ * 
+ * NB - Should improve the cardinality(), name() & depth() to allow complex binding expressions to reach 
+ * through the recursive calls down the object graph.
+ * </pre>
+ * @author mike
+ */
 public class DataBuilder {
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -94,11 +140,22 @@ public class DataBuilder {
 		customer = user.getCustomer();
 	}
 	
+	/**
+	 * Set a fixture that this builder will build for.
+	 * @param fixture	The name of the fixture
+	 * @return
+	 */
 	public DataBuilder fixture(@SuppressWarnings("hiding") String fixture) {
 		this.fixture = fixture;
 		return this;
 	}
 
+	/**
+	 * Set a fixture that this build will build for.
+	 * This method will configure the builder in the most useful way given the fixture type.
+	 * @param type	The implicit fixture type.
+	 * @return
+	 */
 	public DataBuilder fixture(FixtureType type) {
 		if (FixtureType.crud.equals(type)) {
 			depth = Integer.MAX_VALUE;
@@ -111,55 +168,108 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Include or exclude required attributes (scalar and references)
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder required(boolean include) {
 		requiredScalars = include;
 		requiredReferences = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude required scalar and/or references independently
+	 * @param includeScalars
+	 * @param includeReferences
+	 * @return
+	 */
 	public DataBuilder required(boolean includeScalars, boolean includeReferences) {
 		requiredScalars = includeScalars;
 		requiredReferences = includeReferences;
 		return this;
 	}
 
+	/**
+	 * Include or exclude optional attributes (scalar and references)
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder optional(boolean include) {
 		optionalScalars = include;
 		optionalReferences = include;
 		return this;
 	}
 
+	/**
+	 * Include or exclude optional scalar and/or references independently
+	 * @param includeScalars
+	 * @param includeReferences
+	 * @return
+	 */
 	public DataBuilder optional(boolean includeScalars, boolean includeReferences) {
 		optionalScalars = includeScalars;
 		optionalReferences = includeReferences;
 		return this;
 	}
 
+	/**
+	 * Include or exclude persistent attributes.
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder persistent(boolean include) {
 		persistent = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude transient attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder transients(boolean include) {
 		this.transients = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude view attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder view(boolean include) {
 		this.view = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude domain attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder domain(boolean include) {
 		this.domain = include;
 		return this;
 	}
 
+	/**
+	 * Include or exclude deprecated attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder deprecated(boolean include) {
 		this.deprecated = include;
 		return this;
 	}
 
+	/**
+	 * Include or exclude attributes by their attribute type
+	 * @param type
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder type(AttributeType type, boolean include) {
 		if (types == null) {
 			types = new HashMap<>();
@@ -168,6 +278,13 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Include or exclude attributes by their name.
+	 * NB This is not bindings.
+	 * @param name
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder name(String name, boolean include) {
 		if (names == null) {
 			names = new HashMap<>();
@@ -176,6 +293,12 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Specify how many elements of a collection to create.
+	 * @param binding
+	 * @param cardinality
+	 * @return
+	 */
 	public DataBuilder cardinality(String binding, int cardinality) {
 		if (cardinalities == null) {
 			cardinalities = new HashMap<>();
@@ -184,11 +307,22 @@ public class DataBuilder {
 		return this;
 	}
 	
+	/**
+	 * Specify an overall recursion depth for the build
+	 * @param depth
+	 * @return
+	 */
 	public DataBuilder depth(@SuppressWarnings("hiding") int depth) {
 		this.depth = depth;
 		return this;
 	}
 	
+	/**
+	 * Specify the recursion depth for an assocition or collection.
+	 * @param binding
+	 * @param depth
+	 * @return
+	 */
 	public DataBuilder depth(String binding, @SuppressWarnings("hiding") int depth) {
 		if (depths == null) {
 			depths = new HashMap<>();
@@ -197,21 +331,45 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Build a domain bean.
+	 * @param moduleName
+	 * @param documentName
+	 * @return
+	 */
 	public <T extends Bean> T build(String moduleName, String documentName) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		return build(m, d, 0);
 	}
 	
+	/**
+	 * Build a domain bean.
+	 * @param module
+	 * @param document
+	 * @return
+	 */
 	public <T extends Bean> T build(Module module, Document document) {
 		return build(module, document, 0);
 	}
 	
+	/**
+	 * Build a domain bean.
+	 * @param document
+	 * @return
+	 */
 	public <T extends Bean> T build(Document document) {
 		Module m = customer.getModule(document.getOwningModuleName());
 		return build(m, document, 0);
 	}
 	
+	/**
+	 * The guts of the build function
+	 * @param module
+	 * @param document
+	 * @param currentDepth
+	 * @return
+	 */
 	private synchronized <T extends Bean> T build(Module module,
 													Document document,
 													int currentDepth) {
@@ -299,7 +457,14 @@ public class DataBuilder {
 		
 		return result;
 	}
-
+	/**
+	 * Create and assign random scalar data.
+	 * @param module
+	 * @param document
+	 * @return
+	 * @throws Exception
+	 */
+	
 	@SuppressWarnings("incomplete-switch")
 	private <T extends Bean> T randomBean(Module module, Document document)
 	throws Exception {
