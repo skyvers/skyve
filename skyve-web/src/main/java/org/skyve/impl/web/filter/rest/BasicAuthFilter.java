@@ -2,7 +2,6 @@ package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.logging.Level;
 
@@ -14,7 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.SQLMetaDataUtil;
 import org.skyve.impl.util.UtilImpl;
@@ -100,10 +101,6 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	
 	private static void validateUserCredentials(Persistence p, String username, String password)
 	throws Exception {
-		// convert the password into the user's password hash
-		MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
-		String hashedPassword = new String(Base64.getEncoder().encode(md.digest(password.getBytes())));
-
 		DocumentQuery q = p.newDocumentQuery(SQLMetaDataUtil.ADMIN_MODULE_NAME, SQLMetaDataUtil.USER_DOCUMENT_NAME);
 		DocumentFilter f = q.getFilter();
 		final String[] customerAndUser = username.split("/");
@@ -118,9 +115,11 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			f.addEquals(Bean.CUSTOMER_NAME, customerAndUser[0]);
 			f.addEquals(SQLMetaDataUtil.USER_NAME_PROPERTY_NAME, customerAndUser[1]);
 		}
-		f.addEquals(SQLMetaDataUtil.PASSWORD_PROPERTY_NAME, hashedPassword);
 		Bean user = q.beanResult();
 		if (user == null) {
+			throw new SecurityException("Invalid username/password");
+		}
+		if (! EXT.checkPassword(password, (String) BindUtil.get(user, SQLMetaDataUtil.PASSWORD_PROPERTY_NAME))) {
 			throw new SecurityException("Invalid username/password");
 		}
 	}
