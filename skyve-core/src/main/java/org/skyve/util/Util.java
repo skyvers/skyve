@@ -183,7 +183,7 @@ public class Util {
 	public static String getPasswordHashingAlgorithm() {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}
-
+	
 	private static Boolean secureUrl = null;
 	
 	public static boolean isSecureUrl() {

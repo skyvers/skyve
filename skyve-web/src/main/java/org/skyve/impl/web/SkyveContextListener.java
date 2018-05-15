@@ -2,7 +2,6 @@ package org.skyve.impl.web;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,7 +12,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
@@ -39,7 +37,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Util;
 
 public class SkyveContextListener implements ServletContextListener {
 	@Override
@@ -283,10 +280,7 @@ public class SkyveContextListener implements ServletContextListener {
 				u.setCustomerName(UtilImpl.BOOTSTRAP_CUSTOMER);
 				u.setContactName(UtilImpl.BOOTSTRAP_USER);
 				u.setName(UtilImpl.BOOTSTRAP_USER);
-				MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
-				Base64 base64Codec = new Base64();
-				String hashedPassword = new String(base64Codec.encode(md.digest(UtilImpl.BOOTSTRAP_PASSWORD.getBytes())));
-				u.setPasswordHash(hashedPassword);
+				u.setPasswordHash(EXT.hashPassword(UtilImpl.BOOTSTRAP_PASSWORD));
 				p.setUser(u);
 
 				bootstrap(p);

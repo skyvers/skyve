@@ -6,27 +6,6 @@
 			xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		 							http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
 		 							http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee.xsd">
-	<authentication-manager>
-<!--
-		<authentication-provider ref="skyve" />
--->
-<!--
-		<authentication-provider>
-			<user-service>
-				<user name="demo/admin" password="{noop}admin" authorities="" />
-			</user-service>
-		</authentication-provider>
--->
-
-		<authentication-provider>
-			<jdbc-user-service data-source-ref="dataSource" 
-								users-by-username-query="select bizCustomer || '/' || userName, password, not inactive from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-								authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-								group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
-								role-prefix="none" />
-		</authentication-provider>
-	</authentication-manager>
-
 	<!-- Do not secure the H2 database servlet -->
 	<http auto-config="true" use-expressions="true" security="none" pattern="/h2/**" />
 
@@ -115,7 +94,28 @@
 		<!-- We don't use Spring's CSRF tokens -->
 		<csrf disabled="true" />
 	</http>
-	
+
+	<authentication-manager>
+		<authentication-provider>
+			<password-encoder ref="delegatingEncoder" />
+			<jdbc-user-service data-source-ref="dataSource" 
+								users-by-username-query="select bizCustomer || '/' || userName, password, not ifNull(inactive, false) from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+								authorities-by-username-query="select bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+								group-authorities-by-username-query="select bizCustomer || '/' || userName, bizCustomer || '/' || userName, 'NoAuth' from ADM_SecurityUser where bizCustomer || '/' || userName = ?"
+								role-prefix="none" />
+		</authentication-provider>
+<!--
+		<authentication-provider ref="skyve" />
+-->
+<!--
+		<authentication-provider>
+			<user-service>
+				<user name="demo/admin" password="{noop}admin" authorities="" />
+			</user-service>
+		</authentication-provider>
+-->
+	</authentication-manager>
+
 	<b:bean id="tokenRepository" class="org.skyve.impl.security.SkyveRememberMeTokenRepository">
 		<b:property name="dataSource" ref="dataSource" />
 	</b:bean>
@@ -125,6 +125,11 @@
 	</b:bean>
 
 	<jee:jndi-lookup id="dataSource" jndi-name="java:/H2Demo" expected-type="javax.sql.DataSource" />
+	
+	<b:bean id="delegatingEncoder" class="org.springframework.security.crypto.factory.PasswordEncoderFactories" factory-method="createDelegatingPasswordEncoder">
+		<b:property name="defaultPasswordEncoderForMatches" ref="legacyEncoder" />
+	</b:bean>
+	<b:bean id="legacyEncoder" class="org.skyve.impl.security.SkyveLegacyPasswordEncoder" />
 	
 <!--
 	<b:bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">

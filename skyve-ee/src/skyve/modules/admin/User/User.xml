@@ -26,7 +26,7 @@
 			<displayName>Password</displayName>
 			<description>Check Password Complexity settings for minimum required strength.</description>
 			<!--  The password is checked and populated in the Bizlet -->
-			<length>80</length>
+			<length>100</length>
 		</text>
 		<text name="generatedPassword" audited="false"  persistent="false" trackChanges="false">
 			<displayName>Generated Password</displayName>
