@@ -94,7 +94,7 @@
 		<!-- We don't use Spring's CSRF tokens -->
 		<csrf disabled="true" />
 		
-		<!-- We don't use springs hsts headers -->
+		<!-- We don't use springs HSTS headers -->
 		<headers>
 			<hsts disabled="true" />
 		</headers>
