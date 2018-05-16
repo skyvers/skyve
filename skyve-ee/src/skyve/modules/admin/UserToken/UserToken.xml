@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="UserToken"
+			xmlns="http://www.skyve.org/xml/document" 
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd" 
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<persistent name="ADM_UserToken" />
+	<singularAlias>User Token</singularAlias>
+	<pluralAlias>User Tokens</pluralAlias>
+	<audited>false</audited>
+	<bizKey expression="{userName}" />
+	<attributes>
+		<text name="userName" required="true">
+			<documentation>
+				<![CDATA[
+					Length is derived User.userName length + bizCustomer length + 1
+				]]>
+			</documentation>
+			<displayName>User Name</displayName>
+			<length>305</length>
+		</text>
+		<text name="series" required="true">
+			<displayName>Series</displayName>
+			<length>64</length>
+		</text>
+		<text name="token" required="true">
+			<displayName>Token</displayName>
+			<length>64</length>
+		</text>
+		<timestamp name="lastUsed" required="true">
+			<displayName>Last Used</displayName>
+		</timestamp>
+	</attributes>
+</document>

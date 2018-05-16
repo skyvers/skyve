@@ -23,6 +23,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - Operation
  * @depend - - - RefreshOption
+ * @depend - - - EvictOption
  * @navhas n auditUser 0..1 User
  * @navhas n refreshDocuments 0..n DataMaintenanceModuleDocument
  * @stereotype "persistent"
@@ -91,6 +92,8 @@ public class DataMaintenance extends AbstractPersistentBean {
 	public static final String auditResponsePropertyName = "auditResponse";
 	/** @hidden */
 	public static final String refreshOptionPropertyName = "refreshOption";
+	/** @hidden */
+	public static final String evictOptionPropertyName = "evictOption";
 
 	/**
 	 * Option
@@ -161,6 +164,84 @@ public class DataMaintenance extends AbstractPersistentBean {
 				RefreshOption[] values = values();
 				domainValues = new ArrayList<>(values.length);
 				for (RefreshOption value : values) {
+					domainValues.add(value.domainValue);
+				}
+			}
+
+			return domainValues;
+		}
+	}
+
+	/**
+	 * Cache Evict
+	 **/
+	@XmlEnum
+	public static enum EvictOption implements Enumeration {
+		bean("Bean", "Bean"),
+		none("None", "None"),
+		all("All", "All");
+
+		private String code;
+		private String description;
+
+		/** @hidden */
+		private DomainValue domainValue;
+
+		/** @hidden */
+		private static List<DomainValue> domainValues;
+
+		private EvictOption(String code, String description) {
+			this.code = code;
+			this.description = description;
+			this.domainValue = new DomainValue(code, description);
+		}
+
+		@Override
+		public String toCode() {
+			return code;
+		}
+
+		@Override
+		public String toDescription() {
+			return description;
+		}
+
+		@Override
+		public DomainValue toDomainValue() {
+			return domainValue;
+		}
+
+		public static EvictOption fromCode(String code) {
+			EvictOption result = null;
+
+			for (EvictOption value : values()) {
+				if (value.code.equals(code)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static EvictOption fromDescription(String description) {
+			EvictOption result = null;
+
+			for (EvictOption value : values()) {
+				if (value.description.equals(description)) {
+					result = value;
+					break;
+				}
+			}
+
+			return result;
+		}
+
+		public static List<DomainValue> toDomainValues() {
+			if (domainValues == null) {
+				EvictOption[] values = values();
+				domainValues = new ArrayList<>(values.length);
+				for (EvictOption value : values) {
 					domainValues.add(value.domainValue);
 				}
 			}
@@ -269,6 +350,10 @@ public class DataMaintenance extends AbstractPersistentBean {
 	 * Option
 	 **/
 	private RefreshOption refreshOption;
+	/**
+	 * Cache Evict
+	 **/
+	private EvictOption evictOption = EvictOption.bean;
 
 	@Override
 	@XmlTransient
@@ -764,6 +849,23 @@ public class DataMaintenance extends AbstractPersistentBean {
 	@XmlElement
 	public void setRefreshOption(RefreshOption refreshOption) {
 		this.refreshOption = refreshOption;
+	}
+
+	/**
+	 * {@link #evictOption} accessor.
+	 * @return	The value.
+	 **/
+	public EvictOption getEvictOption() {
+		return evictOption;
+	}
+
+	/**
+	 * {@link #evictOption} mutator.
+	 * @param evictOption	The new value.
+	 **/
+	@XmlElement
+	public void setEvictOption(EvictOption evictOption) {
+		this.evictOption = evictOption;
 	}
 
 	/**

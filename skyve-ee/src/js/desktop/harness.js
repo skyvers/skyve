@@ -120,16 +120,16 @@ isc.BizUtil.addClassProperties({
 							details.showMember(isc.ListView.contents);
 						}
 						if (leaf.ref == 'grid') {
-							isc.ListView.setGridDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setGridDataSource(viewer.data.root.name + "_" + leaf.name, leaf.config);
 						}
 						else if (leaf.ref == 'cal') {
-							isc.ListView.setCalendarDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setCalendarDataSource(viewer.data.root.name + "_" + leaf.name, leaf.config);
 						}
 						else if (leaf.ref == 'tree') {
-							isc.ListView.setTreeDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setTreeDataSource(viewer.data.root.name + "_" + leaf.name, leaf.config);
 						}
 						else if (leaf.ref == 'map') {
-							isc.ListView.setMapDataSource(viewer.data.root.name + "_" + leaf.name);
+							isc.ListView.setMapDataSource(viewer.data.root.name + "_" + leaf.name, leaf.config);
 						}
 						else {
 							alert('Menu ref of ' + leaf.ref + 'is unknown');

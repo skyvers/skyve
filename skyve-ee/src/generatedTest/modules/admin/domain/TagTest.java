@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.Tag.TagFactoryExtension;
-import modules.admin.util.TagFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class TagTest extends AbstractDomainTest<Tag> {
 
-	private TagFactory factory;
-
 	@Override
 	protected Tag getBean() throws Exception {
-		if (factory == null) {
-			factory = new TagFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 	}
 }

@@ -14,6 +14,7 @@ import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
+import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
@@ -74,7 +75,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 	@Override
 	public void executePushListContext(PushListContext push) {
-		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push, getUser());
+		PrimeFacesAutomationContext newContext = ExecutionDelegate.newContext(push);
 
 		push(newContext);
 		newContext.generate(push, componentBuilder);
@@ -191,7 +192,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 	@Override
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
-		ExecutionDelegate.executeTestDataEnter(testDataEnter, getUser(), context, this);
+		ExecutionDelegate.executeTestDataEnter(testDataEnter, context, this);
 	}
 
 	@Override
@@ -505,7 +506,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		}
 
 		// Determine the Document of the edit view to push
-		Customer c = getUser().getCustomer();
+		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(context.getModuleName());
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);

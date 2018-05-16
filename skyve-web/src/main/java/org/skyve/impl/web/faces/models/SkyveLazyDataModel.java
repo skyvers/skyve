@@ -17,6 +17,7 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.web.faces.beans.FacesView;
@@ -29,6 +30,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -68,12 +70,13 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 											int pageSize,
 											List<SortMeta> multiSortMeta,
 											Map<String, Object> filters) {
-		Customer c = CORE.getUser().getCustomer();
+		User u = CORE.getUser();
+		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
 		DocumentQueryDefinition query = null;
 		ListModel<Bean> model = null;
-		
+
 		// model type of request
 		if (modelName != null) {
 			model = CORE.getRepository().getListModel(c, d, modelName, true);
@@ -103,6 +106,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter<Bean>> {
 	        model = queryModel;
 		}
 
+		if (! u.canReadDocument(model.getDrivingDocument())) {
+			throw new SecurityException(model.getDrivingDocument().getName() + " in module " + model.getDrivingDocument().getOwningModuleName(), u.getName());
+		}
+		
 		if (view != null) {
 			BeanMapAdapter<?> currentBean = view.getCurrentBean();
 			if (currentBean != null) {

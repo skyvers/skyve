@@ -1,8 +1,8 @@
 package modules.admin.Audit.actions;
 
-import modules.admin.Audit.AuditFactoryExtension;
 import modules.admin.domain.Audit;
-import modules.admin.util.AuditFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -11,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class SourceVersionChangedTest extends AbstractActionTest<Audit, SourceVersionChanged> {
 
-	private AuditFactory factory;
-
 	@Override
 	protected SourceVersionChanged getAction() {
 		return new SourceVersionChanged();
@@ -20,10 +18,8 @@ public class SourceVersionChangedTest extends AbstractActionTest<Audit, SourceVe
 
 	@Override
 	protected Audit getBean() throws Exception {
-		if (factory == null) {
-			factory = new AuditFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Audit.MODULE_NAME, Audit.DOCUMENT_NAME);
 	}
 }

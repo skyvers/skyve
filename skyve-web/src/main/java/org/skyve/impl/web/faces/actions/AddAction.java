@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
+import org.skyve.impl.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -13,6 +14,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.beans.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -69,6 +71,13 @@ public class AddAction extends FacesAction<Void> {
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Collection targetCollection = (Collection) target.getAttribute();
 		Document collectionDocument = module.getDocument(customer, targetCollection.getDocumentName());
+    	Persistent persistent = collectionDocument.getPersistent();
+    	if ((persistent != null) && 
+    			(persistent.getName() != null) && 
+    			(! user.canCreateDocument(collectionDocument))) {
+			throw new SecurityException("create this data", user.getName());
+		}
+
 		Bean newBean = collectionDocument.newInstance(user);
 
 		// Set the parent of a child bean, if applicable

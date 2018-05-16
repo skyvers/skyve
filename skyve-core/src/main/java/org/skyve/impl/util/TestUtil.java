@@ -453,14 +453,13 @@ public class TestUtil {
 				} else {
 					String className = String.format("modules.%1$s.%2$s.%2$sFactoryExtension", module.getName(),
 							document.getName());
-					Util.LOGGER.info(String.format("Looking for factory extension annotations in %s", className));
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {
 							Util.LOGGER.fine("Found class " + c.getName());
 							if (c.isAnnotationPresent(DataMap.class)) {
 								DataMap annotation = c.getAnnotation(DataMap.class);
-								Util.LOGGER.info(
+								Util.LOGGER.fine(
 										String.format("attributeName: %s fileName: %s", annotation.attributeName(),
 												annotation.fileName()));
 								if (attribute.getName().equals(annotation.attributeName())) {
@@ -471,7 +470,7 @@ public class TestUtil {
 								SkyveFactory annotation = c.getAnnotation(SkyveFactory.class);
 								DataMap[] values = annotation.value();
 								for (DataMap map : values) {
-									Util.LOGGER.info(
+									Util.LOGGER.fine(
 											String.format("attributeName: %s fileName: %s", map.attributeName(), map.fileName()));
 									if (attribute.getName().equals(map.attributeName())) {
 										fileName = map.fileName();
@@ -491,7 +490,7 @@ public class TestUtil {
 						"Looking for test data file in data/%s.txt", fileName != null ? fileName : attribute.getName()));
 				String value = randomValueFromFile(module, document, attribute.getName(), fileName);
 				if (value != null) {
-					Util.LOGGER.info(String.format("Random %s: %s", attribute.getName(), value));
+					Util.LOGGER.fine(String.format("Random %s: %s", attribute.getName(), value));
 					return value;
 				}
 			}
@@ -630,7 +629,7 @@ public class TestUtil {
 					DATA_CACHE.put(key, values);
 					Util.LOGGER.fine(String.format("Caching attribute %s with filename %s", key, fileToLoad));
 					if (values != null && values.size() > 0) {
-						Util.LOGGER.info(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
+						Util.LOGGER.fine(String.format("Loaded %s list from %s. Found %d values.", attributeName, fileToLoad,
 								Integer.valueOf(values.size())));
 					}
 				}

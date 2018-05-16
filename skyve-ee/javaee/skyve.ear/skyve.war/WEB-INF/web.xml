@@ -11,6 +11,24 @@
 	</context-param>
 -->	
 
+	<!-- Spring Security Configuration -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/spring/*.xml</param-value>
+	</context-param>
+	<filter>                                                                                  
+		<filter-name>springSecurityFilterChain</filter-name>                                  
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>     
+	</filter>
+	<filter-mapping>                                                                          
+		<filter-name>springSecurityFilterChain</filter-name>                                  
+		<url-pattern>/*</url-pattern>                                                         
+	</filter-mapping>
+	
+	<listener>                                                                                
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
 	<!-- FACES PARAMS -->
 	<context-param>
         <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
@@ -265,7 +283,7 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>CSRFHeadersFilter</filter-name>
-		<url-pattern>/j_security_check</url-pattern>
+		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
 	<!-- HSTS Header for protection from man in the middle on user agent client networks -->
@@ -295,7 +313,7 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>HSTSHeaderFilter</filter-name>
-		<url-pattern>/j_security_check</url-pattern>
+		<url-pattern>/login</url-pattern>
 	</filter-mapping>
 
     <filter>
@@ -516,7 +534,7 @@
     </servlet-mapping>
 
     <welcome-file-list>
-        <welcome-file>home.jsp</welcome-file>
+        <welcome-file>/home.jsp</welcome-file>
     </welcome-file-list>
 
     <mime-mapping>
@@ -576,72 +594,4 @@
 	<session-config>
 		<session-timeout>30</session-timeout>
 	</session-config>
-
-	<login-config>
-		<auth-method>FORM</auth-method>
-		<realm-name>Default</realm-name>
-		<form-login-config>
-			<form-login-page>/login</form-login-page>
-			<form-error-page>/loginError</form-error-page>
-		</form-login-config>
-	</login-config>
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>Secured</web-resource-name>
-			<!-- Do not secure the home servlet as this ensures the right login page is displayed -->
-			<!-- Do not secure faces pages as they are secured by a FacesSecurityFilter -->
-			<!-- Secure dynamic image URLs -->
-			<url-pattern>/images/dynamic.png</url-pattern>
-			<!-- Secure all report URLs -->
-			<url-pattern>/report/*</url-pattern>
-			<url-pattern>/export/*</url-pattern>
-			<!-- Image Servlet for HTML reporting through Jasper -->
-			<url-pattern>/image/*</url-pattern>
-			<!-- Secure customer resource servlet -->
-			<url-pattern>/resource/*</url-pattern>
-			<url-pattern>/content/*</url-pattern>
-			<!-- Secure text search servlet -->
-			<url-pattern>/smartsearch/*</url-pattern>
-			<!-- Secure list view servlet -->
-			<url-pattern>/smartlist/*</url-pattern>
-			<!-- Secure snap servlet -->
-			<url-pattern>/smartsnap/*</url-pattern>
-			<!-- Secure tag servlet -->
-			<url-pattern>/smarttag/*</url-pattern>
-			<!-- Secure previous values servlet -->
-			<url-pattern>/smartprev/*</url-pattern>
-			<!-- Secure edit view servlet -->
-			<url-pattern>/smartedit/*</url-pattern>
-			<!-- Secure view generation servlet -->
-			<url-pattern>/smartgen/*</url-pattern>
-			<!-- Secure map servlet -->
-			<url-pattern>/map/*</url-pattern>
-			<!-- Secure rest services -->
-			<url-pattern>/rest/*</url-pattern>
-			<!-- Secure the Bizport Export Servlet -->
-			<url-pattern>/bizexport.xls</url-pattern>
-			<url-pattern>/bizexport.xlsx</url-pattern>
-			<!-- Secure the Download Servlet -->
-			<url-pattern>/download/*</url-pattern>
-			<!-- Do not Secure trackmate servlet - it handles authentication itself -->
-			<!-- secure the systems JSPs and HTMLs -->
-			<url-pattern>/home.jsp</url-pattern>
-			<url-pattern>/pages/changePassword.jsp</url-pattern>
-			<url-pattern>/pages/htmlEdit/browseImages.jsp</url-pattern>
-			<url-pattern>/pages/map/geolocate.jsp</url-pattern>
-		</web-resource-collection>
-		<web-resource-collection>
-			<web-resource-name>NoTraceOrOptions</web-resource-name>
-			<url-pattern>/*</url-pattern>
-			<http-method>OPTIONS</http-method>
-			<http-method>TRACE</http-method>
-		</web-resource-collection>
-		<auth-constraint>
-			<role-name>Nobody</role-name>
-		</auth-constraint>
-	</security-constraint>
-	<!-- Deny all permission -->
-	<security-role>
-		<role-name>Nobody</role-name>
-	</security-role>
 </web-app>

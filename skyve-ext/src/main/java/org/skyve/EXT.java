@@ -14,9 +14,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperPrint;
-
 import org.apache.poi.ss.usermodel.Workbook;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
@@ -25,13 +22,14 @@ import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
 import org.skyve.dataaccess.sql.SQLDataAccess;
 import org.skyve.domain.Bean;
-import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.UploadException;
 import org.skyve.impl.bizport.POISheet;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.bizport.StandardGenerator;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
+import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.MailUtil;
 import org.skyve.impl.util.ReportParameters;
 import org.skyve.impl.util.ReportUtil;
@@ -48,6 +46,14 @@ import org.skyve.persistence.DataStore;
 import org.skyve.persistence.Persistence;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.MailAttachment;
+import org.skyve.util.Util;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperPrint;
 
 /**
  * The central factory for creating all objects required in skyve ext.
@@ -613,5 +619,52 @@ public class EXT {
 	
 	public static SQLDataAccess newSQLDataAccess(DataStore dataStore) {
 		return new SQLDataAccessImpl(dataStore);
+	}
+	
+	/**
+	 * Provide a hash of a clear text password.
+	 * @param clearText
+	 * @return	The encoded password.
+	 * @throws Exception
+	 */
+	public static String hashPassword(String clearText) throws Exception {
+		String result = null;
+
+		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
+		// Legacy hashing with no SALT
+		if ("MD5".equals(passwordHashingAlgorithm) || "SHA1".equals(passwordHashingAlgorithm)) {
+			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
+		}
+		else if ("bcrypt".equals(passwordHashingAlgorithm)) {
+			result = "{bcrypt}" + new BCryptPasswordEncoder().encode(clearText);
+		}
+		else if ("pbkdf2".equals(passwordHashingAlgorithm)) {
+			result = "{pbkdf2}" + new Pbkdf2PasswordEncoder().encode(clearText);
+		}
+		else if ("scrypt".equals(passwordHashingAlgorithm)) {
+			result = "{scrypt}" + new SCryptPasswordEncoder().encode(clearText);
+		}
+		else {
+			throw new DomainException(passwordHashingAlgorithm + " not supported");
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Check a hash against a clear text password.
+	 * @param	clearText
+	 * @param	The encoded password.
+	 * @return	true if it matches, or false if it doesn't
+	 * @throws Exception
+	 */
+	public static boolean checkPassword(String clearText, String hashedPassword) throws Exception {
+		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
+		// Legacy hashing with no SALT
+		if ("MD5".equals(passwordHashingAlgorithm) || "SHA1".equals(passwordHashingAlgorithm)) {
+			return SkyveLegacyPasswordEncoder.matches(clearText, hashedPassword, passwordHashingAlgorithm);
+		}
+
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder().matches(clearText, hashedPassword);
 	}
 }

@@ -73,7 +73,7 @@ isc.ListView.addClassProperties({
 		        	if (leaf.ref == 'grid') {
 		        		var grid = isc.BizUtil.createListGrid();
 		        		portlet.addItem(grid);
-		        		grid.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
+		        		grid.setDataSource(dragTarget.data.root.name + "_" + leaf.name, leaf.config);
 					}
 					else if (leaf.ref == 'cal') {
 		        		var calendar = isc.BizUtil.createCalendar();
@@ -83,7 +83,7 @@ isc.ListView.addClassProperties({
 					else if (leaf.ref == 'tree') {
 		        		var tree = isc.BizUtil.createTreeGrid();
 		        		portlet.addItem(tree);
-		        		tree.setDataSource(dragTarget.data.root.name + "_" + leaf.name);
+		        		tree.setDataSource(dragTarget.data.root.name + "_" + leaf.name, leaf.config);
 					}
 					else if (leaf.ref == 'map') {
 		        		var map = isc.BizUtil.createMap();
@@ -118,7 +118,8 @@ isc.ListView.addClassProperties({
 	},
 	
 	// set the data source for the list view grid
-	setGridDataSource: function(ID) { // the ID of the data source
+	setGridDataSource: function(ID,  // the ID of the data source
+								menuConfig) { // config from the menu item (optional parameter)
 		if (isc.ListView._grid) {} else {
 			isc.ListView._grid = isc.BizUtil.createListGrid();
 			isc.ListView.contents.addMember(isc.ListView._grid);
@@ -135,11 +136,13 @@ isc.ListView.addClassProperties({
 		isc.ListView.contents.hideMember(isc.ListView._portal);
 		isc.ListView.contents.showMember(isc.ListView._grid);
 		var ds = eval(ID);
-		isc.ListView._setHeading(isc.ListView._grid.setDataSource(ds), ds.icon, ds.fontIcon, ds.modoc);
+		var title = isc.ListView._grid.setDataSource(ds, menuConfig);
+		isc.ListView._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
 	},
 	
 	// set the data source for the list view calendar
-	setCalendarDataSource: function(ID) { // the ID of the data source
+	setCalendarDataSource: function(ID, // the ID of the data source
+									menuConfig) { // config from the menu item (optional parameter)
 		if (isc.ListView._calendar) {} else {
 			isc.ListView._calendar = isc.BizUtil.createCalendar();
 			isc.ListView.contents.addMember(isc.ListView._calendar);
@@ -162,7 +165,8 @@ isc.ListView.addClassProperties({
 	},
 	
 	// set the data source for the list view tree
-	setTreeDataSource: function(ID) { // the ID of the data source
+	setTreeDataSource: function(ID, // the ID of the data source
+								menuConfig) { // config from the menu item (optional parameter)
 		if (isc.ListView._tree) {} else {
 			isc.ListView._tree = isc.BizUtil.createTreeGrid();
 			isc.ListView.contents.addMember(isc.ListView._tree);
@@ -180,11 +184,13 @@ isc.ListView.addClassProperties({
 		isc.ListView.contents.showMember(isc.ListView._tree);
 
 		var ds = eval(ID);
-		isc.ListView._setHeading(isc.ListView._tree.setDataSource(ds), ds.icon, ds.fontIcon, ds.modoc);
+		var title = isc.ListView._tree.setDataSource(ds, menuConfig);
+		isc.ListView._setHeading(title, ds.icon, ds.fontIcon, ds.modoc);
 	},
 
 	// set the data source for the list view map
-	setMapDataSource: function(ID) { // the ID of the data source
+	setMapDataSource: function(ID, // the ID of the data source
+								menuConfig) { // config from the menu item (optional parameter)
 		if (isc.ListView._map) {} else {
 			isc.ListView._map = isc.BizUtil.createMap();
 			isc.ListView.contents.addMember(isc.ListView._map);

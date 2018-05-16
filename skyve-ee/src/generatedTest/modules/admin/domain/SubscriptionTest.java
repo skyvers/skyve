@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.Subscription.SubscriptionFactoryExtension;
-import modules.admin.util.SubscriptionFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class SubscriptionTest extends AbstractDomainTest<Subscription> {
 
-	private SubscriptionFactory factory;
-
 	@Override
 	protected Subscription getBean() throws Exception {
-		if (factory == null) {
-			factory = new SubscriptionFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Subscription.MODULE_NAME, Subscription.DOCUMENT_NAME);
 	}
 }

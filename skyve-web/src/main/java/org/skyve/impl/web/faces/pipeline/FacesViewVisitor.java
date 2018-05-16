@@ -160,7 +160,6 @@ public class FacesViewVisitor extends ViewVisitor {
 	private boolean createView;
 	private String widgetId;
 	private UIComponent fragment; // if we have a widgetId to render, this holds a reference to that component
-	private ViewImpl view;
 
 	private UIComponent current; // current component being constructed
 	private Stack<Container> currentContainers = new Stack<>(); // used to determine how to add widgets to containers

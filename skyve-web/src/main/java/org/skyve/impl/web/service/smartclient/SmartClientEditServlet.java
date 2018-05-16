@@ -893,10 +893,6 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 				processedBean = persistence.save(processDocument, (PersistentBean) processedBean);
 			}
-
-			if (ImplicitActionName.Print.equals(implicitAction)) {
-
-			}
 		}
 		
 		Bean beanToRender = formBean;

@@ -144,7 +144,7 @@ public class UtilImpl {
 	public static boolean JOB_SCHEDULER = true;
 
 	// Password hash algorithm
-	public static String PASSWORD_HASHING_ALGORITHM = "MD5";
+	public static String PASSWORD_HASHING_ALGORITHM = "bcrypt";
 
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
@@ -152,8 +152,8 @@ public class UtilImpl {
 	public static String BOOTSTRAP_PASSWORD = null;
 	
 	// For versioning javascript/css etc for web site
-	public static final String WEB_RESOURCE_FILE_VERSION = "20180423";
-	public static final String SKYVE_VERSION = "20180423";
+	public static final String WEB_RESOURCE_FILE_VERSION = "20180515";
+	public static final String SKYVE_VERSION = "20180515";
 	public static final String SMART_CLIENT_DIR = "isomorphic110";
 
 	// for skyve script

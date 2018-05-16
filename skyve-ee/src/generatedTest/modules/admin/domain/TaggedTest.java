@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.TaggedFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class TaggedTest extends AbstractDomainTest<Tagged> {
 
-	private TaggedFactory factory;
-
 	@Override
 	protected Tagged getBean() throws Exception {
-		if (factory == null) {
-			factory = new TaggedFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Tagged.MODULE_NAME, Tagged.DOCUMENT_NAME);
 	}
 }

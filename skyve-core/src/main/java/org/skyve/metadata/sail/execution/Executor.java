@@ -1,7 +1,7 @@
 package org.skyve.metadata.sail.execution;
 
-import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -39,12 +39,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
-import org.skyve.metadata.user.User;
 
 public interface Executor {
-	public User getUser();
-	public void setUser(User user);
-	
 	public void executeAutomation(Automation automation);
 	public void executeInteraction(Interaction interaction);
 

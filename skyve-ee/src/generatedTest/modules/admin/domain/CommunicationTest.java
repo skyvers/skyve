@@ -1,7 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.Communication.CommunicationFactoryExtension;
-import modules.admin.util.CommunicationFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -10,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class CommunicationTest extends AbstractDomainTest<Communication> {
 
-	private CommunicationFactory factory;
-
 	@Override
 	protected Communication getBean() throws Exception {
-		if (factory == null) {
-			factory = new CommunicationFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 	}
 }

@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.GroupFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class GroupTest extends AbstractDomainTest<Group> {
 
-	private GroupFactory factory;
-
 	@Override
 	protected Group getBean() throws Exception {
-		if (factory == null) {
-			factory = new GroupFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Group.MODULE_NAME, Group.DOCUMENT_NAME);
 	}
 }

@@ -117,6 +117,15 @@
 				<value code="Save"/>
 			</values>
 		</enum>
+		<enum name="evictOption" persistent="false" trackChanges="false" audited="false">
+			<displayName>Cache Evict</displayName>
+			<defaultValue>bean</defaultValue>
+			<values>
+				<value code="Bean" />
+				<value code="None" />
+				<value code="All" />
+			</values>
+		</enum>
 	</attributes>
 	<conditions>
 		<condition name="backupSelected">

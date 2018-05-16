@@ -216,6 +216,7 @@
     <xs:complexContent>
       <xs:extension base="tns:item">
         <xs:sequence/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
         <xs:attribute name="document" type="xs:string"/>
         <xs:attribute name="model" type="xs:string"/>
         <xs:attribute name="query" type="xs:string"/>
@@ -254,6 +255,7 @@
     <xs:complexContent>
       <xs:extension base="tns:item">
         <xs:sequence/>
+        <xs:attribute name="autoPopulate" type="xs:boolean"/>
         <xs:attribute name="document" type="xs:string"/>
         <xs:attribute name="model" type="xs:string"/>
         <xs:attribute name="query" type="xs:string"/>

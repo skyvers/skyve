@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
+import org.openqa.selenium.WebDriver.Timeouts;
 
 public abstract class CrossBrowserTest {
 	private static final String CHROME_DRIVER_CLASS = "org.openqa.selenium.chrome.ChromeDriver";
@@ -120,7 +121,9 @@ public abstract class CrossBrowserTest {
 	private void setupBrowser(String baseUrl, Dimension resolution) {
 		this.baseUrl = baseUrl;
 		Options manage = driver.manage();
-		manage.timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		Timeouts timeouts = manage.timeouts();
+		timeouts.pageLoadTimeout(30, TimeUnit.SECONDS);
+		timeouts.implicitlyWait(0, TimeUnit.MILLISECONDS);
 		if (resolution != null) {
 			manage.window().setSize(resolution);
 		}

@@ -108,7 +108,7 @@ span.right {
 }
 
 /* popup wheel of death style */
-#busy {
+.wheelOfDeath {
 	display: none;
 	position: absolute;
 	width: 50px;

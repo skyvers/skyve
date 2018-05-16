@@ -1,12 +1,11 @@
 package modules.admin.User;
 
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
@@ -20,7 +19,6 @@ import org.skyve.metadata.user.Role;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
-import org.skyve.util.Util;
 
 import modules.admin.Configuration.ComplexityModel;
 import modules.admin.domain.ChangePassword;
@@ -216,9 +214,7 @@ public class UserBizlet extends Bizlet<User> {
 							e.getMessages().add(message);
 						}
 
-						MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
-						Base64 base64Codec = new Base64();
-						hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
+						hashedPassword = EXT.hashPassword(newPassword);
 						user.setPassword(hashedPassword);
 
 						// clear reset password details

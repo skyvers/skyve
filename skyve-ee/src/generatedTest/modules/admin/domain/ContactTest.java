@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.ContactFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class ContactTest extends AbstractDomainTest<Contact> {
 
-	private ContactFactory factory;
-
 	@Override
 	protected Contact getBean() throws Exception {
-		if (factory == null) {
-			factory = new ContactFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
 	}
 }

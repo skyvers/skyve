@@ -1,7 +1,8 @@
 package modules.admin.DocumentCreator.actions;
 
 import modules.admin.domain.DocumentCreator;
-import modules.admin.util.DocumentCreatorFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -10,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class SubmitTest extends AbstractActionTest<DocumentCreator, Submit> {
 
-	private DocumentCreatorFactory factory;
-
 	@Override
 	protected Submit getAction() {
 		return new Submit();
@@ -19,10 +18,8 @@ public class SubmitTest extends AbstractActionTest<DocumentCreator, Submit> {
 
 	@Override
 	protected DocumentCreator getBean() throws Exception {
-		if (factory == null) {
-			factory = new DocumentCreatorFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(DocumentCreator.MODULE_NAME, DocumentCreator.DOCUMENT_NAME);
 	}
 }

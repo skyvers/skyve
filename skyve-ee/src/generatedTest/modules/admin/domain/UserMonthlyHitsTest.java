@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.UserMonthlyHitsFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class UserMonthlyHitsTest extends AbstractDomainTest<UserMonthlyHits> {
 
-	private UserMonthlyHitsFactory factory;
-
 	@Override
 	protected UserMonthlyHits getBean() throws Exception {
-		if (factory == null) {
-			factory = new UserMonthlyHitsFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(UserMonthlyHits.MODULE_NAME, UserMonthlyHits.DOCUMENT_NAME);
 	}
 }

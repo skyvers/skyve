@@ -1,6 +1,7 @@
 package modules.admin.domain;
 
-import modules.admin.util.ConfigurationFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractDomainTest;
 
 /**
@@ -9,14 +10,10 @@ import util.AbstractDomainTest;
  */
 public class ConfigurationTest extends AbstractDomainTest<Configuration> {
 
-	private ConfigurationFactory factory;
-
 	@Override
 	protected Configuration getBean() throws Exception {
-		if (factory == null) {
-			factory = new ConfigurationFactory();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Configuration.MODULE_NAME, Configuration.DOCUMENT_NAME);
 	}
 }

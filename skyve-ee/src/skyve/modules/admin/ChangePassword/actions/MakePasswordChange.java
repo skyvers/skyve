@@ -1,13 +1,7 @@
 package modules.admin.ChangePassword.actions;
 
-import java.security.MessageDigest;
-
-import modules.admin.Configuration.ComplexityModel;
-import modules.admin.domain.ChangePassword;
-import modules.admin.domain.Configuration;
-
-import org.apache.commons.codec.binary.Base64;
 import org.skyve.CORE;
+import org.skyve.EXT;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
@@ -20,8 +14,11 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.Util;
 import org.skyve.web.WebContext;
+
+import modules.admin.Configuration.ComplexityModel;
+import modules.admin.domain.ChangePassword;
+import modules.admin.domain.Configuration;
 
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 	private static final long serialVersionUID = -4317908281075686229L;
@@ -64,27 +61,22 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
 		modules.admin.domain.User userBean = persistence.retrieve(userDocument, user.getId(), true);
 
-		MessageDigest md = MessageDigest.getInstance(Util.getPasswordHashingAlgorithm());
-		Base64 base64Codec = new Base64();
-
 		// check old password matches if it is defined
 		if (oldPassword != null) {
-			String oldHashedPassword = new String(base64Codec.encode(md.digest(oldPassword.getBytes())));
-			if (! oldHashedPassword.equals(userBean.getPassword())) {
+			if (! EXT.checkPassword(oldPassword, userBean.getPassword())) {
 				Message message = new Message(ChangePassword.oldPasswordPropertyName,
-						"The old password is incorrect.  Please re-enter the old/existing password.");
+												"The old password is incorrect.  Please re-enter the old/existing password.");
 				throw new ValidationException(message);
 			}
 		}
 		
-		String hashedPassword = new String(base64Codec.encode(md.digest(newPassword.getBytes())));
-
-		if(hashedPassword.equals(userBean.getPassword())){
+		if (EXT.checkPassword(newPassword, userBean.getPassword())) {
 			Message message = new Message("This password matches a previous one.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);
 			throw new ValidationException(message);			
 		}
-		userBean.setPassword(hashedPassword);
+
+		userBean.setPassword(EXT.hashPassword(newPassword));
 
 		// clear reset password details
 		userBean.setPasswordExpired(Boolean.FALSE);

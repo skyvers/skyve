@@ -7,7 +7,7 @@
 // file in your page and be sure to apply the HTML fragments in the
 // /isomorphic/system/authentication/integration directory to your
 // login/maxLoginAttemptsExceeded pages.
-isc.RPCManager.credentialsURL = "j_security_check";
+isc.RPCManager.credentialsURL = "login";
 isc.RPCManager.addClassMethods({
 	// callback from smart client login system
 	loginRequired: function(transactionNum, rpcRequest, rpcResponse) {
@@ -126,9 +126,9 @@ isc.defineClass("LoginWindow", "Window").addProperties({
 	
 		        // the actual credentials, from the form
 		        params : {
-		            j_username: (isc.BizUtil.customer ? isc.BizUtil.customer : this.loginForm.getValue("customer")) + 
+		            username: (isc.BizUtil.customer ? isc.BizUtil.customer : this.loginForm.getValue("customer")) + 
 	    	        				"/" + this.loginForm.getValue("username"),
-					j_password: this.loginForm.getValue("password")
+					password: this.loginForm.getValue("password")
 	        	},
 	        	callback : this.getID()+".loginReply(rpcResponse)"
 	    	});

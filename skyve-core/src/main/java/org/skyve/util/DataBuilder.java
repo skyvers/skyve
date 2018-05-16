@@ -36,10 +36,10 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.util.test.DataFactory;
 import org.skyve.util.test.DataMap;
 import org.skyve.util.test.SkyveFactory;
 import org.skyve.util.test.SkyveFixture;
@@ -49,6 +49,52 @@ import com.mifmif.common.regex.Generex;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+/**
+ * <pre>
+ * DataBuilder is used to create random instances of domain objects generated from Skyve document definitions.
+ * It follows the builder pattern and has options for including and excluding both scalar (single valued) attributes
+ * and references (associations and collections).
+ * The attributes are populated with data that conforms to the data types, lengths and constraints 
+ * declared in the Document metadata.
+ * DataBuilder can be recursive enabling the instantiation and populate of an entire object tree graph from 1 starting point.
+ * 
+ * Data Factories and Fixtures are also catered for.
+ * By convention, a document can have a corresponding factory by defining a class called <Document-Name>Factory, similar to Bizlets.
+ * DataBuilder will find these classes when it needs to construct an instance of the document.
+ * It looks for public static or instance methods that take no arguments and return the domain object type required.
+ * If there are more than one candidate method that can be called, DataBuilder will randomly call one of the methods.
+ * 
+ * Fixtures are named groupings of methods that when executed together can collaboratively produce a data set for a specific purpose.
+ * Fixtures can be named with a String name, or there are implicit fixture types that are defined in the FixtureType enum.
+ * Annotating the methods in a Data Factory with either a fixture name or fixture type acts like a filter ensuring 
+ * that only suitable methods for each fixture (or use case) are called.
+ * Methods can be given a combination of multiple fixture names and types.
+ * DataBuilders and the SAIL language can name the fixture to use when generating data in this manner.
+ * A Data Factory can enlist the help of a DataBuilder in its fixture methods but beware of infinite recursion problems.
+ * Recursion is usually ended by ensuring that a different fixture or no fixture is called from the 
+ * calling fixture method.
+ * 
+ * The fixture types set the starting state of the DataBuilder to something that should be useful for the given use case.
+ * For instance SAIL sets no recursion and population of all attributes but CRUD sets infinite recursion and no optional references.
+ * 
+ * <code>
+ * Usage:
+ * 
+ * Create an object for a CRUD test
+ * Contact c = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+ * </code>
+ * 
+ * DataBuilder uses the current user and customer (CORE.getUser()) during creation of random data.
+ * 
+ * There are a number of methods that can be called in the DataBuilder before calling one of the build methods
+ * that filter and configure behavior for the different attributes.
+ * Check the method javadoc.
+ * 
+ * NB - Should improve the cardinality(), name() & depth() to allow complex binding expressions to reach 
+ * through the recursive calls down the object graph.
+ * </pre>
+ * @author mike
+ */
 public class DataBuilder {
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -72,9 +118,12 @@ public class DataBuilder {
 	private static final Map<String, String> DATA_MAP_CACHE = new HashMap<>();
 
 	private User user;
+	private Customer customer;
 	private String fixture;
-	private boolean required = true;
-	private boolean optional = true;
+	private boolean requiredScalars = true;
+	private boolean optionalScalars = true;
+	private boolean requiredReferences = true;
+	private boolean optionalReferences = true;
 	private boolean persistent = true;
 	private boolean transients = true;
 	private boolean view = true;
@@ -88,57 +137,139 @@ public class DataBuilder {
 
 	public DataBuilder() {
 		user = CORE.getUser();
+		customer = user.getCustomer();
 	}
 	
-	public DataBuilder(User user) {
-		this.user = user;
-	}
-	
+	/**
+	 * Set a fixture that this builder will build for.
+	 * @param fixture	The name of the fixture
+	 * @return
+	 */
 	public DataBuilder fixture(@SuppressWarnings("hiding") String fixture) {
 		this.fixture = fixture;
 		return this;
 	}
 
+	/**
+	 * Set a fixture that this build will build for.
+	 * This method will configure the builder in the most useful way given the fixture type.
+	 * @param type	The implicit fixture type.
+	 * @return
+	 */
 	public DataBuilder fixture(FixtureType type) {
+		if (FixtureType.crud.equals(type)) {
+			depth = Integer.MAX_VALUE;
+			optionalReferences = false;
+		}
+		else if (FixtureType.sail.equals(type)) {
+			depth = 0;
+		}
 		this.fixture = type.toString();
 		return this;
 	}
 
+	/**
+	 * Include or exclude required attributes (scalar and references)
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder required(boolean include) {
-		required = include;
+		requiredScalars = include;
+		requiredReferences = include;
 		return this;
 	}
 	
-	public DataBuilder optional(boolean include) {
-		optional = include;
+	/**
+	 * Include or exclude required scalar and/or references independently
+	 * @param includeScalars
+	 * @param includeReferences
+	 * @return
+	 */
+	public DataBuilder required(boolean includeScalars, boolean includeReferences) {
+		requiredScalars = includeScalars;
+		requiredReferences = includeReferences;
 		return this;
 	}
 
+	/**
+	 * Include or exclude optional attributes (scalar and references)
+	 * @param include
+	 * @return
+	 */
+	public DataBuilder optional(boolean include) {
+		optionalScalars = include;
+		optionalReferences = include;
+		return this;
+	}
+
+	/**
+	 * Include or exclude optional scalar and/or references independently
+	 * @param includeScalars
+	 * @param includeReferences
+	 * @return
+	 */
+	public DataBuilder optional(boolean includeScalars, boolean includeReferences) {
+		optionalScalars = includeScalars;
+		optionalReferences = includeReferences;
+		return this;
+	}
+
+	/**
+	 * Include or exclude persistent attributes.
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder persistent(boolean include) {
 		persistent = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude transient attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder transients(boolean include) {
 		this.transients = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude view attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder view(boolean include) {
 		this.view = include;
 		return this;
 	}
 	
+	/**
+	 * Include or exclude domain attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder domain(boolean include) {
 		this.domain = include;
 		return this;
 	}
 
+	/**
+	 * Include or exclude deprecated attributes
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder deprecated(boolean include) {
 		this.deprecated = include;
 		return this;
 	}
 
+	/**
+	 * Include or exclude attributes by their attribute type
+	 * @param type
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder type(AttributeType type, boolean include) {
 		if (types == null) {
 			types = new HashMap<>();
@@ -147,6 +278,13 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Include or exclude attributes by their name.
+	 * NB This is not bindings.
+	 * @param name
+	 * @param include
+	 * @return
+	 */
 	public DataBuilder name(String name, boolean include) {
 		if (names == null) {
 			names = new HashMap<>();
@@ -155,6 +293,12 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Specify how many elements of a collection to create.
+	 * @param binding
+	 * @param cardinality
+	 * @return
+	 */
 	public DataBuilder cardinality(String binding, int cardinality) {
 		if (cardinalities == null) {
 			cardinalities = new HashMap<>();
@@ -163,11 +307,22 @@ public class DataBuilder {
 		return this;
 	}
 	
+	/**
+	 * Specify an overall recursion depth for the build
+	 * @param depth
+	 * @return
+	 */
 	public DataBuilder depth(@SuppressWarnings("hiding") int depth) {
 		this.depth = depth;
 		return this;
 	}
 	
+	/**
+	 * Specify the recursion depth for an assocition or collection.
+	 * @param binding
+	 * @param depth
+	 * @return
+	 */
 	public DataBuilder depth(String binding, @SuppressWarnings("hiding") int depth) {
 		if (depths == null) {
 			depths = new HashMap<>();
@@ -176,93 +331,121 @@ public class DataBuilder {
 		return this;
 	}
 
+	/**
+	 * Build a domain bean.
+	 * @param moduleName
+	 * @param documentName
+	 * @return
+	 */
 	public <T extends Bean> T build(String moduleName, String documentName) {
-		Customer c = user.getCustomer();
-		Module m = c.getModule(moduleName);
-		Document d = m.getDocument(c, documentName);
-		return build(c, m, d, 0);
+		Module m = customer.getModule(moduleName);
+		Document d = m.getDocument(customer, documentName);
+		return build(m, d, 0);
 	}
 	
+	/**
+	 * Build a domain bean.
+	 * @param module
+	 * @param document
+	 * @return
+	 */
 	public <T extends Bean> T build(Module module, Document document) {
-		return build(user.getCustomer(), module, document, 0);
+		return build(module, document, 0);
 	}
 	
+	/**
+	 * Build a domain bean.
+	 * @param document
+	 * @return
+	 */
 	public <T extends Bean> T build(Document document) {
-		Customer c = user.getCustomer();
-		Module m = c.getModule(document.getOwningModuleName());
-		return build(c, m, document, 0);
+		Module m = customer.getModule(document.getOwningModuleName());
+		return build(m, document, 0);
 	}
 	
-	private synchronized <T extends Bean> T build(Customer customer, 
-													Module module,
+	/**
+	 * The guts of the build function
+	 * @param module
+	 * @param document
+	 * @param currentDepth
+	 * @return
+	 */
+	private synchronized <T extends Bean> T build(Module module,
 													Document document,
 													int currentDepth) {
 		T result = null;
 		try {
-			result = dataFactory(customer, (DocumentImpl) document);
+			result = dataFactory((DocumentImpl) document);
 			if (result == null) {
-				result = randomBean(customer, module, document);
-			}
-	
-			for (Attribute attribute : document.getAllAttributes()) {
-				if (filter(attribute)) {
-					continue;
-				}
-				
-				String name = attribute.getName();
-				AttributeType type = attribute.getAttributeType();
-				if (AttributeType.association.equals(type)) {
-					if (currentDepth < depth) { // check global depth
-						// check assigned depth
-						if (depths != null) {
-							Integer associationDepth = depths.get(name);
-							if ((associationDepth != null) && (currentDepth >= associationDepth.intValue())) {
-								continue;
-							}
-						}
-	
-						AssociationImpl association = (AssociationImpl) attribute;
-						Module associationModule = module;
-						String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
-						if (associationModuleRef != null) {
-							associationModule = customer.getModule(associationModuleRef);
-						}
-						Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
-						BindUtil.set(result,
-										name,
-										build(customer, associationModule, associationDocument, currentDepth + 1));
+				result = randomBean(module, document);
+
+				for (Attribute attribute : document.getAllAttributes()) {
+					if (filter(attribute)) {
+						continue;
 					}
-				}
-				else if (AttributeType.collection.equals(type)) {
-					if (currentDepth < depth) { // check global depth
-						// check assigned depth
-						if (depths != null) {
-							Integer collectionDepth = depths.get(name);
-							if ((collectionDepth != null) && (currentDepth >= collectionDepth.intValue())) {
-								continue;
+					
+					String name = attribute.getName();
+					AttributeType type = attribute.getAttributeType();
+					if (AttributeType.association.equals(type)) {
+						if (currentDepth < depth) { // check global depth
+							// check assigned depth
+							if (depths != null) {
+								Integer associationDepth = depths.get(name);
+								if ((associationDepth != null) && (currentDepth >= associationDepth.intValue())) {
+									continue;
+								}
 							}
-						}
-	
-						Collection collection = (Collection) attribute;
-						Module collectionModule = module;
-						String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
-						if (collectionModuleRef != null) {
-							collectionModule = customer.getModule(collectionModuleRef);
-						}
-						Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
-						@SuppressWarnings("unchecked")
-						List<Bean> list = (List<Bean>) BindUtil.get(result, name);
-						
-						int cardinality = 2;
-						if (cardinalities != null) {
-							Integer collectionCardinality = cardinalities.get(name);
-							if (collectionCardinality != null) {
-								cardinality = collectionCardinality.intValue();
+		
+							AssociationImpl association = (AssociationImpl) attribute;
+							Module associationModule = module;
+							String associationModuleRef = module.getDocumentRefs().get(association.getDocumentName()).getReferencedModuleName();
+							if (associationModuleRef != null) {
+								associationModule = customer.getModule(associationModuleRef);
 							}
+							Document associationDocument = associationModule.getDocument(customer, association.getDocumentName());
+							BindUtil.set(result,
+											name,
+											build(associationModule, associationDocument, currentDepth + 1));
 						}
-	
-						for (int i = 0; i < cardinality; i++) {
-							list.add(build(customer, collectionModule, collectionDocument, currentDepth + 1));
+					}
+					else if (AttributeType.collection.equals(type)) {
+						if (currentDepth < depth) { // check global depth
+							// check assigned depth
+							if (depths != null) {
+								Integer collectionDepth = depths.get(name);
+								if ((collectionDepth != null) && (currentDepth >= collectionDepth.intValue())) {
+									continue;
+								}
+							}
+		
+							Collection collection = (Collection) attribute;
+							Integer minCardinality = collection.getMinCardinality();
+							Module collectionModule = module;
+							String collectionModuleRef = module.getDocumentRefs().get(collection.getDocumentName()).getReferencedModuleName();
+							if (collectionModuleRef != null) {
+								collectionModule = customer.getModule(collectionModuleRef);
+							}
+							Document collectionDocument = collectionModule.getDocument(customer, collection.getDocumentName());
+							@SuppressWarnings("unchecked")
+							List<Bean> list = (List<Bean>) BindUtil.get(result, name);
+							
+							int cardinality = 1; // default to a single element
+							// Set min cardinality if it is set on the met-data and is greater than 2
+							if ((minCardinality != null) && (minCardinality.intValue() > cardinality)) {
+								cardinality = minCardinality.intValue();
+							}
+							
+							// check if there is a cardinality set by the build for this collection
+							if (cardinalities != null) {
+								Integer collectionCardinality = cardinalities.get(name);
+								if (collectionCardinality != null) {
+									cardinality = collectionCardinality.intValue();
+								}
+							}
+		
+							for (int i = 0; i < cardinality; i++) {
+								list.add(build(collectionModule, collectionDocument, currentDepth + 1));
+							}
 						}
 					}
 				}
@@ -274,9 +457,16 @@ public class DataBuilder {
 		
 		return result;
 	}
-
+	/**
+	 * Create and assign random scalar data.
+	 * @param module
+	 * @param document
+	 * @return
+	 * @throws Exception
+	 */
+	
 	@SuppressWarnings("incomplete-switch")
-	private <T extends Bean> T randomBean(Customer customer, Module module, Document document)
+	private <T extends Bean> T randomBean(Module module, Document document)
 	throws Exception {
 		T result = document.newInstance(user);
 		
@@ -350,13 +540,27 @@ public class DataBuilder {
 		AttributeType type = attribute.getAttributeType();
 
 		if (attribute.isRequired()) {
-			if (! required) {
-				return true;
+			if (attribute instanceof Reference) {
+				if (! requiredReferences) {
+					return true;
+				}
+			}
+			else {
+				if (! requiredScalars) {
+					return true;
+				}
 			}
 		}
 		else {
-			if (! optional) {
-				return true;
+			if (attribute instanceof Reference) {
+				if (! optionalReferences) {
+					return true;
+				}
+			}
+			else {
+				if (! optionalScalars) {
+					return true;
+				}
 			}
 		}
 		if (attribute.isPersistent()) {
@@ -421,12 +625,12 @@ public class DataBuilder {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T extends Bean> T dataFactory(Customer customer, DocumentImpl document)
+	private <T extends Bean> T dataFactory(DocumentImpl document)
 	throws Exception {
 		T result = null;
 		
 		// If we have a data factory defined for this document,
-		DataFactory factory = CORE.getRepository().getDataFactory(customer, document.getOwningModuleName(), document.getName());
+		Object factory = CORE.getRepository().getDataFactory(customer, document.getOwningModuleName(), document.getName());
 		if (factory != null) {
 			Class<?> beanType = document.getBeanClass(customer);
 			List<Method> methods = new ArrayList<>();
@@ -474,7 +678,6 @@ public class DataBuilder {
 			
 			// If there are any valid methods at all
 			if (! methods.isEmpty()) {
-				factory.setUser(user);
 				result = (T) methods.get(RANDOM.nextInt(methods.size())).invoke(factory);
 			}
 		}
@@ -646,8 +849,6 @@ public class DataBuilder {
 					Util.LOGGER.fine(String.format("Loaded %s filename from cache", key));
 				} else {
 					String className = String.format("modules.%s.util.%sFactoryExtension", module.getName(), document.getName());
-					Util.LOGGER
-							.fine(String.format("Looking for factory extension annotations in %s", className));
 					try {
 						Class<?> c = Thread.currentThread().getContextClassLoader().loadClass(className);
 						if (c != null) {

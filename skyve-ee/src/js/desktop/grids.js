@@ -158,6 +158,8 @@ isc.BizListGrid.addProperties({
 	showSnap: true,
 	showTag: true,
 
+	autoPopulate: true, // auto fetch from the data source
+
 	// Lookup control - set when this BizListGrid is used as a picklist
 	_lookup: null
 });
@@ -1333,6 +1335,10 @@ isc.BizListGrid.addMethods({
 			}
 		}
 		
+		if (! me.autoPopulate) {
+			gridConfig.emptyMessage = 'No items shown. Filter the grid.';
+		}
+		
 		if (config.gridConfig) {
 			isc.addProperties(gridConfig, config.gridConfig);
 		}
@@ -1404,7 +1410,8 @@ isc.BizListGrid.addMethods({
 	},
 	
 	// returns the title of the data source
-	setDataSource: function(ID) { // the ID of the data source
+	setDataSource: function(ID, // the ID of the data source
+							menuConfig) { // config sent through from the menu (optional parameter)
 		var me = this;
 
 		// switch off any snapshot selected before
@@ -1415,6 +1422,15 @@ isc.BizListGrid.addMethods({
 		me.canCreate = me._dataSource.canCreate;
 		me.canUpdate = me._dataSource.canUpdate;
 		me.canDelete = me._dataSource.canDelete;
+		
+		if (menuConfig) {
+			// set the menu defaults (remember that one instance of BizListGrid is shared for list view)
+			me.autoPopulate = true;
+			// then override if there are menu config values
+			if (menuConfig.autoPopulate !== undefined) {
+				me.autoPopulate = menuConfig.autoPopulate;
+			}
+		}
 
 		var fields = [];
 		if (me.isRepeater) {
@@ -1564,7 +1580,9 @@ isc.BizListGrid.addMethods({
 				bizParentIdField.rootValue = null;
 			}
 		}
-		me.grid.filterData();
+		if (me.autoPopulate) {
+			me.grid.filterData();
+		}
 		me.grid.selectionChanged(null, false); // ensure that buttons are disabled
 
 		return me._dataSource.getTitle();

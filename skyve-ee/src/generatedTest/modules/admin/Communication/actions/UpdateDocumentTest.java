@@ -1,8 +1,8 @@
 package modules.admin.Communication.actions;
 
-import modules.admin.Communication.CommunicationFactoryExtension;
 import modules.admin.domain.Communication;
-import modules.admin.util.CommunicationFactory;
+import org.skyve.util.DataBuilder;
+import org.skyve.util.test.SkyveFixture.FixtureType;
 import util.AbstractActionTest;
 
 /**
@@ -11,8 +11,6 @@ import util.AbstractActionTest;
  */
 public class UpdateDocumentTest extends AbstractActionTest<Communication, UpdateDocument> {
 
-	private CommunicationFactory factory;
-
 	@Override
 	protected UpdateDocument getAction() {
 		return new UpdateDocument();
@@ -20,10 +18,8 @@ public class UpdateDocumentTest extends AbstractActionTest<Communication, Update
 
 	@Override
 	protected Communication getBean() throws Exception {
-		if (factory == null) {
-			factory = new CommunicationFactoryExtension();
-		}
-
-		return factory.getInstance();
+		return new DataBuilder()
+			.fixture(FixtureType.crud)
+			.build(Communication.MODULE_NAME, Communication.DOCUMENT_NAME);
 	}
 }
