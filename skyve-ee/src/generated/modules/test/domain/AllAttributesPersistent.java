@@ -38,6 +38,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
  * 
  * @depend - - - Enum3
  * @navhas n aggregatedCollection 0..n AllAttributesPersistent
+ * @navcomposed n composedAssociation 0..1 AllAttributesPersistent
  * @navhas n aggregatedAssociation 0..1 AllAttributesPersistent
  * @stereotype "persistent"
  */
@@ -57,6 +58,8 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String aggregatedAssociationPropertyName = "aggregatedAssociation";
+	/** @hidden */
+	public static final String composedAssociationPropertyName = "composedAssociation";
 	/** @hidden */
 	public static final String booleanFlagPropertyName = "booleanFlag";
 	/** @hidden */
@@ -178,6 +181,10 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	 * Aggregated Association
 	 **/
 	private AllAttributesPersistent aggregatedAssociation = null;
+	/**
+	 * Composed Association
+	 **/
+	private AllAttributesPersistent composedAssociation = null;
 	/**
 	 * Boolean Flag
 	 **/
@@ -314,6 +321,24 @@ public class AllAttributesPersistent extends AbstractPersistentBean {
 	public void setAggregatedAssociation(AllAttributesPersistent aggregatedAssociation) {
 		preset(aggregatedAssociationPropertyName, aggregatedAssociation);
 		this.aggregatedAssociation = aggregatedAssociation;
+	}
+
+	/**
+	 * {@link #composedAssociation} accessor.
+	 * @return	The value.
+	 **/
+	public AllAttributesPersistent getComposedAssociation() {
+		return composedAssociation;
+	}
+
+	/**
+	 * {@link #composedAssociation} mutator.
+	 * @param composedAssociation	The new value.
+	 **/
+	@XmlElement
+	public void setComposedAssociation(AllAttributesPersistent composedAssociation) {
+		preset(composedAssociationPropertyName, composedAssociation);
+		this.composedAssociation = composedAssociation;
 	}
 
 	/**

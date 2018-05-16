@@ -188,28 +188,30 @@ public class PersistenceTests extends AbstractSkyveTest {
 
 		Assert.assertFalse(test.isPreSaveCalled());
 		Assert.assertFalse(test.isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(0)).isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(1)).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedAssociation().isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedAssociation().isPostSaveCalled());
+		Assert.assertFalse(test.getComposedAssociation().isPreSaveCalled());
+		Assert.assertFalse(test.getComposedAssociation().isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(0).isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(0).isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(1).isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(1).isPostSaveCalled());
 
 		// Don't assign this coz we wanna test the old transient bean for evidence of bizlet calls
 		MappedExtensionSingleStrategyExtension persistedTest = p.save(test);
 
 		Assert.assertTrue(test.isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) test.getAggregatedCollection().get(1)).isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedAssociation().isPreSaveCalled());
+		Assert.assertTrue(test.getComposedAssociation().isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedCollection().get(0).isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedCollection().get(1).isPreSaveCalled());
 
 		// Post save is called on the now managed persistent version
 		Assert.assertTrue(persistedTest.isPostSaveCalled());
-		Assert.assertTrue(
-				((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertTrue(
-				((MappedExtensionSingleStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedAssociation().isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getComposedAssociation().isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedCollection().get(0).isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedCollection().get(1).isPostSaveCalled());
 	}
 
 	@Test
@@ -218,28 +220,30 @@ public class PersistenceTests extends AbstractSkyveTest {
 
 		Assert.assertFalse(test.isPreSaveCalled());
 		Assert.assertFalse(test.isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(0)).isPostSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(1)).isPreSaveCalled());
-		Assert.assertFalse(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedAssociation().isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedAssociation().isPostSaveCalled());
+		Assert.assertFalse(test.getComposedAssociation().isPreSaveCalled());
+		Assert.assertFalse(test.getComposedAssociation().isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(0).isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(0).isPostSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(1).isPreSaveCalled());
+		Assert.assertFalse(test.getAggregatedCollection().get(1).isPostSaveCalled());
 
 		// Don't assign this coz we wanna test the old transient bean for evidence of bizlet calls
 		MappedExtensionJoinedStrategyExtension persistedTest = p.save(test);
 
 		Assert.assertTrue(test.isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) test.getAggregatedAssociation()).isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(0)).isPreSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) test.getAggregatedCollection().get(1)).isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedAssociation().isPreSaveCalled());
+		Assert.assertTrue(test.getComposedAssociation().isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedCollection().get(0).isPreSaveCalled());
+		Assert.assertTrue(test.getAggregatedCollection().get(1).isPreSaveCalled());
 
 		// Post save is called on the now managed persistent version
 		Assert.assertTrue(persistedTest.isPostSaveCalled());
-		Assert.assertTrue(
-				((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(0)).isPostSaveCalled());
-		Assert.assertTrue(((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedAssociation()).isPostSaveCalled());
-		Assert.assertTrue(
-				((MappedExtensionJoinedStrategyExtension) persistedTest.getAggregatedCollection().get(1)).isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedAssociation().isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getComposedAssociation().isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedCollection().get(0).isPostSaveCalled());
+		Assert.assertTrue(persistedTest.getAggregatedCollection().get(1).isPostSaveCalled());
 	}
 
 	@Test
@@ -316,6 +320,29 @@ public class PersistenceTests extends AbstractSkyveTest {
 		Assert.assertEquals(values[5], persistedTest.getAggregatedCollection().get(0).getDerivedInteger());
 		Assert.assertEquals(values[6], persistedTest.getAggregatedCollection().get(1).getBaseDerivedInteger());
 		Assert.assertEquals(values[7], persistedTest.getAggregatedCollection().get(1).getDerivedInteger());
+	}
+
+	@Test
+	public void testAggregatedAssociationDoesntCascadeDelete() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test.setComposedAssociation(null);
+		test.getAggregatedCollection().clear();
+		test = p.save(test);
+		String associationBizId = test.getAggregatedAssociation().getBizId();
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		p.delete(test);
+		Assert.assertEquals(associationBizId, p.newSQL("select bizId from TEST_AllAttributesPersistent").scalarResult(String.class));
+	}
+
+	@Test
+	public void testComposedAssociationDoesCascadeDelete() throws Exception {
+		AllAttributesPersistent test = Util.constructRandomInstance(u, m, aapd, 2);
+		test.setAggregatedAssociation(null);
+		test.getAggregatedCollection().clear();
+		test = p.save(test);
+		Assert.assertEquals(2, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
+		p.delete(test);
+		Assert.assertEquals(0, p.newSQL("select count(1) from TEST_AllAttributesPersistent").scalarResult(Number.class).intValue());
 	}
 
 	@Test
