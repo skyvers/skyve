@@ -49,6 +49,7 @@ import org.skyve.util.MailAttachment;
 import org.skyve.util.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
@@ -659,12 +660,8 @@ public class EXT {
 	 * @throws Exception
 	 */
 	public static boolean checkPassword(String clearText, String hashedPassword) throws Exception {
-		String passwordHashingAlgorithm = Util.getPasswordHashingAlgorithm();
-		// Legacy hashing with no SALT
-		if ("MD5".equals(passwordHashingAlgorithm) || "SHA1".equals(passwordHashingAlgorithm)) {
-			return SkyveLegacyPasswordEncoder.matches(clearText, hashedPassword, passwordHashingAlgorithm);
-		}
-
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder().matches(clearText, hashedPassword);
+		DelegatingPasswordEncoder dpe = (DelegatingPasswordEncoder) PasswordEncoderFactories.createDelegatingPasswordEncoder();
+		dpe.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
+		return dpe.matches(clearText, hashedPassword);
 	}
 }
