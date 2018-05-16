@@ -493,4 +493,78 @@ public class PluralUtilTest {
 		assertThat(result7, is(nullValue()));
 		assertThat(result8, is(nullValue()));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleNoResultsReturnsDefaultValue() throws Exception {
+		// call the method under test
+		String result = PluralUtil.article("^&*");
+
+		// verify the result
+		assertThat(result, is("a"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleKnownResultReturnsA() throws Exception {
+		// call the method under test
+		String result = PluralUtil.article("Honey");
+
+		// verify the result
+		assertThat(result, is("a"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleKnownResultReturnsAn() throws Exception {
+		// call the method under test
+		String result = PluralUtil.article("Honest");
+
+		// verify the result
+		assertThat(result, is("an"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleResultsInstantiatesDictionaryFirstTime() throws Exception {
+		ArticleNode.Data result = PluralUtil.articleResults("honey");
+
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getPrefix(), is("honey"));
+		assertThat(result.getArticle(), is("a"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleResultsNoResultsReturnsDefaultValue() throws Exception {
+		ArticleNode.Data result = PluralUtil.articleResults("^&*");
+
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getPrefix(), is(""));
+		assertThat(result.getArticle(), is("a"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testArticleResultsInstantiatesDictionaryOnce() throws Exception {
+		ArticleNode.Data result = PluralUtil.articleResults("honey");
+
+		assertThat(result, is(notNullValue()));
+		assertThat(result.getPrefix(), is("honey"));
+		assertThat(result.getArticle(), is("a"));
+		assertThat(result.getaCount(), is(Integer.valueOf(1139)));
+		assertThat(result.getAnCount(), is(Integer.valueOf(1)));
+
+		// System.out.println("\n" + result);
+
+		ArticleNode.Data result2 = PluralUtil.articleResults("honest");
+
+		assertThat(result2, is(notNullValue()));
+		assertThat(result2.getPrefix(), is("hone"));
+		assertThat(result2.getArticle(), is("an"));
+		assertThat(result2.getaCount(), is(Integer.valueOf(1263)));
+		assertThat(result2.getAnCount(), is(Integer.valueOf(3987)));
+
+		// System.out.println("\n" + result2);
+	}
 }
