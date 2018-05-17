@@ -196,8 +196,8 @@
 								<div class="col-7-sm center">
 									<table>
 										<tr>
-											<td style="padding:0 15px 0 0">
-												<input type="checkbox" id="remember" name="remember" />
+											<td style="padding:0 15px 2px 0">
+												<input type="checkbox" style="font-size:64px" id="remember" name="remember" />
 											</td>
 											<td>
 												<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
