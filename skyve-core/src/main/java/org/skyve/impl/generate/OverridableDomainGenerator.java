@@ -1061,9 +1061,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					
 					fw.append("\" table=\"").append(collectionTableName);
 
-					if (type == CollectionType.aggregation) {
+					if (CollectionType.aggregation.equals(type)) {
 						fw.append("\" cascade=\"persist,save-update,refresh,merge\">\n");
-					} else if (type == CollectionType.composition) {
+					} else if (CollectionType.composition.equals(type)) {
 						fw.append("\" cascade=\"all-delete-orphan\">\n");
 					} else {
 						throw new IllegalStateException("Collection type " + type + " not supported.");
@@ -1258,9 +1258,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					fw.append(referencedModuleName).append(referencedDocumentName);
 					fw.append("\" column=\"").append(association.getName());
-					if (type == AssociationType.composition) {
-						fw.append("_id\" cascade=\"persist,save-update,refresh,delete,merge");
-					} else if (type == AssociationType.aggregation) {
+					if (AssociationType.composition.equals(type)) {
+						fw.append("_id\" unique=\"true\" cascade=\"persist,save-update,refresh,delete-orphan,merge");
+					} else if (AssociationType.aggregation.equals(type)) {
 						fw.append("_id\" cascade=\"persist,save-update,refresh,merge");
 					} else {
 						throw new IllegalStateException("Association type " + type + " not supported.");

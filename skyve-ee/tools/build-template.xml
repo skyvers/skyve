@@ -5,16 +5,16 @@
 	<property name="skyve-war-path" value="${skyve-ear-path}/skyve.war" />
 
 	<path id="classpath">
-		<fileset dir="lib">
-			<include name="**/*.jar"/>
-		</fileset>
-		<fileset dir="tools/lib">
-			<include name="**/*.jar"/>
-		</fileset>
 		<fileset dir="${ear-path}/lib">
 			<include name="**/*.jar"/>
 		</fileset>
 		<fileset dir="${war-path}/WEB-INF/lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="lib">
+			<include name="**/*.jar"/>
+		</fileset>
+		<fileset dir="tools/lib">
 			<include name="**/*.jar"/>
 		</fileset>
 		<!-- don't use a file element here - doesn't work in old ant -->

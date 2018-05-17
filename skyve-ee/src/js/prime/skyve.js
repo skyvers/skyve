@@ -86,7 +86,19 @@ SKYVE = function() {
 		},
 		
 		getCheckboxValue: function(id) {
-			return SKYVE.getById(id + '_input').is(":checked");
+			var value = SKYVE.getById(id + '_input').val();
+			if (value == '0') {
+				return null;
+			}
+			else if (value == '1') {
+				return true;
+			}
+			else if (value == '2') {
+				return false;
+			}
+			else {
+				return SKYVE.getById(id + '_input').is(":checked");
+			}
 		},
 		
 		setCheckboxValue: function(id, trueOrFalse) {
