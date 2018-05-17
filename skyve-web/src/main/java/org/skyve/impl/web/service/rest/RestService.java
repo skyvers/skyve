@@ -50,11 +50,38 @@ public class RestService {
 	@GET
 	@Path("/json/{module}/{document}/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Bean retrieveJSON(@PathParam("module") String module, 
+	public String retrieveJSON(@PathParam("module") String module, 
 								@PathParam("document") String document,
 								@PathParam("id") String id) {
-		response.setContentType(MediaType.APPLICATION_JSON);
-		return retrieve(module, document, id);
+		String result = null;
+		Bean bean = null;
+		
+		Persistence p = null;
+		try {
+			response.setContentType(MediaType.APPLICATION_JSON);
+			p = CORE.getPersistence();
+			User u = p.getUser();
+			Customer c = u.getCustomer();
+			Module m = c.getModule(module);
+			Document d = m.getDocument(c, document);
+			
+			if (! u.canReadDocument(d)) {
+				throw new SecurityException("read this data", u.getName());
+			}
+	
+	    	bean = p.retrieve(d, id, false);
+	    	if (bean == null) {
+	    		throw new NoResultsException();
+	    	}
+	    	Util.populateFully(bean);
+	    	result = JSON.marshall(CORE.getUser().getCustomer(), bean, null);
+		}
+		catch (Throwable t) {
+			t.printStackTrace();
+			AbstractRestFilter.error(p, response, t.getLocalizedMessage());
+		}
+		
+		return result;
 	}
 
 	@GET
@@ -63,15 +90,11 @@ public class RestService {
 	public Bean retrieveXML(@PathParam("module") String module, 
 										@PathParam("document") String document,
 										@PathParam("id") String id) {
-		response.setContentType(MediaType.APPLICATION_XML);
-		return retrieve(module, document, id);
-	}
-	
-	private Bean retrieve(String module, String document, String id) {
 		Bean result = null;
 		
 		Persistence p = null;
 		try {
+			response.setContentType(MediaType.APPLICATION_XML);
 			p = CORE.getPersistence();
 			User u = p.getUser();
 			Customer c = u.getCustomer();
