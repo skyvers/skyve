@@ -334,7 +334,7 @@ public class RestService {
 	@GET
 	@Path("/content/{contentId}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] query(@PathParam("contentId") String contentId) {
+	public byte[] queryContent(@PathParam("contentId") String contentId) {
 		byte[] result = null;
 		
 		try {
