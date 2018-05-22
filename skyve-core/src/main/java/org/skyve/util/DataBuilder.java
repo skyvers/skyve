@@ -50,49 +50,61 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
- * <pre>
+ * <p>
  * DataBuilder is used to create random instances of domain objects generated from Skyve document definitions.
  * It follows the builder pattern and has options for including and excluding both scalar (single valued) attributes
  * and references (associations and collections).
- * The attributes are populated with data that conforms to the data types, lengths and constraints 
+ * The attributes are populated with data that conforms to the data types, lengths and constraints
  * declared in the Document metadata.
  * DataBuilder can be recursive enabling the instantiation and populate of an entire object tree graph from 1 starting point.
+ * </p>
  * 
+ * <p>
  * Data Factories and Fixtures are also catered for.
- * By convention, a document can have a corresponding factory by defining a class called <Document-Name>Factory, similar to Bizlets.
- * DataBuilder will find these classes when it needs to construct an instance of the document.
- * It looks for public static or instance methods that take no arguments and return the domain object type required.
- * If there are more than one candidate method that can be called, DataBuilder will randomly call one of the methods.
+ * By convention, a document can have a corresponding factory by defining a class called <Document-Name>Factory, similar to
+ * Bizlets. DataBuilder will find these classes when it needs to construct an instance of the document.
+ * It looks for public static or instance methods that take no arguments and returns the domain object type required.
+ * If there is more than one candidate method that can be called, DataBuilder will randomly call one of the methods.
+ * </p>
  * 
- * Fixtures are named groupings of methods that when executed together can collaboratively produce a data set for a specific purpose.
- * Fixtures can be named with a String name, or there are implicit fixture types that are defined in the FixtureType enum.
- * Annotating the methods in a Data Factory with either a fixture name or fixture type acts like a filter ensuring 
- * that only suitable methods for each fixture (or use case) are called.
- * Methods can be given a combination of multiple fixture names and types.
- * DataBuilders and the SAIL language can name the fixture to use when generating data in this manner.
- * A Data Factory can enlist the help of a DataBuilder in its fixture methods but beware of infinite recursion problems.
- * Recursion is usually ended by ensuring that a different fixture or no fixture is called from the 
- * calling fixture method.
+ * <p>
+ * Fixtures are named groupings of methods that when executed together can collaboratively produce a data set for a specific
+ * purpose. Fixtures can be named with a String name, or there are implicit fixture types that are defined in the FixtureType
+ * enum. Annotating the methods in a Data Factory with either a fixture name or fixture type acts like a filter ensuring
+ * that only suitable methods for each fixture (or use case) are called. Methods can be given a combination of multiple fixture
+ * names and types. DataBuilders and the SAIL language can name the fixture to use when generating data in this manner.
+ * A Data Factory can enlist the help of a DataBuilder in its fixture methods, but beware of infinite recursion problems.
+ * Recursion is usually ended by ensuring that a different fixture or no fixture is called from the calling fixture method.
+ * </p>
  * 
+ * <p>
  * The fixture types set the starting state of the DataBuilder to something that should be useful for the given use case.
- * For instance SAIL sets no recursion and population of all attributes but CRUD sets infinite recursion and no optional references.
+ * For instance, SAIL sets no recursion and population of all attributes but CRUD sets infinite recursion and no optional
+ * references.
+ * </p>
  * 
- * <code>
+ * <pre>
  * Usage:
- * 
  * Create an object for a CRUD test
+ * <code>
  * Contact c = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
  * </code>
- * 
- * DataBuilder uses the current user and customer (CORE.getUser()) during creation of random data.
- * 
- * There are a number of methods that can be called in the DataBuilder before calling one of the build methods
- * that filter and configure behavior for the different attributes.
- * Check the method javadoc.
- * 
- * NB - Should improve the cardinality(), name() & depth() to allow complex binding expressions to reach 
- * through the recursive calls down the object graph.
  * </pre>
+ * 
+ * <p>
+ * DataBuilder uses the current user and customer (CORE.getUser()) during creation of random data.
+ * </p>
+ * 
+ * <p>
+ * There are a number of methods that can be called in the DataBuilder before calling one of the build methods
+ * that filter and configure behavior for the different attributes. Check the method javadoc.
+ * </p>
+ * 
+ * <p>
+ * NB - Should improve the cardinality(), name() & depth() to allow complex binding expressions to reach
+ * through the recursive calls down the object graph.
+ * </p>
+ * 
  * @author mike
  */
 public class DataBuilder {
