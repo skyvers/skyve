@@ -16,7 +16,7 @@ import org.skyve.impl.web.faces.beans.FacesView;
 public class LayoutBuilderChain extends LayoutBuilder {
 	private LayoutBuilder[] builders;
 	
-	protected LayoutBuilderChain(LayoutBuilder... builders) {
+	public LayoutBuilderChain(LayoutBuilder... builders) {
 		this.builders = builders;
 	}
 	

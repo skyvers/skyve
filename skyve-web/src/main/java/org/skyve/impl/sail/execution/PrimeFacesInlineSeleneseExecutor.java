@@ -183,7 +183,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
 			command("click", String.format("//a[contains(@href, '#%s')]", clientId));
 		}
@@ -204,7 +204,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 			boolean text = (component instanceof InputText) || 
 								(component instanceof InputTextarea) || 
 								(component instanceof Password);
@@ -277,7 +277,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 
 			// if exists and is not disabled
 			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
@@ -384,7 +384,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 														binding));
 		}
 		for (UIComponent lookupComponent : lookupComponents) {
-			String clientId = ComponentCollector.clientId(lookupComponent);
+			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
 				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
 			}
@@ -461,7 +461,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 														binding));
 		}
 		for (UIComponent dataGridComponent : dataGridComponents) {
-			String dataGridClientId = ComponentCollector.clientId(dataGridComponent);
+			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
 					comment(String.format("Zoom on row %d on data grid [%s] (%s)", row, binding, dataGridClientId));
@@ -477,8 +477,8 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 			if (buttonComponents != null) { // button may not be shown
 				for (UIComponent buttonComponent : buttonComponents) {
 					String buttonClientId = (row != null) ?
-												ComponentCollector.clientId(buttonComponent, row) :
-												ComponentCollector.clientId(buttonComponent);
+												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
+												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
 						// data grid is present
 						command("storeElementPresent", dataGridClientId, "present");
@@ -491,7 +491,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 						command("if", "${disabled} == false");
 						// All good, continue with the button click
 						if (step instanceof DataGridRemove) {
-							command("click", ComponentCollector.clientId(buttonComponent, row));
+							command("click", PrimeFacesAutomationContext.clientId(buttonComponent, row));
 							command("waitForNotVisible", "busy");
 						}
 						else {
@@ -581,7 +581,7 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 		for (UIComponent listGridComponent : listGridComponents) {
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
-				String listGridClientId = ComponentCollector.clientId(listGridComponent);
+				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
 						comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
@@ -599,8 +599,8 @@ public class PrimeFacesInlineSeleneseExecutor extends InlineSeleneseExecutor<Pri
 
 				for (UIComponent buttonComponent : buttonComponents) {
 					String buttonClientId = (row != null) ?
-												ComponentCollector.clientId(buttonComponent, row) :
-												ComponentCollector.clientId(buttonComponent);
+												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
+												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
 						// list grid is present
 						command("storeElementPresent", listGridClientId, "present");

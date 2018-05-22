@@ -29,6 +29,15 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		}
 	}
 	
+	protected void step(String id) {
+		String xpath = String.format("//a[contains(@href, '#%s')]", id);
+		WebElement element = byXpath(xpath);
+		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+			click(element);
+			waitForAjaxResponse();
+		}
+	}
+	
 	protected void checkbox(String id, Boolean value) {
 		WebElement element = byId(id);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
@@ -71,14 +80,28 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 	}
 	
 	protected void text(String id, String value) {
-		WebElement element = byId(id);
-		if ((element != null) &&
-				element.isDisplayed() &&
-				element.isEnabled() &&
-				(element.getAttribute("disabled") == null) &&
-				(element.getAttribute("readonly") == null)) {
-			element.clear();
-			element.sendKeys((value == null) ? "" : value);
+		boolean success = false;
+		while (! success) {
+			WebElement element = byId(id);
+			if ((element != null) &&
+					element.isDisplayed() &&
+					element.isEnabled() &&
+					(element.getAttribute("disabled") == null) &&
+					(element.getAttribute("readonly") == null)) {
+				try {
+					element.clear();
+					element.sendKeys((value == null) ? "" : value);
+					success = true;
+				}
+				catch (StaleElementReferenceException e) {
+					// do nothing - we'll try again
+				}
+			}
+			else {
+				break;
+			}
+		}
+		if (success) {
 			waitForAjaxResponse();
 		}
 	}
@@ -263,7 +286,7 @@ public abstract class PrimeFacesTest extends CrossBrowserTest {
 		WebElement element = byId(listGridId);
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// Find the row
-			element = element.findElement(By.xpath(String.format("//tr[%s]/td", String.valueOf(row))));
+			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
 			click(element);
 			waitForAjaxResponse();
 		}

@@ -1,11 +1,7 @@
 package org.skyve.impl.sail.execution;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 
 import org.primefaces.component.button.Button;
@@ -30,6 +26,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
+import org.skyve.metadata.MetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.sail.language.Step;
@@ -38,40 +35,16 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
 
-class ComponentCollector extends NoOpComponentBuilder {
-	private AutomationContext context;
+class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
+	private PrimeFacesAutomationContext context;
 	private Step step;
-	private Map<String, List<UIComponent>> components = new TreeMap<>();
-	private Map<String, List<Object>> widgets = new TreeMap<>();
+	// component that was built in the component builder but added in the layout builder
+	private MetaData addedViewComponent;
+	private String addedViewComponentIdentifier;
 	
-	ComponentCollector(AutomationContext context, Step step) {
+	ComponentCollectingComponentBuilder(PrimeFacesAutomationContext context, Step step) {
 		this.context = context;
 		this.step = step;
-	}
-	
-	private void put(String identifier, UIComponent component, Object widget) {
-//System.out.println(identifier + " -> " + clientId(component) + " & " + widget);
-		List<UIComponent> componentList = components.get(identifier);
-		if (componentList == null) {
-			componentList = new ArrayList<>();
-			components.put(identifier, componentList);
-		}
-		componentList.add(component);
-
-		List<Object> widgetList = widgets.get(identifier);
-		if (widgetList == null) {
-			widgetList = new ArrayList<>();
-			widgets.put(identifier, widgetList);
-		}
-		widgetList.add(widget);
-	}
-	
-	List<UIComponent> getFacesComponents(String identifier) {
-		return components.get(identifier);
-	}
-
-	List<Object> getSkyveWidgets(String identifier) {
-		return widgets.get(identifier);
 	}
 	
 	@Override
@@ -83,10 +56,10 @@ class ComponentCollector extends NoOpComponentBuilder {
 								String title) {
 		if (component != null) {
 			if (name != null) {
-				put(name.toString(), component, name);
+				context.put(name.toString(), component, name);
 			}
 			else {
-				put(action.getName(), component, action);
+				context.put(action.getName(), component, action);
 			}
 		}
 		return component;
@@ -99,7 +72,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action) {
 		if (component != null) {
-			put(button.getActionName(), component, button);
+			context.put(button.getActionName(), component, button);
 		}
 		return component;
 	}
@@ -107,7 +80,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 	@Override
 	public UIComponent download(UIComponent component, Action action, String moduleName, String documentName) {
 		if (component != null) {
-			put(action.getName(), component, action);
+			context.put(action.getName(), component, action);
 		}
 		
 		return component;
@@ -120,7 +93,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 										String moduleName,
 										String documentName) {
 		if (component != null) {
-			put(action.getName(), component, action);
+			context.put(action.getName(), component, action);
 		}
 		
 		return component;
@@ -129,7 +102,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 	@Override
 	public UIComponent report(UIComponent component, Action action) {
 		if (component != null) {
-			put(action.getName(), component, action);
+			context.put(action.getName(), component, action);
 		}
 		
 		return component;
@@ -140,7 +113,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 										org.skyve.impl.metadata.view.widget.Button button,
 										Action action) {
 		if (component != null) {
-			put(action.getName(), component, action);
+			context.put(action.getName(), component, action);
 		}
 		
 		return component;
@@ -154,22 +127,40 @@ class ComponentCollector extends NoOpComponentBuilder {
 									ListGrid listGrid,
 									boolean canCreateDocument) {
 		if (component != null) {
-			String listGridIdentifier = (step instanceof PushEditContext) ? modelName : step.getIdentifier(context);
-
-			put(listGridIdentifier, component, listGrid);
-			UIComponent potentialActionColumn = component.getChildren().get(component.getChildCount() - 1);
-			UIComponent addButton = potentialActionColumn.getFacet("header");
-			if (addButton instanceof Button) {
-				put(listGridIdentifier + ".new", addButton, listGrid);
+			addedViewComponent = listGrid;
+			if (step instanceof PushEditContext) { // an edit view
+				addedViewComponentIdentifier = String.format("%s.%s", ((PushEditContext) step).getModuleName(), modelName);
 			}
-			UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
-			if (zoomButton instanceof Button) {
-				put(listGridIdentifier + ".zoom", zoomButton, listGrid);
+			else {
+				addedViewComponentIdentifier = step.getIdentifier(context);
+				listGrid(component);
 			}
-			put(listGridIdentifier + ".select", component.getChildren().get(0), listGrid);
 		}
 		
 		return component;
+	}
+	
+	void addToContainer(UIComponent componentToAdd) {
+		if (addedViewComponent instanceof ListGrid) {
+			listGrid(componentToAdd);
+		}
+	}
+	
+	private void listGrid(UIComponent listGridComponent) {
+		context.put(addedViewComponentIdentifier, listGridComponent, addedViewComponentIdentifier);
+		UIComponent potentialActionColumn = listGridComponent.getChildren().get(listGridComponent.getChildCount() - 1);
+		UIComponent addButton = potentialActionColumn.getFacet("header");
+		if (addButton instanceof Button) {
+			context.put(addedViewComponentIdentifier + ".new", addButton, addedViewComponent);
+		}
+		UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
+		if (zoomButton instanceof Button) {
+			context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
+		}
+		context.put(addedViewComponentIdentifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
+
+		addedViewComponent = null;
+		addedViewComponentIdentifier = null;
 	}
 	
 	@Override
@@ -183,27 +174,27 @@ class ComponentCollector extends NoOpComponentBuilder {
 		// component = current as it was set in the previous builder in the chain
 		if (component != null) {
 			String dataGridIdentifier = grid.getBinding();
-			put(dataGridIdentifier, component, grid);
+			context.put(dataGridIdentifier, component, grid);
 			UIComponent potentialActionColumn = component.getChildren().get(component.getChildCount() - 1);
 			UIComponent addButton = potentialActionColumn.getFacet("header");
 			if (addButton instanceof CommandButton) {
-				put(dataGridIdentifier + ".new", addButton, grid);
+				context.put(dataGridIdentifier + ".new", addButton, grid);
 			}
 			List<UIComponent> potentialActionColumnChildren = potentialActionColumn.getChildren();
 			if (potentialActionColumnChildren.size() > 0) {
 				UIComponent zoomButton = potentialActionColumnChildren.get(0);
 				if (zoomButton instanceof CommandButton) {
-					put(dataGridIdentifier + ".zoom", zoomButton, grid);
+					context.put(dataGridIdentifier + ".zoom", zoomButton, grid);
 				}
 			}
 			// child 1 is a spacer.
 			if (potentialActionColumnChildren.size() > 2) {
 				UIComponent removeButton = potentialActionColumnChildren.get(2);
 				if (removeButton instanceof CommandButton) {
-					put(dataGridIdentifier + ".remove", removeButton, grid);
+					context.put(dataGridIdentifier + ".remove", removeButton, grid);
 				}
 			}
-			put(dataGridIdentifier + ".select", component.getChildren().get(0), grid);
+			context.put(dataGridIdentifier + ".select", component.getChildren().get(0), grid);
 		}
 		
 		return component;
@@ -298,7 +289,7 @@ class ComponentCollector extends NoOpComponentBuilder {
 	public UIComponent tab(UIComponent component, Tab tab) {
 		if (component != null) {
 			// TODO this needs to take into account that it could be nested in other tabs and have a name clash
-			put(tab.getTitle() + " Tab", component, tab);
+			context.put(tab.getTitle() + " Tab", component, tab);
 		}
 		return component;
 	}
@@ -328,46 +319,9 @@ class ComponentCollector extends NoOpComponentBuilder {
 	
 	private UIComponent putByBinding(Bound bound, UIComponent component) {
 		if (component != null) {
-			put(bound.getBinding(), component, bound);
+			context.put(bound.getBinding(), component, bound);
 		}
 
 		return component;
-	}
-	
-	public static String clientId(UIComponent component, Integer row) {
-		String id = clientId(component);
-		int lastColonIndex = id.lastIndexOf(':');
-		if (lastColonIndex > -1) {
-			id = String.format("%s:%d%s", id.substring(0, lastColonIndex), row, id.substring(lastColonIndex));
-		}
-		else {
-			id = String.format("%s:%d", id, row);
-		}
-		
-		return id;
-	}
-	
-	public static String clientId(UIComponent component) {
-		StringBuilder result = new StringBuilder(32);
-		clientId(component, result);
-
-		UIComponent parent = component.getParent();
-		while (parent != null) {
-			if (parent instanceof NamingContainer) {
-				clientId(parent, result);
-			}
-			parent = parent.getParent();
-		}
-
-		return result.toString();
-	}
-	
-	private static void clientId(UIComponent component, StringBuilder clientId) {
-		if (clientId.length() == 0) {
-			clientId.append(component.getId());
-		}
-		else {
-			clientId.insert(0, ':').insert(0, component.getId());
-		}
 	}
 }

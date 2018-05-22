@@ -16,6 +16,7 @@ import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
@@ -182,10 +183,23 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		if (components == null) {
 			throw new MetaDataException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] is not valid or is not on the view.");
 		}
+		boolean wizard = false;
+		List<Object> widgets = context.getSkyveWidgets(identifier);
+		for (Object widget : widgets) {
+			if (widget instanceof TabPane) {
+				wizard = ((TabPane) widget).getProperties().containsKey("wizard");
+			}
+		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
-			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-			indent().append("tab(\"").append(clientId).append("\");").newline();
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (wizard) {
+				comment(String.format("click step [%s]", tabSelect.getTabPath()));
+				indent().append("step(\"").append(clientId).append("\");").newline();
+			}
+			else {
+				comment(String.format("click tab [%s]", tabSelect.getTabPath()));
+				indent().append("tab(\"").append(clientId).append("\");").newline();
+			}
 		}
 	}
 
@@ -204,7 +218,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			throw new MetaDataException("<DataEnter /> with binding [" + identifier + "] is not valid or is not on the view.");
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 			boolean text = (component instanceof InputText) || 
 								(component instanceof InputTextarea) || 
 								(component instanceof Password) ||
@@ -259,7 +273,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 
 			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
 			indent().append("button(\"").append(clientId).append("\", ").append(String.valueOf(ajax));
@@ -279,7 +293,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
 		}
 		for (UIComponent component : components) {
-			String clientId = ComponentCollector.clientId(component);
+			String clientId = PrimeFacesAutomationContext.clientId(component);
 
 			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
 			indent().append("redirectButton(\"").append(clientId).append("\", ");
@@ -364,7 +378,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 														binding));
 		}
 		for (UIComponent lookupComponent : lookupComponents) {
-			String clientId = ComponentCollector.clientId(lookupComponent);
+			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
 				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
 				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(String.valueOf(row)).append(");").newline();
@@ -414,7 +428,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 														binding));
 		}
 		for (UIComponent dataGridComponent : dataGridComponents) {
-			String dataGridClientId = ComponentCollector.clientId(dataGridComponent);
+			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
 			boolean ajax = false;
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
@@ -432,8 +446,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 			if (buttonComponents != null) { // button may not be shown
 				for (UIComponent buttonComponent : buttonComponents) {
 					String buttonClientId = (row != null) ?
-												ComponentCollector.clientId(buttonComponent, row) :
-												ComponentCollector.clientId(buttonComponent);
+												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
+												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
 						indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
 						append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
@@ -518,7 +532,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		for (UIComponent listGridComponent : listGridComponents) {
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
-				String listGridClientId = ComponentCollector.clientId(listGridComponent);
+				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
 						comment(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
@@ -536,8 +550,8 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 
 				for (UIComponent buttonComponent : buttonComponents) {
 					String buttonClientId = (row != null) ?
-												ComponentCollector.clientId(buttonComponent, row) :
-												ComponentCollector.clientId(buttonComponent);
+												PrimeFacesAutomationContext.clientId(buttonComponent, row) :
+												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
 						if (step instanceof ListGridSelect) {
 							indent().append("listGridSelect(\"").append(listGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
