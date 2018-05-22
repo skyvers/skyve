@@ -15,6 +15,7 @@ import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
@@ -24,6 +25,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
+import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -62,6 +65,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Binder.TargetMetaData;
 
 public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<PrimeFacesAutomationContext> {
@@ -486,10 +490,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 	public void executeListGridNew(ListGridNew nu) {
 		listGridButton(nu, null);
 		
-		PrimeFacesAutomationContext context = peek();
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(context.getModuleName());
-		push.setDocumentName(context.getDocumentName());
+		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
 		push.setCreateView(nu.getCreateView());
 		push.execute(this);
 	}
@@ -498,10 +499,7 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 	public void executeListGridZoom(ListGridZoom zoom) {
 		listGridButton(zoom, zoom.getRow());
 		
-		PrimeFacesAutomationContext context = peek();
-		PushEditContext push = new PushEditContext();
-		push.setModuleName(context.getModuleName());
-		push.setDocumentName(context.getDocumentName());
+		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this);
 	}
 
@@ -517,7 +515,6 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 		push.execute(this);
 	}
 
-	// TODO handle embedded list grid from an edit view
 	private void listGridButton(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
@@ -564,6 +561,55 @@ public class PrimeFacesInlineWebDriverExecutor extends InlineWebDriverExecutor<P
 				}
 			}
 		}
+	}
+	
+	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
+		PushEditContext result = new PushEditContext();
+
+		PrimeFacesAutomationContext context = peek();
+		if (ViewType.list.equals(context.getViewType())) {
+			result.setModuleName(context.getModuleName());
+			result.setDocumentName(context.getDocumentName());
+		}
+		else {
+			String key = queryName;
+			if (key == null) {
+				key = documentName;
+			}
+			if (key == null) {
+				key = modelName;
+			}
+			Customer c = CORE.getUser().getCustomer();
+			Module m = c.getModule(context.getModuleName());
+			DocumentQueryDefinition q = m.getDocumentQuery(key);
+			if (q != null) {
+				result.setModuleName(q.getDocumentModule(c).getName());
+				result.setDocumentName(q.getDocumentName());
+			}
+			else {
+				DocumentRef r = m.getDocumentRefs().get(key);
+				if (r != null) {
+					result.setModuleName(r.getReferencedModuleName());
+					result.setDocumentName(key);
+				}
+				else {
+					Document d = m.getDocument(c, context.getDocumentName());
+					ListModel<Bean> lm = CORE.getRepository().getListModel(c, d, key, true);
+					if (lm != null) {
+						d = lm.getDrivingDocument();
+						result.setModuleName(d.getOwningModuleName());
+						result.setDocumentName(d.getName());
+					}
+					else {
+						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
+																	step.getClass().getSimpleName(),
+																	step.getIdentifier(context)));
+					}
+				}
+			}
+		}
+		
+		return result;
 	}
 
 	@Override
