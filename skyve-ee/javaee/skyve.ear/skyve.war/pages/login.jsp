@@ -196,7 +196,7 @@
 								<div class="col-7-sm center">
 									<table>
 										<tr>
-											<td style="padding:0 15px 2px 0">
+											<td style="vertical-align:center">
 												<input type="checkbox" style="font-size:64px;width:16px;height:16px" id="remember" name="remember" />
 											</td>
 											<td>
