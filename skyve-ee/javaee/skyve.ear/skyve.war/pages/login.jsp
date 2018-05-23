@@ -197,7 +197,7 @@
 									<table>
 										<tr>
 											<td style="padding:0 15px 2px 0">
-												<input type="checkbox" style="font-size:64px" id="remember" name="remember" />
+												<input type="checkbox" style="font-size:64px;width:16px;height:16px" id="remember" name="remember" />
 											</td>
 											<td>
 												<label for="remember"><%=Util.i18n("page.login.remember.label", locale)%></label>
