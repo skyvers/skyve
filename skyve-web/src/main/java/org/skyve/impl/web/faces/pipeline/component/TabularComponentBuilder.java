@@ -1413,6 +1413,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 							lookup.getDisabledConditionName(),
 							displayBinding,
 							query,
+							lookup.getParameters(),
 							lookup.getPixelWidth(),
 							false);
 	}
@@ -2528,6 +2529,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 											String disabled, 
 											String displayBinding, 
 											QueryDefinition query, 
+											List<FilterParameter> parameters,
 											Integer pixelWidth,
 											boolean dontDisplay) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE, 
@@ -2559,6 +2561,7 @@ public class TabularComponentBuilder extends ComponentBuilder {
 		attributes.put("module", query.getOwningModule().getName());
 		attributes.put("query", query.getName());
 		attributes.put("display", displayBinding);
+		attributes.put("parameters", parameters);
 
 		setSize(result, 
 					dontDisplay ? "display:none" : null, 

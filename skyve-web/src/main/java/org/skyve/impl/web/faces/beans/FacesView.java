@@ -359,11 +359,7 @@ public class FacesView<T extends Bean> extends Harness {
 	 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - LIST KEY = " + key);
 			result = beans.get(key.toString());
 			if (result == null) {
-				List<Bean> interimBeans = new GetBeansAction(bizModule, queryName, parameters).execute();
-				result = new ArrayList<>(interimBeans.size());
-				for (Bean bean : interimBeans) {
-					result.add(new BeanMapAdapter<>(bean));
-				}
+				result = new GetBeansAction(bizModule, queryName, parameters).execute();
 				beans.put(key.toString(), result);
 			}
  		}
@@ -464,13 +460,27 @@ public class FacesView<T extends Bean> extends Harness {
 		String completeModule = (String) attributes.get("module");
 		String completeQuery = (String) attributes.get("query");
 		String displayBinding = (String) attributes.get("display");
+
+		// Take a defensive copy of the parameters collection and add the query to the description binding
 		@SuppressWarnings("unchecked")
 		List<FilterParameter> parameters = (List<FilterParameter>) attributes.get("parameters");
-		FilterParameterImpl displayParameter = new FilterParameterImpl();
-		displayParameter.setName(displayBinding);
-		displayParameter.setOperator(FilterOperator.like);
-		displayParameter.setValue(query);
-		parameters.add(displayParameter);
+		if (parameters == null) {
+			parameters = new ArrayList<>();
+		}
+		else {
+			parameters = new ArrayList<>(parameters);
+		}
+		
+		// Add the query parameter if its defined
+		String parameterValue = Util.processStringValue(query);
+		if (parameterValue != null) {
+			FilterParameterImpl displayParameter = new FilterParameterImpl();
+			displayParameter.setName(displayBinding);
+			displayParameter.setOperator(FilterOperator.like);
+			displayParameter.setValue(parameterValue);
+			parameters.add(displayParameter);
+		}
+		
 		if (UtilImpl.FACES_TRACE) UtilImpl.LOGGER.info("FacesView - COMPLETE = " + completeModule + "." + completeQuery + " : " + query);
 		return getBeans(completeModule, completeQuery, parameters);
 	}

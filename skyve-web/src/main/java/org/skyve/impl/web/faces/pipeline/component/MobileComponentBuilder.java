@@ -324,6 +324,7 @@ public class MobileComponentBuilder extends TabularComponentBuilder {
 										lookup.getDisabledConditionName(),
 										displayBinding,
 										query,
+										lookup.getParameters(),
 										lookup.getPixelWidth(),
 										true);
 
