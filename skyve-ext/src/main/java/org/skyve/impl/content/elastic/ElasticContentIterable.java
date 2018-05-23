@@ -1,4 +1,4 @@
-package org.skyve.impl.content.elasticsearch;
+package org.skyve.impl.content.elastic;
 
 import java.text.ParseException;
 import java.util.Iterator;

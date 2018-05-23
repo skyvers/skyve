@@ -19,7 +19,7 @@ import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elasticsearch.ESClient;
+import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl.ExportedReference;
 import org.skyve.impl.metadata.repository.AbstractRepository;

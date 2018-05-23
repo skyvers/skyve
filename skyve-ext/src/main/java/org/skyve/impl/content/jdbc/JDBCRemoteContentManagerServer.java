@@ -8,7 +8,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
-import org.skyve.impl.content.elasticsearch.ESClient;
+import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.StateUtil;
 import org.skyve.util.Util;

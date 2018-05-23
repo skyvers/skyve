@@ -1,4 +1,4 @@
-package org.skyve.impl.content.elasticsearch;
+package org.skyve.impl.content.elastic;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,7 +53,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
-public class ElasticContentManager extends AbstractContentManager {
+public class ESClient extends AbstractContentManager {
 	static final String ATTACHMENT_INDEX_NAME = "attachments";
 	static final String ATTACHMENT_INDEX_TYPE = "attachment";
 	static final String BEAN_INDEX_NAME = "beans";
@@ -95,14 +95,14 @@ public class ElasticContentManager extends AbstractContentManager {
 
 	private Client client = null;
 	
-	public ElasticContentManager() {
+	public ESClient() {
 		client = ElasticUtil.localClient(node);
 	}
 	
 	@Override
 	public void init() throws Exception {
-		ElasticUtil.prepareIndex(client, ElasticContentManager.ATTACHMENT_INDEX_NAME, ElasticContentManager.ATTACHMENT_INDEX_TYPE);
-		ElasticUtil.prepareIndex(client, ElasticContentManager.BEAN_INDEX_NAME, ElasticContentManager.BEAN_INDEX_TYPE);
+		ElasticUtil.prepareIndex(client, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
+		ElasticUtil.prepareIndex(client, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
 	}
 
 	@Override

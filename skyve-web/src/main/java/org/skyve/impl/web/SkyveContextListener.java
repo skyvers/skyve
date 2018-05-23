@@ -19,7 +19,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.content.elasticsearch.ESClient;
+import org.skyve.impl.content.elastic.ESClient;
 import org.skyve.impl.metadata.repository.AbstractRepository;
 import org.skyve.impl.metadata.repository.LocalSecureRepository;
 import org.skyve.impl.metadata.user.SuperUser;
