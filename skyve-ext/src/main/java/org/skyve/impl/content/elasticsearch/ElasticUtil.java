@@ -29,10 +29,10 @@ import org.elasticsearch.node.NodeBuilder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
-public class ESUtil {
+public class ElasticUtil {
 	private static final String CLUSTER_NAME = "SKYVE_CONTENT";
 
-	private ESUtil() {
+	private ElasticUtil() {
 		// disallow instantiation
 	}
 	
@@ -144,7 +144,7 @@ public class ESUtil {
 		StringBuilder result = new StringBuilder(1024);
 		
 		try {
-			try (InputStream is= ESUtil.class.getResourceAsStream(url)) {
+			try (InputStream is = ElasticUtil.class.getResourceAsStream(url)) {
 				try (InputStreamReader isr = new InputStreamReader(is)) {
 					try (BufferedReader br = new BufferedReader(isr)) {
 						String line;
@@ -216,8 +216,8 @@ public class ESUtil {
 		UtilImpl.CONTENT_DIRECTORY = "/C:/_/skyve/skyve-ee/content/";
 		try (Node n = localNode()) {
 			try (Client c = localClient(n)) {
-				ESUtil.prepareIndex(c, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
-				ESUtil.prepareIndex(c, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
+				ElasticUtil.prepareIndex(c, ESClient.ATTACHMENT_INDEX_NAME, ESClient.ATTACHMENT_INDEX_TYPE);
+				ElasticUtil.prepareIndex(c, ESClient.BEAN_INDEX_NAME, ESClient.BEAN_INDEX_TYPE);
 				Thread.sleep(10000);
 				System.out.println(analyze(c));
 			}

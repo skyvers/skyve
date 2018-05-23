@@ -14,10 +14,10 @@ import org.skyve.content.SearchResult;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 
-class ESIterable implements ContentIterable {
+class ElasticContentIterable implements ContentIterable {
 	private Client client = null;
 
-	ESIterable(Client client) {
+	ElasticContentIterable(Client client) {
 		this.client = client;
 	}
 	
