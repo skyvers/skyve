@@ -12,6 +12,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.DocumentQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.widget.bound.FilterParameter;
 import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Util;
@@ -19,8 +20,8 @@ import org.skyve.util.Util;
 public class GetBeansAction extends FacesAction<List<Bean>> {
 	private String bizModule;
 	private String queryName;
-	private Map<String, Object> parameters;
-	public GetBeansAction(String bizModule, String queryName, Map<String, Object> parameters) {
+	private List<FilterParameter> parameters;
+	public GetBeansAction(String bizModule, String queryName, List<FilterParameter> parameters) {
 		this.bizModule = bizModule;
 		this.queryName = queryName;
 		this.parameters = parameters;
@@ -42,11 +43,15 @@ public class GetBeansAction extends FacesAction<List<Bean>> {
 		if (parameters != null) {
 			StringBuilder substring = new StringBuilder(32);
 			DocumentFilter documentFilter = documentQuery.getFilter();
-			for (String parameterName : parameters.keySet()) {
+/*
+			for (FilterParameter parameter : parameters) {
+				
+				parameter.getValue();
 				substring.setLength(0);
 				substring.append('%').append(parameters.get(parameterName)).append('%');
 				documentFilter.addLike(parameterName, substring.toString());
 			}
+*/
 		}
 
 		return documentQuery.projectedResults();
