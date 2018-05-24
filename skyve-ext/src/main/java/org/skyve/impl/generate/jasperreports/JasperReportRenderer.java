@@ -1,15 +1,18 @@
 package org.skyve.impl.generate.jasperreports;
 
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.base.JRBoxPen;
-import net.sf.jasperreports.engine.design.*;
-import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
-import net.sf.jasperreports.engine.type.*;
-import net.sf.jasperreports.engine.xml.JRXmlWriter;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
-import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
@@ -28,10 +31,49 @@ import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Util;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
+import net.sf.jasperreports.engine.DefaultJasperReportsContext;
+import net.sf.jasperreports.engine.JRBand;
+import net.sf.jasperreports.engine.JRElement;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRExpression;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JRLineBox;
+import net.sf.jasperreports.engine.JRReport;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.JasperReportsContext;
+import net.sf.jasperreports.engine.base.JRBoxPen;
+import net.sf.jasperreports.engine.design.JRDesignBand;
+import net.sf.jasperreports.engine.design.JRDesignElement;
+import net.sf.jasperreports.engine.design.JRDesignExpression;
+import net.sf.jasperreports.engine.design.JRDesignField;
+import net.sf.jasperreports.engine.design.JRDesignImage;
+import net.sf.jasperreports.engine.design.JRDesignLine;
+import net.sf.jasperreports.engine.design.JRDesignParameter;
+import net.sf.jasperreports.engine.design.JRDesignQuery;
+import net.sf.jasperreports.engine.design.JRDesignRectangle;
+import net.sf.jasperreports.engine.design.JRDesignSection;
+import net.sf.jasperreports.engine.design.JRDesignStaticText;
+import net.sf.jasperreports.engine.design.JRDesignSubreport;
+import net.sf.jasperreports.engine.design.JRDesignSubreportParameter;
+import net.sf.jasperreports.engine.design.JRDesignTextElement;
+import net.sf.jasperreports.engine.design.JRDesignTextField;
+import net.sf.jasperreports.engine.design.JRDesignVariable;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
+import net.sf.jasperreports.engine.type.CalculationEnum;
+import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
+import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
+import net.sf.jasperreports.engine.type.IncrementTypeEnum;
+import net.sf.jasperreports.engine.type.LineStyleEnum;
+import net.sf.jasperreports.engine.type.ModeEnum;
+import net.sf.jasperreports.engine.type.PositionTypeEnum;
+import net.sf.jasperreports.engine.type.ResetTypeEnum;
+import net.sf.jasperreports.engine.type.RotationEnum;
+import net.sf.jasperreports.engine.type.SplitTypeEnum;
+import net.sf.jasperreports.engine.type.StretchTypeEnum;
+import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
+import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
 
@@ -152,12 +194,11 @@ public class JasperReportRenderer {
             addVariables(designSpecification);
             addBands(designSpecification);
 
-            final String jrxml = JRXmlWriter.writeReport(jasperDesign, "UTF-8");
+            final String result = JRXmlWriter.writeReport(jasperDesign, "UTF-8");
             rendered = true;
-            return jrxml;
-        } else {
-            throw new IllegalArgumentException("Invalid module or document name.");
+            return result;
         }
+        throw new IllegalArgumentException("Invalid module or document name.");
     }
 
     private String renderFromReportDesignParameters() throws JRException {
@@ -188,7 +229,7 @@ public class JasperReportRenderer {
 
         parameter = new JRDesignParameter();
         parameter.setName("RESOURCE_DIR");
-        parameter.setValueClass(java.lang.String.class);
+        parameter.setValueClass(String.class);
         jasperDesign.addParameter(parameter);
 
         // TODO allow grouping here
@@ -237,19 +278,19 @@ public class JasperReportRenderer {
             designField.setDescription(column.getName());
             designField.setValueClass(String.class);
             jasperDesign.addField(designField);
-            if (isAggregatableAttribute(column.getAttributeType())) {
-                JRDesignField aggregateField = new JRDesignField();
-                aggregateField.setName(column.getName());
-                aggregateField.setValueClass(column.getAttributeType().getImplementingType());
-                jasperDesign.addField(aggregateField);
-            }
 
-            // Aggregation variable.
             if (isAggregatableAttribute(column.getAttributeType())) {
+            	// Aggregate field
+            	JRDesignField aggregateField = new JRDesignField();
+                aggregateField.setName(column.getName());
+                aggregateField.setValueClass(AttributeType.date.equals(column.getAttributeType()) ? Date.class : Number.class);
+                jasperDesign.addField(aggregateField);
+
+                // Aggregation variable.
                 if (AttributeType.date.equals(column.getAttributeType())) {
                     final JRDesignVariable minDateVariable = new JRDesignVariable();
                     minDateVariable.setName(String.format("%s_minDate", column.getName()));
-                    minDateVariable.setValueClass(DateOnly.class);
+                    minDateVariable.setValueClass(Date.class);
                     minDateVariable.setCalculation(CalculationEnum.LOWEST);
                     final JRDesignExpression minDateExpression = new JRDesignExpression();
                     minDateExpression.setText("$F{" + column.getName() + "}");
@@ -258,7 +299,7 @@ public class JasperReportRenderer {
 
                     final JRDesignVariable maxDateVariable = new JRDesignVariable();
                     maxDateVariable.setName(String.format("%s_maxDate", column.getName()));
-                    maxDateVariable.setValueClass(DateOnly.class);
+                    maxDateVariable.setValueClass(Date.class);
                     maxDateVariable.setCalculation(CalculationEnum.HIGHEST);
                     final JRDesignExpression maxDateExpression = new JRDesignExpression();
                     maxDateExpression.setText("$F{" + column.getName() + "}");
@@ -268,11 +309,7 @@ public class JasperReportRenderer {
                     final JRDesignVariable columnSummaryVariable = new JRDesignVariable();
                     columnSummaryVariable.setName(String.format("%s_summary", column.getName()));
 
-                    if (isCustomNumberType(column.getAttributeType())) {
-                        columnSummaryVariable.setValueClass(Number.class);
-                    } else {
-                        columnSummaryVariable.setValueClass(column.getAttributeType().getImplementingType());
-                    }
+                    columnSummaryVariable.setValueClass(Number.class);
                     columnSummaryVariable.setCalculation(CalculationEnum.SUM);
                     columnSummaryVariable.setResetType(ResetTypeEnum.REPORT);
                     final JRDesignExpression variableExpression = new JRDesignExpression();
@@ -342,7 +379,11 @@ public class JasperReportRenderer {
                     textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                     expression = new JRDesignExpression();
                     if (AttributeType.date.equals(column.getAttributeType())) {
-                        expression.setText(String.format("$V{%s_minDate} + \" - \" + $V{%s_maxDate}", column.getName(), column.getName()));
+                        expression.setText(String.format("(($V{%s_minDate} == null) || ($V{%s_maxDate} == null)) ? \"\" : $V{%s_minDate} + \" - \" + $V{%s_maxDate}",
+                        									column.getName(),
+                        									column.getName(),
+                        									column.getName(),
+                        									column.getName()));
                     } else {
                         expression.setText(String.format("$V{%s_summary}", column.getName()));
                     }
@@ -375,7 +416,7 @@ public class JasperReportRenderer {
                 textField.setStretchWithOverflow(true);
                 textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
                 expression = new JRDesignExpression();
-                expression.setText("$F{" + column.getName() + "}");
+                expression.setText("$F{" + column.getName() + "_display}");
                 textField.setExpression(expression);
                 detailBand.addElement(textField);
             }
@@ -1232,11 +1273,5 @@ public class JasperReportRenderer {
                 attributeType == AttributeType.decimal5 ||
                 attributeType == AttributeType.decimal10 ||
                 attributeType == AttributeType.date;
-    }
-
-    protected boolean isCustomNumberType(AttributeType attributeType) {
-        return attributeType == AttributeType.decimal2 ||
-                attributeType == AttributeType.decimal5 ||
-                attributeType == AttributeType.decimal10;
     }
 }
