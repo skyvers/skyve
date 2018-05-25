@@ -73,6 +73,7 @@ public final class ReportDesignParameters {
 	private ReportFormat reportFormat;
 	private boolean pretty;
 	private boolean paginated;
+	private boolean showSummary;
 	private ReportStyle reportStyle;
 	// No [format] as all it does is pick the width and height
 	private int pageWidth;
@@ -102,6 +103,12 @@ public final class ReportDesignParameters {
 	}
 	public ReportStyle getReportStyle() {
 		return reportStyle;
+	}
+	public boolean isShowSummary() {
+		return showSummary;
+	}
+	public void setShowSummary(boolean showSummary) {
+		this.showSummary = showSummary;
 	}
 	public boolean isPretty() {
 		return pretty;

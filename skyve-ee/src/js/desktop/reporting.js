@@ -225,14 +225,17 @@ isc.ReportDialog.addClassProperties({
 							(value == 'odt')) {
 						form.getItem('isPaginated').setValue(true);
 						form.getItem('isPretty').setValue(true);
+                        form.getItem('showSummary').setValue(true);
 					}
 					else if ((value == 'html') || (value == 'xhtml')) {
 						form.getItem('isPaginated').setValue(false);
 						form.getItem('isPretty').setValue(true);
+                        form.getItem('showSummary').setValue(false);
 					}
 					else {
 						form.getItem('isPaginated').setValue(false);
 						form.getItem('isPretty').setValue(false);
+						form.getItem('showSummary').setValue(false);
 					}
 					form.getItem('fileNameSuffix').setValue('.' + value);
 				}
@@ -287,7 +290,16 @@ isc.ReportDialog.addClassProperties({
 				type: "checkbox",
 				required: true,
 				defaultValue: true
-			}
+			},
+            {type: "spacer"},
+            {type: "spacer"},
+            {type: "spacer"},
+            {name: "showSummary",
+                title: "Show Summary",
+                type: "checkbox",
+                required: true,
+                defaultValue: true
+            }
 		]
 	}),
 	

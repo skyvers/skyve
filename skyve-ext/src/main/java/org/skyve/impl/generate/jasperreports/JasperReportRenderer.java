@@ -585,7 +585,9 @@ public class JasperReportRenderer {
         textField.setExpression(expression);
         textField.setPositionType(PositionTypeEnum.FLOAT);
         summaryBand.addElement(textField);
-        jasperDesign.setSummary(summaryBand);
+        if (Boolean.TRUE.equals(reportDesignParameters.isShowSummary())) {
+            jasperDesign.setSummary(summaryBand);
+        }
 
         rendered = true;
         return JRXmlWriter.writeReport(jasperDesign, "UTF-8");
