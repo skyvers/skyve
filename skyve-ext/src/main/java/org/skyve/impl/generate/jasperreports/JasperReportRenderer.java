@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import net.sf.jasperreports.engine.type.*;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -62,18 +63,6 @@ import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JRDesignVariable;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.query.JRQueryExecuterFactory;
-import net.sf.jasperreports.engine.type.CalculationEnum;
-import net.sf.jasperreports.engine.type.EvaluationTimeEnum;
-import net.sf.jasperreports.engine.type.HorizontalTextAlignEnum;
-import net.sf.jasperreports.engine.type.IncrementTypeEnum;
-import net.sf.jasperreports.engine.type.LineStyleEnum;
-import net.sf.jasperreports.engine.type.ModeEnum;
-import net.sf.jasperreports.engine.type.PositionTypeEnum;
-import net.sf.jasperreports.engine.type.ResetTypeEnum;
-import net.sf.jasperreports.engine.type.RotationEnum;
-import net.sf.jasperreports.engine.type.SplitTypeEnum;
-import net.sf.jasperreports.engine.type.StretchTypeEnum;
-import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
 public class JasperReportRenderer {
@@ -814,6 +803,7 @@ public class JasperReportRenderer {
         final JRDesignImage logoImage = new JRDesignImage(null);
         logoImage.setWidth(logoWidth);
         logoImage.setHeight(titleBand.getHeight());
+        logoImage.setScaleImage(ScaleImageEnum.RETAIN_SHAPE);
         final JRDesignExpression expression = new JRDesignExpression();
         expression.setText(String.format("org.skyve.impl.generate.jasperreports.ContentImageForReport.customerLogo(%d, %d)", logoWidth, titleBand.getHeight()));
         logoImage.setExpression(expression);
